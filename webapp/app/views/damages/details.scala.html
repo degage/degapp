@@ -1,0 +1,234 @@
+@(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog], proofList: java.util.List[File])
+@import org.joda.time.format.DateTimeFormat
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    }
+@scripts = {
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+        <script>
+        function loadDescriptionModal ( damageId ) {
+        myJsRoutes.controllers.Damages.editDamage ( damageId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        function loadStatusModal ( damageId ) {
+        myJsRoutes.controllers.Damages.addStatus ( damageId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        function loadProofModal ( damageId ) {
+        myJsRoutes.controllers.Damages.addProof ( damageId ).ajax ( {
+        success : function ( html ) {
+        $ ( "#resultModal" ).html ( html ) ;
+        $ ( '#detailsModal' ).modal ( 'show' ) ;
+        },
+        error : function ( ) {
+        // TODO: make clearer
+        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        }
+        } ) ;
+        }
+        </script>
+}
+@app("Schade details", stylesheets, scripts) {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.Damages.showDamages">Schadedossiers</a></li>
+            <li class="active">Schadedossier details</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Schadedossier details</h1>
+                @flashes()
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <button class="btn btn-default" onclick="loadDescriptionModal(@damage.getId)">Tijd/beschrijving aanpassen</button>
+                        <button class="btn btn-default" onclick="loadStatusModal(@damage.getId)">Nieuwe status</button>
+                        <button class="btn btn-default" onclick="loadProofModal(@damage.getId)">Nieuw bewijsstuk</button>
+                        @if(!damage.getFinished){
+                            <a class="btn btn-default" href="@routes.Damages.setDamageFinished(damage.getId, 1)">Schadedossier sluiten</a>
+                        }else{
+                            <a class="btn btn-default" href="@routes.Damages.setDamageFinished(damage.getId, 0)">Schadedossier heropenen</a>
+                        }
+
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-wrench"></i> Geselecteerd schadedossier
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        Autodetails:
+                        <div class="well">
+                                <!-- row -->
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Autonaam:</strong> <a class="" href="@routes.Cars.detail(car.getId)">@car.getName</a>
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Merk:</strong> @car.getBrand
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Type:</strong> @car.getType
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <strong>Bouwjaar:</strong> @car.getYear
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Brandstof:</strong> @car.getFuel.getDescription
+                                </div>
+                                <div class="col-sm-4">
+                                    <strong>Deuren:</strong> @car.getDoors
+                                </div>
+                            </div>
+                            @if(car.getTechnicalCarDetails != null){
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Nummerplaat:</strong> @car.getTechnicalCarDetails.getLicensePlate
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Chassisnummer:</strong> @car.getTechnicalCarDetails.getChassisNumber
+                                    </div>
+                                </div>
+                            }
+                            @if(car.getInsurance != null){
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Verzekering:</strong> @car.getInsurance.getName
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Bonus-malus:</strong> @car.getInsurance.getBonusMalus
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Polisnr:</strong> @car.getInsurance.getPolisNr
+                                    </div>
+                                </div>
+                            }
+
+                        </div>
+                            Eigenaar:
+                            <div class="well">
+                                    <!-- row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Naam:</strong> <a class="" href="@routes.Profile.index(owner.getId)">@owner.getFirstName @owner.getLastName</a>
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Adres:</strong>
+                                        @if(owner.getAddressDomicile != null){
+                                            @owner.getAddressDomicile.getStreet
+                                            @owner.getAddressDomicile.getNumber
+                                            @owner.getAddressDomicile.getBus
+                                            @owner.getAddressDomicile.getZip
+                                            @owner.getAddressDomicile.getCity
+                                        }else{
+                                            Niet ingegeven
+                                        }
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Telefoon:</strong>
+                                        @if(owner.getCellphone == null && owner.getPhone == null){
+                                            Niet ingegeven
+                                        }else{
+                                            @owner.getCellphone
+                                            @owner.getPhone
+                                        }
+                                    </div>
+
+                                </div>
+                            </div>
+                            Autoreservatie:
+                            <div class="well">
+                                    <!-- row -->
+                                <div class="row">
+                                    <div class="col-sm-4">
+                                        <strong>Van:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getFrom)
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Tot:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getTo)
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <strong>Status:</strong> @damage.getCarRide.getReservation.getStatus.getDescription
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            Schadedossier:
+                            <div class="well">
+                                <p><strong>Tijd:</strong>
+                                <br>
+                                @DateTimeFormat.forPattern("dd/MM/YYYY HH:mm").print(damage.getTime)
+                                </p>
+                                <p>
+                                <strong>Beschrijving:</strong>
+                                <br>
+                                @damage.getDescription
+                                </p>
+                                <p>
+                                <strong>Log:</strong>
+                                </p>
+                                <ul class="list-group">
+                                @for(damageLog <- damageLogList) {
+                                    <li class="list-group-item">
+                                        <strong class="list-group-item-heading">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damageLog.getCreated)</strong>
+                                        <p class="list-group-item-text">@damageLog.getDescription</p>
+                                    </li>
+
+                                }
+                                </ul>
+                                <p>
+                                    <strong>Bewijsstukken:</strong>
+                                </p>
+                                    @if(proofList.size() == 0){
+                                        Nog geen bestanden geupload.
+                                    }else{
+                                        <ul>
+                                            @for(file <- proofList){
+                                                <li>
+                                                    <a href="@routes.Damages.getProof(file.getId)" target="_blank">@file.getFileName</a>
+                                                    <a href="@routes.Damages.deleteProof(damage.getId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
+                                                </li>
+                                            }
+
+                                        </ul>
+                                    }
+
+
+                            </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+    <div id="resultModal"></div>
+}

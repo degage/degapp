@@ -1,0 +1,51 @@
+@(form: Form[Settings.EditSettingModel])
+
+    @scripts = {
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+        <script>
+        $('#datepicker').datetimepicker({
+        weekStart: 1,
+        language: 'nl',
+        todayBtn:  1,
+        autoclose: 1,
+        todayHighlight: 1,
+        startView: 2,
+        forceParse: 0,
+        showMeridian: 1,
+        startDate: new Date()
+        });
+        </script>
+    }
+
+@app("Systeemvariabele toevoegen", Html(""), scripts) {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.Settings.sysvarsOverview">Systeemvariabelen</a></li>
+            <li class="active">Systeemvariabele toevoegen</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        @flashes()
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Systeemvariabele toevoegen</h1>
+                <div class="panel panel-default">
+
+
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                            @sysvarform(form, routes.Settings.createSysvarPost)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+}

@@ -1,0 +1,43 @@
+div.popover_input {
+    padding: 10px;
+    background-color: #FFF;
+    border: 1.5px solid #DDD;
+    border-radius: 5px;
+    position: absolute;
+    margin-bottom: 10px;
+}
+
+div.popover_input:before, div.popover_input:after {
+    content: "";
+    position: absolute;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    top: 100%;
+    left: 50%;
+    margin-left: -10px;
+}
+
+div.popover_input:before {
+    border-top: 10px solid #DDD;
+    margin-top: 1px;
+}
+
+div.popover_input:after{
+    border-top: 10px solid #FFF;
+    z-index: 1;
+}
+
+div.popover_input table {
+    width: 100%;
+}
+
+div.popover_input table td {
+    text-align: center;
+}
+
+div.popover_input table td:hover {
+    cursor: pointer;
+    cursor: hand;
+    border-radius: 10px;
+    background-color: #F0F0F0;
+}

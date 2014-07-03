@@ -1,0 +1,31 @@
+# Installatie database #
+
+Gebruikt mysql server (5.5)
+
+## Aanmaken database ##
+
+Via mysql-client: `mysql -u root -p`
+```
+CREATE DATABASE IF NOT EXISTS degage
+   DEFAULT CHARACTER SET utf8
+   DEFAULT COLLATE utf8_general_ci;
+
+CREATE USER 'degage'@'localhost'
+   IDENTIFIED BY 'DeGaGe';
+
+GRANT ALL ON degage.* TO 'degage'@'localhost';
+```
+
+## Create the database tables ##
+
+Via mysql-client
+```
+mysql degage -u degage -p < create-tables.sql
+```
+
+## Fill in with initial data ##
+```
+mysql degage -u degage -p < init.sql
+```
+
+

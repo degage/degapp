@@ -1,0 +1,37 @@
+@(userId: Int)
+@app("Profielfoto uploaden") {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.Profile.index(userId)">Profiel</a></li>
+            <li class="active">Profielfoto wijzigen</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Profielfoto wijzigen</h1>
+                @flashes()
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-wrench"></i> File upload
+                    </div>
+
+                    <div class="panel-body">
+                    @helper.form(routes.Profile.profilePictureUploadPost(userId), 'enctype -> "multipart/form-data") {
+                        <input type="file" name="picture">
+                        <br>
+                        <input class="btn btn-sm btn-default" type="submit" value="Verzenden">
+                    }
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+}

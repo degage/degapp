@@ -1,0 +1,42 @@
+@(adjustForm: play.data.Form[Reserve.ReservationModel], reservation: Reservation)
+@import providers.DataProvider;
+
+@helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
+    <div class="row">
+        <div id="fromadjust" class="form-group hidden col-sm-10">
+            <br />
+            <strong>Reservatie van:</strong>
+            <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_from">
+                <input id="input_from" name="from" class="form-control searchTextField" size="16" value="@reservation.getFrom.toString("yyyy-MM-dd HH:mm")">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div><br />
+        </div>
+        <div id="untiladjust" class="form-group hidden col-sm-10">
+            <strong>Reservatie tot:</strong>
+            <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_until">
+                <input id="input_until" name="until" class="form-control searchTextField" size="16" value="@reservation.getTo.toString("yyyy-MM-dd HH:mm")">
+                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+            </div>
+        </div>
+    </div><br />
+    <!-- row -->
+    <!-- /row -->
+    @if(reservation.getStatus == ReservationStatus.ACCEPTED || reservation.getStatus == ReservationStatus.REQUEST) {
+        @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
+            @if(reservation.getUser.getId != userId) {
+                <div class="alert alert-warning alert-dismissable">
+                    Pas op! Je bent niet de bestuurder, maar ziet onderstaande knoppen toch omdat je admin bent!
+                </div>
+            }
+        }
+        <div class="row">
+            <div class="col-lg-12">
+                <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>
+                <button id="adjust" type="button" class="btn btn-xs btn-primary">Reservatie inkorten</button>
+                <a id="annulateReservation" type="button" class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+            </div>
+        </div>
+    }
+}

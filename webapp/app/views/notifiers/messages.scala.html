@@ -1,0 +1,56 @@
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/messages.js")'></script>
+    <script>
+        var route = myJsRoutes.controllers.Messages.showReceivedMessagesPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <!-- <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet"> -->
+}
+@app("Berichten", stylesheets, scripts) {
+
+<div id="page-header-wrapper">
+    <ol class="breadcrumb">
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        <li class="active">Berichten</li>
+    </ol>
+</div>
+
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Berichten</h1>
+            @flashes()
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <a class="btn btn-default btn-sm" href="@routes.Messages.newMessage()">Nieuw bericht</a>
+                    <a class="btn btn-default btn-sm" href="@routes.Messages.markAllMessagesAsRead">Markeer alle berichten als gelezen</a>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs" id="myTab">
+              <li id="tab_received" class="active"><a href="#resultsPanel" data-toggle="tab">Ontvangen</a></li>
+              <li id="tab_sent"><a href="#resultsPanel" data-toggle="tab">Verzonden</a></li>
+              <li class="hidden"><button id="searchButton"></button></li>
+            </ul>
+
+            <div class="tab-content">
+              <div class="tab-pane active" id="resultsPanel">
+                <div class="panel panel-default tabpanel">
+                    <div class="panel-body">
+                        <div id="resultsTable">
+                            <!-- Here comes the loaded page -->
+                        </div>
+                    </div>
+                </div>
+              </div>
+            </div>
+        </div>
+        <!-- /col-lg-12 -->
+    </div>
+    <!-- /row -->
+</div>
+<!-- /page-wrapper -->
+}

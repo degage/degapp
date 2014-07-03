@@ -1,0 +1,41 @@
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+    var route = myJsRoutes.controllers.Damages.showDamagesPageOwner;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
+@app("Schadedossiers (eigenaar)", stylesheets, scripts) {
+
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Schadedossiers</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Schadedossiers</h1>
+                @flashes()
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <p>
+                            Bekijk hier als eigenaar de schadedossiers van jouw auto's.
+                        </p>
+                        <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+    </div>
+}

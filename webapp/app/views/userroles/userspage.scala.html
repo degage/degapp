@@ -1,0 +1,50 @@
+@(users: List[User], page : Int, amountOfResults : Int, amountOfPages : Int)
+@import scala.collection.mutable.Map;
+@import providers.DataProvider;
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-userroles">
+    <thead>
+        <tr role="row">
+            <th name="user_name" class="sortable" tabindex="0" >Naam</th>
+            <th>Rollen</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if(users.isEmpty) {
+            <tr>
+                <td style="text-align: center; background-color: #F0F0F0; padding: 8px;" colspan="6">
+                    Geen enkele gebruiker voldoet aan jouw zoekterm(men)
+                </td>
+            </tr>
+        } else {
+            @defining(DataProvider.getUserRoleProvider) { provider =>
+                @defining(Map(
+                    UserRole.USER -> "label-user",
+                    UserRole.CAR_USER -> "label-user_car",
+                    UserRole.CAR_OWNER -> "label-user_owner",
+                    UserRole.SUPER_USER -> "label-user_super",
+                    UserRole.INFOSESSION_ADMIN -> "label-admin_info",
+                    UserRole.MAIL_ADMIN -> "label-admin_mail",
+                    UserRole.PROFILE_ADMIN -> "label-admin_profile",
+                    UserRole.RESERVATION_ADMIN -> "label-admin_reserv")) { roles =>
+                    @for(user <- users) {
+                        <tr>
+                            <td><a href="@routes.Profile.index(user.getId)">@user.getFirstName @user.getLastName</a></td>
+                            <td>
+                            @for(role <- provider.getRoles(user.getId, false)) {
+                                <span class="label @roles.get(role)">@role.getDescription</span>
+                            }
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-xs">
+                                    <a href="@routes.UserRoles.edit(user.getId)" class="btn btn-primary">Rollen bewerken</a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                }
+            }
+        }
+    </tbody>
+</table>
+<p id="pagination" name="@amountOfResults,@amountOfPages"></p>

@@ -1,0 +1,216 @@
+@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0, countryList: List[String], typeList: List[String])
+@import providers.DataProvider;
+@* TODO: This file should be renamed since it's also used for editing *@
+@scripts = {
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+
+@* Source: https://github.com/smalot/bootstrap-datetimepicker, released under Apache v2 license *@
+    <script>
+        function onInfoSessionTypeChange() {
+            if(document.getElementById("infosession_type_select").value === "Ander") {
+                $("#type_alternative_wrap" ).show();
+            } else {
+                $("#type_alternative_wrap" ).hide();
+            }
+        }
+
+        $(document).ready(function() {
+
+            onInfoSessionTypeChange();
+
+            $("input[name='addresstype']:radio").change(function(e)
+            {
+                console.log('Address type changed!');
+                if(e.target.value === 'other'){
+                    $('#otherAddress').show();
+                } else {
+                    $('#otherAddress').hide();
+                }
+            });
+
+            $('#datepicker').datetimepicker({
+                weekStart: 1,
+                language: 'nl',
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                pickerPosition: 'bottom-left',
+                startDate: new Date()
+            });
+        });
+    </script>
+}
+
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+}
+
+@app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
+            <li class="active">Nieuwe infosessie</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Infosessies</h1>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> @(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie")
+                    </div>
+                    <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                                @helper.form(if (editId == 0) routes.InfoSessions.createNewSession else routes.InfoSessions.editSessionPost(editId), 'class -> "form-horizontal") {
+                                    @if(form.hasGlobalErrors) {
+                                        <div class="alert alert-danger alert-dismissable">
+                                            <strong>Error!</strong> @form.globalError.message
+                                        </div>
+                                    }
+                                    @flashes()
+
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Algemeen</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="host">Host</label>
+                                                    @if(form("userId").value){
+                                                        @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
+                                                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                                                <input type="hidden" name="userId" value="@user.getId" />
+                                                                <div class="viewId"></div>
+                                                                <ul class="dropdown-menu" role="menu"></ul>
+                                                            </div>
+                                                        }
+                                                    }else{
+                                                        @defining(DataProvider.getUserProvider().getUser()) { user =>
+                                                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
+                                                                <input type="hidden" name="userId" value="@user.getId"/>
+                                                                <div class="viewId"></div>
+                                                                <ul class="dropdown-menu" role="menu"></ul>
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="time">Tijdstip</label>
+                                                    <div class="col-md-4">
+                                                        <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
+                                                            <input class="form-control input-md" size="16" type="text" value="@form("time").value" placeholder="Tijdstip"readonly>
+                                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                        </div>
+                                                        <input type="text" class="hidden" id="time" name="time" value="@form("time").value" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="max_enrollees">Maximum aantal deelnemers (0 = onbeperkt)</label>
+                                                    <div class="col-md-12">
+                                                        <input id="max_enrollees" name="max_enrollees" type="number"class="form-control input-md" value="@form("max_enrollees").value">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <div class="col-md-12">
+                                                        @helper.select(form("type"), helper.options(typeList), '_label -> "Type", 'class -> "form-control", 'id -> "infosession_type_select", 'onchange -> "onInfoSessionTypeChange()")
+                                                    </div>
+                                                    <div id="type_alternative_wrap">
+                                                        <label class="col-md-12" for="type_alternative">Specifieer type</label>
+                                                        <div class="col-md-12">
+                                                            <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("type_alternative").value">
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-md-1" for="comments">Commentaar</label>
+                                                    <div class="col-md-12">
+                                                        <textarea id="comments" name="comments" class="form-control input-md" rows="6" maxlength="256">@form("comments").value</textarea>
+                                                    </div>
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">
+                                            <h3 class="panel-title">Adres</h3>
+                                        </div>
+                                        <div class="panel-body">
+                                            <fieldset>
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.street">Straat</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.street" name="address.street" type="text" class="form-control input-md" value="@form("address.street").value">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.number">Nummer</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" value="@form("address.number").value">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.bus">Bus</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.bus" maxlength="3" name="address.bus" type="text" class="form-control input-md" value="@form("address.bus").value">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.zipCode">Postcode</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" value="@form("address.zipCode").value">
+                                                    </div>
+                                                </div>
+
+                                                <div class="form-group">
+                                                    <label class="col-md-12" for="address.city">Stad</label>
+                                                    <div class="col-md-12">
+                                                        <input id="address.city" name="address.city" type="text" class="form-control input-md" value="@form("address.city").value">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-12">
+                                                    @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
+                                                </div>
+                                            </fieldset>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="col-md-1 control-label" for="create"></label>
+                                        <div class="col-md-12">
+                                            <button type="submit" id="create" name="create" class="btn btn-block btn-success">@{ if(editId == 0) "Infosessie aanmaken" else "Wijzigingen opslaan" }</button>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                    <!-- /.panel-body -->
+                </div>
+                <!-- /.panel -->
+            </div>
+            <!-- /col-lg-12 -->
+        </div>
+        <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+}

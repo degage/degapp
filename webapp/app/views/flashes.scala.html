@@ -1,0 +1,17 @@
+@(canDismiss: Boolean = true)
+@if(!flash.isEmpty()) {
+    @if(canDismiss) {
+        @for((msgKey, msgValue) <- flash) {
+            <div class="alert alert-@msgKey alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                @msgValue
+            </div>
+        }
+    } else {
+        @for((msgKey, msgValue) <- flash) {
+            <div class="alert alert-@msgKey">
+                @msgValue
+            </div>
+        }
+    }
+}

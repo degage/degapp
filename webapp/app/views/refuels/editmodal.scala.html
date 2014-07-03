@@ -1,0 +1,48 @@
+@(form: Form[Refuels.RefuelModel], refuelId: Integer)
+<!-- Large modal -->
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div id=" " class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Tankbeurt aanvullen</h4>
+            </div>
+
+            @helper.form(routes.Refuels.provideRefuelInfoPost(refuelId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
+                <fieldset>
+                    <div id="modalBody" class="modal-body">
+                        <div class="panel-body">
+
+                            <div class="form-group">
+                                <label class="col-md-1 control-label" for="amount"></label>
+                                <div class="col-md-12">
+                                    <input id="amount" name="amount" type="text" pattern="[0-9]+([,\.][0-9]+)?" title="Geef een (komma)getal in" placeholder="Bedrag in euro (max 200)" class="form-control input-md" value="@form("amount").value" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="col-md-1 control-label" for="picture">Bewijsmateriaal</label>
+                                <div class="col-md-12">
+                                    <input id="picture" name="picture" type="file" class="form-control input-md" required>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+                        <button type="submit" id="add" name="add" class="btn btn-success">Voeg toe</button>
+                    </div>
+
+                </fieldset>
+            }
+
+
+        </div>
+    </div>
+</div>

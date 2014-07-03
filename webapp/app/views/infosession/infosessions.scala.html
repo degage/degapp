@@ -1,0 +1,115 @@
+@(enrolled: InfoSession = null, map: Maps.MapDetails = null, showApprovalButton: Boolean = false)
+@import providers.DataProvider;
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+        var route = myJsRoutes.controllers.InfoSessions.showUpcomingSessionsPage;
+        var infoSessionId;
+
+        // Show confirm message to subscribe to an infosession
+        function showConfirmationModal(id){
+            infoSessionId = id;
+            $('#myModal').modal('show');
+        }
+
+        function changeInfoSession() {
+            window.location = myJsRoutes.controllers.InfoSessions.enrollSession(infoSessionId).url;
+        }
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+
+    <!-- Maps: -->
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.js"))'></script>
+    <script src="@routes.Assets.at("javascripts/maps-custom.js")" type="text/javascript"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.min.css")">
+}
+
+@app("Infosessies", stylesheets, scripts) {
+<div id="page-header-wrapper">
+    <ol class="breadcrumb">
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        <li class="active">Infosessies</li>
+    </ol>
+</div>
+
+<div id="page-wrapper">
+    @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+            @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Infosessies</h1>
+                @flashes()
+
+                @if(showApprovalButton) {
+                    <div class="panel panel-success">
+                        <div class="panel-heading">
+                            <i class="fa fa-check-square-o"></i> Aanwezigheid goedgekeurd!
+                        </div>
+                        <div class="panel-body">
+                            Jouw aanwezigheid op deze infosessie werd bevestigd.
+                        </div>
+                    </div>
+                }
+                
+                @if(enrolled != null) {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-lightbulb-o fa-fw"></i> Gekozen infosessie
+                        </div>
+                        <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            @detailPartial(enrolled, fullUser, map)
+                            <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
+                            @if(!showApprovalButton) {
+                                <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
+                            }
+                        </div>
+                    </div>
+                }
+
+                @if(!showApprovalButton) {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <i class="fa fa-calendar fa-fw"></i> Geplande infosessies
+                        </div>
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
+                            </div>
+                        </div>
+                        <!-- /.panel-body -->
+                    </div>
+                    <!-- /.panel -->
+                }
+            </div>
+            <!-- /col-lg-12 -->
+        </div>
+        <!-- /row -->
+    }
+</div>
+<!-- /page-wrapper -->
+
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">Infosessie wijzigen</h4>
+      </div>
+      <div class="modal-body">
+        Je hebt je reeds voor een andere infosessie ingeschreven. Ben je zeker dat je deze wilt wijzigen?
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+        <button class="btn btn-success"  onClick="changeInfoSession()">Ja, schrijf me in voor deze infosessie</button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+}

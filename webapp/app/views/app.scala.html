@@ -1,0 +1,366 @@
+@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
+@import org.joda.time.format.DateTimeFormat
+@import providers.DataProvider;
+@import providers.CommunicationProvider;
+@defining(DataProvider.getUserProvider().getUser()) { user =>
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src="@routes.Assets.at("javascripts/jquery-1.11.0.min.js")" type="text/javascript"></script>
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.js"))'></script>
+        <script type="text/javascript">
+            function forceResponsiveTables() {
+              var windowSize = $(window).width();
+              if ($('.table-responsive > .table').length > 0) {
+                $.each($('.table-responsive > .table'), function (index, value) {
+                  var thisTable = $(value);
+                  var tableSize = thisTable.width();
+                  var parent = thisTable.parent('.table-responsive');
+                  // 768px is the default for bootstrap 3's responsive-table, modify if needed
+                  if (windowSize <= 768) {
+                    parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                  } else {
+                    if (tableSize >= windowSize) {
+                      // Change the border color based on the bootstrap theme colors
+                      parent.css('width', '100%').css('overflow-x', 'scroll').css('overflow-y', 'hidden').css('margin-bottom', '15px').css('border', '1px solid #DDDDDD');
+                    } else {
+                      parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
+                    }
+                  }
+                });
+              }
+            }
+        </script>
+        <script>
+            // Loadingimage to use in pagination.js
+            var loadingImage = '@routes.Assets.at("images/car-loader.gif")'
+        </script>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+        <title>@title</title>
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+
+        <!-- Core CSS - Include with every page -->
+        <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap.min.css"))">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/font-awesome.min.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/sb-admin.css")">
+        @stylesheets @* To include stylesheets from external templates *@
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/colortheme.css")"> -->
+
+            <!--[if lt IE 9]>
+            <script src="@routes.Assets.at("javascripts/compatibility/html5shiv.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/compatibility/css3-mediaqueries.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/compatibility/respond.min.js")" type="text/javascript"></script>
+        <![endif]-->
+    </head>
+    <body>
+        <div id="wrapper">
+            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="@routes.Dashboard.index">Dégage</a>
+                </div>
+                <!-- /.navbar-header -->
+                <ul class="nav navbar-top-links navbar-right">
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-envelope fa-fw"></i>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="topnumber">@unread_number</span>
+                                }
+                            }
+                        </a>
+                        <ul class="dropdown-menu dropdown-messages">
+                            @defining(DataProvider.getCommunicationProvider().getMessages(user.getId())) { messages =>
+                                @for((message, index) <- messages.zipWithIndex) {
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
+                                        <li>
+                                            <a href="@routes.Messages.showMessages()">
+                                                <div>
+                                                    @if(!message.isRead){
+                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName [ongelezen]</strong>
+                                                    }else{
+                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName</strong>
+                                                    }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(message.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { message_body =>
+                                                    <div>@Html(message_body.substring(0,math.min(80,message_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
+                            <li>
+                                <a class="text-center" href="@routes.Messages.showMessages()">
+                                    <strong>Bekijk alle berichten</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-messages -->
+                    </li>
+                    <!-- /.dropdown -->
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-bell fa-fw"></i>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="topnumber">@unread_number</span>
+                              }
+                            }
+                        </a>
+                        <ul class="dropdown-menu dropdown-messages">
+                            @defining(DataProvider.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
+                                @for((notification, index) <- notifications.zipWithIndex) {
+                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
+                                        <li>
+                                            <a href="@routes.Notifications.showNotifications()">
+                                                <div>
+                                                    @if(!notification.getRead){
+                                                    <strong>Dégage (ongelezen)</strong>
+                                                        }else{
+                                                    Dégage
+                                                        }
+                                                    <span class="pull-right text-muted">
+                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
+                                                    </span>
+                                                </div>
+                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
+                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
+                                                }
+
+                                            </a>
+                                        </li>
+                                        <li class="divider"></li>
+                                    }
+                                }
+                            }
+                            <li>
+                                <a class="text-center" href="@routes.Notifications.showNotifications()">
+                                    <strong>Bekijk alle notificaties</strong>
+                                    <i class="fa fa-angle-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-messages -->
+                    </li>
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <span class="">@user.toString</span>
+                            <!-- @if(DataProvider.getSettingProvider.getBoolOrDefault("show_profile", true)) { -->
+                               <!-- <img class="avatar" src="" alt="small profile picture"> -->
+                                <!--<img class="avatar" src="@routes.Profile.getProfilePicture(user.getId)" alt="small profile picture">-->
+                            <!-- } -->
+                        </a>
+                        <ul class="dropdown-menu dropdown-user">
+                            <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                            </li>
+                            <li><a href="@routes.Settings.index"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                            </li>
+                        </ul>
+                        <!-- /.dropdown-user -->
+                    </li>
+                    <!-- /.dropdown -->
+                </ul>
+                <!-- /.navbar-top-links -->
+            </nav>
+            <!-- /.navbar-static-top -->
+
+            @if(session.get("impersonated") != null){
+                <div class="impersonating">Je impersoneert @user.toString!</div>
+            }
+
+            <nav class="navbar-default navbar-static-side" role="navigation">
+                <div class="sidebar-collapse">
+                    <ul class="nav" id="side-menu">
+                        <li class="submenu">LENER</li>
+                        <li @if(title == "Dashboard") {class="active"}>
+                            <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                        </li>
+                        @if(!DataProvider.getUserRoleProvider.isFullUser(user)){
+                        <li @if(title == "Infosessies") {class="active"}>
+                            <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
+                        </li>
+                        }
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_USER)){
+                        <li @if(title == "Reserveren") {class="active"}>
+                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
+                        </li>
+                        <li @if(title == "Ritten") {class="active"}>
+                            <a href="@routes.Drives.index"><i class="fa fa-car fa-fw"></i>
+                                Ritten
+                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
+                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
+                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
+                        </li>
+                        <li @if(title == "Tankbeurten") {class="active"}>
+                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i>
+                                Tankbeurten
+                                @defining(Refuels.refuelsWithStatus(RefuelStatus.CREATED)) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
+                        </li>
+                        <li @if(title == "Afrekeningen") {class="active"}>
+                            <a href="@routes.Receipts.index"><i class="fa fa-money fa-fw"></i> Afrekeningen</a>
+                        </li>
+                        <li @if(title == "Schadedossiers") {class="active"}>
+                            <a href="@routes.Damages.showDamages"><i class="fa fa-tasks fa-fw"></i>
+                                Schadedossiers
+                                @defining(Damages.openDamages()) { requests =>
+                                    @if(requests > 0) {
+                                        <span class="sidenumber">@requests</span>
+                                    }
+                                }
+                            </a>
+                        </li>
+                        }
+
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_OWNER)){
+                        <li class="submenu">EIGENAAR</li>
+                        <li @if(title == "Auto's") {class="active"}>
+                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-car fa-fw"></i> Auto's</a>
+                        </li>
+                        <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
+                            <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
+                        </li>
+                        <li @if(title == "Schadedossiers (eigenaar)") {class="active"}>
+                            <a href="@routes.Damages.showDamagesOwner()"><i class="fa fa-tasks fa-fw"></i> Schadedossiers</a>
+                        </li>
+                        }
+
+                        <li class="submenu">ACCOUNT</li>
+                        <li @if(title == "Berichten") {class="active"}>
+                            <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                                @if(unread_number>0){
+                                    <span class="sidenumber">@unread_number</span>
+                                }
+                            }</a>
+                        </li>
+                        <li @if(title == "Notificaties") {class="active"}>
+                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-bell fa-fw"></i> Notificaties
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="sidenumber">@unread_number</span>
+                              }
+                            }</a>
+                        </li>
+                        <li @if(title == "Profiel") {class="active"}>
+                            <a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                        </li>
+                        <li @if(title == "Instellingen") {class="active"}>
+                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
+                        </li>
+
+                        @if(DataProvider.getUserRoleProvider.isAdmin(user)){
+                            <li class="submenu">ADMIN</li>
+
+
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.MAIL_ADMIN)){
+                        <li @if(title == "Templates") {class="active"}>
+                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Templates</a>
+                        </li>
+                        }
+
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.RESERVATION_ADMIN)){
+                            <li @if(title == "Ritten (Admin)") {class="active"}>
+                            <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
+                            </li>
+                        }
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.PROFILE_ADMIN)){
+                        <li @if(title == "Gebruikers") {class="active"}>
+                            <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
+                        </li>
+                        }
+
+                        @if(DataProvider.getUserRoleProvider.hasSomeRole(user, Array(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN) )){
+                            <li @if(title == "Goedkeuringen gebruikers") {class="active"}>
+                                <a href="@routes.InfoSessions.pendingApprovalList"><i class="fa fa-file fa-fw"></i> Goedkeuring gebruikers</a>
+                            </li>
+                        }
+
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.INFOSESSION_ADMIN)){
+                            <li @if(title == "Infosessies (Admin)") {class="active"}>
+                            <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
+                            </li>
+                        }
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_ADMIN)){
+                            <li @if(title == "Auto's (Admin)") {class="active"}>
+                            <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
+                            </li>
+                            <li @if(title == "Autokosten (Admin)") {class="active"}>
+                                <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
+                            </li>
+                            <li @if(title == "Tankbeurten (Admin)") {class="active"}>
+                                <a href="@routes.Refuels.showAllRefuels()"><i class="fa fa-file fa-fw"></i> Tankbeurten</a>
+                            </li>
+                            <li @if(title == "Schadedossiers (Admin)") {class="active"}>
+                                <a href="@routes.Damages.showAllDamages()"><i class="fa fa-file fa-fw"></i> Schadedossiers</a>
+                            </li>
+                        }
+
+                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.SUPER_USER)){
+                        <li class="submenu">SUPERUSER</li>
+                        <li @if(title == "Gebruikersrollen") {class="active"}>
+                            <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>
+                        </li>
+
+                        <li @if(title == "Systeemvariabelen") {class="active"}>
+                            <a href="@routes.Settings.sysvarsOverview"><i class="fa fa-wrench fa-fw"></i> Systeemvariabelen</a>
+                        </li>
+
+                        <li @if(title == "Rapportering") {class="active"}>
+                            <a href="@routes.Reports.index"><i class="fa fa-files-o fa-fw"></i> Rapportering</a>
+                        </li>
+                        }
+                        }
+                        <li id="logoutbutton"><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                    </ul>
+                    <!-- /#side-menu -->
+                </div>
+                <!-- /.sidebar-collapse -->
+            </nav>
+            <!-- /.navbar-static-side -->
+
+            @content
+            
+        </div>
+        <!-- /#wrapper -->
+        @scripts
+        <!-- Core Scripts - Include with every page -->
+        <script src="@routes.Assets.at("javascripts/less-1.7.0.min.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/plugins/metisMenu/jquery.metisMenu.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("javascripts/sb-admin.js")" type="text/javascript"></script>
+        
+        <!-- Page-Level Plugin Scripts - Main -->
+
+        <!-- Page-Level Demo Scripts - Main - Use for reference -->
+    </body>
+</html>
+}

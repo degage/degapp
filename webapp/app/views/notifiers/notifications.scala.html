@@ -1,0 +1,63 @@
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
+    <script>
+    var route = myJsRoutes.controllers.Notifications.showNotificationsPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
+}
+@app("Notificaties", stylesheets, scripts) {
+
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Notificaties</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Notificaties</h1>
+                @if(!flash.isEmpty()) {
+                    @for((msgKey, msgValue) <- flash) {
+                        <div class="alert alert-@msgKey">
+                        @msgValue
+                        </div>
+                    }
+                }
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <a class="btn btn-default btn-sm" href="@routes.Notifications.markAllNotificationsAsRead">Markeer alle notificaties als gelezen</a>
+                    </div>
+                </div>
+
+                <ul class="nav nav-tabs" id="myTab">
+                  <li id="tab_unread" name="0" class="active"><a href="#resultsPanel" data-toggle="tab">Ongelezen</a></li>
+                  <li id="tab_read" name="1"><a href="#resultsPanel" data-toggle="tab">Gelezen</a></li>
+                  <li class="hidden"><button id="searchButton"></button></li>
+                </ul>
+                <input id='hidden_input' name="notification_read" value="0" class="searchTextField hidden">
+
+                <div class="tab-content">
+                  <div class="tab-pane active" id="resultsPanel">
+                    <div class="panel panel-default tabpanel">
+                        <div class="panel-body">
+                            <div id="resultsTable">
+                                <!-- Here comes the loaded timeline -->
+                            </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+            </div>
+            <!-- /col-lg-12 -->
+        </div>
+        <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+}

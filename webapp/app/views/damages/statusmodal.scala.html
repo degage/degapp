@@ -1,0 +1,41 @@
+@(form: Form[Damages.DamageStatusModel], damageId: Integer)
+<!-- Large modal -->
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div id=" " class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Nieuwe log-status</h4>
+            </div>
+
+            @helper.form(routes.Damages.addStatusPost(damageId), 'class -> "form-horizontal") {
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
+                <fieldset>
+                    <div id="modalBody" class="modal-body">
+                        <div class="panel-body">
+
+                            <div class="form-group">
+                                <label class="col-md-1 control-label" for="amount">Status</label>
+                                <div class="col-md-12">
+                                    <input id="status" name="status" type="text" class="form-control input-md" value="@form("status").value" required>
+                                </div>
+                            </div>
+
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+                        <button type="submit" id="add" name="add" class="btn btn-success">Voeg toe</button>
+                    </div>
+
+                </fieldset>
+
+            }
+        </div>
+    </div>
+</div>

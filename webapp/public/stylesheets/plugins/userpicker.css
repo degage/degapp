@@ -1,0 +1,7 @@
+div.userpicker div.viewId {
+    position: absolute;
+    bottom: 0;
+    right: 30px;
+    line-height: 34px;
+    color: #ccc;
+}

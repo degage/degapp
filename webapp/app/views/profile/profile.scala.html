@@ -1,0 +1,52 @@
+@(user: User)
+
+@app("Profiel") {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Profiel</li>
+        </ol>
+    </div>
+    <div id="page-wrapper">
+        @flashes()
+        <h1 class="page-header">Profiel</h1>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="panel panel-default">
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                    @smallProfile(user, false)
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                    <!-- /.panel -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Details
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <form role="form">
+                            <div class="form-group">
+                                <label class="h4">Woonplaats</label>
+                                @defining(user.getAddressResidence) { address =>
+                                    @if(address != null) {
+                                        <p class="form-control-static">@address.getZip @address.getCity,<br>@address.getCountry</p>
+                                    } else {
+                                        <p>Niet gespecifieerd.</p>
+                                    }
+                                }
+                            </div>
+                        </form>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+}

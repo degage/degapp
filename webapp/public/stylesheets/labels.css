@@ -1,0 +1,31 @@
+.label-user {
+    background-color: #00CC00;
+}
+
+.label-user_car {
+    background-color: #009900;
+}
+
+.label-user_owner {
+    background-color: #006600;
+}
+
+.label-user_super {
+    background-color: #003300;
+}
+
+.label-admin_info {
+    background-color: #0000FF;
+}
+
+.label-admin_mail {
+    background-color: #0000CC;
+}
+
+.label-admin_profile {
+    background-color: #000099;
+}
+
+.label-admin_reserv{
+    background-color: #000066;
+}

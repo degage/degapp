@@ -1,0 +1,28 @@
+@(map: Maps.MapDetails)
+    @scripts = {
+        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.js"))'></script>
+        <script src="@routes.Assets.at("javascripts/maps-custom.js")" type="text/javascript"></script>
+    }
+
+    @stylesheets = {
+        <style>
+            #map { height: 600px; width: 1400px; }
+        </style>
+        <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
+    }
+
+@app("Simple map view", stylesheets, scripts){
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="#">Maps</a></li>
+            <li class="active">Test</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <h1>Simple map test</h1>
+            <div id="map" data-lat="@map.getLatitude" data-lon="@map.getLongtitude" data-zoom="@map.getZoom" data-message="@map.getMessage"></div>
+        </div>
+    </div>
+}

@@ -1,0 +1,77 @@
+@(sessions: List[InfoSession], enrolled: InfoSession = null, page: Int, amountOfInfoSessions: Int, amountOfPages: Int)
+@import providers.DataProvider;
+<div class="table-responsive">
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
+    <thead>
+        <tr role="row">
+            <th>Type</th>
+            <th name="date" class="sortable">Tijdstip</th>
+            <th>Inschrijvingen</th>
+            <th>Host</th>
+            <th>Adres</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @defining(DataProvider.getUserRoleProvider.isFullUser) { fullUser =>
+            @for(session <- sessions) {
+                <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" }>
+                <td>
+                    @session.getType match {
+                        case InfoSessionType.NORMAL => {
+                            <span class="fa fa-user"></span>
+                        } case InfoSessionType.OWNER => {
+                            <span class="fa fa-group"></span>
+                        } case InfoSessionType.OTHER => {
+                            <span class="fa fa-briefcase"></span>
+                        }
+                        case _ => {}
+                    }
+                    @session.getType.getDescription @if(session.getType.equals(InfoSessionType.OTHER)) {
+                    : @session.getTypeAlternative
+                    }
+                </td>
+                <td>@session.getTime.toString("dd-MM-yyyy HH:mm")</td>
+                @if(session.getMaxEnrollees != 0) {
+                    @if(session.getEnrolleeCount == session.getMaxEnrollees) {
+                        <td><strong>Volzet</strong></td>
+                    } else {
+                        <td>@session.getEnrolleeCount / @session.getMaxEnrollees</td>
+                    }
+                } else {
+                    <td>@session.getEnrolleeCount</td>
+                }
+
+                <td>
+                    @if(fullUser) {
+                        <a href="@routes.Profile.index(session.getHost.getId)">@session.getHost</a>
+                    } else {
+                        @session.getHost
+                    }
+                </td>
+                <td>@session.getAddress</td>
+                <td>
+                    <div class="btn-group btn-group-xs">
+                        <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">details</a>
+                        @if(enrolled == null && (session.getMaxEnrollees == 0 || session.getEnrolleeCount < session.getMaxEnrollees)) {
+                            <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(session.getId)">
+                                inschrijven</a>
+                        } else {
+                            @* Scala y u no 'else if' ??? *@
+                            @if(enrolled != null && enrolled.getId == session.getId) {
+                                <button type="button" disabled="disabled" onclick="showConfirmationModal ( @session.getId() )" class="btn btn-success">
+                                    inschrijven</button>
+                            } else {
+                                <button type="button" onclick="showConfirmationModal ( @session.getId() )" class="btn btn-success">
+                                    inschrijven</button>
+                            }
+                        }
+                    </div>
+                </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+</div>
+<p id="pagination" name="@amountOfInfoSessions,@amountOfPages"></p>

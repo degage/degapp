@@ -1,0 +1,32 @@
+@(notifications: List[Notification], page : Int, amountOfResults : Int, amountOfPages : Int)
+@import org.joda.time.format.DateTimeFormat
+<ul class="chat">
+@for((notification, index) <- notifications.zipWithIndex) {
+        <li>
+            <div class="chat-body clearfix">
+                <div class="header">
+                    @if(!notification.getRead){
+                        <strong class="primary-font">@notification.getSubject (Ongelezen)</strong>
+                    }else{
+                        <strong class="primary-font">@notification.getSubject</strong>
+                    }
+                    <small class="text-muted">
+                        - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(notification.getTimestamp)
+                    </small>
+                    @if(!notification.getRead){
+                        <a type="button" class="close" aria-hidden="true" href="@routes.Notifications.markNotificationAsRead(notification.getId)"><small><i class="fa fa-eye fa-fw"></i></small></a>
+                    }
+                </div>
+                <div class="msg-body">
+                    <p>
+                    @Html(notification.getBody)
+                    </p>
+                </div>
+            </div>
+        </li>
+}
+</ul>
+
+<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+
+

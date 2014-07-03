@@ -1,0 +1,188 @@
+@(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
+@import providers.DataProvider;
+@scripts = {
+    <script>
+        function onSameAddressChange() {
+            if($('#sameAddress').is(':checked')) {
+                $('#residenceAddress_street').val($('#domicileAddress_street').val());
+                $('#residenceAddress_nr').val($('#domicileAddress_nr').val());
+                $('#residenceAddress_city').val($('#domicileAddress_city').val());
+                $('#residenceAddress_zip').val($('#domicileAddress_zip').val());
+                $('#residenceAddress_bus').val($('#domicileAddress_bus').val());
+                $('#residenceAddress_country').val($('#domicileAddress_country').val());
+
+                $("#residenceAdressWrap" ).hide();
+            } else {
+                $("#residenceAdressWrap" ).show();
+            }
+        }
+
+        $(document).ready(function() {
+            // Check if domicile == residence
+            var sameAddresses = $('#residenceAddress_street').val() == $('#domicileAddress_street').val() &&
+                $('#residenceAddress_nr').val() == $('#domicileAddress_nr').val() &&
+                $('#residenceAddress_city').val() == $('#domicileAddress_city').val() &&
+                $('#residenceAddress_zip').val() == $('#domicileAddress_zip').val() &&
+                $('#residenceAddress_bus').val() == $('#domicileAddress_bus').val() &&
+                $('#residenceAddress_country').val() == $('#domicileAddress_country').val();
+            if(sameAddresses) {
+                $('#sameAddress').attr('checked', true);
+            }
+            onSameAddressChange();
+        });
+    </script>
+}
+    @app("Profiel bewerken", scripts) {
+
+        <div id="page-header-wrapper">
+            <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+                <li><a href="@routes.Profile.indexWithoutId">Profiel</a></li>
+                <li class="active">Bewerken</li>
+            </ol>
+        </div>
+
+        <div id="page-wrapper">
+            <h1 class="page-header">Profiel bewerken</h1>
+            <div class="row">
+            @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
+                <div class="col-lg-3">
+                    @if(form.hasGlobalErrors) {
+                        <div class="alert alert-danger alert-dismissable">
+                            <strong>Error!</strong> @form.globalError.message
+                        </div>
+                    }
+                    <div class="panel panel-default">
+                            <!-- /.panel-heading -->
+                        <div class="panel-body">
+                            <div class="form-group">
+                                <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-12">Voornaam</label>
+                                <div class="col-md-12">
+                                    <input name="firstName" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("firstName").value">
+                                </div>
+                                <label class="col-md-12">Familienaam</label>
+                                <div class="col-md-12">
+                                    <input name="lastName" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("lastName").value">
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-12">E-mail</label>
+                                <div class="col-md-12">
+                                    <input name="email" type="text" class="form-control input-md" value="@form("email").value" disabled>
+                                </div>
+                                <label class="col-md-12">Telefoon</label>
+                                <div class="col-md-12">
+                                    <input name="phone" type="text" class="form-control input-md" value="@form("phone").value">
+                                </div>
+                                <label class="col-md-12">GSM</label>
+                                <div class="col-md-12">
+                                    <input name="mobile" type="text" class="form-control input-md" value="@form("mobile").value">
+                                </div>
+                            </div>
+                        </div>
+                            <!-- /.panel-body -->
+                    </div>
+                </div>
+                <div class="col-md-9">
+                    
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Domicilieadres</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <label class="col-md-12">Straat</label>
+                                        <div class="col-md-12">
+                                            <input id="domicileAddress_street" name="domicileAddress.street" type="text" class="form-control input-md" value="@form("domicileAddress.street").value">
+                                        </div>
+                                        <label class="col-md-12">Nummer</label>
+                                        <div class="col-md-12">
+                                            <input id="domicileAddress_nr" name="domicileAddress.number" type="text" class="form-control input-md" value="@form("domicileAddress.number").value">
+                                        </div>
+                                        <label class="col-md-12">Stad</label>
+                                        <div class="col-md-12">
+                                            <input id="domicileAddress_city" name="domicileAddress.city" type="text" class="form-control input-md" value="@form("domicileAddress.city").value">
+                                        </div>
+                                        <label class="col-md-12">Postcode</label>
+                                        <div class="col-md-12">
+                                            <input id="domicileAddress_zip" name="domicileAddress.zipCode" type="text" class="form-control input-md" value="@form("domicileAddress.zipCode").value">
+                                        </div>
+                                        <label class="col-md-12">Bus</label>
+                                        <div class="col-md-12">
+                                            <input id="domicileAddress_bus" name="domicileAddress.bus" type="text" class="form-control input-md" value="@form("domicileAddress.bus").value">
+                                        </div>
+                                        <div class="col-md-12">
+                                            @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land", 'id -> "domicileAddress_country", 'class -> "form-control")
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Verblijfsadres</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        <input id="sameAddress" type="checkbox" onchange="onSameAddressChange()"> Zelfde als domicilieadres
+                                        <div id="residenceAdressWrap">
+                                            <hr />
+                                            <label class="col-md-12">Straat</label>
+                                            <div class="col-md-12">
+                                                <input id="residenceAddress_street" name="residenceAddress.street" type="text" class="form-control input-md" value="@form("residenceAddress.street").value">
+                                            </div>
+                                            <label class="col-md-12">Nummer</label>
+                                            <div class="col-md-12">
+                                                <input id="residenceAddress_nr" name="residenceAddress.number" type="text" class="form-control input-md" value="@form("residenceAddress.number").value">
+                                            </div>
+                                            <label class="col-md-12">Stad</label>
+                                            <div class="col-md-12">
+                                                <input id="residenceAddress_city" name="residenceAddress.city" type="text" class="form-control input-md" value="@form("residenceAddress.city").value">
+                                            </div>
+                                            <label class="col-md-12">Postcode</label>
+                                            <div class="col-md-12">
+                                                <input id="residenceAddress_zip" name="residenceAddress.zipCode" type="text" class="form-control input-md" value="@form("residenceAddress.zipCode").value">
+                                            </div>
+                                            <label class="col-md-12">Bus</label>
+                                            <div class="col-md-12">
+                                                <input id="residenceAddress_bus" name="residenceAddress.bus" type="text" class="form-control input-md" value="@form("residenceAddress.bus").value">
+                                            </div>
+                                            <div class="col-md-12">
+                                            @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land", 'id -> "residenceAddress_country", 'class -> "form-control")
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h3 class="panel-title">Waarborg</h3>
+                                    </div>
+                                    <div class="panel-body">
+                                        @if(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)){
+                                            <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Waarborg betaald
+                                        } else {
+                                            <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Waarborg betaald
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="panel panel-default">
+                                    <div class="panel-body">
+                                        <button name="saveChanges" class="btn btn-block btn-success" onclick="onSameAddressChange()">Wijzigingen opslaan</button>
+                                    </div>
+                                </div>
+                            </div>
+                </div>
+                <!-- /col-lg-9 -->
+            }
+            </div>
+            <!-- /row -->
+        </div>
+    }

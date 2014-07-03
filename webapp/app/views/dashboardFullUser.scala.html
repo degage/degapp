@@ -1,0 +1,157 @@
+@(user: User, completeness: Int = 0, form: play.data.Form[Reserve.IndexModel])
+@import providers.DataProvider
+
+
+<div class="">
+    <div class="">
+        @defining(DataProvider.getUserRoleProvider.hasRole(user.getId, UserRole.CAR_OWNER)) { owner =>
+            <div class="row">
+                @if(owner) {
+                    @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { requests =>
+                        <div class="col-lg-3">
+                            <div  class="panel @if(requests == 0) { panel-success } else { panel-info } ">
+                                <div class="panel-heading">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            <i class="fa fa-car fa-5x"></i>
+                                        </div>
+                                        <div class="col-xs-6 text-right">
+                                        @if(requests > 0) { <p class="announcement-heading">@requests</p> }
+                                            <p class="announcement-text">
+                                                @if(requests == 0) { Geen nieuwe reservaties }
+                                                @if(requests == 1) { Nieuwe reservatie }
+                                                @if(requests > 1) { Nieuwe reservaties }
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <a href="@routes.Drives.indexWithStatus(ReservationStatus.REQUEST.toString)">
+                                    <div class="panel-body">
+                                        <div class="row">
+                                            <div class="col-xs-6">
+                                                Ga naar reservaties
+                                            </div>
+                                            <div class="col-xs-6 text-right">
+                                                <i class="fa fa-arrow-circle-right"></i>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                }
+                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, false)) { requests =>
+                    <div class="@if(owner) { col-lg-3 } else { col-lg-4 }">
+                        <div  class="panel @if(requests == 0) { panel-success } else { panel-info } ">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <i class="fa fa-edit fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-6 text-right">
+                                        <p class="announcement-heading">@requests</p>
+                                        <p class="announcement-text">@if(requests == 1) { Rit vereist } else { Ritten vereisen } details</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="@if(requests > 0) {
+                                @routes.Drives.indexWithStatus(ReservationStatus.REQUEST_DETAILS.toString)
+                                } else { @routes.Drives.index() }">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            Ga naar ritten
+                                        </div>
+                                        <div class="col-xs-6 text-right">
+                                            <i class="fa fa-arrow-circle-right"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                }
+                @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread =>
+                    <div class="@if(owner) { col-lg-3 } else { col-lg-4 }">
+                        <div  class="panel @if(unread == 0) { panel-success } else { panel-info } ">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <i class="fa fa-envelope fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-6 text-right">
+                                        <p class="announcement-heading">@unread</p>
+                                        <p class="announcement-text">Ongelezen @if(unread == 1) { bericht } else { berichten }</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <a href="@routes.Messages.showMessages">
+                                <div class="panel-body">
+                                    <div class="row">
+                                        <div class="col-xs-6">
+                                            Ga naar berichten
+                                        </div>
+                                        <div class="col-xs-6 text-right">
+                                            <i class="fa fa-arrow-circle-right"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                }
+                <div class="@if(owner) { col-lg-3 } else { col-lg-4 }">
+                    <div  class="panel @if(completeness == 100) { panel-success } else { panel-info } ">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-6">
+                                    <i class="fa fa-user fa-5x"></i>
+                                </div>
+                                <div class="col-xs-6 text-right">
+                                    <p class="announcement-heading">Volledigheid profiel</p>
+                                    <div class="progress">
+                                        @if(completeness == 100){
+                                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                        } else {
+                                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <a href="@routes.Profile.indexWithoutId">
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        @if(completeness != 100) {
+                                            Vul je profiel verder aan
+                                        } else {
+                                            Ga naar je profiel
+                                        }
+                                    </div>
+                                    <div class="col-xs-6 text-right">
+                                        <i class="fa fa-arrow-circle-right"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <div class="panel panel-default">
+            @helper.form(routes.Reserve.indexWithDate(), 'class -> "form-horizontal") {
+                <input name="from" id="input_from" class="hidden" type="text">
+                <input name="until" id="input_until" class="hidden" type="text">
+            <div class="panel-body">
+                <div id="calendar"></div>
+            </div>
+            }
+        </div>
+    </div>
+</div>

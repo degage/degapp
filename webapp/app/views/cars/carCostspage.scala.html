@@ -1,0 +1,73 @@
+@(carCostList: List[CarCost], page : Int, amountOfResults : Int, amountOfPages : Int)
+@import org.joda.time.format.DateTimeFormat
+@import providers.DataProvider;
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-carCosts">
+    <thead>
+    <tr role="row">
+        <th>Auto</th>
+        <th>Beschrijving</th>
+        <th>Tijd</th>
+        <th>Bedrag</th>
+        <th>Status</th>
+        <th>Bewijs</th>
+        <th>Acties</th>
+    </tr>
+    </thead>
+    <tbody>
+    @if(carCostList.isEmpty) {
+    <tr>
+        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
+            Er zijn momenteel geen autogebonden kostaanvragen in het systeem.
+        </td>
+    </tr>
+    } else {
+    @for(carCost <- carCostList) {
+    <tr>
+        <td><a href="@routes.Cars.detail(carCost.getCar.getId)">@carCost.getCar.getName</a></td>
+        <td>@carCost.getDescription</td>
+        <td>@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(carCost.getTime)</td>
+        <td>@carCost.getAmount</td>
+        <td>
+            @carCost.getStatus match {
+            case CarCostStatus.ACCEPTED => {
+            <span class="fa fa-check-circle"></span>
+            }
+            case CarCostStatus.REFUSED => {
+            <span class="fa fa-minus-circle"></span>
+            }
+            case CarCostStatus.REQUEST => {
+            <span class="fa fa-question-circle"></span>
+            }
+            case _ => {}
+            }
+            @carCost.getStatus.getDescription
+        </td>
+        <td>
+            <div class="btn-group btn-group-xs">
+                <a class="btn btn-primary" href="@routes.Cars.getProof(carCost.getProofId)">Link</a>
+            </div>
+        </td>
+        @if(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
+            <td>
+            @carCost.getStatus match {
+                case CarCostStatus.ACCEPTED => {
+                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                }
+                case CarCostStatus.REFUSED => {
+                    <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                }
+                case CarCostStatus.REQUEST => {
+                    <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                }
+                case _ => {}
+            }
+
+            </td>
+        }
+    </tr>
+    }
+    }
+    </tbody>
+</table>
+<p id="pagination" name="@amountOfResults,@amountOfPages"></p>

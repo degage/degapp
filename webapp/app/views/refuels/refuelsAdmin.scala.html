@@ -1,0 +1,94 @@
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+    var route = myJsRoutes.controllers.Refuels.showAllRefuelsPage;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+    <script src="@routes.Assets.at("javascripts/app/refuelInfo.js")"></script>
+    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+}
+@app("Tankbeurten (Admin)", stylesheets, scripts) {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Tankbeurten (Admin)</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Tankbeurten (Admin)</h1>
+                @flashes()
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-task"></i> Tankbeurten
+                    </div>
+                    <div class="panel-body">
+                        <div class="row">
+                            <div class="col-lg-12">
+                                <p>
+                                    Hier kan je als admin alle tankbeurten zien en die eventueel wijzigen.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-6 col-md-4">
+                                <div class="userpicker" data-url="@routes.CarPicker.getList()">
+                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
+                                    <input type="hidden" class="searchTextField" name="refuel_car_id" value="" />
+                                    <div class="viewId"></div>
+                                    <ul class="dropdown-menu" role="menu"></ul>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-md-4">
+                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
+                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Eigenaar"/>
+                                    <input type="hidden" class="searchTextField" name="refuel_owner_id" value="" />
+                                    <div class="viewId"></div>
+                                    <ul class="dropdown-menu" role="menu"></ul>
+                                </div>
+                            </div>
+                            <div class="col-xs-6 col-md-4">
+                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
+                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Bestuurder"/>
+                                    <input type="hidden" class="searchTextField" name="refuel_user_id" value="" />
+                                    <div class="viewId"></div>
+                                    <ul class="dropdown-menu" role="menu"></ul>
+                                </div>
+                            </div>
+                        </div><br />
+                        <hr />
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <div class="btn-group btn-group">
+                                    <button id="searchButton" class="btn btn-success">Zoek!</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="resultsTable">
+                                <!-- Here comes the loaded page -->
+                        </div>
+
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+    <div id="resultModal"></div>
+}

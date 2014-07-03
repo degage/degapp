@@ -1,0 +1,56 @@
+@(form: Form[Damages.DamageModel], damageId: Integer)
+<!-- Large modal -->
+<script>
+$('#costtime').datetimepicker({"autoclose": true, language: 'nl'});
+</script>
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div id=" " class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">Nieuwe autokost</h4>
+            </div>
+
+            @helper.form(routes.Damages.editDamagePost(damageId), 'class -> "form-horizontal") {
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
+                <fieldset>
+                    <div id="modalBody" class="modal-body">
+                        <div class="panel-body">
+
+
+                            <div class="form-group">
+                                <label class="col-md-1 control-label" for="description"></label>
+                                <div class="col-md-12">
+                                    <input id="description" name="description" type="text" placeholder="Beschrijving" class="form-control input-md" value="@form("description").value" required>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div id="costtime" class="input-group date form_datetime col-md-5" data-link-field="input_time">
+                                    <label class="col-md-1 control-label" for="time"></label>
+                                    <div class="col-md-12">
+                                        <input id="input_time" name="time" placeholder="Datum" class="form-control input-md"  type="text" value="@form("time").value" required>
+                                    </div>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Annuleren</button>
+                        <button type="submit" id="add" name="add" class="btn btn-success">Voeg toe</button>
+                    </div>
+
+                </fieldset>
+            }
+
+
+        </div>
+    </div>
+</div>

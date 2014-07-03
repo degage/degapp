@@ -1,0 +1,47 @@
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+        var route = myJsRoutes.controllers.InfoSessions.pendingApprovalListPaged;
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+
+    <script>
+        $(document).ready(function () {
+            $(window).resize(forceResponsiveTables);
+            forceResponsiveTables();
+        });
+    </script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
+
+@app("Goedkeuringen gebruikers", stylesheets, scripts) {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Goedkeuringen gebruikers</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Goedkeuringen gebruikers</h1>
+
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+}

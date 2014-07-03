@@ -1,0 +1,85 @@
+@(form: play.data.Form[controllers.Messages.MessageCreationModel])
+    @import providers.DataProvider;
+    @stylesheets = {
+        <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
+        <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+
+    }
+    @scripts = {
+        <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
+        <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+
+    }
+@app("Nieuw bericht",stylesheets, scripts) {
+
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li><a href="@routes.Messages.showMessages()">Berichten</a></li>
+            <li class="active">Nieuw bericht</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Nieuw bericht</h1>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Nieuw
+                    </div>
+                        <!-- /.panel-heading -->
+
+
+                    <div class="panel-body">
+                    @helper.form(routes.Messages.createNewMessage , 'class -> "form-horizontal") {
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="receiver">Ontvanger</label>
+                            @if(form("userId").value){
+                                @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
+                                    <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" autocomplete="false" />
+                                        <input type="hidden" name="userId" value="@user.getId" />
+                                        <div class="viewId" value="@user.getId"></div>
+                                        <ul class="dropdown-menu" role="menu"></ul>
+                                    </div>
+                                }
+                            }else{
+                                <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                    <input type="text" data-toggle="dropdown" class="form-control input-md" />
+                                    <input type="hidden" name="userId" />
+                                    <div class="viewId"></div>
+                                    <ul class="dropdown-menu" role="menu"></ul>
+                                </div>
+                            }
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="subject">Onderwerp</label>
+                            <div class="col-md-12">
+                                <input id="subject" name="subject" type="text" class="form-control input-md" value="">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="body">Bericht</label>
+                            <div class="col-md-12">
+                                <textarea id="body" name="body" class="form-control" rows="6"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="col-md-1 control-label" for="body"></label>
+                            <div class="col-md-12">
+                                <button type="submit" id="create" name="create" class="btn btn-block btn-success">Verzend</button>
+                            </div>
+                        </div>
+                    }
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+    </div>
+}

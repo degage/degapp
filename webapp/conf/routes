@@ -1,0 +1,214 @@
+# Routes
+# This file defines all application routes (Higher priority routes first)
+# ~~~~
+
+# Home page
+GET         /                                       controllers.Application.index()
+GET         /information                            controllers.Information.index()
+
+# Dashboard page
+GET         /dashboard                              controllers.Dashboard.index()
+
+# UserRoles
+GET         /userroles                              controllers.UserRoles.index()
+GET         /userroles/page                         controllers.UserRoles.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /userroles/edit                         controllers.UserRoles.edit(userId: Int)
+POST        /userroles/edit                         controllers.UserRoles.editPost(userId: Int)
+
+# Drives
+GET         /drives                                 controllers.Drives.index()
+GET         /drives_tab                             controllers.Drives.indexWithStatus(status: String)
+GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /drives/admin                           controllers.Drives.drivesAdmin()
+GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /drive_details                          controllers.Drives.details(reservationId: Int)
+POST        /drive_details/status                   controllers.Drives.setReservationStatus(reservationId: Int)
+POST        /drive_details/adjusted                 controllers.Drives.adjustDetails(reservationId: Int)
+POST        /drive_details/provide_info             controllers.Drives.provideDriveInfo(reservationId: Int)
+GET         /drive_details/approve_info             controllers.Drives.approveDriveInfo(reservationId: Int)
+GET         /drives-cancelled                       controllers.Drives.cancelReservation(reservationId: Int)
+
+# Reservations
+GET         /reserve                                controllers.Reserve.index()
+POST        /reserve                                controllers.Reserve.indexWithDate()
+GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
+GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
+POST        /reserve/reservation                    controllers.Reserve.confirmReservation(cardId: Int)
+
+
+# Receipts
+GET         /receipts                                  controllers.Receipts.index()
+GET         /receipts/page                             controllers.Receipts.showReceiptsPage(page: Int, asc: Int ?= 1,orderBy: String ?= "", filter: String ?= "")
+
+
+# User pages
+GET         /settings                               controllers.Settings.index()
+
+# Notifiers
+GET         /messages                               controllers.Messages.showMessages()
+GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/sent/page                     controllers.Messages.showSentMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
+GET         /messages/markallasread                 controllers.Messages.markAllMessagesAsRead()
+GET         /messages/new                           controllers.Messages.newMessage()
+GET         /messages/reply                         controllers.Messages.reply(userId: Int)
+POST        /messages/new                           controllers.Messages.createNewMessage()
+GET         /notifications                          controllers.Notifications.showNotifications()
+GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
+GET         /notifications/markallasread            controllers.Notifications.markAllNotificationsAsRead()
+GET         /notifications/page                     controllers.Notifications.showNotificationsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+
+# Profile pages
+GET         /profile                                controllers.Profile.indexWithoutId()
+GET         /profile/edit                           controllers.Profile.edit(userId: Int)
+POST        /profile/edit                           controllers.Profile.editPost(userId: Int)
+GET         /profile/byid                           controllers.Profile.index(userId: Int)
+GET         /profile/changepicture                  controllers.Profile.profilePictureUpload(userId: Int)
+POST        /profile/changepicture                  controllers.Profile.profilePictureUploadPost(userId: Int)
+GET         /profile/picture                        controllers.Profile.getProfilePicture(userId: Int)
+GET         /profile/identitycard                   controllers.Profile.editIdentityCard(userId: Int)
+POST        /profile/identitycard                   controllers.Profile.editIdentityCardPost(userId: Int)
+GET         /profile/identitycard/deletefile        controllers.Profile.deleteFile(userId: Int, fileId: Int, group: String)
+GET         /profile/identitycard/file              controllers.Profile.viewFile(userId: Int, fileId: Int, group: String)
+GET         /profile/driverslicense                 controllers.Profile.editDriversLicense(userId: Int)
+POST        /profile/driverslicense                 controllers.Profile.editDriversLicensePost(userId: Int)
+GET         /profile/editstatus                     controllers.Profile.editUserStatus(userId: Int)
+POST        /profile/editstatus                     controllers.Profile.editUserStatusPost(userId: Int)
+
+# Users
+GET         /users                                  controllers.Users.showUsers()
+GET         /users/page                             controllers.Users.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /users/impersonate                      controllers.Users.impersonate(userId: Int)
+
+# Login screen
+GET         /login                                  controllers.Login.login(redirect ?= null)
+POST        /login                                  controllers.Login.authenticate(redirect ?= null)
+GET         /logout                                 controllers.Login.logout()
+GET         /register                               controllers.Login.register()
+POST        /register                               controllers.Login.register_process()
+GET         /register/verify                        controllers.Login.register_verification(userId: Int, code: String)
+GET         /register/reactivate                    controllers.Login.requestNewEmailVerificationProcess(email: String)
+GET         /pwreset                                controllers.Login.resetPassword(userId: Int, code: String)
+POST        /pwreset                                controllers.Login.resetPasswordProcess(userId: Int, code: String)
+GET         /pwresetrequest                         controllers.Login.resetPasswordRequest()
+POST        /pwresetrequest                         controllers.Login.resetPasswordRequestProcess()
+
+# Infosessions
+GET         /infosession/new                        controllers.InfoSessions.newSession()
+POST        /infosession/new                        controllers.InfoSessions.createNewSession()
+GET         /infosession                            controllers.InfoSessions.showUpcomingSessions()
+GET         /infosession/page                       controllers.InfoSessions.showUpcomingSessionsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /infosession/admin                      controllers.InfoSessions.showSessions()
+GET         /infosession/admin/page                 controllers.InfoSessions.showSessionsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /infosession/enroll                     controllers.InfoSessions.enrollSession(id: Int)
+GET         /infosession/unenroll                   controllers.InfoSessions.unenrollSession()
+GET         /infosession/view                       controllers.InfoSessions.detail(id: Int)
+GET         /infosession/removeAttendee             controllers.InfoSessions.removeUserFromSession(sessionId: Int, userId: Int)
+GET         /infosession/edit                       controllers.InfoSessions.editSession(sessionId: Int)
+POST        /infosession/edit                       controllers.InfoSessions.editSessionPost(sessionId: Int)
+GET         /infosession/status                     controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
+GET         /infosession/delete                     controllers.InfoSessions.removeSession(sessionId: Int)
+GET         /infosession/approval                   controllers.InfoSessions.requestApproval()
+POST        /infosession/approval                   controllers.InfoSessions.requestApprovalPost()
+GET         /infosession/approvals/page             controllers.InfoSessions.pendingApprovalListPaged(page: Int)
+GET         /infosession/approvals                  controllers.InfoSessions.pendingApprovalList()
+GET         /infosession/approval/details           controllers.InfoSessions.approvalDetails(id: Int)
+POST        /infosession/approval/details           controllers.InfoSessions.approvalAdminAction(id: Int)
+GET         /infosession/approval/admin             controllers.InfoSessions.approvalAdmin(id: Int)
+POST        /infosession/approval/admin             controllers.InfoSessions.approvalAdminPost(id: Int)
+POST        /infosession/adduser                    controllers.InfoSessions.addUserToSession(sessionId: Int)
+
+# Settings
+GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(id: Int)
+POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost(id: Int)
+GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
+GET         /settings/sysvars/create                controllers.Settings.createSysvar()
+POST        /settings/sysvars/create                controllers.Settings.createSysvarPost()
+GET         /changepass                             controllers.Settings.changePassword()
+POST        /changepass                             controllers.Settings.changePasswordPost()
+
+
+# Emailtemplates
+GET         /emailtemplate                          controllers.EmailTemplates.showExistingTemplates()
+GET         /emailtemplate/page                     controllers.EmailTemplates.showExistingTemplatesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /emailtemplate/edit                     controllers.EmailTemplates.showTemplate(id: Int)
+POST        /emailtemplate/edit                     controllers.EmailTemplates.editTemplate()
+
+# Cars
+GET         /cars/admin                             controllers.Cars.showCars()
+GET         /cars                                   controllers.Cars.showUserCars()
+GET         /cars/page                              controllers.Cars.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /cars/new                               controllers.Cars.newCar()
+POST        /cars/new                               controllers.Cars.addNewCar()
+GET         /cars/view                              controllers.Cars.detail(id: Int)
+GET         /cars/edit                              controllers.Cars.editCar(carId: Int)
+POST        /cars/edit                              controllers.Cars.editCarPost(carId: Int)
+GET         /cars/picture                           controllers.Cars.getPicture(carId: Int)
+GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
+POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
+GET         /cars/carcosts                          controllers.Cars.showCarCosts()
+GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
+GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
+GET         /cars/carcosts/proof                    controllers.Cars.getProof(proofId: Int)
+GET         /cars/availabilities/edit               controllers.Cars.updateAvailabilities(carId : Int, values : String)
+GET         /cars/priviliges/edit                   controllers.Cars.updatePriviliged(carId : Int, values : String)
+
+#Refuels
+GET         /refuels                                controllers.Refuels.showRefuels()
+GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
+GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/admin                          controllers.Refuels.showAllRefuels()
+GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
+POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
+GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
+GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
+GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
+GET         /refuels/owner/request                  controllers.Refuels.makeRefuelStatusRequest(refuelId: Int)
+
+
+#Damages
+GET         /damages                                controllers.Damages.showDamages()
+GET         /damages/page                           controllers.Damages.showDamagesPage(page: Int, pageSize:Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/owner                          controllers.Damages.showDamagesOwner()
+GET         /damages/owner/page                     controllers.Damages.showDamagesPageOwner(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/admin                          controllers.Damages.showAllDamages()
+GET         /damages/admin/page                     controllers.Damages.showDamagesPageAdmin(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /damages/details                        controllers.Damages.showDamageDetails(damageId: Int)
+GET         /damages/edit                           controllers.Damages.editDamage(damageId: Int)
+GET         /damages/status                         controllers.Damages.addStatus(damageId: Int)
+POST        /damages/status                         controllers.Damages.addStatusPost(damageId: Int)
+GET         /damages/proof                          controllers.Damages.addProof(damageId: Int)
+POST        /damages/proof                          controllers.Damages.addProofPost(damageId: Int)
+GET         /damages/proof/file                     controllers.Damages.getProof(proofId: Int)
+GET         /damages/proof/deletefile               controllers.Damages.deleteProof(damageId: Int, fileId: Int)
+POST        /damages/edit                           controllers.Damages.editDamagePost(damageId: Int)
+GET         /damages/finished                       controllers.Damages.setDamageFinished(damageId: Int, status: Int)
+
+# Maps
+GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
+GET         /maps/test                              controllers.Maps.showMap()
+
+# Reports
+GET         /reports                                controllers.Reports.index()
+GET         /reports/users                          controllers.Reports.getUsers()
+GET         /reports/reservations                   controllers.Reports.getReservations()
+GET         /reports/reservations/owner             controllers.Reports.getReservationsForOwner()
+GET         /reports/cars                           controllers.Reports.getCars()
+
+# User Picker
+GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
+# Car Picker
+GET         /carpicker                              controllers.CarPicker.getList(search: String ?= "")
+
+# Javascript routing
+GET         /assets/javascripts/routes              controllers.Application.javascriptRoutes()
+
+# Map static resources from the /public folder to the /assets URL path
+GET         /assets/*file                           controllers.Assets.at(path="/public", file)
+
+# Support for webjar packages such as bootstrap
+GET         /webjars/*file                          controllers.WebJarAssets.at(file)

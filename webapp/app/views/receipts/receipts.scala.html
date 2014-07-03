@@ -1,0 +1,70 @@
+@import providers.DataProvider;
+
+@scripts = {
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+    var route = myJsRoutes.controllers.Receipts.showReceiptsPage;
+	console.log(route);
+    </script>
+    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+}
+
+@app("Afrekeningen", stylesheets, scripts) {
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+            <li class="active">Afrekeningen</li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Afrekeningen</h1>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Rekeningen zoeken
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                            <!-- TODO: layout, more fields to search on -->
+                        <div class="row">
+                            <div class="col-xs-6">
+                                <input id="date" class="searchTextField form-control" name="date" type="date" placeholder="Datum" >
+                            </div>
+                        </div>
+                        <hr />
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <div class="btn-group btn-group">
+                                    <button id="searchButton" class="btn btn-success">Zoek!</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <i class="fa fa-bar-chart-o fa-fw"></i> Afrekeningen
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div id="resultsTable" class="table-responsive">
+                                <!-- Here comes the loaded table-->
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+                    <!-- /.panel -->
+            </div>
+                <!-- /col-lg-12 -->
+        </div>
+            <!-- /row -->
+    </div>
+    <!-- /page-wrapper -->
+}

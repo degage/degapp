@@ -1,0 +1,54 @@
+@(sessions: List[InfoSession], page: Int, amountOfInfoSessions: Int, amountOfPages: Int)
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
+    <thead>
+    <tr role="row">
+        <th>Type</th>
+        <th name="date" class="sortable">Tijdstip</th>
+        <th>Inschrijvingen</th>
+        <th>Host</th>
+        <th>Adres</th>
+        <th>Acties</th>
+    </tr>
+    </thead>
+    <tbody>
+    @for(session <- sessions) {
+    <tr>
+        <td>
+            @session.getType match {
+                case InfoSessionType.NORMAL => {
+                    <span class="fa fa-user"></span>
+                } case InfoSessionType.OWNER => {
+                    <span class="fa fa-car"></span>
+                } case InfoSessionType.OTHER => {
+
+                }
+                case _ => {}
+            }
+            @session.getType.getDescription @if(session.getType.equals(InfoSessionType.OTHER)) {
+            : @session.getTypeAlternative
+            }
+        </td>
+        <td>@session.getTime.toString("dd-MM-YYYY HH:mm")</td>
+        @if(session.getMaxEnrollees != 0) {
+        @if(session.getEnrolleeCount == session.getMaxEnrollees) {
+        <td><strong>Volzet</strong></td>
+        } else {
+        <td>@session.getEnrolleeCount / @session.getMaxEnrollees</td>
+        }
+        } else {
+        <td>@session.getEnrolleeCount</td>
+        }
+
+        <td><a href="@routes.Profile.index(session.getHost.getId)">@session.getHost</a></td>
+        <td>@session.getAddress</td>
+        <td>
+            <div class="btn-group btn-group-xs">
+                <a href="@routes.InfoSessions.detail(session.getId)" class="btn btn-primary">details</a>
+                <a href="@routes.InfoSessions.editSession(session.getId)" class="btn btn-success">bewerken</a>
+            </div>
+        </td>
+    </tr>
+    }
+    </tbody>
+</table>
+<p id="pagination" name="@amountOfInfoSessions,@amountOfPages"></p>

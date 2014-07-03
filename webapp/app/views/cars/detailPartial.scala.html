@@ -1,0 +1,98 @@
+@(car: Car, mapDetails: Maps.MapDetails = null)
+@import providers.DataProvider;
+@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+    @defining(DataProvider.getUserProvider().getUser()) { user =>
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="panel panel-default">
+                    <div class="panel-header">
+
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+
+                        @if(car == null) {
+                            <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                        } else {
+                            <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                        }
+                        <!-- TODO: profile picture-->
+
+
+                    <h2>@car.getName</h2>
+                    <p>
+                        <strong>Auto:</strong> @car.getBrand @car.getType <br>
+                        <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner.toString</a>
+                    </p>
+                    <p>
+                        <strong>Status:</strong>
+                        @if(car.isActive) {
+                            <span class="label label-success">Actief</span>
+                        } else {
+                            <span class="label label-danger">Non-actief</span>
+                        }
+                    </p>
+
+                        <!-- /.panel-body -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 class="panel-title">Adres</h3>
+                    </div>
+                    <div class="panel-body">
+                        <strong>Adres:</strong> @car.getLocation.toString
+                        <div class="well map">
+                            @map(mapDetails)
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        Details
+                    </div>
+                    <div class="panel-body">
+                        <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
+                        <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
+                        <strong>Manueel: </strong> @if(car.isManual) { ja } else { nee } <br>
+                        <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                        <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                        <strong>Brandstof: </strong>  @{car.getFuel.getDescription } <br>
+                        <strong>Commentaar: </strong> <br> @car.getComments
+                    </div>
+                </div>
+
+                @if(isAdmin || car.getOwner.getId == user.getId) {
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Geheime details (enkel zichtbaar voor admin en eigenaar)
+                        </div>
+
+                        <div class="panel-body">
+
+                            <strong>Bouwjaar: </strong> @if(car.getYear == null) { Onbekend } else { @car.getYear }<br>
+                            <strong>Gemiddeld verbruik (per 100 km): </strong> @if(car.getFuelEconomy == null) { Onbekend } else { @car.getFuelEconomy }<br>
+                            <strong>Geschatte huidige waarde: </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
+                            <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)">Link</a> }<br>
+                            <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
+                            <strong>Verzekeraar: </strong> @if(car.getInsurance == null || car.getInsurance.getName == null) { Onbekend } else { @car.getInsurance.getName }<br>
+                            <strong>Verzekering vervaldatum: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @car.getInsurance.getExpiration }<br>
+                            <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus== null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
+                            <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr== null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>
+
+                        </div>
+                    </div>
+                }
+            </div>
+            <!-- /col-md-9 -->
+        </div>
+    }
+}

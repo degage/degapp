@@ -1,0 +1,54 @@
+@(user: User, reservations: List[Reservation], form: play.data.Form[Reserve.IndexModel], completeness: Int = 0,
+        userWentToInfoSession: Boolean = false, approvalRequestSent: Boolean = false)
+@import providers.DataProvider;
+    @scripts = {
+        <script src="@routes.Assets.at("javascripts/app/dashboard.js")"></script>
+        <script src="@routes.Assets.at("javascripts/plugins/calendar.js")" type="text/javascript"></script>
+        <script>
+        var events = [];
+        @for(reservation <- reservations) {
+            var from = "@reservation.getFrom.toString("yyyy-MM-dd HH:mm")";
+            var parts1 = from.split(" ");
+            var d1 = parts1[0].split("-");
+            var t1 = parts1[1].split(":");
+            var until = "@reservation.getTo.toString("yyyy-MM-dd HH:mm")";
+            var parts2 = until.split(" ");
+            var d2 = parts2[0].split("-");
+            var t2 = parts2[1].split(":");
+            events.push(new CalendarEvent("@reservation.getCar.getName",
+            new Date(d1[0],(d1[1]-1),d1[2],t1[0],t1[1]),
+            new Date(d2[0],(d2[1]-1),d2[2],t2[0],t2[1]),
+            "@routes.Drives.details(reservation.getId).toString()"
+            , "details"
+            ));
+        }
+        </script>
+    }
+    @stylesheets = {
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/calendar.css")">
+    }
+
+@app("Dashboard", stylesheets, scripts) {
+<div id="page-header-wrapper">
+	<ol class="breadcrumb">
+		<li class="active">Dashboard</li>
+	</ol>
+</div>
+
+<div id="page-wrapper">
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Dashboard</h1>
+            @if(DataProvider.getUserRoleProvider.isFullUser(user) || DataProvider.getUserRoleProvider.hasRole(user, UserRole.SUPER_USER)){
+                @views.html.dashboardFullUser(user, completeness, form)
+            } else {
+                @views.html.dashboardRegistered(user, completeness, userWentToInfoSession, approvalRequestSent)
+            }
+        </div>
+        <!-- /col-lg-12 -->
+    </div>
+    <!-- /row -->
+</div>
+<!-- /page-wrapper -->
+}

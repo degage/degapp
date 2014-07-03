@@ -1,0 +1,42 @@
+@(users: List[User], page : Int, amountOfResults : Int, amountOfPages : Int)
+@import providers.DataProvider;
+@import providers.UserProvider;
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
+    <thead>
+        <tr role="row">
+            <th name="user_name" class="sortable" tabindex="0" >Naam</th>
+            <th>Acties</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if(users.isEmpty) {
+            <tr>
+                <td style="text-align: center; background-color: #F0F0F0; padding: 8px;" colspan="6">
+                    Geen enkele gebruiker voldoet aan jouw zoekterm(men)
+                </td>
+            </tr>
+        } else {
+            @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)) { isAdmin =>
+                    @defining(!(session.get("impersonated") == null || session.get("impersonated").isEmpty)) { impersonating =>
+                        @for(user <- users) {
+                            <tr>
+                                <td><a href="@routes.Profile.index(user.getId)">@user</a></td>
+                                <td>
+                                    <div class="btn-group btn-group-xs">
+                                        @if(isAdmin) {
+                                            <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Wijzig</a>
+                                        }
+                                        @if(!impersonating && DataProvider.getUserRoleProvider.hasRole(UserRole.SUPER_USER) && !UserProvider.isBlocked(user)) {
+                                            <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">
+                                                Impersoneer</a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+            }
+        }
+    </tbody>
+</table>
+<p id="pagination" name="@amountOfResults,@amountOfPages"></p>

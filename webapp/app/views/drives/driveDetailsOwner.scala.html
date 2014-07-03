@@ -1,0 +1,31 @@
+@(refuseFrom: play.data.Form[Drives.RemarksModel], reservation: Reservation)
+@import providers.DataProvider;
+
+<!-- /row -->
+@if(reservation.getStatus == ReservationStatus.REQUEST) {
+    @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
+        @if(reservation.getCar.getOwner.getId != userId) {
+            <div class="alert alert-warning alert-dismissable">
+                Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
+            </div>
+        }
+    }
+    <div class="row">
+        <div class="col-xs-12">
+                @helper.form(routes.Drives.setReservationStatus(reservation.getId), 'class -> "form-horizontal") {
+                    <div class="row">
+                        <div class="col-sm-6 col-xs-6 btn-group btn-group-xs">
+                            <button type="submit" class="btn btn-xs btn-success" name="status" value="@ReservationStatus.ACCEPTED">Goedkeuren</button>
+                            <button type="submit" class="btn btn-xs btn-danger" name="status" value="@ReservationStatus.REFUSED">Afkeuren</button>
+                        </div>
+                    </div><br />
+                    <div class="row">
+                        <div class="col-xs-12">
+                            <textarea name="remarks" class="form-control" rows="3" placeholder="Reden voor de weigering/opmerkingen bij de goedkeuring"></textarea>
+                        </div>
+                    </div>
+                }
+            </div><br />
+        </div>
+    </div>
+}

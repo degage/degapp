@@ -1,0 +1,356 @@
+@(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
+@import providers.DataProvider;
+@stylesheets = {
+    <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
+    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+}
+@scripts = {
+
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+    <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
+    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+    <script>
+        $(document).ready(function() {
+
+            $('#datepicker').datetimepicker({
+                minView: 2,
+                weekStart: 1,
+                language: 'nl',
+                todayBtn:  1,
+                autoclose: 1,
+                todayHighlight: 1,
+                startView: 2,
+                forceParse: 0,
+                showMeridian: 1,
+                startDate: new Date()
+            });
+        });
+    </script>
+
+}
+
+@app(if (car == null) "Nieuwe auto" else "Bewerk auto", stylesheets, scripts) {
+
+    <div id="page-header-wrapper">
+        <ol class="breadcrumb">
+            <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        </ol>
+    </div>
+
+    <div id="page-wrapper">
+        <h1 class="page-header">@(if (car == null) "Nieuwe auto" else "Bewerk auto") </h1>
+        <div class="row">
+        @helper.form(if (car == null) routes.Cars.addNewCar() else routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+            <div class="col-lg-3">
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
+                <div class="panel panel-default">
+                    <div class="panel-header">
+
+                    </div>
+                        <!-- /.panel-heading -->
+                    <div class="panel-body">
+                        <div class="col-md-12">
+                            @if(car == null) {
+                                <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
+                            } else {
+                                <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                            }
+                        </div>
+                        <div class="form-group">
+                            <fieldset>
+                                <div class="form-group">
+                                    <div class="col-md-12">
+                                        @helper.checkbox(form("active"), '_label -> "Actief")
+                                    </div>
+                                    @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                                        @if(isAdmin) {
+                                            <label class="col-md-12" for="userId">Eigenaar</label>
+                                            <div class="col-md-12">
+                                            @if(car != null){
+                                                @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value().toInt, false)) { user =>
+                                                    <div class="userpicker" data-url="@routes.UserPicker.getList()">
+                                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                                        <input type="hidden" name="userId" value="@user.getId" />
+                                                        <div class="viewId"></div>
+                                                        <ul class="dropdown-menu" role="menu"></ul>
+                                                    </div>
+                                                }
+                                            }else{
+                                                @defining(DataProvider.getUserProvider().getUser()) { user =>
+                                                    <div class="userpicker" data-url="@routes.UserPicker.getList()">
+                                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
+                                                        <input type="hidden" name="userId" value="@user.getId"/>
+                                                        <div class="viewId"></div>
+                                                        <ul class="dropdown-menu" role="menu"></ul>
+                                                    </div>
+                                                }
+                                            }
+                                            </div>
+                                        } else {
+                                            @defining(DataProvider.getUserProvider().getUser()) { user =>
+                                                <input type="hidden" name="userId" value="@user.getId"/>
+                                            }
+                                        }
+                                    }
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="name">Autonaam</label>
+                                    <div class="col-md-12">
+                                        <input id="name" name="name" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("name").value">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="brand">Automerk</label>
+                                    <div class="col-md-12">
+                                        <input id="brand" name="brand" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("brand").value">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-1 control-label" for="type">Type</label>
+                                    <div class="col-md-12">
+                                        <input id="type" name="type" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("type").value">
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="col-md-12" for="carphoto">Foto</label>
+                                    <div class="col-md-12">
+                                        <input id="picture" name="picture" type="file" class="form-control input-md">
+                                    </div>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                        <!-- /.panel-body -->
+                </div>
+            </div>
+            <div class="col-md-9">
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Adres
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.street">Straat</label>
+                                            <div class="col-md-12">
+                                                <input id="address.street" name="address.street" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.street").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.number">Nummer</label>
+                                            <div class="col-md-12">
+                                                <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.number").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.bus">Bus</label>
+                                            <div class="col-md-12">
+                                                <input id="address.bus" maxlength="3" name="address.bus" type="text" class="form-control input-md" value="@form("address.bus").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.zipCode">Postcode</label>
+                                            <div class="col-md-12">
+                                                <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.zipCode").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="address.city">Stad</label>
+                                            <div class="col-md-12">
+                                                <input id="address.city" name="address.city" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.city").value">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-12">
+                                            @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Details
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="seats">Aantal zitplaatsen</label>
+                                            <div class="col-md-12">
+                                                <input id="seats" name="seats" type="number" class="form-control input-md" placeholder="Verplicht" value="@form("seats").value">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="doors">Aantal deuren</label>
+                                            <div class="col-md-12">
+                                                <input id="doors" name="doors" type="number" class="form-control input-md" placeholder="Verplicht" value="@form("doors").value">
+                                            </div>
+                                        </div>
+                                            <div class="col-md-12">
+                                                @helper.checkbox(form("manual"), '_label -> "Manueel?")
+                                            </div>
+                                            <div class="col-md-12">
+                                                @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
+                                            </div>
+                                            <div class="col-md-12">
+                                                @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
+                                            </div>
+                                            <div class="col-md-12">
+                                                @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof", 'class -> "form-control")
+                                            </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="year">Bouwjaar</label>
+                                            <div class="col-md-12">
+                                                <input id="year" name="year" type="number" class="form-control input-md" value="@form("year").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="fuelEconomy">Gemiddeld verbruik (per 100 km)</label>
+                                            <div class="col-md-12">
+                                                <input id="fuelEconomy" name="fuelEconomy" type="number" class="form-control input-md" value="@form("fuelEconomy").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="estimatedValue">Geschatte huidige waarde</label>
+                                            <div class="col-md-12">
+                                                <input id="estimatedValue" name="estimatedValue" type="number" class="form-control input-md" value="@form("estimatedValue").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="ownerAnnualKm">Gemiddeld aantal kilometers (per jaar)</label>
+                                            <div class="col-md-12">
+                                                <input id="ownerAnnualKm" name="ownerAnnualKm" type="number" class="form-control input-md" value="@form("ownerAnnualKm").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-1" for="comments">Commentaar</label>
+                                            <div class="col-md-12">
+                                                <textarea id="comments" name="comments" class="form-control input-md" rows="6" maxlength="256">@form("comments").value</textarea>
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Technische details
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="licensePlate">Nummerplaat</label>
+                                            <div class="col-md-12">
+                                                <input id="licensePlate" name="licensePlate" type="text" class="form-control input-md" value="@form("licensePlate").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
+                                            <div class="col-md-12">
+                                                Huidig: @if(car == null || car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) {
+                                                    Onbekend
+                                                } else {
+                                                    <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)" target="_blank">Link</a>
+                                                }
+                                            </div>
+                                            <div class="col-md-12">
+                                                <input id="file" name="file" type="file" class="form-control input-md">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="chassisNumber">Chassisnummer</label>
+                                            <div class="col-md-12">
+                                                <input id="chassisNumber" name="chassisNumber" type="number" class="form-control input-md" value="@form("chassisNumber").value">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-heading">
+                                    Verzekering
+                                </div>
+                                <div class="panel-body">
+                                    <fieldset>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="insuranceName">Verzekeraar</label>
+                                            <div class="col-md-12">
+                                                <input id="insuranceName" name="insuranceName" type="text" class="form-control input-md" value="@form("insuranceName").value">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="expiration">Vervaldatum</label>
+                                            <div class="col-md-4">
+                                                <div id="datepicker" class="input-group date form_date" data-date-format="dd MM yyyy" data-link-field="expiration">
+                                                    <input class="form-control input-md" size="16" type="text" value="@form("expiration").value"readonly>
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                </div>
+                                                <input type="text" class="hidden" id="expiration" name="expiration" value="@form("expiration").value" />
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="bonusMalus">Bonus Malus</label>
+                                            <div class="col-md-12">
+                                                <input id="bonusMalus" name="bonusMalus" type="number" class="form-control input-md" value="@form("bonusMalus").value">
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label class="col-md-12" for="polisNr">Polis nummer</label>
+                                            <div class="col-md-12">
+                                                <input id="polisNr" name="polisNr" type="number" class="form-control input-md" value="@form("polisNr").value">
+                                            </div>
+                                        </div>
+                                    </fieldset>
+                                </div>
+                            </div>
+                                <!--TODO: car privileges, perioden waarin auto mag gedeeld worden, (tijdelijk) op nonactief zetten -->
+                        </div>
+
+                        <div class="form-group">
+                            <div class="panel panel-default">
+                                <div class="panel-body">
+                                    @if(car == null) {
+                                        <button name="saveChanges" class="btn btn-block btn-success">Auto aanmaken</button>
+                                    } else {
+                                        <button name="saveChanges" class="btn btn-block btn-success">Wijzigingen opslaan</button>
+                                    }
+                                </div>
+                            </div>
+                            <!-- /.panel-body -->
+                        </div>
+                        <!-- /.panel-default -->
+                    </div>
+                </div>
+            </div>
+            <!-- /col-md-9 -->
+        }
+        </div>
+    </div>
+            <!-- /row -->
+}

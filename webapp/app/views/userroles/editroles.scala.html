@@ -1,0 +1,61 @@
+@(roles: Array[Tuple2[UserRole, Boolean]], user: User)
+    @import scala.collection.mutable.Map;
+
+    @defining(Map(
+        UserRole.CAR_OWNER -> "Eigenaar",
+        UserRole.CAR_USER -> "Lener",
+        UserRole.CAR_ADMIN -> "Kan auto's beheren en autogebonden kosten goedkeuren",
+        UserRole.INFOSESSION_ADMIN -> "Kan infosessies beheren",
+        UserRole.SUPER_USER -> "Kan globale variabelen aanpassen, rechten beheren, ...",
+        UserRole.MAIL_ADMIN -> "Kan email-templates aanpassen",
+        UserRole.RESERVATION_ADMIN -> "Kan autoreservaties modereren")) { roleDesc =>
+        @app("Bewerk roles") {
+            <div id="page-header-wrapper">
+                <ol class="breadcrumb">
+                    <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+                    <li><a href="@routes.UserRoles.index">Gebruikersrollen</a></li>
+                    <li class="active">Bewerken</li>
+                </ol>
+            </div>
+
+            <div id="page-wrapper">
+                <div class="row">
+                    <div class="col-lg-12">
+                        @flashes()
+                        <h1 class="page-header">Gebruikersrollen</h1>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-wrench"></i> Rollen voor @user.getEmail
+                            </div>
+                            <div class="panel-body">
+                            @helper.form(routes.UserRoles.editPost(user.getId), 'class -> "form-horizontal") {
+                                <fieldset>
+                                    <div class="form-group">
+                                    @for((role, checked) <- roles) {
+                                        @* TODO: Cleaner syntax to add 'checked' attribute *@
+                                        @if(checked) {
+
+                                            <input type="checkbox" name="role" value="@role" checked> @role @if(roleDesc.contains(role)) { - <span style="font-style:italic">@roleDesc(role)</span> } <br>
+                                        } else {
+                                            <input type="checkbox" name="role" value="@role"> @role @if(roleDesc.contains(role)) { - <span style="font-style:italic">@roleDesc(role)</span> }  <br>
+                                            }
+                                    }
+                                    </div>
+
+                                    <div class="form-group">
+                                        <div class="col-md-12">
+                                            <button id="reset" name="reset" class="btn btn-block btn-success">Wijzig rollen</button>
+                                        </div>
+                                    </div>
+                                </fieldset>
+                            }
+                            </div>
+                                <!-- /.panel-body -->
+                        </div>
+                            <!-- /.panel -->
+                    </div>
+                </div>
+            </div>
+        }
+    }

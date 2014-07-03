@@ -1,0 +1,49 @@
+@scripts = {
+    <script src="@routes.Assets.at("javascripts/bootstrap-colorpicker.min.js")" type="text/javascript"></script>
+    <script>
+        $(function(){
+            $('.theme').colorpicker();
+        });
+        $('.theme').colorpicker().on('changeColor', function(ev){
+            less.modifyVars({ '@@bg' : ev.color.toHex() });
+        });
+    </script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-colorpicker.min.css")">
+}
+
+@app("Instellingen", stylesheets, scripts) {
+
+<div id="page-header-wrapper">
+    <ol class="breadcrumb">
+        <li><a href="@routes.Dashboard.index">Dashboard</a></li>
+        <li class="active">Instellingen</li>
+    </ol>
+</div>
+
+<div id="page-wrapper">
+    @flashes()
+
+    <div class="row">
+        <div class="col-lg-12">
+            <h1 class="page-header">Instellingen</h1>
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <i class="fa fa-gears fa-fw"></i> Instellingen
+                </div>
+                <!-- /.panel-heading -->
+                <div class="panel-body">
+                    <div class="col-lg-12">
+                        <a href="@routes.Settings.changePassword" class="btn btn-default">Wachtwoord wijzigen</a> <br> <br>
+                    </div>
+                </div>
+                <!-- /.panel-body -->
+            </div>
+            <!-- /.panel -->
+        </div>
+        <!-- /col-lg-12 -->
+    </div>
+    <!-- /row -->
+    </div>
+}
