@@ -26,7 +26,8 @@ libraryDependencies ++= Seq(
   "com.typesafe.akka"       %% "akka-actor"                  % "2.3.0",
   "org.apache.poi"          % "poi"                          % "3.8",
   "org.apache.poi"          % "poi-ooxml"                    % "3.9",
-  "com.itextpdf"            % "itextpdf"                     % "5.1.3"
+  "com.itextpdf"            % "itextpdf"                     % "5.1.3",
+  "com.typesafe"            % "config"                       % "1.2.1"
 )
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)

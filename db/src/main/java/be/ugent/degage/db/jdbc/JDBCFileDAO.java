@@ -9,7 +9,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JDBCFileDAO implements FileDAO {
+class JDBCFileDAO implements FileDAO {
 
     private Connection connection;
 

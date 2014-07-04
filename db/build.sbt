@@ -14,6 +14,8 @@ libraryDependencies += "org.apache.commons" % "commons-lang3" % "3.1"
 
 libraryDependencies += "joda-time" % "joda-time" % "2.3"
 
+libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
+
 autoScalaLibrary := false
 
 parallelExecution in Test := false

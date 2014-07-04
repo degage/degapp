@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Cedric on 4/21/2014.
  */
-public class JDBCSettingDAO implements SettingDAO {
+class JDBCSettingDAO implements SettingDAO {
 
     private Connection connection;
     private PreparedStatement getSettingForDateStatement;

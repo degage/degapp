@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 26/04/14.
  */
-public class JDBCRefuelDAO implements RefuelDAO {
+class JDBCRefuelDAO implements RefuelDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"refuel_id"};
 

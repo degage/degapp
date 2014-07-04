@@ -3,41 +3,41 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.DataAccessProvider;
-import be.ugent.degage.db.DatabaseConfiguration;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 
 /**
- * Created by Cedric on 2/16/14.
+ * Implementation of a data access provider based on JDBC.
  */
-public class JDBCDataAccessProvider implements DataAccessProvider {
+class JDBCDataAccessProvider implements DataAccessProvider {
 
-    private static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
+    JDBCDataAccessProvider(boolean testDatabase, DataSource dataSource) {
+        this.testDatabase = testDatabase;
+        this.dataSource = dataSource;
+    }
 
-    private DatabaseConfiguration configuration;
+    private boolean testDatabase;
 
-    public JDBCDataAccessProvider(DatabaseConfiguration configuration){
-        this.configuration = configuration;
+    private DataSource dataSource;
+
+    /**
+     * Is this a database used for testing? If so, some additional operations are allowed.
+     */
+    public boolean isTest() {
+        return testDatabase;
     }
 
     @Override
     public DataAccessContext getDataAccessContext() throws DataAccessException {
-        Connection conn;
         try {
-            Class.forName(JDBC_DRIVER);
-            conn = DriverManager.getConnection(getDatabaseUrl(configuration), configuration.getUsername(), configuration.getPassword());
-            return new JDBCDataAccessContext(conn);
-        } catch (ClassNotFoundException e) {
-            throw new DataAccessException("Couldn't find jdbc driver", e);
+            return new JDBCDataAccessContext(dataSource.getConnection());
         } catch (SQLException e) {
             throw new DataAccessException("Couldn't connect to degage database", e);
         }
     }
 
-    private static String getDatabaseUrl(DatabaseConfiguration configuration){
-        return String.format("jdbc:mysql://%s:%d/%s", configuration.getServer(), configuration.getPort(), configuration.getDatabase());
-    }
+
 
 }

@@ -13,7 +13,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class JDBCReceiptDAO implements ReceiptDAO {
+class JDBCReceiptDAO implements ReceiptDAO {
 
     private Connection connection;
     public JDBCReceiptDAO(Connection connection) {

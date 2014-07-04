@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 27/04/14.
  */
-public class JDBCSchedulerDAO implements SchedulerDAO {
+class JDBCSchedulerDAO implements SchedulerDAO {
 
     private Connection connection;
     private PreparedStatement getReminderEmailListStatement;

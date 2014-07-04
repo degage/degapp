@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by Cedric on 2/22/14.
  */
-public class JDBCInfoSessionDAO implements InfoSessionDAO {
+class JDBCInfoSessionDAO implements InfoSessionDAO {
 
     private Connection connection;
 

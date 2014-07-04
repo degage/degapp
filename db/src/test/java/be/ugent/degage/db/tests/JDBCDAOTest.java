@@ -3,9 +3,8 @@ package be.ugent.degage.db.tests;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.DataAccessProvider;
-import be.ugent.degage.db.DatabaseConfiguration;
 import be.ugent.degage.db.dao.*;
-import be.ugent.degage.db.jdbc.JDBCDataAccessProvider;
+import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.models.*;
 import org.joda.time.DateTime;
 import org.junit.Assert;
@@ -40,7 +39,7 @@ public class JDBCDAOTest {
      */
     @Before
     public void setUp() throws Exception {
-        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("/be/ugent/degage/db/tests/testdb.properties"));
+        DataAccessProvider provider = JDBCDataAccess.getTestDataAccessProvider();
         context = provider.getDataAccessContext();
 
         addressDAO = context.getAddressDAO();
@@ -214,7 +213,7 @@ public class JDBCDAOTest {
      */
     private void createAddresses() throws Exception {
         Scanner sc = new Scanner(JDBCDAOTest.class.getResourceAsStream("/be/ugent/degage/db/tests/random/random_addresses.txt"));
-        sc.useDelimiter("\\t|\\r\\n");
+        sc.useDelimiter("\\t");
         sc.nextLine(); //skip header first time
         while(sc.hasNext()) {
             // Todo: read country from scanner
@@ -222,7 +221,7 @@ public class JDBCDAOTest {
             String street = sc.next();
             String nr = sc.next();
             String zip = sc.next();
-            String city = sc.next();
+            String city = sc.nextLine();
 
             Address address = addressDAO.createAddress(country, zip, city, street, nr, "");
 

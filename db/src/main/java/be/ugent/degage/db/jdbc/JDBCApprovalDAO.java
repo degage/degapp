@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by Cedric on 3/30/2014.
  */
-public class JDBCApprovalDAO implements ApprovalDAO {
+class JDBCApprovalDAO implements ApprovalDAO {
 
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
             "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email, " +

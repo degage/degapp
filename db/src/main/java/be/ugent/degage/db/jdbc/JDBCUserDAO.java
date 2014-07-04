@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Cedric on 2/16/14.
  */
-public class JDBCUserDAO implements UserDAO {
+class JDBCUserDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 

@@ -23,7 +23,7 @@ import org.joda.time.DateTime;
  *
  * @author Laurent
  */
-public class JDBCReservationDAO implements ReservationDAO {
+class JDBCReservationDAO implements ReservationDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"reservation_id"};
 

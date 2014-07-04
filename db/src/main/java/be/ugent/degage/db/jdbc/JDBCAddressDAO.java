@@ -9,7 +9,7 @@ import java.sql.*;
 /**
  * Created by Cedric on 2/21/14.
  */
-public class JDBCAddressDAO implements AddressDAO {
+class JDBCAddressDAO implements AddressDAO {
 
     private Connection connection;
     private PreparedStatement getAddressStatement;

@@ -19,7 +19,7 @@ import java.util.List;
  *
  * @author Laurent
  */
-public class JDBCCarDAO implements CarDAO{
+class JDBCCarDAO implements CarDAO{
 
     private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
 

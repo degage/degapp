@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 15/04/14.
  */
-public class JDBCCarCostDAO implements CarCostDAO {
+class JDBCCarCostDAO implements CarCostDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"carcost_id"};
 

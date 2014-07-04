@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 22/03/14.
  */
-public class JDBCMessageDAO implements MessageDAO {
+class JDBCMessageDAO implements MessageDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"message_id"};
 

@@ -27,5 +27,20 @@ mysql degage -u degage -p < create-tables.sql
 ```
 mysql degage -u degage -p < init.sql
 ```
+## Test database
+
+Via mysql-client: `mysql -u root -p`
+```
+CREATE DATABASE IF NOT EXISTS degagetest
+   DEFAULT CHARACTER SET utf8
+   DEFAULT COLLATE utf8_general_ci;
+
+GRANT ALL ON degagetest.* TO 'degage'@'localhost';
+```
+Via mysql-client
+```
+mysql degagetest -u degage -p < create-tables.sql
+mysql degagetest -u degage -p < init.sql
+```
 
 

@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 04/05/14.
  */
-public class JDBCDamageLogDAO implements DamageLogDAO {
+class JDBCDamageLogDAO implements DamageLogDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"damage_log_id"};
     private Connection connection;

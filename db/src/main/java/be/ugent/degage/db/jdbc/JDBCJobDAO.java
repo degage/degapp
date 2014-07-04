@@ -13,7 +13,7 @@ import java.util.List;
 /**
  * Created by Cedric on 5/3/2014.
  */
-public class JDBCJobDAO implements JobDAO {
+class JDBCJobDAO implements JobDAO {
 
     private static final String JOB_FIELDS = "job_id, job_type, job_ref_id, job_time, job_finished";
 

@@ -15,7 +15,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 02/05/14.
  */
-public class JDBCDamageDAO implements DamageDAO {
+class JDBCDamageDAO implements DamageDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"damage_id"};
     private Connection connection;

@@ -13,7 +13,7 @@ import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.UserRoleDAO;
 
-public class JDBCUserRoleDAO implements UserRoleDAO{
+class JDBCUserRoleDAO implements UserRoleDAO{
 
 	private Connection connection;
 	private PreparedStatement insertUserRolesStatement;

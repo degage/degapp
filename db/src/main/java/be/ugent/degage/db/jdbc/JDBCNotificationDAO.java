@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 15/03/14.
  */
-public class JDBCNotificationDAO implements NotificationDAO {
+class JDBCNotificationDAO implements NotificationDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"notification_id"};
 

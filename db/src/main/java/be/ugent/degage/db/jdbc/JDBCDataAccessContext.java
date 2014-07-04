@@ -10,7 +10,7 @@ import java.sql.SQLException;
 /**
  * Created by Cedric on 2/16/14.
  */
-public class JDBCDataAccessContext implements DataAccessContext {
+class JDBCDataAccessContext implements DataAccessContext {
 
     private Connection connection;
     private UserDAO userDAO;

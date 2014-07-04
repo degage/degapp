@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 01/03/14.
  */
-public class JDBCTemplateDAO implements TemplateDAO {
+class JDBCTemplateDAO implements TemplateDAO {
 
     private String TEMPLATE_QUERY = "SELECT template_id, template_title, template_body, template_subject, template_send_mail, template_send_mail_changeable " +
             "FROM templates ";

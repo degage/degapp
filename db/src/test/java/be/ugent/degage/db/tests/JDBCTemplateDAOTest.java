@@ -3,9 +3,8 @@ package be.ugent.degage.db.tests;
 import be.ugent.degage.db.*;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessProvider;
-import be.ugent.degage.db.DatabaseConfiguration;
 import be.ugent.degage.db.dao.TemplateDAO;
-import be.ugent.degage.db.jdbc.JDBCDataAccessProvider;
+import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.EmailTemplate;
 import org.junit.Before;
@@ -30,7 +29,7 @@ public class JDBCTemplateDAOTest {
      */
 	@Before
     public void setUp() throws Exception {
-        DataAccessProvider provider = new JDBCDataAccessProvider(DatabaseConfiguration.getResourceConfiguration("/be/ugent/degage/db/tests/testdb.properties"));
+        DataAccessProvider provider = JDBCDataAccess.getTestDataAccessProvider();
         context = provider.getDataAccessContext();
 
         templateDAO = context.getTemplateDAO();

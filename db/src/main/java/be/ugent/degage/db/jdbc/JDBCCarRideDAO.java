@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by HannesM on 10/03/14.
  */
-public class JDBCCarRideDAO implements CarRideDAO {
+class JDBCCarRideDAO implements CarRideDAO {
 
     private Connection connection;
 
