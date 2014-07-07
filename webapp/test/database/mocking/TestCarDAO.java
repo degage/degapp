@@ -59,17 +59,17 @@ public class TestCarDAO implements CarDAO{
     }
 
     @Override
-    public List<User> getPriviliged(Car car) throws DataAccessException {
+    public List<User> getPrivileged(Car car) throws DataAccessException {
         return null;
     }
 
     @Override
-    public void addPriviliged(Car car, List<User> users) throws DataAccessException {
+    public void addPrivileged(Car car, List<User> users) throws DataAccessException {
 
     }
 
     @Override
-    public void deletePriviliged(Car car, List<User> users) throws DataAccessException {
+    public void deletePrivileged(Car car, List<User> users) throws DataAccessException {
 
     }
 

@@ -13,24 +13,21 @@ import providers.DataProvider;
  */
 public class ReservationAutoAcceptJob implements ScheduledJobExecutor {
     @Override
-    public void execute(Job job) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            ReservationDAO dao = context.getReservationDAO();
-            Reservation reservation = dao.getReservation(job.getRefId());
-            if(reservation == null) {
-                return;
-            }
+    public void execute(DataAccessContext context, Job job) {
+        ReservationDAO dao = context.getReservationDAO();
+        Reservation reservation = dao.getReservation(job.getRefId());
+        if (reservation == null) {
+            return;
+        }
 
-            if(reservation.getStatus() == ReservationStatus.REQUEST ) {
-                if(reservation.getFrom().isBeforeNow()) {
-                    reservation.setStatus(ReservationStatus.ACCEPTED);
-                    Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "Automatisch goedgekeurd door systeem.", reservation);
-                } else {
-                    reservation.setStatus(ReservationStatus.CANCELLED);
-                }
-                dao.updateReservation(reservation);
-                context.commit();
+        if (reservation.getStatus() == ReservationStatus.REQUEST) {
+            if (reservation.getFrom().isBeforeNow()) {
+                reservation.setStatus(ReservationStatus.ACCEPTED);
+                Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "Automatisch goedgekeurd door systeem.", reservation);
+            } else {
+                reservation.setStatus(ReservationStatus.CANCELLED);
             }
+            dao.updateReservation(reservation);
         }
 
     }

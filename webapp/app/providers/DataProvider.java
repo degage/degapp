@@ -1,7 +1,7 @@
 package providers;
 
 import be.ugent.degage.db.DataAccessProvider;
-import play.Logger;
+import db.DataAccess;
 
 /**
  * Created by Cedric on 2/16/14.
@@ -43,20 +43,8 @@ public class DataProvider {
         return communicationProvider;
     }
 
-    public static void setDataAccessProvider(DataAccessProvider provider) {
-        if(accessProvider != null) {
-            Logger.info("DatabaseProvider changed to " + provider.getClass().getCanonicalName());
-        }
-
-        accessProvider = provider;
-        userRoleProvider = null;
-        userProvider = null;
-    }
-
+    @Deprecated
     public static DataAccessProvider getDataAccessProvider() {
-        if (accessProvider == null) {
-            throw new NullPointerException("No databaseprovider has been specified.");
-        }
-        return accessProvider;
+        return DataAccess.getProvider();
     }
 }

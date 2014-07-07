@@ -12,20 +12,18 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 26/04/14.
  */
-public class SendUnreadNotificationsMailScheduler implements Runnable {
+public class SendUnreadNotificationsMailScheduler extends RunnableInContext {
 
     @Override
-    public void run() {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            SchedulerDAO dao = context.getSchedulerDAO();
-            //Todo: number_of_unread_messages from system_variable
-            List<User> emailList = dao.getReminderEmailList(0);
-            context.commit();
-            for(User user : emailList){
-                Notifier.sendReminderMail(user);
-            }
-        }catch(DataAccessException ex) {
-            throw ex;
+    public void runInContext(DataAccessContext context) {
+
+        SchedulerDAO dao = context.getSchedulerDAO();
+        //Todo: number_of_unread_messages from system_variable
+        List<User> emailList = dao.getReminderEmailList(0);
+
+        for (User user : emailList) {
+            Notifier.sendReminderMail(context, user);
         }
     }
+
 }

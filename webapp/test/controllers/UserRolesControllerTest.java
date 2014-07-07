@@ -19,6 +19,7 @@ import be.ugent.degage.db.models.Address;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 
+import db.DataAccess;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -26,7 +27,7 @@ import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import be.ugent.degage.db.DataAccessContext;
 import providers.DataProvider;
-import be.ugent.degage.db.UserRoleDAO;
+import be.ugent.degage.db.dao.UserRoleDAO;
 
 public class UserRolesControllerTest {
 
@@ -41,7 +42,7 @@ public class UserRolesControllerTest {
 	public void setUp(){
 		helper = new TestHelper();
 		helper.setTestProvider();
-		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataAccess.getContext();
 		userRoleDAO = context.getUserRoleDAO();
 		admin = helper.createRegisteredUser("admin@test.com", "1234piano", "Pol", "Thijs",  new UserRole[]{UserRole.SUPER_USER});
 		Address address = new Address("Belgium","9000", "Gent", "Sterre", "S2", "bib");

@@ -2,6 +2,7 @@ package be.ugent.degage.db.jdbc;
 
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.*;
 
 import java.sql.Connection;
@@ -36,12 +37,48 @@ class JDBCDataAccessContext implements DataAccessContext {
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
+    }
+
+    @Override
+    public void begin() {
         try {
-            this.connection.setAutoCommit(false); //we don't want to commit ourselves
-        }catch(SQLException ex){
-            //TODO: log?
+            connection.setAutoCommit(false);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Auto commit could not be disabled", ex);
         }
     }
+
+    @Override
+    public void commit() {
+        try {
+            connection.commit();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Commit error", ex);
+        }
+    }
+
+    @Override
+    public void rollback() {
+        try {
+            connection.rollback();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Rollback error", ex);
+        }
+    }
+
+    @Override
+    public void close() {
+        try {
+            connection.setAutoCommit(true);
+               // needed in case of connection pooling,
+               // also commits current transaction as a bonus, but we do not want to rely on this
+
+            connection.close();
+        } catch(SQLException ex){
+            throw new DataAccessException("Close error", ex);
+        }
+    }
+
 
     @Override
     public UserDAO getUserDAO() {
@@ -89,39 +126,6 @@ class JDBCDataAccessContext implements DataAccessContext {
             addressDAO = new JDBCAddressDAO(connection);
         }
         return addressDAO;
-    }
-
-    @Override
-    public void begin() {
-        //TODO What happens here?
-    }
-
-    @Override
-    public void commit() {
-        try {
-            connection.commit();
-        } catch (SQLException ex) {
-            //TODO ??
-        }
-    }
-
-    @Override
-    public void rollback() {
-        try {
-            connection.rollback();
-        } catch(SQLException ex){
-            //TODO ??
-        }
-    }
-
-    @Override
-    public void close() {
-        try {
-            connection.commit(); //finalize commit if necessary
-            connection.close();
-        } catch(SQLException ex){
-            //TODO ??
-        }
     }
 
 	@Override

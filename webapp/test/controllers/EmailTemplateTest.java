@@ -20,6 +20,7 @@ import be.ugent.degage.db.models.EmailTemplate;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 
+import db.DataAccess;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -27,7 +28,7 @@ import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import be.ugent.degage.db.DataAccessContext;
 import providers.DataProvider;
-import be.ugent.degage.db.TemplateDAO;
+import be.ugent.degage.db.dao.TemplateDAO;
 
 public class EmailTemplateTest {
 	
@@ -43,7 +44,7 @@ public class EmailTemplateTest {
 	public void setUp(){
 		helper = new TestHelper();
 		helper.setTestProvider();
-		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataAccess.getContext();
 		emailDAO = context.getTemplateDAO();
 		templates = emailDAO.getAllTemplates();
 		nonAdmins = new ArrayList<>();

@@ -25,7 +25,7 @@ public class Application extends Controller {
                         javascript.Cars.showCarCostsPage(),
                         javascript.Cars.getCarCostModal(),
                         javascript.Cars.updateAvailabilities(),
-                        javascript.Cars.updatePriviliged(),
+                        javascript.Cars.updatePrivileged(),
                         javascript.Refuels.provideRefuelInfo(),
                         javascript.Refuels.showUserRefuelsPage(),
                         javascript.Refuels.showOwnerRefuelsPage(),

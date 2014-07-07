@@ -13,7 +13,12 @@ import java.util.List;
 import java.util.Map;
 
 import be.ugent.degage.db.*;
+import be.ugent.degage.db.dao.AddressDAO;
+import be.ugent.degage.db.dao.UserDAO;
+import be.ugent.degage.db.dao.UserRoleDAO;
+import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.models.*;
+import db.DataAccess;
 import org.joda.time.DateTime;
 import org.mindrot.jbcrypt.BCrypt;
 
@@ -30,9 +35,8 @@ public class TestHelper {
 	private DataAccessProvider provider;
 	
 	public TestHelper(){
-		provider = new TestDataAccessProvider();
-		DataProvider.setDataAccessProvider(provider);
-		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
+		provider = JDBCDataAccess.getTestDataAccessProvider();
+		DataAccessContext context = provider.getDataAccessContext();
 		userDAO = context.getUserDAO();
 		userRoleDAO = context.getUserRoleDAO();
 		addressDAO = context.getAddressDAO();
@@ -63,13 +67,13 @@ public class TestHelper {
     }
 
     public  void addUserRole(User user, UserRole role) {
-        UserRoleDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
+        UserRoleDAO dao = DataAccess.getContext().getUserRoleDAO();
         dao.addUserRole(user.getId(), role);
         DataProvider.getUserRoleProvider().invalidateRoles(user);
     }
 
     public  void removeUserRole(User user, UserRole role) {
-        UserRoleDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getUserRoleDAO();
+        UserRoleDAO dao = DataAccess.getContext().getUserRoleDAO();
         dao.removeUserRole(user.getId(), role);
         DataProvider.getUserRoleProvider().invalidateRoles(user);
     }
@@ -78,24 +82,24 @@ public class TestHelper {
                                 Address location, int seats, int doors, int year, boolean gps,
                                 boolean hook, CarFuel fuel, int fuelEconomy, int estimatedValue,
                                 int ownerAnnualKm, User owner, String comments) {
-        CarDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getCarDAO();
+        CarDAO dao = DataAccess.getContext().getCarDAO();
         Car car = dao.createCar(name, brand, type, location, seats, doors, year, false, gps, hook, fuel, fuelEconomy, estimatedValue, ownerAnnualKm, null, null, owner, comments, true);
         return car;
     }
 
     public Reservation createReservation(DateTime from, DateTime to, Car car, User user) {
-        ReservationDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getReservationDAO();
+        ReservationDAO dao = DataAccess.getContext().getReservationDAO();
         Reservation reservation = dao.createReservation(from, to, car, user, "");
         return reservation;
     }
 
     public void updateReservation(Reservation r) {
-        ReservationDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getReservationDAO();
+        ReservationDAO dao = DataAccess.getContext().getReservationDAO();
         dao.updateReservation(r);
     }
 	
 	public InfoSession createInfoSession(InfoSessionType type, User host, Address address, DateTime time, int max){
-		InfoSessionDAO dao = DataProvider.getDataAccessProvider().getDataAccessContext().getInfoSessionDAO();
+		InfoSessionDAO dao = DataAccess.getContext().getInfoSessionDAO();
 		InfoSession session = dao.createInfoSession(type, "", host, address, time, max, "");
 		return session;
 	}

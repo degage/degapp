@@ -14,17 +14,15 @@ import providers.DataProvider;
  */
 public class InfoSessionReminderJob implements ScheduledJobExecutor {
     @Override
-    public void execute(Job job) {
-        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
-            InfoSessionDAO dao = context.getInfoSessionDAO();
-            InfoSession session = dao.getInfoSession(job.getRefId(), true);
-            if(session == null)
-                return;
+    public void execute(DataAccessContext context, Job job) {
+        InfoSessionDAO dao = context.getInfoSessionDAO();
+        InfoSession session = dao.getInfoSession(job.getRefId(), true);
+        if (session == null)
+            return;
 
-            for(Enrollee er : session.getEnrolled()){
-                Notifier.sendInfoSessionEnrolledMail(er.getUser(), session); //TODO: use seperate correct notifier
-                Logger.debug("Sent infosession reminder mail to " + er.getUser());
-            }
+        for (Enrollee er : session.getEnrolled()) {
+            Notifier.sendInfoSessionEnrolledMail(context, er.getUser(), session); //TODO: use separate correct notifier
+            Logger.debug("Sent infosession reminder mail to " + er.getUser());
         }
     }
 }

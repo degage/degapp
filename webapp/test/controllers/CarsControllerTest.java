@@ -26,23 +26,23 @@ import be.ugent.degage.db.models.UserGender;
 import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.models.UserStatus;
 
+import db.DataAccess;
 import org.junit.Before;
 import org.junit.Test;
 import org.mindrot.jbcrypt.BCrypt;
 
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
-import be.ugent.degage.db.AddressDAO;
-import be.ugent.degage.db.CarDAO;
+import be.ugent.degage.db.dao.AddressDAO;
+import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.DataAccessContext;
 import providers.DataProvider;
-import be.ugent.degage.db.UserDAO;
-import be.ugent.degage.db.UserRoleDAO;
-import be.ugent.degage.db.mocking.TestDataAccessProvider;
+import be.ugent.degage.db.dao.UserDAO;
+import be.ugent.degage.db.dao.UserRoleDAO;
 
 public class CarsControllerTest {
 
-    // TODO: CarCosts, CarPriviliges, CarAvailabilities
+    // TODO: CarCosts, CarPrivileges, CarAvailabilities
 
 	private List<Car> cars, users;
 	private CarDAO carDAO;
@@ -60,7 +60,7 @@ public class CarsControllerTest {
 		cars = new ArrayList<>();
 		users = new ArrayList<>();
 		helper.setTestProvider();
-		DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
+		DataAccessContext context = DataAccess.getContext();
 		carDAO = context.getCarDAO();
 		userDAO = context.getUserDAO();
 		userRoleDAO = context.getUserRoleDAO();

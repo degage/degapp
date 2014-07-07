@@ -14,6 +14,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 import controllers.Security.RoleSecured;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
+import db.DataAccess;
+import db.InjectContext;
 import org.joda.time.DateTime;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -49,13 +51,13 @@ public class Receipts extends Controller {
     }
 
     /**
-     *
-     * @param page The page in the userlists
-     * @param ascInt An integer representing ascending (1) or descending (0)
+     * @param page    The page in the userlists
+     * @param ascInt  An integer representing ascending (1) or descending (0)
      * @param orderBy A field representing the field to order on
      * @return A partial page with a table of users of the corresponding page
      */
     // @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showReceiptsPage(int page, int ascInt, String orderBy, String date) {
         // TODO: orderBy not as String-argument?
         FilterField receiptsField = FilterField.stringToField(orderBy);
@@ -65,25 +67,22 @@ public class Receipts extends Controller {
         return ok(receiptsList(page, receiptsField, asc, filter));
     }
 
+    // used within inject context
     private static Html receiptsList(int page, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            User currentUser = DataProvider.getUserProvider().getUser();
-            ReceiptDAO dao = context.getReceiptDAO();
+        User currentUser = DataProvider.getUserProvider().getUser();
+        ReceiptDAO dao = DataAccess.getInjectedContext().getReceiptDAO();
 
-            if(orderBy == null) {
-                orderBy = FilterField.RECEIPT_DATE;
-            }
-            List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
-
-            int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
-            //int amountOfResults = listOfReceipts.size();
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) PAGE_SIZE);
-
-            //if(){rendernew()}
-            return receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages);
-        } catch (DataAccessException ex) {
-            throw ex;
+        if (orderBy == null) {
+            orderBy = FilterField.RECEIPT_DATE;
         }
+        List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
+
+        int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
+        //int amountOfResults = listOfReceipts.size();
+        int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
+
+        //if(){rendernew()}
+        return receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages);
     }
 
     public static void generateReceipt(User u, Date d) {
@@ -104,21 +103,14 @@ public class Receipts extends Controller {
 
     }
 
+    @InjectContext
     public static void addToDataBase(String name, String filename, BigDecimal price) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            ReceiptDAO dao = context.getReceiptDAO();
-            try {
-                FileDAO fdao = context.getFileDAO();
-                File file = fdao.createFile(filename, name, "pdf", -1);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReceiptDAO dao = context.getReceiptDAO();
+        FileDAO fdao = context.getFileDAO();
+        File file = fdao.createFile(filename, name, "pdf", -1);
 
-                dao.createReceipt(name, new DateTime(date), file, user, price);
-            } catch (DataAccessException ex) {
-                context.rollback();
-                throw ex;
-            }
-        } catch (DataAccessException ex) {
-            throw ex; //TODO: show gracefully
-        }
+        dao.createReceipt(name, new DateTime(date), file, user, price);
     }
 
     public static BigDecimal generatePDF(Document document) {
@@ -153,7 +145,8 @@ public class Receipts extends Controller {
             getLoanerBillData(date, user.getId());
             saldo = createLoanerTable(document);
 
-            DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext();
+            DataAccessContext context = DataAccess.getContext();
+            // TODO: inject context
             for (Car car : context.getCarDAO().getCarsOfUser(user.getId())) {
                 getCarBillData(date, car.getId());
                 saldo = saldo.add(createCarTable(document, car.getName()));
@@ -237,7 +230,7 @@ public class Receipts extends Controller {
         BigDecimal refuelOthers = BigDecimal.ZERO;
         BigDecimal refuelOwner = BigDecimal.ZERO;
 
-        for (Refuel refuel: refuels) {
+        for (Refuel refuel : refuels) {
             if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) == 0) {
                 refuelOwner = refuelOwner.add(refuel.getAmount());
             } else {
@@ -274,152 +267,152 @@ public class Receipts extends Controller {
         return total;
     }
 
-private static BigDecimal createLoanerTable(Document document)
-      throws DocumentException {
-    document.add(new Paragraph("Ritten"));
+    private static BigDecimal createLoanerTable(Document document)
+            throws DocumentException {
+        document.add(new Paragraph("Ritten"));
 
-    SettingProvider provider = DataProvider.getSettingProvider();
-    int levels = provider.getInt("cost_levels", new DateTime(date));
+        SettingProvider provider = DataProvider.getSettingProvider();
+        int levels = provider.getInt("cost_levels", new DateTime(date));
 
-    PdfPTable drivesTable = new PdfPTable(4 + levels);
-    drivesTable.setWidthPercentage(100);
-    drivesTable.setSpacingBefore(5);
-    drivesTable.setSpacingAfter(10);
+        PdfPTable drivesTable = new PdfPTable(4 + levels);
+        drivesTable.setWidthPercentage(100);
+        drivesTable.setSpacingBefore(5);
+        drivesTable.setSpacingAfter(10);
 
-    add(drivesTable, "Auto", true, false);
-    add(drivesTable, "Datum", true, false);
-    add(drivesTable, "Afstand", true, false);
+        add(drivesTable, "Auto", true, false);
+        add(drivesTable, "Datum", true, false);
+        add(drivesTable, "Afstand", true, false);
 
-    int lower = 0;
-    int upper = 0;
+        int lower = 0;
+        int upper = 0;
 
-    for(int j=0; j < levels; j++){
-        if (j > 0)
-            lower = upper;
+        for (int j = 0; j < levels; j++) {
+            if (j > 0)
+                lower = upper;
 
-        if (j < levels - 1) {
-            upper = provider.getInt("cost_limit_" + j, new DateTime(date));
-            add(drivesTable,lower + "-" + upper + " km", true, false);
-        } else {
-            add(drivesTable, "> " + upper + " km", true, false);
+            if (j < levels - 1) {
+                upper = provider.getInt("cost_limit_" + j, new DateTime(date));
+                add(drivesTable, lower + "-" + upper + " km", true, false);
+            } else {
+                add(drivesTable, "> " + upper + " km", true, false);
+            }
         }
-	}
-    add(drivesTable,"Ritprijs",  true, false);
+        add(drivesTable, "Ritprijs", true, false);
 
-    add(drivesTable,"",  true);
-    add(drivesTable,"",  true);
-    add(drivesTable,"",  true);
-    
-	for(int j=0; j < levels; j++){
-	    add(drivesTable,"€" + provider.getDouble("cost_" + j, new DateTime(date)) + "/km");
-	}
+        add(drivesTable, "", true);
+        add(drivesTable, "", true);
+        add(drivesTable, "", true);
 
-    add(drivesTable,"",  true);
+        for (int j = 0; j < levels; j++) {
+            add(drivesTable, "€" + provider.getDouble("cost_" + j, new DateTime(date)) + "/km");
+        }
 
-    int totalDistance = 0;
-    BigDecimal totalCost = BigDecimal.ZERO;
-    int[] totals = new int[levels];
+        add(drivesTable, "", true);
 
-    for (CarRide ride : rides) {
+        int totalDistance = 0;
+        BigDecimal totalCost = BigDecimal.ZERO;
+        int[] totals = new int[levels];
 
-        int distance = ride.getEndMileage() - ride.getStartMileage();
-        totalDistance += distance;
+        for (CarRide ride : rides) {
 
-        add(drivesTable, ride.getReservation().getCar().getName());
-        add(drivesTable, new SimpleDateFormat("dd-MM-yyyy").format(ride.getReservation().getFrom().toDate()));
-        add(drivesTable, distance + " km");
+            int distance = ride.getEndMileage() - ride.getStartMileage();
+            totalDistance += distance;
 
-        int level;
-        lower = 0;
-        for (level = 0; level < levels; level++) {
-            int limit = 0;
-            int d;
+            add(drivesTable, ride.getReservation().getCar().getName());
+            add(drivesTable, new SimpleDateFormat("dd-MM-yyyy").format(ride.getReservation().getFrom().toDate()));
+            add(drivesTable, distance + " km");
 
-            if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, new DateTime(date))))
-                d = distance;
-            else
-                d = limit - lower;
+            int level;
+            lower = 0;
+            for (level = 0; level < levels; level++) {
+                int limit = 0;
+                int d;
 
-            totals[level] += d;
-            distance -= d;
-            add(drivesTable, d + " km");
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, new DateTime(date))))
+                    d = distance;
+                else
+                    d = limit - lower;
 
-            if (distance == 0) {
-                level++;
-                break;
+                totals[level] += d;
+                distance -= d;
+                add(drivesTable, d + " km");
+
+                if (distance == 0) {
+                    level++;
+                    break;
+                }
+
+                lower = limit;
             }
 
-            lower = limit;
+            for (int i = level; i < levels; i++) {
+                add(drivesTable, "");
+            }
+
+            totalCost = totalCost.add(ride.getCost());
+
+            if (ride.getCost().compareTo(BigDecimal.ZERO) != 0)
+                add(drivesTable, "€ " + ride.getCost(), true);
+            else
+                add(drivesTable, "--", true);
         }
 
-        for (int i = level; i < levels; i++) {
-            add(drivesTable, "");
+        add(drivesTable, "TOTALEN", true);
+        add(drivesTable, "");
+        add(drivesTable, totalDistance + " km", true);
+
+        for (int j = 0; j < levels; j++) {
+            add(drivesTable, totals[j] + " km", true);
         }
 
-        totalCost = totalCost.add(ride.getCost());
+        add(drivesTable, "€ " + totalCost, true);
 
-        if (ride.getCost().compareTo(BigDecimal.ZERO) != 0)
-            add(drivesTable, "€ " + ride.getCost(), true);
-        else
-            add(drivesTable, "--", true);
+        document.add(drivesTable);
+
+        document.add(new Paragraph("Tankbeurten"));
+        PdfPTable refuelsTable = new PdfPTable(3);
+        refuelsTable.setWidthPercentage(100);
+        refuelsTable.setSpacingBefore(5);
+        refuelsTable.setSpacingAfter(10);
+
+        add(refuelsTable, "Auto", true);
+        add(refuelsTable, "Datum", true);
+        add(refuelsTable, "Prijs", true);
+
+        BigDecimal refuelTotal = BigDecimal.ZERO;
+
+        for (Refuel refuel : refuels) {
+            add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
+            add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
+            if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) != 0) {
+                add(refuelsTable, "€ " + refuel.getAmount(), true);
+                refuelTotal = refuelTotal.add(refuel.getAmount());
+            } else
+                add(refuelsTable, "-- € " + refuel.getAmount(), true);
+        }
+
+        add(refuelsTable, "TOTAAL", true);
+        add(refuelsTable, "");
+        add(refuelsTable, "€ " + refuelTotal, true);
+
+        document.add(refuelsTable);
+
+        PdfPTable totalTable = new PdfPTable(3);
+        totalTable.setSpacingBefore(5);
+        totalTable.setSpacingAfter(10);
+
+        add(totalTable, "Totaal ritten", true);
+        add(totalTable, "Totaal tankbeurten", true);
+        add(totalTable, "SALDO", true);
+
+        add(totalTable, "+ € " + totalCost);
+        add(totalTable, "- € " + refuelTotal);
+        add(totalTable, "€ " + totalCost.subtract(refuelTotal), true);
+
+        document.add(totalTable);
+
+        return totalCost.subtract(refuelTotal);
     }
-
-    add(drivesTable, "TOTALEN", true);
-    add(drivesTable, "");
-    add(drivesTable, totalDistance + " km", true);
-
-	for(int j = 0; j < levels; j++){
-	    add(drivesTable, totals[j] + " km", true);
-	}
-
-    add(drivesTable, "€ " + totalCost, true);
-
-    document.add(drivesTable);
-
-    document.add(new Paragraph("Tankbeurten"));
-    PdfPTable refuelsTable = new PdfPTable(3);
-    refuelsTable.setWidthPercentage(100);
-    refuelsTable.setSpacingBefore(5);
-    refuelsTable.setSpacingAfter(10);
-
-    add(refuelsTable, "Auto", true);
-    add(refuelsTable, "Datum", true);
-    add(refuelsTable, "Prijs", true);
-
-    BigDecimal refuelTotal = BigDecimal.ZERO;
-
-    for (Refuel refuel : refuels) {
-        add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
-        add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
-        if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) != 0) {
-            add(refuelsTable, "€ " + refuel.getAmount(), true);
-            refuelTotal = refuelTotal.add(refuel.getAmount());
-        } else
-            add(refuelsTable, "-- € " + refuel.getAmount(), true);
-    }
-
-    add(refuelsTable, "TOTAAL", true);
-    add(refuelsTable, "");
-    add(refuelsTable, "€ " + refuelTotal, true);
-
-    document.add(refuelsTable);
-
-    PdfPTable totalTable = new PdfPTable(3);
-    totalTable.setSpacingBefore(5);
-    totalTable.setSpacingAfter(10);
-
-    add(totalTable, "Totaal ritten", true);
-    add(totalTable, "Totaal tankbeurten", true);
-    add(totalTable, "SALDO", true);
-
-    add(totalTable, "+ € " + totalCost);
-    add(totalTable, "- € " + refuelTotal);
-    add(totalTable, "€ " + totalCost.subtract(refuelTotal), true);
-
-    document.add(totalTable);
-
-    return totalCost.subtract(refuelTotal);
-}
 
 
     public static void add(PdfPTable table, String contents, boolean fat) {
@@ -427,11 +420,11 @@ private static BigDecimal createLoanerTable(Document document)
     }
 
     public static void add(PdfPTable table, String contents, boolean fat, boolean border) {
-        Font f=new Font(FontFamily.COURIER, 8);
-        if(fat){
-            f=new Font(FontFamily.COURIER, 8, Font.BOLD);
+        Font f = new Font(FontFamily.COURIER, 8);
+        if (fat) {
+            f = new Font(FontFamily.COURIER, 8, Font.BOLD);
         }
-        PdfPCell cell=new PdfPCell(new Paragraph(contents,f));
+        PdfPCell cell = new PdfPCell(new Paragraph(contents, f));
         cell.setHorizontalAlignment(Element.ALIGN_CENTER);
         if (border) {
             cell.setPaddingBottom(5);
@@ -447,27 +440,24 @@ private static BigDecimal createLoanerTable(Document document)
         add(table, contents, false);
     }
 
+    @InjectContext
     public static void getLoanerBillData(Date d, int user) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            CarRideDAO cdao = context.getCarRideDAO();
-            RefuelDAO rdao = context.getRefuelDAO();
-            rides = cdao.getBillRidesForLoaner(d, user);
-            refuels = rdao.getBillRefuelsForLoaner(d, user);
-        } catch(DataAccessException ex) {
-            throw ex;
-        }
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarRideDAO cdao = context.getCarRideDAO();
+        RefuelDAO rdao = context.getRefuelDAO();
+        rides = cdao.getBillRidesForLoaner(d, user);
+        refuels = rdao.getBillRefuelsForLoaner(d, user);
     }
 
+    @InjectContext
     public static void getCarBillData(Date d, int car) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            CarRideDAO crdao = context.getCarRideDAO();
-            RefuelDAO rdao = context.getRefuelDAO();
-            CarCostDAO ccdao = context.getCarCostDAO();
-            rides = crdao.getBillRidesForCar(d, car);
-            refuels = rdao.getBillRefuelsForCar(d, car);
-            carcosts = ccdao.getBillCarCosts(d, car);
-        } catch(DataAccessException ex) {
-            throw ex;
-        }
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarRideDAO crdao = context.getCarRideDAO();
+        RefuelDAO rdao = context.getRefuelDAO();
+        CarCostDAO ccdao = context.getCarCostDAO();
+        rides = crdao.getBillRidesForCar(d, car);
+        refuels = rdao.getBillRefuelsForCar(d, car);
+        carcosts = ccdao.getBillCarCosts(d, car);
     }
 }

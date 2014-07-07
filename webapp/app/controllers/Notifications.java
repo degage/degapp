@@ -9,6 +9,8 @@ import be.ugent.degage.db.models.Notification;
 import be.ugent.degage.db.models.User;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
+import db.DataAccess;
+import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -30,10 +32,11 @@ public class Notifications extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     public static Result showNotifications() {
-       return ok(notifications.render());
+        return ok(notifications.render());
     }
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showNotificationsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
@@ -47,19 +50,16 @@ public class Notifications extends Controller {
 
     }
 
+    // used with injected context
     private static Html notificationList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            NotificationDAO dao = context.getNotificationDAO();
+        NotificationDAO dao = DataAccess.getInjectedContext().getNotificationDAO();
 
-            List<Notification> list = dao.getNotificationList(orderBy, asc, page, pageSize, filter);
+        List<Notification> list = dao.getNotificationList(orderBy, asc, page, pageSize, filter);
 
-            int amountOfResults = dao.getAmountOfNotifications(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
+        int amountOfResults = dao.getAmountOfNotifications(filter);
+        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-            return notificationspage.render(list, page, amountOfResults, amountOfPages);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        return notificationspage.render(list, page, amountOfResults, amountOfPages);
     }
 
     /**
@@ -69,17 +69,13 @@ public class Notifications extends Controller {
      * @return message index page
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result markNotificationAsRead(int notificationId) {
         User user = DataProvider.getUserProvider().getUser();
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            NotificationDAO dao = context.getNotificationDAO();
-            dao.markNotificationAsRead(notificationId);
-            context.commit();
-            DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
-            return redirect(routes.Notifications.showNotifications());
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        NotificationDAO dao = DataAccess.getInjectedContext().getNotificationDAO();
+        dao.markNotificationAsRead(notificationId);
+        DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
+        return redirect(routes.Notifications.showNotifications());
     }
 
     /**
@@ -88,17 +84,13 @@ public class Notifications extends Controller {
      * @return notification index page
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result markAllNotificationsAsRead() {
         User user = DataProvider.getUserProvider().getUser();
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            NotificationDAO dao = context.getNotificationDAO();
-            dao.markAllNotificationsAsRead(user.getId());
-            context.commit();
-            DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
-            return redirect(routes.Notifications.showNotifications());
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        NotificationDAO dao = DataAccess.getInjectedContext().getNotificationDAO();
+        dao.markAllNotificationsAsRead(user.getId());
+        DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
+        return redirect(routes.Notifications.showNotifications());
     }
 
 }

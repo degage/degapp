@@ -4,7 +4,9 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.*;
+import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserRole;
+import db.DataAccess;
 import play.Logger;
 import play.api.Play;
 import play.mvc.Controller;
@@ -19,7 +21,6 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.io.File;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -56,7 +57,7 @@ public class FileHelper {
         } else generatedFolder = property;
     }
 
-    private static Path createPath(String fileName, String subfolder){
+    private static Path createPath(String fileName, String subfolder) {
         if (fileName.contains("/") || fileName.contains("\\"))
             throw new RuntimeException("Filename contains slashes.");
 
@@ -110,9 +111,9 @@ public class FileHelper {
         return path;
     }
 
-    public static Result getFileStreamResult(FileDAO dao, int fileId){
+    public static Result getFileStreamResult(FileDAO dao, int fileId) {
         be.ugent.degage.db.models.File file = dao.getFile(fileId);
-        if(file != null){
+        if (file != null) {
             try {
                 FileInputStream is = new FileInputStream(Paths.get(uploadFolder, file.getPath()).toFile()); //TODO: this cannot be sent with a Try-with-resources (stream already closed), check if Play disposes properly
                 return file.getContentType() != null && !file.getContentType().isEmpty() ? Controller.ok(is).as(file.getContentType()) : Controller.ok(is);
@@ -123,16 +124,17 @@ public class FileHelper {
         } else return Controller.notFound();
     }
 
-    public static boolean isImageContentType(String contentType){
+    public static boolean isImageContentType(String contentType) {
         return IMAGE_CONTENT_TYPES.contains(contentType);
     }
 
-    public static boolean isDocumentContentType(String contentType){
+    public static boolean isDocumentContentType(String contentType) {
         return isImageContentType(contentType) || DOCUMENT_CONTENT_TYPES.contains(contentType);
     }
 
     /**
      * Returns a file in the public directory
+     *
      * @param path
      * @return
      */
@@ -140,10 +142,10 @@ public class FileHelper {
         String playPath = Play.current().path().getAbsolutePath();
         try {
             FileInputStream is;
-            if(Play.isProd(Play.current())){
+            if (Play.isProd(Play.current())) {
                 playPath = Paths.get(playPath, ConfigurationHelper.getConfigurationString("application.classpath")).toString();
                 is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
-            }else{
+            } else {
                 is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
             }
             return Controller.ok(is).as(contentType);
@@ -173,9 +175,9 @@ public class FileHelper {
     }
 
     private static void createResizedJpeg(File sourceFile, File destFile, int maxWidth) throws IOException {
-        try(ImageInputStream iis = ImageIO.createImageInputStream(sourceFile)) {
+        try (ImageInputStream iis = ImageIO.createImageInputStream(sourceFile)) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(iis);
-            while(readers.hasNext()){
+            while (readers.hasNext()) {
                 ImageReader reader = readers.next();
                 try {
                     reader.setInput(iis, false); // We want to enforce a specific reader to keep the format
@@ -189,12 +191,12 @@ public class FileHelper {
                     bufferedThumbnail.getGraphics().drawImage(thumbnail, 0, 0, null);
                     ImageIO.write(bufferedThumbnail, reader.getFormatName(), new FileOutputStream(destFile, false));
                     return;
-                } catch(IIOException ex){
+                } catch (IIOException ex) {
                     continue;
                 }
             }
             throw new RuntimeException("No image reader installed for given format.");
-        } catch(IOException ex){
+        } catch (IOException ex) {
             //??
             throw ex;
         }
@@ -222,30 +224,29 @@ public class FileHelper {
         }
     }
 
-    public static Result genericFileAction(int userId, int fileId, FileAction action){
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO udao = context.getUserDAO();
-            FileDAO fdao = context.getFileDAO();
-            User user = udao.getUser(userId, true);
+    // to be used inside an injected context
+    public static Result genericFileAction(int userId, int fileId, FileAction action) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        UserDAO udao = context.getUserDAO();
+        FileDAO fdao = context.getFileDAO();
+        User user = udao.getUser(userId, true);
 
-            if (user == null) {
-                return Controller.badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
-            }
+        if (user == null) {
+            return Controller.badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+        }
 
+        try {
             be.ugent.degage.db.models.File file = action.getFile(fileId, user, fdao, context);
-            if(file == null) {
+            if (file == null) {
                 Controller.flash("danger", "Bestand niet gevonden.");
                 return action.failAction(user);
             } else {
-                try {
-                    return action.process(file, fdao, context);
-                } catch(IOException | DataAccessException ex){
-                    context.rollback();
-                    throw new RuntimeException(ex);
-                }
+                return action.process(file, fdao, context);
             }
-        } catch(DataAccessException ex){
-            throw ex;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
+
 }
+

@@ -5,6 +5,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.routes;
+import db.DataAccess;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
@@ -21,20 +22,17 @@ public class Notifier extends Mailer {
 
     public static final String NOREPLY = "Dégage <noreply@degage.be>";
 
+    // to be used with injected context
     public static void sendVerificationMail(User user, String verificationUrl) {
         String mail = "";
         setSubject("Verifieer jouw Dégage-account");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
-            mail = replaceUserTags(user, template.getBody());
-            String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.register_verification(user.getId(), verificationUrl).toString();
-            mail = mail.replace("%verification_url%", vUrl);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
+        mail = replaceUserTags(user, template.getBody());
+        String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.register_verification(user.getId(), verificationUrl).toString();
+        mail = mail.replace("%verification_url%", vUrl);
 
         if (!play.api.Play.isDev(play.api.Play.current())) {
             send(mail);
@@ -43,319 +41,283 @@ public class Notifier extends Mailer {
 
     /**
      * Creates a notification for the user and automatically invalidates the cache
+     *
      * @param dao
      * @param user
      * @param subject
      * @param mail
      */
-    private static void createNotification(NotificationDAO dao,  User user, String subject, String mail){
+    private static void createNotification(NotificationDAO dao, User user, String subject, String mail) {
         dao.createNotification(user, subject, mail);
         DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
         DataProvider.getCommunicationProvider().invalidateNotificationNumber(user.getId());
     }
 
+    // to be used with injected context
     public static void sendWelcomeMail(User user) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.WELCOME);
-            mail = replaceUserTags(user, template.getBody());
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        }catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.WELCOME);
+        mail = replaceUserTags(user, template.getBody());
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendMembershipStatusChanged(User user, boolean approved, String comment) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template;
-            if(approved){
-                template = dao.getTemplate(MailType.MEMBERSHIP_APPROVED);
-            }else{
-                template = dao.getTemplate(MailType.MEMBERSHIP_REFUSED);
-            }
-            mail = replaceUserTags(user, template.getBody());
-            mail = mail.replace("%comment%", comment);
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        }catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template;
+        if (approved) {
+            template = dao.getTemplate(MailType.MEMBERSHIP_APPROVED);
+        } else {
+            template = dao.getTemplate(MailType.MEMBERSHIP_REFUSED);
+        }
+        mail = replaceUserTags(user, template.getBody());
+        mail = mail.replace("%comment%", comment);
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendCarCostStatusChanged(User user, CarCost carCost, boolean approved) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template;
-            if(approved){
-                template = dao.getTemplate(MailType.CARCOST_APPROVED);
-            }else{
-                template = dao.getTemplate(MailType.CARCOST_REFUSED);
-            }
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceCarCostTags(carCost, mail);
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        }catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template;
+        if (approved) {
+            template = dao.getTemplate(MailType.CARCOST_APPROVED);
+        } else {
+            template = dao.getTemplate(MailType.CARCOST_REFUSED);
+        }
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceCarCostTags(carCost, mail);
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
 
-
+    // to be used with injected context
     public static void sendRefuelStatusChanged(User user, Refuel refuel, boolean approved) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template;
-            if(approved){
-                template = dao.getTemplate(MailType.REFUEL_APPROVED);
-            }else{
-                template = dao.getTemplate(MailType.REFUEL_REFUSED);
-            }
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceRefuelTags(refuel, mail);
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        }catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template;
+        if (approved) {
+            template = dao.getTemplate(MailType.REFUEL_APPROVED);
+        } else {
+            template = dao.getTemplate(MailType.REFUEL_REFUSED);
+        }
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceRefuelTags(refuel, mail);
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendCarCostRequest(CarCost carCost) {
         String mail = "";
         String userMail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
-            UserRoleDAO userRoleDAO = context.getUserRoleDAO();
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            List<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
-            mail = replaceCarCostTags(carCost, template.getBody());
-            for(User u: carAdminList){
-                userMail = replaceUserTags(u, mail);
-                createNotification(notificationDAO, u, template.getSubject(), userMail);
-            }
-
-        }catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
+        UserRoleDAO userRoleDAO = context.getUserRoleDAO();
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        List<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
+        mail = replaceCarCostTags(carCost, template.getBody());
+        for (User u : carAdminList) {
+            userMail = replaceUserTags(u, mail);
+            createNotification(notificationDAO, u, template.getSubject(), userMail);
         }
+
     }
 
+    // to be used with injected context
     public static void sendRefuelRequest(User user, Refuel refuel) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.REFUEL_REQUEST);
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceRefuelTags(refuel, mail);
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        }catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.REFUEL_REQUEST);
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceRefuelTags(refuel, mail);
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
-    public static void sendInfoSessionEnrolledMail(User user, InfoSession infoSession) {
+    public static void sendInfoSessionEnrolledMail(DataAccessContext context, User user, InfoSession infoSession) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceInfoSessionTags(infoSession, mail);
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceInfoSessionTags(infoSession, mail);
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceCarReservationTags(carReservation, mail);
-            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceCarReservationTags(carReservation, mail);
+        mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendReservationDetailsProvidedMail(User user, Reservation carReservation) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceCarReservationTags(carReservation, mail);
-            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceCarReservationTags(carReservation, mail);
+        mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
 
+    // to be used with injected context
     public static void sendReservationApprovedByOwnerMail(User user, String remarks, Reservation carReservation) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            CarDAO cdao = context.getCarDAO();
-            Car car = cdao.getCar(carReservation.getCar().getId());
-            EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceCarReservationTags(carReservation, mail);
-            mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
-            mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
-            mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).toString());
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        CarDAO cdao = context.getCarDAO();
+        Car car = cdao.getCar(carReservation.getCar().getId());
+        EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceCarReservationTags(carReservation, mail);
+        mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
+        mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
+        mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).toString());
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendReservationRefusedByOwnerMail(User user, String reason, Reservation carReservation) {
         String mail = "";
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
-            mail = replaceUserTags(user, template.getBody());
-            mail = replaceCarReservationTags(carReservation, mail);
-            mail = mail.replace("%reservation_reason%", reason);
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
+        mail = replaceUserTags(user, template.getBody());
+        mail = replaceCarReservationTags(carReservation, mail);
+        mail = mail.replace("%reservation_reason%", reason);
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
-    public static void sendContractManagerAssignedMail(User user, Approval approval){
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.CONTRACTMANAGER_ASSIGNED);
-            String mail = replaceUserTags(user, template.getBody());
-            mail = mail.replace("%admin_name%", approval.getAdmin().toString());
-            NotificationDAO notificationDAO = context.getNotificationDAO();
-            createNotification(notificationDAO, user, template.getSubject(), mail);
-            if(template.getSendMail()){
-                setSubject(template.getSubject());
-                addRecipient(user.getEmail());
-                addFrom(NOREPLY);
-                send(mail);
-            }
+    // to be used with injected context
+    public static void sendContractManagerAssignedMail(User user, Approval approval) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.CONTRACTMANAGER_ASSIGNED);
+        String mail = replaceUserTags(user, template.getBody());
+        mail = mail.replace("%admin_name%", approval.getAdmin().toString());
+        NotificationDAO notificationDAO = context.getNotificationDAO();
+        createNotification(notificationDAO, user, template.getSubject(), mail);
+        if (template.getSendMail()) {
+            setSubject(template.getSubject());
+            addRecipient(user.getEmail());
+            addFrom(NOREPLY);
+            send(mail);
         }
     }
 
+    // to be used with injected context
     public static void sendPasswordResetMail(User user, String verificationUrl) {
         String mail = "";
         setSubject("Wachtwoord opnieuw instellen");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.PASSWORD_RESET);
-            mail = replaceUserTags(user, template.getBody());
-            String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.resetPassword(user.getId(), verificationUrl).toString();
-            mail = mail.replace("%password_reset_url%", vUrl);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.PASSWORD_RESET);
+        mail = replaceUserTags(user, template.getBody());
+        String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.resetPassword(user.getId(), verificationUrl).toString();
+        mail = mail.replace("%password_reset_url%", vUrl);
 
         if (!play.api.Play.isDev(play.api.Play.current())) {
             send(mail);
         }
     }
 
-    public static void sendReminderMail(User user) {
+    public static void sendReminderMail(DataAccessContext context, User user) {
         String mail = "";
         setSubject("Ongelezen berichten");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(MailType.REMINDER_MAIL);
-            mail = replaceUserTags(user, template.getBody());
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        TemplateDAO dao = context.getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(MailType.REMINDER_MAIL);
+        mail = replaceUserTags(user, template.getBody());
         send(mail);
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            SchedulerDAO dao = context.getSchedulerDAO();
-            dao.setReminded(user);
-            context.commit();
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        SchedulerDAO sdao = context.getSchedulerDAO();
+        sdao.setReminded(user);
     }
 
     private static String replaceUserTags(User user, String template) {

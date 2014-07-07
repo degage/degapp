@@ -4,16 +4,9 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
 import providers.DataProvider;
 
-/**
- * Created by Cedric on 5/7/2014.
- */
-public class CheckFinishedRidesJob implements Runnable {
+public class CheckFinishedRidesJob extends RunnableInContext {
     @Override
-    public void run() {
-        try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()){
-            ReservationDAO dao = context.getReservationDAO();
-            dao.updateTable();
-            context.commit();
-        }
+    public void runInContext(DataAccessContext context) {
+            context.getReservationDAO().updateTable();
     }
 }

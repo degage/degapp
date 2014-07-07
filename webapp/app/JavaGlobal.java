@@ -1,23 +1,18 @@
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.TemplateDAO;
-import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.models.MailType;
+import db.DataAccess;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import play.Application;
-import play.Logger;
 import play.data.format.Formatters;
 import play.db.DB;
-import providers.DataProvider;
 import scala.concurrent.duration.Duration;
 import schedulers.CheckFinishedRidesJob;
 import schedulers.Scheduler;
 import schedulers.SendUnreadNotificationsMailScheduler;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +24,7 @@ public class JavaGlobal {
 
     // Tests if all templates are in the database, and if the database works
     private static void testDatabase() {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataAccess.getContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             StringBuilder sb = new StringBuilder();
             for (MailType type : MailType.values()) {
@@ -92,8 +87,7 @@ public class JavaGlobal {
     }
 
     private static void onStartDevProd(String dataSourceName) {
-        DataAccessProvider dap = JDBCDataAccess.createDataAccessProvider(DB.getDataSource (dataSourceName));
-        DataProvider.setDataAccessProvider(dap);
+        DataAccess.setProviderFromDataSource(DB.getDataSource(dataSourceName));
         testDatabase();
         registerDateTimeFormatter();
         startScheduler();
@@ -117,8 +111,7 @@ public class JavaGlobal {
      * Called when  the application starts in development mode
      */
     public static void onStartTest() {
-        DataAccessProvider dap = JDBCDataAccess.getTestDataAccessProvider();
-        DataProvider.setDataAccessProvider(dap);
+        DataAccess.setProviderForTesting();
         registerDateTimeFormatter();
         startScheduler(); // TODO: needed in test mode?
     }

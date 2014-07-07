@@ -17,22 +17,18 @@ import java.util.List;
  */
 public class ReportGenerationJob implements ScheduledJobExecutor {
     @Override
-    public void execute(Job job) {
+    public void execute(DataAccessContext context, Job job) {
 
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            context.getCarRideDAO().endPeriod();
-            context.getRefuelDAO().endPeriod();
-            context.getCarCostDAO().endPeriod();
+        context.getCarRideDAO().endPeriod();
+        context.getRefuelDAO().endPeriod();
+        context.getCarCostDAO().endPeriod();
 
-            UserDAO dao = context.getUserDAO();
+        UserDAO dao = context.getUserDAO();
 
-            List<User> users = dao.getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
-            context.commit();
-            for(User user : users) {
-                Receipts.generateReceipt(user, new Date(java.util.Calendar.getInstance().getTime().getTime()));
-            }
-        }catch(DataAccessException ex) {
-            throw ex;
+        List<User> users = dao.getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
+        context.commit();
+        for (User user : users) {
+            Receipts.generateReceipt(user, new Date(java.util.Calendar.getInstance().getTime().getTime()));
         }
     }
 }

@@ -9,6 +9,8 @@ import be.ugent.degage.db.models.EmailTemplate;
 import be.ugent.degage.db.models.UserRole;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
+import db.DataAccess;
+import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -33,7 +35,7 @@ public class EmailTemplates extends Controller {
      */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
     public static Result showExistingTemplates() {
-       return ok(emailtemplates.render());
+        return ok(emailtemplates.render());
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
@@ -47,21 +49,17 @@ public class EmailTemplates extends Controller {
     }
 
     private static Html templateList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
+        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
 
-            if(orderBy == null) {
-                orderBy = FilterField.TEMPLATE_NAME;
-            }
-            List<EmailTemplate> listOfTemplates = dao.getTemplateList(orderBy, asc, page, pageSize, filter);
-
-            int amountOfResults = dao.getAmountOfTemplates(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
-
-            return emailtemplatespage.render(listOfTemplates, page, amountOfResults, amountOfPages);
-        } catch (DataAccessException ex) {
-            throw ex;
+        if (orderBy == null) {
+            orderBy = FilterField.TEMPLATE_NAME;
         }
+        List<EmailTemplate> listOfTemplates = dao.getTemplateList(orderBy, asc, page, pageSize, filter);
+
+        int amountOfResults = dao.getAmountOfTemplates(filter);
+        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+
+        return emailtemplatespage.render(listOfTemplates, page, amountOfResults, amountOfPages);
     }
 
     /**
@@ -71,17 +69,14 @@ public class EmailTemplates extends Controller {
      * @return the detail page of specific template
      */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @InjectContext
     public static Result showTemplate(int templateId) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            EmailTemplate template = dao.getTemplate(templateId);
-            if (template == null) {
-                return badRequest("Template bestaat niet.");
-            } else {
-                return ok(edit.render(template));
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
+        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
+        EmailTemplate template = dao.getTemplate(templateId);
+        if (template == null) {
+            return badRequest("Template bestaat niet.");
+        } else {
+            return ok(edit.render(template));
         }
 
     }
@@ -93,19 +88,15 @@ public class EmailTemplates extends Controller {
      * @return templates index page
      */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @InjectContext
     public static Result editTemplate() {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            TemplateDAO dao = context.getTemplateDAO();
-            final Map<String, String[]> values = request().body().asFormUrlEncoded();
-            String templateBody = values.get("template_body")[0];
-            String templateSubject = values.get("template_subject")[0];
-            int templateId = Integer.parseInt(values.get("template_id")[0]);
-            boolean templateSendMail = Boolean.parseBoolean(values.get("template_send_mail")[0]);
-            dao.updateTemplate(templateId, templateBody, templateSubject, templateSendMail);
-            context.commit();
-            return ok(routes.EmailTemplates.showExistingTemplates().toString());
-        } catch (DataAccessException ex) {
-            throw ex; //TODO: show gracefully
-        }
+        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
+        final Map<String, String[]> values = request().body().asFormUrlEncoded();
+        String templateBody = values.get("template_body")[0];
+        String templateSubject = values.get("template_subject")[0];
+        int templateId = Integer.parseInt(values.get("template_id")[0]);
+        boolean templateSendMail = Boolean.parseBoolean(values.get("template_send_mail")[0]);
+        dao.updateTemplate(templateId, templateBody, templateSubject, templateSendMail);
+        return ok(routes.EmailTemplates.showExistingTemplates().toString());
     }
 }

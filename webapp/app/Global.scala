@@ -36,11 +36,9 @@
  */
 
 import java.io.File
-import java.util.Date
-import play.api.db.DB
-import play.api.mvc.{RequestHeader, Handler}
-import play.api.{Configuration, Mode, Application, GlobalSettings}
+
 import com.typesafe.config.ConfigFactory
+import play.api.{Application, Configuration, GlobalSettings, Mode}
 
 /**
  * Adapts the global settings object to our needs. Most of the functionality is

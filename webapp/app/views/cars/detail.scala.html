@@ -189,10 +189,10 @@
                         </div>
                     </div>
 
-                    <!-- Gepriviligeerden -->
+                    <!-- Geprivilegeerden -->
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Gepriviligieerden
+                            Geprivilegieerden
                         </div>
                             <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -207,14 +207,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if(car.getPriviliged.isEmpty) {
+                                    @if(car.getPrivileged.isEmpty) {
                                         <tr>
                                             <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
-                                                Je auto heeft nog geen gepriviligieerden.
+                                                Je auto heeft nog geen geprivilegieerden.
                                             </td>
                                         </tr>
                                     } else {
-                                        @for(user <- car.getPriviliged) {
+                                        @for(user <- car.getPrivileged) {
                                             <tr>
                                                 <td>
                                                     @user.getFirstName @user.getLastName

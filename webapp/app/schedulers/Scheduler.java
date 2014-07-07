@@ -5,6 +5,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
+import db.DataAccess;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.libs.Akka;
@@ -28,6 +29,7 @@ public class Scheduler implements Runnable {
 
 
     private static final Map<JobType, ScheduledJobExecutor> EXECUTORS;
+
     static {
         EXECUTORS = new EnumMap<>(JobType.class);
         EXECUTORS.put(JobType.IS_REMINDER, new InfoSessionReminderJob());
@@ -56,9 +58,9 @@ public class Scheduler implements Runnable {
         cachedPool = Executors.newCachedThreadPool();
     }
 
-    public void stop(){
-        if(isRunning){
-            if(!(cachedPool.isTerminated() || cachedPool.isShutdown()))
+    public void stop() {
+        if (isRunning) {
+            if (!(cachedPool.isTerminated() || cachedPool.isShutdown()))
                 cachedPool.shutdown();
             runningJobs.clear();
         }
@@ -77,7 +79,7 @@ public class Scheduler implements Runnable {
      * Checks if there's a report already scheduled
      */
     private void checkInitialReports() {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataAccess.getContext()) {
             JobDAO dao = context.getJobDAO();
             Job reportJob = dao.getLastJobForType(JobType.REPORT);
             if (reportJob == null) {
@@ -86,7 +88,7 @@ public class Scheduler implements Runnable {
                     dao.createJob(JobType.REPORT, 0, scheduledFor);
                     context.commit();
                     Logger.info("Scheduled next report for " + scheduledFor.toString());
-                } catch(DataAccessException ex){
+                } catch (DataAccessException ex) {
                     Logger.error("Failed to schedule report job", ex);
                 }
             }
@@ -108,11 +110,11 @@ public class Scheduler implements Runnable {
 
     @Override
     public void run() {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+        try (DataAccessContext context = DataAccess.getProvider().getDataAccessContext()) {
             JobDAO dao = context.getJobDAO();
             List<Job> jobs = dao.getUnfinishedBefore(new DateTime());
-            for(Job job : jobs){
-                if(!runningJobs.contains(job)){
+            for (Job job : jobs) {
+                if (!runningJobs.contains(job)) {
                     runningJobs.put(job.getId(), job); // Add the job to the already scheduled pool
                     cachedPool.submit(new ScheduledJob(job));
                 }
@@ -124,27 +126,30 @@ public class Scheduler implements Runnable {
 
     private class ScheduledJob implements Runnable {
         private Job job;
-        public ScheduledJob(Job job){
+
+        public ScheduledJob(Job job) {
             this.job = job;
         }
 
         @Override
         public void run() {
-            try {
+            try (DataAccessContext context = DataAccess.getContext()) {
                 ScheduledJobExecutor executor = EXECUTORS.get(job.getType());
                 if (executor == null) {
                     Logger.error("No executor for type: " + job.getType());
                 } else {
-                    executor.execute(job);
-                    try(DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
+                    try {
+                        executor.execute(context, job);
                         JobDAO dao = context.getJobDAO();
                         dao.setJobStatus(job.getId(), true);
                         context.commit();
                         Logger.info("Finished job: " + job);
+                    } catch (Exception ex) {
+                        Logger.error("Error during " + job.toString() + ": " + ex.getMessage());
+                        context.rollback();
+                        throw ex;
                     }
                 }
-            } catch(Exception ex){
-                Logger.error("Error during " + job.toString() + ": " + ex.getMessage());
             } finally {
                 runningJobs.remove(job.getId());
             }

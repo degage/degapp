@@ -21,11 +21,11 @@ function deletePrivilege(e) {
 
 function newPrivilege(e) {
     var currentRow = $(e).closest('tr');
-    currentRow.before(newPriviligeRow());
+    currentRow.before(newPrivilegeRow());
     initUserPicker(); // userpicker.js has to be included!
 }
 
-function newPriviligeRow() {
+function newPrivilegeRow() {
     return '' +
         '<tr>' +
         '<td>' +
@@ -54,7 +54,7 @@ function updatePrivileged(carId) {
         values = addValue(values, value);
     }
 
-    myJsRoutes.controllers.Cars.updatePriviliged(carId, values).ajax({
+    myJsRoutes.controllers.Cars.updatePrivileged(carId, values).ajax({
         success : function() {
             location.reload();
             scroll(0,0);

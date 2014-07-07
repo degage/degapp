@@ -10,6 +10,8 @@ import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
+import db.DataAccess;
+import db.InjectContext;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -33,7 +35,7 @@ public class Messages extends Controller {
         public Integer userId;
 
         public String validate() {
-            if(userId == null || userId == 0 || "".equals(subject) || "".equals(body))
+            if (userId == null || userId == 0 || "".equals(subject) || "".equals(body))
                 return "Vul alle velden in";
 
             return null;
@@ -55,6 +57,7 @@ public class Messages extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showReceivedMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
@@ -67,6 +70,7 @@ public class Messages extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showSentMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
@@ -78,18 +82,15 @@ public class Messages extends Controller {
         return ok(messageList(page, pageSize, field, asc, filter));
     }
 
+    // used in injected context
     private static Html messageList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            MessageDAO dao = context.getMessageDAO();
-            List<Message> messageList = dao.getMessageList(orderBy, asc, page, pageSize, filter);
+        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
+        List<Message> messageList = dao.getMessageList(orderBy, asc, page, pageSize, filter);
 
-            int amountOfResults = dao.getAmountOfMessages(filter);
-            int amountOfPages = (int) Math.ceil( amountOfResults / (double) pageSize);
+        int amountOfResults = dao.getAmountOfMessages(filter);
+        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-            return messagespage.render(messageList, page, amountOfResults, amountOfPages);
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        return messagespage.render(messageList, page, amountOfResults, amountOfPages);
     }
 
     /**
@@ -112,62 +113,51 @@ public class Messages extends Controller {
 
     @RoleSecured.RoleAuthenticated()
     public static Result reply(int userId) {
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            UserDAO dao = context.getUserDAO();
-            User user = dao.getUser(userId, true);
-            if (user == null) {
-                flash("danger", "GebruikersID " + userId + " bestaat niet.");
-                return redirect(routes.Messages.showMessages());
-            }
-            MessageCreationModel model = new MessageCreationModel();
-            model.userId = user.getId();
-            Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
-            return ok(addmessage.render(editForm.fill(model)));
-
-        }catch (DataAccessException ex) {
-            throw ex;
+        UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
+        User user = dao.getUser(userId, true);
+        if (user == null) {
+            flash("danger", "GebruikersID " + userId + " bestaat niet.");
+            return redirect(routes.Messages.showMessages());
         }
+        MessageCreationModel model = new MessageCreationModel();
+        model.userId = user.getId();
+        Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
+        return ok(addmessage.render(editForm.fill(model)));
+
     }
 
 
     /**
      * Method: POST
-     *
+     * <p>
      * Creates a new message based on submitted form data
      *
      * @return the messages index list
      */
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result createNewMessage() {
         Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
             return badRequest(addmessage.render(createForm));
         } else {
 
-            try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-                MessageDAO dao = context.getMessageDAO();
+            DataAccessContext context = DataAccess.getInjectedContext();
+            MessageDAO dao = context.getMessageDAO();
 
-                try {
-                    User sender = DataProvider.getUserProvider().getUser();
-                    User receiver = context.getUserDAO().getUser(createForm.get().userId, false);
-                    Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
-                    DataProvider.getCommunicationProvider().invalidateMessages(receiver.getId()); // invalidate the message
-                    DataProvider.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
-                    if (mes != null) {
-                        return redirect(
-                                routes.Messages.showMessages() // return to infosession list
-                        );
-                    } else {
-                        createForm.error("Failed to create message in database. Contact administrator.");
-                        return badRequest(addmessage.render(createForm));
-                    }
-                } catch (DataAccessException ex) {
-                    context.rollback();
-                    throw ex;
-                }
-            } catch (DataAccessException ex) {
-                throw ex; //TODO: show gracefully
+            User sender = DataProvider.getUserProvider().getUser();
+            User receiver = context.getUserDAO().getUser(createForm.get().userId, false);
+            Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
+            DataProvider.getCommunicationProvider().invalidateMessages(receiver.getId()); // invalidate the message
+            DataProvider.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
+            if (mes != null) {
+                return redirect(
+                        routes.Messages.showMessages() // return to infosession list
+                );
+            } else {
+                createForm.error("Failed to create message in database. Contact administrator.");
+                return badRequest(addmessage.render(createForm));
             }
         }
     }
@@ -179,17 +169,13 @@ public class Messages extends Controller {
      * @return message index page
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result markMessageAsRead(int messageId) {
         User user = DataProvider.getUserProvider().getUser();
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-           MessageDAO dao = context.getMessageDAO();
-           dao.markMessageAsRead(messageId);
-            context.commit();
-            DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
-            return redirect(routes.Messages.showMessages());
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
+        dao.markMessageAsRead(messageId);
+        DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
+        return redirect(routes.Messages.showMessages());
     }
 
     /**
@@ -198,16 +184,12 @@ public class Messages extends Controller {
      * @return message index page
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result markAllMessagesAsRead() {
         User user = DataProvider.getUserProvider().getUser();
-        try (DataAccessContext context = DataProvider.getDataAccessProvider().getDataAccessContext()) {
-            MessageDAO dao = context.getMessageDAO();
-            dao.markAllMessagesAsRead(user.getId());
-            context.commit();
-            DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
-            return redirect(routes.Messages.showMessages());
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
+        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
+        dao.markAllMessagesAsRead(user.getId());
+        DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
+        return redirect(routes.Messages.showMessages());
     }
 }
