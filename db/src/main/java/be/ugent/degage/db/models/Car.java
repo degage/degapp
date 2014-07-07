@@ -35,7 +35,7 @@ public class Car {
     private String comments;
     private List<CarAvailabilityInterval> availabilities;
     private boolean active;
-    private List<User> priviliged;
+    private List<User> privileged;
     private File photo;
 
     public Car() {
@@ -228,12 +228,12 @@ public class Car {
         this.active = active;
     }
 
-    public List<User> getPriviliged() {
-        return priviliged;
+    public List<User> getPrivileged() {
+        return privileged;
     }
 
-    public void setPriviliged(List<User> priviliged) {
-        this.priviliged = priviliged;
+    public void setPrivileged(List<User> privileged) {
+        this.privileged = privileged;
     }
 
     public File getPhoto() {

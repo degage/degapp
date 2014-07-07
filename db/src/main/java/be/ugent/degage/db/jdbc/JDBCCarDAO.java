@@ -136,9 +136,9 @@ class JDBCCarDAO implements CarDAO{
     private PreparedStatement createAvailabilityStatement;
     private PreparedStatement updateAvailabilityStatement;
     private PreparedStatement deleteAvailabilityStatement;
-    private PreparedStatement getPriviligedStatement;
-    private PreparedStatement createPriviligedStatement;
-    private PreparedStatement deletePriviligedStatement;
+    private PreparedStatement getPrivilegedStatement;
+    private PreparedStatement createPrivilegedStatement;
+    private PreparedStatement deletePrivilegedStatement;
 
     public JDBCCarDAO(Connection connection) {
         this.connection = connection;
@@ -359,28 +359,28 @@ class JDBCCarDAO implements CarDAO{
         return deleteAvailabilityStatement;
     }
 
-    private PreparedStatement getPriviligedStatement() throws SQLException {
-        if (getPriviligedStatement == null) {
-            getPriviligedStatement = connection.prepareStatement("SELECT * FROM carprivileges " +
+    private PreparedStatement getPrivilegedStatement() throws SQLException {
+        if (getPrivilegedStatement == null) {
+            getPrivilegedStatement = connection.prepareStatement("SELECT * FROM carprivileges " +
                     "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?");
         }
-        return getPriviligedStatement;
+        return getPrivilegedStatement;
     }
 
-    private PreparedStatement createPriviligedStatement() throws SQLException {
-        if (createPriviligedStatement == null) {
-            createPriviligedStatement = connection.prepareStatement("INSERT INTO carprivileges(car_privilege_user_id, " +
+    private PreparedStatement createPrivilegedStatement() throws SQLException {
+        if (createPrivilegedStatement == null) {
+            createPrivilegedStatement = connection.prepareStatement("INSERT INTO carprivileges(car_privilege_user_id, " +
                     "car_privilege_car_id) " +
                     "VALUES (?,?)");
         }
-        return createPriviligedStatement;
+        return createPrivilegedStatement;
     }
 
-    private PreparedStatement deletePriviligedStatement() throws SQLException {
-        if (deletePriviligedStatement == null) {
-            deletePriviligedStatement = connection.prepareStatement("DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?");
+    private PreparedStatement deletePrivilegedStatement() throws SQLException {
+        if (deletePrivilegedStatement == null) {
+            deletePrivilegedStatement = connection.prepareStatement("DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?");
         }
-        return deletePriviligedStatement;
+        return deletePrivilegedStatement;
     }
     
     @Override
@@ -663,7 +663,7 @@ class JDBCCarDAO implements CarDAO{
                 if(rs.next()) {
                     Car car = populateCar(rs, true);
                     car.setAvailabilities(getAvailabilities(car));
-                    car.setPriviliged(getPriviliged(car));
+                    car.setPrivileged(getPrivileged(car));
                     return car;
                 } else return null;
             } catch (SQLException ex) {
@@ -763,9 +763,9 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public List<User> getPriviliged(Car car) throws DataAccessException {
+    public List<User> getPrivileged(Car car) throws DataAccessException {
         try {
-            PreparedStatement ps = getPriviligedStatement();
+            PreparedStatement ps = getPrivilegedStatement();
             ps.setInt(1, car.getId());
             List<User> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
@@ -774,44 +774,44 @@ class JDBCCarDAO implements CarDAO{
                 }
                 return users;
             } catch (SQLException ex) {
-                throw new DataAccessException("Error reading priviliged resultset", ex);
+                throw new DataAccessException("Error reading privileged resultset", ex);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of priviliged", ex);
+            throw new DataAccessException("Could not retrieve a list of privileged", ex);
         }
     }
 
     @Override
-    public void addPriviliged(Car car, List<User> users) throws DataAccessException {
+    public void addPrivileged(Car car, List<User> users) throws DataAccessException {
         try {
             for(User user : users) {
-                PreparedStatement ps = createPriviligedStatement();
+                PreparedStatement ps = createPrivilegedStatement();
                 ps.setInt(1, user.getId());
                 ps.setInt(2, car.getId());
 
                 if(ps.executeUpdate() == 0)
-                    throw new DataAccessException("No rows were affected when creating priviliged.");
+                    throw new DataAccessException("No rows were affected when creating privileged.");
             }
         } catch(SQLException ex) {
-            throw new DataAccessException("Failed to create new priviliged");
+            throw new DataAccessException("Failed to create new privileged");
         }
     }
 
     @Override
-    public void deletePriviliged(Car car, List<User> users) throws DataAccessException {
+    public void deletePrivileged(Car car, List<User> users) throws DataAccessException {
         try {
             for(User user : users) {
-                PreparedStatement ps = deletePriviligedStatement();
+                PreparedStatement ps = deletePrivilegedStatement();
 
                 ps.setInt(1, user.getId());
                 ps.setInt(2, car.getId());
 
                 if(ps.executeUpdate() == 0)
-                    throw new DataAccessException("No rows were affected when deleting priviliged.");
+                    throw new DataAccessException("No rows were affected when deleting privileged.");
 
             }
         } catch(SQLException ex) {
-            throw new DataAccessException("Failed to delete priviliged");
+            throw new DataAccessException("Failed to delete privileged");
         }
     }
 
