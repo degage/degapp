@@ -543,7 +543,7 @@ public class Drives extends Controller {
      * @param userIsLoaner Extra filtering specifying the user has to be loaner
      * @return The number of reservations
      */
-    // TODO:
+    // must be used with injected context
     public static int reservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
         User user = DataProvider.getUserProvider().getUser();
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();

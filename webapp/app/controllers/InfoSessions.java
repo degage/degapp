@@ -451,7 +451,7 @@ public class InfoSessions extends Controller {
 
                     flash("success", alreadyAttending == null ? ("Je bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
                             "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
-                    Notifier.sendInfoSessionEnrolledMail(context,user, session);
+                    Notifier.sendInfoSessionEnrolledMail(context, user, session);
                     return redirect(routes.InfoSessions.detail(sessionId));
                 } catch (DataAccessException ex) {
                     throw ex;
@@ -885,7 +885,8 @@ public class InfoSessions extends Controller {
      */
     @RoleSecured.RoleAuthenticated()
     @InjectContext
-    public static F.Promise<Result> showUpcomingSessions() {
+    // TODO: inject context does not work here
+    public static F.Promise<Result> showUpcomingSessionsOriginal() {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
@@ -910,6 +911,16 @@ public class InfoSessions extends Controller {
                     }
             );
         }
+    }
+
+
+    public static Result showUpcomingSessions() {
+        final User user = DataProvider.getUserProvider().getUser();
+        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
+        final boolean didUserGoToInfoSession = didUserGoToInfoSession();
+        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
+
     }
 
     /**

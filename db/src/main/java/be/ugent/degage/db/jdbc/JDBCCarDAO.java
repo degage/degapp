@@ -190,7 +190,7 @@ class JDBCCarDAO implements CarDAO{
                     rs.getInt("details_car_registration");
                     if(!rs.wasNull()) registration = JDBCFileDAO.populateFile(rs, "files");
 
-                    Integer chassisNr = rs.getInt("details_car_chassis_number");
+                    String chassisNr = rs.getString("details_car_chassis_number");
                     if(rs.wasNull()) chassisNr = null;
                     technicalCarDetails = new TechnicalCarDetails(rs.getInt("details_id"), rs.getString("details_car_license_plate"), registration, chassisNr);
                 }
@@ -474,6 +474,7 @@ class JDBCCarDAO implements CarDAO{
     }
 
     private void setTechnicalCarDetailsVariables(PreparedStatement ps, TechnicalCarDetails technicalCarDetails) throws SQLException {
+        // TODO: remove these types of if/else in the string case (but first check)
         if(technicalCarDetails.getLicensePlate() != null)
             ps.setString(1, technicalCarDetails.getLicensePlate());
         else
@@ -483,7 +484,7 @@ class JDBCCarDAO implements CarDAO{
         else
             ps.setNull(2, Types.INTEGER);
         if(technicalCarDetails.getChassisNumber() != null)
-            ps.setInt(3, technicalCarDetails.getChassisNumber());
+            ps.setString(3, technicalCarDetails.getChassisNumber());
         else
             ps.setNull(3, Types.INTEGER);
     }

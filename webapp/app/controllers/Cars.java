@@ -83,7 +83,7 @@ public class Cars extends Controller {
         // TechnicalCarDetails
         public String licensePlate;
         // public String registration; // TODO: file inschrijvingsbewijs
-        public Integer chassisNumber;
+        public String chassisNumber;
 
         // Insurance
         public String insuranceName;
@@ -308,7 +308,7 @@ public class Cars extends Controller {
                 }
             }
             if ((model.licensePlate != null && !model.licensePlate.equals(""))
-                    || (model.chassisNumber != null && model.chassisNumber != 0) || file != null) {
+                    || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || file != null) {
                 technicalCarDetails = new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber);
             }
             CarInsurance insurance = null;
@@ -459,7 +459,7 @@ public class Cars extends Controller {
         }
         if (car.getTechnicalCarDetails() == null) {
             if ((model.licensePlate != null && !model.licensePlate.equals(""))
-                    || (model.chassisNumber != null && model.chassisNumber != 0) || file != null)
+                    || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || file != null)
                 car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber));
         } else {
             if (model.licensePlate != null && !model.licensePlate.equals(""))
@@ -468,7 +468,7 @@ public class Cars extends Controller {
                 car.getTechnicalCarDetails().setLicensePlate(null);
 
             car.getTechnicalCarDetails().setRegistration(null);
-            if (model.chassisNumber != null && model.chassisNumber != 0)
+            if (model.chassisNumber != null && !model.chassisNumber.isEmpty())
                 car.getTechnicalCarDetails().setChassisNumber(model.chassisNumber);
             else
                 car.getTechnicalCarDetails().setChassisNumber(null);

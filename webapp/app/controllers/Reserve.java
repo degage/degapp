@@ -109,6 +109,7 @@ public class Reserve extends Controller {
      * @return the reservation index page containing all cars
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @InjectContext
     public static Result index() {
         return ok(showIndex());
     }
@@ -119,6 +120,7 @@ public class Reserve extends Controller {
      * @return the reservation index page containing one specific car
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @InjectContext
     public static Result indexWithCar(String carName, int id) {
         return ok(showIndex(carName, "", "", id));
     }
@@ -129,6 +131,7 @@ public class Reserve extends Controller {
      * @return the reservation index page containing one specific car
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @InjectContext
     public static Result indexWithDate() {
         Form<IndexModel> form = Form.form(IndexModel.class).bindFromRequest();
         if (form.hasErrors()) {

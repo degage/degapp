@@ -14,7 +14,7 @@ CREATE TABLE `filegroups` (
 );
 
 CREATE TABLE `files` (
-  `file_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `file_id` INT NOT NULL AUTO_INCREMENT,
   `file_path` VARCHAR(255) NOT NULL,
   `file_name` VARCHAR(128) NULL,
   `file_content_type` VARCHAR(64) NULL,
@@ -27,7 +27,7 @@ CREATE TABLE `files` (
 
 
 CREATE TABLE `addresses` (
-  `address_id` INT(10) NOT NULL AUTO_INCREMENT,
+  `address_id` INT NOT NULL AUTO_INCREMENT,
   `address_country` VARCHAR(64) NOT NULL DEFAULT 'Belgium',
   `address_city` VARCHAR(64) NOT NULL,
   `address_zipcode` VARCHAR(12) NOT NULL,
@@ -95,7 +95,7 @@ CREATE TABLE `technicalcardetails` (
 	`details_id` INT NOT NULL AUTO_INCREMENT,
 	`details_car_license_plate` VARCHAR(64),
 	`details_car_registration` INT,
-	`details_car_chassis_number` INT(17),
+	`details_car_chassis_number` VARCHAR(17),
 	`details_created_at` DATETIME,
 	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`details_id`),
@@ -308,7 +308,7 @@ CREATE TABLE `templatetagassociations` ( # Welke tags horen bij welke templates
 
 CREATE TABLE `verifications` (
 	`verification_ident` CHAR(37) NOT NULL,
-	`verification_user_id` INT(11) NOT NULL,
+	`verification_user_id` INT NOT NULL,
 	`verification_type` ENUM('REGISTRATION','PWRESET') NOT NULL DEFAULT 'REGISTRATION',
 	`verification_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`verification_user_id`, `verification_type`),
@@ -328,13 +328,13 @@ CREATE TABLE `notifications` ( # from system to user
 );
 
 CREATE TABLE `approvals` (
-  `approval_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `approval_user` INT(11) NULL DEFAULT NULL,
-  `approval_admin` INT(11) NULL DEFAULT NULL,
+  `approval_id` INT NOT NULL AUTO_INCREMENT,
+  `approval_user` INT NULL DEFAULT NULL,
+  `approval_admin` INT NULL DEFAULT NULL,
   `approval_submission` DATETIME NOT NULL,
   `approval_date` DATETIME NULL DEFAULT NULL,
   `approval_status` ENUM('PENDING','ACCEPTED','DENIED') NOT NULL DEFAULT 'PENDING',
-  `approval_infosession` INT(11) NULL DEFAULT NULL,
+  `approval_infosession` INT NULL DEFAULT NULL,
   `approval_user_message` TEXT NULL,
   `approval_admin_message` TEXT NULL,
   PRIMARY KEY (`approval_id`),
@@ -349,7 +349,7 @@ CREATE TABLE `approvals` (
 CREATE TABLE `jobs` (
   `job_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `job_type` ENUM('IS_REMINDER','RES_REMINDER','REPORT', 'RESERVE_ACCEPT', 'DRIVE_FINISH') NOT NULL DEFAULT 'REPORT',
-  `job_ref_id` INT(11) NULL DEFAULT '0',
+  `job_ref_id` INT NULL DEFAULT '0',
   `job_time` DATETIME NOT NULL,
   `job_finished` BIT(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`job_id`)
@@ -357,7 +357,7 @@ CREATE TABLE `jobs` (
 
 
 CREATE TABLE `settings` (
-  `setting_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `setting_id` INT NOT NULL AUTO_INCREMENT,
   `setting_name` CHAR(32) NOT NULL,
   `setting_value` VARCHAR(256) NULL DEFAULT NULL,
   `setting_after` DATETIME NULL DEFAULT NULL,
@@ -365,11 +365,11 @@ CREATE TABLE `settings` (
 );
 
 CREATE TABLE `receipts` (
-  `receipt_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `receipt_id` INT NOT NULL AUTO_INCREMENT,
   `receipt_name` CHAR(32) NOT NULL,
   `receipt_date` DATETIME NULL DEFAULT NULL,
   `receipt_fileID` INT NULL DEFAULT NULL,
-  `receipt_userID` INT(11) NOT NULL,
+  `receipt_userID` INT NOT NULL,
   `receipt_price` DECIMAL(19,4),
   PRIMARY KEY (`receipt_id`),
   FOREIGN KEY (`receipt_fileID`) REFERENCES files(`file_id`),

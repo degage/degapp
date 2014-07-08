@@ -7,13 +7,13 @@ public class TechnicalCarDetails {
     private Integer id = null;
     private String licensePlate;
     private File registration;
-    private Integer chassisNumber;
+    private String chassisNumber;
 
-    public TechnicalCarDetails(String licensePlate, File registration, Integer chassisNumber) {
+    public TechnicalCarDetails(String licensePlate, File registration, String chassisNumber) {
         this(null, licensePlate, registration, chassisNumber);
     }
 
-    public TechnicalCarDetails(Integer id, String licensePlate, File registration, Integer chassisNumber) {
+    public TechnicalCarDetails(Integer id, String licensePlate, File registration, String chassisNumber) {
         this.id = id;
         this.licensePlate = licensePlate;
         this.registration = registration;
@@ -44,11 +44,11 @@ public class TechnicalCarDetails {
         this.registration = registration;
     }
 
-    public Integer getChassisNumber() {
+    public String getChassisNumber() {
         return chassisNumber;
     }
 
-    public void setChassisNumber(Integer chassisNumber) {
+    public void setChassisNumber(String chassisNumber) {
         this.chassisNumber = chassisNumber;
     }
 }
