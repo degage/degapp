@@ -32,4 +32,23 @@ public class AddressDAOTest extends DAOTest {
         assertEquals ("Krijgslaan", address.getStreet());
         assertEquals ("S9", address.getBus());
     }
+
+    @Test
+    public void updateAddressTest () {
+        Address address = addresses[0];
+        address.setZip ("9999");
+        address.setBus (null);
+        dao.updateAddress(address);
+
+        address = dao.getAddress(addresses[0].getId());
+        assertEquals ("9999", address.getZip());
+        assertEquals ("Krijgslaan", address.getStreet());
+        assertNull (address.getBus());
+    }
+
+    @Test
+    public void deleteTest () {
+        dao.deleteAddress(addresses[0].getId());
+        assertNull (dao.getAddress(addresses[0].getId()));
+    }
 }

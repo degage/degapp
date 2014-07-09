@@ -37,7 +37,7 @@ CREATE TABLE `addresses` (
   `address_created_at` DATETIME,
   `address_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`address_id`),
-  INDEX `address_place_zip` (`address_city`)
+  INDEX `address_place_zip` (`address_city`)     -- TODO: is this needed?
 );
 
 CREATE TABLE `users` (

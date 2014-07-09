@@ -7,13 +7,13 @@ import javax.sql.DataSource;
 
 /**
  * Provides methods to obtain a data access provider that connects to a database.
- * <p/>
+ * <p>
  * To obtain a data access provider use one of two methods
  * <ul>
  * <li>{@link #createDataAccessProvider} in production or development code</li>
- * <li>{@link #createTestDataAccessProvider}</li>, when testing</li>
+ * <li>{@link #createTestDataAccessProvider}, when testing</li>
  * </ul>
- * <p/>
+ * <p>
  * Note that only MySQL databases are supported, and only for version 5.5 or higher.
  */
 public final class JDBCDataAccess {

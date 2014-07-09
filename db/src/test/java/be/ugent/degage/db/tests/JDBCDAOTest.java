@@ -266,7 +266,7 @@ public class JDBCDAOTest {
         Iterator<Address> iAddresses = addresses.iterator();
         while(iAddresses.hasNext()) {
             Address address = iAddresses.next();
-            addressDAO.deleteAddress(address);
+            addressDAO.deleteAddress(address.getId());
             try {
                 Address returnAddress = addressDAO.getAddress(address.getId());
                 if(returnAddress != null)

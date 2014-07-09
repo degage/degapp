@@ -781,10 +781,10 @@ public class Profile extends Controller {
             // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
             // TODO: soft-delete addresses and keep references
             if (deleteDomicile)
-                adao.deleteAddress(domicileAddress);
+                adao.deleteAddress(domicileAddress.getId());
 
             if (deleteResidence)
-                adao.deleteAddress(residenceAddress);
+                adao.deleteAddress(residenceAddress.getId());
 
             //TODO: identity card & numbers, profile picture
 
