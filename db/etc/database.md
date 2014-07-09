@@ -18,7 +18,7 @@ GRANT ALL ON degage.* TO 'degage'@'localhost';
 
 ## Create the database tables ##
 
-Via mysql-client
+Via mysql-client, in `sql`-directory
 ```
 mysql degage -u degage -p < create-tables.sql
 ```
@@ -37,7 +37,7 @@ CREATE DATABASE IF NOT EXISTS degagetest
 
 GRANT ALL ON degagetest.* TO 'degage'@'localhost';
 ```
-Via mysql-client
+Via mysql-client, in `sql`-directory
 ```
 mysql degagetest -u degage -p < create-tables.sql
 mysql degagetest -u degage -p < init.sql

@@ -40,7 +40,7 @@ public class JDBCTemplateDAOTest {
      * Tests getting and updating (not creating!) of templates
      * @throws Exception
      */
-	@Test
+	//@Test
 	public void testTemplateDAO() throws Exception {
         try {
 		    getTemplateTest();
