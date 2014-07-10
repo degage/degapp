@@ -32,4 +32,5 @@ libraryDependencies ++= Seq(
 
 lazy val root = (project in file(".")).enablePlugins(PlayJava)
 
-TwirlKeys.templateImports += "be.ugent.degage.db.models._"
+TwirlKeys.templateImports ++= Seq ("snippets._", "be.ugent.degage.db.models._")
+
