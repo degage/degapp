@@ -13,15 +13,15 @@ public class IdentityCard {
     private String id; // Identiteitskaartnummer
 
     private String registrationNr; // Rijksregisternummer
-    private FileGroup fileGroup;
+    private Integer fileGroupId;
 
     public IdentityCard() {
     }
 
-    public IdentityCard(String id, String registrationNr, FileGroup fileGroup) {
+    public IdentityCard(String id, String registrationNr, int fileGroup) {
         this.id = id;
         this.registrationNr = registrationNr;
-        this.fileGroup = fileGroup;
+        this.fileGroupId = fileGroup;
     }
 
     public void setId(String id) {
@@ -39,12 +39,12 @@ public class IdentityCard {
         this.registrationNr = registrationNr;
     }
 
-    public FileGroup getFileGroup() {
-        return fileGroup;
+    public Integer getFileGroupId() {
+        return fileGroupId;
     }
 
-    public void setFileGroup(FileGroup fileGroup) {
-        this.fileGroup = fileGroup;
+    public void setFileGroupId(Integer fileGroupId) {
+        this.fileGroupId = fileGroupId;
     }
 
 

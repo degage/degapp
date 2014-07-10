@@ -1,4 +1,4 @@
-@(user: User, form: Form[Profile.EditIdentityCardForm])
+@(user: User, form: Form[Profile.EditIdentityCardForm], listOfFiles: Iterable[File])
 @import controllers.util.FileType;
 
     @app("Identiteitskaart wijzigen") {
@@ -56,19 +56,16 @@
                             </div>
 
                              <div class="panel-body">
-                                @if(user.getIdentityCard == null || user.getIdentityCard.getFileGroup == null || user.getIdentityCard.getFileGroup.size() == 0) {
-                                    Nog geen bestanden geupload.
-                                } else {
                                     <ul>
-                                     @for(file <- user.getIdentityCard.getFileGroup.getList){
+                                 @foreach.orElse(listOfFiles){ file =>
                                         <li>
                                             <a href="@routes.Profile.viewFile(user.getId, file.getId,  FileType.IDENTITYCARD.name)" target="_blank">@file.getFileName</a>
                                             <a href="@routes.Profile.deleteFile(user.getId, file.getId, FileType.IDENTITYCARD.name)"><span class="glyphicon glyphicon-remove"></span></a>
                                         </li>
-                                    }
-
+                                 }{
+                                   Nog geen bestanden geupload.
+                                 }
                                     </ul>
-                                }
                             </div>
 
                                 <!-- /.panel-body -->

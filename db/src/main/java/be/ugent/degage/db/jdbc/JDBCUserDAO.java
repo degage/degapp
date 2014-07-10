@@ -199,8 +199,7 @@ class JDBCUserDAO implements UserDAO {
             int driverLicenseFileGroupId = rs.getInt(tableName + ".user_driver_license_file_group_id");
             if(!rs.wasNull()) {
                 driverLicenseNotNull = true;
-                FileGroup driverLicenseFileGroup = new FileGroup(driverLicenseFileGroupId);
-                driverLicense.setFileGroup(driverLicenseFileGroup);
+                driverLicense.setFileGroupId(driverLicenseFileGroupId);
             }
             if(driverLicenseNotNull)
                 user.setDriverLicense(driverLicense);
@@ -222,8 +221,7 @@ class JDBCUserDAO implements UserDAO {
             int identityCardFileGroupId = rs.getInt(tableName + ".user_identity_card_file_group_id");
             if(!rs.wasNull()) {
                 identityCardNotNull = true;
-                FileGroup identityCardFileGroup = new FileGroup(identityCardFileGroupId);
-                identityCard.setFileGroup(identityCardFileGroup);
+                identityCard.setFileGroupId(identityCardFileGroupId);
             }
             if(identityCardNotNull)
                 user.setIdentityCard(identityCard);
@@ -345,8 +343,8 @@ class JDBCUserDAO implements UserDAO {
                 } else {
                     if(user.getDriverLicense().getId() == null) ps.setNull(15, Types.VARCHAR);
                     else ps.setString(15, user.getDriverLicense().getId());
-                    if(user.getDriverLicense().getFileGroup() == null) ps.setNull(16, Types.INTEGER);
-                    else ps.setInt(16, user.getDriverLicense().getFileGroup().getId());
+                    if(user.getDriverLicense().getFileGroupId() == null) ps.setNull(16, Types.INTEGER);
+                    else ps.setInt(16, user.getDriverLicense().getFileGroupId());
                 }
 
                 if(user.getIdentityCard() == null) {
@@ -358,8 +356,8 @@ class JDBCUserDAO implements UserDAO {
                     else ps.setString(17, user.getIdentityCard().getId());
                     if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(18, Types.VARCHAR);
                     else ps.setString(18, user.getIdentityCard().getRegistrationNr());
-                    if(user.getIdentityCard().getFileGroup() == null) ps.setNull(19, Types.INTEGER);
-                    else ps.setInt(19, user.getIdentityCard().getFileGroup().getId());
+                    if(user.getIdentityCard().getFileGroupId() == null) ps.setNull(19, Types.INTEGER);
+                    else ps.setInt(19, user.getIdentityCard().getFileGroupId());
                 }
 
 

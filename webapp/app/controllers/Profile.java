@@ -157,7 +157,7 @@ public class Profile extends Controller {
                         FileDAO fdao = context.getFileDAO();
                         UserDAO udao = context.getUserDAO();
                         try {
-                            File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
+                            File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType(), null);
                             int oldPictureId = user.getProfilePictureId();
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user, true);
@@ -290,16 +290,17 @@ public class Profile extends Controller {
         if (canEditProfile(user, currentUser)) {
             Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
 
-            if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) { // get all uploaded files already
+            Iterable<File> listOfFiles = null;
+            if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null) { // get all uploaded files already
                 FileDAO fdao = context.getFileDAO();
-                user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+                listOfFiles = fdao.getFiles(user.getIdentityCard().getFileGroupId());
             }
 
             if (user.getIdentityCard() != null) {
                 form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
             }
 
-            return ok(identitycard.render(user, form));
+            return ok(identitycard.render(user, form, listOfFiles));
         } else {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
         }
@@ -329,22 +330,22 @@ public class Profile extends Controller {
                 if (!canEditProfile(user, currentUser))
                     return null;
 
-                FileGroup files = null;
+                Iterable<File> files = null;
                 switch (type) {
                     case IDENTITYCARD:
-                        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null)
-                            files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null)
+                            files = dao.getFiles(user.getIdentityCard().getFileGroupId()); //TODO: remove this hack to get actual files
                         break;
                     case DRIVERSLICENSE:
-                        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null)
-                            files = dao.getFiles(user.getDriverLicense().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null)
+                            files = dao.getFiles(user.getDriverLicense().getFileGroupId()); //TODO: remove this hack to get actual files
                         break;
                 }
 
                 if (files == null)
                     return null;
                 else
-                    return files.getFileWithId(fileId);
+                    return getFileWithId(files, fileId);
             }
 
             @Override
@@ -352,6 +353,19 @@ public class Profile extends Controller {
                 return redirect(routes.Profile.editIdentityCard(user.getId()));
             }
         });
+    }
+
+    /*
+     * Return the file in the list with the given idea
+     */
+    private static File getFileWithId (Iterable<File> files, int id) {
+        // linear search is fast enough
+        for (File file : files) {
+            if (file.getId() == id) {
+                return file;
+            }
+        }
+        return null;
     }
 
 
@@ -391,22 +405,22 @@ public class Profile extends Controller {
                 if (!canEditProfile(user, currentUser))
                     return null;
 
-                FileGroup files = null;
+                Iterable<File> files = null;
                 switch (type) {
                     case IDENTITYCARD:
-                        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null)
-                            files = dao.getFiles(user.getIdentityCard().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null)
+                            files = dao.getFiles(user.getIdentityCard().getFileGroupId()); //TODO: remove this hack to get actual files
                         break;
                     case DRIVERSLICENSE:
-                        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null)
-                            files = dao.getFiles(user.getDriverLicense().getFileGroup().getId()); //TODO: remove this hack to get actual files
+                        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null)
+                            files = dao.getFiles(user.getDriverLicense().getFileGroupId()); //TODO: remove this hack to get actual files
                         break;
                 }
 
                 if (files == null)
                     return null;
                 else
-                    return files.getFileWithId(fileId);
+                    return getFileWithId(files, fileId);
             }
 
             @Override
@@ -435,14 +449,14 @@ public class Profile extends Controller {
         if (user == null || !canEditProfile(user, currentUser)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
-
-        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) {
-            user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+        Iterable<File> listOfFiles = null;
+        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null) {
+            listOfFiles = fdao.getFiles(user.getIdentityCard().getFileGroupId());
         }
 
         Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(identitycard.render(user, form));
+            return badRequest(identitycard.render(user, form, listOfFiles));
         } else {
             try {
                 boolean updateUser = false; // Only perform a user update when we changed something (so not when adding a file to existing filegroup)
@@ -462,20 +476,21 @@ public class Profile extends Controller {
                 if (newFile != null) {
                     if (!FileHelper.isDocumentContentType(newFile.getContentType())) {
                         flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
-                        return badRequest(identitycard.render(user, form));
+                        return badRequest(identitycard.render(user, form, listOfFiles));
                     } else {
-                        FileGroup group = card.getFileGroup();
+                        Integer group = card.getFileGroupId();
                         if (group == null) {
                             // Create new filegroup
-                            group = fdao.createFileGroup();
-                            card.setFileGroup(group);
+                            group = fdao.createFileGroupNumber();
+                            card.setFileGroupId(group);
                             updateUser = true;
                         }
 
                         // Now we add the file to the group
                         Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.identitycard"));
-                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
-                        group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group);
+                        // group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        // TODO: check the comment above
                     }
                 }
 
@@ -491,10 +506,9 @@ public class Profile extends Controller {
                 if (updateUser) {
                     udao.updateUser(user, true);
                 }
-                context.commit();
 
                 flash("success", "Jouw identiteitskaart werd succesvol bijgewerkt.");
-                return ok(identitycard.render(user, form));
+                return ok(identitycard.render(user, form, listOfFiles));
             } catch (DataAccessException | IOException ex) { //IO or database error causes a rollback
                 context.rollback();
                 throw new RuntimeException(ex); //unchecked
@@ -536,16 +550,17 @@ public class Profile extends Controller {
         if (canEditProfile(user, currentUser)) {
             Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class);
 
-            if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null) { // get all uploaded files already
+            Iterable<File> listOfFiles = null;
+            if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null) { // get all uploaded files already
                 FileDAO fdao = context.getFileDAO();
-                user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+                listOfFiles = fdao.getFiles(user.getDriverLicense().getFileGroupId());
             }
 
             if (user.getDriverLicense() != null) {
                 form = form.fill(new EditDriversLicenseModel(user.getDriverLicense().getId()));
             }
 
-            return ok(driverslicense.render(user, form));
+            return ok(driverslicense.render(user, form, listOfFiles));
         } else {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
         }
@@ -565,13 +580,14 @@ public class Profile extends Controller {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
-        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroup() != null) {
-            user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));  // TODO: remove this hack to get actual files
+        Iterable<File> listOfFiles = null;
+        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null) {
+            listOfFiles = fdao.getFiles(user.getDriverLicense().getFileGroupId());
         }
 
         Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(driverslicense.render(user, form));
+            return badRequest(driverslicense.render(user, form, listOfFiles));
         } else {
             try {
                 boolean updateUser = false; // Only perform a user update when we changed something (so not when adding a file to existing filegroup)
@@ -591,20 +607,21 @@ public class Profile extends Controller {
                 if (newFile != null) {
                     if (!FileHelper.isDocumentContentType(newFile.getContentType())) {
                         flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
-                        return badRequest(driverslicense.render(user, form));
+                        return badRequest(driverslicense.render(user, form, listOfFiles));
                     } else {
-                        FileGroup group = card.getFileGroup();
+                        // TODO: all of the below should go in db module
+                        Integer group = card.getFileGroupId();
                         if (group == null) {
                             // Create new filegroup
-                            group = fdao.createFileGroup();
-                            card.setFileGroup(group);
+                            group = fdao.createFileGroupNumber();
+                            card.setFileGroupId(group);
                             updateUser = true;
                         }
 
                         // Now we add the file to the group
                         Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.driverslicense"));
-                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
-                        group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group);
+                       //  group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
                     }
                 }
 
@@ -619,7 +636,7 @@ public class Profile extends Controller {
                 }
 
                 flash("success", "Je rijbewijs werd succesvol bijgewerkt.");
-                return ok(driverslicense.render(user, form));
+                return ok(driverslicense.render(user, form, listOfFiles));
             } catch (IOException ex) { //IO or database error causes a rollback
                 throw new RuntimeException(ex); //unchecked
             }

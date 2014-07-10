@@ -2,16 +2,34 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.File;
-import be.ugent.degage.db.models.FileGroup;
 
 /**
- * Created by Cedric on 4/11/2014.
+ * DAO for handling file(path)s
  */
 public interface FileDAO {
+
+    /**
+     * Return the file with given id, or null if it does not exist
+     */
     public File getFile(int id) throws DataAccessException;
-    public FileGroup getFiles(int fileGroup) throws DataAccessException;
-    public File createFile(String path, String fileName, String contentType, int fileGroup) throws DataAccessException;
-    public File createFile(String path, String fileName, String contentType) throws DataAccessException;
-    public FileGroup createFileGroup() throws DataAccessException;
+
+    /**
+     * Create a new file group number.
+     */
+    public int createFileGroupNumber() throws DataAccessException;
+
+    /**
+     * Return all files in a given file group.
+     */
+    public Iterable<File> getFiles(int fileGroupNumber) throws DataAccessException;
+
+    /**
+     * Create a file in the given file group (which can be null)
+     */
+    public File createFile(String path, String fileName, String contentType, Integer fileGroupNumber) throws DataAccessException;
+
+    /**
+     * Delete a file
+     */
     public void deleteFile(int fileId) throws DataAccessException;
 }

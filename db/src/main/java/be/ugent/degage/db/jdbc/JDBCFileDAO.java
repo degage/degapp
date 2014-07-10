@@ -3,7 +3,6 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.models.File;
-import be.ugent.degage.db.models.FileGroup;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -29,14 +28,6 @@ class JDBCFileDAO implements FileDAO {
         }
         return deleteFileStatement;
     }
-
-    private PreparedStatement getCreateFileGroupStatement() throws SQLException {
-        if(createFileGroupStatement == null){
-            createFileGroupStatement = connection.prepareStatement("INSERT INTO filegroups VALUES()", new String[]{"file_group_id"});
-        }
-        return createFileGroupStatement;
-    }
-
 
     private PreparedStatement getGetFileStatement() throws SQLException {
         if (getFileStatement == null) {
@@ -77,8 +68,6 @@ class JDBCFileDAO implements FileDAO {
                     return null;
                 else
                     return populateFile(rs);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to read file resultset.", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get file from db.", ex);
@@ -86,7 +75,7 @@ class JDBCFileDAO implements FileDAO {
     }
 
     @Override
-    public FileGroup getFiles(int fileGroup) throws DataAccessException {
+    public Iterable<File> getFiles(int fileGroup) throws DataAccessException {
         try {
             PreparedStatement ps = getGetFileGroupStatement();
             ps.setInt(1, fileGroup);
@@ -96,9 +85,7 @@ class JDBCFileDAO implements FileDAO {
                 while (rs.next()) {
                     files.add(populateFile(rs));
                 }
-                return new FileGroup(fileGroup, files);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to read filegroup resultset.", ex);
+                return files;
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get files from group.", ex);
@@ -107,7 +94,7 @@ class JDBCFileDAO implements FileDAO {
 
 
     @Override
-    public File createFile(String path, String fileName, String contentType, int fileGroup) throws DataAccessException {
+    public File createFile(String path, String fileName, String contentType, Integer fileGroup) throws DataAccessException {
         try {
             PreparedStatement ps = getCreateFileStatement();
             ps.setString(1, path);
@@ -135,24 +122,15 @@ class JDBCFileDAO implements FileDAO {
     }
 
     @Override
-    public File createFile(String path, String fileName, String contentType) throws DataAccessException {
-        return createFile(path, fileName, contentType, -1);
-    }
-
-    @Override
-    public FileGroup createFileGroup() throws DataAccessException {
-       // This is a really silly way of creating a filegroup with only indices. Should use MySQL COUNTER instead of TABLE (but breaks FK's)
-        try {
-            PreparedStatement ps = getCreateFileGroupStatement();
-            if (ps.executeUpdate() != 1)
+    public int createFileGroupNumber() throws DataAccessException {
+        // This is a really silly way of creating a filegroup with only indices. Should use MySQL COUNTER instead of TABLE (but breaks FK's)
+        try (Statement stat = connection.createStatement()) {
+            if (stat.executeUpdate("INSERT INTO filegroups VALUES()", new String[]{"file_group_id"}) != 1)
                 throw new DataAccessException("New filegroup record failed. No rows affected.");
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
+            try (ResultSet keys = stat.getGeneratedKeys()) {
                 if (!keys.next())
                     throw new DataAccessException("Failed to read keys for new filegroup record.");
-                return new FileGroup(keys.getInt(1));
-            } catch(SQLException ex){
-                throw new DataAccessException("Failed to read filegroup id.", ex);
+                return keys.getInt(1);
             }
         } catch(SQLException ex){
             throw new DataAccessException("Failed to create new filegroup.", ex);

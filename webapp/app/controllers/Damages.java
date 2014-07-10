@@ -166,9 +166,9 @@ public class Damages extends Controller {
         DamageLogDAO damageLogDAO = context.getDamageLogDAO();
         FileDAO fileDAO = context.getFileDAO();
         Damage damage = dao.getDamage(damageId);
-        List<File> proofList;
+        Iterable<File> proofList;
         if (damage.getProofId() != 0) {
-            proofList = fileDAO.getFiles(damage.getProofId()).getList();
+            proofList = fileDAO.getFiles(damage.getProofId());
         } else {
             proofList = new ArrayList<>();
         }
@@ -247,9 +247,9 @@ public class Damages extends Controller {
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            List<File> proofList;
+            Iterable<File> proofList;
             if (damage.getProofId() != 0) {
-                proofList = fileDAO.getFiles(damage.getProofId()).getList();
+                proofList = fileDAO.getFiles(damage.getProofId());
             } else {
                 proofList = new ArrayList<>();
             }
@@ -291,9 +291,9 @@ public class Damages extends Controller {
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            List<File> proofList;
+            Iterable<File> proofList;
             if (damage.getProofId() != 0) {
-                proofList = fileDAO.getFiles(damage.getProofId()).getList();
+                proofList = fileDAO.getFiles(damage.getProofId());
             } else {
                 proofList = new ArrayList<>();
             }
@@ -362,20 +362,16 @@ public class Damages extends Controller {
                     flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
                     return badRequest();
                 } else {
-                    FileGroup group;
-                    if (damage.getProofId() == 0) {
+                    int fileGroupNumber = damage.getProofId();
+                    if (fileGroupNumber == 0) {
                         // Create new filegroup
-                        group = fdao.createFileGroup();
-                        damage.setProofId(group.getId());
+                        fileGroupNumber = fdao.createFileGroupNumber();
+                        damage.setProofId(fileGroupNumber);
                         updateDamage = true;
-
-                    } else {
-                        group = fdao.getFiles(damage.getProofId());
                     }
                     // Now we add the file to the group
                     Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.damages"));
-                    File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group.getId());
-                    group.addFile(file);
+                    File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), fileGroupNumber);
                 }
             }
             if (updateDamage) {

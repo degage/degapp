@@ -1,4 +1,4 @@
-@(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog], proofList: java.util.List[File])
+@(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog], proofList: Iterable[File])
 @import org.joda.time.format.DateTimeFormat
     @stylesheets = {
         <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
@@ -204,20 +204,14 @@
                                 <p>
                                     <strong>Bewijsstukken:</strong>
                                 </p>
-                                    @if(proofList.size() == 0){
-                                        Nog geen bestanden geupload.
-                                    }else{
-                                        <ul>
-                                            @for(file <- proofList){
-                                                <li>
+                                 @foreach.orElse(proofList){ file =>
+                                        <li>
                                                     <a href="@routes.Damages.getProof(file.getId)" target="_blank">@file.getFileName</a>
                                                     <a href="@routes.Damages.deleteProof(damage.getId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
-                                                </li>
-                                            }
-
-                                        </ul>
-                                    }
-
+                                        </li>
+                                 }{
+                                   Nog geen bestanden geupload.
+                                 }
 
                             </div>
                     </div>

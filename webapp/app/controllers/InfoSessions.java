@@ -530,10 +530,12 @@ public class InfoSessions extends Controller {
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
         user = udao.getUser(user.getId(), true); // gets the full user instead of small cached one
-        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroup() != null) {
+        Iterable<File> identityFiles = null;
+        Iterable<File> licenseFiles = null;
+        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null) {
             // TODO: fix identity card dao so these lines are unnecessary
-            user.getIdentityCard().setFileGroup(fdao.getFiles(user.getIdentityCard().getFileGroup().getId()));
-            user.getDriverLicense().setFileGroup(fdao.getFiles(user.getDriverLicense().getFileGroup().getId()));
+            identityFiles = fdao.getFiles(user.getIdentityCard().getFileGroupId());
+            licenseFiles = fdao.getFiles(user.getDriverLicense().getFileGroupId());
         }
 
         List<String> errors = new ArrayList<>();
@@ -543,13 +545,13 @@ public class InfoSessions extends Controller {
             errors.add("Verblijfsadres ontbreekt.");
         if (user.getIdentityCard() == null)
             errors.add("Identiteitskaart ontbreekt.");
-        if (user.getIdentityCard() != null && (user.getIdentityCard().getFileGroup() == null || user.getIdentityCard().getFileGroup().size() == 0))
+        if (user.getIdentityCard() != null && (user.getIdentityCard().getFileGroupId() == null || ! identityFiles.iterator().hasNext()))
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
         if (user.getDriverLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
         if (!user.isPayedDeposit())
             errors.add("Waarborg nog niet betaald.");
-        if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroup() == null || user.getDriverLicense().getFileGroup().size() == 0))
+        if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroupId() == null || ! licenseFiles.iterator().hasNext()))
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
         return errors;

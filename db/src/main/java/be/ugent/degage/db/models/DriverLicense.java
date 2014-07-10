@@ -11,14 +11,14 @@ package be.ugent.degage.db.models;
 public class DriverLicense {
     
     private String id;
-    private FileGroup fileGroup;
+    private Integer fileGroupId;
 
     public DriverLicense() {
     }
 
-    public DriverLicense(String id, FileGroup fileGroup) {
+    public DriverLicense(String id, Integer fileGroupId) {
         this.id = id;
-        this.fileGroup = fileGroup;
+        this.fileGroupId = fileGroupId;
     }
 
 
@@ -30,11 +30,11 @@ public class DriverLicense {
         this.id = id;
     }
 
-    public FileGroup getFileGroup() {
-        return fileGroup;
+    public Integer getFileGroupId() {
+        return fileGroupId;
     }
 
-    public void setFileGroup(FileGroup fileGroup) {
-        this.fileGroup = fileGroup;
+    public void setFileGroupId(Integer fileGroupId) {
+        this.fileGroupId = fileGroupId;
     }
 }

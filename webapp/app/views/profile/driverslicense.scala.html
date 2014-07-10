@@ -1,4 +1,4 @@
-@(user: User, form: Form[Profile.EditDriversLicenseModel])
+@(user: User, form: Form[Profile.EditDriversLicenseModel], listOfFiles: Iterable[File])
 @import controllers.util.FileType;
 @app("Rijbewijs wijzigen") {
     <div id="page-header-wrapper">
@@ -53,19 +53,16 @@
                         </div>
 
                         <div class="panel-body">
-                        @if(user.getDriverLicense == null || user.getDriverLicense.getFileGroup == null || user.getDriverLicense.getFileGroup.size() == 0) {
-                            Nog geen bestanden geupload.
-                        } else {
-                            <ul>
-                            @for(file <- user.getDriverLicense.getFileGroup.getList){
-                                <li>
-                                    <a href="@routes.Profile.viewFile(user.getId, file.getId, FileType.DRIVERSLICENSE.name)" target="_blank">@file.getFileName</a>
-                                    <a href="@routes.Profile.deleteFile(user.getId, file.getId, FileType.DRIVERSLICENSE.name)"><span class="glyphicon glyphicon-remove"></span></a>
-                                </li>
-                            }
-
-                            </ul>
-                        }
+                                    <ul>
+                                 @foreach.orElse(listOfFiles){ file =>
+                                        <li>
+                                            <a href="@routes.Profile.viewFile(user.getId, file.getId, FileType.DRIVERSLICENSE.name)" target="_blank">@file.getFileName</a>
+                                            <a href="@routes.Profile.deleteFile(user.getId, file.getId, FileType.DRIVERSLICENSE.name)"><span class="glyphicon glyphicon-remove"></span></a>
+                                        </li>
+                                 }{
+                                   Nog geen bestanden geupload.
+                                 }
+                                    </ul>
                         </div>
 
                             <!-- /.panel-body -->

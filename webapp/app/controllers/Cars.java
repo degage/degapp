@@ -286,7 +286,7 @@ public class Cars extends Controller {
                     try {
                         Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                         FileDAO fdao = context.getFileDAO();
-                        file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                        file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType(), null);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex); //no more checked catch -> error page!
                     }
@@ -301,7 +301,7 @@ public class Cars extends Controller {
                     try {
                         Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
                         FileDAO fdao = context.getFileDAO();
-                        picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                        picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType(), null);
                     } catch (IOException ex) {
                         throw new RuntimeException(ex); //no more checked catch -> error page!
                     }
@@ -435,7 +435,7 @@ public class Cars extends Controller {
                 try {
                     Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                     FileDAO fdao = context.getFileDAO();
-                    file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                    file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType(), null);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex); //no more checked catch -> error page!
                 }
@@ -451,7 +451,7 @@ public class Cars extends Controller {
                 try {
                     Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
                     FileDAO fdao = context.getFileDAO();
-                    picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                    picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType(), null);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex); //no more checked catch -> error page!
                 }
@@ -880,7 +880,7 @@ public static class CarCostModel {
                         Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.carboundproofs"));
                         FileDAO fdao = context.getFileDAO();
                         try {
-                            File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
+                            File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType(), null);
                             CarCost carCost = dao.createCarCost(car, model.amount, model.mileage, model.description, model.time, file.getId());
                             if (carCost == null) {
                                 flash("danger", "Failed to add the carcost to the database. Contact administrator.");
