@@ -34,7 +34,7 @@ class JDBCReceiptDAO implements ReceiptDAO {
 
     private static final String RECEIPT_QUERY = "SELECT * FROM receipts " +
             " LEFT JOIN files ON files.file_id = receipts.receipt_fileID " +
-            " LEFT JOIN Users ON users.user_id = receipts.receipt_userID ";
+            " LEFT JOIN users ON users.user_id = receipts.receipt_userID ";
 
     public static final String FILTER_FRAGMENT =
         " WHERE "+ USER_FRAGMENT + " AND "+ DATE_FRAGMENT2;

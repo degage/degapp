@@ -101,12 +101,12 @@ class JDBCDamageDAO implements DamageDAO {
 
     private PreparedStatement getGetAmountOfDamagesStatement() throws SQLException {
         if(getGetAmountOfDamagesStatement == null) {
-            getGetAmountOfDamagesStatement = connection.prepareStatement("SELECT count(damage_id) as amount_of_damages FROM Damages " +
-                    "JOIN CarRides ON damage_car_ride_id = car_ride_car_reservation_id " +
-                    "JOIN CarReservations ON damage_car_ride_id = reservation_id " +
-                    "LEFT JOIN FileGroups ON damage_filegroup_id = file_group_id " +
-                    "JOIN Cars ON reservation_car_id = car_id " +
-                    "JOIN Users ON reservation_user_id = user_id " + FILTER_FRAGMENT);
+            getGetAmountOfDamagesStatement = connection.prepareStatement("SELECT count(damage_id) as amount_of_damages FROM damages " +
+                    "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
+                    "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+                    "LEFT JOIN filegroups ON damage_filegroup_id = file_group_id " +
+                    "JOIN cars ON reservation_car_id = car_id " +
+                    "JOIN users ON reservation_user_id = user_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfDamagesStatement;
     }

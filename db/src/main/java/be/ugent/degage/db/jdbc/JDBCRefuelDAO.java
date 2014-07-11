@@ -22,7 +22,7 @@ class JDBCRefuelDAO implements RefuelDAO {
             "LEFT JOIN cars ON reservation_car_id = car_id " +
             "LEFT JOIN users ON reservation_user_id = user_id " +
             "LEFT JOIN users owners ON car_owner_user_id = owners.user_id " +
-            "LEFT JOIN FILES ON refuel_file_id = file_id ";
+            "LEFT JOIN files ON refuel_file_id = file_id ";
 
     private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND car_id LIKE ? AND refuel_status <> ?";
 
@@ -115,7 +115,7 @@ class JDBCRefuelDAO implements RefuelDAO {
                     "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
                     "LEFT JOIN cars ON reservation_car_id = car_id " +
                     "LEFT JOIN users ON reservation_user_id = user_id " +
-                    "LEFT JOIN FILES ON refuel_file_id = file_id " + FILTER_FRAGMENT);
+                    "LEFT JOIN files ON refuel_file_id = file_id " + FILTER_FRAGMENT);
         }
         return getGetAmountOfRefuelsStatement;
     }
