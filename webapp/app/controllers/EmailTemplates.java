@@ -34,11 +34,13 @@ public class EmailTemplates extends Controller {
      * @return all the templates that are available in the system
      */
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @InjectContext
     public static Result showExistingTemplates() {
         return ok(emailtemplates.render());
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @InjectContext
     public static Result showExistingTemplatesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
@@ -48,6 +50,7 @@ public class EmailTemplates extends Controller {
         return ok(templateList(page, pageSize, carField, asc, filter));
     }
 
+    // used with injected context
     private static Html templateList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
 

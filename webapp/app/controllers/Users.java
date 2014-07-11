@@ -27,6 +27,7 @@ public class Users extends Controller {
      * @return The users index-page with all users
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @InjectContext
     public static Result showUsers() {
         return ok(users.render());
     }
@@ -39,6 +40,7 @@ public class Users extends Controller {
      * @return A partial page with a table of users of the corresponding page
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @InjectContext
     public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField carField = FilterField.stringToField(orderBy);
@@ -48,7 +50,7 @@ public class Users extends Controller {
         return ok(userList(page, pageSize, carField, asc, filter));
     }
 
-    @InjectContext
+    // only in injected context
     private static Html userList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
 

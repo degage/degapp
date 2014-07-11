@@ -105,6 +105,7 @@ public class Drives extends Controller {
      * starting with active tab containing the approved reservations.
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result index() {
         return ok(showIndex());
     }
@@ -117,6 +118,7 @@ public class Drives extends Controller {
      * starting with the tab containing the reservations with the specified status active.
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result indexWithStatus(String status) {
         return ok(showIndex(ReservationStatus.valueOf(status)));
     }
@@ -125,7 +127,8 @@ public class Drives extends Controller {
      * @return the html page of the index page starting with the tab containing
      * the approved reservations active.
      */
-    public static Html showIndex() {
+    // used in injected context
+    private static Html showIndex() {
         return drives.render(ReservationStatus.ACCEPTED);
     }
 
@@ -133,7 +136,8 @@ public class Drives extends Controller {
      * @return the html page of the index page starting with the tab containing
      * the reservations with the specified status active.
      */
-    public static Html showIndex(ReservationStatus status) {
+    // used in injected context
+    private static Html showIndex(ReservationStatus status) {
         return drives.render(status);
     }
 
@@ -143,6 +147,7 @@ public class Drives extends Controller {
      * @return the html page of the drives page only visible for admins
      */
     @RoleSecured.RoleAuthenticated({UserRole.RESERVATION_ADMIN})
+    @InjectContext
     public static Result drivesAdmin() {
         return ok(drivesAdmin.render());
     }
@@ -156,6 +161,7 @@ public class Drives extends Controller {
      * @return the detail page of specific drive/reservation
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @InjectContext
     public static Result details(int reservationId) {
         Html result = detailsPage(reservationId);
         if (result != null)
@@ -215,7 +221,7 @@ public class Drives extends Controller {
         }
         if (!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)
                 && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
-            flash("Errror", "Je bent niet gemachtigd om deze informatie op te vragen");
+            flash("Error", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
         }
         CarRide driveInfo = null;
@@ -340,6 +346,7 @@ public class Drives extends Controller {
      * @return the drives index page
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @InjectContext
     public static Result cancelReservation(int reservationId) {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.CANCELLED);
         if (reservation == null)
@@ -355,8 +362,8 @@ public class Drives extends Controller {
      * @param status        the status to which the reservation is to be set
      * @return the reservation if successful, null otherwise
      */
-    @InjectContext
-    public static Reservation adjustStatus(int reservationId, ReservationStatus status) {
+    // used in injected context
+    private static Reservation adjustStatus(int reservationId, ReservationStatus status) {
         User user = DataProvider.getUserProvider().getUser();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();

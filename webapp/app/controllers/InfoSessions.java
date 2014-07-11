@@ -97,6 +97,7 @@ public class InfoSessions extends Controller {
      * @return An infosession form
      */
     @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @InjectContext
     public static Result newSession() {
         User user = DataProvider.getUserProvider().getUser();
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class);
@@ -598,7 +599,8 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @InjectContext
+    // used in injected context
+    // TODO: used in Dashboard only
     public static boolean approvalRequestSent() {
         User user = DataProvider.getUserProvider().getUser();
         ApprovalDAO dao = DataAccess.getInjectedContext().getApprovalDAO();
@@ -653,6 +655,7 @@ public class InfoSessions extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @InjectContext
     public static Result pendingApprovalList() {
         return ok(approvals.render());
     }
@@ -691,6 +694,7 @@ public class InfoSessions extends Controller {
         }
     }
 
+    // used in injected context
     private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminModel> form, boolean bad) {
         EnrollementStatus status = EnrollementStatus.ABSENT;
         if (ap.getSession() != null) {
@@ -870,7 +874,8 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @InjectContext
+    // used in injected context
+    // TODO: also used in dashboard
     public static boolean didUserGoToInfoSession() {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
@@ -916,7 +921,10 @@ public class InfoSessions extends Controller {
     }
 
 
+    @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showUpcomingSessions() {
+        // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
@@ -932,6 +940,7 @@ public class InfoSessions extends Controller {
      * @return
      */
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    @InjectContext
     public static Result showSessions() {
         return ok(infosessionsAdmin.render());
 

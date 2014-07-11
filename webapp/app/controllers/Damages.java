@@ -68,6 +68,7 @@ public class Damages extends Controller {
      * @return index page containing all the damages from a specific user
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showDamages() {
         return ok(damages.render());
     }
@@ -78,6 +79,7 @@ public class Damages extends Controller {
      * @return index page containing all the damages from a specific owner
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showDamagesOwner() {
         return ok(damagesOwner.render());
     }
@@ -88,6 +90,7 @@ public class Damages extends Controller {
      * @return index page containing all the damages from everyone
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @InjectContext
     public static Result showAllDamages() {
         return ok(damagesAdmin.render());
     }
@@ -213,6 +216,7 @@ public class Damages extends Controller {
      * @return modal to provide new damage log status
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result addStatus(int damageId) {
         return ok(statusmodal.render(Form.form(DamageStatusModel.class), damageId));
     }
@@ -223,6 +227,7 @@ public class Damages extends Controller {
      * @return modal to provide new damage proof
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result addProof(int damageId) {
         return ok(proofmodal.render(damageId));
     }
@@ -423,7 +428,7 @@ public class Damages extends Controller {
      *
      * @return The number of damages
      */
-    @InjectContext
+    // should only be used with injected context
     public static int openDamages() {
         User user = DataProvider.getUserProvider().getUser();
         DamageDAO dao = DataAccess.getInjectedContext().getDamageDAO();

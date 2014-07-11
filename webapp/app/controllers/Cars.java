@@ -162,6 +162,7 @@ public class Cars extends Controller {
      * @return The cars index-page with all cars (only available to car_user+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @InjectContext
     public static Result showCars() {
         return ok(views.html.cars.carsAdmin.render());
     }
@@ -242,6 +243,7 @@ public class Cars extends Controller {
      * @return A form to create a new car (only available to car_owner+)
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
     public static Result newCar() {
         return ok(views.html.cars.edit.render(Form.form(CarModel.class), null, getCountryList(), getFuelList()));
     }
@@ -912,6 +914,7 @@ public static class CarCostModel {
      * @return index page containing all the carcost requests
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @InjectContext
     public static Result showCarCosts() {
         return ok(carCostsAdmin.render());
     }

@@ -41,6 +41,7 @@ public class Settings extends Controller {
         }
     }
 
+    @InjectContext
     public static Result index() {
         return ok(overview.render());
     }
@@ -62,6 +63,7 @@ public class Settings extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result changePassword() {
         return ok(changepass.render(Form.form(ChangePasswordModel.class)));
     }
@@ -134,12 +136,15 @@ public class Settings extends Controller {
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @InjectContext
+    // TODO: do we need this?
     public static Result createSysvar() {
         return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, DateTime.now()))));
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     @InjectContext
+    // TODO: do we need this?
     public static Result createSysvarPost() {
         Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
         if (form.hasErrors() || form.get().name == null) {

@@ -90,7 +90,7 @@
                                                     <label class="col-md-12" for="host">Host</label>
                                                     @if(form("userId").value){
                                                          <!-- TODO: move this to controller -->
-                                                         @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
+                                                         @defining(db.DataAccess.getInjectedContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
                                                                 <input type="hidden" name="userId" value="@user.getId" />

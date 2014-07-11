@@ -29,6 +29,7 @@ import java.util.List;
  */
 public class Reports extends Controller {
 
+    @InjectContext
     public static Result index() {
         return ok(reports.render());
     }

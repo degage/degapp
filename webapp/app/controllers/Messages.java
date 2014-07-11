@@ -52,6 +52,7 @@ public class Messages extends Controller {
      * @return index page containing all the received messages of a specific user
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showMessages() {
         return ok(messages.render());
     }
@@ -100,6 +101,7 @@ public class Messages extends Controller {
      */
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result newMessage() {
         Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
         return ok(addmessage.render(editForm));
@@ -112,6 +114,7 @@ public class Messages extends Controller {
      */
 
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result reply(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
         User user = dao.getUser(userId, true);

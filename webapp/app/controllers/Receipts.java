@@ -46,6 +46,7 @@ public class Receipts extends Controller {
      * @return The users index-page with all users
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @InjectContext
     public static Result index() {
         return ok(receipts.render());
     }
@@ -85,6 +86,7 @@ public class Receipts extends Controller {
         return receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages);
     }
 
+    // TODO: should go in a separate helper class or even a separate module
     public static void generateReceipt(User u, Date d) {
         try {
             date = d;
@@ -103,8 +105,7 @@ public class Receipts extends Controller {
 
     }
 
-    @InjectContext
-    public static void addToDataBase(String name, String filename, BigDecimal price) {
+    private static void addToDataBase(String name, String filename, BigDecimal price) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReceiptDAO dao = context.getReceiptDAO();
         FileDAO fdao = context.getFileDAO();
@@ -113,7 +114,7 @@ public class Receipts extends Controller {
         dao.createReceipt(name, new DateTime(date), file, user, price);
     }
 
-    public static BigDecimal generatePDF(Document document) {
+    private static BigDecimal generatePDF(Document document) {
         BigDecimal saldo = BigDecimal.ZERO;
         try {
             String imageUrl = "https://fbcdn-sphotos-e-a.akamaihd.net/hphotos-ak-frc3/t1.0-9/969296_656566794396242_1002112915_n.jpg";
@@ -415,11 +416,11 @@ public class Receipts extends Controller {
     }
 
 
-    public static void add(PdfPTable table, String contents, boolean fat) {
+    private static void add(PdfPTable table, String contents, boolean fat) {
         add(table, contents, fat, true);
     }
 
-    public static void add(PdfPTable table, String contents, boolean fat, boolean border) {
+    private static void add(PdfPTable table, String contents, boolean fat, boolean border) {
         Font f = new Font(FontFamily.COURIER, 8);
         if (fat) {
             f = new Font(FontFamily.COURIER, 8, Font.BOLD);
@@ -436,12 +437,11 @@ public class Receipts extends Controller {
         table.addCell(cell);
     }
 
-    public static void add(PdfPTable table, String contents) {
+    private static void add(PdfPTable table, String contents) {
         add(table, contents, false);
     }
 
-    @InjectContext
-    public static void getLoanerBillData(Date d, int user) {
+    private static void getLoanerBillData(Date d, int user) {
         DataAccessContext context = DataAccess.getInjectedContext();
         CarRideDAO cdao = context.getCarRideDAO();
         RefuelDAO rdao = context.getRefuelDAO();
@@ -449,8 +449,7 @@ public class Receipts extends Controller {
         refuels = rdao.getBillRefuelsForLoaner(d, user);
     }
 
-    @InjectContext
-    public static void getCarBillData(Date d, int car) {
+    private static void getCarBillData(Date d, int car) {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         CarRideDAO crdao = context.getCarRideDAO();

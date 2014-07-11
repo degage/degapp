@@ -50,6 +50,7 @@ public class Refuels extends Controller {
      * @return index page containing all the refuel requests from a specific user
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showRefuels() {
         return ok(refuels.render());
     }
@@ -77,6 +78,7 @@ public class Refuels extends Controller {
      * @return index page containing all the refuel requests to a specific owner
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @InjectContext
     public static Result showOwnerRefuels() {
         return ok(refuelsOwner.render());
     }
@@ -104,6 +106,7 @@ public class Refuels extends Controller {
      * @return index page containing all the refuel requests to a specific owner
      */
     @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @InjectContext
     public static Result showAllRefuels() {
         return ok(refuelsAdmin.render());
     }
@@ -143,6 +146,7 @@ public class Refuels extends Controller {
      * @return modal to provide refuel information
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result provideRefuelInfo(int refuelId) {
         return ok(editmodal.render(Form.form(RefuelModel.class), refuelId));
     }
@@ -276,7 +280,7 @@ public class Refuels extends Controller {
      * @param status The status
      * @return The number of refuels
      */
-    @InjectContext
+    // should only be used with injected context
     public static int refuelsWithStatus(RefuelStatus status) {
         User user = DataProvider.getUserProvider().getUser();
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();

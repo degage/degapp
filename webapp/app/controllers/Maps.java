@@ -89,6 +89,7 @@ public class Maps extends Controller {
      * @return A promise with the longtitude and latitude
      */
     @InjectContext
+    // TODO: inject context probably does not work here
     public static Promise<F.Tuple<Double, Double>> getLatLongPromise(int addressId) {
         AddressDAO dao = DataAccess.getInjectedContext().getAddressDAO();
         Address address = dao.getAddress(addressId);
@@ -121,6 +122,7 @@ public class Maps extends Controller {
      * @return A test map
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showMap() {
         return ok(simplemap.render(new MapDetails(51.1891253d, 4.2355338d, 13, "Some marker")));
     }

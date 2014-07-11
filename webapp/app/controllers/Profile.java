@@ -78,6 +78,7 @@ public class Profile extends Controller {
      * @return The page to upload
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result profilePictureUpload(int userId) {
         return ok(uploadPicture.render(userId));
     }
@@ -202,6 +203,7 @@ public class Profile extends Controller {
      * @return A profile page for the currently requesting user
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result indexWithoutId() {
         User user = DataProvider.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
         User currentUser = DataProvider.getUserProvider().getUser();
@@ -674,6 +676,7 @@ public class Profile extends Controller {
      * @param user The user to quote
      * @return Completeness in percents
      */
+    // TODO: should go into a helper class? (Also used by Dashboard)
     public static int getProfileCompleteness(User user) {
         int total = 0;
 

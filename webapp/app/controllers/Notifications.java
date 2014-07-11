@@ -31,6 +31,7 @@ public class Notifications extends Controller {
      * @return index page containing all the received notifications of a specific user
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
     public static Result showNotifications() {
         return ok(notifications.render());
     }

@@ -80,6 +80,7 @@ public class Login extends Controller {
      *
      * @return The login index page
      */
+    // needs no injected context
     public static Result login(String redirect) {
         // Allow a force login when the user doesn't exist anymore
         User user = DataProvider.getUserProvider().getUser(false);
@@ -129,6 +130,7 @@ public class Login extends Controller {
      *
      * @return A page where the user can request a password reset
      */
+    // needs no injected context
     public static Result resetPasswordRequest() {
         return ok(singlemailform.render(Form.form(EmailFormModel.class)));
     }
@@ -236,6 +238,7 @@ public class Login extends Controller {
      * @return Redirect to page or login form when an error occured
      */
 
+    // needs no injected context
     public static Result authenticate(String redirect) {
         Form<LoginModel> loginForm = Form.form(LoginModel.class).bindFromRequest();
         if (loginForm.hasErrors()) {
@@ -275,6 +278,7 @@ public class Login extends Controller {
      *
      * @return Page to register to
      */
+    // needs no injected context
     public static Result register() {
         if (DataProvider.getUserProvider().getUser() == null) {
             return ok(

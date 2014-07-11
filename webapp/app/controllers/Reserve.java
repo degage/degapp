@@ -143,14 +143,14 @@ public class Reserve extends Controller {
     /**
      * @return The html context of the reservations index page with date from and until and car added
      */
-    public static Html showIndex(String carName, String from, String until, int id) {
+    private static Html showIndex(String carName, String from, String until, int id) {
         return reservations.render("", carName, id, from, until);
     }
 
     /**
      * @return The html context of the reservations index page
      */
-    public static Html showIndex() {
+    private static Html showIndex() {
         return reservations.render("", "", -1, "", "");
     }
 

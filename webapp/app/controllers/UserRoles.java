@@ -35,6 +35,7 @@ public class UserRoles extends Controller {
      * @return A table with all users and their userroles
      */
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @InjectContext
     public static Result index() {
         return ok(overview.render());
     }

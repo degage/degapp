@@ -8,6 +8,7 @@ import views.html.index;
 
 public class Application extends Controller {
 
+    // does not need context
     public static Result index() {
         return ok(index.render());
     }
