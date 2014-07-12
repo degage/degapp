@@ -8,6 +8,13 @@ SET default_storage_engine=INNODB;
 -- TABLES
 -- ~~~~~~
 
+CREATE TABLE `settings` (
+  `setting_name` CHAR(32) NOT NULL,
+  `setting_value` VARCHAR(256) NULL DEFAULT NULL,
+  `setting_after` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`setting_name`,`setting_after`)
+);
+
 -- TODO: replace by counter (but then cannot longer be a foreign key)
 CREATE TABLE `filegroups` (
 	`file_group_id` INT NOT NULL AUTO_INCREMENT,
@@ -356,14 +363,6 @@ CREATE TABLE `jobs` (
   PRIMARY KEY (`job_id`)
 );
 
-
-CREATE TABLE `settings` (
-  `setting_id` INT NOT NULL AUTO_INCREMENT,
-  `setting_name` CHAR(32) NOT NULL,
-  `setting_value` VARCHAR(256) NULL DEFAULT NULL,
-  `setting_after` DATETIME NULL DEFAULT NULL,
-  PRIMARY KEY (`setting_id`)
-);
 
 CREATE TABLE `receipts` (
   `receipt_id` INT NOT NULL AUTO_INCREMENT,

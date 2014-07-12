@@ -120,8 +120,8 @@ POST        /infosession/approval/admin             controllers.InfoSessions.app
 POST        /infosession/adduser                    controllers.InfoSessions.addUserToSession(sessionId: Int)
 
 # Settings
-GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(id: Int)
-POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost(id: Int)
+GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(name: String)
+POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost()
 GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
 GET         /settings/sysvars/create                controllers.Settings.createSysvar()
 POST        /settings/sysvars/create                controllers.Settings.createSysvarPost()

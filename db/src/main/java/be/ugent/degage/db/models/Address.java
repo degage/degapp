@@ -1,7 +1,7 @@
 package be.ugent.degage.db.models;
 
 /**
- * Created by Cedric on 2/21/14.
+ * Represents an address stored in the database
  */
 public class Address {
     private int id;

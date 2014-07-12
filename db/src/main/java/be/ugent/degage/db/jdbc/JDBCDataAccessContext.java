@@ -79,6 +79,9 @@ class JDBCDataAccessContext implements DataAccessContext {
         }
     }
 
+    public Connection getConnection() {
+        return connection;
+    }
 
     @Override
     public UserDAO getUserDAO() {

@@ -30,6 +30,8 @@ import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.Period;
 import java.util.List;
 
 public class Receipts extends Controller {
@@ -123,7 +125,7 @@ public class Receipts extends Controller {
             image.scaleAbsolute(60f, 60f);
             document.add(image);
 
-            DateTime report = new DateTime(date);
+            Instant report = date.toInstant();
 
             PdfPTable table = new PdfPTable(3);
             add(table, "Afrekening n°:");
@@ -136,8 +138,8 @@ public class Receipts extends Controller {
             add(table, "" + user.getAddressDomicile(), true);
             add(table, "");
             add(table, "Periode:", false, false);
-            add(table, "vanaf " + new SimpleDateFormat("dd-MM-yyyy").format(report.minusMonths(3).toDate()), false, false);
-            add(table, "t.e.m. " + new SimpleDateFormat("dd-MM-yyyy").format(report.minusDays(1).toDate()), false, false);
+            add(table, "vanaf " + new SimpleDateFormat("dd-MM-yyyy").format(report.minus(Period.ofMonths(3))), false, false);
+            add(table, "t.e.m. " + new SimpleDateFormat("dd-MM-yyyy").format(report.minus(Period.ofDays(1))), false, false);
 
             table.setSpacingAfter(20);
 
@@ -157,7 +159,7 @@ public class Receipts extends Controller {
             Font f2 = new Font(FontFamily.COURIER, 6);
             document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB", f));
             document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent", f));
-            document.add(new Paragraph("Gelieve de afrekening te betalen voor " + new SimpleDateFormat("dd-MM-yyyy").format(report.plusMonths(3).toDate()), f));
+            document.add(new Paragraph("Gelieve de afrekening te betalen voor " + new SimpleDateFormat("dd-MM-yyyy").format(report.plus(Period.ofMonths(3))), f));
             document.add(new Paragraph("Bij betaling, gelieve het nummer van de afrekening te vermelden", f2));
         } catch (Exception e) {
             e.printStackTrace();
@@ -187,7 +189,7 @@ public class Receipts extends Controller {
         add(carTable, "Totaal aantal kilometers:", true);
         add(carTable, (loanerDist + othersDist) + " km", true);
 
-        double deprecation = DataProvider.getSettingProvider().getDouble("deprecation_cost", new DateTime(date));
+        double deprecation = DataProvider.getSettingProvider().getDouble("deprecation_cost", date.toInstant());
 
         if (loanerDist + othersDist > 0) {
             add(carTable, "Door eigenaar gereden:");
@@ -273,7 +275,7 @@ public class Receipts extends Controller {
         document.add(new Paragraph("Ritten"));
 
         SettingProvider provider = DataProvider.getSettingProvider();
-        int levels = provider.getInt("cost_levels", new DateTime(date));
+        int levels = provider.getInt("cost_levels", date.toInstant());
 
         PdfPTable drivesTable = new PdfPTable(4 + levels);
         drivesTable.setWidthPercentage(100);
@@ -292,7 +294,7 @@ public class Receipts extends Controller {
                 lower = upper;
 
             if (j < levels - 1) {
-                upper = provider.getInt("cost_limit_" + j, new DateTime(date));
+                upper = provider.getInt("cost_limit_" + j, date.toInstant());
                 add(drivesTable, lower + "-" + upper + " km", true, false);
             } else {
                 add(drivesTable, "> " + upper + " km", true, false);
@@ -305,7 +307,7 @@ public class Receipts extends Controller {
         add(drivesTable, "", true);
 
         for (int j = 0; j < levels; j++) {
-            add(drivesTable, "€" + provider.getDouble("cost_" + j, new DateTime(date)) + "/km");
+            add(drivesTable, "€" + provider.getDouble("cost_" + j, date.toInstant()) + "/km");
         }
 
         add(drivesTable, "", true);
@@ -329,7 +331,7 @@ public class Receipts extends Controller {
                 int limit = 0;
                 int d;
 
-                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, new DateTime(date))))
+                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date.toInstant())))
                     d = distance;
                 else
                     d = limit - lower;

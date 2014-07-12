@@ -1,4 +1,4 @@
-@(settings: List[Setting])
+@(settings: Iterable[Setting])
 @import providers.SettingProvider;
 @app("Systeemvariabelen") {
     <div id="page-header-wrapper">
@@ -24,16 +24,14 @@
                             </tr>
                         </thead>
                         <tbody>
-                        @for(setting <- settings) {
+                        @foreach.tr(settings) { setting =>
                             <tr>
                                 <td>@setting.getName</td>
                                 <td>@setting.getValue</td>
-                                <td>@if(setting.getAfterDate == null) { / } else {
-                                    @setting.getAfterDate.toString(SettingProvider.DATE_FORMAT)
-                                }</td>
+                                <td>@SettingProvider.instantToString(setting.getAfterDate)</td>
                                 <td>
                                     <div class="btn-group btn-group-xs">
-                                        <a class="btn btn-primary" href="@routes.Settings.editSysvar(setting.getId)">Wijzigen</a>
+                                        <a class="btn btn-primary" href="@routes.Settings.editSysvar(setting.getName)">Wijzigen</a>
                                     </div>
                                 </td>
                             </tr>
@@ -46,11 +44,13 @@
             </div>
                 <!-- /col-lg-12 -->
         </div>
+        <!-- TODO: not needed
         <div class="row">
             <div class="col-lg-12">
                 <a class="btn btn-success" href="@routes.Settings.createSysvar">Systeemvariabele toevoegen</a>
             </div>
         </div>
+        -->
             <!-- /row -->
     </div>
 }

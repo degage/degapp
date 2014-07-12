@@ -25,6 +25,7 @@ import views.html.drives.drivesAdmin;
 import views.html.drives.drivespage;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -457,7 +458,7 @@ public class Drives extends Controller {
         }
 
         if (isOwner) {
-            calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
+            calculateDriveCost(ride, reservation.getFrom().toDate().toInstant(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
             dao.updateCarRide(ride);
         } else {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
@@ -507,14 +508,14 @@ public class Drives extends Controller {
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
         ride.setStatus(true);
-        calculateDriveCost(ride, reservation.getFrom(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
+        calculateDriveCost(ride, reservation.getFrom().toDate().toInstant(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
         dao.updateCarRide(ride);
         reservation.setStatus(ReservationStatus.FINISHED);
         rdao.updateReservation(reservation);
         return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
     }
 
-    private static void calculateDriveCost(CarRide ride, DateTime date, boolean privileged) {
+    private static void calculateDriveCost(CarRide ride, Instant date, boolean privileged) {
         if (privileged) {
             ride.setCost(BigDecimal.ZERO);
         } else {

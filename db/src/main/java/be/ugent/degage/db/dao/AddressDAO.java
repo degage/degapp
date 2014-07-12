@@ -4,7 +4,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.Address;
 
 /**
- * Created by Cedric on 2/21/14.
+ * Data access object for addresses
  */
 public interface AddressDAO {
 

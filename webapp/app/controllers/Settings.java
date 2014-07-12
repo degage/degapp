@@ -13,9 +13,11 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
+import providers.SettingProvider;
 import providers.UserProvider;
 import views.html.settings.*;
 
+import java.time.Instant;
 import java.util.List;
 
 public class Settings extends Controller {
@@ -24,13 +26,14 @@ public class Settings extends Controller {
     public static class EditSettingModel {
         public String value;
         public String name;
-        public DateTime after;
+        // TODO: binding for LocalDateTime
+        public String after;
 
 
         public EditSettingModel() {
         }
 
-        public EditSettingModel(String value, String name, DateTime after) {
+        public EditSettingModel(String value, String name, String after) {
             this.value = value;
             this.name = name;
             this.after = after;
@@ -98,39 +101,39 @@ public class Settings extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     @InjectContext
     public static Result sysvarsOverview() {
-        SettingDAO dao = DataAccess.getInjectedContext().getSettingDAO();
-        List<Setting> settings = dao.getSettings();
-        return ok(sysvars.render(settings));
+        return ok(sysvars.render(DataAccess.getInjectedContext().getSettingDAO().getSettings()));
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     @InjectContext
-    public static Result editSysvar(int id) {
+    public static Result editSysvar(String name) {
+        // TODO: should not allow name to be edited as well...
         SettingDAO dao = DataAccess.getInjectedContext().getSettingDAO();
-        Setting setting = dao.getSetting(id);
-        if (setting == null) {
+        String value = dao.getSettingForNow(name);
+        if (value == null) {
             flash("danger", "Deze setting ID bestaat niet.");
             return redirect(routes.Settings.sysvarsOverview());
         } else {
-            EditSettingModel model = new EditSettingModel(setting.getValue(), setting.getName(), setting.getAfterDate());
+            EditSettingModel model = new EditSettingModel(value, name,
+                    SettingProvider.instantToString(Instant.now())
+            );
 
-            return ok(editsysvar.render(Form.form(EditSettingModel.class).fill(model), setting));
+            return ok(editsysvar.render(Form.form(EditSettingModel.class).fill(model)));
         }
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     @InjectContext
-    public static Result editSysvarPost(int id) {
+    public static Result editSysvarPost() {
         SettingDAO dao = DataAccess.getInjectedContext().getSettingDAO();
 
         Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(editsysvar.render(form, dao.getSetting(id)));
+            return badRequest(editsysvar.render(form));
         } else {
             EditSettingModel model = form.get();
-            dao.updateSetting(id, model.name, model.value, model.after);
-            // context.commit(); // TODO: wat doet dit hier?
-            flash("success", "De systeemvariabele werd succesvol aangepast.");
+            dao.createSettingAfterDate(model.name, model.value, SettingProvider.stringToInstant(model.after));
+            flash("success", "De systeemvariabele werd met succes aangepast.");
             return redirect(routes.Settings.sysvarsOverview());
         }
     }
@@ -139,20 +142,20 @@ public class Settings extends Controller {
     @InjectContext
     // TODO: do we need this?
     public static Result createSysvar() {
-        return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, DateTime.now()))));
+        return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, SettingProvider.instantToString(Instant.now())))));
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     @InjectContext
     // TODO: do we need this?
-    public static Result createSysvarPost() {
+     public static Result createSysvarPost() {
         Form<EditSettingModel> form = Form.form(EditSettingModel.class).bindFromRequest();
         if (form.hasErrors() || form.get().name == null) {
             return badRequest(createsysvar.render(form));
         } else {
             SettingDAO dao = DataAccess.getInjectedContext().getSettingDAO();
             EditSettingModel model = form.get();
-            dao.createSettingAfterDate(model.name, model.value, model.after);
+            dao.createSettingAfterDate(model.name, model.value, SettingProvider.stringToInstant(model.after));
             // context.commit(); // TODO: wat doet dit hier?
             flash("success", "De systeemvariabele werd succesvol aangemaakt.");
             return redirect(routes.Settings.sysvarsOverview());

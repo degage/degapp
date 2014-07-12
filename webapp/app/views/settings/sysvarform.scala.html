@@ -10,28 +10,28 @@
     <fieldset>
         <div class="form-group">
             <div class="col-md-12">
-                <label for="@form("name").name">Naam:</label>
-                <input name="@form("name").name" type="text" placeholder="Naam" class="form-control input-md" value="@form("name").value">
+                <label for='@form("name").name'>Naam:</label>
+                <input name='@form("name").name' type="text" placeholder="Naam" class="form-control input-md" value='@form("name").value'>
 
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-12">
-                <label for="@form("value").name">Waarde:</label>
-                <input name="@form("value").name" type="text" placeholder="Waarde" class="form-control input-md" value="@form("value").value">
+                <label for='@form("value").name'>Waarde:</label>
+                <input name='@form("value").name' type="text" placeholder="Waarde" class="form-control input-md" value='@form("value").value'>
             </div>
         </div>
 
         <div class="form-group">
             <div class="col-md-4">
                 <label for="time">Actief vanaf:</label>
-                <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="@form("after").name">
-                    <input class="form-control input-md" size="16" type="text" value="@form("after").value" placeholder="Tijdstip" readonly>
+                <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field='@form("after").name'>
+                    <input class="form-control input-md" size="16" type="text" value='@form("after").value' placeholder="Tijdstip" readonly>
                     <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                 </div>
-                <input type="text" class="hidden" id="@form("after").name" name="@form("after").name" value="@form("after").value" />
+                <input type="text" class="hidden" id='@form("after").name' name='@form("after").name' value='@form("after").value' />
             </div>
         </div>
         <button type="submit" name="save" class="btn btn-block btn-success">Opslaan</button>

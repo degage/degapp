@@ -3,18 +3,28 @@ package providers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.SettingDAO;
-import org.joda.time.DateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
+
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Created by Cedric on 4/21/2014.
  */
 public class SettingProvider {
 
-    //TODO: provide caching for all overview - WARNING - dates may vary on request!
-    private static final String SETTING_KEY = "setting:%s";
-    public static final DateTimeFormatter DATE_FORMAT = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static String instantToString (Instant instant) {
+        return LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault()).format(INSTANT_FORMATTER);
+    }
+
+    public static Instant stringToInstant (String string) {
+        return LocalDateTime.parse(string, INSTANT_FORMATTER)
+                .atZone(ZoneOffset.systemDefault()).toInstant();
+    }
 
     private DataAccessProvider provider;
 
@@ -22,160 +32,93 @@ public class SettingProvider {
         this.provider = provider;
     }
 
-    public void createSetting(String name, String value, DateTime afterDate) {
+    public void createSetting(String name, String value, Instant afterDate) {
         try (DataAccessContext context = provider.getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
             dao.createSettingAfterDate(name, value, afterDate);
         }
     }
 
-    public void createSetting(String name, boolean value, DateTime afterDate) {
+    public void createSetting(String name, boolean value, Instant afterDate) {
         createSetting(name, Boolean.toString(value), afterDate);
     }
 
-    public void createSetting(String name, int value, DateTime afterDate) {
+    public void createSetting(String name, int value, Instant afterDate) {
         createSetting(name, Integer.toString(value), afterDate);
     }
 
-    public void createSetting(String name, double value, DateTime afterDate) {
+    public void createSetting(String name, double value, Instant afterDate) {
         createSetting(name, Double.toString(value), afterDate);
     }
 
-    public void createSetting(String name, DateTime value, DateTime afterDate) {
-        createSetting(name, value.toString(DATE_FORMAT), afterDate);
+    public void createSetting(String name, Instant value, Instant afterDate) {
+        createSetting(name, instantToString(value), afterDate);
     }
 
-    public String getString(String name, DateTime forDate) {
+    public String getString (String name) {
         try (DataAccessContext context = provider.getDataAccessContext()) {
             SettingDAO dao = context.getSettingDAO();
-            return dao.getSettingForDate(name, forDate);
+            return dao.getSettingForNow(name);
         }
     }
 
-    public String getStringOrDefault(String name, String defaultValue, DateTime forDate) {
-        String value = getString(name, forDate);
+   public String getString (String name, Instant instant) {
+        try (DataAccessContext context = provider.getDataAccessContext()) {
+            return context.getSettingDAO().getSettingForDate(name, instant);
+        }
+    }
+
+    public String getStringOrDefault(String name, String defaultValue) {
+        String value = getString(name);
         if (value == null)
             return defaultValue;
         else
             return value;
     }
 
-    public int getInt(String name, DateTime forDate) {
-        return Integer.valueOf(getString(name, forDate));
-    }
-
-    public int getIntOrDefault(String name, int defaultValue, DateTime forDate) {
-        try {
-            return getInt(name, forDate);
-        } catch (Exception ex) {
-            return defaultValue;
-        }
-    }
-
-    public double getDouble(String name, DateTime forDate) {
-        return Double.valueOf(getString(name, forDate));
-    }
-
-    public double getDoubleOrDefault(String name, double defaultValue, DateTime forDate) {
-        try {
-            return getDouble(name, forDate);
-        } catch (Exception ex) {
-            return defaultValue;
-        }
-    }
-
-    public DateTime getDate(String name, DateTime forDate) {
-        return DATE_FORMAT.parseDateTime(getString(name, forDate));
-    }
-
-    public DateTime getDateOrDefault(String name, DateTime defaultValue, DateTime forDate) {
-        try {
-            return getDate(name, forDate);
-        } catch (Exception ex) {
-            return defaultValue;
-        }
-    }
-
-    public boolean getBool(String name, DateTime forDate) {
-        return Boolean.parseBoolean(getString(name, forDate));
-    }
-
-    public boolean getBoolOrDefault(String name, boolean defaultValue, DateTime forDate) {
-        try {
-            return getBool(name, forDate);
-        } catch (Exception ex) {
-            return defaultValue;
-        }
-    }
-
-    /**
-     * Gets setting based on current timestamp
-     *
-     * @param name
-     * @return
-     */
-    public String getString(String name) {
-        return getString(name, DateTime.now());
-    }
-
-    public String getStringOrDefault(String name, String defaultValue){
-        return getStringOrDefault(name, defaultValue, DateTime.now());
-    }
-
-    /**
-     * Gets setting based on current timestamp
-     *
-     * @param name
-     * @return
-     */
     public int getInt(String name) {
-        return getInt(name, DateTime.now());
+        return Integer.valueOf(getString(name));
     }
 
-    public int getIntOrDefault(String name, int defaultValue){
-        return getIntOrDefault(name, defaultValue, DateTime.now());
+    public int getInt(String name, Instant instant) {
+        return Integer.valueOf(getString(name,instant));
     }
 
-    /**
-     * Gets setting based on current timestamp
-     *
-     * @param name
-     * @return
-     */
+    public int getIntOrDefault(String name, int defaultValue) {
+        try {
+            return getInt(name);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
+    }
+
     public double getDouble(String name) {
-        return getDouble(name, DateTime.now());
+        return Double.valueOf(getString(name));
     }
 
-    public double getDoubleOrDefault(String name, double defaultValue){
-        return getDoubleOrDefault(name, defaultValue, DateTime.now());
+   public double getDouble(String name, Instant instant) {
+        return Double.valueOf(getString(name, instant));
     }
 
-    /**
-     * Gets setting based on current timestamp
-     *
-     * @param name
-     * @return
-     */
-    public DateTime getDate(String name) {
-        return getDate(name, DateTime.now());
+    public double getDoubleOrDefault(String name, double defaultValue) {
+        try {
+            return getDouble(name);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
     }
 
-    public DateTime getDateOrDefault(String name, DateTime defaultValue){
-        return getDateOrDefault(name, defaultValue, DateTime.now());
-    }
-
-    /**
-     * Gets setting based on current timestamp
-     *
-     * @param name
-     * @return
-     */
     public boolean getBool(String name) {
-        return getBool(name, DateTime.now());
+        return Boolean.parseBoolean(getString(name));
     }
 
-    public boolean getBoolOrDefault(String name, boolean defaultValue){
-        return getBoolOrDefault(name, defaultValue, DateTime.now());
+    public boolean getBoolOrDefault(String name, boolean defaultValue) {
+        try {
+            return getBool(name);
+        } catch (Exception ex) {
+            return defaultValue;
+        }
     }
+
 
 }

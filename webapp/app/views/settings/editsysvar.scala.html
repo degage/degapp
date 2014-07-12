@@ -1,4 +1,4 @@
-@(form: Form[Settings.EditSettingModel], setting: Setting)
+@(form: Form[Settings.EditSettingModel])
 
     @scripts = {
         <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
@@ -37,7 +37,7 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-12">
-                            @sysvarform(form, routes.Settings.editSysvarPost(setting.getId))
+                            @sysvarform(form, routes.Settings.editSysvarPost)
                             </div>
                         </div>
                     </div>

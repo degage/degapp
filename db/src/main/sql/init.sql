@@ -2,8 +2,10 @@
 
 -- Tables must already have been created with create-tables.sql
 
+load data local infile 'settings.txt'
+   into table settings
+   fields terminated by ':';
 
 source init-templates.sql;
-source init-settings.sql;
 source init-users.sql;
 source init-userroles.sql;

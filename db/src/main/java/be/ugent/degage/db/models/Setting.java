@@ -1,29 +1,21 @@
 package be.ugent.degage.db.models;
-import org.joda.time.DateTime;
+
+import java.time.Instant;
 
 /**
- * Created by Cedric on 4/21/2014.
+ * Represents a system variable stored in the database. The same variable can be stored several times, but with a different
+ * date for which it is valid.,
  */
 public class Setting {
 
-    private int id;
     private String name;
     private String value;
-    private DateTime afterDate;
+    private Instant afterDate;
 
-    public Setting(int id, String name, String value, DateTime afterDate) {
-        this.id = id;
+    public Setting(String name, String value, Instant afterDate) {
         this.name = name;
         this.value = value;
         this.afterDate = afterDate;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -42,11 +34,11 @@ public class Setting {
         this.value = value;
     }
 
-    public DateTime getAfterDate() {
+    public Instant getAfterDate() {
         return afterDate;
     }
 
-    public void setAfterDate(DateTime afterDate) {
+    public void setAfterDate(Instant afterDate) {
         this.afterDate = afterDate;
     }
 }
