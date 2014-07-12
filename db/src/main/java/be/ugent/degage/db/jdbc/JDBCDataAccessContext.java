@@ -126,7 +126,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public AddressDAO getAddressDAO() {
         if(addressDAO == null){
-            addressDAO = new JDBCAddressDAO(connection);
+            addressDAO = new JDBCAddressDAO(this);
         }
         return addressDAO;
     }
@@ -230,7 +230,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public SettingDAO getSettingDAO() {
         if(settingDAO == null){
-            settingDAO = new JDBCSettingDAO(connection);
+            settingDAO = new JDBCSettingDAO(this);
         }
         return settingDAO;
     }

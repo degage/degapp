@@ -12,58 +12,22 @@ import java.util.List;
 /**
  * JDBC implementation of SettingDAO
  */
-class JDBCSettingDAO implements SettingDAO {
+class JDBCSettingDAO extends AbstractDAO implements SettingDAO {
 
-    private final Connection connection;
-    private PreparedStatement getSettingForDateStatement;
-    private PreparedStatement getSettingForNowStatement;
-    private PreparedStatement createSettingAfterStatement;
-
-    public JDBCSettingDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCSettingDAO(JDBCDataAccessContext context) {
+        super(context);
     }
 
-    private PreparedStatement getGetSettingForNowStatement() throws SQLException {
-        if (getSettingForNowStatement == null) {
-            getSettingForNowStatement = connection.prepareStatement(
-                    "SELECT setting_value FROM settings WHERE setting_name=? AND setting_after < NOW()" +
-                            " ORDER BY setting_after DESC LIMIT 1");
-        }
-        return getSettingForNowStatement;
-    }
 
-    private PreparedStatement getGetSettingForDateStatement() throws SQLException {
-        if (getSettingForDateStatement == null) {
-            getSettingForDateStatement = connection.prepareStatement(
-                    "SELECT setting_value FROM settings WHERE setting_name=? AND setting_after < ?" +
-                            " ORDER BY setting_after DESC LIMIT 1");
-        }
-        return getSettingForDateStatement;
-    }
-
-    private PreparedStatement getCreateSettingAfterStatement() throws SQLException {
-        if (createSettingAfterStatement == null) {
-            createSettingAfterStatement = connection.prepareStatement(
-                    "INSERT INTO settings(setting_name, setting_value, setting_after) " +
-                            "VALUES(?, ?, ?)");
-        }
-        return createSettingAfterStatement;
-    }
-
-    private static final String GET_SETTINGS_STATEMENT =
-            "SELECT s.setting_name, s.setting_value, s.setting_after " +
-                    "FROM ( SELECT setting_name, MAX(setting_after) AS m " +
-                    "       FROM settings GROUP BY setting_name ) AS t " +
-                    "JOIN settings AS s " +
-                    "  WHERE t.setting_name = s.setting_name " +
-                    "    AND t.m = s.setting_after " +
-                    "ORDER BY s.setting_name ASC";
-
+    private LazyStatement getSettingForNowStatement = new LazyStatement(
+        "SELECT setting_value FROM settings WHERE setting_name=? AND setting_after < NOW()" +
+                            " ORDER BY setting_after DESC LIMIT 1"
+    );
 
     @Override
     public String getSettingForNow(String name) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetSettingForNowStatement();
+            PreparedStatement ps = getSettingForNowStatement.value();
             ps.setString(1, name);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next())
@@ -77,10 +41,15 @@ class JDBCSettingDAO implements SettingDAO {
 
     }
 
+    private LazyStatement getSettingForDateStatement= new LazyStatement(
+            "SELECT setting_value FROM settings WHERE setting_name=? AND setting_after < ?" +
+                            " ORDER BY setting_after DESC LIMIT 1"
+    );
+
     @Override
     public String getSettingForDate(String name, Instant instant) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetSettingForDateStatement();
+            PreparedStatement ps = getSettingForDateStatement.value();
             ps.setString(1, name);
             ps.setTimestamp(2, Timestamp.from(instant));
             try (ResultSet rs = ps.executeQuery()) {
@@ -95,10 +64,15 @@ class JDBCSettingDAO implements SettingDAO {
 
     }
 
+    private LazyStatement createSettingAfterStatement = new LazyStatement(
+        "INSERT INTO settings(setting_name, setting_value, setting_after) " +
+                            "VALUES(?, ?, ?)"
+    );
+
     @Override
     public void createSettingAfterDate(String name, String value, Instant after) {
         try {
-            PreparedStatement ps = getCreateSettingAfterStatement();
+            PreparedStatement ps = createSettingAfterStatement.value();
             ps.setString(1, name);
             ps.setString(2, value);
             ps.setTimestamp(3, Timestamp.from(after));
@@ -111,9 +85,19 @@ class JDBCSettingDAO implements SettingDAO {
         }
     }
 
+    private static final String GET_SETTINGS_STATEMENT =
+            "SELECT s.setting_name, s.setting_value, s.setting_after " +
+                    "FROM ( SELECT setting_name, MAX(setting_after) AS m " +
+                    "       FROM settings GROUP BY setting_name ) AS t " +
+                    "JOIN settings AS s " +
+                    "  WHERE t.setting_name = s.setting_name " +
+                    "    AND t.m = s.setting_after " +
+                    "ORDER BY s.setting_name ASC";
+
+
     @Override
     public Iterable<Setting> getSettings() throws DataAccessException {
-        try (Statement stat = connection.createStatement();
+        try (Statement stat = createStatement();
                 ResultSet rs = stat.executeQuery(GET_SETTINGS_STATEMENT)){
             List<Setting> settings = new ArrayList<>();
             while (rs.next()) {

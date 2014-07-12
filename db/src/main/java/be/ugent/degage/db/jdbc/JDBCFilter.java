@@ -14,7 +14,7 @@ public class JDBCFilter implements Filter {
     // TODO: this class should not be public!
 
     // EnumMap doesn't want F.class as a constructor-argument, so we use HashMap
-    private Map<FilterField, String> content = new HashMap<FilterField, String>();
+    private Map<FilterField, String> content = new HashMap<>();
 
     /**
      * Associate with a given filterfield a specified value.
