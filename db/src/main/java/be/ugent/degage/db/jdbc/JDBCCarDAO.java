@@ -183,7 +183,7 @@ class JDBCCarDAO implements CarDAO{
             if(withRest) {
                 photo = JDBCFileDAO.populateFile(rs, "pictures");
                 location = JDBCAddressDAO.populateAddress(rs);
-                user = JDBCUserDAO.populateUserPartial(rs, false);
+                user = JDBCUserDAO.populateUserPartial(rs);
                 rs.getInt("car_technical_details");
                 if(!rs.wasNull()) {
                     File registration = null;
@@ -771,7 +771,7 @@ class JDBCCarDAO implements CarDAO{
             List<User> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    users.add(JDBCUserDAO.populateUserPartial(rs, false));
+                    users.add(JDBCUserDAO.populateUserPartial(rs));
                 }
                 return users;
             } catch (SQLException ex) {

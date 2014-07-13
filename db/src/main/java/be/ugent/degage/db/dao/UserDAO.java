@@ -18,6 +18,22 @@ public interface UserDAO {
     public User getUser(String email) throws DataAccessException;
 
     /**
+     * Return the user with the given email address and (plain text) password.
+     */
+    public User getUserWithPassword (String email, String password) throws DataAccessException;
+
+    /**
+     * Change the password of the given user.
+     * @return true if and only the old password was correct
+     */
+    public boolean changePassword (int userId, String oldPassword, String newPassword) throws DataAccessException;
+
+    /**
+     * Give a new password to the user. (User {@link #changePassword} by preference.)
+     */
+    public void updatePassword (int userId, String newPassword) throws DataAccessException;
+
+    /**
      * Return the user with the given id
      */
     public User getUser(int userId) throws DataAccessException;
@@ -44,7 +60,8 @@ public interface UserDAO {
 	public void deleteUser(int userId) throws DataAccessException;
 
     /**
-     * Create a new user
+     * Create a new user.
+     * @param password plain text password
      */
     public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException;
 

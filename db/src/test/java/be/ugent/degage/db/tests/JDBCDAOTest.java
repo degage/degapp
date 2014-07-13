@@ -316,12 +316,19 @@ public class JDBCDAOTest {
      */
     private void getUserByIdTest(boolean withRest) {
         for(User user : users) {
-            User returnUser = userDAO.getUser(user.getId(), withRest);
+            User returnUser = userDAO.getUser(user.getId());
 
             Assert.assertEquals(returnUser, user);
         }
     }
 
+    private void getUserByIdPartialTest(boolean withRest) {
+        for(User user : users) {
+            User returnUser = userDAO.getUserPartial(user.getId());
+
+            Assert.assertEquals(returnUser, user);
+        }
+    }
     /**
      * First createUsers() and createAddresses() has to be called
      */
@@ -338,7 +345,6 @@ public class JDBCDAOTest {
             user.setEmail(user.getEmail() + ".com");
             user.setFirstName(user.getFirstName() + "Test");
             user.setLastName(user.getLastName() + "Test");
-            user.setPassword(user.getPassword() + "Test");
             String cellphone = sc.next();
             user.setCellphone(cellphone);
             String phone = sc.next();
@@ -359,7 +365,7 @@ public class JDBCDAOTest {
             user.setAgreeTerms(agreeTerms);
             int contractManagerId = sc.nextInt();
             //user.setContractManager(users.get(contractManagerId-1));
-            userDAO.updateUser(user, true);
+            userDAO.updateUser(user);
         }
         getUserByIdTest(true);
     }
@@ -369,8 +375,8 @@ public class JDBCDAOTest {
      */
     private void deleteUserTest() {
         for(User user : users) {
-            userDAO.deleteUser(user);
-            User returnUser = userDAO.getUser(user.getId(), true);
+            userDAO.deleteUser(user.getId());
+            User returnUser = userDAO.getUser(user.getId());
             Assert.assertEquals(returnUser.getStatus(), UserStatus.DROPPED);
         }
     }

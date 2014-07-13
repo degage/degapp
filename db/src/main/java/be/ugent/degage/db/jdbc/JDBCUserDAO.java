@@ -5,6 +5,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
+import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -13,11 +14,11 @@ import java.util.List;
 /**
  * JDBC implementation of @link{UserDAO}
  */
-class JDBCUserDAO implements UserDAO {
+class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 
-    private static final String SMALL_USER_FIELDS = "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email";
+    private static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email";
 
     private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM users";
 
@@ -47,380 +48,38 @@ class JDBCUserDAO implements UserDAO {
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
     }
 
-    private Connection connection;
-    private PreparedStatement getUserByEmailStatement;
-    private PreparedStatement smallGetUserByIdStatement;
-    private PreparedStatement getUserByIdStatement;
-    private PreparedStatement createUserStatement;
-    private PreparedStatement smallUpdateUserStatement;
-    private PreparedStatement updateUserStatement;
-    private PreparedStatement deleteUserStatement;
-    private PreparedStatement createVerificationStatement;
-    private PreparedStatement getVerificationStatement;
-    private PreparedStatement deleteVerificationStatement;
-    private PreparedStatement getGetUserListPageByNameAscStatement;
-    private PreparedStatement getGetUserListPageByNameDescStatement;
-    private PreparedStatement getGetAmountOfUsersStatement;
-
-
-    public JDBCUserDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCUserDAO(JDBCDataAccessContext context) {
+        super(context);
     }
 
-    private PreparedStatement getDeleteVerificationStatement() throws SQLException {
-        if (deleteVerificationStatement == null) {
-            deleteVerificationStatement = connection.prepareStatement("DELETE FROM verifications WHERE verification_user_id = ? AND verification_type = ?");
-        }
-        return deleteVerificationStatement;
-    }
+    // TODO: move to separate verification dao?
 
-    private PreparedStatement getCreateVerificationStatement() throws SQLException {
-        if (createVerificationStatement == null) {
-            createVerificationStatement = connection.prepareStatement("INSERT INTO verifications(verification_ident, verification_user_id, verification_type) VALUES(UUID(),?, ?)");
-        }
-        return createVerificationStatement;
-    }
-
-    private PreparedStatement getGetVerificationStatement() throws SQLException {
-        if (getVerificationStatement == null) {
-            getVerificationStatement = connection.prepareStatement("SELECT verification_ident FROM verifications WHERE verification_user_id = ? AND verification_type = ?");
-        }
-        return getVerificationStatement;
-    }
-
-    private PreparedStatement getDeleteUserStatement() throws SQLException {
-        if (deleteUserStatement == null) {
-            deleteUserStatement = connection.prepareStatement("UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?");
-        }
-        return deleteUserStatement;
-    }
-
-    private PreparedStatement getUserByEmailStatement() throws SQLException {
-        if (getUserByEmailStatement == null) {
-            getUserByEmailStatement = connection.prepareStatement(USER_QUERY + " WHERE users.user_email = ?");
-        }
-        return getUserByEmailStatement;
-    }
-
-    private PreparedStatement getSmallGetUserByIdStatement() throws SQLException {
-        if (smallGetUserByIdStatement == null) {
-            smallGetUserByIdStatement = connection.prepareStatement(SMALL_USER_QUERY + " WHERE user_id = ?");
-        }
-        return smallGetUserByIdStatement;
-    }
-
-    private PreparedStatement getGetUserByIdStatement() throws SQLException {
-        if (getUserByIdStatement == null) {
-            getUserByIdStatement = connection.prepareStatement(USER_QUERY + " WHERE users.user_id = ?");
-        }
-        return getUserByIdStatement;
-    }
-
-    private PreparedStatement getCreateUserStatement() throws SQLException {
-        if (createUserStatement == null) {
-            createUserStatement = connection.prepareStatement("INSERT INTO users(user_email, user_password, user_firstname, user_lastname) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
-        }
-        return createUserStatement;
-    }
-
-    private PreparedStatement getSmallUpdateUserStatement() throws SQLException {
-        if (smallUpdateUserStatement == null) {
-            smallUpdateUserStatement = connection.prepareStatement("UPDATE users SET user_email=?, user_password=?, user_firstname=?, user_lastname=? WHERE user_id = ?");
-        }
-        return smallUpdateUserStatement;
-    }
-
-    private PreparedStatement getUpdateUserStatement() throws SQLException {
-        if (updateUserStatement == null) {
-            updateUserStatement = connection.prepareStatement("UPDATE users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
-                    "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
-                    "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?,  " +
-                    "user_identity_card_id=?, user_identity_card_registration_nr=? " +
-                    "WHERE user_id = ?");
-        }
-        return updateUserStatement;
-    }
-
-    private PreparedStatement getGetUserListPageByNameAscStatement() throws SQLException {
-        if (getGetUserListPageByNameAscStatement == null) {
-            getGetUserListPageByNameAscStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname asc, users.user_lastname asc LIMIT ?, ?");
-        }
-        return getGetUserListPageByNameAscStatement;
-    }
-
-    private PreparedStatement getGetUserListPageByNameDescStatement() throws SQLException {
-        if (getGetUserListPageByNameDescStatement == null) {
-            getGetUserListPageByNameDescStatement = connection.prepareStatement(USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname desc, users.user_lastname desc LIMIT ?, ?");
-        }
-        return getGetUserListPageByNameDescStatement;
-    }
-
-    private PreparedStatement getGetAmountOfUsersStatement() throws SQLException {
-        if (getGetAmountOfUsersStatement == null) {
-            getGetAmountOfUsersStatement = connection.prepareStatement("SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT);
-        }
-        return getGetAmountOfUsersStatement;
-    }
-
-
-    public static User populateUser(ResultSet rs, boolean withPassword) throws SQLException {
-        return populateUser(rs, withPassword, "users");
-    }
-    public static User populateUserPartial(ResultSet rs, boolean withPassword) throws SQLException {
-        return populateUserPartial(rs, withPassword, "users");
-    }
-
-    public static User populateUser(ResultSet rs, boolean withPassword, String tableName) throws SQLException {
-        if (rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0) { //Fix for left join not returning nullable int
-            return null;
-        }
-
-        // TODO: call populateUserPartial
-        User user = new User(
-                rs.getInt(tableName + ".user_id"),
-                rs.getString(tableName + ".user_email"),
-                rs.getString(tableName + ".user_firstname"),
-                rs.getString(tableName + ".user_lastname"),
-                withPassword ? rs.getString(tableName + ".user_password") : null);
-
-            user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
-            user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
-            user.setCellphone(rs.getString(tableName + ".user_cellphone"));
-            user.setPhone(rs.getString(tableName + ".user_phone"));
-            user.setGender(UserGender.valueOf(rs.getString(tableName + ".user_gender")));
-            user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
-            user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
-            user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
-
-            if (rs.getObject(tableName + ".user_image_id") != null) {
-                user.setProfilePictureId(rs.getInt(tableName + ".user_image_id"));
-            }
-
-            user.setLicense(rs.getString(tableName + ".user_driver_license_id"));
-
-            IdentityCard identityCard = new IdentityCard();
-            boolean identityCardNotNull = false;
-            String identityCardId = rs.getString(tableName + ".user_identity_card_id");
-            if (!rs.wasNull()) {
-                identityCardNotNull = true;
-                identityCard.setId(identityCardId);
-            }
-            String identityCardRegistrationNr = rs.getString(tableName + ".user_identity_card_registration_nr");
-            if (!rs.wasNull()) {
-                identityCardNotNull = true;
-                identityCard.setRegistrationNr(identityCardRegistrationNr);
-            }
-            if (identityCardNotNull)
-                user.setIdentityCard(identityCard);
-            else
-                user.setIdentityCard(null);
-
-            user.setStatus(UserStatus.valueOf(rs.getString(tableName + ".user_status")));
-
-
-        return user;
-    }
-
-
-    public static User populateUserPartial(ResultSet rs, boolean withPassword, String tableName) throws SQLException {
-        if (rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0) { //Fix for left join not returning nullable int
-            return null;
-        }
-
-        User user = new User(rs.getInt(tableName + ".user_id"), rs.getString(tableName + ".user_email"), rs.getString(tableName + ".user_firstname"), rs.getString(tableName + ".user_lastname"),
-                withPassword ? rs.getString(tableName + ".user_password") : null);
-
-        return user;
-    }
+    private LazyStatement deleteVerificationStatement = new LazyStatement(
+            "DELETE FROM verifications WHERE verification_user_id = ? AND verification_type = ?"
+    );
 
     @Override
-    public User getUser(String email) {
-        if (email == null || email.isEmpty())
-            return null;
-
+    public void deleteVerificationString(User user, VerificationType type) throws DataAccessException {
         try {
-            PreparedStatement ps = getUserByEmailStatement();
-            ps.setString(1, email);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
-                    return populateUser(rs, true);
-                else return null;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading user resultset", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch user by email.", ex);
-        }
-    }
-
-    @Override
-    public User getUser(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetUserByIdStatement();
-            ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateUser(rs, true);
-                } else return null;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading user resultset", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch user by id.", ex);
-        }
-
-    }
-
-    @Override
-    public User getUserPartial(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getSmallGetUserByIdStatement();
-            ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateUserPartial(rs, true);
-                } else return null;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading user resultset", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch user by id.", ex);
-        }
-
-    }
-
-
-    @Override
-    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        try {
-            PreparedStatement ps = getCreateUserStatement();
-            ps.setString(1, email);
-            ps.setString(2, password);
-            ps.setString(3, firstName);
-            ps.setString(4, lastName);
-
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when creating user.");
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
-                return new User(keys.getInt(1), email, firstName, lastName, password); //TODO: extra constructor
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for new user.", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to commit new user transaction.", ex);
-        }
-    }
-
-    @Override
-    public void updateUser(User user) throws DataAccessException {
-        try {
-            PreparedStatement ps = getUpdateUserStatement();
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getPassword());
-            ps.setString(3, user.getFirstName());
-            ps.setString(4, user.getLastName());
-
-
-            ps.setString(5, user.getStatus().name());
-            ps.setString(6, user.getGender().name());
-            if (user.getPhone() == null) ps.setNull(7, Types.VARCHAR);
-            else ps.setString(7, user.getPhone());
-            if (user.getCellphone() == null) ps.setNull(8, Types.VARCHAR);
-            else ps.setString(8, user.getCellphone());
-            if (user.getAddressDomicile() == null) ps.setNull(9, Types.INTEGER);
-            else ps.setInt(9, user.getAddressDomicile().getId());
-            if (user.getAddressResidence() == null) ps.setNull(10, Types.INTEGER);
-            else ps.setInt(10, user.getAddressResidence().getId());
-            if (user.getDamageHistory() == null) ps.setNull(11, Types.VARCHAR);
-            else ps.setString(11, user.getDamageHistory());
-            ps.setBoolean(12, user.isPayedDeposit());
-            ps.setBoolean(13, user.isAgreeTerms());
-
-            if (user.getProfilePictureId() != -1) ps.setInt(14, user.getProfilePictureId());
-            else ps.setNull(14, Types.INTEGER);
-            if (user.getLicense() == null) {
-                ps.setNull(15, Types.VARCHAR);
-            } else {
-                ps.setString(15, user.getLicense());
-            }
-
-            if (user.getIdentityCard() == null) {
-                ps.setNull(16, Types.VARCHAR);
-                ps.setNull(17, Types.VARCHAR);
-            } else {
-                if (user.getIdentityCard().getId() == null) ps.setNull(16, Types.VARCHAR);
-                else ps.setString(16, user.getIdentityCard().getId());
-                if (user.getIdentityCard().getRegistrationNr() == null) ps.setNull(17, Types.VARCHAR);
-                else ps.setString(17, user.getIdentityCard().getRegistrationNr());
-            }
-
-
-            ps.setInt(18, user.getId());
-
-
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("User update affected 0 rows.");
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to update user", ex);
-        }
-    }
-
-    @Override
-    public void updateUserPartial(User user) throws DataAccessException {
-        try {
-            PreparedStatement ps = getSmallUpdateUserStatement();
-
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getPassword());
-            ps.setString(3, user.getFirstName());
-            ps.setString(4, user.getLastName());
-
-            ps.setInt(5, user.getId());
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("User update affected 0 rows.");
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to update user", ex);
-        }
-    }
-
-    @Override
-    public void deleteUser(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getDeleteUserStatement();
-            ps.setInt(1, userId);
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when deleting (=updating to DROPPED) user.");
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not delete user", ex);
-        }
-
-    }
-
-    @Override
-    public String getVerificationString(User user, VerificationType type) throws DataAccessException {
-        try {
-            PreparedStatement ps = getGetVerificationStatement();
+            PreparedStatement ps = deleteVerificationStatement.value();
             ps.setInt(1, user.getId());
             ps.setString(2, type.name());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next())
-                    return null;
-                else return rs.getString("verification_ident");
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to read verification resultset.", ex);
-            }
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("Verification delete operation affected 0 rows.");
+
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to get verification string.", ex);
+            throw new DataAccessException("Failed to delete verification.", ex);
         }
     }
+
+    private LazyStatement createVerificationStatement = new LazyStatement(
+            "INSERT INTO verifications(verification_ident, verification_user_id, verification_type) VALUES(UUID(),?, ?)"
+    );
 
     @Override
     public String createVerificationString(User user, VerificationType type) throws DataAccessException {
         try {
-            PreparedStatement ps = getCreateVerificationStatement();
+            PreparedStatement ps = createVerificationStatement.value();
             ps.setInt(1, user.getId());
             ps.setString(2, type.name());
             if (ps.executeUpdate() == 0)
@@ -433,19 +92,377 @@ class JDBCUserDAO implements UserDAO {
         }
     }
 
+    private LazyStatement getVerificationStatement = new LazyStatement(
+            "SELECT verification_ident FROM verifications WHERE verification_user_id = ? AND verification_type = ?"
+    );
+
     @Override
-    public void deleteVerificationString(User user, VerificationType type) throws DataAccessException {
+    public String getVerificationString(User user, VerificationType type) throws DataAccessException {
         try {
-            PreparedStatement ps = getDeleteVerificationStatement();
+            PreparedStatement ps = getVerificationStatement.value();
             ps.setInt(1, user.getId());
             ps.setString(2, type.name());
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("Verification delete operation affected 0 rows.");
-
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next())
+                    return null;
+                else
+                    return rs.getString("verification_ident");
+            }
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to delete verification.", ex);
+            throw new DataAccessException("Failed to get verification string.", ex);
         }
     }
+
+
+    public static User populateUser(ResultSet rs) throws SQLException {
+        return populateUser(rs, "users");
+    }
+
+    public static User populateUserPartial(ResultSet rs) throws SQLException {
+        return populateUserPartial(rs, "users");
+    }
+
+    public static User populateUser(ResultSet rs, String tableName) throws SQLException {
+        if (rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0) { //Fix for left join not returning nullable int
+            return null;
+        }
+
+        // TODO: call populateUserPartial
+        User user = new User(
+                rs.getInt(tableName + ".user_id"),
+                rs.getString(tableName + ".user_email"),
+                rs.getString(tableName + ".user_firstname"),
+                rs.getString(tableName + ".user_lastname"));
+
+        user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
+        user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
+        user.setCellphone(rs.getString(tableName + ".user_cellphone"));
+        user.setPhone(rs.getString(tableName + ".user_phone"));
+        user.setGender(UserGender.valueOf(rs.getString(tableName + ".user_gender")));
+        user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
+        user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
+        user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
+
+        if (rs.getObject(tableName + ".user_image_id") != null) {
+            user.setProfilePictureId(rs.getInt(tableName + ".user_image_id"));
+        }
+
+        user.setLicense(rs.getString(tableName + ".user_driver_license_id"));
+
+        IdentityCard identityCard = new IdentityCard();
+        boolean identityCardNotNull = false;
+        String identityCardId = rs.getString(tableName + ".user_identity_card_id");
+        if (!rs.wasNull()) {
+            identityCardNotNull = true;
+            identityCard.setId(identityCardId);
+        }
+        String identityCardRegistrationNr = rs.getString(tableName + ".user_identity_card_registration_nr");
+        if (!rs.wasNull()) {
+            identityCardNotNull = true;
+            identityCard.setRegistrationNr(identityCardRegistrationNr);
+        }
+        if (identityCardNotNull)
+            user.setIdentityCard(identityCard);
+        else
+            user.setIdentityCard(null);
+
+        user.setStatus(UserStatus.valueOf(rs.getString(tableName + ".user_status")));
+
+
+        return user;
+    }
+
+
+    public static User populateUserPartial(ResultSet rs, String tableName) throws SQLException {
+        if (rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0) { //Fix for left join not returning nullable int
+            return null;
+        }
+
+        User user = new User(rs.getInt(tableName + ".user_id"),
+                rs.getString(tableName + ".user_email"),
+                rs.getString(tableName + ".user_firstname"),
+                rs.getString(tableName + ".user_lastname")
+        );
+
+        return user;
+    }
+
+    private LazyStatement getUserByEmailStatement = new LazyStatement(
+            USER_QUERY + " WHERE users.user_email = ?"
+    );
+
+    @Override
+    public User getUser(String email) {
+        if (email == null || email.isEmpty())
+            return null;
+
+        try {
+            PreparedStatement ps = getUserByEmailStatement.value();
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return populateUser(rs);
+                else
+                    return null;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by email.", ex);
+        }
+    }
+
+    private LazyStatement getUserByPasswordStatement = new LazyStatement(
+            "SELECT users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
+                    "users.user_password, users.user_status " +
+                    "FROM users WHERE users.user_email = ?"
+    );
+
+
+    @Override
+    public User getUserWithPassword(String email, String password) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUserByPasswordStatement.value();
+            ps.setString(1, email);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    User result = populateUserPartial(rs);
+                    result.setStatus(UserStatus.valueOf(rs.getString("users.user_status")));
+                    if (BCrypt.checkpw(password, rs.getString("users.user_password"))) {
+                        return result;
+                    } else {
+                        return null;
+                    }
+                } else
+                    return null;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by email.", ex);
+        }
+    }
+
+
+    private LazyStatement getPasswordByIdStatement = new LazyStatement(
+            "SELECT user_password FROM users WHERE user_id = ?"
+    );
+
+    private LazyStatement updatePasswordStatement = new LazyStatement(
+            "UPDATE users SET user_password = ? WHERE user_id = ?"
+    );
+
+    @Override
+    public boolean changePassword(int userId, String oldPassword, String newPassword) throws DataAccessException {
+        try {
+            PreparedStatement ps = getPasswordByIdStatement.value();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (!rs.next() || !BCrypt.checkpw(oldPassword, rs.getString("user_password"))) {
+                    return false;
+                }
+            }
+
+            ps = updatePasswordStatement.value();
+            ps.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
+            ps.setInt (2, userId);
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("Could not change password");
+            }
+            return true;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not change password", ex);
+        }
+    }
+
+    @Override public void updatePassword (int userId, String newPassword) throws DataAccessException {
+        try {
+            PreparedStatement ps = updatePasswordStatement.value();
+            ps.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
+            ps.setInt (2, userId);
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("Could not update password");
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not update password", ex);
+        }
+    }
+
+    private LazyStatement getUserByIdStatement = new LazyStatement(
+            USER_QUERY + " WHERE users.user_id = ?"
+    );
+
+    @Override
+    public User getUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUserByIdStatement.value();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return populateUser(rs);
+                } else
+                    return null;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by id.", ex);
+        }
+
+    }
+
+    private LazyStatement smallGetUserByIdStatement = new LazyStatement(
+            SMALL_USER_QUERY + " WHERE user_id = ?"
+    );
+
+    @Override
+    public User getUserPartial(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = smallGetUserByIdStatement.value();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return populateUserPartial(rs);
+                } else
+                    return null;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by id.", ex);
+        }
+
+    }
+
+
+    private LazyStatement createUserStatement = new LazyStatement(
+            "INSERT INTO users(user_email, user_password, user_firstname, user_lastname) VALUES (?,?,?,?)",
+            "user_id"
+    );
+
+    @Override
+    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
+        try {
+            PreparedStatement ps = createUserStatement.value();
+            ps.setString(1, email);
+            ps.setString(2, BCrypt.hashpw(password, BCrypt.gensalt(12)));
+            ps.setString(3, firstName);
+            ps.setString(4, lastName);
+
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when creating user.");
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+                return new User(keys.getInt(1), email, firstName, lastName);
+            } catch (SQLException ex) {
+                throw new DataAccessException("Failed to get primary key for new user.", ex);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to commit new user transaction.", ex);
+        }
+    }
+
+    private LazyStatement updateUserStatement = new LazyStatement(
+            "UPDATE users SET user_email=?, user_firstname=?, user_lastname=?, user_status=?, " +
+                    "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, " +
+                    "user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
+                    "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?,  " +
+                    "user_identity_card_id=?, user_identity_card_registration_nr=? " +
+                    "WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUser(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = updateUserStatement.value();
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getFirstName());
+            ps.setString(3, user.getLastName());
+
+
+            ps.setString(4, user.getStatus().name());
+            ps.setString(5, user.getGender().name());
+            ps.setString(6, user.getPhone());
+            ps.setString(7, user.getCellphone());
+            if (user.getAddressDomicile() == null) ps.setNull(8, Types.INTEGER);
+            else ps.setInt(8, user.getAddressDomicile().getId());
+            if (user.getAddressResidence() == null) ps.setNull(9, Types.INTEGER);
+            else ps.setInt(9, user.getAddressResidence().getId());
+            if (user.getDamageHistory() == null) ps.setNull(10, Types.VARCHAR);
+            else ps.setString(10, user.getDamageHistory());
+            ps.setBoolean(11, user.isPayedDeposit());
+            ps.setBoolean(12, user.isAgreeTerms());
+
+            if (user.getProfilePictureId() != -1) ps.setInt(13, user.getProfilePictureId());
+            else ps.setNull(13, Types.INTEGER);
+            ps.setString(14, user.getLicense());
+
+
+            if (user.getIdentityCard() == null) {
+                ps.setNull(15, Types.VARCHAR);
+                ps.setNull(16, Types.VARCHAR);
+            } else {
+                ps.setString(15, user.getIdentityCard().getId());
+                ps.setString(16, user.getIdentityCard().getRegistrationNr());
+            }
+
+
+            ps.setInt(17, user.getId());
+
+
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("User update affected 0 rows.");
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user", ex);
+        }
+    }
+
+    private LazyStatement smallUpdateUserStatement = new LazyStatement(
+            "UPDATE users SET user_email=?, user_firstname=?, user_lastname=? WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUserPartial(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = smallUpdateUserStatement.value();
+
+            ps.setString(1, user.getEmail());
+            ps.setString(2, user.getFirstName());
+            ps.setString(3, user.getLastName());
+
+            ps.setInt(4, user.getId());
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("User update affected 0 rows.");
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user", ex);
+        }
+    }
+
+    private LazyStatement deleteUserStatement = new LazyStatement(
+            "UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?"
+    );
+
+    @Override
+    public void deleteUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = deleteUserStatement.value();
+            ps.setInt(1, userId);
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("No rows were affected when deleting (=updating to DROPPED) user.");
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not delete user", ex);
+        }
+
+    }
+
+    // TODO: refactor filters
+
+    private LazyStatement getUserListPageByNameAscStatement = new LazyStatement(
+            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname asc, users.user_lastname asc LIMIT ?, ?"
+    );
+
+    private LazyStatement getUserListPageByNameDescStatement = new LazyStatement(
+            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname desc, users.user_lastname desc LIMIT ?, ?"
+    );
+
+    private LazyStatement getAmountOfUsersStatement = new LazyStatement(
+            "SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT
+    );
+
 
     /**
      * @param filter The filter to apply to
@@ -455,7 +472,7 @@ class JDBCUserDAO implements UserDAO {
     @Override
     public int getAmountOfUsers(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfUsersStatement();
+            PreparedStatement ps = getAmountOfUsersStatement.value();
             fillFragment(ps, filter, 1);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -477,7 +494,7 @@ class JDBCUserDAO implements UserDAO {
             PreparedStatement ps = null;
             switch (orderBy) {
                 case USER_NAME:
-                    ps = asc ? getGetUserListPageByNameAscStatement() : getGetUserListPageByNameDescStatement();
+                    ps = asc ? getUserListPageByNameAscStatement.value() : getUserListPageByNameDescStatement.value();
                     break;
             }
             if (ps == null) {
@@ -491,7 +508,7 @@ class JDBCUserDAO implements UserDAO {
             List<User> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    users.add(populateUser(rs, false));
+                    users.add(populateUser(rs));
                 }
                 return users;
             } catch (SQLException ex) {

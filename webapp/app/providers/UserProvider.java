@@ -6,7 +6,6 @@ import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserStatus;
-import org.mindrot.jbcrypt.BCrypt;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -42,20 +41,6 @@ public class UserProvider {
         if(email == null || email.isEmpty())
             return null;
         else return getUser(email, cached);
-    }
-
-    public static boolean hasValidPassword(User user, String password){
-        return user != null && BCrypt.checkpw(password, user.getPassword());
-    }
-
-    /**
-     * Hashes a password using the BCRYPT iteration hashing method including a salt.
-     *
-     * @param password The password to be hashed
-     * @return The hashed password including the salt
-     */
-    public static String hashPassword(String password) {
-        return BCrypt.hashpw(password, BCrypt.gensalt(12));
     }
 
     public User getUser() {

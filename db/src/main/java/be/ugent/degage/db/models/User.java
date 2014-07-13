@@ -9,7 +9,6 @@ public class User {
     private String email;
     private String firstName;
     private String lastName;
-    private String password;
     private String phone;
     private String cellphone;
     private Address addressDomicile;
@@ -23,24 +22,19 @@ public class User {
     private boolean payedDeposit;
     private boolean agreeTerms;
 
-    public User(int id, String email, String firstName, String lastName){
-        this(id, email, firstName, lastName, null);
-    }
-
     public User(String email) {
-        this(0, email, null, null, null);
+        this(0, email, null, null);
     }
 
     public User() {
-        this(0, null, null, null, null);
+        this(0, null, null, null);
     }
 
-    public User(int id, String email, String firstName, String lastName, String password){
+    public User(int id, String email, String firstName, String lastName){
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.password = password;
 
         this.status = UserStatus.REGISTERED;
         this.profilePictureId = -1;
@@ -92,14 +86,6 @@ public class User {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getPhone() {
@@ -187,7 +173,7 @@ public class User {
     }
 
     @Override
-    // TODO: remove these equals and hash codes
+    // TODO: remove these equals and hash codes (probably used by Cache mechanism of play?)
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
@@ -210,7 +196,6 @@ public class User {
         if (identityCard != null ? !identityCard.equals(user.identityCard) : user.identityCard != null) return false;
         if (!lastName.equals(user.lastName)) return false;
         if (license != null ? !license.equals(user.license) : user.license != null) return false;
-        if (!password.equals(user.password)) return false;
         if (phone != null ? !phone.equals(user.phone) : user.phone != null) return false;
         if (status != user.status) return false;
 
@@ -223,7 +208,6 @@ public class User {
         result = 31 * result + email.hashCode();
         result = 31 * result + firstName.hashCode();
         result = 31 * result + lastName.hashCode();
-        result = 31 * result + password.hashCode();
         result = 31 * result + (phone != null ? phone.hashCode() : 0);
         result = 31 * result + (cellphone != null ? cellphone.hashCode() : 0);
         result = 31 * result + (addressDomicile != null ? addressDomicile.hashCode() : 0);

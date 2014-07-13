@@ -9,7 +9,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 /**
- * Created by Cedric on 2/16/14.
+ * JDBC implementation of {@link be.ugent.degage.db.DataAccessContext}
  */
 class JDBCDataAccessContext implements DataAccessContext {
 
@@ -86,7 +86,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public UserDAO getUserDAO() {
         if (userDAO == null) {
-            userDAO = new JDBCUserDAO(connection);
+            userDAO = new JDBCUserDAO(this);
         }
         return userDAO;
     }

@@ -81,7 +81,7 @@ class JDBCUserRoleDAO implements UserRoleDAO{
             List<User> userList = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()){
                 while(rs.next()){
-                    userList.add(JDBCUserDAO.populateUserPartial(rs, false, "users"));
+                    userList.add(JDBCUserDAO.populateUserPartial(rs, "users"));
                 }
                 return userList;
             } catch (SQLException ex){

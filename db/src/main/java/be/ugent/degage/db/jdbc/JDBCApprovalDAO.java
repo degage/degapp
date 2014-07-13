@@ -17,8 +17,8 @@ import java.util.List;
 class JDBCApprovalDAO implements ApprovalDAO {
 
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
-            "users.user_id, users.user_password, users.user_firstname, users.user_lastname, users.user_email, " +
-            "admins.user_id, admins.user_password, admins.user_firstname, admins.user_lastname, admins.user_email, " +
+            "users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
+            "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, " +
             "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_type_alternative, infosession_comments ";
 
     private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +
@@ -107,7 +107,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     }
 
     private Approval populateApproval(ResultSet rs) throws SQLException {
-        return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUserPartial(rs, false, "users"), JDBCUserDAO.populateUserPartial(rs, false, "admins"),
+        return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUserPartial(rs, "users"), JDBCUserDAO.populateUserPartial(rs, "admins"),
                 new DateTime(rs.getTimestamp("approval_submission").getTime()),
                 rs.getTimestamp("approval_date") != null ? new DateTime(rs.getTimestamp("approval_date").getTime()) : null,
                 rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSession(rs, false, false), Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),

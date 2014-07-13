@@ -82,16 +82,13 @@ public class Settings extends Controller {
             UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
             User user = DataProvider.getUserProvider().getUser(false);
 
-            if (!UserProvider.hasValidPassword(user, model.oldpw)) {
-                form.reject("Je oude wachtwoord is incorrect.");
-                return badRequest(changepass.render(form));
-            } else {
-                user.setPassword(UserProvider.hashPassword(model.newpw));
-                dao.updateUserPartial(user);
-
+            if (dao.changePassword(user.getId(), model.oldpw, model.newpw)) {
                 DataProvider.getUserProvider().invalidateUser(user);
                 flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
                 return redirect(routes.Settings.index());
+            } else {
+                form.reject("Je oude wachtwoord is incorrect.");
+                return badRequest(changepass.render(form));
             }
 
         }

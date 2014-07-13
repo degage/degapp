@@ -215,8 +215,7 @@ public class Login extends Controller {
                     return badRequest("There was no password reset requested on this account.");
                 } else if (ident.equals(uuid)) {
                     dao.deleteVerificationString(user, VerificationType.PWRESET);
-                    user.setPassword(UserProvider.hashPassword(resetForm.get().password));
-                    dao.updateUser(user);
+                    dao.updatePassword(user.getId(), resetForm.get().password);
 
                     DataProvider.getUserProvider().invalidateUser(user);
                     flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
@@ -238,15 +237,15 @@ public class Login extends Controller {
      * @return Redirect to page or login form when an error occured
      */
 
-    // needs no injected context
+    @InjectContext
     public static Result authenticate(String redirect) {
         Form<LoginModel> loginForm = Form.form(LoginModel.class).bindFromRequest();
         if (loginForm.hasErrors()) {
             return badRequest(login.render(loginForm, redirect));
         } else {
-            User user = DataProvider.getUserProvider().getUser(loginForm.get().email);
+            User user = DataAccess.getInjectedContext().getUserDAO().getUserWithPassword(loginForm.get().email, loginForm.get().password);
 
-            if (UserProvider.hasValidPassword(user, loginForm.get().password)) {
+            if (user != null) {
                 if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
                     loginForm.reject("Deze account is nog niet geactiveerd. Gelieve je inbox te checken.");
                     loginForm.data().put("reactivate", "True");
@@ -350,7 +349,7 @@ public class Login extends Controller {
                 return badRequest(register.render(registerForm));
             } else {
                 UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-                User user = dao.createUser(registerForm.get().email, UserProvider.hashPassword(registerForm.get().password),
+                User user = dao.createUser(registerForm.get().email, registerForm.get().password,
                         registerForm.get().firstName, registerForm.get().lastName);
 
                 // Now we create a registration UUID

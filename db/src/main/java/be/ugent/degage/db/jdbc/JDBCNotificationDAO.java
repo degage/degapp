@@ -46,7 +46,7 @@ class JDBCNotificationDAO implements NotificationDAO {
     }
 
     public static Notification populateNotification(ResultSet rs) throws SQLException {
-        Notification notification = new Notification(rs.getInt("notification_id"), JDBCUserDAO.populateUserPartial(rs, false),
+        Notification notification = new Notification(rs.getInt("notification_id"), JDBCUserDAO.populateUserPartial(rs),
                 rs.getBoolean("notification_read"), rs.getString("notification_subject"), rs.getString("notification_body"),
                 new DateTime(rs.getTimestamp("notification_created_at")));
         return notification;

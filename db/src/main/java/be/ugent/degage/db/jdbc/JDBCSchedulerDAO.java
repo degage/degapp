@@ -78,7 +78,7 @@ class JDBCSchedulerDAO implements SchedulerDAO {
         List<User> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(JDBCUserDAO.populateUserPartial(rs, false, "reminder"));
+                list.add(JDBCUserDAO.populateUserPartial(rs, "reminder"));
             }
             return list;
         }catch (SQLException e){

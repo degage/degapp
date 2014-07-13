@@ -20,6 +20,10 @@ libraryDependencies += "joda-time" % "joda-time" % "2.3"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
 
+// TODO: use java.security instead ?
+libraryDependencies += "org.mindrot"  % "jbcrypt"  % "0.3m"
+
+
 autoScalaLibrary := false
 
 parallelExecution in Test := false

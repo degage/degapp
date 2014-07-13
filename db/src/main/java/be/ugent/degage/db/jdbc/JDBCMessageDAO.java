@@ -102,8 +102,8 @@ class JDBCMessageDAO implements MessageDAO {
     }
 
     public static Message populateMessage(ResultSet rs) throws SQLException {
-        Message message = new Message(rs.getInt("message_id"), JDBCUserDAO.populateUserPartial(rs, false, "Sender"),
-                JDBCUserDAO.populateUserPartial(rs, false, "Receiver"), rs.getBoolean("message_read"),
+        Message message = new Message(rs.getInt("message_id"), JDBCUserDAO.populateUserPartial(rs, "Sender"),
+                JDBCUserDAO.populateUserPartial(rs, "Receiver"), rs.getBoolean("message_read"),
                 rs.getString("message_subject"), rs.getString("message_body"),
                 new DateTime(rs.getTimestamp("message_created_at")));
         return message;
