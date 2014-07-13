@@ -410,27 +410,27 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    private LazyStatement smallUpdateUserStatement = new LazyStatement(
-            "UPDATE users SET user_email=?, user_firstname=?, user_lastname=? WHERE user_id = ?"
-    );
-
-    @Override
-    public void updateUserPartial(User user) throws DataAccessException {
-        try {
-            PreparedStatement ps = smallUpdateUserStatement.value();
-
-            ps.setString(1, user.getEmail());
-            ps.setString(2, user.getFirstName());
-            ps.setString(3, user.getLastName());
-
-            ps.setInt(4, user.getId());
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("User update affected 0 rows.");
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to update user", ex);
-        }
-    }
+//    private LazyStatement smallUpdateUserStatement = new LazyStatement(
+//            "UPDATE users SET user_email=?, user_firstname=?, user_lastname=? WHERE user_id = ?"
+//    );
+//
+//    @Override
+//    public void updateUserPartial(User user) throws DataAccessException {
+//        try {
+//            PreparedStatement ps = smallUpdateUserStatement.value();
+//
+//            ps.setString(1, user.getEmail());
+//            ps.setString(2, user.getFirstName());
+//            ps.setString(3, user.getLastName());
+//
+//            ps.setInt(4, user.getId());
+//            if (ps.executeUpdate() == 0)
+//                throw new DataAccessException("User update affected 0 rows.");
+//
+//        } catch (SQLException ex) {
+//            throw new DataAccessException("Failed to update user", ex);
+//        }
+//    }
 
     private LazyStatement deleteUserStatement = new LazyStatement(
             "UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?"

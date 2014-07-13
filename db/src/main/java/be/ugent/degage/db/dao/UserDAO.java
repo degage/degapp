@@ -51,7 +51,7 @@ public interface UserDAO {
     /**
      * Update partial information about the given user
      */
-    public void updateUserPartial(User user) throws DataAccessException;
+    //public void updateUserPartial(User user) throws DataAccessException;
 
 
     /**
