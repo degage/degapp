@@ -158,7 +158,7 @@ public class Profile extends Controller {
                         FileDAO fdao = context.getFileDAO();
                         UserDAO udao = context.getUserDAO();
                         try {
-                            File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType(), null);
+                            File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
                             int oldPictureId = user.getProfilePictureId();
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user, true);
@@ -177,7 +177,7 @@ public class Profile extends Controller {
                                 }
                             }
 
-                            flash("success", "De profielfoto werd succesvol aangepast.");
+                            flash("success", "De profielfoto werd met succes aangepast.");
                             return redirect(routes.Profile.index(userId));
                         } catch (DataAccessException ex) {
                             FileHelper.deleteFile(relativePath);
@@ -475,7 +475,7 @@ public class Profile extends Controller {
                         // Now we add the file to the group
                         Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.identitycard"));
                         // TODO: combine statements in DAO
-                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), 0);
+                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType());
                         fdao.addIdFile(user.getId(), file.getId());
                     }
                 }
@@ -584,7 +584,7 @@ public class Profile extends Controller {
                     } else {
                         // Now we add the file to the group
                         Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.driverslicense"));
-                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), 0);
+                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType());
                         fdao.addLicenseFile(user.getId(), file.getId());
                     }
                 }

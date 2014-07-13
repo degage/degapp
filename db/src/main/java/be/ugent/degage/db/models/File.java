@@ -1,5 +1,9 @@
 package be.ugent.degage.db.models;
 
+/**
+ * Represents an (image) file stored on the server.
+ */
+
 public class File {
     private int fileId;
     private String path;
@@ -42,6 +46,7 @@ public class File {
         this.contentType = contentType;
     }
 
+    // TODO: remove equals and hashCode
     public boolean equals(Object o){
         if(o == null)                return false;
         if(!(o instanceof File)) return false;

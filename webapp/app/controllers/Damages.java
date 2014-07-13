@@ -286,7 +286,7 @@ public class Damages extends Controller {
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            Iterable<File> proofList = fileDAO.getFiles(damageId);
+            Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
             flash("danger", "Status toevoegen mislukt.");
             return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
         } else {
@@ -354,7 +354,7 @@ public class Damages extends Controller {
                 } else {
                    // Now we add the file to the group
                     Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.damages"));
-                    File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), null);
+                    File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType());
                     fdao.addDamageFile(damageId, file.getId()); // TODO: make this one (atomic) call to fdao
                 }
             }

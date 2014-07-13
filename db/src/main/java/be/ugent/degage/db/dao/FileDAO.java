@@ -14,19 +14,9 @@ public interface FileDAO {
     public File getFile(int id) throws DataAccessException;
 
     /**
-     * Create a new file group number.
+     * Create a file
      */
-    public int createFileGroupNumber() throws DataAccessException;
-
-    /**
-     * Return all files in a given file group.
-     */
-    public Iterable<File> getFiles(int fileGroupNumber) throws DataAccessException;
-
-    /**
-     * Create a file in the given file group (which can be null)
-     */
-    public File createFile(String path, String fileName, String contentType, Integer fileGroupNumber) throws DataAccessException;
+    public File createFile(String path, String fileName, String contentType) throws DataAccessException;
 
     /**
      * Delete a file

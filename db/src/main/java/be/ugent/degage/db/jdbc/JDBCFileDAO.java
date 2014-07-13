@@ -4,14 +4,13 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.models.File;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 class JDBCFileDAO extends AbstractDAO implements FileDAO {
-
-    private Connection connection;
-
 
     public JDBCFileDAO(JDBCDataAccessContext context) {
         super(context);
@@ -46,14 +45,10 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
         }
     }
 
-    private LazyStatement getFileGroupStatement = new LazyStatement(
-            "SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_file_group_id = ?"
-    );
-
     // used with queries that return a list of files
     private Iterable<File> getFiles(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
-            List<File> files = new ArrayList<>();
+            Collection<File> files = new ArrayList<>();
             while (rs.next()) {
                 files.add(populateFile(rs));
             }
@@ -61,34 +56,18 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
         }
     }
 
-    @Override
-    public Iterable<File> getFiles(int fileGroup) throws DataAccessException {
-        try {
-            PreparedStatement ps = getFileGroupStatement.value();
-            ps.setInt(1, fileGroup);
-            return getFiles(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to get files from group.", ex);
-        }
-    }
-
     private LazyStatement createFileStatement = new LazyStatement(
-            "INSERT INTO files(file_path, file_name, file_content_type, file_file_group_id) VALUES(?,?,?,?)",
+            "INSERT INTO files(file_path, file_name, file_content_type) VALUES(?,?,?)",
             "file_id"
     );
 
     @Override
-    public File createFile(String path, String fileName, String contentType, Integer fileGroup) throws DataAccessException {
+    public File createFile(String path, String fileName, String contentType) throws DataAccessException {
         try {
             PreparedStatement ps = createFileStatement.value();
             ps.setString(1, path);
             ps.setString(2, fileName);
             ps.setString(3, contentType);
-
-            if (fileGroup == -1)
-                ps.setNull(4, Types.NULL);
-            else
-                ps.setInt(4, fileGroup);
 
             if (ps.executeUpdate() != 1)
                 throw new DataAccessException("New file record failed. No rows affected.");
@@ -100,22 +79,6 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create file in be.ugent.degage.database.", ex);
-        }
-    }
-
-    @Override
-    public int createFileGroupNumber() throws DataAccessException {
-        // This is a really silly way of creating a filegroup with only indices. Should use MySQL COUNTER instead of TABLE (but breaks FK's)
-        try (Statement stat = connection.createStatement()) {
-            if (stat.executeUpdate("INSERT INTO filegroups VALUES()", new String[]{"file_group_id"}) != 1)
-                throw new DataAccessException("New filegroup record failed. No rows affected.");
-            try (ResultSet keys = stat.getGeneratedKeys()) {
-                if (!keys.next())
-                    throw new DataAccessException("Failed to read keys for new filegroup record.");
-                return keys.getInt(1);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create new filegroup.", ex);
         }
     }
 
@@ -137,9 +100,8 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
 
     private LazyStatement getDamageFilesStatement = new LazyStatement(
             "SELECT file_id, file_path, file_name, file_content_type " +
-                    "FROM files JOIN damagefiles " +
-                    "WHERE files.file_id = damagefiles.file_id " +
-                    "   AND damagefiles.damage_id = ?"
+                    "FROM files JOIN damagefiles USING (file_id) " +
+                    "WHERE damagefiles.damage_id = ?"
     );
 
     @Override
@@ -171,8 +133,8 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
 
     private LazyStatement getIdFilesStatement = new LazyStatement(
             "SELECT file_id, file_path, file_name, file_content_type " +
-                    "FROM files JOIN idfiles " +
-                    "WHERE files.file_id = idfiles.file_id AND idfiles.user_id = ?"
+                    "FROM files JOIN idfiles USING (file_id) " +
+                    "WHERE idfiles.user_id = ?"
     );
 
     @Override
@@ -204,8 +166,8 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
 
     private LazyStatement getLicenseFilesStatement = new LazyStatement(
             "SELECT file_id, file_path, file_name, file_content_type " +
-                    "FROM files JOIN licensefiles " +
-                    "WHERE files.file_id = idfiles.file_id AND idfiles.user_id = ?"
+                    "FROM files JOIN licensefiles USING(file_id) " +
+                    "WHERE licensefiles.user_id = ?"
     );
 
     @Override

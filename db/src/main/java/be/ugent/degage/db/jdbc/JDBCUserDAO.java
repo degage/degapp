@@ -324,17 +324,17 @@ class JDBCUserDAO implements UserDAO {
                 }
 
                 if(user.getIdentityCard() == null) {
-                    ps.setNull(15, Types.VARCHAR);
                     ps.setNull(16, Types.VARCHAR);
+                    ps.setNull(17, Types.VARCHAR);
                 } else {
-                    if(user.getIdentityCard().getId() == null) ps.setNull(15, Types.VARCHAR);
-                    else ps.setString(15, user.getIdentityCard().getId());
-                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(16, Types.VARCHAR);
-                    else ps.setString(16, user.getIdentityCard().getRegistrationNr());
+                    if(user.getIdentityCard().getId() == null) ps.setNull(16, Types.VARCHAR);
+                    else ps.setString(16, user.getIdentityCard().getId());
+                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(17, Types.VARCHAR);
+                    else ps.setString(17, user.getIdentityCard().getRegistrationNr());
                 }
 
 
-                ps.setInt(17, user.getId());
+                ps.setInt(18, user.getId());
             }
 
             if(ps.executeUpdate() == 0)

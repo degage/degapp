@@ -1,11 +1,12 @@
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.models.Address;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
 /**
  * JDBC implementation of {@link AddressDAO}

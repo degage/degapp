@@ -111,7 +111,7 @@ public class Receipts extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReceiptDAO dao = context.getReceiptDAO();
         FileDAO fdao = context.getFileDAO();
-        File file = fdao.createFile(filename, name, "pdf", -1);
+        File file = fdao.createFile(filename, name, "pdf");
 
         dao.createReceipt(name, new DateTime(date), file, user, price);
     }

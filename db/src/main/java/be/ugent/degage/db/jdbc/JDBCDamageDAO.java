@@ -1,20 +1,22 @@
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.dao.DamageDAO;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
+import be.ugent.degage.db.dao.DamageDAO;
 import be.ugent.degage.db.models.CarRide;
 import be.ugent.degage.db.models.Damage;
-import be.ugent.degage.db.models.File;
 import org.joda.time.DateTime;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * JDBC implementation of {@Link DamageDAO}
+ * JDBC implementation of {@link DamageDAO}
  */
 class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
 

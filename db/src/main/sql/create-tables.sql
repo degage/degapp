@@ -15,22 +15,15 @@ CREATE TABLE `settings` (
   PRIMARY KEY (`setting_name`,`setting_after`)
 );
 
--- TODO: replace by counter (but then cannot longer be a foreign key)
-CREATE TABLE `filegroups` (
-	`file_group_id` INT NOT NULL AUTO_INCREMENT,
-	PRIMARY KEY (`file_group_id`)           -- needed for foreign key constraint
-);
 
 CREATE TABLE `files` (
   `file_id` INT NOT NULL AUTO_INCREMENT,
   `file_path` VARCHAR(255) NOT NULL,
   `file_name` VARCHAR(128) NULL,
   `file_content_type` VARCHAR(64) NULL,
-  `file_file_group_id` INT NULL DEFAULT NULL,
   `file_created_at` DATETIME,
   `file_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`file_id`),
-	FOREIGN KEY (`file_file_group_id`) REFERENCES filegroups(`file_group_id`)
+	PRIMARY KEY (`file_id`)
 );
 
 

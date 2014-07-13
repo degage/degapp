@@ -181,7 +181,7 @@ public class Refuels extends Controller {
                         Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.refuelproofs"));
                         FileDAO fdao = context.getFileDAO();
                         try {
-                            File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType(), null);
+                            File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
                             refuel.setAmount(model.amount);
                             refuel.setStatus(RefuelStatus.REQUEST);
                             refuel.setProof(file);

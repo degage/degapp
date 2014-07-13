@@ -30,6 +30,5 @@ DROP TABLE licensefiles;
 DROP TABLE users;
 DROP TABLE addresses;
 DROP TABLE files;
-DROP TABLE filegroups;
 
 DROP TABLE settings;
