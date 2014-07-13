@@ -189,7 +189,7 @@ class JDBCRefuelDAO implements RefuelDAO {
 
         refuel.setBilled(rs.getDate("refuel_billed"));
 
-        refuel.getCarRide().getReservation().getCar().setOwner(JDBCUserDAO.populateUser(rs, false, false, "owners"));
+        refuel.getCarRide().getReservation().getCar().setOwner(JDBCUserDAO.populateUserPartial(rs, false, "owners"));
 
         return refuel;
     }

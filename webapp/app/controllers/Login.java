@@ -176,7 +176,7 @@ public class Login extends Controller {
     @InjectContext
     public static Result resetPassword(int userId, String uuid) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId, false);
+        User user = dao.getUserPartial(userId);
         if (user == null) {
             return badRequest("Deze user bestaat niet."); //TODO: flash
         } else {
@@ -206,7 +206,7 @@ public class Login extends Controller {
             return badRequest(pwreset.render(resetForm, userId, uuid));
         } else {
             UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-            User user = dao.getUser(userId, true);
+            User user = dao.getUser(userId);
             if (user == null) {
                 return badRequest("Deze user bestaat niet."); //TODO: flash
             } else {
@@ -216,7 +216,7 @@ public class Login extends Controller {
                 } else if (ident.equals(uuid)) {
                     dao.deleteVerificationString(user, VerificationType.PWRESET);
                     user.setPassword(UserProvider.hashPassword(resetForm.get().password));
-                    dao.updateUser(user, true);
+                    dao.updateUser(user);
 
                     DataProvider.getUserProvider().invalidateUser(user);
                     flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
@@ -303,7 +303,7 @@ public class Login extends Controller {
     public static Result register_verification(int userId, String uuid) {
 
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId);
         if (user == null) {
             return badRequest("Deze user bestaat niet."); //TODO: flash
         } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
@@ -317,7 +317,7 @@ public class Login extends Controller {
                 dao.deleteVerificationString(user, VerificationType.REGISTRATION);
                 user.setStatus(UserStatus.REGISTERED);
 
-                dao.updateUser(user, true);
+                dao.updateUser(user);
                 DataProvider.getUserProvider().invalidateUser(user);
 
                 flash("success", "Je email werd succesvol geverifieerd. Gelieve aan te melden.");

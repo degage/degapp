@@ -107,7 +107,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     }
 
     private Approval populateApproval(ResultSet rs) throws SQLException {
-        return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUser(rs, false, false, "users"), JDBCUserDAO.populateUser(rs, false, false, "admins"),
+        return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUserPartial(rs, false, "users"), JDBCUserDAO.populateUserPartial(rs, false, "admins"),
                 new DateTime(rs.getTimestamp("approval_submission").getTime()),
                 rs.getTimestamp("approval_date") != null ? new DateTime(rs.getTimestamp("approval_date").getTime()) : null,
                 rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSession(rs, false, false), Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),

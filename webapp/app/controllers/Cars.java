@@ -271,7 +271,7 @@ public class Cars extends Controller {
             if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
                     || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
                 // User is permitted to add cars for other users
-                owner = context.getUserDAO().getUser(model.userId, false);
+                owner = context.getUserDAO().getUserPartial(model.userId);
             }
             TechnicalCarDetails technicalCarDetails = null;
             Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -514,7 +514,7 @@ public class Cars extends Controller {
         if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
                 || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
             // User is permitted to add cars for other users
-            car.setOwner(context.getUserDAO().getUser(model.userId, false));
+            car.setOwner(context.getUserDAO().getUserPartial(model.userId));
         }
 
         dao.updateCar(car);
@@ -738,11 +738,11 @@ public class Cars extends Controller {
                 int id = Integer.parseInt(value);
                 User user;
                 if (id > 0) { // create
-                    user = context.getUserDAO().getUser(id, false);
+                    user = context.getUserDAO().getUserPartial(id);
                     if (!userInList(id, privileged))
                         usersToAdd.add(user);
                 } else { // delete
-                    user = context.getUserDAO().getUser(-1 * id, false);
+                    user = context.getUserDAO().getUserPartial(-1 * id);
                     usersToDelete.add(user);
                 }
                 if (user == null) {

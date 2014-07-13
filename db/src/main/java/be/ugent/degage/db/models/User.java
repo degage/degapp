@@ -1,7 +1,7 @@
 package be.ugent.degage.db.models;
 
 /**
- * Created by Cedric on 2/16/14.
+ * Represents a single user
  */
 public class User {
 

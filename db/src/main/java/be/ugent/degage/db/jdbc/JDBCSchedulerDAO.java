@@ -33,7 +33,7 @@ class JDBCSchedulerDAO implements SchedulerDAO {
                     "LEFT JOIN (SELECT * FROM notifications WHERE notification_read=0) o " +
                     "ON o.notification_user_id = p.user_id GROUP BY p.user_id) a " +
                     "LEFT JOIN (SELECT * FROM messages WHERE message_read=0) b " +
-                    "ON a.user_id = b.message_to_user_id GROUP BY a.user_id) AS Reminder " +
+                    "ON a.user_id = b.message_to_user_id GROUP BY a.user_id) AS reminder " +
                     "WHERE (number_of_notifications > ? OR number_of_messages > ?) " +
                     "AND user_last_notified < DATE_SUB(NOW(),INTERVAL 7 DAY)");
         }
@@ -78,7 +78,7 @@ class JDBCSchedulerDAO implements SchedulerDAO {
         List<User> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(JDBCUserDAO.populateUser(rs, false, false, "Reminder"));
+                list.add(JDBCUserDAO.populateUserPartial(rs, false, "reminder"));
             }
             return list;
         }catch (SQLException e){

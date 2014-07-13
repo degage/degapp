@@ -37,7 +37,7 @@
                             <label class="col-md-1 control-label" for="receiver">Ontvanger</label>
                             @if(form("userId").value){
                                  <!-- TODO: move this to controller -->
-                                 @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUser(form("userId").value.toInt, false)) { user =>
+                                 @defining(DataProvider.getDataAccessProvider.getDataAccessContext.getUserDAO.getUserPartial(form("userId").value.toInt)) { user =>
                                     <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                         <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" autocomplete="false" />
                                         <input type="hidden" name="userId" value="@user.getId" />

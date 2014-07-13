@@ -229,7 +229,7 @@ public class FileHelper {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
 
         if (user == null) {
             return Controller.badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));

@@ -214,7 +214,7 @@ class JDBCInfoSessionDAO implements InfoSessionDAO {
         User host = null;
         if(withJoins) {
             address = JDBCAddressDAO.populateAddress(rs);
-            host = JDBCUserDAO.populateUser(rs, false, false);
+            host = JDBCUserDAO.populateUserPartial(rs, false);
         }
         int maxEnrollees = rs.getInt("infosession_max_enrollees");
 

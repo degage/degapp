@@ -171,7 +171,7 @@ public class Damages extends Controller {
         Damage damage = dao.getDamage(damageId);
         Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
         Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
-        User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
+        User owner = userDAO.getUser(damagedCar.getOwner().getId());
         List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
         return ok(details.render(damage, owner, damagedCar, damageLogList, proofList));
     }
@@ -245,7 +245,7 @@ public class Damages extends Controller {
             DamageLogDAO damageLogDAO = context.getDamageLogDAO();
             Damage damage = dao.getDamage(damageId);
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
-            User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
+            User owner = userDAO.getUser(damagedCar.getOwner().getId());
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
             Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
             flash("danger", "Beschrijving aanpassen mislukt.");
@@ -284,7 +284,7 @@ public class Damages extends Controller {
             DamageLogDAO damageLogDAO = context.getDamageLogDAO();
             Damage damage = dao.getDamage(damageId);
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
-            User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
+            User owner = userDAO.getUser(damagedCar.getOwner().getId()); // TODO: why is this not partial (and in other places?)
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
             Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
             flash("danger", "Status toevoegen mislukt.");

@@ -1,7 +1,7 @@
 package be.ugent.degage.db.models;
 
 /**
- * Created by HannesM on 15/03/14.
+ * Gender of a user (database default = UNKNOWN)
  */
 public enum UserGender {
     MALE,

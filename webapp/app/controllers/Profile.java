@@ -96,7 +96,7 @@ public class Profile extends Controller {
         //TODO: Rely on heavy caching of the image ID or views since each app page includes this
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         if (user != null && user.getProfilePictureId() >= 0) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), user.getProfilePictureId());
         } else {
@@ -120,7 +120,7 @@ public class Profile extends Controller {
         // We load the other user(by id)
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
-        user = dao.getUser(userId, true);
+        user = dao.getUser(userId);
 
         // Check if the userId exists
         if (user == null || currentUser.getId() != user.getId() && !DataProvider.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN)) {
@@ -161,8 +161,7 @@ public class Profile extends Controller {
                             File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
                             int oldPictureId = user.getProfilePictureId();
                             user.setProfilePictureId(file.getId());
-                            udao.updateUser(user, true);
-                            context.commit();
+                            udao.updateUser(user);
 
                             if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
                                 try {
@@ -220,8 +219,9 @@ public class Profile extends Controller {
     @InjectContext
     public static Result index(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId);
 
+        // TODO: introduce userExists
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
             return redirect(routes.Dashboard.index());
@@ -279,7 +279,7 @@ public class Profile extends Controller {
     public static Result editIdentityCard(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId);
 
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
@@ -440,7 +440,7 @@ public class Profile extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         User currentUser = DataProvider.getUserProvider().getUser();
 
         if (user == null || !canEditProfile(user, currentUser)) {
@@ -490,7 +490,7 @@ public class Profile extends Controller {
                 }
 
                 if (updateUser) {
-                    udao.updateUser(user, true);
+                    udao.updateUser(user);
                 }
 
                 flash("success", "Jouw identiteitskaart werd succesvol bijgewerkt.");
@@ -523,7 +523,7 @@ public class Profile extends Controller {
     public static Result editDriversLicense(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId);
 
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
@@ -554,7 +554,7 @@ public class Profile extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         User currentUser = DataProvider.getUserProvider().getUser();
 
         if (user == null || !canEditProfile(user, currentUser)) {
@@ -596,7 +596,7 @@ public class Profile extends Controller {
                 }
 
                 if (updateUser) {
-                    udao.updateUser(user, true);
+                    udao.updateUser(user);
                 }
 
                 flash("success", "Je rijbewijs werd succesvol bijgewerkt.");
@@ -620,7 +620,7 @@ public class Profile extends Controller {
     @InjectContext
     public static Result edit(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId);
         User currentUser = DataProvider.getUserProvider().getUser();
 
         if (!canEditProfile(user, currentUser)) {
@@ -673,7 +673,7 @@ public class Profile extends Controller {
     @InjectContext
     public static Result editUserStatus(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         if (user == null) {
             flash("danger", "GebruikersID bestaat niet.");
             return redirect(routes.Users.showUsers());
@@ -686,7 +686,7 @@ public class Profile extends Controller {
     @InjectContext
     public static Result editUserStatusPost(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         if (user == null) {
             flash("danger", "GebruikersID bestaat niet.");
             return redirect(routes.Users.showUsers());
@@ -695,7 +695,7 @@ public class Profile extends Controller {
             UserStatus status = Enum.valueOf(UserStatus.class, strStatus);
             if (user.getStatus() != status) {
                 user.setStatus(status);
-                udao.updateUser(user, true);
+                udao.updateUser(user);
 
                 DataProvider.getUserProvider().invalidateUser(user); //wipe the status from ram
 
@@ -720,7 +720,7 @@ public class Profile extends Controller {
     public static Result editPost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId);
         User currentUser = DataProvider.getUserProvider().getUser();
 
         boolean isProfileAdmin = DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN);
@@ -758,7 +758,7 @@ public class Profile extends Controller {
             boolean deleteResidence = model.residenceAddress.isEmpty() && residenceAddress != null;
             user.setAddressResidence(deleteResidence || model.residenceAddress.isEmpty() ? null : modifyAddress(model.residenceAddress, residenceAddress, adao));
 
-            dao.updateUser(user, true); // Full update (includes FKs)
+            dao.updateUser(user); // Full update (includes FKs)
 
             // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
             // TODO: soft-delete addresses and keep references

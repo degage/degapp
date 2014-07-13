@@ -86,7 +86,7 @@ public class UserRoles extends Controller {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
             return badRequest(overview.render());
@@ -131,7 +131,7 @@ public class UserRoles extends Controller {
     public static Result editPost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
-        User user = udao.getUser(userId, true);
+        User user = udao.getUser(userId);
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
             return badRequest(overview.render());

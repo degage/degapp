@@ -5,8 +5,7 @@
 package be.ugent.degage.db.models;
 
 /**
- *
- * @author Laurent
+ * The various user statuses. (Database default: EMAIL_VALIDATING)
  */
 public enum UserStatus {
     EMAIL_VALIDATING,

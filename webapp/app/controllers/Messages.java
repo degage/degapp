@@ -117,7 +117,7 @@ public class Messages extends Controller {
     @InjectContext
     public static Result reply(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId, true);
+        User user = dao.getUser(userId); // TODO: full user needed?
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
             return redirect(routes.Messages.showMessages());
@@ -150,7 +150,7 @@ public class Messages extends Controller {
             MessageDAO dao = context.getMessageDAO();
 
             User sender = DataProvider.getUserProvider().getUser();
-            User receiver = context.getUserDAO().getUser(createForm.get().userId, false);
+            User receiver = context.getUserDAO().getUserPartial(createForm.get().userId);
             Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
             DataProvider.getCommunicationProvider().invalidateMessages(receiver.getId()); // invalidate the message
             DataProvider.getCommunicationProvider().invalidateMessageNumber(receiver.getId());

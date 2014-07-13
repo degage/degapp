@@ -73,7 +73,7 @@ public class Users extends Controller {
             return redirect(routes.Dashboard.index());
         } else {
             UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-            User user = dao.getUser(userId, false);
+            User user = dao.getUserPartial(userId);
             if (user != null) {
                 if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)) {
                     flash("danger", "Je kan geen superuser impersoneren.");

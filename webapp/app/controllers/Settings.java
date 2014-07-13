@@ -87,8 +87,7 @@ public class Settings extends Controller {
                 return badRequest(changepass.render(form));
             } else {
                 user.setPassword(UserProvider.hashPassword(model.newpw));
-                dao.updateUser(user, false);
-                // context.commit(); // TODO: wat doet dit hier?
+                dao.updateUserPartial(user);
 
                 DataProvider.getUserProvider().invalidateUser(user);
                 flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");

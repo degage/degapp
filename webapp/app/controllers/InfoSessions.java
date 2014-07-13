@@ -184,7 +184,7 @@ public class InfoSessions extends Controller {
 
             // Check the host field
             UserDAO udao = context.getUserDAO();
-            User host = udao.getUser(editForm.get().userId, false);
+            User host = udao.getUserPartial(editForm.get().userId);
 
             if (host == null) {
                 editForm.reject("Infosessie gastheer bestaat niet.");
@@ -325,7 +325,7 @@ public class InfoSessions extends Controller {
 
         UserDAO udao = context.getUserDAO();
 
-        User user = udao.getUser(userId, false);
+        User user = udao.getUserPartial(userId);
         if (user == null) {
             flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -358,7 +358,7 @@ public class InfoSessions extends Controller {
         }
 
         UserDAO udao = context.getUserDAO();
-        User user = udao.getUser(userId, false);
+        User user = udao.getUserPartial(userId);
         if (user == null) {
             flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -396,7 +396,7 @@ public class InfoSessions extends Controller {
             flash("danger", "InfoSessie bestaat niet.");
             return redirect(routes.InfoSessions.pendingApprovalList());
         } else {
-            User user = udao.getUser(userId, false);
+            User user = udao.getUserPartial(userId);
             if (user == null) {
                 flash("danger", "GebruikersID bestaat niet.");
                 return redirect(routes.InfoSessions.detail(sessionId));
@@ -488,7 +488,7 @@ public class InfoSessions extends Controller {
             }
 
             UserDAO udao = context.getUserDAO();
-            User host = udao.getUser(createForm.get().userId, false);
+            User host = udao.getUserPartial(createForm.get().userId);
             if (host == null) {
                 createForm.reject("De gastheer ID bestaat niet.");
                 return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
@@ -530,7 +530,7 @@ public class InfoSessions extends Controller {
     private static List<String> checkApprovalConditions(User user, DataAccessContext context) {
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
-        user = udao.getUser(user.getId(), true); // gets the full user instead of small cached one
+        user = udao.getUser(user.getId()); // gets the full user instead of small cached one
         Iterable<File> identityFiles = fdao.getIdFiles(user.getId());
         Iterable<File> licenseFiles = fdao.getLicenseFiles(user.getId());
 
@@ -634,7 +634,7 @@ public class InfoSessions extends Controller {
                 ApprovalDAO dao = context.getApprovalDAO();
                 InfoSessionDAO idao = context.getInfoSessionDAO();
                 UserDAO udao = context.getUserDAO();
-                user = udao.getUser(user.getId(), true); //get full user
+                user = udao.getUser(user.getId()); //get full user
                 Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
                 if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
                     flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
@@ -642,7 +642,7 @@ public class InfoSessions extends Controller {
                 } else {
                     Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
                     user.setStatus(UserStatus.FULL_VALIDATING); //set to validation
-                    udao.updateUser(user, true); //full update
+                    udao.updateUser(user); //full update
                     return redirect(routes.Dashboard.index());
                 }
             }
@@ -728,7 +728,7 @@ public class InfoSessions extends Controller {
 
                 // Get the contact admin
                 UserDAO udao = context.getUserDAO();
-                ap.setUser(udao.getUser(ap.getUser().getId(), true));
+                ap.setUser(udao.getUser(ap.getUser().getId()));
 
                 return approvalForm(ap, context, Form.form(ApprovalAdminModel.class).fill(model), false);
             }
@@ -748,7 +748,7 @@ public class InfoSessions extends Controller {
         } else {
 
             UserDAO udao = context.getUserDAO();
-            ap.setUser(udao.getUser(ap.getUser().getId(), true));
+            ap.setUser(udao.getUser(ap.getUser().getId()));
             EnrollementStatus status = EnrollementStatus.ABSENT;
             if (ap.getSession() != null) {
                 InfoSessionDAO idao = context.getInfoSessionDAO();
@@ -773,7 +773,7 @@ public class InfoSessions extends Controller {
             return redirect(routes.InfoSessions.pendingApprovalList());
         } else {
             UserDAO udao = context.getUserDAO();
-            User contractManager = udao.getUser(userId, false);
+            User contractManager = udao.getUserPartial(userId);
 
             if (contractManager != null) {
                 if (!DataProvider.getUserRoleProvider().hasRole(contractManager, UserRole.INFOSESSION_ADMIN)) {
@@ -829,10 +829,10 @@ public class InfoSessions extends Controller {
                 dao.updateApproval(ap);
 
                 // Set contact admin
-                User user = udao.getUser(ap.getUser().getId(), true);
+                User user = udao.getUser(ap.getUser().getId());
                 user.setStatus(UserStatus.FULL);
                 user.setAgreeTerms(true); //TODO: check if we can accept this earlier, as it is accepted once approval is submitted
-                udao.updateUser(user, true); //full update
+                udao.updateUser(user); //full update
 
                 // Add the new user roles
                 UserRoleDAO roleDao = context.getUserRoleDAO();

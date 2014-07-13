@@ -209,13 +209,13 @@ public class Drives extends Controller {
             flash("Error", "De opgegeven reservatie is onbestaand");
             return null;
         }
-        User loaner = udao.getUser(reservation.getUser().getId(), true);
+        User loaner = udao.getUser(reservation.getUser().getId());
         Car car = cdao.getCar(reservation.getCar().getId());
         if (car == null || loaner == null) {
             flash("Error", "De reservatie bevat ongeldige gegevens");
             return null;
         }
-        User owner = udao.getUser(car.getOwner().getId(), true);
+        User owner = udao.getUser(car.getOwner().getId());
         if (owner == null) {
             flash("Error", "De reservatie bevat ongeldige gegevens");
             return null;
@@ -233,13 +233,13 @@ public class Drives extends Controller {
         if (nextReservation != null)
             nextReservation = nextReservation.getFrom().isBefore(reservation.getTo().plusDays(1)) ? nextReservation : null;
         User nextLoaner = nextReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
-                udao.getUser(nextReservation.getUser().getId(), true) : null;
+                udao.getUser(nextReservation.getUser().getId()) : null;
 
         Reservation previousReservation = rdao.getPreviousReservation(reservation);
         if (previousReservation != null)
             previousReservation = previousReservation.getTo().isAfter(reservation.getFrom().minusDays(1)) ? previousReservation : null;
         User previousLoaner = previousReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
-                udao.getUser(previousReservation.getUser().getId(), true) : null;
+                udao.getUser(previousReservation.getUser().getId()) : null;
 
         return driveDetails.render(adjustForm, refuseForm, detailsForm, reservation, driveInfo, car, owner, loaner,
                 previousLoaner, nextLoaner);
