@@ -158,7 +158,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public DamageDAO getDamageDAO() {
         if(damageDAO == null){
-            damageDAO = new JDBCDamageDAO(connection);
+            damageDAO = new JDBCDamageDAO(this);
         }
         return damageDAO;
     }
@@ -222,7 +222,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public FileDAO getFileDAO() {
         if(fileDAO == null){
-            fileDAO = new JDBCFileDAO(connection);
+            fileDAO = new JDBCFileDAO(this);
         }
         return fileDAO;
     }

@@ -32,4 +32,14 @@ public interface FileDAO {
      * Delete a file
      */
     public void deleteFile(int fileId) throws DataAccessException;
+
+    /**
+     * Return the image files for a damage case
+     */
+    public Iterable<File> getDamageFiles (int damageId) throws DataAccessException;
+
+    /**
+     * Add an image file to a damage case
+     */
+    public void addDamageFile (int damageId, int fileId) throws DataAccessException;
 }

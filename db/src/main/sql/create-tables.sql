@@ -252,15 +252,21 @@ CREATE TABLE `refuels` (
 CREATE TABLE `damages` (
 	`damage_id` INT NOT NULL AUTO_INCREMENT,
 	`damage_car_ride_id` INT NOT NULL,
-	`damage_filegroup_id` INT,
 	`damage_description` TEXT,
 	`damage_finished` BIT(1) NOT NULL DEFAULT 0,
 	`damage_time` DATETIME NOT NULL,
    	`damage_created_at` DATETIME,
    	`damage_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_id`),
-	FOREIGN KEY (`damage_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`),
-	FOREIGN KEY (`damage_filegroup_id`) REFERENCES filegroups(`file_group_id`)
+	FOREIGN KEY (`damage_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`)
+);
+
+CREATE TABLE damagefiles (
+    damage_id INT NOT NULL,
+    file_id INT NOT NULL,
+    PRIMARY KEY (damage_id, file_id),
+    FOREIGN KEY (damage_id) REFERENCES damages(damage_id),
+    FOREIGN KEY (file_id) REFERENCES files(file_id)
 );
 
 CREATE TABLE `damagelogs` (

@@ -169,12 +169,7 @@ public class Damages extends Controller {
         DamageLogDAO damageLogDAO = context.getDamageLogDAO();
         FileDAO fileDAO = context.getFileDAO();
         Damage damage = dao.getDamage(damageId);
-        Iterable<File> proofList;
-        if (damage.getProofId() != 0) {
-            proofList = fileDAO.getFiles(damage.getProofId());
-        } else {
-            proofList = new ArrayList<>();
-        }
+        Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
         Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
         User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
         List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
@@ -252,12 +247,7 @@ public class Damages extends Controller {
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            Iterable<File> proofList;
-            if (damage.getProofId() != 0) {
-                proofList = fileDAO.getFiles(damage.getProofId());
-            } else {
-                proofList = new ArrayList<>();
-            }
+            Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
             flash("danger", "Beschrijving aanpassen mislukt.");
             return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
         } else {
@@ -296,12 +286,7 @@ public class Damages extends Controller {
             Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId(), true);
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            Iterable<File> proofList;
-            if (damage.getProofId() != 0) {
-                proofList = fileDAO.getFiles(damage.getProofId());
-            } else {
-                proofList = new ArrayList<>();
-            }
+            Iterable<File> proofList = fileDAO.getFiles(damageId);
             flash("danger", "Status toevoegen mislukt.");
             return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
         } else {
@@ -367,16 +352,10 @@ public class Damages extends Controller {
                     flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
                     return badRequest();
                 } else {
-                    int fileGroupNumber = damage.getProofId();
-                    if (fileGroupNumber == 0) {
-                        // Create new filegroup
-                        fileGroupNumber = fdao.createFileGroupNumber();
-                        damage.setProofId(fileGroupNumber);
-                        updateDamage = true;
-                    }
-                    // Now we add the file to the group
+                   // Now we add the file to the group
                     Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.damages"));
-                    File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), fileGroupNumber);
+                    File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), null);
+                    fdao.addDamageFile(damageId, file.getId()); // TODO: make this one (atomic) call to fdao
                 }
             }
             if (updateDamage) {

@@ -11,6 +11,7 @@ DROP TABLE templatetags;
 DROP TABLE templates;
 DROP TABLE messages;
 DROP TABLE damagelogs;
+DROP TABLE damagefiles;
 DROP TABLE damages;
 DROP TABLE refuels;
 DROP TABLE carrides;

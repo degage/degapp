@@ -8,47 +8,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class JDBCFileDAO implements FileDAO {
+class JDBCFileDAO extends AbstractDAO implements FileDAO {
 
     private Connection connection;
 
-    private PreparedStatement createFileStatement;
-    private PreparedStatement getFileGroupStatement;
-    private PreparedStatement getFileStatement;
-    private PreparedStatement deleteFileStatement;
-    private PreparedStatement createFileGroupStatement;
 
-    public JDBCFileDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCFileDAO(JDBCDataAccessContext context) {
+        super(context);
     }
 
-    private PreparedStatement getDeleteFileStatement() throws SQLException {
-        if(deleteFileStatement == null){
-            deleteFileStatement = connection.prepareStatement("DELETE FROM files WHERE file_id = ?");
-        }
-        return deleteFileStatement;
-    }
-
-    private PreparedStatement getGetFileStatement() throws SQLException {
-        if (getFileStatement == null) {
-            getFileStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_id = ?");
-        }
-        return getFileStatement;
-    }
-
-    private PreparedStatement getCreateFileStatement() throws SQLException {
-        if (createFileStatement == null) {
-            createFileStatement = connection.prepareStatement("INSERT INTO files(file_path, file_name, file_content_type, file_file_group_id) VALUES(?,?,?,?)", new String[]{"file_id"});
-        }
-        return createFileStatement;
-    }
-
-    private PreparedStatement getGetFileGroupStatement() throws SQLException {
-        if (getFileGroupStatement == null) {
-            getFileGroupStatement = connection.prepareStatement("SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_file_group_id = ?");
-        }
-        return getFileGroupStatement;
-    }
 
     public static File populateFile(ResultSet rs) throws SQLException {
         return new File(rs.getInt("file_id"), rs.getString("file_path"), rs.getString("file_name"), rs.getString("file_content_type"));
@@ -58,13 +26,17 @@ class JDBCFileDAO implements FileDAO {
         return new File(rs.getInt(tableName + ".file_id"), rs.getString(tableName + ".file_path"), rs.getString(tableName + ".file_name"), rs.getString(tableName + ".file_content_type"));
     }
 
+    private LazyStatement getFileStatement = new LazyStatement(
+            "SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_id = ?"
+    );
+
     @Override
     public File getFile(int id) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetFileStatement();
+            PreparedStatement ps = getFileStatement.value();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if(!rs.next())
+                if (!rs.next())
                     return null;
                 else
                     return populateFile(rs);
@@ -74,29 +46,41 @@ class JDBCFileDAO implements FileDAO {
         }
     }
 
+    private LazyStatement getFileGroupStatement = new LazyStatement(
+            "SELECT file_id, file_path, file_name, file_content_type FROM files WHERE file_file_group_id = ?"
+    );
+
+    // used with queries that return a list of files
+    private Iterable<File> getFiles(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            List<File> files = new ArrayList<>();
+            while (rs.next()) {
+                files.add(populateFile(rs));
+            }
+            return files;
+        }
+    }
+
     @Override
     public Iterable<File> getFiles(int fileGroup) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetFileGroupStatement();
+            PreparedStatement ps = getFileGroupStatement.value();
             ps.setInt(1, fileGroup);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                List<File> files = new ArrayList<>();
-                while (rs.next()) {
-                    files.add(populateFile(rs));
-                }
-                return files;
-            }
+            return getFiles(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get files from group.", ex);
         }
     }
 
+    private LazyStatement createFileStatement = new LazyStatement(
+            "INSERT INTO files(file_path, file_name, file_content_type, file_file_group_id) VALUES(?,?,?,?)",
+            "file_id"
+    );
 
     @Override
     public File createFile(String path, String fileName, String contentType, Integer fileGroup) throws DataAccessException {
         try {
-            PreparedStatement ps = getCreateFileStatement();
+            PreparedStatement ps = createFileStatement.value();
             ps.setString(1, path);
             ps.setString(2, fileName);
             ps.setString(3, contentType);
@@ -113,8 +97,6 @@ class JDBCFileDAO implements FileDAO {
                 if (!keys.next())
                     throw new DataAccessException("Failed to read keys for new file record.");
                 return new File(keys.getInt(1), path, fileName, contentType);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for new file.", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create file in be.ugent.degage.database.", ex);
@@ -132,20 +114,58 @@ class JDBCFileDAO implements FileDAO {
                     throw new DataAccessException("Failed to read keys for new filegroup record.");
                 return keys.getInt(1);
             }
-        } catch(SQLException ex){
+        } catch (SQLException ex) {
             throw new DataAccessException("Failed to create new filegroup.", ex);
         }
     }
 
+    private LazyStatement deleteFileStatement = new LazyStatement(
+         "DELETE FROM files WHERE file_id = ?"
+    );
+
     @Override
     public void deleteFile(int fileId) throws DataAccessException {
         try {
-            PreparedStatement ps = getDeleteFileStatement();
+            PreparedStatement ps = deleteFileStatement.value();
             ps.setInt(1, fileId);
-            if(ps.executeUpdate() != 1)
+            if (ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
-        } catch(SQLException ex){
+        } catch (SQLException ex) {
             throw new DataAccessException("Failed to prepare delete file query.", ex);
+        }
+    }
+
+    private LazyStatement getDamageFilesStatement = new LazyStatement(
+            "SELECT file_id, file_path, file_name, file_content_type " +
+                    "FROM files JOIN damagefiles " +
+                    "WHERE files.file_id = damagefiles.file_id " +
+                    "   AND damagefiles.damage_id = ?"
+    );
+
+    @Override
+    public Iterable<File> getDamageFiles(int damageId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getDamageFilesStatement.value();
+            ps.setInt(1, damageId);
+            return getFiles(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to get damage files", ex);
+        }
+    }
+
+    private LazyStatement addDamageFileStatement = new LazyStatement(
+            "INSERT INTO damagefiles(damage)id,file_id) VALUES (?,?)"
+    );
+
+    @Override
+    public void addDamageFile(int damageId, int fileId) throws DataAccessException {
+        try {
+            PreparedStatement ps = addDamageFileStatement.value();
+            ps.setInt (1, damageId);
+            ps.setInt (2, fileId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to add damage file", ex);
         }
     }
 }
