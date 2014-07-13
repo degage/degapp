@@ -24,7 +24,7 @@ class JDBCUserDAO implements UserDAO {
     private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, users.user_gender, " +
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
             "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
-            "users.user_driver_license_id, users.user_driver_license_file_group_id, users.user_identity_card_id, users.user_identity_card_registration_nr, users.user_identity_card_file_group_id, " +
+            "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
             "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_image_id";
 
     private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM users " +
@@ -134,8 +134,8 @@ class JDBCUserDAO implements UserDAO {
     	if (updateUserStatement == null){
     		updateUserStatement = connection.prepareStatement("UPDATE users SET user_email=?, user_password=?, user_firstname=?, user_lastname=?, user_status=?, " +
                     "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
-                    "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?, user_driver_license_file_group_id=?, " +
-                    "user_identity_card_id=?, user_identity_card_registration_nr=?, user_identity_card_file_group_id=? " +
+                    "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?,  " +
+                    "user_identity_card_id=?, user_identity_card_registration_nr=? " +
                     "WHERE user_id = ?");
     	}
     	return updateUserStatement;
@@ -189,22 +189,7 @@ class JDBCUserDAO implements UserDAO {
                 user.setProfilePictureId(rs.getInt(tableName + ".user_image_id"));
             }
 
-            DriverLicense driverLicense = new DriverLicense();
-            boolean driverLicenseNotNull = false;
-            String driverLicenseId = rs.getString(tableName + ".user_driver_license_id");
-            if(!rs.wasNull()) {
-                driverLicenseNotNull = true;
-                driverLicense.setId(driverLicenseId);
-            }
-            int driverLicenseFileGroupId = rs.getInt(tableName + ".user_driver_license_file_group_id");
-            if(!rs.wasNull()) {
-                driverLicenseNotNull = true;
-                driverLicense.setFileGroupId(driverLicenseFileGroupId);
-            }
-            if(driverLicenseNotNull)
-                user.setDriverLicense(driverLicense);
-            else
-                user.setDriverLicense(null);
+            user.setLicense(rs.getString(tableName + ".user_driver_license_id"));
 
             IdentityCard identityCard = new IdentityCard();
             boolean identityCardNotNull = false;
@@ -217,11 +202,6 @@ class JDBCUserDAO implements UserDAO {
             if(!rs.wasNull()) {
                 identityCardNotNull = true;
                 identityCard.setRegistrationNr(identityCardRegistrationNr);
-            }
-            int identityCardFileGroupId = rs.getInt(tableName + ".user_identity_card_file_group_id");
-            if(!rs.wasNull()) {
-                identityCardNotNull = true;
-                identityCard.setFileGroupId(identityCardFileGroupId);
             }
             if(identityCardNotNull)
                 user.setIdentityCard(identityCard);
@@ -337,31 +317,24 @@ class JDBCUserDAO implements UserDAO {
 
                 if(user.getProfilePictureId() != -1) ps.setInt(14, user.getProfilePictureId());
                 else ps.setNull(14, Types.INTEGER);
-                if(user.getDriverLicense() == null) {
+                if(user.getLicense() == null) {
                     ps.setNull(15, Types.VARCHAR);
-                    ps.setNull(16, Types.INTEGER);
                 } else {
-                    if(user.getDriverLicense().getId() == null) ps.setNull(15, Types.VARCHAR);
-                    else ps.setString(15, user.getDriverLicense().getId());
-                    if(user.getDriverLicense().getFileGroupId() == null) ps.setNull(16, Types.INTEGER);
-                    else ps.setInt(16, user.getDriverLicense().getFileGroupId());
+                    ps.setString(15, user.getLicense());
                 }
 
                 if(user.getIdentityCard() == null) {
-                    ps.setNull(17, Types.VARCHAR);
-                    ps.setNull(18, Types.VARCHAR);
-                    ps.setNull(19, Types.INTEGER);
+                    ps.setNull(15, Types.VARCHAR);
+                    ps.setNull(16, Types.VARCHAR);
                 } else {
-                    if(user.getIdentityCard().getId() == null) ps.setNull(17, Types.VARCHAR);
-                    else ps.setString(17, user.getIdentityCard().getId());
-                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(18, Types.VARCHAR);
-                    else ps.setString(18, user.getIdentityCard().getRegistrationNr());
-                    if(user.getIdentityCard().getFileGroupId() == null) ps.setNull(19, Types.INTEGER);
-                    else ps.setInt(19, user.getIdentityCard().getFileGroupId());
+                    if(user.getIdentityCard().getId() == null) ps.setNull(15, Types.VARCHAR);
+                    else ps.setString(15, user.getIdentityCard().getId());
+                    if(user.getIdentityCard().getRegistrationNr() == null) ps.setNull(16, Types.VARCHAR);
+                    else ps.setString(16, user.getIdentityCard().getRegistrationNr());
                 }
 
 
-                ps.setInt(20, user.getId());
+                ps.setInt(17, user.getId());
             }
 
             if(ps.executeUpdate() == 0)

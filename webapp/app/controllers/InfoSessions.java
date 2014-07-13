@@ -531,13 +531,8 @@ public class InfoSessions extends Controller {
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
         user = udao.getUser(user.getId(), true); // gets the full user instead of small cached one
-        Iterable<File> identityFiles = null;
-        Iterable<File> licenseFiles = null;
-        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null) {
-            // TODO: fix identity card dao so these lines are unnecessary
-            identityFiles = fdao.getFiles(user.getIdentityCard().getFileGroupId());
-            licenseFiles = fdao.getFiles(user.getDriverLicense().getFileGroupId());
-        }
+        Iterable<File> identityFiles = fdao.getIdFiles(user.getId());
+        Iterable<File> licenseFiles = fdao.getLicenseFiles(user.getId());
 
         List<String> errors = new ArrayList<>();
         if (user.getAddressDomicile() == null)
@@ -546,13 +541,13 @@ public class InfoSessions extends Controller {
             errors.add("Verblijfsadres ontbreekt.");
         if (user.getIdentityCard() == null)
             errors.add("Identiteitskaart ontbreekt.");
-        if (user.getIdentityCard() != null && (user.getIdentityCard().getFileGroupId() == null || ! identityFiles.iterator().hasNext()))
+        if (user.getIdentityCard() != null && (! identityFiles.iterator().hasNext()))
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
-        if (user.getDriverLicense() == null)
+        if (user.getLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
         if (!user.isPayedDeposit())
             errors.add("Waarborg nog niet betaald.");
-        if (user.getDriverLicense() != null && (user.getDriverLicense().getFileGroupId() == null || ! licenseFiles.iterator().hasNext()))
+        if (user.getLicense() != null && (! licenseFiles.iterator().hasNext()))
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
         return errors;

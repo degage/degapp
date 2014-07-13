@@ -36,10 +36,30 @@ public interface FileDAO {
     /**
      * Return the image files for a damage case
      */
-    public Iterable<File> getDamageFiles (int damageId) throws DataAccessException;
+    public Iterable<File> getDamageFiles(int damageId) throws DataAccessException;
 
     /**
      * Add an image file to a damage case
      */
-    public void addDamageFile (int damageId, int fileId) throws DataAccessException;
+    public void addDamageFile(int damageId, int fileId) throws DataAccessException;
+
+    /**
+     * Return the image files for an identity card
+     */
+    public Iterable<File> getIdFiles(int userId) throws DataAccessException;
+
+    /**
+     * Add an image file for an identity card
+     */
+    public void addIdFile(int userId, int fileId) throws DataAccessException;
+
+    /**
+     * Return the image files for a drivers license
+     */
+    public Iterable<File> getLicenseFiles(int userId) throws DataAccessException;
+
+    /**
+     * Add an image file for a drivers license
+     */
+    public void addLicenseFile(int userId, int fileId) throws DataAccessException;
 }

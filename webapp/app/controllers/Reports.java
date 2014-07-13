@@ -84,7 +84,7 @@ public class Reports extends Controller {
                     j += 5;
                 }
                 row.createCell(j++).setCellValue(user.getGender().name());
-                row.createCell(j++).setCellValue((user.getDriverLicense() != null) ? user.getDriverLicense().getId() : "");
+                row.createCell(j++).setCellValue((user.getLicense() != null) ? user.getLicense() : "");
                 row.createCell(j++).setCellValue(user.getStatus().name());
                 row.createCell(j++).setCellValue((user.getIdentityCard() != null) ? user.getIdentityCard().getRegistrationNr() : "");
                 row.createCell(j++).setCellValue(user.getDamageHistory());

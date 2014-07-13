@@ -507,10 +507,8 @@ class JDBCInfoSessionDAO implements InfoSessionDAO {
                 if (!rs.next()) {
                     return null;
                 } else {
-                    return new Tuple(populateInfoSession(rs, true, true), Enum.valueOf(EnrollementStatus.class, rs.getString("status")));
+                    return new Tuple<>(populateInfoSession(rs, true, true), Enum.valueOf(EnrollementStatus.class, rs.getString("status")));
                 }
-            } catch (SQLException ex) {
-                throw new DataAccessException("Invalid query for last infosession.", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to fetch last for user", ex);

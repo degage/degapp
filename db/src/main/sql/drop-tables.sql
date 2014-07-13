@@ -25,6 +25,8 @@ DROP TABLE cars;
 DROP TABLE technicalcardetails;
 DROP TABLE carinsurances;
 DROP TABLE userroles;
+DROP TABLE idfiles;
+DROP TABLE licensefiles;
 DROP TABLE users;
 DROP TABLE addresses;
 DROP TABLE files;

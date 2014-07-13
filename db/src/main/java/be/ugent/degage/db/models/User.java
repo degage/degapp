@@ -15,7 +15,7 @@ public class User {
     private Address addressDomicile;
     private Address addressResidence;
     private UserGender gender;
-    private DriverLicense license;
+    private String license;
     private UserStatus status;
     private IdentityCard identityCard;
     private String damageHistory;
@@ -125,7 +125,7 @@ public class User {
     public void setAddressResidence(Address addressResidence) {
         this.addressResidence = addressResidence;
     }
-    public DriverLicense getDriverLicense() {
+    public String getLicense() {
         return license;
     }
 
@@ -137,7 +137,7 @@ public class User {
         this.gender = gender;
     }
 
-    public void setDriverLicense(DriverLicense license) {
+    public void setLicense(String license) {
         this.license = license;
     }
 
@@ -187,6 +187,7 @@ public class User {
     }
 
     @Override
+    // TODO: remove these equals and hash codes
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

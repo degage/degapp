@@ -86,8 +86,8 @@
                             <div class="form-group">
                                 <label class="h4">Rijbewijs</label>
                                 <p class="form-control-static">
-                                    @if(user.getDriverLicense != null && user.getDriverLicense.getId != null && !user.getDriverLicense.getId.isEmpty) {
-                                        @user.getDriverLicense.getId
+                                    @if(user.getLicense != null) {
+                                        @user.getLicense
                                     } else {
                                         Niet gespecifieerd.
                                     }

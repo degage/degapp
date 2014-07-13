@@ -292,12 +292,7 @@ public class Profile extends Controller {
         if (canEditProfile(user, currentUser)) {
             Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
 
-            Iterable<File> listOfFiles = null;
-            if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null) { // get all uploaded files already
-                FileDAO fdao = context.getFileDAO();
-                listOfFiles = fdao.getFiles(user.getIdentityCard().getFileGroupId());
-            }
-
+            Iterable<File> listOfFiles = context.getFileDAO().getIdFiles(userId);
             if (user.getIdentityCard() != null) {
                 form = form.fill(new EditIdentityCardForm(user.getIdentityCard().getId(), user.getIdentityCard().getRegistrationNr()));
             }
@@ -335,12 +330,12 @@ public class Profile extends Controller {
                 Iterable<File> files = null;
                 switch (type) {
                     case IDENTITYCARD:
-                        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null)
-                            files = dao.getFiles(user.getIdentityCard().getFileGroupId()); //TODO: remove this hack to get actual files
+                        if (user.getIdentityCard() != null)
+                            files = dao.getIdFiles(userId);
                         break;
                     case DRIVERSLICENSE:
-                        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null)
-                            files = dao.getFiles(user.getDriverLicense().getFileGroupId()); //TODO: remove this hack to get actual files
+                        if (user.getLicense() != null)
+                            files = dao.getLicenseFiles(userId);
                         break;
                 }
 
@@ -410,12 +405,12 @@ public class Profile extends Controller {
                 Iterable<File> files = null;
                 switch (type) {
                     case IDENTITYCARD:
-                        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null)
-                            files = dao.getFiles(user.getIdentityCard().getFileGroupId()); //TODO: remove this hack to get actual files
+                        if (user.getIdentityCard() != null)
+                            files = dao.getIdFiles(userId);
                         break;
                     case DRIVERSLICENSE:
-                        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null)
-                            files = dao.getFiles(user.getDriverLicense().getFileGroupId()); //TODO: remove this hack to get actual files
+                        if (user.getLicense() != null)
+                            files = dao.getLicenseFiles(userId);
                         break;
                 }
 
@@ -451,10 +446,7 @@ public class Profile extends Controller {
         if (user == null || !canEditProfile(user, currentUser)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
-        Iterable<File> listOfFiles = null;
-        if (user.getIdentityCard() != null && user.getIdentityCard().getFileGroupId() != null) {
-            listOfFiles = fdao.getFiles(user.getIdentityCard().getFileGroupId());
-        }
+        Iterable<File> listOfFiles = fdao.getIdFiles(userId);
 
         Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class).bindFromRequest();
         if (form.hasErrors()) {
@@ -480,19 +472,11 @@ public class Profile extends Controller {
                         flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
                         return badRequest(identitycard.render(user, form, listOfFiles));
                     } else {
-                        Integer group = card.getFileGroupId();
-                        if (group == null) {
-                            // Create new filegroup
-                            group = fdao.createFileGroupNumber();
-                            card.setFileGroupId(group);
-                            updateUser = true;
-                        }
-
                         // Now we add the file to the group
                         Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.identitycard"));
-                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group);
-                        // group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
-                        // TODO: check the comment above
+                        // TODO: combine statements in DAO
+                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), 0);
+                        fdao.addIdFile(user.getId(), file.getId());
                     }
                 }
 
@@ -552,14 +536,9 @@ public class Profile extends Controller {
         if (canEditProfile(user, currentUser)) {
             Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class);
 
-            Iterable<File> listOfFiles = null;
-            if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null) { // get all uploaded files already
-                FileDAO fdao = context.getFileDAO();
-                listOfFiles = fdao.getFiles(user.getDriverLicense().getFileGroupId());
-            }
-
-            if (user.getDriverLicense() != null) {
-                form = form.fill(new EditDriversLicenseModel(user.getDriverLicense().getId()));
+            Iterable<File> listOfFiles = context.getFileDAO().getLicenseFiles(userId);
+            if (user.getLicense() != null) {
+                form = form.fill(new EditDriversLicenseModel(user.getLicense()));
             }
 
             return ok(driverslicense.render(user, form, listOfFiles));
@@ -582,11 +561,7 @@ public class Profile extends Controller {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
-        Iterable<File> listOfFiles = null;
-        if (user.getDriverLicense() != null && user.getDriverLicense().getFileGroupId() != null) {
-            listOfFiles = fdao.getFiles(user.getDriverLicense().getFileGroupId());
-        }
-
+        Iterable<File> listOfFiles = context.getFileDAO().getLicenseFiles(userId);
         Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class).bindFromRequest();
         if (form.hasErrors()) {
             return badRequest(driverslicense.render(user, form, listOfFiles));
@@ -597,12 +572,8 @@ public class Profile extends Controller {
                 Http.MultipartFormData body = request().body().asMultipartFormData();
                 EditDriversLicenseModel model = form.get();
 
-                DriverLicense card = user.getDriverLicense();
-                if (card == null) {
-                    updateUser = true;
-                    card = new DriverLicense();
-                    user.setDriverLicense(card);
-                }
+                String card = user.getLicense();
+
 
                 // Now check if we also have to create / add file to the group
                 Http.MultipartFormData.FilePart newFile = body.getFile("file");
@@ -611,25 +582,16 @@ public class Profile extends Controller {
                         flash("danger", "Het documentstype dat je bijgevoegd hebt is niet toegestaan. (" + newFile.getContentType() + ").");
                         return badRequest(driverslicense.render(user, form, listOfFiles));
                     } else {
-                        // TODO: all of the below should go in db module
-                        Integer group = card.getFileGroupId();
-                        if (group == null) {
-                            // Create new filegroup
-                            group = fdao.createFileGroupNumber();
-                            card.setFileGroupId(group);
-                            updateUser = true;
-                        }
-
                         // Now we add the file to the group
                         Path relativePath = FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.driverslicense"));
-                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), group);
-                       //  group.addFile(file); //this doesn't change the database, but allows reuse as model for next render
+                        File file = fdao.createFile(relativePath.toString(), newFile.getFilename(), newFile.getContentType(), 0);
+                        fdao.addLicenseFile(user.getId(), file.getId());
                     }
                 }
 
-                if (user.getDriverLicense().getId() != null && !user.getDriverLicense().getId().equals(model.cardNumber) ||
-                        model.cardNumber != null && user.getDriverLicense().getId() == null) {
-                    card.setId(model.cardNumber);
+                if (user.getLicense() != null && !user.getLicense().equals(model.cardNumber) ||
+                        model.cardNumber != null && user.getLicense() == null) {
+                    user.setLicense(model.cardNumber);
                     updateUser = true;
                 }
 

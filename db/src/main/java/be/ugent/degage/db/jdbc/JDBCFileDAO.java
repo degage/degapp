@@ -154,7 +154,7 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
     }
 
     private LazyStatement addDamageFileStatement = new LazyStatement(
-            "INSERT INTO damagefiles(damage)id,file_id) VALUES (?,?)"
+            "INSERT INTO damagefiles(damage_id,file_id) VALUES (?,?)"
     );
 
     @Override
@@ -166,6 +166,72 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to add damage file", ex);
+        }
+    }
+
+    private LazyStatement getIdFilesStatement = new LazyStatement(
+            "SELECT file_id, file_path, file_name, file_content_type " +
+                    "FROM files JOIN idfiles " +
+                    "WHERE files.file_id = idfiles.file_id AND idfiles.user_id = ?"
+    );
+
+    @Override
+    public Iterable<File> getIdFiles(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getIdFilesStatement.value();
+            ps.setInt(1, userId);
+            return getFiles(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to get id files", ex);
+        }
+    }
+
+    private LazyStatement addIdFileStatement = new LazyStatement(
+            "INSERT INTO idfiles(user_id,file_id) VALUES (?,?)"
+    );
+
+    @Override
+    public void addIdFile(int userId, int fileId) throws DataAccessException {
+        try {
+            PreparedStatement ps = addIdFileStatement.value();
+            ps.setInt (1, userId);
+            ps.setInt (2, fileId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to add id file", ex);
+        }
+    }
+
+    private LazyStatement getLicenseFilesStatement = new LazyStatement(
+            "SELECT file_id, file_path, file_name, file_content_type " +
+                    "FROM files JOIN licensefiles " +
+                    "WHERE files.file_id = idfiles.file_id AND idfiles.user_id = ?"
+    );
+
+    @Override
+    public Iterable<File> getLicenseFiles(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getLicenseFilesStatement.value();
+            ps.setInt(1, userId);
+            return getFiles(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to get license files", ex);
+        }
+    }
+
+    private LazyStatement addLicenseFileStatement = new LazyStatement(
+            "INSERT INTO licensefiles(user_id,file_id) VALUES (?,?)"
+    );
+
+    @Override
+    public void addLicenseFile(int userId, int fileId) throws DataAccessException {
+        try {
+            PreparedStatement ps = addLicenseFileStatement.value();
+            ps.setInt (1, userId);
+            ps.setInt (2, fileId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to add license file", ex);
         }
     }
 }
