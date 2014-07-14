@@ -1,4 +1,4 @@
-@(car: Car, mapDetails: Maps.MapDetails = null)
+@(car: Car, availabilities: Iterable[CarAvailabilityInterval], mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider;
     @scripts = {
         <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -118,15 +118,14 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if(car.getAvailabilities.isEmpty) {
+                                    @if(!availabilities.iterator.hasNext) {
                                         <tr>
                                             <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
                                                 Zolang je geen beschikbaarheid opgeeft, kan je auto steeds gereserveerd worden.
                                             </td>
                                         </tr>
                                     } else {
-                                        @for(availability <- car.getAvailabilities) {
-                                            <tr>
+                                        @foreach.tr(availabilities){availability =>
                                                 <td class="hidden">
                                                     <input class="availability_id hidden" value="@availability.getId">
                                                 </td>
@@ -173,7 +172,6 @@
                                                         <button type="button" class="btn btn-danger" onclick="deleteAvailability(this)">Verwijderen</button>
                                                     </div>
                                                 </td>
-                                            </tr>
                                         }
                                     }
                                     <tr>

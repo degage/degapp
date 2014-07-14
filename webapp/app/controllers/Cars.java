@@ -775,12 +775,11 @@ public class Cars extends Controller {
      * @param carId The car to show details of
      * @return A detail page of the car (only available to car_user+)
      */
+    /*   // TODO: make maps work again
     @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
     @InjectContext
     public static F.Promise<Result> detail(int carId) {
 
-        // TODO: why is this a Promise
-        // TODO: does this still work with injection?
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
         final Car car = dao.getCar(carId);
 
@@ -811,28 +810,47 @@ public class Cars extends Controller {
             }
         }
     }
+     */
 
-/**
- * *********************
- * Car costs       *
- * **********************
- */
+    /**
+     * @param carId The car to show details of
+     * @return A detail page of the car (only available to car_user+)
+     */
+    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result detail(int carId) {
 
-public static class CarCostModel {
+        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        final Car car = dao.getCar(carId);
 
-    public String description;
-    public BigDecimal amount;
-    public BigDecimal mileage;
-    public DateTime time;
-
-
-    public String validate() {
-        if ("".equals(description))
-            return "Geef aub een beschrijving op.";
-        return null;
+        if (car == null) {
+            return badRequest(userCarList());
+        } else {
+            return ok(detail.render(car, dao.getAvailabilities(carId), null));
+        }
     }
 
-}
+    /**
+     * *********************
+     * Car costs       *
+     * **********************
+     */
+
+    public static class CarCostModel {
+
+        public String description;
+        public BigDecimal amount;
+        public BigDecimal mileage;
+        public DateTime time;
+
+
+        public String validate() {
+            if ("".equals(description))
+                return "Geef aub een beschrijving op.";
+            return null;
+        }
+
+    }
 
 
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})

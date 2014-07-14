@@ -663,8 +663,7 @@ class JDBCCarDAO implements CarDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
                     Car car = populateCar(rs, true);
-                    car.setAvailabilities(getAvailabilities(car));
-                    car.setPrivileged(getPrivileged(car));
+                    car.setPrivileged(getPrivileged(car));    // TODO: remove
                     return car;
                 } else return null;
             } catch (SQLException ex) {
@@ -677,10 +676,10 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public List<CarAvailabilityInterval> getAvailabilities(Car car) throws DataAccessException {
+    public List<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException {
         try {
             PreparedStatement ps = getAvailabilitiesStatement();
-            ps.setInt(1, car.getId());
+            ps.setInt(1, carId);
             List<CarAvailabilityInterval> availabilities = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {

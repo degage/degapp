@@ -212,14 +212,6 @@ public class Car {
         this.comments = comments;
     }
 
-    public List<CarAvailabilityInterval> getAvailabilities() {
-        return availabilities;
-    }
-
-    public void setAvailabilities(List<CarAvailabilityInterval> availabilities) {
-        this.availabilities = availabilities;
-    }
-
     public boolean isActive() {
         return active;
     }

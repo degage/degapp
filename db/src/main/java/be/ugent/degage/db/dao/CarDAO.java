@@ -23,7 +23,7 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
 
-    public List<CarAvailabilityInterval> getAvailabilities(Car car) throws DataAccessException;
+    public List<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException;
     public void addOrUpdateAvailabilities(Car car, List<CarAvailabilityInterval> availabilities) throws DataAccessException;
     public void deleteAvailabilties(List<CarAvailabilityInterval> availabilities) throws DataAccessException;
 
