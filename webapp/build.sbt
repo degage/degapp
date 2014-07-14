@@ -15,6 +15,7 @@ libraryDependencies ++= Seq(
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.0-SNAPSHOT",
+  "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recusive direct field binding
   "org.webjars"             %% "webjars-play"                % "2.3.0",  
   "com.typesafe.play.plugins" %% "play-plugins-mailer"       % "2.3.0",
   "org.webjars"             %  "bootstrap"                   % "3.1.1",
