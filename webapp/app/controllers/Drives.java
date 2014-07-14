@@ -26,6 +26,7 @@ import views.html.drives.drivespage;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -581,13 +582,11 @@ public class Drives extends Controller {
 
     private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, User user, Reservation reservation) {
         CarDAO cdao = context.getCarDAO();
-        List<User> users = cdao.getPrivileged(reservation.getCar());
         boolean isPrivileged = false;
-        int index = 0;
-        while (!isPrivileged && index < users.size()) {
-            if (users.get(index).getId() == user.getId())
-                isPrivileged = true;
-            index++;
+        // TODO: see also Reserve.confirmReservation
+        Iterator<User> iterator = cdao.getPrivileged(reservation.getCar().getId()).iterator();
+        while (!isPrivileged && iterator.hasNext()) {
+            isPrivileged = user.getId() == iterator.next().getId();
         }
         return isPrivileged;
     }

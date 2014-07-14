@@ -23,15 +23,17 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
 
-    public List<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException;
-    public void addOrUpdateAvailabilities(Car car, List<CarAvailabilityInterval> availabilities) throws DataAccessException;
-    public void deleteAvailabilties(List<CarAvailabilityInterval> availabilities) throws DataAccessException;
+    public Iterable<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException;
+    public void addOrUpdateAvailabilities(Car car, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
+    public void deleteAvailabilties(Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
 
-    public List<User> getPrivileged(Car car) throws DataAccessException;
-    public void addPrivileged(Car car, List<User> users) throws DataAccessException;
-    public void deletePrivileged(Car car, List<User> users) throws DataAccessException;
+    public Iterable<User> getPrivileged(int carId) throws DataAccessException;
+    public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException;
+    public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException;
 
     public int getAmountOfCars(Filter filter) throws DataAccessException;
+
+    // TODO: List -> Iterable
     public List<Car> getCarList(int page, int pageSize) throws DataAccessException;
     public List<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public List<Car> getCarsOfUser(int user_id) throws DataAccessException;

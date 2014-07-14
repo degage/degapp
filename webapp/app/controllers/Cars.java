@@ -9,6 +9,7 @@ import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.models.*;
+import com.google.common.collect.Iterables;
 import controllers.Security.RoleSecured;
 import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
@@ -20,7 +21,6 @@ import notifiers.Notifier;
 import org.joda.time.DateTime;
 import org.joda.time.LocalTime;
 import play.data.Form;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -728,7 +728,7 @@ public class Cars extends Controller {
 
         String[] values = valuesString.split(";");
 
-        List<User> privileged = car.getPrivileged();
+        Iterable<User> privileged = dao.getPrivileged(carId);
 
         List<User> usersToAdd = new ArrayList<>();
         List<User> usersToDelete = new ArrayList<>();
@@ -739,7 +739,7 @@ public class Cars extends Controller {
                 User user;
                 if (id > 0) { // create
                     user = context.getUserDAO().getUserPartial(id);
-                    if (!userInList(id, privileged))
+                    if (Iterables.find(privileged, x -> x.getId() == id, null) == null)
                         usersToAdd.add(user);
                 } else { // delete
                     user = context.getUserDAO().getUserPartial(-1 * id);
@@ -755,20 +755,11 @@ public class Cars extends Controller {
             }
         }
 
-        dao.addPrivileged(car, usersToAdd);
-        dao.deletePrivileged(car, usersToDelete);
+        dao.addPrivileged(carId, usersToAdd);
+        dao.deletePrivileged(carId, usersToDelete);
 
         flash("success", "Je wijzigingen werden succesvol toegepast.");
         return redirect(routes.Cars.detail(car.getId()));
-    }
-
-    private static boolean userInList(int userId, List<User> users) {
-        for (User u : users) {
-            if (u.getId() == userId) {
-                return true;
-            }
-        }
-        return false;
     }
 
     /**
@@ -826,7 +817,7 @@ public class Cars extends Controller {
         if (car == null) {
             return badRequest(userCarList());
         } else {
-            return ok(detail.render(car, dao.getAvailabilities(carId), null));
+            return ok(detail.render(car, dao.getAvailabilities(carId), dao.getPrivileged(carId), null));
         }
     }
 

@@ -662,9 +662,7 @@ class JDBCCarDAO implements CarDAO{
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
-                    Car car = populateCar(rs, true);
-                    car.setPrivileged(getPrivileged(car));    // TODO: remove
-                    return car;
+                    return populateCar(rs, true);
                 } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading car resultset", ex);
@@ -710,7 +708,7 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public void addOrUpdateAvailabilities(Car car, List<CarAvailabilityInterval> availabilities) throws DataAccessException {
+    public void addOrUpdateAvailabilities(Car car, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException {
         try {
             for(CarAvailabilityInterval availability : availabilities) {
                 if(availability.getId() == null) { // create
@@ -743,7 +741,7 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public void deleteAvailabilties(List<CarAvailabilityInterval> availabilities) throws DataAccessException {
+    public void deleteAvailabilties(Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException {
         try {
             for(CarAvailabilityInterval availability : availabilities) {
                 if(availability.getId() == null) {
@@ -763,10 +761,10 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public List<User> getPrivileged(Car car) throws DataAccessException {
+    public Iterable<User> getPrivileged(int carId) throws DataAccessException {
         try {
             PreparedStatement ps = getPrivilegedStatement();
-            ps.setInt(1, car.getId());
+            ps.setInt(1, carId);
             List<User> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
@@ -782,12 +780,12 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public void addPrivileged(Car car, List<User> users) throws DataAccessException {
+    public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException {
         try {
             for(User user : users) {
                 PreparedStatement ps = createPrivilegedStatement();
                 ps.setInt(1, user.getId());
-                ps.setInt(2, car.getId());
+                ps.setInt(2, carId);
 
                 if(ps.executeUpdate() == 0)
                     throw new DataAccessException("No rows were affected when creating privileged.");
@@ -798,13 +796,13 @@ class JDBCCarDAO implements CarDAO{
     }
 
     @Override
-    public void deletePrivileged(Car car, List<User> users) throws DataAccessException {
+    public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException {
         try {
             for(User user : users) {
                 PreparedStatement ps = deletePrivilegedStatement();
 
                 ps.setInt(1, user.getId());
-                ps.setInt(2, car.getId());
+                ps.setInt(2, carId);
 
                 if(ps.executeUpdate() == 0)
                     throw new DataAccessException("No rows were affected when deleting privileged.");

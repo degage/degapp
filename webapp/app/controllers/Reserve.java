@@ -26,6 +26,7 @@ import views.html.reserve.reservations;
 import views.html.reserve.reservationspage;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -232,11 +233,12 @@ public class Reserve extends Controller {
 
             if (reservation != null) {
                 // Check if user is owner or privileged
+                // TODO: delegate this to db module
                 boolean autoAccept = car.getOwner().getId() == user.getId();
-                int i = 0;
-                while (!autoAccept && i < car.getPrivileged().size()) {
-                    if (car.getPrivileged().get(i).getId() == user.getId()) {
-                        autoAccept = true;
+                if (! autoAccept) {
+                    Iterator<User> iterator = dao.getPrivileged(carId).iterator();
+                    while (! autoAccept && iterator.hasNext()) {
+                        autoAccept = user.getId() == iterator.next().getId();
                     }
                 }
                 if (autoAccept) {
