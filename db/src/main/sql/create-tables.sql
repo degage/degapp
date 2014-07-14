@@ -180,6 +180,8 @@ CREATE TABLE `infosessions` (
 	FOREIGN KEY (`infosession_address_id`) REFERENCES addresses(`address_id`)
 );
 
+
+
 CREATE TABLE `infosessionenrollees` ( # Wie is ingeschreven?
 	`infosession_id` INT NOT NULL,
 	`infosession_enrollee_id` INT NOT NULL,

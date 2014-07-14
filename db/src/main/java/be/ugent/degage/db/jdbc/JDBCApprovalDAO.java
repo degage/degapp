@@ -110,7 +110,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
         return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUserPartial(rs, "users"), JDBCUserDAO.populateUserPartial(rs, "admins"),
                 new DateTime(rs.getTimestamp("approval_submission").getTime()),
                 rs.getTimestamp("approval_date") != null ? new DateTime(rs.getTimestamp("approval_date").getTime()) : null,
-                rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSession(rs, false, false), Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
+                rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSession(rs), Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
                 rs.getString("approval_user_message"), rs.getString("approval_admin_message"));
     }
 

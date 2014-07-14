@@ -1,4 +1,4 @@
-@(infoSession: InfoSession, enrolled: InfoSession = null, map: Maps.MapDetails = null)
+@(infoSession: InfoSession, enrolled: InfoSession = null, enrollees: Iterable[Enrollee], map: Maps.MapDetails = null)
 @import providers.DataProvider;
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
@@ -93,10 +93,11 @@
             </div>
 
             @* TODO: can other users see the attendees, or only admins?? *@
-            @if(infoSession.hasEnrolled) {
+
+            @if(enrollees.iterator.hasNext) {
                 <div class="panel panel-default">
                     <div class="panel-heading">
-                        <i class="fa fa-users fa-fw"></i> Aanwezigen (@infoSession.getEnrolled.size)
+                        <i class="fa fa-users fa-fw"></i> Ingeschreven (@infoSession.getEnrolleeCount)
                     </div>
                     <div class="panel-body">
 
@@ -114,9 +115,9 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                @for((enrollee, index) <- infoSession.getEnrolled.zipWithIndex) {
+                                @foreach.withIndex(enrollees){ (enrollee,index) =>
                                     <tr>
-                                        <td>@(index + 1)</td>
+                                        <td>@index</td>
                                         <td>
                                             @if(fullUser) {
                                                 <a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser.getFirstName @enrollee.getUser.getLastName</a>

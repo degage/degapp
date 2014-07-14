@@ -94,7 +94,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public InfoSessionDAO getInfoSessionDAO() {
         if(infoSessionDAO == null){
-            infoSessionDAO = new JDBCInfoSessionDAO(connection);
+            infoSessionDAO = new JDBCInfoSessionDAO(this);
         }
         return infoSessionDAO;
     }

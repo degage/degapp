@@ -58,6 +58,14 @@ public class InfoSessions extends Controller {
         public String comments;
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
+        public Addresses.EditAddressModel getAddress() {
+            return address;
+        }
+
+        public void setAddress(Addresses.EditAddressModel address) {
+            this.address = address;
+        }
+
         public static int getInt(Integer i) {
             return i == null ? 0 : i;
         }
@@ -120,7 +128,7 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result editSession(int sessionId) {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        InfoSession is = dao.getInfoSession(sessionId, false);
+        InfoSession is = dao.getInfoSession(sessionId);
         if (is == null) {
             flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -145,7 +153,7 @@ public class InfoSessions extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         InfoSessionDAO dao = context.getInfoSessionDAO();
 
-        if (dao.getInfoSession(sessionId, false) == null) {
+        if (dao.getInfoSession(sessionId) == null) {
             flash("danger", "Deze infosessie bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
@@ -176,7 +184,7 @@ public class InfoSessions extends Controller {
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
-            InfoSession session = dao.getInfoSession(sessionId, false);
+            InfoSession session = dao.getInfoSession(sessionId);
             if (session == null) {
                 flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -256,26 +264,41 @@ public class InfoSessions extends Controller {
             flash("danger", "Je bent niet ingeschreven voor een toekomstige infosessie.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
-            dao.unregisterUser(alreadyAttending, user);
+            dao.unregisterUser(alreadyAttending.getId(), user.getId());
 
             flash("success", "Je bent succesvol uitgeschreven uit deze infosessie.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         }
     }
 
-    /**
-     * Method: GET
-     * Returns the detail promise of the given sessionId. If enabled, this also fetches map location and enables the map view.
-     *
-     * @param sessionId The sessionId to which the detail belongs to
-     * @return A session detail page promise
-     */
+    // TODO: reintegrate the Map (using a promise instead of a result?)
+    @RoleSecured.RoleAuthenticated()
+    @InjectContext
+    public static Result detail(int sessionId) {
+         User user = DataProvider.getUserProvider().getUser();
+         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+         InfoSession session = dao.getInfoSession(sessionId);
+
+        if (session == null) {
+            return badRequest("Sessie id bestaat niet.");
+        } else {
+            return ok(detail.render(
+                    session,
+                    dao.getAttendingInfoSession(user),
+                    dao.getEnrollees(sessionId), null));
+        }
+    }
+
+
+    /*
     @RoleSecured.RoleAuthenticated()
     @InjectContext
     public static F.Promise<Result> detail(int sessionId) {
         final User user = DataProvider.getUserProvider().getUser();
         final InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        final InfoSession session = dao.getInfoSession(sessionId, true);
+        final InfoSession session = dao.getInfoSession(sessionId);
+        final Iterable<Enrollee> enrollees = dao.getEnrollees(sessionId);
+
         if (session == null) {
             return F.Promise.promise(new F.Function0<Result>() {
                 @Override
@@ -289,7 +312,7 @@ public class InfoSessions extends Controller {
                 return Maps.getLatLongPromise(session.getAddress().getId()).map(
                         new F.Function<F.Tuple<Double, Double>, Result>() {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
-                                return ok(detail.render(session, enrolled,
+                                return ok(detail.render(session, enrolled, enrollees,
                                         coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + session.getTime().toString("dd-MM-yyyy") + " om " + session.getTime().toString("HH:mm"))));
                             }
                         }
@@ -304,6 +327,7 @@ public class InfoSessions extends Controller {
             }
         }
     }
+    */
 
     /**
      * Method: GET
@@ -317,7 +341,7 @@ public class InfoSessions extends Controller {
     public static Result removeUserFromSession(int sessionId, int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         InfoSessionDAO dao = context.getInfoSessionDAO();
-        InfoSession is = dao.getInfoSession(sessionId, false);
+        InfoSession is = dao.getInfoSession(sessionId);
         if (is == null) {
             flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -331,7 +355,7 @@ public class InfoSessions extends Controller {
             return redirect(routes.InfoSessions.showUpcomingSessions());
         }
 
-        dao.unregisterUser(is, user);
+        dao.unregisterUser(sessionId, userId);
 
         flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
         return redirect(routes.InfoSessions.detail(sessionId));
@@ -351,7 +375,7 @@ public class InfoSessions extends Controller {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         InfoSessionDAO dao = context.getInfoSessionDAO();
-        InfoSession is = dao.getInfoSession(sessionId, false);
+        InfoSession is = dao.getInfoSession(sessionId);
         if (is == null) {
             flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
@@ -366,7 +390,7 @@ public class InfoSessions extends Controller {
 
         EnrollementStatus enrollStatus = Enum.valueOf(EnrollementStatus.class, status);
 
-        dao.setUserEnrollmentStatus(is, user, enrollStatus);
+        dao.setUserEnrollmentStatus(sessionId, userId, enrollStatus);
         flash("success", "De gebruikerstatus werd succesvol aangepast.");
         return redirect(routes.InfoSessions.detail(sessionId));
     }
@@ -391,8 +415,8 @@ public class InfoSessions extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
         InfoSessionDAO idao = context.getInfoSessionDAO();
-        InfoSession is = idao.getInfoSession(sessionId, true);
-        if (is == null) {
+        InfoSession infoSession = idao.getInfoSession(sessionId);
+        if (infoSession == null) {
             flash("danger", "InfoSessie bestaat niet.");
             return redirect(routes.InfoSessions.pendingApprovalList());
         } else {
@@ -402,7 +426,7 @@ public class InfoSessions extends Controller {
                 return redirect(routes.InfoSessions.detail(sessionId));
             } else {
                 // TODO: simplify the user equals only by id
-                for (Enrollee others : is.getEnrolled()) {
+                for (Enrollee others : idao.getEnrollees(sessionId)) {
                     if (others.getUser().getId() == user.getId()) {
                         flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
                         return redirect(routes.InfoSessions.detail(sessionId));
@@ -410,7 +434,7 @@ public class InfoSessions extends Controller {
                 }
 
                 // Now we enroll
-                idao.registerUser(is, user);
+                idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
 
                 flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
                 return redirect(routes.InfoSessions.detail(sessionId));
@@ -435,22 +459,23 @@ public class InfoSessions extends Controller {
         InfoSessionDAO dao = context.getInfoSessionDAO();
 
         InfoSession alreadyAttending = dao.getAttendingInfoSession(user);
-        InfoSession session = dao.getInfoSession(sessionId, true); //TODO: just add going subclause (like in getAttending requirement)
+        InfoSession session = dao.getInfoSession(sessionId); //TODO: just add going subclause (like in getAttending requirement)
+        int numberOfAttendees = dao.getAmountOfAttendees(sessionId);
         if (session == null) {
             flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
-            if (session.getMaxEnrollees() != 0 && session.getEnrolleeCount() == session.getMaxEnrollees()) {
+            if (session.getMaxEnrollees() != 0 && numberOfAttendees == session.getMaxEnrollees()) {
                 flash("danger", "Deze infosessie zit reeds vol.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 try {
                     if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
-                        dao.unregisterUser(alreadyAttending, user);
+                        dao.unregisterUser(alreadyAttending.getId(), user.getId());
                     }
-                    dao.registerUser(session, user);
+                    dao.registerUser(sessionId, user.getId()); // TODO: disallow registration when full
 
-                    flash("success", alreadyAttending == null ? ("Je bent succesvol ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                    flash("success", alreadyAttending == null ? ("Je bent met succes ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
                             "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
                     Notifier.sendInfoSessionEnrolledMail(context, user, session);
                     return redirect(routes.InfoSessions.detail(sessionId));
@@ -694,8 +719,7 @@ public class InfoSessions extends Controller {
         EnrollementStatus status = EnrollementStatus.ABSENT;
         if (ap.getSession() != null) {
             InfoSessionDAO idao = context.getInfoSessionDAO();
-            InfoSession is = idao.getInfoSession(ap.getSession().getId(), true);
-            status = is.getEnrollmentStatus(ap.getUser());
+            status = idao.getUserEnrollmentStatus(ap.getSession().getId(),ap.getUser().getId());
         }
 
         if (!bad) {
@@ -752,8 +776,7 @@ public class InfoSessions extends Controller {
             EnrollementStatus status = EnrollementStatus.ABSENT;
             if (ap.getSession() != null) {
                 InfoSessionDAO idao = context.getInfoSessionDAO();
-                InfoSession is = idao.getInfoSession(ap.getSession().getId(), true);
-                status = is.getEnrollmentStatus(ap.getUser());
+                status = idao.getUserEnrollmentStatus(ap.getSession().getId(),ap.getUser().getId());
             }
 
             return ok(setcontractadmin.render(ap, status, ap.getAdmin()));
@@ -1005,7 +1028,7 @@ public class InfoSessions extends Controller {
             orderBy = FilterField.INFOSESSION_DATE;
         }
 
-        List<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, pageSize, filter);
+        Iterable<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, pageSize, filter);
         if (enrolled != null) {
             //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
             // Hack herpedy derp!!
@@ -1018,7 +1041,7 @@ public class InfoSessions extends Controller {
             }
         }
 
-        int amountOfResults = dao.getAmountOfInfoSessions(filter);
+        int amountOfResults = dao.getNumberOfInfoSessions(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
         if (admin)
             return infosessionsAdminPage.render(sessions, page, amountOfResults, amountOfPages);
