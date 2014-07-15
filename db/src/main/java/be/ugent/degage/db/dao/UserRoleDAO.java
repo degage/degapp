@@ -13,7 +13,7 @@ import be.ugent.degage.db.models.UserRole;
  */
 public interface UserRoleDAO {
     /**
-     * Return the set of roels for a given user.
+     * Return the set of roles for a given user.
      */
 	public Set<UserRole> getUserRoles(int userId) throws DataAccessException;
 

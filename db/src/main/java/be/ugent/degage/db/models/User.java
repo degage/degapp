@@ -172,6 +172,10 @@ public class User {
         return firstName + " " + lastName;
     }
 
+    public String getFullName() {
+        return lastName + ", " + firstName;
+    }
+
     @Override
     // TODO: remove these equals and hash codes (probably used by Cache mechanism of play?)
     public boolean equals(Object o) {

@@ -346,8 +346,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 return new User(keys.getInt(1), email, firstName, lastName);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for new user.", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to commit new user transaction.", ex);
@@ -478,11 +476,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next())
                     return rs.getInt("amount_of_users");
-                else return 0;
-
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of users", ex);
+                else
+                    return 0;
             }
+
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of users", ex);
         }
@@ -511,8 +508,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     users.add(populateUser(rs));
                 }
                 return users;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading users resultset", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);
