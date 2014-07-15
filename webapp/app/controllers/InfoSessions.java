@@ -862,12 +862,10 @@ public class InfoSessions extends Controller {
 
                 // Add the new user roles
                 UserRoleDAO roleDao = context.getUserRoleDAO();
-                Set<UserRole> hasRoles = roleDao.getUserRoles(user.getId());
-                if (m.sharer && !hasRoles.contains(UserRole.CAR_OWNER))
+                if (m.sharer)
                     roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
-                if (m.user && !hasRoles.contains(UserRole.CAR_USER))
+                if (m.user)
                     roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
-                context.commit();
                 DataProvider.getUserRoleProvider().invalidateRoles(ap.getUser());
                 Notifier.sendMembershipStatusChanged(ap.getUser(), true, m.message);
                 flash("success", "De gebruikersrechten werden succesvol aangepast.");

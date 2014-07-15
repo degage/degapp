@@ -2,7 +2,11 @@ package be.ugent.degage.db;
 
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.dao.SettingDAO;
+import be.ugent.degage.db.dao.UserDAO;
+import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.models.Address;
+import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserRole;
 
 import java.time.Instant;
 
@@ -48,6 +52,31 @@ public final class Fixtures {
         dao.createSettingAfterDate("deprecation_cost", "0.75", Instant.now().minusSeconds(1));
         dao.createSettingAfterDate("deprecation_cost", "0.85", Instant.now().plusSeconds(20));
         dao.createSettingAfterDate("deprecation_cost", "0.95", Instant.now().plusSeconds(60));
+    }
+
+    public static User[] createUsersPartial (DataAccessContext context) {
+
+        UserDAO dao = context.getUserDAO();
+
+        return new User[] {
+                dao.createUser("admin@gmail.com", "adminpass", "Sam", "Vimes"),
+                dao.createUser("normal@gmail.com", "normalpass", "Nobby", "Nobbs"),
+                dao.createUser ("user1@gmail.com", "user1pass", "John", "Jones"),
+                dao.createUser ("user2@gmail.com", "user2pass", "Jane", "Doe")
+        };
+
+    }
+
+    public static void createUserRoles (DataAccessContext context, User[] users) {
+        UserRoleDAO dao = context.getUserRoleDAO();
+
+        dao.addUserRole(users[0].getId(), UserRole.SUPER_USER);
+        dao.addUserRole(users[2].getId(), UserRole.CAR_ADMIN);
+        dao.addUserRole(users[2].getId(), UserRole.CAR_OWNER);
+        dao.addUserRole(users[3].getId(), UserRole.CAR_ADMIN);
+        for (User user : users) {
+            dao.addUserRole (user.getId(), UserRole.CAR_USER);
+        }
     }
 
 }

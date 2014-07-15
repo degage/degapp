@@ -149,7 +149,7 @@ public class Notifier extends Mailer {
         EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
         UserRoleDAO userRoleDAO = context.getUserRoleDAO();
         NotificationDAO notificationDAO = context.getNotificationDAO();
-        List<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
+        Iterable<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
         mail = replaceCarCostTags(carCost, template.getBody());
         for (User u : carAdminList) {
             userMail = replaceUserTags(u, mail);

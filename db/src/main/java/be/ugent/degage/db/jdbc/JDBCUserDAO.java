@@ -18,7 +18,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 
-    private static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email";
+    static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email";
 
     private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM users";
 

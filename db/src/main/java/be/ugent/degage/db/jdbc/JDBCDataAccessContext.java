@@ -174,7 +174,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
 	public UserRoleDAO getUserRoleDAO() {
 		if(userRoleDAO == null){
-			userRoleDAO = new JDBCUserRoleDAO(connection);
+			userRoleDAO = new JDBCUserRoleDAO(this);
         }
         return userRoleDAO;
 	}

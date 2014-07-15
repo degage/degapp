@@ -172,7 +172,6 @@ public class UserRoles extends Controller {
                     for (UserRole addedRole : addedRoles) {
                         dao.addUserRole(userId, addedRole);
                     }
-                    context.commit();
 
                     // Invalidate the cache for a page refresh
                     DataProvider.getUserRoleProvider().invalidateRoles(user);
