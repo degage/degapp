@@ -1,5 +1,6 @@
 @(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
     <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
@@ -68,35 +69,28 @@
                                     <div class="col-md-12">
                                         @helper.checkbox(form("active"), '_label -> "Actief")
                                     </div>
-                                    @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
+                                    @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
                                         @if(isAdmin) {
                                             <label class="col-md-12" for="userId">Eigenaar</label>
                                             <div class="col-md-12">
                                             @if(car != null){
-                                                <!-- TODO: move this to controller -->
-                                                @defining(db.DataAccess.getInjectedContext.getUserDAO.getUserPartial(form("userId").value().toInt)) { user =>
-                                                    <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.getFullName" />
-                                                        <input type="hidden" name="userId" value="@user.getId" />
-                                                        <div class="viewId"></div>
-                                                        <ul class="dropdown-menu" role="menu"></ul>
-                                                    </div>
-                                                }
-                                            }else{
-                                                @defining(DataProvider.getUserProvider().getUser()) { user =>
-                                                    <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                                                        <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.getFullName"/>
-                                                        <input type="hidden" name="userId" value="@user.getId"/>
-                                                        <div class="viewId"></div>
-                                                        <ul class="dropdown-menu" role="menu"></ul>
-                                                    </div>
-                                                }
+                                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
+                                                    <input type="text" data-toggle="dropdown" class="form-control input-md" value="@CurrentUser.getFullName" />
+                                                    <input type="hidden" name="userId" value="CurrentUser.getId" />
+                                                    <div class="viewId"></div>
+                                                    <ul class="dropdown-menu" role="menu"></ul>
+                                                </div>
+                                            } else {
+                                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
+                                                    <input type="text" data-toggle="dropdown" class="form-control input-md" value="@CurrentUser.getFullName"/>
+                                                    <input type="hidden" name="userId" value="CurrentUser.getId"/>
+                                                    <div class="viewId"></div>
+                                                    <ul class="dropdown-menu" role="menu"></ul>
+                                                </div>
                                             }
                                             </div>
                                         } else {
-                                            @defining(DataProvider.getUserProvider().getUser()) { user =>
-                                                <input type="hidden" name="userId" value="@user.getId"/>
-                                            }
+                                            <input type="hidden" name="userId" value="CurrentUser.getId"/>
                                         }
                                     }
                                 </div>

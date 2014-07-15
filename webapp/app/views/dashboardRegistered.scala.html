@@ -1,5 +1,6 @@
 @(user: User, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
 
+        @* Always called with current user *@
 <div class="panel panel-default">
     <div class="panel-body">
             Welkom op onze webapplicatie, @user.getFirstName! Om volwaardig lid te worden moeten als eerst nog
@@ -21,12 +22,12 @@
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-xs-12">
-                                @if(!userWentToInfoSession) {
-                                    Inschrijven voor een infosessie kan <a href="@routes.InfoSessions.showUpcomingSessions">
-                                        hier</a>.
-                                } else {
+                                @if(userWentToInfoSession) {
                                     Je bent reeds naar een infosessie geweest, werk de volgende stappen af om volwaardig
                                     lid te worden.
+                                } else {
+                                    Inschrijven voor een infosessie kan <a href="@routes.InfoSessions.showUpcomingSessions">
+                                        hier</a>.
                                 }
                             </div>
                         </div>

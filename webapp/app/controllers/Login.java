@@ -1,5 +1,6 @@
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserStatus;
@@ -234,7 +235,8 @@ public class Login extends Controller {
         if (loginForm.hasErrors()) {
             return badRequest(login.render(loginForm, redirect));
         } else {
-            User user = DataAccess.getInjectedContext().getUserDAO().getUserWithPassword(loginForm.get().email, loginForm.get().password);
+            DataAccessContext context = DataAccess.getInjectedContext();
+            User user = context.getUserDAO().getUserWithPassword(loginForm.get().email, loginForm.get().password);
 
             if (user != null) {
                 if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
@@ -246,7 +248,7 @@ public class Login extends Controller {
                     loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
                     return badRequest(login.render(loginForm, redirect));
                 } else {
-                    CurrentUser.set(user);
+                    CurrentUser.set(user, context.getUserRoleDAO().getUserRoles(user.getId()));
                     if (redirect != null) {
                         return redirect(redirect);
                     } else {

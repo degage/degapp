@@ -1,5 +1,6 @@
 @(enrolled: InfoSession = null, map: Maps.MapDetails = null, showApprovalButton: Boolean = false)
-@import providers.DataProvider;
+@import db.CurrentUser
+@import providers.DataProvider
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
@@ -37,7 +38,7 @@
 </div>
 
 <div id="page-wrapper">
-    @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+    @defining(CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
             @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
         <div class="row">
             <div class="col-lg-12">

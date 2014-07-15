@@ -27,6 +27,17 @@ import java.util.Set;
  */
 public class RoleSecured {
 
+    public static boolean hasSomeRole(Set<UserRole> roles, UserRole[] searchFor){
+        if (roles.contains (UserRole.SUPER_USER)) {
+            return true;
+        }
+        for(UserRole role : searchFor){
+            if(roles.contains(role))
+                return true;
+        }
+        return false;
+    }
+
     /**
      * Creation of the annotation interface.
      * Use of the RoleAuthorization class for action composition.
@@ -67,7 +78,7 @@ public class RoleSecured {
                 Set<UserRole> roles = DataProvider.getUserRoleProvider().getRoles(user.getId(), true); // cached instance
 
                 // If user has got one of the specified roles, delegate to the requested page
-                if(securedRoles.length == 0 || UserRoleProvider.hasSomeRole(roles, securedRoles)){
+                if(securedRoles.length == 0 || hasSomeRole(roles, securedRoles)){
                     return delegate.call(ctx);
                 } else {
                     // User is not authorized

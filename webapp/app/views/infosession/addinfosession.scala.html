@@ -1,5 +1,6 @@
 @(form: play.data.Form[InfoSessions.InfoSessionCreationModel], editId: Int = 0, countryList: List[String], typeList: List[String])
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
 @* TODO: This file should be renamed since it's also used for editing *@
 @scripts = {
     <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
@@ -99,15 +100,13 @@
                                                             </div>
                                                         }
                                                     }else{
-                                                        @defining(DataProvider.getUserProvider().getUser()) { user =>
-                                                            <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
-                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.getFullName"/>
-                                                                <input type="hidden" name="userId" value="@user.getId"/>
-                                                                <div class="viewId"></div>
-                                                                <ul class="dropdown-menu" role="menu"></ul>
-                                                            </div>
-                                                        }
-                                                    }
+                                                        <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
+                                                            <input type="text" data-toggle="dropdown" class="form-control input-md" value="@CurrentUser.getFullName"/>
+                                                            <input type="hidden" name="userId" value="CurrentUser.getId"/>
+                                                            <div class="viewId"></div>
+                                                            <ul class="dropdown-menu" role="menu"></ul>
+                                                        </div>
+                                                }
                                                 </div>
                                                 <div class="form-group">
                                                     <label class="col-md-12" for="time">Tijdstip</label>

@@ -1,7 +1,8 @@
 @(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RemarksModel],
 infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
 car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
 
 @scripts = {
 <script type="text/javascript" src="@routes.Assets.at("javascripts/app/driveDetails.js")"></script>
@@ -30,7 +31,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 }
 @app("Rit details", stylesheets, scripts) {
 
-@defining(DataProvider.getUserRoleProvider.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
+@defining(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
 @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
 <div id="page-header-wrapper">
     <ol class="breadcrumb">

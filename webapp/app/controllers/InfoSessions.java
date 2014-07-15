@@ -750,6 +750,7 @@ public class InfoSessions extends Controller {
                         ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
                 model.sharer = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
                 model.user = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
+                    // TODO: remove need for UserRoleProvider
 
                 // Get the contact admin
                 UserDAO udao = context.getUserDAO();
@@ -801,6 +802,7 @@ public class InfoSessions extends Controller {
 
             if (contractManager != null) {
                 if (!DataProvider.getUserRoleProvider().hasRole(contractManager, UserRole.INFOSESSION_ADMIN)) {
+                    // TODO: remove need for UserRoleProvider
                     flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
                     return redirect(routes.InfoSessions.approvalAdmin(id));
                 } else {
@@ -860,7 +862,7 @@ public class InfoSessions extends Controller {
 
                 // Add the new user roles
                 UserRoleDAO roleDao = context.getUserRoleDAO();
-                Set<UserRole> hasRoles = DataProvider.getUserRoleProvider().getRoles(user.getId());
+                Set<UserRole> hasRoles = roleDao.getUserRoles(user.getId());
                 if (m.sharer && !hasRoles.contains(UserRole.CAR_OWNER))
                     roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
                 if (m.user && !hasRoles.contains(UserRole.CAR_USER))

@@ -1,7 +1,8 @@
 @(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""))(content: Html)
 @import org.joda.time.format.DateTimeFormat
-@import providers.DataProvider;
-@import providers.CommunicationProvider;
+@import db.CurrentUser
+@import providers.DataProvider
+@import providers.CommunicationProvider
 @defining(DataProvider.getUserProvider().getUser()) { user =>
 
 <!DOCTYPE html>
@@ -73,14 +74,14 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-envelope fa-fw"></i>
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(CurrentUser.getId)) { unread_number =>
                                 @if(unread_number>0){
                                     <span class="topnumber">@unread_number</span>
                                 }
                             }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
-                            @defining(DataProvider.getCommunicationProvider().getMessages(user.getId())) { messages =>
+                            @defining(DataProvider.getCommunicationProvider().getMessages(CurrentUser.getId)) { messages =>
                                 @for((message, index) <- messages.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
                                         <li>
@@ -118,14 +119,14 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-bell fa-fw"></i>
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(CurrentUser.getId)) { unread_number =>
                               @if(unread_number>0){
                                   <span class="topnumber">@unread_number</span>
                               }
                             }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
-                            @defining(DataProvider.getCommunicationProvider().getNotifications(user.getId())) { notifications =>
+                            @defining(DataProvider.getCommunicationProvider().getNotifications(CurrentUser.getId)) { notifications =>
                                 @for((notification, index) <- notifications.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
                                         <li>
@@ -161,7 +162,7 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <span class="">@user.getFullName</span>
+                            <span class="">@CurrentUser.getFullName</span>
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -192,7 +193,7 @@
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
                         }
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_USER)){
+                        @if(CurrentUser.hasRole(UserRole.CAR_USER)){
                         <li @if(title == "Reserveren") {class="active"}>
                             <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
                         </li>
@@ -233,7 +234,7 @@
                         </li>
                         }
 
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_OWNER)){
+                        @if(CurrentUser.hasRole(UserRole.CAR_OWNER)){
                         <li class="submenu">EIGENAAR</li>
                         <li @if(title == "Auto's") {class="active"}>
                             <a href="@routes.Cars.showUserCars()"><i class="fa fa-car fa-fw"></i> Auto's</a>
@@ -249,7 +250,7 @@
                         <li class="submenu">ACCOUNT</li>
                         <li @if(title == "Berichten") {class="active"}>
                             <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread_number =>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(CurrentUser.getId)) { unread_number =>
                                 @if(unread_number>0){
                                     <span class="sidenumber">@unread_number</span>
                                 }
@@ -257,7 +258,7 @@
                         </li>
                         <li @if(title == "Notificaties") {class="active"}>
                         <a href="@routes.Notifications.showNotifications()"><i class="fa fa-bell fa-fw"></i> Notificaties
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(user.getId())) { unread_number =>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(CurrentUser.getId)) { unread_number =>
                               @if(unread_number>0){
                                   <span class="sidenumber">@unread_number</span>
                               }
@@ -270,39 +271,39 @@
                             <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
                         </li>
 
-                        @if(DataProvider.getUserRoleProvider.isAdmin(user)){
+                        @if(CurrentUser.isAdmin){
                             <li class="submenu">ADMIN</li>
 
 
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.MAIL_ADMIN)){
+                        @if(CurrentUser.hasRole(UserRole.MAIL_ADMIN)){
                         <li @if(title == "Templates") {class="active"}>
                             <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Templates</a>
                         </li>
                         }
 
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.RESERVATION_ADMIN)){
+                        @if(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)){
                             <li @if(title == "Ritten (Admin)") {class="active"}>
                             <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
                             </li>
                         }
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.PROFILE_ADMIN)){
+                        @if(CurrentUser.hasRole(UserRole.PROFILE_ADMIN)){
                         <li @if(title == "Gebruikers") {class="active"}>
                             <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
                         </li>
                         }
 
-                        @if(DataProvider.getUserRoleProvider.hasSomeRole(user, Array(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN) )){
+                        @if(CurrentUser.hasSomeRole(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN )){
                             <li @if(title == "Goedkeuringen gebruikers") {class="active"}>
                                 <a href="@routes.InfoSessions.pendingApprovalList"><i class="fa fa-file fa-fw"></i> Goedkeuring gebruikers</a>
                             </li>
                         }
 
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.INFOSESSION_ADMIN)){
+                        @if(CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)){
                             <li @if(title == "Infosessies (Admin)") {class="active"}>
                             <a href="@routes.InfoSessions.showSessions()"><i class="fa fa-file fa-fw"></i> Infosessies</a>
                             </li>
                         }
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.CAR_ADMIN)){
+                        @if(CurrentUser.hasRole(UserRole.CAR_ADMIN)){
                             <li @if(title == "Auto's (Admin)") {class="active"}>
                             <a href="@routes.Cars.showCars()"><i class="fa fa-file fa-fw"></i> Auto's</a>
                             </li>
@@ -317,7 +318,7 @@
                             </li>
                         }
 
-                        @if(DataProvider.getUserRoleProvider.hasRole(user, UserRole.SUPER_USER)){
+                        @if(CurrentUser.hasRole(UserRole.SUPER_USER)){
                         <li class="submenu">SUPERUSER</li>
                         <li @if(title == "Gebruikersrollen") {class="active"}>
                             <a href="@routes.UserRoles.index()"><i class="fa fa-wrench fa-fw"></i> Gebruikersrollen</a>

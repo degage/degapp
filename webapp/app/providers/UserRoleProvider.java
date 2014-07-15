@@ -19,7 +19,6 @@ import java.util.Set;
 public class UserRoleProvider {
 
     private static final String ROLES_BY_ID = "role:id:%d";
-    private static final UserRole[] ADMIN_ROLES = new UserRole[] { UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN, UserRole.MAIL_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER };
 
     private DataAccessProvider provider;
     private UserProvider userProvider;
@@ -33,20 +32,6 @@ public class UserRoleProvider {
         return getRoles(userId, true);
     }
 
-    /**
-     * Does the current user have the required role?
-     */
-    public boolean hasRole (UserRole role) {
-        return  hasRole (CurrentUser.getId(), role);
-    }
-
-    public boolean hasRole(Integer id, UserRole role) {
-        if (id == null)
-            return false;
-        else
-            return hasRole(getRoles(id), role);
-    }
-
     public boolean hasRole(User user, UserRole role) {
         return hasRole(getRoles(user.getId()), role);
     }
@@ -55,30 +40,8 @@ public class UserRoleProvider {
         return roles.contains(role) || roles.contains(UserRole.SUPER_USER); // Superuser has all roles!!
     }
 
-    public static boolean hasSomeRole(Set<UserRole> roles, UserRole[] searchFor){
-        for(UserRole role : searchFor){
-            if(hasRole(roles, role))
-                return true;
-        }
-        return false;
-    }
-
-    public boolean hasSomeRole(User user, UserRole[] roles){
-        Set<UserRole> l = getRoles(user.getId());
-        return hasSomeRole(l, roles);
-    }
-
-    public boolean isAdmin(User user){
-        return hasSomeRole(user, ADMIN_ROLES);
-    }
-
-    public boolean isAdmin(){
-        return isAdmin(userProvider.getUser());
-    }
-
-    public boolean hasSomeRole(UserRole[] roles){
-        User u = userProvider.getUser();
-        return hasSomeRole(u, roles);
+    public static boolean hasSomeRole(Set<UserRole> roles, UserRole role1, UserRole role2){
+        return roles.contains(UserRole.SUPER_USER) || roles.contains(role1) || roles.contains(role2);
     }
 
     public boolean isFullUser(User user) {
@@ -88,6 +51,16 @@ public class UserRoleProvider {
     public boolean isFullUser() {
         User user = userProvider.getUser();
         return isFullUser(user);
+    }
+
+    public boolean isAdmin (User user) {
+        // TODO: only needed because admins can change profiles too
+        Set<UserRole> roleSet = getRoles(user.getId());
+        return roleSet.contains (UserRole.SUPER_USER) ||
+                roleSet.contains (UserRole.CAR_ADMIN) ||
+                roleSet.contains (UserRole.INFOSESSION_ADMIN) ||
+                roleSet.contains (UserRole.MAIL_ADMIN) ||
+                roleSet.contains (UserRole.RESERVATION_ADMIN);
     }
 
     public Set<UserRole> getRoles(int userId, boolean cached) {

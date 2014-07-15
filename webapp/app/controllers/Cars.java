@@ -15,6 +15,7 @@ import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -262,16 +263,16 @@ public class Cars extends Controller {
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             CarDAO dao = context.getCarDAO();
-            User user = DataProvider.getUserProvider().getUser();
             CarModel model = carForm.get();
             AddressDAO adao = context.getAddressDAO();
             Address address = modifyAddress(model.address, null, adao);
 
-            User owner = user;
-            if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
-                    || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+            User owner;
+            if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
                 // User is permitted to add cars for other users
                 owner = context.getUserDAO().getUserPartial(model.userId);
+            } else {
+                owner= context.getUserDAO().getUserPartial(CurrentUser.getId()); // TODO: can this be avoided?
             }
             TechnicalCarDetails technicalCarDetails = null;
             Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -348,17 +349,17 @@ public class Cars extends Controller {
             flash("danger", "Auto met ID=" + carId + " bestaat niet.");
             return badRequest(userCarList());
         } else {
-            User currentUser = DataProvider.getUserProvider().getUser();
-            if (!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))) {
+            if (car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+
+                CarModel model = new CarModel();
+                model.populate(car);
+
+                Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
+                return ok(edit.render(editForm, car, getCountryList(), getFuelList()));
+            } else {
                 flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                 return badRequest(userCarList());
             }
-
-            CarModel model = new CarModel();
-            model.populate(car);
-
-            Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
-            return ok(edit.render(editForm, car, getCountryList(), getFuelList()));
         }
     }
 
@@ -385,8 +386,7 @@ public class Cars extends Controller {
             return badRequest(userCarList());
         }
 
-        User currentUser = DataProvider.getUserProvider().getUser();
-        if (!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.RESERVATION_ADMIN))) {
+        if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest(userCarList());
         }
@@ -510,9 +510,7 @@ public class Cars extends Controller {
             car.setPhoto(picture);
         }
 
-        User user = DataProvider.getUserProvider().getUser();
-        if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)
-                || DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_ADMIN)) {
+        if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             // User is permitted to add cars for other users
             car.setOwner(context.getUserDAO().getUserPartial(model.userId));
         }
@@ -539,8 +537,7 @@ public class Cars extends Controller {
             return badRequest(userCarList());
         }
 
-        User currentUser = DataProvider.getUserProvider().getUser();
-        if (!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))) {
+        if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest(userCarList());
         }
@@ -720,8 +717,7 @@ public class Cars extends Controller {
             return badRequest(userCarList());
         }
 
-        User currentUser = DataProvider.getUserProvider().getUser();
-        if (!(car.getOwner().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))) {
+        if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
             flash("danger", "Je heeft geen rechten tot het bewerken van deze wagen.");
             return badRequest(userCarList());
         }
@@ -937,9 +933,7 @@ public class Cars extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         // Check if admin or car owner
-        User user = DataProvider.getUserProvider().getUser();
-        UserRoleProvider userRoleProvider = DataProvider.getUserRoleProvider();
-        if (!userRoleProvider.hasRole(user, UserRole.CAR_ADMIN) || !userRoleProvider.hasRole(user, UserRole.SUPER_USER)) {
+        if (!CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             String carIdString = filter.getValue(FilterField.CAR_ID);
             int carId;
             if (carIdString.equals("")) {
@@ -948,7 +942,7 @@ public class Cars extends Controller {
                 carId = Integer.parseInt(carIdString);
             }
             CarDAO carDAO = DataAccess.getInjectedContext().getCarDAO();
-            List<Car> listOfCars = carDAO.getCarsOfUser(user.getId());
+            List<Car> listOfCars = carDAO.getCarsOfUser(CurrentUser.getId());
             // Check if carId in cars
             boolean isCarOfUser = false;
             for (Car c : listOfCars) {

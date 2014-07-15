@@ -7,6 +7,7 @@ import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -197,7 +198,6 @@ public class Drives extends Controller {
     // should be used with an injected context only
     private static Html detailsPage(int reservationId, Form<Reserve.ReservationModel> adjustForm, Form<RemarksModel> refuseForm,
                                     Form<InfoModel> detailsForm) {
-        User user = DataProvider.getUserProvider().getUser();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         UserDAO udao = context.getUserDAO();
@@ -219,8 +219,8 @@ public class Drives extends Controller {
             flash("Error", "De reservatie bevat ongeldige gegevens");
             return null;
         }
-        if (!isLoaner(reservation, user) && !isOwnerOfReservedCar(context, user, reservation)
-                && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
+        if (!isLoaner(reservation, CurrentUser.getId()) && !isOwnerOfReservedCar(context, CurrentUser.getId(), reservation)
+                && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("Error", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
         }
@@ -256,7 +256,6 @@ public class Drives extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result adjustDetails(int reservationId) {
-        User user = DataProvider.getUserProvider().getUser();
         Form<RemarksModel> refuseModel = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
@@ -269,7 +268,7 @@ public class Drives extends Controller {
             adjustForm.reject("Er is een fout gebeurt bij het opvragen van de rit.");
             return badRequest(showIndex());
         }
-        if (!isLoaner(reservation, user) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
+        if (!isLoaner(reservation, CurrentUser.getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             adjustForm.reject("Je bent niet gemachtigd deze actie uit te voeren.");
             return badRequest(showIndex());
         }
@@ -364,7 +363,6 @@ public class Drives extends Controller {
      */
     // used in injected context
     private static Reservation adjustStatus(int reservationId, ReservationStatus status) {
-        User user = DataProvider.getUserProvider().getUser();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
         Reservation reservation = dao.getReservation(reservationId);
@@ -373,23 +371,25 @@ public class Drives extends Controller {
             return null;
         }
         // Both super user and reservation admin are allowed to adjust the status of a reservation
-        if (!(DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER))
-                && !((DataProvider.getUserRoleProvider().hasRole(user, UserRole.RESERVATION_ADMIN)))) {
+        if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
+            // TODO: refactor these additional checks
             switch (status) {
                 // Only the loaner is allowed to cancel a reservation at any time
                 case CANCELLED:
-                    if (!isLoaner(reservation, user) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
+                    if (isLoaner(reservation, CurrentUser.getId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+                        if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
+                            flash("Error", "De reservatie is niet meer in aanvraag en is niet goedgekeurd!");
+                            return null;
+                        }
+                    } else {
                         flash("Error", "Alleen de ontlener mag een reservatie annuleren!");
-                        return null;
-                    } else if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                        flash("Error", "De reservatie is niet meer in aanvraag en is niet goedgekeurd!");
                         return null;
                     }
                     break;
                 // The owner is allowed to approve or refuse a reservation if that reservation
                 // has the request or request_new status
                 default:
-                    if (!isOwnerOfReservedCar(context, user, reservation)
+                    if (!isOwnerOfReservedCar(context, CurrentUser.getId(), reservation)
                             || reservation.getStatus() != ReservationStatus.REQUEST) {
                         flash("Error", "Alleen de eigenaar kan de status van een reservatie aanpassen");
                         return null;
@@ -409,7 +409,6 @@ public class Drives extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result provideDriveInfo(int reservationId) {
-        User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
         Form<RemarksModel> refuseForm = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
@@ -426,8 +425,8 @@ public class Drives extends Controller {
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
         // Test if user is authorized
-        boolean isOwner = isOwnerOfReservedCar(context, user, reservation);
-        if (!isLoaner(reservation, user) && !isOwner && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
+        boolean isOwner = isOwnerOfReservedCar(context, CurrentUser.getId(), reservation);
+        if (!isLoaner(reservation, CurrentUser.getId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
@@ -450,7 +449,7 @@ public class Drives extends Controller {
                 Damage damage = damageDAO.createDamage(ride);
                 context.commit();
             }
-        } else if (isOwner || DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
+        } else if (isOwner || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             // Owner is allowed to adjust the information
             ride.setStartMileage(detailsForm.get().startMileage);
             ride.setEndMileage(detailsForm.get().endMileage);
@@ -459,7 +458,7 @@ public class Drives extends Controller {
         if (isOwner) {
             Instant instant = reservation.getFrom().toDate().toInstant();
             calculateDriveCost(ride,
-                    isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation),
+                    isOwnerOfReservedCar(context, reservation.getUser().getId(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser().getId(), reservation),
                     context.getSettingDAO().getCostSettings(instant));
             dao.updateCarRide(ride);
         } else {
@@ -487,7 +486,6 @@ public class Drives extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
     @InjectContext
     public static Result approveDriveInfo(int reservationId) {
-        User user = DataProvider.getUserProvider().getUser();
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
         Form<RemarksModel> refuseForm = Form.form(RemarksModel.class);
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
@@ -500,7 +498,7 @@ public class Drives extends Controller {
             detailsForm.reject("De reservatie kan niet opgevraagd worden. Gelieve de database administrator te contacteren.");
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
-        if (!isOwnerOfReservedCar(context, user, reservation) && !DataProvider.getUserRoleProvider().hasRole(user.getId(), UserRole.RESERVATION_ADMIN)) {
+        if (!isOwnerOfReservedCar(context, CurrentUser.getId(), reservation) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
@@ -512,7 +510,7 @@ public class Drives extends Controller {
         ride.setStatus(true);
         Instant instant = reservation.getFrom().toDate().toInstant();
         calculateDriveCost(ride,
-                isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation),
+                isOwnerOfReservedCar(context, reservation.getUser().getId(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser().getId(), reservation),
                 context.getSettingDAO().getCostSettings(instant));
         dao.updateCarRide(ride);
         reservation.setStatus(ReservationStatus.FINISHED);
@@ -566,13 +564,13 @@ public class Drives extends Controller {
      * Private method to determine whether the user is owner of the car belonging to a reservation.
      *
      * @param context     the data access context required to communicate with the database
-     * @param user        the user who is possibly the owner of the car
+     * @param userId        the user who is possibly the owner of the car
      * @param reservation the reservation containing the car
      * @return true if the user is the owner, false otherwise
      */
-    private static boolean isOwnerOfReservedCar(DataAccessContext context, User user, Reservation reservation) {
+    private static boolean isOwnerOfReservedCar(DataAccessContext context, int userId, Reservation reservation) {
         CarDAO cdao = context.getCarDAO();
-        List<Car> cars = cdao.getCarsOfUser(user.getId());
+        List<Car> cars = cdao.getCarsOfUser(userId);
         boolean isOwner = false;
         int index = 0;
         while (!isOwner && index < cars.size()) {
@@ -583,13 +581,13 @@ public class Drives extends Controller {
         return isOwner;
     }
 
-    private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, User user, Reservation reservation) {
+    private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, int userId, Reservation reservation) {
         CarDAO cdao = context.getCarDAO();
         boolean isPrivileged = false;
         // TODO: see also Reserve.confirmReservation
         Iterator<User> iterator = cdao.getPrivileged(reservation.getCar().getId()).iterator();
         while (!isPrivileged && iterator.hasNext()) {
-            isPrivileged = user.getId() == iterator.next().getId();
+            isPrivileged = (userId == iterator.next().getId());
         }
         return isPrivileged;
     }
@@ -598,11 +596,11 @@ public class Drives extends Controller {
      * Private method to determine whether the user is loaner of the car belonging to a reservation.
      *
      * @param reservation the reservation containing the car
-     * @param user        the user who is possibly the loaner of the car
+     * @param userId        the user who is possibly the loaner of the car
      * @return true if the user is the owner, false otherwise
      */
-    private static boolean isLoaner(Reservation reservation, User user) {
-        return reservation.getUser().getId() == user.getId();
+    private static boolean isLoaner(Reservation reservation, int userId) {
+        return reservation.getUser().getId() == userId;
     }
 
     // RENDERING THE PARTIAL

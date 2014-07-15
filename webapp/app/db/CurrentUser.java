@@ -1,7 +1,10 @@
 package db;
 
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserRole;
 import play.mvc.Controller;
+
+import java.util.Set;
 
 /**
  * Manages information about the current user, as stored in the HTTP session
@@ -9,14 +12,23 @@ import play.mvc.Controller;
 public class CurrentUser {
 
     /**
+     * Is there a valid user?
+     */
+    public static boolean isValid () {
+        return Controller.session().get("id") != null;
+    }
+
+    /**
      * Register the given user as the current user. (As part of logging in or switching to another user.)
      * @param user partially filled in user object
      */
-    public static void set (User user) {
+    public static void set (User user, Set<UserRole> roleSet) {
         // TODO: add roles
         Controller.session("id", Integer.toString(user.getId()));
         Controller.session("email", user.getEmail());
         Controller.session("fullName", user.getFullName());
+
+        Controller.session("roles", UserRole.toString(roleSet));
     }
 
     /**
@@ -39,6 +51,45 @@ public class CurrentUser {
      */
     public static String getFullName () {
         return Controller.session("fullName");
+    }
+
+    /**
+     * Retrieve the roles of the current user
+     */
+    private static Set<UserRole> getRoles () {
+        return UserRole.fromString(Controller.session("roles"));
+    }
+
+    /**
+     * Does the current user have the indicated role, or is the current user a super user? (Super users automatically
+     * acquire all roles.)
+     */
+    public static boolean hasRole (UserRole role) {
+        Set<UserRole> roleSet = getRoles();
+        return roleSet.contains (UserRole.SUPER_USER) ||
+                roleSet.contains (role);
+    }
+
+    /**
+     * Does the current user have one of the indicated roles (or is he a super user)?
+     */
+    public static boolean hasSomeRole (UserRole role1, UserRole role2) {
+        Set<UserRole> roleSet = getRoles();
+        return roleSet.contains (UserRole.SUPER_USER) ||
+                roleSet.contains (role1) ||
+                roleSet.contains (role2);
+    }
+
+    /**
+     * Does the current user have one of the administrative roles?
+     */
+    public static boolean isAdmin () {
+        Set<UserRole> roleSet = getRoles();
+        return roleSet.contains (UserRole.SUPER_USER) ||
+                roleSet.contains (UserRole.CAR_ADMIN) ||
+                roleSet.contains (UserRole.INFOSESSION_ADMIN) ||
+                roleSet.contains (UserRole.MAIL_ADMIN) ||
+                roleSet.contains (UserRole.RESERVATION_ADMIN);
     }
 
 }

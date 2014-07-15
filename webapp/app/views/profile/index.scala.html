@@ -1,7 +1,7 @@
 @(user: User, completeness: Int = 0, editable: Boolean)
-@import providers.DataProvider;
+@import db.CurrentUser
 @app("Profiel") {
-    @defining(DataProvider.getUserRoleProvider.isAdmin) { isAdmin =>
+    @defining(CurrentUser.isAdmin) { isAdmin =>
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>

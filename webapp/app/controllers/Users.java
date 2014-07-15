@@ -1,5 +1,6 @@
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
@@ -69,15 +70,15 @@ public class Users extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
     @InjectContext
     public static Result impersonate(int userId) {
-        User user = DataAccess.getInjectedContext().getUserDAO().getUserPartial(userId);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        User user = context.getUserDAO().getUserPartial(userId);
         if (user != null) {
             if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)) {
                 flash("danger", "Je kan geen superuser impersoneren.");
-                return redirect(routes.Dashboard.index());
             } else {
-                CurrentUser.set(user);
-                return redirect(routes.Dashboard.index());
+                CurrentUser.set(user, context.getUserRoleDAO().getUserRoles(userId));
             }
+            return redirect(routes.Dashboard.index());
         } else {
             flash("danger", "Deze gebruikersID bestaat niet.");
             return redirect(routes.Users.showUsers());

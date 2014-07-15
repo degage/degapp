@@ -1,10 +1,10 @@
 @(user: User, completeness: Int = 0, form: play.data.Form[Reserve.IndexModel])
 @import providers.DataProvider
-
-
+@import db.CurrentUser
+@* Always called with current user *@
 <div class="">
     <div class="">
-        @defining(DataProvider.getUserRoleProvider.hasRole(user.getId, UserRole.CAR_OWNER)) { owner =>
+        @defining(CurrentUser.hasRole(UserRole.CAR_OWNER)) { owner =>
             <div class="row">
                 @if(owner) {
                     @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { requests =>

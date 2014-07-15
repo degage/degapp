@@ -8,6 +8,7 @@ import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.Security.RoleSecured;
 import controllers.util.*;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.Logger;
@@ -114,7 +115,6 @@ public class Profile extends Controller {
     @InjectContext
     public static Result profilePictureUploadPost(int userId) {
         // First we check if the user is allowed to upload to this userId
-        User currentUser = DataProvider.getUserProvider().getUser();
         User user;
 
         // We load the other user(by id)
@@ -123,7 +123,7 @@ public class Profile extends Controller {
         user = dao.getUser(userId);
 
         // Check if the userId exists
-        if (user == null || currentUser.getId() != user.getId() && !DataProvider.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN)) {
+        if (user == null || CurrentUser.getId() != user.getId() && !CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
@@ -205,8 +205,7 @@ public class Profile extends Controller {
     @InjectContext
     public static Result indexWithoutId() {
         User user = DataProvider.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
-        User currentUser = DataProvider.getUserProvider().getUser();
-        return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user, currentUser)));
+        return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user)));
     }
 
     /**
@@ -230,9 +229,9 @@ public class Profile extends Controller {
         User currentUser = DataProvider.getUserProvider().getUser();
 
         // Only a profile admin or user itself can edit
-        if (canEditProfile(user, currentUser)) {
-            return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user, currentUser)));
-        } else if (DataProvider.getUserRoleProvider().isFullUser(currentUser)) {
+        if (canEditProfile(user)) {
+            return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user)));
+        } else if (DataProvider.getUserRoleProvider().isFullUser(currentUser)) { // TODO: remove reference to currentUser
             return ok(profile.render(user));
         } else {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
@@ -243,11 +242,10 @@ public class Profile extends Controller {
      * Returns whether the currentUser can edit the profile of user
      *
      * @param user        The subject
-     * @param currentUser The actor
      * @return A boolean when the profile can be edited
      */
-    private static boolean canEditProfile(User user, User currentUser) {
-        return currentUser.getId() == user.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser, UserRole.PROFILE_ADMIN);
+    private static boolean canEditProfile(User user) {
+        return CurrentUser.getId() == user.getId() || CurrentUser.hasRole(UserRole.PROFILE_ADMIN);
     }
 
     public static class EditIdentityCardForm {
@@ -286,10 +284,9 @@ public class Profile extends Controller {
             return redirect(routes.Dashboard.index());
         }
 
-        User currentUser = DataProvider.getUserProvider().getUser();
 
         // Only a profile admin or user itself can edit
-        if (canEditProfile(user, currentUser)) {
+        if (canEditProfile(user)) {
             Form<EditIdentityCardForm> form = Form.form(EditIdentityCardForm.class);
 
             Iterable<File> listOfFiles = context.getFileDAO().getIdFiles(userId);
@@ -323,8 +320,7 @@ public class Profile extends Controller {
 
             @Override
             public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
-                User currentUser = DataProvider.getUserProvider().getUser();
-                if (!canEditProfile(user, currentUser))
+                if (!canEditProfile(user))
                     return null;
 
                 Iterable<File> files = null;
@@ -398,8 +394,7 @@ public class Profile extends Controller {
 
             @Override
             public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
-                User currentUser = DataProvider.getUserProvider().getUser();
-                if (!canEditProfile(user, currentUser))
+                if (!canEditProfile(user))
                     return null;
 
                 Iterable<File> files = null;
@@ -441,9 +436,7 @@ public class Profile extends Controller {
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
         User user = udao.getUser(userId);
-        User currentUser = DataProvider.getUserProvider().getUser();
-
-        if (user == null || !canEditProfile(user, currentUser)) {
+        if (user == null || !canEditProfile(user)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
         Iterable<File> listOfFiles = fdao.getIdFiles(userId);
@@ -530,10 +523,8 @@ public class Profile extends Controller {
             return redirect(routes.Dashboard.index());
         }
 
-        User currentUser = DataProvider.getUserProvider().getUser();
-
         // Only a profile admin or user itself can edit
-        if (canEditProfile(user, currentUser)) {
+        if (canEditProfile(user)) {
             Form<EditDriversLicenseModel> form = Form.form(EditDriversLicenseModel.class);
 
             Iterable<File> listOfFiles = context.getFileDAO().getLicenseFiles(userId);
@@ -555,9 +546,8 @@ public class Profile extends Controller {
         UserDAO udao = context.getUserDAO();
         FileDAO fdao = context.getFileDAO();
         User user = udao.getUser(userId);
-        User currentUser = DataProvider.getUserProvider().getUser();
 
-        if (user == null || !canEditProfile(user, currentUser)) {
+        if (user == null || !canEditProfile(user)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
@@ -621,9 +611,8 @@ public class Profile extends Controller {
     public static Result edit(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
         User user = dao.getUser(userId);
-        User currentUser = DataProvider.getUserProvider().getUser();
 
-        if (!canEditProfile(user, currentUser)) {
+        if (!canEditProfile(user)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
@@ -721,11 +710,10 @@ public class Profile extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
         User user = dao.getUser(userId);
-        User currentUser = DataProvider.getUserProvider().getUser();
 
-        boolean isProfileAdmin = DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.PROFILE_ADMIN);
+        boolean isProfileAdmin = CurrentUser.hasRole(UserRole.PROFILE_ADMIN);
 
-        if (currentUser.getId() != user.getId() && !isProfileAdmin) {
+        if (CurrentUser.getId() != user.getId() && !isProfileAdmin) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 

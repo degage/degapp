@@ -1,5 +1,7 @@
 @(user: User, reservations: List[Reservation], form: play.data.Form[Reserve.IndexModel], completeness: Int = 0,
         userWentToInfoSession: Boolean = false, approvalRequestSent: Boolean = false)
+
+        @* Always called with current user *@
 @import providers.DataProvider;
     @scripts = {
         <script src="@routes.Assets.at("javascripts/app/dashboard.js")"></script>

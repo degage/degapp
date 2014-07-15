@@ -11,6 +11,7 @@ import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import org.joda.time.DateTime;
@@ -191,17 +192,18 @@ public class Damages extends Controller {
             flash("danger", "Schadedossier met ID=" + damageId + " bestaat niet.");
             return badRequest();
         } else {
-            User currentUser = DataProvider.getUserProvider().getUser();
-            if (!(damage.getCarRide().getReservation().getUser().getId() == currentUser.getId() || DataProvider.getUserRoleProvider().hasRole(currentUser.getId(), UserRole.CAR_ADMIN))) {
+            //User currentUser = DataProvider.getUserProvider().getUser();
+            if ((damage.getCarRide().getReservation().getUser().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
+
+                DamageModel model = new DamageModel();
+                model.populate(damage);
+
+                Form<DamageModel> editForm = Form.form(DamageModel.class).fill(model);
+                return ok(editmodal.render(editForm, damageId));
+            } else {
                 flash("danger", "Je hebt geen rechten tot het bewerken van dit schadedossier.");
                 return badRequest();
             }
-
-            DamageModel model = new DamageModel();
-            model.populate(damage);
-
-            Form<DamageModel> editForm = Form.form(DamageModel.class).fill(model);
-            return ok(editmodal.render(editForm, damageId));
         }
     }
 

@@ -1,7 +1,8 @@
 @(user: User, editable: Boolean)
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
 <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-<h2>@user.getFirstName @user.getLastName</h2>
+<h2>@user.getFullName</h2>
 <p>
     <strong>Email:</strong> @user.getEmail
     <br>
@@ -22,10 +23,10 @@
     }
 </p>
 <p>
-    @if(DataProvider.getUserRoleProvider.isAdmin) {
+    @if(CurrentUser.isAdmin) {
         <strong>Status: </strong> <span class="label label-default">@user.getStatus</span>
     }
-    @if(DataProvider.getUserRoleProvider.isAdmin(user)){
+    @if(providers.DataProvider.getUserRoleProvider.isAdmin(user)){
         <span class="label label-default"><i class="fa fa-star" style="color: yellow;"></i> Admin</span>
     }
 </p>

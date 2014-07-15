@@ -1,5 +1,6 @@
 @(infoSession: InfoSession, enrolled: InfoSession = null, enrollees: Iterable[Enrollee], map: Maps.MapDetails = null)
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
 @scripts = {
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
 
@@ -37,7 +38,7 @@
     <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Details infosessie</h1>
-        @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
+        @defining(CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
                 @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
            @flashes()
             @if(isAdmin) {

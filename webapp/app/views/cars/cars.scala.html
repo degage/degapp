@@ -3,7 +3,9 @@
 }
 @stylesheets = {
 }
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
+
 @app("Auto's", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -17,8 +19,8 @@
             <div class="col-lg-12">
                 <h1 class="page-header">Auto's</h1>
                 @flashes()
-                @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_ADMIN) ||
-                        DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_OWNER)) { isAdmin =>
+                @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN) ||
+                        CurrentUser.hasRole(UserRole.CAR_OWNER)) { isAdmin =>
                     @if(isAdmin) {
                         <div class="panel panel-default">
                             <div class="panel-body">
