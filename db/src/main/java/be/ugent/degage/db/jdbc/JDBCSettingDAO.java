@@ -2,6 +2,7 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.SettingDAO;
+import be.ugent.degage.db.models.Costs;
 import be.ugent.degage.db.models.Setting;
 
 import java.sql.*;
@@ -111,6 +112,59 @@ class JDBCSettingDAO extends AbstractDAO implements SettingDAO {
             return settings;
         } catch(SQLException ex){
             throw new DataAccessException("Failed to read overview resultset.", ex);
+        }
+    }
+
+    private LazyStatement getCostsSettingsStatement = new LazyStatement(
+            "SELECT s.setting_value " +
+                    "FROM ( SELECT setting_name, MAX(setting_after) AS m " +
+                    "       FROM settings " +
+                    "       WHERE setting_name LIKE ? AND setting_after < ? " +
+                    "       GROUP BY setting_name ) AS t " +
+                    "JOIN settings AS s " +
+                    "  WHERE t.setting_name = s.setting_name " +
+                    "    AND t.m = s.setting_after " +
+                    "ORDER BY s.setting_name ASC"
+    );
+
+
+    @Override
+    public Costs getCostSettings(Instant instant) throws DataAccessException {
+        try {
+            PreparedStatement ps = getCostsSettingsStatement.value();
+
+            List<String> amountList = new ArrayList<>();
+
+            ps.setString (1, "cost\\__");
+            ps.setTimestamp(2, Timestamp.from(instant));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    amountList.add(rs.getString("setting_value"));
+                }
+            }
+
+            List<String> limitList = new ArrayList<>();
+            ps.setString (1, "cost\\_limit\\__");
+            ps.setTimestamp(2, Timestamp.from(instant));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    limitList.add (rs.getString("setting_value"));
+                }
+            }
+            PreparedStatement ps2 = getSettingForDateStatement.value();
+            ps2.setString(1, "deprecation_cost");
+            ps2.setTimestamp(2, Timestamp.from(instant));
+            String deprecationString = null;
+
+            try (ResultSet rs = ps2.executeQuery()) {
+                if (rs.next())
+                    deprecationString = rs.getString("setting_value");
+            }
+
+            return new Costs(deprecationString, amountList, limitList);
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not obtain all cost information", ex);
         }
     }
 }

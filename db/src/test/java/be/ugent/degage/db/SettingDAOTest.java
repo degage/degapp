@@ -1,6 +1,7 @@
 package be.ugent.degage.db;
 
 import be.ugent.degage.db.dao.SettingDAO;
+import be.ugent.degage.db.models.Costs;
 import be.ugent.degage.db.models.Setting;
 import com.google.common.collect.Iterables;
 import org.junit.Before;
@@ -26,6 +27,7 @@ public class SettingDAOTest extends DAOTest {
     public void getDAOAndFixtures() {
         dao = context.getSettingDAO();
         Fixtures.createSettings(context);
+        Fixtures.createCostSettings(context);
     }
 
     @Test
@@ -47,6 +49,15 @@ public class SettingDAOTest extends DAOTest {
                 Iterables.find(list, s -> s.getName().equals("setting_1")).getValue());
         assertEquals ("value_new",
                 Iterables.find(list, s -> s.getName().equals("setting_2")).getValue());
+    }
+
+    @Test
+    public void getCostSettingsTest() {
+        Costs costs = dao.getCostSettings(Instant.now().plusSeconds(30));
+        assertEquals (4, costs.getLevels());
+        assertEquals (0.31, costs.getCost(1), 0.001);
+        assertEquals (132, costs.getLimit(2));
+        assertEquals (0.85, costs.getDeprecation(), 0.001);
     }
 
 }

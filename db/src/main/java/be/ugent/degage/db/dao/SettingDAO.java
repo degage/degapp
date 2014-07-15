@@ -1,6 +1,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.models.Costs;
 import be.ugent.degage.db.models.Setting;
 import org.joda.time.DateTime;
 
@@ -34,4 +35,10 @@ public interface SettingDAO {
      * Return a list of all settings with their newest value.
      */
     public Iterable<Setting> getSettings() throws DataAccessException;
+
+    /**
+     * Return all cost related settings valid at the given instant
+     */
+    public Costs getCostSettings(Instant instant) throws DataAccessException;
+
 }

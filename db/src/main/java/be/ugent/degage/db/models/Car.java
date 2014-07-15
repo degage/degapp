@@ -4,13 +4,8 @@
  */
 package be.ugent.degage.db.models;
 
-import org.joda.time.LocalTime;
-
-import java.util.List;
-
 /**
- *
- * @author Laurent
+ * Represents information about a certain car.
  */
 public class Car {
     
