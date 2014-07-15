@@ -28,7 +28,7 @@ public class UserRoleProvider {
         this.userProvider = userProvider;
     }
 
-    public EnumSet<UserRole> getRoles(int userId) {
+    public Set<UserRole> getRoles(int userId) {
         return getRoles(userId, true);
     }
 
@@ -94,7 +94,7 @@ public class UserRoleProvider {
         return hasRole(user, role);
     }
 
-    public EnumSet<UserRole> getRoles(int userId, boolean cached) {
+    public Set<UserRole> getRoles(int userId, boolean cached) {
 
         String key = String.format(ROLES_BY_ID, userId);
 
@@ -106,7 +106,7 @@ public class UserRoleProvider {
         if (obj == null || !(obj instanceof EnumSet)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 UserRoleDAO dao = context.getUserRoleDAO();
-                EnumSet<UserRole> roles = dao.getUserRoles(userId);
+                Set<UserRole> roles = dao.getUserRoles(userId);
                 if (roles != null) { // cache and return
                     Cache.set(key, roles);
                     return roles;

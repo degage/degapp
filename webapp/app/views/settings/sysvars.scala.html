@@ -1,5 +1,4 @@
 @(settings: Iterable[Setting])
-@import providers.SettingProvider;
 @app("Systeemvariabelen") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -28,7 +27,7 @@
                             <tr>
                                 <td>@setting.getName</td>
                                 <td>@setting.getValue</td>
-                                <td>@SettingProvider.instantToString(setting.getAfterDate)</td>
+                                <td>@Settings.instantToString(setting.getAfterDate)</td>
                                 <td>
                                     <div class="btn-group btn-group-xs">
                                         <a class="btn btn-primary" href="@routes.Settings.editSysvar(setting.getName)">Wijzigen</a>

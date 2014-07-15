@@ -1,7 +1,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
@@ -18,7 +17,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
-import providers.SettingProvider;
 import views.html.drives.driveDetails;
 import views.html.drives.drives;
 import views.html.drives.drivesAdmin;
@@ -293,7 +291,7 @@ public class Drives extends Controller {
             // Remove old reservation auto accept and add new
             JobDAO jdao = context.getJobDAO();
             jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId()); //remove the old job
-            int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+            int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
             MutableDateTime autoAcceptDate = new MutableDateTime();
             autoAcceptDate.addMinutes(minutesAfterNow);
             jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
@@ -459,7 +457,10 @@ public class Drives extends Controller {
         }
 
         if (isOwner) {
-            calculateDriveCost(ride, reservation.getFrom().toDate().toInstant(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
+            Instant instant = reservation.getFrom().toDate().toInstant();
+            calculateDriveCost(ride,
+                    isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation),
+                    context.getSettingDAO().getCostSettings(instant));
             dao.updateCarRide(ride);
         } else {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
@@ -509,32 +510,34 @@ public class Drives extends Controller {
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
         ride.setStatus(true);
-        calculateDriveCost(ride, reservation.getFrom().toDate().toInstant(), isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation));
+        Instant instant = reservation.getFrom().toDate().toInstant();
+        calculateDriveCost(ride,
+                isOwnerOfReservedCar(context, reservation.getUser(), reservation) || isPrivilegedUserOfReservedCar(context, reservation.getUser(), reservation),
+                context.getSettingDAO().getCostSettings(instant));
         dao.updateCarRide(ride);
         reservation.setStatus(ReservationStatus.FINISHED);
         rdao.updateReservation(reservation);
         return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
     }
 
-    private static void calculateDriveCost(CarRide ride, Instant date, boolean privileged) {
+    private static void calculateDriveCost(CarRide ride, boolean privileged, Costs costInfo) {
         if (privileged) {
             ride.setCost(BigDecimal.ZERO);
         } else {
-            SettingProvider provider = DataProvider.getSettingProvider();
-
             double cost = 0;
             int distance = ride.getEndMileage() - ride.getStartMileage();
-            int levels = provider.getInt("cost_levels", date);
+            int levels = costInfo.getLevels();
             int lower = 0;
 
             for (int level = 0; level < levels; level++) {
                 int limit;
 
-                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date))) {
-                    cost += distance * provider.getDouble("cost_" + level, date);
+                // TODO: refactor this
+                if (level == levels - 1 || distance <= (limit = costInfo.getLimit(level))) {
+                    cost += distance * costInfo.getCost(level);
                     break;
                 } else {
-                    cost += (limit - lower) * provider.getDouble("cost_" + level, date);
+                    cost += (limit - lower) * costInfo.getCost(level);
                     distance -= (limit - lower);
                     lower = limit;
                 }

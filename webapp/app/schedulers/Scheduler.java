@@ -9,7 +9,6 @@ import db.DataAccess;
 import org.joda.time.DateTime;
 import play.Logger;
 import play.libs.Akka;
-import providers.DataProvider;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
@@ -69,7 +68,7 @@ public class Scheduler implements Runnable {
     public void start() {
         if (!isRunning) {
             checkInitialReports();
-            int refresh = getSecondsInterval(); // refresh rate in seconds
+            int refresh = Integer.parseInt(DataAccess.getContext().getSettingDAO().getSettingForNow("scheduler_interval")); // refresh rate in seconds
             schedule(Duration.create(refresh, TimeUnit.SECONDS), this);
             isRunning = true;
         }
@@ -93,10 +92,6 @@ public class Scheduler implements Runnable {
                 }
             }
         }
-    }
-
-    private int getSecondsInterval() {
-        return DataProvider.getSettingProvider().getIntOrDefault("scheduler_interval", 5 * 60);
     }
 
     public void schedule(FiniteDuration repeatDuration, Runnable task) {

@@ -224,7 +224,7 @@ public class Reserve extends Controller {
 
             // Schedule the auto accept
             JobDAO jdao = context.getJobDAO();
-            int minutesAfterNow = DataProvider.getSettingProvider().getIntOrDefault("reservation_auto_accept", 4320);
+            int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
             MutableDateTime autoAcceptDate = new MutableDateTime();
             autoAcceptDate.addMinutes(minutesAfterNow);
             jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());

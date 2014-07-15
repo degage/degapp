@@ -214,8 +214,8 @@ public class InfoSessions extends Controller {
                 JobDAO jdao = context.getJobDAO();
                 jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
 
-                int minutesBefore = DataProvider.getSettingProvider().getIntOrDefault("infosession_reminder", 1440);
-                MutableDateTime reminderDate = new MutableDateTime(session.getTime());
+                int minutesBefore = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder"));
+            MutableDateTime reminderDate = new MutableDateTime(session.getTime());
                 reminderDate.addMinutes(-minutesBefore);
                 jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
             }
@@ -308,7 +308,7 @@ public class InfoSessions extends Controller {
             });
         } else {
             final InfoSession enrolled = dao.getAttendingInfoSession(user);
-            if (DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
+            if (DataProvider.getSettingProvider().getBooleanOrDefault("show_maps", true)) {
                 return Maps.getLatLongPromise(session.getAddress().getId()).map(
                         new F.Function<F.Tuple<Double, Double>, Result>() {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
@@ -523,7 +523,7 @@ public class InfoSessions extends Controller {
 
             // Schedule the reminder
             JobDAO jdao = context.getJobDAO();
-            int minutesBefore = DataProvider.getSettingProvider().getIntOrDefault("infosession_reminder", 1440);
+            int minutesBefore = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder"));
             MutableDateTime reminderDate = new MutableDateTime(session.getTime());
             reminderDate.addMinutes(-minutesBefore);
             jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
@@ -683,8 +683,9 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalListPaged(int page) {
-        int pageSize = DataProvider.getSettingProvider().getIntOrDefault("infosessions_page_size", 10);
-        ApprovalDAO dao = DataAccess.getInjectedContext().getApprovalDAO();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        int pageSize = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosessions_page_size")); // should be application constant?
+        ApprovalDAO dao = context.getApprovalDAO();
         List<Approval> approvalsList = dao.getApprovals(page, pageSize);
         int amountOfResults = dao.getApprovalCount();
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
@@ -917,14 +918,8 @@ public class InfoSessions extends Controller {
         final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
 
         final boolean didUserGoToInfoSession = didUserGoToInfoSession();
-        if (enrolled == null || !DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
-            return F.Promise.promise(new F.Function0<Result>() {
-                @Override
-                public Result apply() throws Throwable {
-                    return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
-                }
-            });
-        } else {
+        boolean showMaps = enrolled != null && "true".equals (DataAccess.getInjectedContext().getSettingDAO().getSettingForNow("show_maps"));
+        if (showMaps) {
 
             return Maps.getLatLongPromise(enrolled.getFirst().getAddress().getId()).map(
                     new F.Function<F.Tuple<Double, Double>, Result>() {
@@ -935,6 +930,13 @@ public class InfoSessions extends Controller {
                         }
                     }
             );
+        } else {
+            return F.Promise.promise(new F.Function0<Result>() {
+                @Override
+                public Result apply() throws Throwable {
+                    return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
+                }
+            });
         }
     }
 

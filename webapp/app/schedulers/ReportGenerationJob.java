@@ -1,15 +1,15 @@
 package schedulers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
+import be.ugent.degage.db.models.Costs;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.User;
 import controllers.Receipts;
-import providers.DataProvider;
 
 import java.sql.Date;
+import java.time.Instant;
 import java.util.List;
 
 /**
@@ -26,9 +26,11 @@ public class ReportGenerationJob implements ScheduledJobExecutor {
         UserDAO dao = context.getUserDAO();
 
         List<User> users = dao.getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
+
+        Costs costInfo = context.getSettingDAO().getCostSettings(Instant.now());
         context.commit();
         for (User user : users) {
-            Receipts.generateReceipt(user, new Date(java.util.Calendar.getInstance().getTime().getTime()));
+            Receipts.generateReceipt(user, new Date(Instant.now().toEpochMilli()), costInfo);
         }
     }
 }

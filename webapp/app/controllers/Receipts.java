@@ -1,7 +1,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
@@ -21,7 +20,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
-import providers.SettingProvider;
 import views.html.receipts.receipts;
 import views.html.receipts.receiptspage;
 
@@ -89,7 +87,7 @@ public class Receipts extends Controller {
     }
 
     // TODO: should go in a separate helper class or even a separate module
-    public static void generateReceipt(User u, Date d) {
+    public static void generateReceipt(User u, Date d, Costs costInfo) {
         try {
             date = d;
             user = u;
@@ -99,7 +97,7 @@ public class Receipts extends Controller {
             String filename = FileHelper.getGeneratedFilesPath(name + ".pdf", "receipts");
             PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.open();
-            addToDataBase(name, filename, generatePDF(document));
+            addToDataBase(name, filename, generatePDF(document, costInfo));
             document.close();
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,7 +114,7 @@ public class Receipts extends Controller {
         dao.createReceipt(name, new DateTime(date), file, user, price);
     }
 
-    private static BigDecimal generatePDF(Document document) {
+    private static BigDecimal generatePDF(Document document, Costs costInfo) {
         BigDecimal saldo = BigDecimal.ZERO;
         try {
             String imageUrl = "https://fbcdn-sphotos-e-a.akamaihd.net/hphotos-ak-frc3/t1.0-9/969296_656566794396242_1002112915_n.jpg";
@@ -146,13 +144,13 @@ public class Receipts extends Controller {
             document.add(table);
 
             getLoanerBillData(date, user.getId());
-            saldo = createLoanerTable(document);
+            saldo = createLoanerTable(document, costInfo);
 
             DataAccessContext context = DataAccess.getContext();
             // TODO: inject context
             for (Car car : context.getCarDAO().getCarsOfUser(user.getId())) {
                 getCarBillData(date, car.getId());
-                saldo = saldo.add(createCarTable(document, car.getName()));
+                saldo = saldo.add(createCarTable(document, car.getName(), costInfo));
             }
 
             Font f = new Font(FontFamily.COURIER, 8);
@@ -167,7 +165,7 @@ public class Receipts extends Controller {
         return saldo;
     }
 
-    private static BigDecimal createCarTable(Document document, String carName)
+    private static BigDecimal createCarTable(Document document, String carName, Costs costInfo)
             throws DocumentException {
         document.newPage();
         document.add(new Paragraph("WAGEN: " + carName));
@@ -189,7 +187,8 @@ public class Receipts extends Controller {
         add(carTable, "Totaal aantal kilometers:", true);
         add(carTable, (loanerDist + othersDist) + " km", true);
 
-        double deprecation = DataProvider.getSettingProvider().getDouble("deprecation_cost", date.toInstant());
+        // TODO: date
+        double deprecation = costInfo.getDeprecation();
 
         if (loanerDist + othersDist > 0) {
             add(carTable, "Door eigenaar gereden:");
@@ -270,12 +269,11 @@ public class Receipts extends Controller {
         return total;
     }
 
-    private static BigDecimal createLoanerTable(Document document)
+    private static BigDecimal createLoanerTable(Document document, Costs costInfo)
             throws DocumentException {
         document.add(new Paragraph("Ritten"));
 
-        SettingProvider provider = DataProvider.getSettingProvider();
-        int levels = provider.getInt("cost_levels", date.toInstant());
+        int levels = costInfo.getLevels();
 
         PdfPTable drivesTable = new PdfPTable(4 + levels);
         drivesTable.setWidthPercentage(100);
@@ -294,7 +292,7 @@ public class Receipts extends Controller {
                 lower = upper;
 
             if (j < levels - 1) {
-                upper = provider.getInt("cost_limit_" + j, date.toInstant());
+                upper = costInfo.getLimit(j);
                 add(drivesTable, lower + "-" + upper + " km", true, false);
             } else {
                 add(drivesTable, "> " + upper + " km", true, false);
@@ -307,7 +305,7 @@ public class Receipts extends Controller {
         add(drivesTable, "", true);
 
         for (int j = 0; j < levels; j++) {
-            add(drivesTable, "€" + provider.getDouble("cost_" + j, date.toInstant()) + "/km");
+            add(drivesTable, "€" + costInfo.getCost (j) + "/km");
         }
 
         add(drivesTable, "", true);
@@ -331,7 +329,8 @@ public class Receipts extends Controller {
                 int limit = 0;
                 int d;
 
-                if (level == levels - 1 || distance <= (limit = provider.getInt("cost_limit_" + level, date.toInstant())))
+                // TODO: refactor
+                if (level == levels - 1 || distance <= (limit = costInfo.getLimit(level)))
                     d = distance;
                 else
                     d = limit - lower;

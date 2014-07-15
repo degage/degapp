@@ -2,26 +2,35 @@ package controllers;
 
 import be.ugent.degage.db.dao.SettingDAO;
 import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.Setting;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import controllers.Security.RoleSecured;
 import db.DataAccess;
 import db.InjectContext;
-import org.joda.time.DateTime;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
-import providers.SettingProvider;
-import providers.UserProvider;
 import views.html.settings.*;
 
 import java.time.Instant;
-import java.util.List;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class Settings extends Controller {
 
+
+    private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+    public static String instantToString(Instant instant) {
+        return LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault()).format(INSTANT_FORMATTER);
+    }
+
+    private static Instant stringToInstant(String string) {
+        return LocalDateTime.parse(string, INSTANT_FORMATTER)
+                .atZone(ZoneOffset.systemDefault()).toInstant();
+    }
 
     public static class EditSettingModel {
         public String value;
@@ -111,7 +120,7 @@ public class Settings extends Controller {
             return redirect(routes.Settings.sysvarsOverview());
         } else {
             EditSettingModel model = new EditSettingModel(value, name,
-                    SettingProvider.instantToString(Instant.now())
+                    instantToString(Instant.now())
             );
 
             return ok(editsysvar.render(Form.form(EditSettingModel.class).fill(model)));
@@ -128,7 +137,7 @@ public class Settings extends Controller {
             return badRequest(editsysvar.render(form));
         } else {
             EditSettingModel model = form.get();
-            dao.createSettingAfterDate(model.name, model.value, SettingProvider.stringToInstant(model.after));
+            dao.createSettingAfterDate(model.name, model.value, stringToInstant(model.after));
             flash("success", "De systeemvariabele werd met succes aangepast.");
             return redirect(routes.Settings.sysvarsOverview());
         }
@@ -138,7 +147,7 @@ public class Settings extends Controller {
     @InjectContext
     // TODO: do we need this?
     public static Result createSysvar() {
-        return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, SettingProvider.instantToString(Instant.now())))));
+        return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, instantToString(Instant.now())))));
     }
 
     @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
@@ -151,7 +160,7 @@ public class Settings extends Controller {
         } else {
             SettingDAO dao = DataAccess.getInjectedContext().getSettingDAO();
             EditSettingModel model = form.get();
-            dao.createSettingAfterDate(model.name, model.value, SettingProvider.stringToInstant(model.after));
+            dao.createSettingAfterDate(model.name, model.value, stringToInstant(model.after));
             // context.commit(); // TODO: wat doet dit hier?
             flash("success", "De systeemvariabele werd succesvol aangemaakt.");
             return redirect(routes.Settings.sysvarsOverview());

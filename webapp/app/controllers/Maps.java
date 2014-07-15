@@ -1,6 +1,5 @@
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.models.Address;
@@ -13,7 +12,6 @@ import play.libs.ws.WS;
 import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
-import providers.DataProvider;
 import views.html.maps.simplemap;
 
 import static play.libs.F.Function;
@@ -70,8 +68,10 @@ public class Maps extends Controller {
      * @return An image for given tile
      */
     @RoleSecured.RoleAuthenticated()
+    @InjectContext
+    // TODO: inject context probably does not work here
     public static Promise<Result> getMap(int zoom, int x, int y) {
-        String mapServer = DataProvider.getSettingProvider().getStringOrDefault("maps_tile_server", TILE_URL);
+        String mapServer = DataAccess.getInjectedContext().getSettingDAO().getSettingForNow("maps_tile_server");
         final Promise<Result> resultPromise = WS.url(String.format(mapServer, zoom, x, y)).get().map(
                 new Function<WSResponse, Result>() {
                     public Result apply(WSResponse response) {

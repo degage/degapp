@@ -13,20 +13,12 @@ public class DataProvider {
     private static UserProvider userProvider;
     private static UserRoleProvider userRoleProvider;
     private static CommunicationProvider communicationProvider;
-    private static SettingProvider settingProvider;
 
     public static UserProvider getUserProvider() {
         if (userProvider == null) {
             userProvider = new UserProvider(getDataAccessProvider());
         }
         return userProvider;
-    }
-
-    public static SettingProvider getSettingProvider(){
-        if(settingProvider == null){
-            settingProvider = new SettingProvider(getDataAccessProvider());
-        }
-        return settingProvider;
     }
 
     public static UserRoleProvider getUserRoleProvider() {

@@ -783,7 +783,7 @@ public class Cars extends Controller {
                 }
             });
         } else {
-            if (DataProvider.getSettingProvider().getBoolOrDefault("show_maps", true)) {
+            if (DataProvider.getSettingProvider().getBooleanOrDefault("show_maps", true)) {
                 return Maps.getLatLongPromise(car.getLocation().getId()).map(
                         new F.Function<F.Tuple<Double, Double>, Result>() {
                             public Result apply(F.Tuple<Double, Double> coordinates) {
