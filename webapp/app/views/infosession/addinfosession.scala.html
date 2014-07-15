@@ -92,7 +92,7 @@
                                                          <!-- TODO: move this to controller -->
                                                          @defining(db.DataAccess.getInjectedContext.getUserDAO.getUserPartial(form("userId").value.toInt)) { user =>
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
-                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString" />
+                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.getFullName" />
                                                                 <input type="hidden" name="userId" value="@user.getId" />
                                                                 <div class="viewId"></div>
                                                                 <ul class="dropdown-menu" role="menu"></ul>
@@ -101,7 +101,7 @@
                                                     }else{
                                                         @defining(DataProvider.getUserProvider().getUser()) { user =>
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
-                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.toString"/>
+                                                                <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.getFullName"/>
                                                                 <input type="hidden" name="userId" value="@user.getId"/>
                                                                 <div class="viewId"></div>
                                                                 <ul class="dropdown-menu" role="menu"></ul>

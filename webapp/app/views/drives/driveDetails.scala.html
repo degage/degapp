@@ -30,7 +30,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 }
 @app("Rit details", stylesheets, scripts) {
 
-@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.RESERVATION_ADMIN)) { isAdmin =>
+@defining(DataProvider.getUserRoleProvider.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
 @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
 <div id="page-header-wrapper">
     <ol class="breadcrumb">

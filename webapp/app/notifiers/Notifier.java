@@ -279,7 +279,7 @@ public class Notifier extends Mailer {
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.CONTRACTMANAGER_ASSIGNED);
         String mail = replaceUserTags(user, template.getBody());
-        mail = mail.replace("%admin_name%", approval.getAdmin().toString());
+        mail = mail.replace("%admin_name%", approval.getAdmin().getFullName());
         NotificationDAO notificationDAO = context.getNotificationDAO();
         createNotification(notificationDAO, user, template.getSubject(), mail);
         if (template.getSendMail()) {

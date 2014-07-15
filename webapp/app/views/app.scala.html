@@ -161,7 +161,7 @@
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
-                            <span class="">@user.toString</span>
+                            <span class="">@user.getFullName</span>
                         </a>
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
@@ -179,10 +179,6 @@
                 <!-- /.navbar-top-links -->
             </nav>
             <!-- /.navbar-static-top -->
-
-            @if(session.get("impersonated") != null){
-                <div class="impersonating">Je impersoneert @user.toString!</div>
-            }
 
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">

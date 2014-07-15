@@ -75,7 +75,7 @@
             <div class="col-lg-12">
                 <h1 class="page-header">Autodetails</h1>
                 @defining(DataProvider.getUserProvider().getUser()) { user =>
-                    @defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+                    @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
                         @flashes()
 
                         @if(car.getOwner.getId == user.getId()) {
@@ -96,7 +96,7 @@
 
                 @detailPartial(car, mapDetails)
 
-                @if(car.getOwner.getId == user.getId() || DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) {
+                @if(car.getOwner.getId == user.getId() || DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_ADMIN)) {
                     <!-- Beschikbaarheid -->
                     <div class="panel panel-default">
                         <div class="panel-heading">

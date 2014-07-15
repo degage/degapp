@@ -54,7 +54,7 @@ public class RoleSecured {
         public F.Promise<Result> call(Context ctx) { // TODO: check whether renaming SimpleResult to Result was correct here
             try {
                 UserRole[] securedRoles = configuration.value();
-                User user = DataProvider.getUserProvider().getUser(ctx.session(), true); // get user from session
+                User user = DataProvider.getUserProvider().getUserFromHttpSession(ctx.session()); // get user from session
 
                 // If user is null, redirect to login page
                 if(user == null) {

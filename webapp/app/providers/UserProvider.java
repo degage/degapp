@@ -6,6 +6,7 @@ import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserStatus;
+import db.CurrentUser;
 import play.cache.Cache;
 import play.mvc.Controller;
 import play.mvc.Http;
@@ -15,7 +16,7 @@ import play.mvc.Http;
  */
 public class UserProvider {
 
-    private static final String USER_BY_EMAIL = "user:email:%s";
+    private static final String USER_BY_ID = "user:id:%d";
 
     private DataAccessProvider provider;
 
@@ -23,70 +24,59 @@ public class UserProvider {
         this.provider = provider;
     }
 
-    public User getUser(String email) throws DataAccessException {
-        return getUser(email, true);
+    public User getUser() {
+        return getUser(true);
     }
-
     /**
      * Returns the user based on session
      * @param cached Whether to use a cached version or not
      * @return The user for current session
      */
-    public User getUser(boolean cached){
-        return getUser(Controller.session(), cached);
-    }
-
-    public User getUser(Http.Session session, boolean cached){
-        String email = session.get("email");
-        if(email == null || email.isEmpty())
+    public User getUser(boolean cached) {
+        Integer userId = CurrentUser.getId();
+        if (userId == null)
             return null;
-        else return getUser(email, cached);
+        else
+            return getUser(userId, cached);
     }
 
-    public User getUser() {
-        return getUser(true);
+    public User getUserFromHttpSession(Http.Session session){
+        // TODO: make this obsolete
+        String idString = Controller.session("id");
+        if (idString == null)
+            return null;
+        else
+            return getUser(Integer.parseInt(idString), true);
     }
 
-    public void createUserSession(User user){
-        Controller.session("email", user.getEmail());
-    }
 
     public void invalidateUser(User user) {
-        Cache.remove(String.format(USER_BY_EMAIL, user.getEmail()));
+        Cache.remove(String.format(USER_BY_ID, user.getId()));
     }
 
     public static boolean isBlocked(User user){
         return user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING;
     }
 
-    public User getUser(String email, boolean cached) throws DataAccessException {
-        if (email == null) {
-            return null;
-        }
+    public User getUser(Integer userId) throws DataAccessException {
+        return getUser(userId, true);
+    }
 
-        String key = String.format(USER_BY_EMAIL, email);
+    public User getUser(int userId, boolean cached) throws DataAccessException {
 
-        Object obj = null;
-        if (cached) {
-            obj = Cache.get(key);
-        }
-
-        if (obj == null || !(obj instanceof User)) {
+        String key = String.format(USER_BY_ID, userId);
+        User user = cached ? (User)Cache.get(key) : null;
+        if (user == null) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 UserDAO dao = context.getUserDAO();
-                User user = dao.getUser(email);
-                //user.setPassword(""); // We wipe the password in RAM, all classes using this in controllers shouldn't use cache!
+                user = dao.getUser(userId);
                 if (user != null) { // cache and return
                     Cache.set(key, user);
-                    return user;
-                } else {
-                    return null;
                 }
             } catch (DataAccessException ex) {
-                throw ex; //TODO: log
+                throw new RuntimeException ("Could not get user", ex); //TODO: log
             }
-        } else {
-            return (User) obj;
         }
+        return user;
     }
 }

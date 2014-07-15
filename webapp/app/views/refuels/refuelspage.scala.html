@@ -1,7 +1,7 @@
 @(refuelList: List[Refuel], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import org.joda.time.format.DateTimeFormat
 @import providers.DataProvider;
-@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+@defining(DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
     @defining(DataProvider.getUserProvider().getUser()) { user =>
         <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
             <thead>

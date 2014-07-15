@@ -10,6 +10,7 @@ import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
@@ -159,7 +160,7 @@ public class UserRoles extends Controller {
             removedRoles.removeAll(newRoles);
 
             // Check if a superuser did delete his role by accident (SU roles can only be removed by other SU users)
-            if (user.getEmail().equals(session("email")) && removedRoles.contains(UserRole.SUPER_USER)) {
+            if (user.getId() == CurrentUser.getId() && removedRoles.contains(UserRole.SUPER_USER)) {
                 flash("danger", "Als superuser kan je je eigen superuser rechten niet verwijderen.");
                 return badRequest(editroles.render(getUserRolesStatus(oldRoles), user));
             } else {

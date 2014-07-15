@@ -1,6 +1,6 @@
 @(car: Car, mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider;
-@defining(DataProvider.getUserRoleProvider.hasRole(session.get("email"), UserRole.CAR_ADMIN)) { isAdmin =>
+@defining(DataProvider.getUserRoleProvider.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
     @defining(DataProvider.getUserProvider().getUser()) { user =>
         <div class="row">
             <div class="col-lg-3">

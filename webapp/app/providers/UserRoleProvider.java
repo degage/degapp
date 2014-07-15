@@ -7,6 +7,7 @@ import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.models.UserStatus;
+import db.CurrentUser;
 import play.cache.Cache;
 
 import java.util.EnumSet;
@@ -32,18 +33,18 @@ public class UserRoleProvider {
         return getRoles(userId, true);
     }
 
-    //TODO: leave this helper function here, or move to the main DataProvider? Decoupling...
-    public boolean hasRole(String email, UserRole role) {
-        User user = userProvider.getUser(email);
-        if (user == null)
-            return false;
-        else {
-            return hasRole(user.getId(), role);
-        }
+    /**
+     * Does the current user have the required role?
+     */
+    public boolean hasRole (UserRole role) {
+        return  hasRole (CurrentUser.getId(), role);
     }
 
-    public boolean hasRole(int id, UserRole role) {
-        return hasRole(getRoles(id), role);
+    public boolean hasRole(Integer id, UserRole role) {
+        if (id == null)
+            return false;
+        else
+            return hasRole(getRoles(id), role);
     }
 
     public boolean hasRole(User user, UserRole role) {
@@ -87,11 +88,6 @@ public class UserRoleProvider {
     public boolean isFullUser() {
         User user = userProvider.getUser();
         return isFullUser(user);
-    }
-
-    public boolean hasRole(UserRole role) {
-        User user = userProvider.getUser();
-        return hasRole(user, role);
     }
 
     public Set<UserRole> getRoles(int userId, boolean cached) {

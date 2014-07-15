@@ -50,7 +50,7 @@
                   <ul class="nav navbar-nav navbar-right">
                     <li><a href="@routes.Application.index">Home</a></li>
                     <li><a href="@routes.Information.index">Informatie</a></li>
-                    @if(session.get("email") == null) {
+                    @if(session.get("id") == null) {
                         <li><a href="@routes.Login.login(null)">Aanmelden</a></li>
                         } else {
                         <li><a href="@routes.Dashboard.index">Dashboard</a></li>

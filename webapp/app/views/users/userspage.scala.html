@@ -17,23 +17,21 @@
             </tr>
         } else {
             @defining(DataProvider.getUserRoleProvider.hasRole(UserRole.PROFILE_ADMIN)) { isAdmin =>
-                    @defining(!(session.get("impersonated") == null || session.get("impersonated").isEmpty)) { impersonating =>
-                        @for(user <- users) {
-                            <tr>
-                                <td><a href="@routes.Profile.index(user.getId)">@user</a></td>
-                                <td>
-                                    <div class="btn-group btn-group-xs">
-                                        @if(isAdmin) {
-                                            <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Wijzig</a>
-                                        }
-                                        @if(!impersonating && DataProvider.getUserRoleProvider.hasRole(UserRole.SUPER_USER) && !UserProvider.isBlocked(user)) {
-                                            <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">
-                                                Impersoneer</a>
-                                        }
-                                    </div>
-                                </td>
-                            </tr>
-                        }
+                    @for(user <- users) {
+                        <tr>
+                            <td><a href="@routes.Profile.index(user.getId)">@user</a></td>
+                            <td>
+                                <div class="btn-group btn-group-xs">
+                                    @if(isAdmin) {
+                                        <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Wijzig</a>
+                                    }
+                                    @if(DataProvider.getUserRoleProvider.hasRole(UserRole.SUPER_USER) && !UserProvider.isBlocked(user)) {
+                                        <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">
+                                            Impersoneer</a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
                     }
             }
         }

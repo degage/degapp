@@ -1,11 +1,10 @@
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserStatus;
 import be.ugent.degage.db.models.VerificationType;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -14,7 +13,6 @@ import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
-import providers.UserProvider;
 import views.html.login.*;
 
 
@@ -84,18 +82,11 @@ public class Login extends Controller {
     public static Result login(String redirect) {
         // Allow a force login when the user doesn't exist anymore
         User user = DataProvider.getUserProvider().getUser(false);
-        if (user == null && !session().isEmpty()) {
-            session().clear();
-        }
-
         if (user == null) {
-            return ok(
-                    views.html.login.login.render(Form.form(LoginModel.class), redirect)
-            );
+            CurrentUser.clear();
+            return ok(views.html.login.login.render(Form.form(LoginModel.class), redirect));
         } else {
-            return redirect(
-                    routes.Dashboard.index()
-            );
+            return redirect(routes.Dashboard.index());
         }
     }
 
@@ -255,8 +246,7 @@ public class Login extends Controller {
                     loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
                     return badRequest(login.render(loginForm, redirect));
                 } else {
-                    session().clear();
-                    DataProvider.getUserProvider().createUserSession(user);
+                    CurrentUser.set(user);
                     if (redirect != null) {
                         return redirect(redirect);
                     } else {
@@ -342,8 +332,8 @@ public class Login extends Controller {
         if (registerForm.hasErrors()) {
             return badRequest(register.render(registerForm));
         } else {
-            session().clear();
-            User otherUser = DataProvider.getUserProvider().getUser(registerForm.get().email);
+            CurrentUser.clear();
+            User otherUser = DataAccess.getInjectedContext().getUserDAO().getUser(registerForm.get().email);
             if (otherUser != null) {
                 registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
                 return badRequest(register.render(registerForm));
@@ -374,19 +364,8 @@ public class Login extends Controller {
             DataProvider.getUserProvider().invalidateUser(user);
             DataProvider.getUserRoleProvider().invalidateRoles(user);
         }
-
-        if (session("impersonated") != null) {
-            session("email", session("impersonated"));
-            session().remove("impersonated");
-            return redirect(
-                    routes.Dashboard.index()
-            );
-        } else {
-            session().clear();
-            return redirect(
-                    routes.Application.index()
-            );
-        }
+        CurrentUser.clear();
+        return redirect(routes.Application.index());
     }
 
 }
