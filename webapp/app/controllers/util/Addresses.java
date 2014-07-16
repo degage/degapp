@@ -9,7 +9,7 @@ import java.util.*;
 /**
  * Created by HannesM on 21/04/14.
  */
-public class Addresses extends Controller {
+public class Addresses  {
 
     private static List<String> COUNTRIES;
     private static final Locale COUNTRY_LANGUAGE = new Locale("nl", "BE");

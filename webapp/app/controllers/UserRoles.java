@@ -22,10 +22,7 @@ import views.html.userroles.editroles;
 import views.html.userroles.overview;
 import views.html.userroles.userspage;
 
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class UserRoles extends Controller {
 
@@ -59,19 +56,36 @@ public class UserRoles extends Controller {
         return ok(userList(page, pageSize, carField, asc, filter)); // TODO: inline userList
     }
 
+    public static class UserWithRoles {
+        public Iterable<UserRole> roleSet;
+        public int id;
+        public String fullName;
+    }
+
     // called within an injected context
     private static Html userList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
-            UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        UserDAO dao = context.getUserDAO();
+        UserRoleDAO urdao = context.getUserRoleDAO();
 
-            if (orderBy == null) {
-                orderBy = FilterField.USER_NAME;
-            }
-            List<User> listOfUsers = dao.getUserList(orderBy, asc, page, pageSize, filter);
+        if (orderBy == null) {
+            orderBy = FilterField.USER_NAME;
+        }
+        List<User> listOfUsers = dao.getUserList(orderBy, asc, page, pageSize, filter);
 
-            int amountOfResults = dao.getAmountOfUsers(filter);
-            int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+        List<UserWithRoles> list = new ArrayList<>();
+        for (User user : listOfUsers) {
+            UserWithRoles uwr = new UserWithRoles();
+            uwr.roleSet =  urdao.getUserRoles(user.getId());
+            uwr.id = user.getId();
+            uwr.fullName = user.getFullName();
+            list.add (uwr);
+        }
 
-            return userspage.render(listOfUsers, page, amountOfResults, amountOfPages);
+        int amountOfResults = dao.getAmountOfUsers(filter);
+        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+
+        return userspage.render(list, page, amountOfResults, amountOfPages);
     }
 
     /**
@@ -172,9 +186,6 @@ public class UserRoles extends Controller {
                     for (UserRole addedRole : addedRoles) {
                         dao.addUserRole(userId, addedRole);
                     }
-
-                    // Invalidate the cache for a page refresh
-                    DataProvider.getUserRoleProvider().invalidateRoles(user);
 
                     flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
                     return ok(editroles.render(getUserRolesStatus(newRoles), user));

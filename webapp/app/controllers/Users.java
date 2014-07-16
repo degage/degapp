@@ -19,6 +19,7 @@ import views.html.users.users;
 import views.html.users.userspage;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by HannesM on 27/03/14.
@@ -73,10 +74,11 @@ public class Users extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         User user = context.getUserDAO().getUserPartial(userId);
         if (user != null) {
-            if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.SUPER_USER)) {
+            Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
+            if (userRoles.contains(UserRole.SUPER_USER)) {
                 flash("danger", "Je kan geen superuser impersoneren.");
             } else {
-                CurrentUser.set(user, context.getUserRoleDAO().getUserRoles(userId));
+                CurrentUser.set(user, userRoles);
             }
             return redirect(routes.Dashboard.index());
         } else {

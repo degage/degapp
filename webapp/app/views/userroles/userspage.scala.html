@@ -1,4 +1,4 @@
-@(users: List[User], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(users: Iterable[UserRoles.UserWithRoles], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import scala.collection.mutable.Map;
 @import providers.DataProvider;
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-userroles">
@@ -10,7 +10,7 @@
         </tr>
     </thead>
     <tbody>
-        @if(users.isEmpty) {
+        @if(!users.iterator.hasNext) {
             <tr>
                 <td style="text-align: center; background-color: #F0F0F0; padding: 8px;" colspan="6">
                     Geen enkele gebruiker voldoet aan jouw zoekterm(men)
@@ -27,20 +27,18 @@
                     UserRole.MAIL_ADMIN -> "label-admin_mail",
                     UserRole.PROFILE_ADMIN -> "label-admin_profile",
                     UserRole.RESERVATION_ADMIN -> "label-admin_reserv")) { roles =>
-                    @for(user <- users) {
-                        <tr>
-                            <td><a href="@routes.Profile.index(user.getId)">@user.getFirstName @user.getLastName</a></td>
-                            <td>
-                            @for(role <- provider.getRoles(user.getId, false)) {
-                                <span class="label @roles.get(role)">@role.getDescription</span>
-                            }
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-xs">
-                                    <a href="@routes.UserRoles.edit(user.getId)" class="btn btn-primary">Rollen bewerken</a>
-                                </div>
-                            </td>
-                        </tr>
+                    @foreach.tr(users) { user =>
+                        <td><a href="@routes.Profile.index(user.id)">@user.fullName</a></td>
+                        <td>
+                            @foreach(user.roleSet) { role =>
+                            <span class="label @roles.get(role)">@role.getDescription</span>
+                        }
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-xs">
+                                <a href="@routes.UserRoles.edit(user.id)" class="btn btn-primary">Rollen bewerken</a>
+                            </div>
+                        </td>
                     }
                 }
             }

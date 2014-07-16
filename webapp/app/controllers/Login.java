@@ -364,7 +364,6 @@ public class Login extends Controller {
         User user = DataProvider.getUserProvider().getUser();
         if (user != null) {
             DataProvider.getUserProvider().invalidateUser(user);
-            DataProvider.getUserRoleProvider().invalidateRoles(user);
         }
         CurrentUser.clear();
         return redirect(routes.Application.index());

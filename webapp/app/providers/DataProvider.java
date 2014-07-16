@@ -23,7 +23,7 @@ public class DataProvider {
 
     public static UserRoleProvider getUserRoleProvider() {
         if (userRoleProvider == null) {
-            userRoleProvider = new UserRoleProvider(getDataAccessProvider(), getUserProvider());
+            userRoleProvider = new UserRoleProvider(getUserProvider());
         }
         return userRoleProvider;
     }

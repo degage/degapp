@@ -1,4 +1,4 @@
-@(user: User, editable: Boolean)
+@(user: User, userIsAdmin: Boolean, editable: Boolean)
 @import providers.DataProvider
 @import db.CurrentUser
 <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
@@ -26,7 +26,7 @@
     @if(CurrentUser.isAdmin) {
         <strong>Status: </strong> <span class="label label-default">@user.getStatus</span>
     }
-    @if(providers.DataProvider.getUserRoleProvider.isAdmin(user)){
+    @if(userIsAdmin){
         <span class="label label-default"><i class="fa fa-star" style="color: yellow;"></i> Admin</span>
     }
 </p>

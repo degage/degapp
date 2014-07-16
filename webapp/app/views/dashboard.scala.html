@@ -2,7 +2,8 @@
         userWentToInfoSession: Boolean = false, approvalRequestSent: Boolean = false)
 
         @* Always called with current user *@
-@import providers.DataProvider;
+@import providers.DataProvider
+@import db.CurrentUser
     @scripts = {
         <script src="@routes.Assets.at("javascripts/app/dashboard.js")"></script>
         <script src="@routes.Assets.at("javascripts/plugins/calendar.js")" type="text/javascript"></script>
@@ -42,7 +43,7 @@
     <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Dashboard</h1>
-            @if(DataProvider.getUserRoleProvider.isFullUser(user) || DataProvider.getUserRoleProvider.hasRole(user, UserRole.SUPER_USER)){
+            @if(DataProvider.getUserRoleProvider.isFullUser(user) || CurrentUser.hasRole(UserRole.SUPER_USER)){
                 @views.html.dashboardFullUser(user, completeness, form)
             } else {
                 @views.html.dashboardRegistered(user, completeness, userWentToInfoSession, approvalRequestSent)

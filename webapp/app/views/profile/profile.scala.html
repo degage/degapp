@@ -1,4 +1,4 @@
-@(user: User)
+@(user: User, userIsAdmin: Boolean)
 
 @app("Profiel") {
     <div id="page-header-wrapper">
@@ -15,7 +15,7 @@
                 <div class="panel panel-default">
                         <!-- /.panel-heading -->
                     <div class="panel-body">
-                    @smallProfile(user, false)
+                    @smallProfile(user, userIsAdmin, false)
                     </div>
                         <!-- /.panel-body -->
                 </div>

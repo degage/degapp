@@ -10,6 +10,7 @@ import controllers.Security.RoleSecured;
 import controllers.util.Addresses;
 import controllers.util.FormHelper;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -631,43 +632,43 @@ public class InfoSessions extends Controller {
     @RoleSecured.RoleAuthenticated()
     @InjectContext
     public static Result requestApprovalPost() {
-        User user = DataProvider.getUserProvider().getUser();
-        if (DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_OWNER) && DataProvider.getUserRoleProvider().hasRole(user, UserRole.CAR_USER)) {
+        if (CurrentUser.hasRole(UserRole.CAR_OWNER) && CurrentUser.hasRole(UserRole.CAR_USER)) {
             flash("warning", "Je bent reeds een volwaardige gebruiker.");
             return redirect(routes.Dashboard.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
             if (form.hasErrors()) {
+                User currentUser = context.getUserDAO().getUserPartial(CurrentUser.getId());
                 ApprovalDAO dao = context.getApprovalDAO();
-                List<Approval> approvals = dao.getPendingApprovals(user);
+                List<Approval> approvals = dao.getPendingApprovals(currentUser);
                 if (!approvals.isEmpty()) {
                     flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                     return redirect(routes.Dashboard.index());
                 } else {
                     InfoSessionDAO idao = context.getInfoSessionDAO();
-                    Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
+                    Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(currentUser);
                     if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
                         flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                         return redirect(routes.InfoSessions.showUpcomingSessions());
                     } else {
-                        List<String> errors = checkApprovalConditions(user, context);
-                        return badRequest(approvalrequest.render(user, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context), didUserGoToInfoSession()));
+                        List<String> errors = checkApprovalConditions(currentUser, context);
+                        return badRequest(approvalrequest.render(currentUser, errors.isEmpty() ? null : errors, form, getTermsAndConditions(context), didUserGoToInfoSession()));
                     }
                 }
             } else {
                 ApprovalDAO dao = context.getApprovalDAO();
                 InfoSessionDAO idao = context.getInfoSessionDAO();
                 UserDAO udao = context.getUserDAO();
-                user = udao.getUser(user.getId()); //get full user
-                Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(user);
+                User currentUser = udao.getUser(CurrentUser.getId());
+                Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(currentUser);
                 if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
                     flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    Approval app = dao.createApproval(user, lastSession == null ? null : lastSession.getFirst(), form.get().message);
-                    user.setStatus(UserStatus.FULL_VALIDATING); //set to validation
-                    udao.updateUser(user); //full update
+                    Approval app = dao.createApproval(currentUser, lastSession == null ? null : lastSession.getFirst(), form.get().message);
+                    currentUser.setStatus(UserStatus.FULL_VALIDATING); //set to validation
+                    udao.updateUser(currentUser); //full update   // TODO: partial update?
                     return redirect(routes.Dashboard.index());
                 }
             }
@@ -748,9 +749,10 @@ public class InfoSessions extends Controller {
                 model.message = ap.getAdminMessage();
                 model.status = (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING
                         ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
-                model.sharer = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_OWNER);
-                model.user = DataProvider.getUserRoleProvider().hasRole(ap.getUser(), UserRole.CAR_USER);
-                    // TODO: remove need for UserRoleProvider
+                Set<UserRole> userRoles = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(ap.getUser().getId());
+
+                model.sharer = userRoles.contains (UserRole.CAR_OWNER);
+                model.user = userRoles.contains (UserRole.CAR_USER);
 
                 // Get the contact admin
                 UserDAO udao = context.getUserDAO();
@@ -801,17 +803,18 @@ public class InfoSessions extends Controller {
             User contractManager = udao.getUserPartial(userId);
 
             if (contractManager != null) {
-                if (!DataProvider.getUserRoleProvider().hasRole(contractManager, UserRole.INFOSESSION_ADMIN)) {
-                    // TODO: remove need for UserRoleProvider
-                    flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
-                    return redirect(routes.InfoSessions.approvalAdmin(id));
-                } else {
+                Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
+                if (userRoles.contains (UserRole.INFOSESSION_ADMIN) || userRoles.contains (UserRole.SUPER_USER)) {
+                    // TODO: introduce hasRole method in DAO
                     app.setAdmin(contractManager);
                     adao.setApprovalAdmin(app, contractManager);
 
                     Notifier.sendContractManagerAssignedMail(app.getUser(), app);
                     flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
                     return redirect(routes.InfoSessions.pendingApprovalList());
+                } else {
+                    flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
+                    return redirect(routes.InfoSessions.approvalAdmin(id));
                 }
             } else {
                 flash("danger", "Contractmanager ID bestaat niet.");
@@ -866,7 +869,6 @@ public class InfoSessions extends Controller {
                     roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
                 if (m.user)
                     roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
-                DataProvider.getUserRoleProvider().invalidateRoles(ap.getUser());
                 Notifier.sendMembershipStatusChanged(ap.getUser(), true, m.message);
                 flash("success", "De gebruikersrechten werden succesvol aangepast.");
 

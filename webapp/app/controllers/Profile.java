@@ -23,6 +23,7 @@ import javax.imageio.IIOException;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Set;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
@@ -232,7 +233,14 @@ public class Profile extends Controller {
         if (canEditProfile(user)) {
             return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user)));
         } else if (DataProvider.getUserRoleProvider().isFullUser(currentUser)) { // TODO: remove reference to currentUser
-            return ok(profile.render(user));
+            Set<UserRole> roleSet = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(userId);
+
+            return ok(profile.render(user,
+                    roleSet.contains(UserRole.SUPER_USER) ||
+                            roleSet.contains(UserRole.CAR_ADMIN) ||
+                            roleSet.contains(UserRole.INFOSESSION_ADMIN) ||
+                            roleSet.contains(UserRole.MAIL_ADMIN) ||
+                            roleSet.contains(UserRole.RESERVATION_ADMIN)));
         } else {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN, UserRole.USER}));
         }
@@ -241,7 +249,7 @@ public class Profile extends Controller {
     /**
      * Returns whether the currentUser can edit the profile of user
      *
-     * @param user        The subject
+     * @param user The subject
      * @return A boolean when the profile can be edited
      */
     private static boolean canEditProfile(User user) {
@@ -351,7 +359,7 @@ public class Profile extends Controller {
     /*
      * Return the file in the list with the given idea
      */
-    private static File getFileWithId (Iterable<File> files, int id) {
+    private static File getFileWithId(Iterable<File> files, int id) {
         // linear search is fast enough
         for (File file : files) {
             if (file.getId() == id) {
