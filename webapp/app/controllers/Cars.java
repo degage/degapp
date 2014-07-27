@@ -27,7 +27,6 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
-import providers.UserRoleProvider;
 import views.html.cars.*;
 
 import java.io.IOException;

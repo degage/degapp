@@ -38,8 +38,6 @@
 </div>
 
 <div id="page-wrapper">
-    @defining(CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)) { isAdmin =>
-            @defining(DataProvider.getUserRoleProvider.isFullUser()) { fullUser =>
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Infosessies</h1>
@@ -63,7 +61,7 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @detailPartial(enrolled, fullUser, map)
+                            @detailPartial(enrolled, CurrentUser.isFullUser, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
                             @if(!showApprovalButton) {
                                 <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
@@ -91,7 +89,6 @@
             <!-- /col-lg-12 -->
         </div>
         <!-- /row -->
-    }
 </div>
 <!-- /page-wrapper -->
 
@@ -112,5 +109,4 @@
     </div>
   </div>
 </div>
-}
 }

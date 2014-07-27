@@ -17,29 +17,27 @@
                 </td>
             </tr>
         } else {
-            @defining(DataProvider.getUserRoleProvider) { provider =>
-                @defining(Map(
-                    UserRole.USER -> "label-user",
-                    UserRole.CAR_USER -> "label-user_car",
-                    UserRole.CAR_OWNER -> "label-user_owner",
-                    UserRole.SUPER_USER -> "label-user_super",
-                    UserRole.INFOSESSION_ADMIN -> "label-admin_info",
-                    UserRole.MAIL_ADMIN -> "label-admin_mail",
-                    UserRole.PROFILE_ADMIN -> "label-admin_profile",
-                    UserRole.RESERVATION_ADMIN -> "label-admin_reserv")) { roles =>
-                    @foreach.tr(users) { user =>
-                        <td><a href="@routes.Profile.index(user.id)">@user.fullName</a></td>
-                        <td>
-                            @foreach(user.roleSet) { role =>
+            @defining(Map(
+                UserRole.USER -> "label-user",
+                UserRole.CAR_USER -> "label-user_car",
+                UserRole.CAR_OWNER -> "label-user_owner",
+                UserRole.SUPER_USER -> "label-user_super",
+                UserRole.INFOSESSION_ADMIN -> "label-admin_info",
+                UserRole.MAIL_ADMIN -> "label-admin_mail",
+                UserRole.PROFILE_ADMIN -> "label-admin_profile",
+                UserRole.RESERVATION_ADMIN -> "label-admin_reserv")) { roles =>
+                @foreach.tr(users) { user =>
+                    <td><a href="@routes.Profile.index(user.id)">@user.fullName</a></td>
+                    <td>
+                        @foreach(user.roleSet){ role =>
                             <span class="label @roles.get(role)">@role.getDescription</span>
                         }
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-xs">
-                                <a href="@routes.UserRoles.edit(user.id)" class="btn btn-primary">Rollen bewerken</a>
-                            </div>
-                        </td>
-                    }
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-xs">
+                            <a href="@routes.UserRoles.edit(user.id)" class="btn btn-primary">Rollen bewerken</a>
+                        </div>
+                    </td>
                 }
             }
         }

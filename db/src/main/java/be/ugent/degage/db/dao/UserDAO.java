@@ -63,7 +63,7 @@ public interface UserDAO {
      * Create a new user.
      * @param password plain text password
      */
-    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException;
+    public User createUser(String email, String password, String firstName, String lastName, UserStatus status) throws DataAccessException;
 
     // TODO: below
     public int getAmountOfUsers(Filter filter) throws DataAccessException;

@@ -3,7 +3,6 @@
 @import db.CurrentUser
 @import providers.DataProvider
 @import providers.CommunicationProvider
-@defining(DataProvider.getUserProvider().getUser()) { user =>
 
 <!DOCTYPE html>
 <html>
@@ -188,7 +187,7 @@
                         <li @if(title == "Dashboard") {class="active"}>
                             <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
-                        @if(!DataProvider.getUserRoleProvider.isFullUser(user)){
+                        @if(!CurrentUser.isFullUser){
                         <li @if(title == "Infosessies") {class="active"}>
                             <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
                         </li>
@@ -356,4 +355,4 @@
         <!-- Page-Level Demo Scripts - Main - Use for reference -->
     </body>
 </html>
-}
+

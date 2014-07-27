@@ -453,7 +453,7 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result enrollSession(int sessionId) {
         User user = DataProvider.getUserProvider().getUser();
-        if (DataProvider.getUserRoleProvider().isFullUser(user)) {
+        if (user.getStatus() == UserStatus.FULL) {
             flash("warning", "Je bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
         }
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -595,7 +595,7 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result requestApproval() {
         User user = DataProvider.getUserProvider().getUser();
-        if (DataProvider.getUserRoleProvider().isFullUser(user)) {
+        if (user.getStatus() == UserStatus.FULL) {
             flash("warning", "Je bent reeds een volwaardige gebruiker.");
             return redirect(routes.Dashboard.index());
         } else {
@@ -901,8 +901,7 @@ public class InfoSessions extends Controller {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
-        final boolean didUserGoToInfoSession = enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !DataProvider.getUserRoleProvider().isFullUser(user);
-        return didUserGoToInfoSession;
+        return enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && user.getStatus() != UserStatus.FULL;
     }
 
     /**

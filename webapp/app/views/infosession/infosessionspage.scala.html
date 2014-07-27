@@ -1,19 +1,18 @@
 @(sessions: Iterable[InfoSession], enrolled: InfoSession = null, page: Int, amountOfInfoSessions: Int, amountOfPages: Int)
-@import providers.DataProvider;
+@import db.CurrentUser
 <div class="table-responsive">
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
-    <thead>
-        <tr role="row">
-            <th>Type</th>
-            <th name="date" class="sortable">Tijdstip</th>
-            <th>Inschrijvingen</th>
-            <th>Host</th>
-            <th>Adres</th>
-            <th>Acties</th>
-        </tr>
-    </thead>
-    <tbody>
-        @defining(DataProvider.getUserRoleProvider.isFullUser) { fullUser =>
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
+        <thead>
+            <tr role="row">
+                <th>Type</th>
+                <th name="date" class="sortable">Tijdstip</th>
+                <th>Inschrijvingen</th>
+                <th>Host</th>
+                <th>Adres</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
             @foreach(sessions) { session =>
                 <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" }>
                 <td>
@@ -43,7 +42,7 @@
                 }
 
                 <td>
-                    @if(fullUser) {
+                    @if(CurrentUser.isFullUser) {
                         <a href="@routes.Profile.index(session.getHost.getId)">@session.getHost</a>
                     } else {
                         @session.getHost
@@ -70,8 +69,7 @@
                 </td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
+        </tbody>
+    </table>
 </div>
 <p id="pagination" name="@amountOfInfoSessions,@amountOfPages"></p>

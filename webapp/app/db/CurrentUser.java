@@ -2,6 +2,7 @@ package db;
 
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
+import be.ugent.degage.db.models.UserStatus;
 import play.mvc.Controller;
 
 import java.util.Set;
@@ -29,6 +30,7 @@ public class CurrentUser {
         Controller.session("fullName", user.getFullName());
 
         Controller.session("roles", UserRole.toString(roleSet));
+        Controller.session("status", user.getStatus().name());
     }
 
     /**
@@ -52,6 +54,14 @@ public class CurrentUser {
     public static String getFullName () {
         return Controller.session("fullName");
     }
+
+    /**
+     * Check whether the current user has status 'FULL'.
+     */
+    public static boolean isFullUser() {
+        return Controller.session("status").equals(UserStatus.FULL.name());
+    }
+
 
     /**
      * Retrieve the roles of the current user

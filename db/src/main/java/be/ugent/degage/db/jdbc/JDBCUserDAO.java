@@ -18,11 +18,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
 
-    static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email";
+    static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email, users.user_status";
 
     private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM users";
 
-    private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_status, users.user_gender, " +
+    private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_gender, " +
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
             "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
             "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
@@ -132,7 +132,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 rs.getInt(tableName + ".user_id"),
                 rs.getString(tableName + ".user_email"),
                 rs.getString(tableName + ".user_firstname"),
-                rs.getString(tableName + ".user_lastname"));
+                rs.getString(tableName + ".user_lastname"),
+                UserStatus.valueOf(rs.getString(tableName + ".user_status")));
 
         user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
         user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
@@ -166,9 +167,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         else
             user.setIdentityCard(null);
 
-        user.setStatus(UserStatus.valueOf(rs.getString(tableName + ".user_status")));
-
-
         return user;
     }
 
@@ -181,8 +179,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         User user = new User(rs.getInt(tableName + ".user_id"),
                 rs.getString(tableName + ".user_email"),
                 rs.getString(tableName + ".user_firstname"),
-                rs.getString(tableName + ".user_lastname")
-        );
+                rs.getString(tableName + ".user_lastname"),
+                UserStatus.valueOf(rs.getString(tableName + ".user_status"))
+                );
 
         return user;
     }
@@ -328,24 +327,25 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
 
     private LazyStatement createUserStatement = new LazyStatement(
-            "INSERT INTO users(user_email, user_password, user_firstname, user_lastname) VALUES (?,?,?,?)",
+            "INSERT INTO users(user_email, user_password, user_firstname, user_lastname, user_status) VALUES (?,?,?,?,?)",
             "user_id"
     );
 
     @Override
-    public User createUser(String email, String password, String firstName, String lastName) throws DataAccessException {
+    public User createUser(String email, String password, String firstName, String lastName, UserStatus status) throws DataAccessException {
         try {
             PreparedStatement ps = createUserStatement.value();
             ps.setString(1, email);
             ps.setString(2, BCrypt.hashpw(password, BCrypt.gensalt(12)));
             ps.setString(3, firstName);
             ps.setString(4, lastName);
+            ps.setString(5, status.name());
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating user.");
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new User(keys.getInt(1), email, firstName, lastName);
+                return new User(keys.getInt(1), email, firstName, lastName, status);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to commit new user transaction.", ex);

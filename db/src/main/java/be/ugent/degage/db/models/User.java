@@ -23,20 +23,20 @@ public class User {
     private boolean agreeTerms;
 
     public User(String email) {
-        this(0, email, null, null);
+        this(0, email, null, null, UserStatus.REGISTERED);
     }
 
     public User() {
-        this(0, null, null, null);
+        this(0, null, null, null, UserStatus.REGISTERED);
     }
 
-    public User(int id, String email, String firstName, String lastName){
+    public User(int id, String email, String firstName, String lastName, UserStatus status){
         this.id = id;
         this.email = email;
         this.firstName = firstName;
         this.lastName = lastName;
 
-        this.status = UserStatus.REGISTERED;
+        this.status = status;
         this.profilePictureId = -1;
     }
 

@@ -11,7 +11,7 @@ public class DataProvider {
     //TODO: this class needs a decent implementation or alternative
     private static DataAccessProvider accessProvider;
     private static UserProvider userProvider;
-    private static UserRoleProvider userRoleProvider;
+
     private static CommunicationProvider communicationProvider;
 
     public static UserProvider getUserProvider() {
@@ -19,13 +19,6 @@ public class DataProvider {
             userProvider = new UserProvider(getDataAccessProvider());
         }
         return userProvider;
-    }
-
-    public static UserRoleProvider getUserRoleProvider() {
-        if (userRoleProvider == null) {
-            userRoleProvider = new UserRoleProvider(getUserProvider());
-        }
-        return userRoleProvider;
     }
 
     public static CommunicationProvider getCommunicationProvider() {

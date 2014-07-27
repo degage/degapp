@@ -342,7 +342,7 @@ public class Login extends Controller {
             } else {
                 UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
                 User user = dao.createUser(registerForm.get().email, registerForm.get().password,
-                        registerForm.get().firstName, registerForm.get().lastName);
+                        registerForm.get().firstName, registerForm.get().lastName, UserStatus.EMAIL_VALIDATING);
 
                 // Now we create a registration UUID
                 String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);

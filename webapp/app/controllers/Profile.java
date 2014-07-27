@@ -227,12 +227,10 @@ public class Profile extends Controller {
             return redirect(routes.Dashboard.index());
         }
 
-        User currentUser = DataProvider.getUserProvider().getUser();
-
         // Only a profile admin or user itself can edit
         if (canEditProfile(user)) {
             return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user)));
-        } else if (DataProvider.getUserRoleProvider().isFullUser(currentUser)) { // TODO: remove reference to currentUser
+        } else if (CurrentUser.isFullUser()) { // TODO: remove reference to currentUser
             Set<UserRole> roleSet = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(userId);
 
             return ok(profile.render(user,

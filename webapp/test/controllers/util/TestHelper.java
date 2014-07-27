@@ -57,8 +57,7 @@ public class TestHelper {
         return createRegisteredUser(email, password, firstName, lastName, new UserRole[] {});
     }
 	public User createRegisteredUser(String email, String password, String firstName, String lastName, UserRole[] roles){
-        User user = userDAO.createUser(email, hashPassword(password), firstName, lastName);
-        user.setStatus(UserStatus.FULL);
+        User user = userDAO.createUser(email, hashPassword(password), firstName, lastName, UserStatus.FULL)
         for(UserRole role : roles){
         	userRoleDAO.addUserRole(user.getId(), role);
         }        
