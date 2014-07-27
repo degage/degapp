@@ -176,6 +176,21 @@ public class User {
         return lastName + ", " + firstName;
     }
 
+    /**
+     * Has this user status {@link be.ugent.degage.db.models.UserStatus#FULL}?
+     * @return
+     */
+    public boolean hasFullStatus() {
+        return status == UserStatus.FULL;
+    }
+
+    /**
+     * Is this user allowed to login (depends on the user status)?
+     */
+    public boolean canLogin() {
+        return status != UserStatus.BLOCKED && status != UserStatus.DROPPED && status != UserStatus.EMAIL_VALIDATING;
+    }
+
     @Override
     // TODO: remove these equals and hash codes (probably used by Cache mechanism of play?)
     public boolean equals(Object o) {

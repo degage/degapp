@@ -58,7 +58,7 @@ public class CurrentUser {
     /**
      * Check whether the current user has status 'FULL'.
      */
-    public static boolean isFullUser() {
+    public static boolean hasFullStatus() {
         return Controller.session("status").equals(UserStatus.FULL.name());
     }
 

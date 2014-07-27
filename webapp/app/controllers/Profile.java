@@ -230,7 +230,7 @@ public class Profile extends Controller {
         // Only a profile admin or user itself can edit
         if (canEditProfile(user)) {
             return ok(index.render(user, getProfileCompleteness(user), canEditProfile(user)));
-        } else if (CurrentUser.isFullUser()) { // TODO: remove reference to currentUser
+        } else if (CurrentUser.hasFullStatus()) { // TODO: remove reference to currentUser
             Set<UserRole> roleSet = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(userId);
 
             return ok(profile.render(user,
@@ -689,7 +689,7 @@ public class Profile extends Controller {
             String strStatus = Form.form().bindFromRequest().get("status");
             UserStatus status = Enum.valueOf(UserStatus.class, strStatus);
             if (user.getStatus() != status) {
-                user.setStatus(status);
+                user.setStatus(status); // TODO: only partial update
                 udao.updateUser(user);
 
                 DataProvider.getUserProvider().invalidateUser(user); //wipe the status from ram

@@ -54,10 +54,6 @@ public class UserProvider {
         Cache.remove(String.format(USER_BY_ID, user.getId()));
     }
 
-    public static boolean isBlocked(User user){
-        return user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED || user.getStatus() == UserStatus.EMAIL_VALIDATING;
-    }
-
     public User getUser(Integer userId) throws DataAccessException {
         return getUser(userId, true);
     }

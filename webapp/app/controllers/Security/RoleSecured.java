@@ -58,7 +58,7 @@ public class RoleSecured {
                     // If user is null, redirect to login page
                     if (user == null) {
                         return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
-                    } else if (UserProvider.isBlocked(user)) {
+                    } else if (!user.canLogin()) {
                         ctx.flash().put("danger", "Dit account is not niet geactiveerd of geblokkeerd.");
                         return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
                     }

@@ -42,7 +42,7 @@
                 }
 
                 <td>
-                    @if(CurrentUser.isFullUser) {
+                    @if(CurrentUser.hasFullStatus) {
                         <a href="@routes.Profile.index(session.getHost.getId)">@session.getHost</a>
                     } else {
                         @session.getHost
@@ -56,7 +56,7 @@
                             <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(session.getId)">
                                 inschrijven</a>
                         } else {
-                            @* Scala y u no 'else if' ??? *@
+                            @* Play templates do not support if else if directly... *@
                             @if(enrolled != null && enrolled.getId == session.getId) {
                                 <button type="button" disabled="disabled" onclick="showConfirmationModal ( @session.getId() )" class="btn btn-success">
                                     inschrijven</button>

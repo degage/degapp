@@ -79,7 +79,7 @@
                     <!-- /.panel-heading -->
                     <div class="panel-body">
                         @* TODO: refine logic behind buttons *@
-                        @detailPartial(infoSession, CurrentUser.isFullUser, map)
+                        @detailPartial(infoSession, CurrentUser.hasFullStatus, map)
                         @if(enrolled == null ) {
                             <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Inschrijven</a>
                         } else {
@@ -119,7 +119,7 @@
                                         <tr>
                                             <td>@index</td>
                                             <td>
-                                                @if(CurrentUser.isFullUser) {
+                                                @if(CurrentUser.hasFullStatus) {
                                                     <a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser.getFirstName @enrollee.getUser.getLastName</a>
                                                 } else {
                                                     @enrollee.getUser.getFirstName @enrollee.getUser.getLastName

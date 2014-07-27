@@ -244,7 +244,7 @@ public class Login extends Controller {
                     loginForm.data().put("reactivate", "True");
                     //TODO: link aanvraag nieuwe bevestigingscode
                     return badRequest(login.render(loginForm, redirect));
-                } else if (user.getStatus() == UserStatus.BLOCKED || user.getStatus() == UserStatus.DROPPED) {
+                } else if (!user.canLogin()) {
                     loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
                     return badRequest(login.render(loginForm, redirect));
                 } else {

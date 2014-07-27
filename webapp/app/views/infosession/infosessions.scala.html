@@ -61,7 +61,7 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            @detailPartial(enrolled, CurrentUser.isFullUser, map)
+                            @detailPartial(enrolled, CurrentUser.hasFullStatus, map)
                             <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.detail(enrolled.getId)">Details</a>
                             @if(!showApprovalButton) {
                                 <a class="btn btn-warning btn-sm" href="@routes.InfoSessions.unenrollSession">Uitschrijven</a>
