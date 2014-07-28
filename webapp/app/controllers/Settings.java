@@ -4,7 +4,6 @@ import be.ugent.degage.db.dao.SettingDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
-import controllers.Security.RoleSecured;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
@@ -74,13 +73,13 @@ public class Settings extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result changePassword() {
         return ok(changepass.render(Form.form(ChangePasswordModel.class)));
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result changePasswordPost() {
         Form<ChangePasswordModel> form = Form.form(ChangePasswordModel.class).bindFromRequest();
@@ -103,13 +102,13 @@ public class Settings extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result sysvarsOverview() {
         return ok(sysvars.render(DataAccess.getInjectedContext().getSettingDAO().getSettings()));
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result editSysvar(String name) {
         // TODO: should not allow name to be edited as well...
@@ -127,7 +126,7 @@ public class Settings extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result editSysvarPost() {
         SettingDAO dao = DataAccess.getInjectedContext().getSettingDAO();
@@ -143,14 +142,14 @@ public class Settings extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     // TODO: do we need this?
     public static Result createSysvar() {
         return ok(createsysvar.render(Form.form(EditSettingModel.class).fill(new EditSettingModel(null, null, instantToString(Instant.now())))));
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     // TODO: do we need this?
      public static Result createSysvarPost() {

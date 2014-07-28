@@ -4,7 +4,6 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.models.Address;
 import com.fasterxml.jackson.databind.JsonNode;
-import controllers.Security.RoleSecured;
 import db.DataAccess;
 import db.InjectContext;
 import play.libs.F;
@@ -67,19 +66,18 @@ public class Maps extends Controller {
      * @param y
      * @return An image for given tile
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     // TODO: inject context probably does not work here
     public static Promise<Result> getMap(int zoom, int x, int y) {
         String mapServer = DataAccess.getInjectedContext().getSettingDAO().getSettingForNow("maps_tile_server");
-        final Promise<Result> resultPromise = WS.url(String.format(mapServer, zoom, x, y)).get().map(
+        return WS.url(String.format(mapServer, zoom, x, y)).get().map(
                 new Function<WSResponse, Result>() {
                     public Result apply(WSResponse response) {
                         return ok(response.getBodyAsStream()).as("image/jpeg");
                     }
                 }
         );
-        return resultPromise;
     }
 
     /**
@@ -94,7 +92,7 @@ public class Maps extends Controller {
         AddressDAO dao = DataAccess.getInjectedContext().getAddressDAO();
         Address address = dao.getAddress(addressId);
         if (address != null) {
-            final Promise<F.Tuple<Double, Double>> resultPromise = WS.url(ADDRESS_RESOLVER)
+            return WS.url(ADDRESS_RESOLVER)
                     .setQueryParameter("street", address.getNumber() + " " + address.getStreet())
                     .setQueryParameter("city", address.getCity())
                     .setQueryParameter("country", "Belgium")
@@ -111,7 +109,6 @@ public class Maps extends Controller {
                                 }
                             }
                     );
-            return resultPromise;
         } else throw new DataAccessException("Could not find address by ID");
     }
 
@@ -121,7 +118,7 @@ public class Maps extends Controller {
      *
      * @return A test map
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showMap() {
         return ok(simplemap.render(new MapDetails(51.1891253d, 4.2355338d, 13, "Some marker")));

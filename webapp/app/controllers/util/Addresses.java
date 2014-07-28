@@ -2,7 +2,6 @@ package controllers.util;
 
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.models.Address;
-import play.mvc.Controller;
 
 import java.util.*;
 

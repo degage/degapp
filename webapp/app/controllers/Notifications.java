@@ -1,13 +1,10 @@
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.Notification;
 import be.ugent.degage.db.models.User;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.DataAccess;
 import db.InjectContext;
@@ -30,13 +27,13 @@ public class Notifications extends Controller {
      *
      * @return index page containing all the received notifications of a specific user
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showNotifications() {
         return ok(notifications.render());
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showNotificationsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
@@ -69,7 +66,7 @@ public class Notifications extends Controller {
      * @param notificationId Id of the message that has to be marked as read
      * @return message index page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result markNotificationAsRead(int notificationId) {
         User user = DataProvider.getUserProvider().getUser();
@@ -84,7 +81,7 @@ public class Notifications extends Controller {
      *
      * @return notification index page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result markAllNotificationsAsRead() {
         User user = DataProvider.getUserProvider().getUser();

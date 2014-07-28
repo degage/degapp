@@ -40,15 +40,6 @@ public class UserProvider {
             return getUser(userId, cached);
     }
 
-    public User getUserFromHttpSession(Http.Session session){
-        // TODO: make this obsolete
-        String idString = Controller.session("id");
-        if (idString == null)
-            return null;
-        else
-            return getUser(Integer.parseInt(idString), true);
-    }
-
 
     public void invalidateUser(User user) {
         Cache.remove(String.format(USER_BY_ID, user.getId()));

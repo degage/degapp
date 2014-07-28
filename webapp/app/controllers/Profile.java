@@ -6,7 +6,6 @@ import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.*;
 import db.CurrentUser;
 import db.DataAccess;
@@ -79,7 +78,7 @@ public class Profile extends Controller {
      * @param userId The userId for which the picture is uploaded
      * @return The page to upload
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result profilePictureUpload(int userId) {
         return ok(uploadPicture.render(userId));
@@ -91,7 +90,7 @@ public class Profile extends Controller {
      * @param userId The user for which the image is requested
      * @return The image with correct content type
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result getProfilePicture(int userId) {
         //TODO: checks on whether other person can see this
@@ -112,7 +111,7 @@ public class Profile extends Controller {
      * @param userId
      * @return
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result profilePictureUploadPost(int userId) {
         // First we check if the user is allowed to upload to this userId
@@ -164,17 +163,10 @@ public class Profile extends Controller {
                             user.setProfilePictureId(file.getId());
                             udao.updateUser(user);
 
-                            if (oldPictureId != -1) {  // After commit we are sure the old one can be deleted
-                                try {
-                                    File oldPicture = fdao.getFile(oldPictureId);
-                                    FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
-                                    fdao.deleteFile(oldPictureId);
-
-                                    context.commit();
-                                } catch (DataAccessException ex) {
-                                    // Failed to delete old profile picture, but no rollback needed
-                                    throw ex;
-                                }
+                            if (oldPictureId != -1) {
+                                File oldPicture = fdao.getFile(oldPictureId);
+                                FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
+                                fdao.deleteFile(oldPictureId);
                             }
 
                             flash("success", "De profielfoto werd met succes aangepast.");
@@ -202,7 +194,7 @@ public class Profile extends Controller {
      *
      * @return A profile page for the currently requesting user
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result indexWithoutId() {
         User user = DataProvider.getUserProvider().getUser(false);  //user always has to exist (roleauthenticated)
@@ -215,7 +207,7 @@ public class Profile extends Controller {
      * @param userId The userId of the user (only available to administrator or user itself)
      * @return The profilepage of the user
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result index(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
@@ -278,7 +270,7 @@ public class Profile extends Controller {
      * @param userId The user the requester wants to edit
      * @return A page to edit the identity card information
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editIdentityCard(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -313,7 +305,7 @@ public class Profile extends Controller {
      * @param fileId
      * @return
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result viewFile(int userId, int fileId, String stype) {
         final FileType type = Enum.valueOf(FileType.class, stype);
@@ -376,7 +368,7 @@ public class Profile extends Controller {
      * @param fileId The file to delete
      * @return A redirect to the identity card page overview
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result deleteFile(final int userId, int fileId, String stype) {
         final FileType type = Enum.valueOf(FileType.class, stype);
@@ -435,7 +427,7 @@ public class Profile extends Controller {
      * @param userId The user to edit
      * @return The overview page or error page when something went wrong
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editIdentityCardPost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -517,7 +509,7 @@ public class Profile extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editDriversLicense(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -545,7 +537,7 @@ public class Profile extends Controller {
     }
 
     // TODO: a LOT of code overlap with identity card!!
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editDriversLicensePost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -568,7 +560,6 @@ public class Profile extends Controller {
                 Http.MultipartFormData body = request().body().asMultipartFormData();
                 EditDriversLicenseModel model = form.get();
 
-                String card = user.getLicense();
 
 
                 // Now check if we also have to create / add file to the group
@@ -584,9 +575,10 @@ public class Profile extends Controller {
                         fdao.addLicenseFile(user.getId(), file.getId());
                     }
                 }
+                String card = user.getLicense();
 
-                if (user.getLicense() != null && !user.getLicense().equals(model.cardNumber) ||
-                        model.cardNumber != null && user.getLicense() == null) {
+                if (card != null && !card.equals(model.cardNumber) ||
+                        model.cardNumber != null && card == null) {
                     user.setLicense(model.cardNumber);
                     updateUser = true;
                 }
@@ -612,7 +604,7 @@ public class Profile extends Controller {
      * @param userId The user to edit
      * @return A user edit page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result edit(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
@@ -664,7 +656,7 @@ public class Profile extends Controller {
         return (int) (((float) total / 8) * 100); //9 records
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result editUserStatus(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
@@ -677,7 +669,7 @@ public class Profile extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result editUserStatusPost(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
@@ -710,7 +702,7 @@ public class Profile extends Controller {
      * @param userId The user id to change
      * @return The new profile page, or the edit form when errors occured
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editPost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();

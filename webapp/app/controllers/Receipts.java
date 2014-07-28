@@ -10,7 +10,6 @@ import com.itextpdf.text.Font.FontFamily;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-import controllers.Security.RoleSecured;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import db.DataAccess;
@@ -45,7 +44,7 @@ public class Receipts extends Controller {
     /**
      * @return The users index-page with all users
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result index() {
         return ok(receipts.render());

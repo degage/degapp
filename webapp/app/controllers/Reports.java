@@ -8,7 +8,6 @@ import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.DataAccess;
 import db.InjectContext;
@@ -34,7 +33,7 @@ public class Reports extends Controller {
         return ok(reports.render());
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result getUsers() {
         File file = new File("users.xlsx");
@@ -96,7 +95,7 @@ public class Reports extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result getReservationsForOwner() {
         User user = DataProvider.getUserProvider().getUser();
@@ -160,7 +159,7 @@ public class Reports extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.SUPER_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result getReservations() {
         File file = new File("reservations.xlsx");
@@ -225,7 +224,7 @@ public class Reports extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.SUPER_USER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result getCars() {
         File file = new File("cars.xlsx");

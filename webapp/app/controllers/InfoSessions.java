@@ -1,12 +1,10 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.Addresses;
 import controllers.util.FormHelper;
 import controllers.util.Pagination;
@@ -105,7 +103,7 @@ public class InfoSessions extends Controller {
      *
      * @return An infosession form
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result newSession() {
         User user = DataProvider.getUserProvider().getUser();
@@ -125,7 +123,7 @@ public class InfoSessions extends Controller {
      * @param sessionId SessionId to edit
      * @return An infosession form for given id
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result editSession(int sessionId) {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
@@ -148,7 +146,7 @@ public class InfoSessions extends Controller {
      * @param sessionId SessionID to remove
      * @return A result redirect whether delete was successfull or not.
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result removeSession(int sessionId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -176,7 +174,7 @@ public class InfoSessions extends Controller {
      * @param sessionId SessionID to edit
      * @return Redirect to edited session, or the form if errors occured
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
@@ -254,7 +252,7 @@ public class InfoSessions extends Controller {
      *
      * @return A redirect to the overview page with message if unenrollment was successfull.
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result unenrollSession() {
         User user = DataProvider.getUserProvider().getUser();
@@ -273,7 +271,7 @@ public class InfoSessions extends Controller {
     }
 
     // TODO: reintegrate the Map (using a promise instead of a result?)
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result detail(int sessionId) {
          User user = DataProvider.getUserProvider().getUser();
@@ -337,7 +335,7 @@ public class InfoSessions extends Controller {
      * @param userId    Userid of the user to be removed
      * @return Status of the operation page
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result removeUserFromSession(int sessionId, int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -370,7 +368,7 @@ public class InfoSessions extends Controller {
      * @param status    New status of the user.
      * @return Redirect to the session detail page if successful.
      */
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
 
@@ -403,10 +401,10 @@ public class InfoSessions extends Controller {
      * @param sessionId
      * @return
      */
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result addUserToSession(int sessionId) {
-        int userId = 0;
+        int  userId;
         try {
             userId = Integer.parseInt(Form.form().bindFromRequest().get("userid"));
         } catch (Exception ex) {
@@ -449,7 +447,7 @@ public class InfoSessions extends Controller {
      * @param sessionId The sessionId to enroll to
      * @return A redirect to the detail page to which the user has subscribed
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result enrollSession(int sessionId) {
         User user = DataProvider.getUserProvider().getUser();
@@ -470,19 +468,15 @@ public class InfoSessions extends Controller {
                 flash("danger", "Deze infosessie zit reeds vol.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
-                try {
-                    if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
-                        dao.unregisterUser(alreadyAttending.getId(), user.getId());
-                    }
-                    dao.registerUser(sessionId, user.getId()); // TODO: disallow registration when full
-
-                    flash("success", alreadyAttending == null ? ("Je bent met succes ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
-                            "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
-                    Notifier.sendInfoSessionEnrolledMail(context, user, session);
-                    return redirect(routes.InfoSessions.detail(sessionId));
-                } catch (DataAccessException ex) {
-                    throw ex;
+                if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
+                    dao.unregisterUser(alreadyAttending.getId(), user.getId());
                 }
+                dao.registerUser(sessionId, user.getId()); // TODO: disallow registration when full
+
+                flash("success", alreadyAttending == null ? ("Je bent met succes ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
+                        "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
+                Notifier.sendInfoSessionEnrolledMail(context, user, session);
+                return redirect(routes.InfoSessions.detail(sessionId));
             }
         }
     }
@@ -494,7 +488,7 @@ public class InfoSessions extends Controller {
      *
      * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
-    @RoleSecured.RoleAuthenticated(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
@@ -530,14 +524,9 @@ public class InfoSessions extends Controller {
             jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
 
 
-            if (session != null) {
-                return redirect(
-                        routes.InfoSessions.showUpcomingSessions() // return to infosession list
-                );
-            } else {
-                createForm.error("Failed to create session in database. Contact administrator.");
-                return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
-            }
+            return redirect(
+                    routes.InfoSessions.showUpcomingSessions() // return to infosession list
+            );
         }
     }
 
@@ -591,7 +580,7 @@ public class InfoSessions extends Controller {
      *
      * @return The page to request approval
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result requestApproval() {
         User user = DataProvider.getUserProvider().getUser();
@@ -629,7 +618,7 @@ public class InfoSessions extends Controller {
         return !approvals.isEmpty();
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result requestApprovalPost() {
         if (CurrentUser.hasRole(UserRole.CAR_OWNER) && CurrentUser.hasRole(UserRole.CAR_USER)) {
@@ -666,7 +655,7 @@ public class InfoSessions extends Controller {
                     flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    Approval app = dao.createApproval(currentUser, lastSession == null ? null : lastSession.getFirst(), form.get().message);
+                    dao.createApproval(currentUser, lastSession.getFirst(), form.get().message);
                     currentUser.setStatus(UserStatus.FULL_VALIDATING); //set to validation
                     udao.updateUser(currentUser); //full update   // TODO: partial update?
                     return redirect(routes.Dashboard.index());
@@ -675,13 +664,13 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalList() {
         return ok(approvals.render());
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalListPaged(int page) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -731,7 +720,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalDetails(int approvalId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -764,7 +753,7 @@ public class InfoSessions extends Controller {
 
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalAdmin(int approvalId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -787,7 +776,7 @@ public class InfoSessions extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalAdminPost(int id) {
         DynamicForm form = Form.form().bindFromRequest();
@@ -829,7 +818,7 @@ public class InfoSessions extends Controller {
      * @param approvalId
      * @return
      */
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalAdminAction(int approvalId) {
         Form<ApprovalAdminModel> form = Form.form(ApprovalAdminModel.class).bindFromRequest();
@@ -910,7 +899,7 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     // TODO: inject context does not work here
     public static F.Promise<Result> showUpcomingSessionsOriginal() {
@@ -925,24 +914,19 @@ public class InfoSessions extends Controller {
             return Maps.getLatLongPromise(enrolled.getFirst().getAddress().getId()).map(
                     new F.Function<F.Tuple<Double, Double>, Result>() {
                         public Result apply(F.Tuple<Double, Double> coordinates) {
-                            return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(),
+                            return ok(infosessions.render(enrolled.getFirst(),
                                     coordinates == null ? null : new Maps.MapDetails(coordinates._1, coordinates._2, 14, "Afspraak op " + enrolled.getFirst().getTime().toString("dd-MM-yyyy") + " om " + enrolled.getFirst().getTime().toString("HH:mm")),
                                     didUserGoToInfoSession));
                         }
                     }
             );
         } else {
-            return F.Promise.promise(new F.Function0<Result>() {
-                @Override
-                public Result apply() throws Throwable {
-                    return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
-                }
-            });
+            return F.Promise.promise(() -> ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession)));
         }
     }
 
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showUpcomingSessions() {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
@@ -960,7 +944,7 @@ public class InfoSessions extends Controller {
      *
      * @return
      */
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result showSessions() {
         return ok(infosessionsAdmin.render());
@@ -976,7 +960,7 @@ public class InfoSessions extends Controller {
      * @param searchString The string to search for
      * @return A partial view of the table containing the filtered upcomming sessions
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showUpcomingSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -999,7 +983,7 @@ public class InfoSessions extends Controller {
      * @param searchString The string to search for
      * @return A partial view of the table containing the filtered sessions
      */
-    @RoleSecured.RoleAuthenticated({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?

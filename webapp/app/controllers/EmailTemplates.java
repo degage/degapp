@@ -1,20 +1,16 @@
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.TemplateDAO;
 import be.ugent.degage.db.models.EmailTemplate;
 import be.ugent.degage.db.models.UserRole;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import providers.DataProvider;
 import views.html.emailtemplates.edit;
 import views.html.emailtemplates.emailtemplates;
 import views.html.emailtemplates.emailtemplatespage;
@@ -33,13 +29,13 @@ public class EmailTemplates extends Controller {
      *
      * @return all the templates that are available in the system
      */
-    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @AllowRoles({UserRole.MAIL_ADMIN})
     @InjectContext
     public static Result showExistingTemplates() {
         return ok(emailtemplates.render());
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @AllowRoles({UserRole.MAIL_ADMIN})
     @InjectContext
     public static Result showExistingTemplatesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -71,7 +67,7 @@ public class EmailTemplates extends Controller {
      * @param templateId the id of the template of which the details are requested
      * @return the detail page of specific template
      */
-    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @AllowRoles({UserRole.MAIL_ADMIN})
     @InjectContext
     public static Result showTemplate(int templateId) {
         TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
@@ -90,7 +86,7 @@ public class EmailTemplates extends Controller {
      *
      * @return templates index page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.MAIL_ADMIN})
+    @AllowRoles({UserRole.MAIL_ADMIN})
     @InjectContext
     public static Result editTemplate() {
         TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();

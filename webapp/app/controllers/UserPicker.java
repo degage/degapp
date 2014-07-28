@@ -5,7 +5,6 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.User;
-import controllers.Security.RoleSecured;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
@@ -19,7 +18,7 @@ public class UserPicker extends Controller {
 
     private static final int MAX_VISIBLE_RESULTS = 10;
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result getList(String search) {
         search = search.trim();

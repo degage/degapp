@@ -6,7 +6,6 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -14,7 +13,6 @@ import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import providers.DataProvider;
 import views.html.users.users;
 import views.html.users.userspage;
 
@@ -29,7 +27,7 @@ public class Users extends Controller {
     /**
      * @return The users index-page with all users
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result showUsers() {
         return ok(users.render());
@@ -42,7 +40,7 @@ public class Users extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of users of the corresponding page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -68,7 +66,7 @@ public class Users extends Controller {
         return userspage.render(listOfUsers, page, amountOfResults, amountOfPages);
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result impersonate(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();

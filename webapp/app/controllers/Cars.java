@@ -10,7 +10,6 @@ import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.collect.Iterables;
-import controllers.Security.RoleSecured;
 import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
@@ -161,7 +160,7 @@ public class Cars extends Controller {
     /**
      * @return The cars index-page with all cars (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showCars() {
         return ok(views.html.cars.carsAdmin.render());
@@ -170,7 +169,7 @@ public class Cars extends Controller {
     /**
      * @return The cars index-page with user cars (only available to car_owners)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result showUserCars() {
         return ok(userCarList());
@@ -193,7 +192,7 @@ public class Cars extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -225,7 +224,7 @@ public class Cars extends Controller {
      * @param carId The car for which the image is requested
      * @return The image with correct content type
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result getPicture(int carId) {
         //TODO: checks on whether other person can see this
@@ -242,7 +241,7 @@ public class Cars extends Controller {
     /**
      * @return A form to create a new car (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result newCar() {
         return ok(views.html.cars.edit.render(Form.form(CarModel.class), null, getCountryList(), getFuelList()));
@@ -253,7 +252,7 @@ public class Cars extends Controller {
      *
      * @return redirect to the CarForm you just filled in or to the cars-index page (only available to car_owner+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
@@ -271,7 +270,7 @@ public class Cars extends Controller {
                 // User is permitted to add cars for other users
                 owner = context.getUserDAO().getUserPartial(model.userId);
             } else {
-                owner= context.getUserDAO().getUserPartial(CurrentUser.getId()); // TODO: can this be avoided?
+                owner = context.getUserDAO().getUserPartial(CurrentUser.getId()); // TODO: can this be avoided?
             }
             TechnicalCarDetails technicalCarDetails = null;
             Http.MultipartFormData body = request().body().asMultipartFormData();
@@ -338,7 +337,7 @@ public class Cars extends Controller {
      * @param carId The car to edit
      * @return A form to edit the car (only available to the corresponding car owner or administrator)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result editCar(int carId) {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
@@ -369,7 +368,7 @@ public class Cars extends Controller {
      * @return Redirect to the car-index page on error or the car detail-page on succes (only available to the corresponding car owner or administrator)
      */
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result editCarPost(int carId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -525,7 +524,7 @@ public class Cars extends Controller {
      *
      * @return redirect to the car detailPage
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result updateAvailabilities(int carId, String valuesString) {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
@@ -673,9 +672,7 @@ public class Cars extends Controller {
 
     // Is day1 - time1 before (or equal to) day2 - time2
     private static boolean isBefore(int day1, LocalTime time1, int day2, LocalTime time2, boolean orEqual) {
-        if (day1 < day2 || (day1 == day2 && (time1.isBefore(time2) || (orEqual && time1.equals(time2)))))
-            return true;
-        return false;
+        return day1 < day2 || (day1 == day2 && (time1.isBefore(time2) || (orEqual && time1.equals(time2))));
     }
 
     private static boolean isBefore(int day1, LocalTime time1, int day2, LocalTime time2) {
@@ -704,7 +701,7 @@ public class Cars extends Controller {
      *
      * @return redirect to the car detailPage
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result updatePrivileged(int carId, String valuesString) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -802,7 +799,7 @@ public class Cars extends Controller {
      * @param carId The car to show details of
      * @return A detail page of the car (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result detail(int carId) {
 
@@ -839,7 +836,7 @@ public class Cars extends Controller {
     }
 
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result getCarCostModal(int id) {
         // TODO: hide from other users (badRequest)
@@ -858,18 +855,15 @@ public class Cars extends Controller {
      *
      * @return redirect to the CarCostForm you just filled in or to the car-detail page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result addNewCarCost(int carId) {
         Form<CarCostModel> carCostForm = Form.form(CarCostModel.class).bindFromRequest();
-        DataAccessContext context = DataAccess.getInjectedContext();
         if (carCostForm.hasErrors()) {
-            CarDAO dao = context.getCarDAO();
-            Car car = dao.getCar(carId);
             flash("danger", "Kost toevoegen mislukt.");
             return redirect(routes.Cars.detail(carId));
-
         } else {
+            DataAccessContext context = DataAccess.getInjectedContext();
             CarCostDAO dao = context.getCarCostDAO();
             CarCostModel model = carCostForm.get();
             CarDAO cardao = context.getCarDAO();
@@ -917,7 +911,7 @@ public class Cars extends Controller {
      *
      * @return index page containing all the carcost requests
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showCarCosts() {
         return ok(carCostsAdmin.render());
@@ -985,7 +979,7 @@ public class Cars extends Controller {
      * @param carCostId The carCost being approved
      * @return the carcost index page if returnToDetail is 0, car detail page if 1.
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result approveCarCost(int carCostId, int returnToDetail) {
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
@@ -1012,7 +1006,7 @@ public class Cars extends Controller {
      * @param carCostId The carCost being approved
      * @return the carcost index page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result refuseCarCost(int carCostId, int returnToDetail) {
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
@@ -1029,7 +1023,7 @@ public class Cars extends Controller {
         }
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result getProof(int proofId) {
         return FileHelper.getFileStreamResult(DataAccess.getInjectedContext().getFileDAO(), proofId);

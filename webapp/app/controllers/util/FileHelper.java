@@ -1,7 +1,6 @@
 package controllers.util;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
@@ -12,7 +11,6 @@ import play.api.Play;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import providers.DataProvider;
 
 import javax.imageio.IIOException;
 import javax.imageio.ImageIO;
@@ -38,8 +36,8 @@ public class FileHelper {
     private static final boolean MOVE_INSTEAD_OF_COPY = true;
 
     //Source: http://www.cs.helsinki.fi/u/hahonen/uusmedia/sisalto/cgi_perl_ssi/mime.html
-    public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList(new String[]{"image/gif", "image/jpeg", "image/png", "image/tiff"}); // array is too small to allocate a Set
-    public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList(new String[]{"text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream"});
+    public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList("image/gif", "image/jpeg", "image/png", "image/tiff"); // array is too small to allocate a Set
+    public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList("text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream");
 
     private static String uploadFolder;
     private static String generatedFolder;
@@ -160,7 +158,7 @@ public class FileHelper {
      * @param path The file path to delete
      * @returns Whether the delete operation was successfull
      */
-    public static boolean deleteFile(Path path) throws IOException {
+    public static boolean deleteFile(Path path) {
         try {
             Path absPath = Paths.get(uploadFolder).resolve(path);
             Files.delete(absPath);
@@ -192,19 +190,16 @@ public class FileHelper {
                     ImageIO.write(bufferedThumbnail, reader.getFormatName(), new FileOutputStream(destFile, false));
                     return;
                 } catch (IIOException ex) {
-                    continue;
+                    // do nothing ???
                 }
             }
             throw new RuntimeException("No image reader installed for given format.");
-        } catch (IOException ex) {
-            //??
-            throw ex;
         }
     }
 
     private static void copyFile(File sourceFile, File destFile) throws IOException {
         if (!destFile.exists()) {
-            destFile.createNewFile();
+            destFile.createNewFile(); // TODO: check return value?
         }
 
         FileChannel source = null;

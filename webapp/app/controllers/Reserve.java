@@ -7,7 +7,6 @@ import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.DataAccess;
 import db.InjectContext;
@@ -95,7 +94,7 @@ public class Reserve extends Controller {
                 else
                     return "Ongeldig datum: tot = " + until;
             }
-            if ("".equals(dateFrom) || "".equals(dateUntil)) // TODO
+            if ("".equals(dateFrom) || "".equals(dateUntil)) // TODO string compared to date
                 return "Gelieve zowel een begin als einddatum te selecteren!";
             else if (dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil))
                 return "De einddatum kan niet voor de begindatum liggen!";
@@ -109,7 +108,7 @@ public class Reserve extends Controller {
      *
      * @return the reservation index page containing all cars
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result index() {
         return ok(showIndex());
@@ -120,7 +119,7 @@ public class Reserve extends Controller {
      *
      * @return the reservation index page containing one specific car
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result indexWithCar(String carName, int id) {
         return ok(showIndex(carName, "", "", id));
@@ -131,7 +130,7 @@ public class Reserve extends Controller {
      *
      * @return the reservation index page containing one specific car
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result indexWithDate() {
         Form<IndexModel> form = Form.form(IndexModel.class).bindFromRequest();
@@ -166,7 +165,7 @@ public class Reserve extends Controller {
      * @param until the string containing the date and time of the end of the reservation
      * @return the details page of a future reservation for a car
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result reserve(int carId, String from, String until) {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
@@ -189,7 +188,7 @@ public class Reserve extends Controller {
      * @param carId The id of the car for which the reservation is being confirmed
      * @return the user is redirected to the drives page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result confirmReservation(int carId) {
         // Get the car object to test whether the operation is legal
@@ -231,26 +230,23 @@ public class Reserve extends Controller {
 
             context.commit();
 
-            if (reservation != null) {
-                // Check if user is owner or privileged
-                // TODO: delegate this to db module
-                boolean autoAccept = car.getOwner().getId() == user.getId();
-                if (! autoAccept) {
-                    Iterator<User> iterator = dao.getPrivileged(carId).iterator();
-                    while (! autoAccept && iterator.hasNext()) {
-                        autoAccept = user.getId() == iterator.next().getId();
-                    }
+            // Check if user is owner or privileged
+            // TODO: delegate this to db module
+            boolean autoAccept = car.getOwner().getId() == user.getId();
+            if (! autoAccept) {
+                Iterator<User> iterator = dao.getPrivileged(carId).iterator();
+                while (! autoAccept && iterator.hasNext()) {
+                    autoAccept = user.getId() == iterator.next().getId();
                 }
-                if (autoAccept) {
-                    reservation.setStatus(ReservationStatus.ACCEPTED);
-                    rdao.updateReservation(reservation);
-                    context.commit();
-                } else {
-                    Notifier.sendReservationApproveRequestMail(car.getOwner(), reservation);
-                }
-                return redirect(routes.Drives.index());
-            } else
-                return badRequest(reservations.render("De reservatie kon niet aangemaakt worden. Contacteer de administrator", "", -1, "", ""));
+            }
+            if (autoAccept) {
+                reservation.setStatus(ReservationStatus.ACCEPTED);
+                rdao.updateReservation(reservation);
+                context.commit();
+            } else {
+                Notifier.sendReservationApproveRequestMail(car.getOwner(), reservation);
+            }
+            return redirect(routes.Drives.index());
         }
     }
 
@@ -271,7 +267,7 @@ public class Reserve extends Controller {
      * @param searchString the string containing all search information
      * @return the requested page of cars for reservation
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
@@ -288,7 +284,7 @@ public class Reserve extends Controller {
             DATETIMEFORMATTER.parseDateTime(filter.getValue(FilterField.FROM));
             DATETIMEFORMATTER.parseDateTime(filter.getValue(FilterField.UNTIL));
         } catch (IllegalArgumentException ex) {
-            return ok(reservationspage.render(new ArrayList<Car>(), page, 0, 0, false));
+            return ok(reservationspage.render(new ArrayList<>(), page, 0, 0, false));
         }
         filter.putValue(FilterField.CAR_ACTIVE, "1");
 

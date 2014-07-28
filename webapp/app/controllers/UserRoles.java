@@ -8,7 +8,6 @@ import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -16,7 +15,6 @@ import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import providers.DataProvider;
 import scala.Tuple2;
 import views.html.userroles.editroles;
 import views.html.userroles.overview;
@@ -32,7 +30,7 @@ public class UserRoles extends Controller {
      *
      * @return A table with all users and their userroles
      */
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result index() {
         return ok(overview.render());
@@ -45,7 +43,7 @@ public class UserRoles extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of users of the corresponding page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -95,7 +93,7 @@ public class UserRoles extends Controller {
      * @param userId
      * @return
      */
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result edit(int userId) {
 
@@ -141,7 +139,7 @@ public class UserRoles extends Controller {
      * @return The user edit page with the newly assigned roles if successfull, error message otherwise
      */
     @SuppressWarnings("unchecked")
-    @RoleSecured.RoleAuthenticated({UserRole.SUPER_USER})
+    @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
     public static Result editPost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();

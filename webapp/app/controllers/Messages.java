@@ -1,14 +1,12 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.MessageDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.DataAccess;
 import db.InjectContext;
@@ -51,13 +49,13 @@ public class Messages extends Controller {
      *
      * @return index page containing all the received messages of a specific user
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showMessages() {
         return ok(messages.render());
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showReceivedMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
@@ -70,7 +68,7 @@ public class Messages extends Controller {
         return ok(messageList(page, pageSize, field, asc, filter));
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showSentMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
@@ -100,7 +98,7 @@ public class Messages extends Controller {
      * @return a new message form
      */
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result newMessage() {
         Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
@@ -113,7 +111,7 @@ public class Messages extends Controller {
      * @return a new message form, with the user already filled in, for reply purposes
      */
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result reply(int userId) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
@@ -138,7 +136,7 @@ public class Messages extends Controller {
      * @return the messages index list
      */
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result createNewMessage() {
         Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
@@ -171,7 +169,7 @@ public class Messages extends Controller {
      * @param messageId Id of the message that has to be marked as read
      * @return message index page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result markMessageAsRead(int messageId) {
         User user = DataProvider.getUserProvider().getUser();
@@ -186,7 +184,7 @@ public class Messages extends Controller {
      *
      * @return message index page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result markAllMessagesAsRead() {
         User user = DataProvider.getUserProvider().getUser();

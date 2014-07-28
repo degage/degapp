@@ -5,7 +5,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -105,7 +104,7 @@ public class Drives extends Controller {
      * @return the drives index page containing all (pending) reservations of the user or for his car
      * starting with active tab containing the approved reservations.
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result index() {
         return ok(showIndex());
@@ -118,7 +117,7 @@ public class Drives extends Controller {
      * @return the drives index page containing all (pending) reservations of the user or for his car
      * starting with the tab containing the reservations with the specified status active.
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result indexWithStatus(String status) {
         return ok(showIndex(ReservationStatus.valueOf(status)));
@@ -147,7 +146,7 @@ public class Drives extends Controller {
      *
      * @return the html page of the drives page only visible for admins
      */
-    @RoleSecured.RoleAuthenticated({UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result drivesAdmin() {
         return ok(drivesAdmin.render());
@@ -161,7 +160,7 @@ public class Drives extends Controller {
      * @param reservationId the id of the reservation of which the details are requested
      * @return the detail page of specific drive/reservation
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result details(int reservationId) {
         Html result = detailsPage(reservationId);
@@ -253,7 +252,7 @@ public class Drives extends Controller {
      * @param reservationId the id of the reservation/drive
      * @return the detail page of specific drive/reservation after the details where adjusted
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result adjustDetails(int reservationId) {
         Form<RemarksModel> refuseModel = Form.form(RemarksModel.class);
@@ -307,7 +306,7 @@ public class Drives extends Controller {
      * @param reservationId the id of the reservation being refused/accepted
      * @return the drives index page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result setReservationStatus(int reservationId) {
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
@@ -344,7 +343,7 @@ public class Drives extends Controller {
      * @param reservationId the id of the reservation being cancelled
      * @return the drives index page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result cancelReservation(int reservationId) {
         Reservation reservation = adjustStatus(reservationId, ReservationStatus.CANCELLED);
@@ -406,7 +405,7 @@ public class Drives extends Controller {
         return reservation;
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result provideDriveInfo(int reservationId) {
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
@@ -440,14 +439,12 @@ public class Drives extends Controller {
             if (refueling > 0) {
                 RefuelDAO refuelDAO = context.getRefuelDAO();
                 for (int i = 0; i < refueling; i++) {
-                    Refuel refuel = refuelDAO.createRefuel(ride);
+                    refuelDAO.createRefuel(ride); // TODO: why is this? Delegate to database module?
                 }
-                context.commit();
             }
             if (damaged) {
                 DamageDAO damageDAO = context.getDamageDAO();
-                Damage damage = damageDAO.createDamage(ride);
-                context.commit();
+                damageDAO.createDamage(ride); // TODO: why is this? Delegate to database module?
             }
         } else if (isOwner || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             // Owner is allowed to adjust the information
@@ -471,7 +468,7 @@ public class Drives extends Controller {
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }
         // Adjust the status of the reservation
-        if (isOwner) {
+        if (isOwner) { // TODO: bug? isOwner is always true at this point
             reservation.setStatus(ReservationStatus.FINISHED);
         } else {
             reservation.setStatus(ReservationStatus.DETAILS_PROVIDED);
@@ -483,7 +480,7 @@ public class Drives extends Controller {
         return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result approveDriveInfo(int reservationId) {
         Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class);
@@ -612,7 +609,7 @@ public class Drives extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showDrivesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -646,7 +643,7 @@ public class Drives extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
-    @RoleSecured.RoleAuthenticated({UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result showDrivesAdminPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?

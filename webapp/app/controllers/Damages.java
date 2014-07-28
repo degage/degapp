@@ -2,12 +2,10 @@ package controllers;
 
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
@@ -26,7 +24,6 @@ import views.html.damages.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -68,7 +65,7 @@ public class Damages extends Controller {
      *
      * @return index page containing all the damages from a specific user
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showDamages() {
         return ok(damages.render());
@@ -79,7 +76,7 @@ public class Damages extends Controller {
      *
      * @return index page containing all the damages from a specific owner
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showDamagesOwner() {
         return ok(damagesOwner.render());
@@ -90,13 +87,13 @@ public class Damages extends Controller {
      *
      * @return index page containing all the damages from everyone
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showAllDamages() {
         return ok(damagesAdmin.render());
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showDamagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -112,7 +109,7 @@ public class Damages extends Controller {
         return ok(damageList(page, pageSize, carField, asc, filter));
     }
 
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showDamagesPageOwner(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -128,7 +125,7 @@ public class Damages extends Controller {
         return ok(damageList(page, pageSize, carField, asc, filter));
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showDamagesPageAdmin(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -160,7 +157,7 @@ public class Damages extends Controller {
      *
      * @return detail page containing all information about a specific damage
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showDamageDetails(int damageId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -182,7 +179,7 @@ public class Damages extends Controller {
      *
      * @return modal to edit damage information
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editDamage(int damageId) {
         DamageDAO dao = DataAccess.getInjectedContext().getDamageDAO();
@@ -212,7 +209,7 @@ public class Damages extends Controller {
      *
      * @return modal to provide new damage log status
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result addStatus(int damageId) {
         return ok(statusmodal.render(Form.form(DamageStatusModel.class), damageId));
@@ -223,7 +220,7 @@ public class Damages extends Controller {
      *
      * @return modal to provide new damage proof
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result addProof(int damageId) {
         return ok(proofmodal.render(damageId));
@@ -234,7 +231,7 @@ public class Damages extends Controller {
      *
      * @return redirect to the damage detail page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result editDamagePost(int damageId) {
         Form<DamageModel> damageForm = Form.form(DamageModel.class).bindFromRequest();
@@ -273,7 +270,7 @@ public class Damages extends Controller {
      *
      * @return redirect to the damage detail page
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result addStatusPost(int damageId) {
         Form<DamageStatusModel> damageStatusForm = Form.form(DamageStatusModel.class).bindFromRequest();
@@ -335,7 +332,7 @@ public class Damages extends Controller {
      * @param damageId The damage to edit
      * @return The detials page of a damage
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result addProofPost(int damageId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -346,7 +343,6 @@ public class Damages extends Controller {
             return redirect(routes.Damages.showDamageDetails(damageId));
         }
         try {
-            boolean updateDamage = false; // Only perform a damage update when filegroup doesn't exist
             Http.MultipartFormData body = request().body().asMultipartFormData();
             Http.MultipartFormData.FilePart newFile = body.getFile("file");
             if (newFile != null) {
@@ -360,9 +356,6 @@ public class Damages extends Controller {
                     fdao.addDamageFile(damageId, file.getId()); // TODO: make this one (atomic) call to fdao
                 }
             }
-            if (updateDamage) {
-                damageDAO.updateDamage(damage);
-            }
             flash("success", "Bestand succesvol toegevoegd.");
             return redirect(routes.Damages.showDamageDetails(damageId));
         } catch (IOException ex) { //IO or database error causes a rollback
@@ -375,7 +368,7 @@ public class Damages extends Controller {
      *
      * @return proof url
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result getProof(int proofId) {
         return FileHelper.getFileStreamResult(DataAccess.getInjectedContext().getFileDAO(), proofId);
@@ -389,19 +382,15 @@ public class Damages extends Controller {
      * @param fileId   The file to delete
      * @return A redirect to the damage details
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result deleteProof(int damageId, int fileId) {
-        try {
-            FileDAO fileDAO = DataAccess.getInjectedContext().getFileDAO();
-            File file = fileDAO.getFile(fileId);
-            fileDAO.deleteFile(file.getId());
-            FileHelper.deleteFile(Paths.get(file.getPath()));
-            flash("success", "Bestand succesvol verwijderd.");
-            return redirect(routes.Damages.showDamageDetails(damageId));
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
+        FileDAO fileDAO = DataAccess.getInjectedContext().getFileDAO();
+        File file = fileDAO.getFile(fileId);
+        fileDAO.deleteFile(file.getId());
+        FileHelper.deleteFile(Paths.get(file.getPath()));
+        flash("success", "Bestand succesvol verwijderd.");
+        return redirect(routes.Damages.showDamageDetails(damageId));
     }
 
     /**

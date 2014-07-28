@@ -9,7 +9,6 @@ import db.DataAccess;
 public class DataProvider {
 
     //TODO: this class needs a decent implementation or alternative
-    private static DataAccessProvider accessProvider;
     private static UserProvider userProvider;
 
     private static CommunicationProvider communicationProvider;

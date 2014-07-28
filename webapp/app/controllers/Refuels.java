@@ -7,7 +7,6 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.*;
-import controllers.Security.RoleSecured;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
@@ -49,7 +48,7 @@ public class Refuels extends Controller {
      *
      * @return index page containing all the refuel requests from a specific user
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result showRefuels() {
         return ok(refuels.render());
@@ -77,7 +76,7 @@ public class Refuels extends Controller {
      *
      * @return index page containing all the refuel requests to a specific owner
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result showOwnerRefuels() {
         return ok(refuelsOwner.render());
@@ -105,13 +104,13 @@ public class Refuels extends Controller {
      *
      * @return index page containing all the refuel requests to a specific owner
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showAllRefuels() {
         return ok(refuelsAdmin.render());
     }
 
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showAllRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -145,7 +144,7 @@ public class Refuels extends Controller {
      *
      * @return modal to provide refuel information
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result provideRefuelInfo(int refuelId) {
         return ok(editmodal.render(Form.form(RefuelModel.class), refuelId));
@@ -156,7 +155,7 @@ public class Refuels extends Controller {
      *
      * @return redirect to the index page containing all the refuel requests
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result provideRefuelInfoPost(int refuelId) {
         Form<RefuelModel> refuelForm = Form.form(RefuelModel.class).bindFromRequest();
@@ -210,7 +209,7 @@ public class Refuels extends Controller {
      *
      * @return proof url
      */
-    @RoleSecured.RoleAuthenticated()
+    @AllowRoles
     @InjectContext
     public static Result getProof(int proofId) {
         return FileHelper.getFileStreamResult(DataAccess.getInjectedContext().getFileDAO(), proofId);
@@ -224,7 +223,7 @@ public class Refuels extends Controller {
      * @param refuelId The refuel being refused
      * @return the refuel admin page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result refuseRefuel(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
@@ -243,7 +242,7 @@ public class Refuels extends Controller {
      * @param refuelId The refuel being approved
      * @return the refuel admin page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result approveRefuel(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
@@ -262,7 +261,7 @@ public class Refuels extends Controller {
      * @param refuelId The refuel being put back to the request status
      * @return the refuel admin page
      */
-    @RoleSecured.RoleAuthenticated({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result makeRefuelStatusRequest(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
