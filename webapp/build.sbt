@@ -30,7 +30,7 @@ libraryDependencies ++= Seq(
   // "org.webjars"             % "jquery-ui"                    % "1.11.0-1", customized version stored in javascript/
 )
 
-lazy val root = (project in file(".")).enablePlugins(PlayJava)
+lazy val root = (project in file(".")).enablePlugins(PlayJava,SbtWeb) // SbtWeb needed for Less plugin
 
 TwirlKeys.templateImports ++= Seq ("snippets._", "be.ugent.degage.db.models._")
 

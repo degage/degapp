@@ -1,19 +1,5 @@
-@scripts = {
-    <script src="@routes.Assets.at("javascripts/bootstrap-colorpicker.min.js")" type="text/javascript"></script>
-    <script>
-        $(function(){
-            $('.theme').colorpicker();
-        });
-        $('.theme').colorpicker().on('changeColor', function(ev){
-            less.modifyVars({ '@@bg' : ev.color.toHex() });
-        });
-    </script>
-}
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/bootstrap-colorpicker.min.css")">
-}
-
-@app("Instellingen", stylesheets, scripts) {
+@()
+@app("Instellingen") {
 
 <div id="page-header-wrapper">
     <ol class="breadcrumb">
