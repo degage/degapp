@@ -2,8 +2,8 @@
 @scripts = {
 
     <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker.js")"></script>
-    <script type="text/javascript" src="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))"></script>
+    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimepicker/js/bootstrap-datetimepicker-adapted.js")"></script> @* TODO: avoid this *@
+    <script type="text/javascript" src="@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")"></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script src="@routes.Assets.at("javascripts/app/infosessionsAdmin.js")"></script>
     <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
@@ -11,7 +11,7 @@
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")">
 }
 
 @app("Infosessies (Admin)", stylesheets, scripts) {

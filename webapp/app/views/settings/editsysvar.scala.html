@@ -1,7 +1,7 @@
 @(form: Form[Settings.EditSettingModel])
 
     @scripts = {
-        <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
+        <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
         <script>
             $('#datepicker').datetimepicker({
             weekStart: 1,

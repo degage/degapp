@@ -5,7 +5,7 @@
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
 
     <!-- For maps: -->
-    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.js"))'></script>
+    <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
     <script src="@routes.Assets.at("javascripts/maps-custom.js")" type="text/javascript"></script>
     <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
     <script>
@@ -20,7 +20,7 @@
 }
 
 @stylesheets = {
-    <link rel="stylesheet" href="@routes.WebJarAssets.at(WebJarAssets.locate("leaflet.css"))" />
+    <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.js")' />
     <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 

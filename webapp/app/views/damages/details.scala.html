@@ -1,11 +1,11 @@
 @(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog], proofList: Iterable[File])
 @import org.joda.time.format.DateTimeFormat
     @stylesheets = {
-        <link rel="stylesheet" media="screen" href="@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.css"))">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")">
     }
 @scripts = {
-    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.js"))'></script>
-    <script type='text/javascript' src='@routes.WebJarAssets.at(WebJarAssets.locate("bootstrap-datetimepicker.nl.js"))'></script>
+    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
         <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
         <script>
         function loadDescriptionModal ( damageId ) {
