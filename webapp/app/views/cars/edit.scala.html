@@ -76,21 +76,21 @@
                                             @if(car != null){
                                                 <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@CurrentUser.getFullName" />
-                                                    <input type="hidden" name="userId" value="CurrentUser.getId" />
+                                                    <input type="hidden" name="userId" value="@CurrentUser.getId" />
                                                     <div class="viewId"></div>
                                                     <ul class="dropdown-menu" role="menu"></ul>
                                                 </div>
                                             } else {
                                                 <div class="userpicker" data-url="@routes.UserPicker.getList()">
                                                     <input type="text" data-toggle="dropdown" class="form-control input-md" value="@CurrentUser.getFullName"/>
-                                                    <input type="hidden" name="userId" value="CurrentUser.getId"/>
+                                                    <input type="hidden" name="userId" value="@CurrentUser.getId"/>
                                                     <div class="viewId"></div>
                                                     <ul class="dropdown-menu" role="menu"></ul>
                                                 </div>
                                             }
                                             </div>
                                         } else {
-                                            <input type="hidden" name="userId" value="CurrentUser.getId"/>
+                                            <input type="hidden" name="userId" value="@CurrentUser.getId"/>
                                         }
                                     }
                                 </div>
@@ -114,8 +114,9 @@
                                     </div>
                                 </div>
 
+                                @* TODO: file type helper *@
                                 <div class="form-group">
-                                    <label class="col-md-12" for="carphoto">Foto</label>
+                                    <label class="col-md-12" for="picture">Foto</label>
                                     <div class="col-md-12">
                                         <input id="picture" name="picture" type="file" class="form-control input-md">
                                     </div>
@@ -134,40 +135,12 @@
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="address.street">Straat</label>
-                                            <div class="col-md-12">
-                                                <input id="address.street" name="address.street" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.street").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="address.number">Nummer</label>
-                                            <div class="col-md-12">
-                                                <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.number").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="address.bus">Bus</label>
-                                            <div class="col-md-12">
-                                                <input id="address.bus" maxlength="3" name="address.bus" type="text" class="form-control input-md" value="@form("address.bus").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="address.zipCode">Postcode</label>
-                                            <div class="col-md-12">
-                                                <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.zipCode").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="address.city">Stad</label>
-                                            <div class="col-md-12">
-                                                <input id="address.city" name="address.city" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("address.city").value">
-                                            </div>
-                                        </div>
+                                        @formGroupTextField(form("address.street"), "Straat", 'placeholder->"Verplicht")
+                                        @formGroupTextField(form("address.number"), "Nummer", 'placeholder->"Verplicht")
+                                        @formGroupTextField(form("address.bus"), "Bus")
+                                        @formGroupTextField(form("address.zipCode"), "Postcode", 'placeholder->"Verplicht")
+                                        @formGroupTextField(form("address.city"), "Stad", 'placeholder->"Verplicht")
+                                        @* TODO: landen niet nodig *@
                                         <div class="col-md-12">
                                             @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
                                         </div>
@@ -182,65 +155,26 @@
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="seats">Aantal zitplaatsen</label>
-                                            <div class="col-md-12">
-                                                <input id="seats" name="seats" type="number" class="form-control input-md" placeholder="Verplicht" value="@form("seats").value">
-                                            </div>
+                                        @formGroupNumberField(form("seats"),"Aantal zitplaatsen", 'placeholder->"Verplicht")
+                                        @formGroupNumberField(form("doors"),"Aantal deuren", 'placeholder->"Verplicht")
+                                        <div class="col-md-12">
+                                            @helper.checkbox(form("manual"), '_label -> "Manueel?")
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="doors">Aantal deuren</label>
-                                            <div class="col-md-12">
-                                                <input id="doors" name="doors" type="number" class="form-control input-md" placeholder="Verplicht" value="@form("doors").value">
-                                            </div>
+                                        <div class="col-md-12">
+                                            @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
                                         </div>
-                                            <div class="col-md-12">
-                                                @helper.checkbox(form("manual"), '_label -> "Manueel?")
-                                            </div>
-                                            <div class="col-md-12">
-                                                @helper.checkbox(form("gps"), '_label -> "GPS aanwezig")
-                                            </div>
-                                            <div class="col-md-12">
-                                                @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
-                                            </div>
-                                            <div class="col-md-12">
-                                                @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof", 'class -> "form-control")
-                                            </div>
+                                        <div class="col-md-12">
+                                            @helper.checkbox(form("hook"), '_label -> "Trekhaak aanwezig")
+                                        </div>
+                                        <div class="col-md-12">
+                                            @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof", 'class -> "form-control")
+                                        </div>
+                                        @formGroupTextField(form("year"),"Bouwjaar")
+                                        @formGroupTextField(form("fuelEconomy"), "Gemiddeld verbruik (per 100 km)")
+                                        @formGroupTextField(form("estimatedValue"), "Geschatte huidige waarde")
+                                        @formGroupTextField(form("ownerAnnualKm"), "Gemiddeld aantal kilometers (per jaar)")
 
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="year">Bouwjaar</label>
-                                            <div class="col-md-12">
-                                                <input id="year" name="year" type="number" class="form-control input-md" value="@form("year").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="fuelEconomy">Gemiddeld verbruik (per 100 km)</label>
-                                            <div class="col-md-12">
-                                                <input id="fuelEconomy" name="fuelEconomy" type="number" class="form-control input-md" value="@form("fuelEconomy").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="estimatedValue">Geschatte huidige waarde</label>
-                                            <div class="col-md-12">
-                                                <input id="estimatedValue" name="estimatedValue" type="number" class="form-control input-md" value="@form("estimatedValue").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="ownerAnnualKm">Gemiddeld aantal kilometers (per jaar)</label>
-                                            <div class="col-md-12">
-                                                <input id="ownerAnnualKm" name="ownerAnnualKm" type="number" class="form-control input-md" value="@form("ownerAnnualKm").value">
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label class="col-md-1" for="comments">Commentaar</label>
-                                            <div class="col-md-12">
-                                                <textarea id="comments" name="comments" class="form-control input-md" rows="6" maxlength="256">@form("comments").value</textarea>
-                                            </div>
-                                        </div>
+                                        @formGroupTextArea(form("comments"), "Commentaar", 6, 'maxlength->"256")
                                     </fieldset>
                                 </div>
                             </div>
@@ -253,12 +187,7 @@
                                 </div>
                                 <div class="panel-body">
                                     <fieldset>
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="licensePlate">Nummerplaat</label>
-                                            <div class="col-md-12">
-                                                <input id="licensePlate" name="licensePlate" type="text" class="form-control input-md" value="@form("licensePlate").value">
-                                            </div>
-                                        </div>
+                                        @formGroupTextField(form("licensePlate"), "Nummerplaat")
 
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
@@ -273,12 +202,7 @@
                                                 <input id="file" name="file" type="file" class="form-control input-md">
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="chassisNumber">Chassisnummer</label>
-                                            <div class="col-md-12">
-                                                <input id="chassisNumber" name="chassisNumber" type="number" class="form-control input-md" value="@form("chassisNumber").value">
-                                            </div>
-                                        </div>
+                                        @formGroupTextField(form("chassisNumber"), "ChassisNumber")
                                     </fieldset>
                                 </div>
                             </div>

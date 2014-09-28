@@ -455,7 +455,13 @@ class JDBCCarDAO implements CarDAO{
             }
             ps.setString(18, comments);
             ps.setBoolean(19, active);
-            ps.setInt(20, photo.getId());
+
+            if (photo != null) {
+                ps.setInt(20, photo.getId());
+            } else {
+                ps.setNull(20, Types.INTEGER);
+            }
+
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
             try (ResultSet keys = ps.getGeneratedKeys()) {

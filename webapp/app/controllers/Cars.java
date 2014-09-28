@@ -138,6 +138,7 @@ public class Cars extends Controller {
          * @return An error string or null
          */
         public String validate() {
+            /* TODO: dit moeten Field Errors worden, en niet één global error */
             String error = "";
             if (userId == null || userId == 0)
                 error += "Geef een eigenaar op. ";
@@ -308,7 +309,7 @@ public class Cars extends Controller {
                     }
                 }
             }
-            if ((model.licensePlate != null && !model.licensePlate.equals(""))
+            if ((model.licensePlate != null && !model.licensePlate.isEmpty())
                     || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || file != null) {
                 technicalCarDetails = new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber);
             }
@@ -328,6 +329,8 @@ public class Cars extends Controller {
                 );
             } else {
                 carForm.error("Failed to add the car to the database. Contact administrator.");
+                // not needed?
+                flash ("danger", "unexpected error");
                 return badRequest(edit.render(carForm, null, getCountryList(), getFuelList()));
             }
         }
@@ -376,9 +379,11 @@ public class Cars extends Controller {
         Car car = dao.getCar(carId);
 
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
-        if (editForm.hasErrors())
+        if (editForm.hasErrors()) {
+            // niet nodig?
+            flash("danger", "Form has errors");
             return badRequest(edit.render(editForm, car, getCountryList(), getFuelList()));
-
+        }
         if (car == null) {
             flash("danger", "Car met ID=" + carId + " bestaat niet.");
             return badRequest(userCarList());
