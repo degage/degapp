@@ -43,15 +43,13 @@
     <div class="row">
         <div class="col-lg-12">
             <h1 class="page-header">Dashboard</h1>
-            @if(CurrentUser.hasFullStatus || CurrentUser.hasRole(UserRole.SUPER_USER)){
-                @views.html.dashboardFullUser(user, completeness, form)
-            } else {
-                @views.html.dashboardRegistered(user, completeness, userWentToInfoSession, approvalRequestSent)
-            }
         </div>
-        <!-- /col-lg-12 -->
     </div>
-    <!-- /row -->
+    @if(CurrentUser.hasFullStatus || CurrentUser.hasRole(UserRole.SUPER_USER)){
+        @views.html.dashboardFullUser(user, completeness, form)
+    } else {
+        @views.html.dashboardRegistered(user, completeness, userWentToInfoSession, approvalRequestSent)
+    }
 </div>
 <!-- /page-wrapper -->
 }
