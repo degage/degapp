@@ -1,27 +1,27 @@
 @(error: String, carName: String, carId: Int, from: String, until: String)
 @scripts = {
     <script>
-        var yesImage = "@routes.Assets.at("images/tristate-checkbox/yes.png")";
-        var noImage = "@routes.Assets.at("images/tristate-checkbox/no.png")";
-        var noneImage = "@routes.Assets.at("images/tristate-checkbox/none.png")";
+        var yesImage = '@routes.Assets.at("images/tristate-checkbox/yes.png")';
+        var noImage = '@routes.Assets.at("images/tristate-checkbox/no.png")';
+        var noneImage = '@routes.Assets.at("images/tristate-checkbox/none.png")';
         var from = '@from'
         var until = '@until'
     </script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/plugins/tristate-checkbox/main.js")"></script>
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/plugins/tristate-checkbox/main.js")'></script>
     <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/app/reservations.js")"></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/pagination.js")"></script>
-    <script type="text/javascript" src="@routes.Assets.at("javascripts/plugins/datetimeinput.js")"></script>
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/app/reservations.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/userpicker.js")"></script>
-    <script type='text/javascript' src="@routes.Assets.at("javascripts/plugins/datetimepicker/js/bootstrap-datetimepicker-adapted.js")"></script>
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/userpicker.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker-adapted.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 }
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/timeinput.css")">
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/timeinput.css")'>
+    <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
 }
 @app("Reserveren", stylesheets, scripts) {
 
