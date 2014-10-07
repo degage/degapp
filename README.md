@@ -1,4 +1,6 @@
 Degage
 ======
 
-Webapplicatie voor autodelen
+Web application for Dégage Gent Belgium
+
+

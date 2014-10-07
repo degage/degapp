@@ -8,22 +8,14 @@
         <script src='@routes.Assets.at("javascripts/app/dashboard.js")'></script>
         <script src='@routes.Assets.at("javascripts/plugins/calendar.js")' type="text/javascript"></script>
         <script>
-        var events = [];
+        var events = [];    // global variable used by 'document ready'-event (cf. dashboard.js)
         @for(reservation <- reservations) {
-            var from = "@reservation.getFrom.toString("yyyy-MM-dd HH:mm")";
-            var parts1 = from.split(" ");
-            var d1 = parts1[0].split("-");
-            var t1 = parts1[1].split(":");
-            var until = "@reservation.getTo.toString("yyyy-MM-dd HH:mm")";
-            var parts2 = until.split(" ");
-            var d2 = parts2[0].split("-");
-            var t2 = parts2[1].split(":");
-            events.push(new CalendarEvent("@reservation.getCar.getName",
-            new Date(d1[0],(d1[1]-1),d1[2],t1[0],t1[1]),
-            new Date(d2[0],(d2[1]-1),d2[2],t2[0],t2[1]),
-            '@routes.Drives.details(reservation.getId).toString()"
-            , "details"
-            ));
+            events.push( registrationEvent(
+            '@reservation.getFrom.toString("yyyy-MM-dd HH:mm")',
+            '@reservation.getTo.toString("yyyy-MM-dd HH:mm")',
+            "@reservation.getCar.getName",
+            "@routes.Drives.details(reservation.getId).toString()"
+            ) );
         }
         </script>
     }
