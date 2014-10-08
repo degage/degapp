@@ -51,6 +51,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         super(context);
     }
 
+    // TODO: check what kind of 'partial' is really needed in each case
 
     /**
      * @param rs The resultset that contains the necessary information
@@ -58,9 +59,15 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      * @throws SQLException
      */
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
+        InfoSession result = populateInfoSessionPartialWithAddress(rs);
+        result.setHost(JDBCUserDAO.populateUserPartial(rs));
+        result.setEnrolleeCount(rs.getInt("sub.total"));
+        return result;
+    }
+
+    public static InfoSession populateInfoSessionPartialWithAddress(ResultSet rs) throws SQLException {
         InfoSession result = populateInfoSessionPartial(rs);
         result.setAddress(JDBCAddressDAO.populateAddress(rs));
-        result.setHost(JDBCUserDAO.populateUserPartial(rs));
         return result;
     }
 
@@ -76,7 +83,6 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         InfoSession infoSession;
 
         infoSession = new InfoSession(id, type, timestamp, null, null, maxEnrollees, commentaar);
-        infoSession.setEnrolleeCount(rs.getInt("sub.total"));
         infoSession.setTypeAlternative(typeAlternative);
 
         return infoSession;
@@ -139,7 +145,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             InfoSession is;
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    is = populateInfoSession(rs);
+                    is = populateInfoSessionPartialWithAddress(rs);
                 } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading infosession resultset", ex);
@@ -460,7 +466,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getAttendeesForSessionStatement = new LazyStatement(
-            "SELECT user_id, user_firstname, user_email, user_lastname, infosession_enrollment_status " +
+            "SELECT user_id, user_firstname, user_email, user_lastname, infosession_enrollment_status, user_status " +
                     "FROM infosessionenrollees " +
                     "INNER JOIN users ON user_id = infosession_enrollee_id " +
                     "WHERE infosession_id = ?"
