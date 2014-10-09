@@ -16,7 +16,7 @@ public interface SettingDAO {
 
     /**
      * Create a new setting which will be valid after the given date and time. Also use this method
-     * for 'updating' the settings.
+     * for 'updating' the settings, because a new value will also correspond to a new instant.
      */
     public void createSettingAfterDate(String name, String value, Instant after) throws DataAccessException;
 

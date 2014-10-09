@@ -121,10 +121,8 @@ POST        /infosession/adduser                    controllers.InfoSessions.add
 
 # Settings
 GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(name: String)
-POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost()
+POST        /settings/sysvars/edit                  controllers.Settings.editSysvarPost(name: String)
 GET         /settings/sysvars                       controllers.Settings.sysvarsOverview()
-GET         /settings/sysvars/create                controllers.Settings.createSysvar()
-POST        /settings/sysvars/create                controllers.Settings.createSysvarPost()
 GET         /changepass                             controllers.Settings.changePassword()
 POST        /changepass                             controllers.Settings.changePasswordPost()
 
