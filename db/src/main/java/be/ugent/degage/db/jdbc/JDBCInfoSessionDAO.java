@@ -59,15 +59,15 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      * @throws SQLException
      */
     public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
-        InfoSession result = populateInfoSessionPartialWithAddress(rs);
-        result.setHost(JDBCUserDAO.populateUserPartial(rs));
+        InfoSession result = populateInfoSessionPartialWithAddressAndHost(rs);
         result.setEnrolleeCount(rs.getInt("sub.total"));
         return result;
     }
 
-    public static InfoSession populateInfoSessionPartialWithAddress(ResultSet rs) throws SQLException {
+    public static InfoSession populateInfoSessionPartialWithAddressAndHost(ResultSet rs) throws SQLException {
         InfoSession result = populateInfoSessionPartial(rs);
         result.setAddress(JDBCAddressDAO.populateAddress(rs));
+        result.setHost(JDBCUserDAO.populateUserPartial(rs));
         return result;
     }
 
@@ -145,7 +145,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             InfoSession is;
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    is = populateInfoSessionPartialWithAddress(rs);
+                    is = populateInfoSessionPartialWithAddressAndHost(rs);
                 } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading infosession resultset", ex);
