@@ -16,11 +16,12 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 public class Settings extends Controller {
 
 
-    private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final DateTimeFormatter INSTANT_FORMATTER = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public static String instantToString(Instant instant) {
         return LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault()).format(INSTANT_FORMATTER);
@@ -34,13 +35,13 @@ public class Settings extends Controller {
     public static class EditSettingModel {
         public String value;
         // TODO: binding for LocalDateTime
-        public String after;
+        public Date after;
 
 
         public EditSettingModel() {
         }
 
-        public EditSettingModel(String value, String after) {
+        public EditSettingModel(String value, Date after) {
             this.value = value;
             this.after = after;
         }
@@ -111,8 +112,7 @@ public class Settings extends Controller {
             flash("danger", "Deze setting ID bestaat niet.");
             return redirect(routes.Settings.sysvarsOverview());
         } else {
-            EditSettingModel model = new EditSettingModel(value, instantToString(Instant.now())
-            );
+            EditSettingModel model = new EditSettingModel(value, new Date());
 
             return ok(editsysvar.render(name, Form.form(EditSettingModel.class).fill(model)));
         }
@@ -128,7 +128,7 @@ public class Settings extends Controller {
             return badRequest(editsysvar.render(name, form));
         } else {
             EditSettingModel model = form.get();
-            dao.createSettingAfterDate(name, model.value, stringToInstant(model.after));
+            dao.createSettingAfterDate(name, model.value, model.after.toInstant());
             flash("success", "De systeemvariabele werd met succes aangepast.");
             return redirect(routes.Settings.sysvarsOverview());
         }

@@ -4,15 +4,18 @@
         <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
         <script>
             $('#datepicker').datetimepicker({
-            weekStart: 1,
-            language: 'nl',
-            todayBtn:  1,
-            autoclose: 1,
-            todayHighlight: 1,
-            startView: 2,
-            forceParse: 0,
-            showMeridian: 1,
-            startDate: new Date()
+                pickerPosition: 'bottom-left',
+                weekStart: 1,
+                language: 'nl',
+                todayBtn:  false,
+                autoclose: 1,
+                todayHighlight: false,
+                startView: 2,
+                minView: 2,
+                forceParse: 0,
+                startDate: new Date(),
+                format: 'dd MM yyyy',
+                linkField: 'after'
             });
         </script>
     }
@@ -28,24 +31,40 @@
 
     <div id="page-wrapper">
         @flashes()
+        <h1 class="page-header">Systeemvariabele bewerken</h1>
         <div class="row">
+            @helper.form(routes.Settings.editSysvarPost(name), 'class -> "form-horizontal") {
             <div class="col-lg-12">
-                <h1 class="page-header">Systeemvariabele bewerken</h1>
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
+                    </div>
+                }
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         Systeemvariabele: <b>@name</b>
                     </div>
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                            @sysvarform(form, routes.Settings.editSysvarPost(name))
+                        <fieldset>
+                            @formGroupTextField(form("value"),"Waarde")
+
+                            @*TODO: use snippet for date picker *@
+                            <div class="form-group">
+                                <label for="datepicker">Actief vanaf:</label>
+                                <div id="datepicker" class="input-group date form_date">
+                                    <input class="form-control input-md" type="text" value='@form("after").value'
+                                           placeholder="Tijdstip">
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
+                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                </div>
                             </div>
-                        </div>
+                            <button type="submit" name="save" class="btn btn-block btn-success">Opslaan</button>
+                            <input type="text" class="hidden" id='after' name='after' value='@form("after").value'/>
+                        </fieldset>
                     </div>
                 </div>
-                    <!-- /.panel -->
             </div>
-                <!-- /col-lg-12 -->
+            }
         </div>
             <!-- /row -->
     </div>
