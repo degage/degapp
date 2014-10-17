@@ -940,6 +940,6 @@ public class InfoSessions extends Controller {
             }
         }
 
-        return ok(infosessionsAdminPage.render(sessions));
+        return ok(infosessionsAdmin.render(sessions));
     }
 }
