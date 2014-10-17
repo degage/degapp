@@ -1,7 +1,5 @@
 package be.ugent.degage.db.dao;
 
-import java.util.EnumSet;
-import java.util.List;
 import java.util.Set;
 
 import be.ugent.degage.db.DataAccessException;

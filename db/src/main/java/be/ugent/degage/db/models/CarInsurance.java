@@ -1,7 +1,5 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
-
 import java.util.Date;
 
 public class CarInsurance {

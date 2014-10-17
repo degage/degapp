@@ -1,7 +1,6 @@
 package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.*;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.ReceiptDAO;
 import be.ugent.degage.db.models.Receipt;
 import be.ugent.degage.db.models.User;

@@ -5,7 +5,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.CarRide;
 import be.ugent.degage.db.models.Damage;
-import be.ugent.degage.db.models.File;
 
 import java.util.List;
 

@@ -18,12 +18,13 @@ public class InfoSessionReminderJob implements ScheduledJobExecutor {
         InfoSessionDAO dao = context.getInfoSessionDAO();
         int sessionId = job.getRefId();
         InfoSession session = dao.getInfoSession(sessionId);
-        if (session == null)
+        if (session == null) {
             return;
-
-        for (Enrollee er : dao.getEnrollees(sessionId)) {
-            Notifier.sendInfoSessionEnrolledMail(context, er.getUser(), session); //TODO: use separate correct notifier
-            Logger.debug("Sent infosession reminder mail to " + er.getUser());
+        } else {
+            for (Enrollee er : dao.getEnrollees(sessionId)) {
+                Notifier.sendInfoSessionEnrolledMail(context, er.getUser(), session); //TODO: use separate correct notifier
+                Logger.debug("Sent infosession reminder mail to " + er.getUser());
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-@(sessions: Iterable[InfoSession], enrolled: InfoSession = null, page: Int, amountOfInfoSessions: Int, amountOfPages: Int)
+@(sessions: Iterable[InfoSession], enrolled: InfoSession = null)
 @import db.CurrentUser
 <div class="table-responsive">
     <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
@@ -72,4 +72,3 @@
         </tbody>
     </table>
 </div>
-<p id="pagination" name="@amountOfInfoSessions,@amountOfPages"></p>

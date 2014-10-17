@@ -150,21 +150,14 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result removeSession(int sessionId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        InfoSessionDAO dao = context.getInfoSessionDAO();
 
-        if (dao.getInfoSession(sessionId) == null) {
-            flash("danger", "Deze infosessie bestaat niet.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
-        } else {
-            dao.deleteInfoSession(sessionId);
+        context.getInfoSessionDAO().deleteInfoSession(sessionId);
 
-            // Delete the reminder
-            JobDAO jdao = context.getJobDAO();
-            jdao.deleteJob(JobType.IS_REMINDER, sessionId);
+        // Delete the reminder
+        context.getJobDAO().deleteJob(JobType.IS_REMINDER, sessionId);
 
-            flash("success", "De infosessie werd succesvol verwijderd.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
-        }
+        flash("success", "De infosessie werd succesvol verwijderd.");
+        return redirect(routes.InfoSessions.showUpcomingSessions());
     }
 
     /**
@@ -214,7 +207,7 @@ public class InfoSessions extends Controller {
                 jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
 
                 int minutesBefore = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder"));
-            MutableDateTime reminderDate = new MutableDateTime(session.getTime());
+                MutableDateTime reminderDate = new MutableDateTime(session.getTime());
                 reminderDate.addMinutes(-minutesBefore);
                 jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
             }
@@ -274,9 +267,9 @@ public class InfoSessions extends Controller {
     @AllowRoles
     @InjectContext
     public static Result detail(int sessionId) {
-         User user = DataProvider.getUserProvider().getUser();
-         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-         InfoSession session = dao.getInfoSession(sessionId);
+        User user = DataProvider.getUserProvider().getUser();
+        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        InfoSession session = dao.getInfoSession(sessionId);
 
         if (session == null) {
             return badRequest("Sessie id bestaat niet.");
@@ -338,23 +331,8 @@ public class InfoSessions extends Controller {
     @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result removeUserFromSession(int sessionId, int userId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        InfoSessionDAO dao = context.getInfoSessionDAO();
-        InfoSession is = dao.getInfoSession(sessionId);
-        if (is == null) {
-            flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
-        }
 
-        UserDAO udao = context.getUserDAO();
-
-        User user = udao.getUserPartial(userId);
-        if (user == null) {
-            flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
-        }
-
-        dao.unregisterUser(sessionId, userId);
+        DataAccess.getInjectedContext().getInfoSessionDAO().unregisterUser(sessionId, userId);
 
         flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
         return redirect(routes.InfoSessions.detail(sessionId));
@@ -371,26 +349,12 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
-
-        DataAccessContext context = DataAccess.getInjectedContext();
-        InfoSessionDAO dao = context.getInfoSessionDAO();
-        InfoSession is = dao.getInfoSession(sessionId);
-        if (is == null) {
-            flash("danger", "Infosessie met ID " + sessionId + " bestaat niet.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
-        }
-
-        UserDAO udao = context.getUserDAO();
-        User user = udao.getUserPartial(userId);
-        if (user == null) {
-            flash("danger", "Gebruiker met ID " + userId + " bestaat niet.");
-            return redirect(routes.InfoSessions.showUpcomingSessions());
-        }
-
-        EnrollementStatus enrollStatus = Enum.valueOf(EnrollementStatus.class, status);
-
-        dao.setUserEnrollmentStatus(sessionId, userId, enrollStatus);
-        flash("success", "De gebruikerstatus werd succesvol aangepast.");
+        DataAccess.getInjectedContext().getInfoSessionDAO().setUserEnrollmentStatus(
+                sessionId,
+                userId,
+                Enum.valueOf(EnrollementStatus.class, status)
+        );
+        flash("success", "De gebruikersstatus werd met succes aangepast.");
         return redirect(routes.InfoSessions.detail(sessionId));
     }
 
@@ -404,7 +368,7 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result addUserToSession(int sessionId) {
-        int  userId;
+        int userId;
         try {
             userId = Integer.parseInt(Form.form().bindFromRequest().get("userid"));
         } catch (Exception ex) {
@@ -414,30 +378,24 @@ public class InfoSessions extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
         InfoSessionDAO idao = context.getInfoSessionDAO();
-        InfoSession infoSession = idao.getInfoSession(sessionId);
-        if (infoSession == null) {
-            flash("danger", "InfoSessie bestaat niet.");
-            return redirect(routes.InfoSessions.pendingApprovalList());
+        User user = udao.getUserPartial(userId);
+        if (user == null) {
+            flash("danger", "GebruikersID bestaat niet.");
+            return redirect(routes.InfoSessions.detail(sessionId));
         } else {
-            User user = udao.getUserPartial(userId);
-            if (user == null) {
-                flash("danger", "GebruikersID bestaat niet.");
-                return redirect(routes.InfoSessions.detail(sessionId));
-            } else {
-                // TODO: simplify the user equals only by id
-                for (Enrollee others : idao.getEnrollees(sessionId)) {
-                    if (others.getUser().getId() == user.getId()) {
-                        flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
-                        return redirect(routes.InfoSessions.detail(sessionId));
-                    }
+            // TODO: simplify the user equals only by id
+            for (Enrollee others : idao.getEnrollees(sessionId)) {
+                if (others.getUser().getId() == user.getId()) {
+                    flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
+                    return redirect(routes.InfoSessions.detail(sessionId));
                 }
-
-                // Now we enroll
-                idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
-
-                flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
-                return redirect(routes.InfoSessions.detail(sessionId));
             }
+
+            // Now we enroll
+            idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
+
+            flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
+            return redirect(routes.InfoSessions.detail(sessionId));
         }
     }
 
@@ -464,7 +422,7 @@ public class InfoSessions extends Controller {
             flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
-            if (session.getMaxEnrollees() != 0 && numberOfAttendees == session.getMaxEnrollees()) {
+            if (session.getMaxEnrollees() != 0 && numberOfAttendees >= session.getMaxEnrollees()) {
                 flash("danger", "Deze infosessie zit reeds vol.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
@@ -556,13 +514,13 @@ public class InfoSessions extends Controller {
             errors.add("Verblijfsadres ontbreekt.");
         if (user.getIdentityCard() == null)
             errors.add("Identiteitskaart ontbreekt.");
-        if (user.getIdentityCard() != null && (! identityFiles.iterator().hasNext()))
+        if (user.getIdentityCard() != null && (!identityFiles.iterator().hasNext()))
             errors.add("Bewijsgegevens identiteitskaart ontbreken");
         if (user.getLicense() == null)
             errors.add("Rijbewijs ontbreekt.");
         if (!user.isPayedDeposit())
             errors.add("Waarborg nog niet betaald.");
-        if (user.getLicense() != null && (! licenseFiles.iterator().hasNext()))
+        if (user.getLicense() != null && (!licenseFiles.iterator().hasNext()))
             if (user.getCellphone() == null && user.getPhone() == null)
                 errors.add("Telefoon/GSM ontbreekt.");
         return errors;
@@ -710,7 +668,7 @@ public class InfoSessions extends Controller {
         EnrollementStatus status = EnrollementStatus.ABSENT;
         if (ap.getSession() != null) {
             InfoSessionDAO idao = context.getInfoSessionDAO();
-            status = idao.getUserEnrollmentStatus(ap.getSession().getId(),ap.getUser().getId());
+            status = idao.getUserEnrollmentStatus(ap.getSession().getId(), ap.getUser().getId());
         }
 
         if (!bad) {
@@ -740,8 +698,8 @@ public class InfoSessions extends Controller {
                         ? ApprovalAdminModel.Action.ACCEPT : ApprovalAdminModel.Action.DENY).name();
                 Set<UserRole> userRoles = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(ap.getUser().getId());
 
-                model.sharer = userRoles.contains (UserRole.CAR_OWNER);
-                model.user = userRoles.contains (UserRole.CAR_USER);
+                model.sharer = userRoles.contains(UserRole.CAR_OWNER);
+                model.user = userRoles.contains(UserRole.CAR_USER);
 
                 // Get the contact admin
                 UserDAO udao = context.getUserDAO();
@@ -769,7 +727,7 @@ public class InfoSessions extends Controller {
             EnrollementStatus status = EnrollementStatus.ABSENT;
             if (ap.getSession() != null) {
                 InfoSessionDAO idao = context.getInfoSessionDAO();
-                status = idao.getUserEnrollmentStatus(ap.getSession().getId(),ap.getUser().getId());
+                status = idao.getUserEnrollmentStatus(ap.getSession().getId(), ap.getUser().getId());
             }
 
             return ok(setcontractadmin.render(ap, status, ap.getAdmin()));
@@ -793,7 +751,7 @@ public class InfoSessions extends Controller {
 
             if (contractManager != null) {
                 Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
-                if (userRoles.contains (UserRole.INFOSESSION_ADMIN) || userRoles.contains (UserRole.SUPER_USER)) {
+                if (userRoles.contains(UserRole.INFOSESSION_ADMIN) || userRoles.contains(UserRole.SUPER_USER)) {
                     // TODO: introduce hasRole method in DAO
                     app.setAdmin(contractManager);
                     adao.setApprovalAdmin(app, contractManager);
@@ -890,18 +848,20 @@ public class InfoSessions extends Controller {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
-        return enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && ! user.hasFullStatus();
+        return enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !user.hasFullStatus();
     }
 
-    /**
+    /*
      * Method: GET
      * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
      *
      * @return
      */
+    /*
     @AllowRoles
     @InjectContext
     // TODO: inject context does not work here
+
     public static F.Promise<Result> showUpcomingSessionsOriginal() {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
@@ -924,98 +884,20 @@ public class InfoSessions extends Controller {
             return F.Promise.promise(() -> ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession)));
         }
     }
-
+    */
 
     @AllowRoles
     @InjectContext
     public static Result showUpcomingSessions() {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
-        final User user = DataProvider.getUserProvider().getUser();
-        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
-        final boolean didUserGoToInfoSession = didUserGoToInfoSession();
-        return ok(infosessions.render(enrolled == null ? null : enrolled.getFirst(), null, didUserGoToInfoSession));
-
-    }
-
-    /**
-     * Method: GET
-     * Returns the promise of list of the upcoming infosessions. When the user is enrolled already this also includes map data if enabled
-     *
-     * @return
-     */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
-    @InjectContext
-    public static Result showSessions() {
-        return ok(infosessionsAdmin.render());
-
-    }
-
-    /**
-     * Method: GET
-     *
-     * @param page         The page number to fetch
-     * @param ascInt
-     * @param orderBy      The orderby type, ASC or DESC
-     * @param searchString The string to search for
-     * @return A partial view of the table containing the filtered upcomming sessions
-     */
-    @AllowRoles
-    @InjectContext
-    public static Result showUpcomingSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-        FilterField filterField = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-        filter.putValue(FilterField.FROM, DateTime.now().toString());
-        filter.putValue(FilterField.UNTIL, "" + DateTime.now().plusYears(100).toString());
-
-        return ok(sessionsList(page, pageSize, filterField, asc, filter, false));
-    }
-
-    /**
-     * Method: GET
-     *
-     * @param page         The page number to fetch
-     * @param ascInt
-     * @param orderBy      The orderby type, ASC or DESC
-     * @param searchString The string to search for
-     * @return A partial view of the table containing the filtered sessions
-     */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
-    @InjectContext
-    public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-        FilterField filterField = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-
-        return ok(sessionsList(page, pageSize, filterField, asc, filter, true));
-    }
-
-    /**
-     * Gets the infosessions html block filtered
-     *
-     * @param page
-     * @param orderBy Orderby type ASC or DESC
-     * @param asc
-     * @param filter  The filter to apply to
-     * @return The html patial table of upcoming sessions for this filter
-     */
-
-    // used with injected context
-    private static Html sessionsList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter, boolean admin) {
-        // TODO: not use boolean admin
         User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        InfoSession enrolled = dao.getAttendingInfoSession(user);
-        if (orderBy == null) {
-            orderBy = FilterField.INFOSESSION_DATE;
-        }
+        Tuple<InfoSession, EnrollementStatus> tuple = dao.getLastInfoSession(user);
+        boolean didUserGoToInfoSession = didUserGoToInfoSession();
 
-        Iterable<InfoSession> sessions = dao.getInfoSessions(orderBy, asc, page, pageSize, filter);
+        InfoSession enrolled = dao.getAttendingInfoSession(user);
+
+        Iterable<InfoSession> sessions = dao.getInfoSessions(true);
         if (enrolled != null) {
             //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
             // Hack herpedy derp!!
@@ -1028,11 +910,36 @@ public class InfoSessions extends Controller {
             }
         }
 
-        int amountOfResults = dao.getNumberOfInfoSessions(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
-        if (admin)
-            return infosessionsAdminPage.render(sessions, page, amountOfResults, amountOfPages);
-        else
-            return infosessionspage.render(sessions, enrolled, page, amountOfResults, amountOfPages);
+        return ok(infosessions.render(sessions, tuple == null ? null : tuple.getFirst(), null, didUserGoToInfoSession));
+
+    }
+
+    /**
+     * Method: GET*
+     *
+     * @return A table containing the upcoming sessions
+     */
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @InjectContext
+    public static Result showSessions() {
+
+        User user = DataProvider.getUserProvider().getUser();
+        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        InfoSession enrolled = dao.getAttendingInfoSession(user);
+
+        Iterable<InfoSession> sessions = dao.getInfoSessions(false);
+        if (enrolled != null) {
+            //TODO: Fix this by also including going count in getAttendingInfoSession (now we fetch it from other list)
+            // Hack herpedy derp!!
+
+            for (InfoSession s : sessions) {
+                if (enrolled.getId() == s.getId()) {
+                    enrolled = s;
+                    break;
+                }
+            }
+        }
+
+        return ok(infosessionsAdminPage.render(sessions));
     }
 }

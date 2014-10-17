@@ -8,8 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.function.Predicate;
 
 import static org.junit.Assert.*;
 

@@ -1,8 +1,6 @@
 package be.ugent.degage.db;
 
-import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.dao.UserRoleDAO;
-import be.ugent.degage.db.models.Address;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import com.google.common.collect.Iterables;

@@ -1,13 +1,10 @@
+@(sessions: Iterable[InfoSession])
 @import providers.DataProvider;
 @scripts = {
-
     <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script>
     <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker-adapted.js")'></script> @* TODO: avoid this *@
     <script type="text/javascript" src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-    <script src='@routes.Assets.at("javascripts/app/infosessionsAdmin.js")'></script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
-
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
@@ -35,44 +32,7 @@
         </div>
     </div>
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies's zoeken
-        </div>
-            <!-- /.panel-heading -->
-        <div class="panel-body">
-            <!-- TODO: layout, more fields to search on -->
-            <div id="searchwell">
-                <form role="form">
-                    <div class="form-group inline-block">
-                        <div id="from" class="inline-block">
-                            <label for="">Vanaf</label>
-                            <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_from">
-                                <input id="input_from" class="form-control" size="16" value="">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                            </div>
-                            <input id="hidden_from" name="from" class="hidden searchTextField">
-                        </div>
-                        <div id="until" class="inline-block form-group">
-                            <label for="">Tot</label>
-                            <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_until">
-                                <input id="input_until" class="form-control" size="16" value="">
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                            </div>
-                            <input id="hidden_until" name="until" class="hidden searchTextField">
-                        </div>
-                        <div>
-                            <button id="searchButton" type="button" class="btn btn-success">Zoek</button>
-                            <button id="reset" type="button" class="btn btn-primary">Verwijder zoekterm</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-            <!-- /.panel-body -->
-    </div>
+    @* Lijst is altijd kort. Zoeken heeft geen zin. *@
 
     <div class="panel panel-default">
         <div class="panel-heading">
@@ -82,6 +42,7 @@
         <div class="panel-body">
             <div id="resultsTable" class="table-responsive">
                 <!-- Here comes the loaded table-->
+                @infosessionsAdminPage(sessions)
             </div>
         </div>
         <!-- /.panel-body -->

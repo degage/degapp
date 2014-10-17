@@ -9,7 +9,6 @@ import be.ugent.degage.db.models.*;
 import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -293,7 +292,7 @@ public class JDBCDAOTest {
 
             // Skip other fields, is for update
             sc.nextLine();
-            User user = userDAO.createUser(email,pass,firstName,lastName);
+            User user = userDAO.createUser(email,pass,firstName,lastName,null);
 
             users.add(user);
         }

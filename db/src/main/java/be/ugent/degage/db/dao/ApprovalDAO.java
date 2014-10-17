@@ -4,7 +4,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.Approval;
 import be.ugent.degage.db.models.InfoSession;
 import be.ugent.degage.db.models.User;
-import org.joda.time.DateTime;
+
 import java.util.List;
 
 /**

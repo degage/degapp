@@ -1,6 +1,9 @@
-/**
+/*
  * Created by Benjamin on 23/03/2014.
  */
+
+ /* TODO: wordt niet langer gebruikt */
+
 // Javascript route
 var route = myJsRoutes.controllers.InfoSessions.showSessionsPage;
 var today = new Date();

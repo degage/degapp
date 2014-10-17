@@ -5,7 +5,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
-import org.joda.time.DateTime;
 
 import java.util.List;
 

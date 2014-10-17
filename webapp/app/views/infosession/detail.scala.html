@@ -92,52 +92,48 @@
                     </div>
                 </div>
 
-                @* TODO: can other users see the attendees, or only admins?? *@
+                @if(isAdmin) {
+                    @if(enrollees.iterator.hasNext) {
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <i class="fa fa-users fa-fw"></i> Ingeschreven (@infoSession.getEnrolleeCount)
+                            </div>
+                            <div class="panel-body">
 
-                @if(enrollees.iterator.hasNext) {
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            <i class="fa fa-users fa-fw"></i> Ingeschreven (@infoSession.getEnrolleeCount)
-                        </div>
-                        <div class="panel-body">
-
-                            <div class="table-responsive">
-                                <table class="table table-striped table-bordered table-hover no-footer">
-                                    <thead>
-                                        <tr role="row">
-                                            <th class="sorting" tabindex="0" rowspan="1" colspan="1">#</th>
-                                            <th class="sorting" tabindex="0" rowspan="1" colspan="1">Naam</th>
-                                            @if(isAdmin) { @* Extra operations for admin such as delete *@
-                                                <th>Aanwezigheid</th>
-                                                <th>Aanwezigheid wijzigen</th>
-                                                <th>Verwijderen</th>
-                                            }
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                    @foreach.withIndex(enrollees){ (enrollee,index) =>
-                                        <tr>
-                                            <td>@index</td>
-                                            <td>
-                                                @if(CurrentUser.hasFullStatus) {
-                                                    <a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser.getFirstName @enrollee.getUser.getLastName</a>
-                                                } else {
-                                                    @enrollee.getUser.getFirstName @enrollee.getUser.getLastName
-                                                }
-                                            </td>
-                                            @if(isAdmin) {
+                                <div class="table-responsive">
+                                    <table class="table table-striped table-bordered table-hover no-footer">
+                                        <thead>
+                                            <tr role="row">
+                                                <th class="sorting" tabindex="0" rowspan="1" colspan="1">#</th>
+                                                <th class="sorting" tabindex="0" rowspan="1" colspan="1">Naam</th>
+                                                    <th>Aanwezigheid</th>
+                                                    <th>Aanwezigheid wijzigen</th>
+                                                    <th>Verwijderen</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                        @foreach.withIndex(enrollees){ (enrollee,index) =>
+                                            <tr>
+                                                <td>@{index+1}</td>
                                                 <td>
-                                                        @if(enrollee.getStatus == EnrollementStatus.ENROLLED) {
-                                                            te bepalen
-                                                        }
+                                                    @if(CurrentUser.hasFullStatus) { @* TODO: who can see user profiles? *@
+                                                        <a href="@routes.Profile.index(enrollee.getUser.getId)">@enrollee.getUser.getFirstName @enrollee.getUser.getLastName</a>
+                                                    } else {
+                                                        @enrollee.getUser.getFirstName @enrollee.getUser.getLastName
+                                                    }
+                                                </td>
+                                                <td>
+                                                    @if(enrollee.getStatus == EnrollementStatus.ENROLLED) {
+                                                        te bepalen
+                                                    }
 
-                                                        @if(enrollee.getStatus == EnrollementStatus.PRESENT) {
-                                                            aanwezig
-                                                        }
+                                                    @if(enrollee.getStatus == EnrollementStatus.PRESENT) {
+                                                        aanwezig
+                                                    }
 
-                                                        @if(enrollee.getStatus == EnrollementStatus.ABSENT) {
-                                                            afwezig
-                                                        }
+                                                    @if(enrollee.getStatus == EnrollementStatus.ABSENT) {
+                                                        afwezig
+                                                    }
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-xs">
@@ -152,16 +148,16 @@
                                                 <td>
                                                     <a class="btn btn-danger btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">aanwezige verwijderen</a>
                                                 </td>
-                                            }
-                                        </tr>
-                                    }
-                                    </tbody>
-                                </table>
+                                            </tr>
+                                        }
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                } else {
-                    <div class="alert alert-success"><span class="fa fa-info-circle"></span> Er zijn nog geen inschrijvingen voor deze infosessie.</div>
+                    } else {
+                        <div class="alert alert-success"><span class="fa fa-info-circle"></span> Er zijn nog geen inschrijvingen voor deze infosessie.</div>
+                    }
                 }
             }
         </div>

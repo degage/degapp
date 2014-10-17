@@ -6,11 +6,8 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 import org.joda.time.DateTime;
-
-import java.util.List;
 
 /**
  * Data access object for information sessions
@@ -29,7 +26,11 @@ public interface InfoSessionDAO {
 
     public Filter createInfoSessionFilter();
 
-    public Iterable<InfoSession> getInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    /**
+     * Return the list of infosessions, ordered by date
+     * @param onlyUpcoming  if true only those infosessions are listed that will occur after the current instant
+     */
+    public Iterable<InfoSession> getInfoSessions(boolean onlyUpcoming) throws DataAccessException;
 
     public int getNumberOfInfoSessions(Filter filter) throws DataAccessException;
 

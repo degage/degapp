@@ -16,23 +16,25 @@ import java.util.Collection;
  */
 class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
-    private static String INFOSESSION_FIELDS = "infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
+    private static String INFOSESSION_FIELDS = "ses.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
             "user_id, user_firstname, user_lastname, user_phone, user_email, user_status";
 
-    private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + " FROM infosessions " +
+    private static String SUBTTOTAL_QUERY =
+                "LEFT JOIN (SELECT COUNT(*) AS total, infosession_id " +
+                "           FROM infosessionenrollees GROUP BY infosession_id) AS sub ON (ses.infosession_id = sub.infosession_id) ";
+
+    private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + ", sub.total FROM infosessions AS ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
-            "JOIN addresses ON infosession_address_id = address_id";
+            "JOIN addresses ON infosession_address_id = address_id " + SUBTTOTAL_QUERY;
 
 
-    private static String INFOSESSION_QUERY = "SELECT sub.total, ses.infosession_id infosession_id, ses.infosession_type infosession_type, ses.infosession_type_alternative infosession_type_alternative, " +
+    private static String INFOSESSION_QUERY = "SELECT sub.total, ses.infosession_id AS infosession_id, ses.infosession_type AS infosession_type, ses.infosession_type_alternative infosession_type_alternative, " +
             "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees, ses.infosession_comments infosession_comments, " +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions ses " +
+            "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions AS ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
-            "JOIN addresses ON infosession_address_id = address_id " +
-            "LEFT JOIN (SELECT COUNT(*) AS total, infosession_id " +
-            "           FROM infosessionenrollees GROUP BY infosession_id) AS sub ON (ses.infosession_id = sub.infosession_id) ";
+            "JOIN addresses ON infosession_address_id = address_id " + SUBTTOTAL_QUERY;
 
     private static String FILTER_FRAGMENT = "WHERE ses.infosession_timestamp > ? AND ses.infosession_timestamp < ?"; // TODO: get something to filter on
 
@@ -58,21 +60,16 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      * @return An Infosession with the information from the resultset
      * @throws SQLException
      */
-    public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
-        InfoSession result = populateInfoSessionPartialWithAddressAndHost(rs);
+    public static InfoSession populateInfoSession(ResultSet rs)  throws SQLException {
+        InfoSession result = populateInfoSessionPartial(rs);
+        result.setAddress(JDBCAddressDAO.populateAddress(rs));
+        result.setHost(JDBCUserDAO.populateUserPartial(rs));
         result.setEnrolleeCount(rs.getInt("sub.total"));
         return result;
     }
 
-    public static InfoSession populateInfoSessionPartialWithAddressAndHost(ResultSet rs) throws SQLException {
-        InfoSession result = populateInfoSessionPartial(rs);
-        result.setAddress(JDBCAddressDAO.populateAddress(rs));
-        result.setHost(JDBCUserDAO.populateUserPartial(rs));
-        return result;
-    }
-
     public static InfoSession populateInfoSessionPartial(ResultSet rs) throws SQLException {
-        int id = rs.getInt("infosession_id");
+        int id = rs.getInt("ses.infosession_id");
         InfoSessionType type = InfoSessionType.valueOf(rs.getString("infosession_type"));
         String typeAlternative = rs.getString("infosession_type_alternative");
         DateTime timestamp = new DateTime(rs.getTimestamp("infosession_timestamp"));
@@ -134,7 +131,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getInfoSessionById = new LazyStatement(
-            INFOSESSION_SELECTOR + " WHERE infosession_id = ?"
+            INFOSESSION_SELECTOR + " WHERE ses.infosession_id = ?"
     );
 
     @Override
@@ -145,26 +142,11 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             InfoSession is;
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    is = populateInfoSessionPartialWithAddressAndHost(rs);
+                    is = populateInfoSession(rs);
                 } else return null;
             } catch (SQLException ex) {
                 throw new DataAccessException("Error reading infosession resultset", ex);
             }
-
-            /*
-            if (withAttendees) {
-                PreparedStatement ps2 = getGetAttendeesForSession();
-                ps2.setInt(1, id);
-                try (ResultSet rs = ps2.executeQuery()) {
-                    while (rs.next()) {
-                        is.addEnrollee(new Enrollee(new User(rs.getInt("user_id"), rs.getString("user_email"), rs.getString("user_firstname"), rs.getString("user_lastname")),
-                                Enum.valueOf(EnrollementStatus.class, rs.getString("infosession_enrollment_status"))));
-                    }
-                } catch (SQLException ex) {
-                    throw new DataAccessException("Failed to get attendees for infosession", ex);
-                }
-            }
-            */
             return is;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch infosession by id.", ex);
@@ -212,7 +194,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getAmountOfInfoSessionsStatement = new LazyStatement(
-            "SELECT COUNT(ses.infosession_id) AS amount_of_infosessions FROM infosessions ses " + FILTER_FRAGMENT
+            "SELECT COUNT(ses.infosession_id) AS amount_of_infosessions FROM infosessions AS ses " + FILTER_FRAGMENT
     );
 
     /**
@@ -237,50 +219,67 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
-    private LazyStatement getInfoSessionsAfterPageByDateAscStatement = new LazyStatement(
-            INFOSESSION_QUERY + FILTER_FRAGMENT +
-                    "ORDER BY infosession_timestamp ASC LIMIT ?, ?"
-    );
+    private static String GET_INFO_SESSIONS_HEAD =
+            "SELECT infosession_id, infosession_type, infosession_type_alternative, " +
+                    "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
+                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status, " +
+                    "enrollee_count " +
+                    "FROM infosessions_extended ";
 
-    private LazyStatement getInfoSessionsAfterPageByDateDescStatement = new LazyStatement(
-            INFOSESSION_QUERY + FILTER_FRAGMENT +
-                    "ORDER BY infosession_timestamp DESC LIMIT ?, ?"
-    );
+    private static String GET_INFO_SESSIONS_ALL =
+            GET_INFO_SESSIONS_HEAD + " ORDER BY infosession_timestamp";
+
+    private static String GET_INFO_SESSIONS_UPCOMING =
+            GET_INFO_SESSIONS_HEAD + " WHERE infosession_timestamp > NOW() ORDER BY infosession_timestamp";
+
+
+    private static InfoSession getInfoSessionFromResultSet (ResultSet rs) throws SQLException{
+        Address address = new Address(
+                rs.getInt("address_id"),
+                rs.getString("address_country"),
+                rs.getString("address_zipcode"),
+                rs.getString("address_city"),
+                rs.getString("address_street"),
+                rs.getString("address_street_number"),
+                rs.getString("address_street_bus")
+        );
+
+        User host = new User (
+                rs.getInt("user_id"),
+                rs.getString("user_email"), // not used
+                rs.getString("user_firstname"),
+                rs.getString("user_lastname"),
+                UserStatus.valueOf(rs.getString("user_status")) // not used
+        );
+        // user_phone also not used
+
+        InfoSession infoSession = new InfoSession(
+                rs.getInt("infosession_id"),
+                InfoSessionType.valueOf(rs.getString("infosession_type")),
+                new DateTime(rs.getTimestamp("infosession_timestamp")),
+                address, host,
+                rs.getInt("infosession_max_enrollees"),
+                rs.getString("infosession_comments")
+        );
+        infoSession.setTypeAlternative(rs.getString("infosession_type_alternative"));
+        infoSession.setEnrolleeCount(rs.getInt("enrollee_count"));
+        return infoSession;
+    }
 
 
     /**
-     * @param orderBy  The field you want to order by
-     * @param asc      Ascending
-     * @param page     The page you want to see
-     * @param pageSize The page size
-     * @param filter   The filter you want to apply
-     * @return List of infosessions with custom ordering and filtering
-     * @throws DataAccessException
      */
     @Override
-    public Iterable<InfoSession> getInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = null;
-            switch (orderBy) {
-                case INFOSESSION_DATE:
-                    ps = asc ? getInfoSessionsAfterPageByDateAscStatement.value() : getInfoSessionsAfterPageByDateDescStatement.value();
-                    break;
+    public Iterable<InfoSession> getInfoSessions(boolean onlyUpcoming) throws DataAccessException {
+        String query = onlyUpcoming ? GET_INFO_SESSIONS_UPCOMING : GET_INFO_SESSIONS_ALL;
+        try (Statement stat = createStatement();
+             ResultSet rs = stat.executeQuery(query)) {
+            Collection<InfoSession> infosessions = new ArrayList<>();
+            while (rs.next()) {
+                infosessions.add(getInfoSessionFromResultSet(rs));
             }
-            if (ps == null) {
-                throw new DataAccessException("Could not create getInfoSessions statement");
-            }
-
-            fillFragment(ps, filter, 1);
-            int first = (page - 1) * pageSize;
-            ps.setInt(3, first);
-            ps.setInt(4, pageSize);
-            try (ResultSet rs = ps.executeQuery()) {
-                Collection<InfoSession> infosessions = new ArrayList<InfoSession>();
-                while (rs.next()) {
-                    infosessions.add(populateInfoSession(rs));
-                }
-                return infosessions;
-            }
+            return infosessions;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of infosessions", ex);
         }
@@ -365,16 +364,11 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
-    private LazyStatement getInfosessionForUserStatement = new LazyStatement(
-            "SELECT sub.total, ie.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
-                    "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
-                    "JOIN users ON infosession_host_user_id = user_id " +
-                    "JOIN addresses ON infosession_address_id = address_id " +
-                    "LEFT JOIN ( SELECT COUNT(*) AS total, ie2.infosession_id " +
-                    "            FROM infosessionenrollees ie2 GROUP BY ie2.infosession_id) AS sub ON (ie.infosession_id = sub.infosession_id) " +
-                    "WHERE infosession_enrollee_id = ? AND infosession_timestamp > ?"
+    private LazyStatement getAttendingInfosessionStatement = new LazyStatement(
+            GET_INFO_SESSIONS_HEAD +
+                    " JOIN infosessionenrollees USING(infosession_id) " +
+                    " WHERE infosession_enrollee_id = ? AND infosession_timestamp > NOW() " +
+                    " ORDER BY infosession_timestamp"
     );
 
     /**
@@ -384,16 +378,15 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      */
     @Override
     public InfoSession getAttendingInfoSession(User user) throws DataAccessException {
-        try {
-            PreparedStatement ps = getInfosessionForUserStatement.value();
+        try (PreparedStatement ps = getAttendingInfosessionStatement.value()) {
             ps.setInt(1, user.getId());
-            ps.setTimestamp(2, new Timestamp(DateTime.now().getMillis())); //TODO: pass date as argument instead of 'now' ??
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next())
+                if (rs.next()) {
+                    return getInfoSessionFromResultSet(rs);
+                } else {
                     return null;
-                else
-                    return populateInfoSession(rs);
+                }
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to fetch infosession for user", ex);
@@ -436,10 +429,10 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getLastInfoSessionForUserStatement = new LazyStatement(
-            "SELECT sub.total, ie.infosession_enrollment_status status, ie.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
+            "SELECT sub.total, ie.infosession_enrollment_status status, ses.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
                     "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
-                    "JOIN infosessions ON ie.infosession_id = infosessions.infosession_id " +
+                    "JOIN infosessions AS ses ON ie.infosession_id = ses.infosession_id " +
                     "JOIN users ON infosession_host_user_id = user_id " +
                     "JOIN addresses ON infosession_address_id = address_id " +
                     "LEFT JOIN ( SELECT COUNT(*) AS total, ie2.infosession_id " +

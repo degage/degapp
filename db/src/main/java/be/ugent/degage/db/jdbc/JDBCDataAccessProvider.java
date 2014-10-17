@@ -5,7 +5,6 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.DataAccessProvider;
 
 import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.SQLException;
 
 /**

@@ -1,14 +1,11 @@
 package be.ugent.degage.db.tests;
 
 import be.ugent.degage.db.*;
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.TemplateDAO;
 import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.EmailTemplate;
 import org.junit.Before;
-import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.List;
@@ -57,7 +54,7 @@ public class JDBCTemplateDAOTest {
         sc.nextLine(); //skip header first time
         while(sc.hasNext() && it.hasNext()) {
             String body = sc.next();
-            EmailTemplate template = (EmailTemplate) it.next();
+            EmailTemplate template = it.next();
             String templateSubject = "";
             boolean templateSendMail = false;
 
