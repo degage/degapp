@@ -16,9 +16,10 @@ import java.util.List;
  */
 class JDBCApprovalDAO implements ApprovalDAO {
 
-    private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
-            "users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
-            "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, " +
+    private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +
+            "approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
+            "users.user_id, users.user_firstname, users.user_lastname, users.user_email, users.user_status, " +
+            "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, admins.user_status, " +
             "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_type_alternative, infosession_comments ";
 
     private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +

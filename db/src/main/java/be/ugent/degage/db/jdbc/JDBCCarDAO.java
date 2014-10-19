@@ -23,6 +23,7 @@ class JDBCCarDAO implements CarDAO{
 
     private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
 
+            // TODO: replace * by actual fields
     public static final String CAR_QUERY = "SELECT * FROM cars " +
             "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
             "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
@@ -361,6 +362,7 @@ class JDBCCarDAO implements CarDAO{
 
     private PreparedStatement getPrivilegedStatement() throws SQLException {
         if (getPrivilegedStatement == null) {
+            // TODO: replace * by actual fields
             getPrivilegedStatement = connection.prepareStatement("SELECT * FROM carprivileges " +
                     "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?");
         }

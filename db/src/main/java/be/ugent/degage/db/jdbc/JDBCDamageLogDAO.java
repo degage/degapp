@@ -35,6 +35,7 @@ class JDBCDamageLogDAO implements DamageLogDAO {
 
     private PreparedStatement getGetDamageLogsStatement() throws SQLException {
         if (getDamageLogsStatement == null) {
+            // TODO: replace * by actual fields
             getDamageLogsStatement = connection.prepareStatement("SELECT * FROM damagelogs " +
                 "JOIN damages ON damage_log_damage_id = damage_id " +
                 "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
@@ -86,7 +87,12 @@ class JDBCDamageLogDAO implements DamageLogDAO {
         List<DamageLog> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                list.add(populateDamageLog(rs));
+                list.add(
+                        new DamageLog(rs.getInt("damage_log_id"),
+                                JDBCDamageDAO.populateDamage(rs),
+                                rs.getString("damage_log_description"),
+                                new DateTime(rs.getTimestamp("damage_log_created_at")))
+                );
             }
             return list;
         } catch (SQLException e) {
@@ -95,8 +101,4 @@ class JDBCDamageLogDAO implements DamageLogDAO {
         }
     }
 
-    public static DamageLog populateDamageLog(ResultSet rs) throws SQLException {
-        return new DamageLog(rs.getInt("damage_log_id"), JDBCDamageDAO.populateDamage(rs),
-                rs.getString("damage_log_description"), new DateTime(rs.getTimestamp("damage_log_created_at")));
-    }
 }

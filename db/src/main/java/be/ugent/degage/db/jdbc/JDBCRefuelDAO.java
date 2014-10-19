@@ -15,6 +15,7 @@ class JDBCRefuelDAO implements RefuelDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"refuel_id"};
 
+    // TODO: reduce output from this query * -> actual fields
     private static final String REFUEL_QUERY = "SELECT * FROM refuels " +
             "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
             "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +

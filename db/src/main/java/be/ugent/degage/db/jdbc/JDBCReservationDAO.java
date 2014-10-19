@@ -26,6 +26,7 @@ class JDBCReservationDAO implements ReservationDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"reservation_id"};
 
+            // TODO: replace * by actual fields
     public static final String RESERVATION_QUERY = "SELECT * FROM carreservations " +
             "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
             "INNER JOIN users ON carreservations.reservation_user_id = users.user_id ";
@@ -46,9 +47,14 @@ class JDBCReservationDAO implements ReservationDAO {
     }
 
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
-        Reservation reservation = new Reservation(rs.getInt("reservation_id"), JDBCCarDAO.populateCar(rs, false),
-                JDBCUserDAO.populateUserPartial(rs), new DateTime(rs.getTimestamp("reservation_from")),
-                new DateTime(rs.getTimestamp("reservation_to")), rs.getString("reservation_message"));
+        Reservation reservation = new Reservation(
+                rs.getInt("reservation_id"),
+                JDBCCarDAO.populateCar(rs, false),
+                JDBCUserDAO.populateUserPartial(rs),
+                new DateTime(rs.getTimestamp("reservation_from")),
+                new DateTime(rs.getTimestamp("reservation_to")),
+                rs.getString("reservation_message")
+        );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         return reservation;
     }
@@ -78,6 +84,7 @@ class JDBCReservationDAO implements ReservationDAO {
 
     private PreparedStatement getGetReservationStatement() throws SQLException {
         if (getReservationStatement == null) {
+            // TODO: replace * by actual fields
             getReservationStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id WHERE reservation_id=?");
         }
         return getReservationStatement;
@@ -104,6 +111,7 @@ class JDBCReservationDAO implements ReservationDAO {
     private PreparedStatement getGetReservationListByCaridStatement() throws SQLException {
         if (getReservationListByCaridStatement == null) {
             // Only request the reservations for which the current user is the loaner or the owner
+            // TODO: replace * by actual fields
             getReservationListByCaridStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     "WHERE car_id=?");
         }
@@ -113,6 +121,7 @@ class JDBCReservationDAO implements ReservationDAO {
     private PreparedStatement getGetReservationListByUseridStatement() throws SQLException {
         if (getReservationListByUseridStatement == null) {
             // Only request the reservations for which the current user is the loaner or the owner
+            // TODO: replace * by actual fields
             getReservationListByUseridStatement = connection.prepareStatement("SELECT * FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     " WHERE (car_owner_user_id = ? OR reservation_user_id = ? ) " +
                     " AND reservation_status != '" + ReservationStatus.REFUSED.toString() +
@@ -235,6 +244,7 @@ class JDBCReservationDAO implements ReservationDAO {
 		}
     }
 
+    // TODO: make two different methods depending on value of getAmount
     private String getReservationsPageStatement(boolean getAmount, String amount, Filter filter) {
         String id;
         if(filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
@@ -248,6 +258,7 @@ class JDBCReservationDAO implements ReservationDAO {
         } else {
             carId = filter.getValue(FilterField.RESERVATION_CAR_ID);
         }
+            // TODO: replace * by actual fields
         String sql = "SELECT " + (getAmount ? " COUNT(reservation_id) AS " + amount : " * ") +
                 " FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
                 " INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
@@ -296,7 +307,9 @@ class JDBCReservationDAO implements ReservationDAO {
                     break;
             }
             sql += " LIMIT " + (page-1)*pageSize + ", " + pageSize;
-            return getReservationList(statement, sql);
+            try (ResultSet rs = statement.executeQuery(sql)) {
+                return getList(rs);
+            }
         } catch (Exception ex) {
             throw new DataAccessException("Could not retrieve a list of reservations", ex);
         }
@@ -355,14 +368,6 @@ class JDBCReservationDAO implements ReservationDAO {
         try (ResultSet rs = ps.executeQuery()) {
             return getList(rs);
         } catch (Exception e){
-            throw new DataAccessException("Error while reading reservation resultset", e);
-        }
-    }
-
-    private List<Reservation> getReservationList(Statement statement, String query) throws DataAccessException {
-        try (ResultSet rs = statement.executeQuery(query)) {
-            return getList(rs);
-        } catch (SQLException e){
             throw new DataAccessException("Error while reading reservation resultset", e);
         }
     }

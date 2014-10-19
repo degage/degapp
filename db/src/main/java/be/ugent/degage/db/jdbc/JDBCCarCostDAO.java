@@ -19,6 +19,7 @@ class JDBCCarCostDAO implements CarCostDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"carcost_id"};
 
+            // TODO: replace * by actual fields
     public static final String CAR_COST_QUERY = "SELECT * FROM carcosts " +
             "JOIN cars ON car_cost_car_id = car_id ";
 
@@ -59,6 +60,7 @@ class JDBCCarCostDAO implements CarCostDAO {
         }
 
     private PreparedStatement getGetCarCostStatement() throws SQLException {
+        // TODO: replace * by actual fields
         if (getCarCostStatement == null) {
             getCarCostStatement = connection.prepareStatement("SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
                     "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
@@ -71,6 +73,7 @@ class JDBCCarCostDAO implements CarCostDAO {
 
     private PreparedStatement getGetBillCarCostsStatement() throws SQLException {
         if (getBillCarCostsStatement == null) {
+            // TODO: replace * by actual fields
             getBillCarCostsStatement = connection.prepareStatement("SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
                     "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
                     "LEFT JOIN technicalcardetails ON car_technical_details = details_id WHERE car_cost_billed = ? AND car_id = ?");

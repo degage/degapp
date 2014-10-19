@@ -59,6 +59,7 @@ class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getGetCarRideStatement() throws SQLException {
         if (getCarRideStatement == null) {
+            // TODO: replace * by actual fields
             getCarRideStatement = connection.prepareStatement("SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
                     "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     " WHERE car_ride_car_reservation_id = ?");
@@ -68,15 +69,19 @@ class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getEndPeriodStatement() throws SQLException {
         if (endPeriodStatement == null) {
-            endPeriodStatement = connection.prepareStatement("UPDATE carrides SET car_ride_billed = CURDATE() " +
-                    "FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
-                    "WHERE carrides.car_ride_billed = NULL AND carrides.car_ride_status = 1 AND carreservation.reservation_to < CURDATE()");
+            endPeriodStatement = connection.prepareStatement(
+                    "UPDATE carrides" +
+                    "  INNER JOIN carreservations ON car_ride_car_reservation_id = reservation_id " +
+                    "  SET car_ride_billed = CURDATE() " +
+                    "  WHERE car_ride_billed IS NULL AND car_ride_status = 1 AND reservation_to < CURDATE() " );
+            // note: mysql update-from does not exist
         }
         return endPeriodStatement;
     }
 
     private PreparedStatement getGetBillRidesForLoanerStatement() throws SQLException {
         if (getBillRidesForLoanerStatement == null) {
+            // TODO: replace * by actual fields
             getBillRidesForLoanerStatement = connection.prepareStatement("SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
                     "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     "WHERE car_ride_billed = ? AND reservation_user_id = ?");
@@ -86,6 +91,7 @@ class JDBCCarRideDAO implements CarRideDAO {
 
     private PreparedStatement getGetBillRidesForCarStatement() throws SQLException {
         if (getBillRidesForCarStatement == null) {
+            // TODO: replace * by actual fields
             getBillRidesForCarStatement = connection.prepareStatement("SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
                     "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     "WHERE car_ride_billed = ? AND reservation_car_id = ?");

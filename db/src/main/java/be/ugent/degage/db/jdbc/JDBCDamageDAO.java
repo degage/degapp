@@ -20,6 +20,7 @@ import java.util.List;
  */
 class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
 
+            // TODO: replace * by actual fields
     private static final String DAMAGE_QUERY = "SELECT * FROM damages " +
             "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
             "JOIN carreservations ON damage_car_ride_id = reservation_id " +

@@ -17,6 +17,7 @@ class JDBCMessageDAO implements MessageDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"message_id"};
 
+    // TODO: reduce output from this query * -> actual fields
     private static final String MESSAGE_QUERY = "SELECT * FROM messages " +
             "JOIN users AS Sender ON message_from_user_id = Sender.user_id " +
             "JOIN users AS Receiver ON message_to_user_id = Receiver.user_id ";

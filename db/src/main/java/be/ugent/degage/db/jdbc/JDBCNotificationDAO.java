@@ -44,13 +44,6 @@ class JDBCNotificationDAO implements NotificationDAO {
         this.connection = connection;
     }
 
-    public static Notification populateNotification(ResultSet rs) throws SQLException {
-        Notification notification = new Notification(rs.getInt("notification_id"), JDBCUserDAO.populateUserPartial(rs),
-                rs.getBoolean("notification_read"), rs.getString("notification_subject"), rs.getString("notification_body"),
-                new DateTime(rs.getTimestamp("notification_created_at")));
-        return notification;
-    }
-
     private PreparedStatement getCreateNotificationStatement() throws SQLException {
         if (createNotificationStatement == null) {
             createNotificationStatement = connection.prepareStatement("INSERT INTO notifications (notification_user_id, " +
@@ -222,13 +215,21 @@ class JDBCNotificationDAO implements NotificationDAO {
 
 
     private List<Notification> getNotificationList(PreparedStatement ps) throws DataAccessException {
-        List<Notification> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
+            List<Notification> list = new ArrayList<>();
             while (rs.next()) {
-                list.add(populateNotification(rs));
+                list.add(new Notification(
+                        rs.getInt("notification_id"),
+                        JDBCUserDAO.populateUserPartial(rs),
+                        rs.getBoolean("notification_read"),
+                        rs.getString("notification_subject"),
+                        rs.getString("notification_body"),
+                        new DateTime(rs.getTimestamp("notification_created_at")
+                        )
+                ));
             }
             return list;
-        }catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Error while reading notification resultset", e);
 
         }
