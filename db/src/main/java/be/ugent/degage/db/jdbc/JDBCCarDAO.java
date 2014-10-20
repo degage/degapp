@@ -13,6 +13,7 @@ import org.joda.time.LocalTime;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -32,6 +33,12 @@ class JDBCCarDAO implements CarDAO{
             "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
             "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
             "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id"; // TODO: multiple records in caravailabilities
+
+    public static final String LIST_CAR_QUERY =
+            "SELECT car_id, car_name, car_brand, car_active, " +
+            "       user_id, user_firstname, user_lastname, user_phone, user_email, user_status " +
+            "FROM cars JOIN users ON car_owner_user_id = user_id " +
+            "WHERE car_name LIKE ? AND car_brand LIKE ? ";
 
     public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
             "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
@@ -285,8 +292,40 @@ class JDBCCarDAO implements CarDAO{
         return getGetCarListPageByBrandDescStatement;
     }
 
+    private  PreparedStatement getListCarsPageByBrandAscStatement;
+    private  PreparedStatement getListCarsPageByBrandDescStatement;
+    private  PreparedStatement getListCarsPageByNameAscStatement;
+    private  PreparedStatement getListCarsPageByNameDescStatement;
+
+    private PreparedStatement getListCarsPageByNameAscStatement() throws SQLException {
+        if(getListCarsPageByNameAscStatement == null) {
+            getListCarsPageByNameAscStatement = connection.prepareStatement(LIST_CAR_QUERY +  "ORDER BY car_name asc LIMIT ?, ?");
+        }
+        return getListCarsPageByNameAscStatement;
+    }
+
+    private PreparedStatement getListCarsPageByNameDescStatement() throws SQLException {
+        if(getListCarsPageByNameDescStatement == null) {
+            getListCarsPageByNameDescStatement = connection.prepareStatement(LIST_CAR_QUERY + "ORDER BY car_name desc LIMIT ?, ?");
+        }
+        return getListCarsPageByNameDescStatement;
+    }
+    private PreparedStatement getListCarsPageByBrandAscStatement() throws SQLException {
+        if(getListCarsPageByBrandAscStatement == null) {
+            getListCarsPageByBrandAscStatement = connection.prepareStatement(LIST_CAR_QUERY + "ORDER BY car_brand asc LIMIT ?, ?");
+        }
+        return getListCarsPageByBrandAscStatement;
+    }
+
+    private PreparedStatement getListCarsPageByBrandDescStatement() throws SQLException {
+        if (getListCarsPageByBrandDescStatement == null) {
+            getListCarsPageByBrandDescStatement = connection.prepareStatement(LIST_CAR_QUERY + "ORDER BY car_brand desc LIMIT ?, ?");
+        }
+        return getListCarsPageByBrandDescStatement;
+    }
+
     private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
-        if(getGetAmountOfCarsStatement == null) {
+        if (getGetAmountOfCarsStatement == null) {
             // TODO: only join with tables tht can be filtered upon
             getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
@@ -296,6 +335,16 @@ class JDBCCarDAO implements CarDAO{
                     "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT);
         }
         return getGetAmountOfCarsStatement;
+    }
+
+    private PreparedStatement getCountCarsStatement;
+
+    private PreparedStatement getCountCarsStatement() throws SQLException {
+        if (getCountCarsStatement == null) {
+            getCountCarsStatement = connection.prepareStatement(
+                    "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?");
+        }
+        return getCountCarsStatement;
     }
 
     private PreparedStatement updateInsuranceStatement() throws SQLException {
@@ -469,14 +518,14 @@ class JDBCCarDAO implements CarDAO{
             ps.setInt(2, technicalCarDetails.getRegistration().getId());
         }
         // do not override existing field with zero!
-        // TODO: create table which holds these picture at a fixed index
+        // TODO: create table which holds these pictures at a fixed index
 
         if(technicalCarDetails.getChassisNumber() != null)
             ps.setString(3, technicalCarDetails.getChassisNumber());
         else
             ps.setNull(3, Types.INTEGER);
 
-        ps.setInt (4, id);
+        ps.setInt(4, id);
 
         if (ps.executeUpdate() == 0) {
             throw new DataAccessException("No rows were affected when updating technicalCarDetails.");
@@ -766,6 +815,30 @@ class JDBCCarDAO implements CarDAO{
     }
 
     /**
+     * @param filter The filter to apply to
+     * @return The amount of filtered cars
+     * @throws DataAccessException
+     */
+    @Override
+    public int countCars(Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getCountCarsStatement();
+            ps.setString (1, filter.getValue(FilterField.CAR_NAME));
+            ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                } else {
+                    return 0;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of cars", ex);
+        }
+    }
+
+    /**
      * Get a carlist, with the default ordering and without filtering
      * @param page The page you want to see
      * @param pageSize The page size
@@ -810,6 +883,57 @@ class JDBCCarDAO implements CarDAO{
         }
     }
 
+    /**
+     * @param orderBy The field you want to order by
+     * @param asc Ascending
+     * @param page The page you want to see
+     * @param pageSize The page size
+     * @param filter The filter you want to apply
+     * @return List of cars with custom ordering and filtering
+     */
+    @Override
+    public Iterable<Car> listCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = null;
+            switch(orderBy) {
+                case CAR_NAME:
+                    ps = asc ? getListCarsPageByNameAscStatement() : getListCarsPageByNameDescStatement();
+                    break;
+                case CAR_BRAND:
+                    ps = asc ? getListCarsPageByBrandAscStatement() : getListCarsPageByBrandDescStatement();
+                    break;
+            }
+            if(ps == null) {
+                throw new DataAccessException("Could not create listCars statement");
+            }
+
+            ps.setString (1, filter.getValue(FilterField.CAR_NAME));
+            ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
+
+            ps.setInt(3, (page-1)*pageSize);
+            ps.setInt(4, pageSize);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                Collection<Car> cars = new ArrayList<>();
+                while (rs.next()) {
+                    User owner = JDBCUserDAO.populateUserPartial(rs);
+                    // only header is really needed
+                    Car result = new Car (
+                            rs.getInt ("car_id"),
+                            rs.getString ("car_name"),
+                            rs.getString ("car_brand"),
+                            null, null, null, null, null, false, false, false, null, null, null, null, null, null,
+                            owner,
+                            null
+                    );
+                    cars.add(result);
+                }
+                return cars;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
     /**
      *
      * @param user_id The id of the user

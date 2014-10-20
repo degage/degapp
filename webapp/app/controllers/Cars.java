@@ -177,6 +177,7 @@ public class Cars extends Controller {
     }
 
     // should only be used with injected context
+    // TODO: called in lots of badRequest calls - change to redirection!
     private static Html userCarList() {
         User user = DataProvider.getUserProvider().getUser();
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
@@ -201,22 +202,17 @@ public class Cars extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(carList(page, pageSize, carField, asc, filter));
-    }
-
-    // used with injected context
-    private static Html carList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
 
-        if (orderBy == null) {
-            orderBy = FilterField.CAR_NAME;
+        if (carField == null) {
+            carField = FilterField.CAR_NAME;
         }
-        List<Car> listOfCars = dao.getCarList(orderBy, asc, page, pageSize, filter);
+        Iterable<Car> listOfCars = dao.listCars(carField, asc, page, pageSize, filter);
 
-        int amountOfResults = dao.getAmountOfCars(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+        int numberOfResults = dao.countCars(filter);
+        int numberOfPages = (int) Math.ceil(numberOfResults / (double) pageSize);
 
-        return views.html.cars.carspage.render(listOfCars, page, amountOfResults, amountOfPages);
+        return ok(views.html.cars.carspage.render(listOfCars, page, numberOfResults, numberOfPages));
     }
 
     /**
