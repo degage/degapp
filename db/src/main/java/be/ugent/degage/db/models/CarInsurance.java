@@ -4,18 +4,12 @@ import java.util.Date;
 
 public class CarInsurance {
 
-	private Integer id;
     private String name;
 	private Date expiration;
 	private Integer bonusMalus;
 	private Integer polisNr;
 
-    public CarInsurance(String name, Date expiration, Integer bonusMalus, Integer polisNr) {
-        this(null, name, expiration, bonusMalus, polisNr);
-    }
-	
-	public CarInsurance(Integer id, String name, Date expiration, Integer bonusMalus, Integer polisNr) {
-		this.id=id;
+	public CarInsurance(String name, Date expiration, Integer bonusMalus, Integer polisNr) {
         this.name = name;
 		this.expiration = expiration;
 		this.bonusMalus = bonusMalus;
@@ -42,14 +36,6 @@ public class CarInsurance {
 	}
 	public void setBonusMalus(Integer bonusMalus) {
 		this.bonusMalus = bonusMalus;
-	}
-
-	public Integer getId() {
-		return id;
-	}
-
-	public void setId(Integer id) {
-		this.id = id;
 	}
 
     public String getName() {

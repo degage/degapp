@@ -94,12 +94,11 @@ CREATE TABLE `userroles` (
 );
 
 CREATE TABLE `carinsurances` (
-	`insurance_id` INT NOT NULL AUTO_INCREMENT,
+	`insurance_id` INT NOT NULL,
 	`insurance_name` VARCHAR(64),
 	`insurance_expiration` DATE,
 	`insurance_contract_id` INT, -- Polisnr
 	`insurance_bonus_malus` INT,
-	`insurance_created_at` DATETIME,
 	`insurance_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`insurance_id`)
 );
@@ -132,7 +131,6 @@ CREATE TABLE `cars` (
 	`car_fuel_economy` INT,
 	`car_estimated_value` INT,
 	`car_owner_annual_km` INT,
-	`car_insurance` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
 	`car_active` BIT(1) NOT NULL DEFAULT 0,
@@ -142,8 +140,7 @@ CREATE TABLE `cars` (
 	PRIMARY KEY (`car_id`),
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES addresses(`address_id`) ON DELETE CASCADE,
-	FOREIGN KEY (`car_images_id`) REFERENCES files(`file_id`),
-	FOREIGN KEY (`car_insurance`) REFERENCES carinsurances(`insurance_id`)
+	FOREIGN KEY (`car_images_id`) REFERENCES files(`file_id`)
 );
 
 CREATE TABLE `carreservations` (
@@ -438,13 +435,7 @@ END $$
 CREATE TRIGGER cars_make AFTER INSERT ON cars FOR EACH ROW
 BEGIN
   INSERT INTO technicalcardetails(details_id) VALUES (new.car_id);
-END $$
-
-CREATE TRIGGER carinsurances_ins BEFORE INSERT ON carinsurances FOR EACH ROW
-BEGIN
-  IF new.insurance_created_at IS NULL THEN
-    SET new.insurance_created_at = now();
-  END IF;
+  INSERT INTO carinsurances(insurance_id) VALUES (new.car_id);
 END $$
 
 CREATE TRIGGER carreservations_ins BEFORE INSERT ON carreservations FOR EACH ROW

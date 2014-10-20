@@ -273,7 +273,6 @@ public class Cars extends Controller {
             } else {
                 owner = context.getUserDAO().getUserPartial(CurrentUser.getId()); // TODO: can this be avoided?
             }
-            TechnicalCarDetails technicalCarDetails = null;
             Http.MultipartFormData body = request().body().asMultipartFormData();
             Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
             Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
@@ -309,15 +308,10 @@ public class Cars extends Controller {
                     }
                 }
             }
-            if ((model.licensePlate != null && !model.licensePlate.isEmpty())
-                    || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || registrationPictureFile != null) {
-                technicalCarDetails = new TechnicalCarDetails(model.licensePlate, registrationPictureFile, model.chassisNumber);
-            }
-            CarInsurance insurance = null;
-            if ((model.insuranceName != null && !model.insuranceName.equals("")) || (model.expiration != null || (model.polisNr != null && model.polisNr != 0))
-                    || (model.bonusMalus != null && model.bonusMalus != 0)) {
-                insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
-            }
+
+            TechnicalCarDetails technicalCarDetails = new TechnicalCarDetails(model.licensePlate, registrationPictureFile, model.chassisNumber);
+            CarInsurance insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
+
             Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
                     model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, carPictureFile);
