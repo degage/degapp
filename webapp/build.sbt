@@ -11,10 +11,13 @@ libraryDependencies ++= Seq(
   cache
 )
 
-// TODO: remove dependency on webjars-play. Play 2.3 has internal webjars support
+// For hikari                                                                      exit
+
+resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/modules/releases/"))(Resolver.ivyStylePatterns)
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.0-SNAPSHOT",
+  "com.edulify"             %% "play-hikaricp"               % "1.4.1",
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play.plugins" %% "play-plugins-mailer"       % "2.3.0",
   "com.typesafe.akka"       %% "akka-actor"                  % "2.3.0",
