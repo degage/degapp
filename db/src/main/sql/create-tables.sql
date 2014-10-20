@@ -53,9 +53,9 @@ CREATE TABLE `users` (
 	`user_address_domicile_id` INT,
 	`user_address_residence_id` INT,
 	`user_driver_license_id` VARCHAR(32),
-	`user_identity_card_id` VARCHAR(32), # Identiteitskaartnr
-	`user_identity_card_registration_nr` VARCHAR(32), # Rijksregisternummer
-	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'EMAIL_VALIDATING', # Stadia die de gebruiker moet doorlopen
+	`user_identity_card_id` VARCHAR(32), -- Identiteitskaartnr
+	`user_identity_card_registration_nr` VARCHAR(32), -- Rijksregisternummer
+	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'EMAIL_VALIDATING', -- Stadia die de gebruiker moet doorlopen
 	`user_damage_history` TEXT,
 	`user_payed_deposit` BIT(1),
 	`user_agree_terms` BIT(1),
@@ -97,7 +97,7 @@ CREATE TABLE `carinsurances` (
 	`insurance_id` INT NOT NULL AUTO_INCREMENT,
 	`insurance_name` VARCHAR(64),
 	`insurance_expiration` DATE,
-	`insurance_contract_id` INT, # Polisnr
+	`insurance_contract_id` INT, -- Polisnr
 	`insurance_bonus_malus` INT,
 	`insurance_created_at` DATETIME,
 	`insurance_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -105,11 +105,10 @@ CREATE TABLE `carinsurances` (
 );
 
 CREATE TABLE `technicalcardetails` (
-	`details_id` INT NOT NULL AUTO_INCREMENT,
+	`details_id` INT NOT NULL,
 	`details_car_license_plate` VARCHAR(64),
 	`details_car_registration` INT,
 	`details_car_chassis_number` VARCHAR(17),
-	`details_created_at` DATETIME,
 	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`details_id`),
 	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`),
@@ -133,7 +132,6 @@ CREATE TABLE `cars` (
 	`car_fuel_economy` INT,
 	`car_estimated_value` INT,
 	`car_owner_annual_km` INT,
-	`car_technical_details` INT,
 	`car_insurance` INT,
 	`car_owner_user_id` INT NOT NULL,
 	`car_comments` VARCHAR(256),
@@ -145,13 +143,12 @@ CREATE TABLE `cars` (
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES addresses(`address_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_images_id`) REFERENCES files(`file_id`),
-	FOREIGN KEY (`car_technical_details`) REFERENCES technicalcardetails(`details_id`),
 	FOREIGN KEY (`car_insurance`) REFERENCES carinsurances(`insurance_id`)
 );
 
 CREATE TABLE `carreservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', # Reeds goedgekeurd?
+	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', -- Reeds goedgekeurd?
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
 	`reservation_from` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
@@ -160,7 +157,7 @@ CREATE TABLE `carreservations` (
 	`reservation_created_at` DATETIME,
 	`reservation_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
-	FOREIGN KEY (`reservation_car_id`) REFERENCES cars(`car_id`), # Wat moet er gebeuren als de auto verwijderd wordt?
+	FOREIGN KEY (`reservation_car_id`) REFERENCES cars(`car_id`), -- Wat moet er gebeuren als de auto verwijderd wordt?
 	FOREIGN KEY (`reservation_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
 );
 
@@ -180,7 +177,7 @@ CREATE TABLE `infosessions` (
 	FOREIGN KEY (`infosession_address_id`) REFERENCES addresses(`address_id`)
 );
 
-CREATE TABLE `infosessionenrollees` ( # Wie is ingeschreven?
+CREATE TABLE `infosessionenrollees` ( -- Wie is ingeschreven?
 	`infosession_id` INT NOT NULL,
 	`infosession_enrollee_id` INT NOT NULL,
 	`infosession_enrollment_status` ENUM('ENROLLED', 'PRESENT', 'ABSENT') NOT NULL DEFAULT 'ENROLLED',
@@ -227,7 +224,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_proof` INT,
 	`car_cost_amount` DECIMAL(19,4) NOT NULL,
 	`car_cost_description` TEXT,
-	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', #approved by car_admin
+	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
 	`car_cost_time` DATETIME,
 	`car_cost_mileage` DECIMAL(10,1),
 	`car_cost_billed` DATE DEFAULT NULL,
@@ -239,8 +236,8 @@ CREATE TABLE `carcosts` (
 );
 
 CREATE TABLE `carrides` (
-  `car_ride_car_reservation_id` INT NOT NULL, # also primary key
-  `car_ride_status` BIT(1) NOT NULL DEFAULT 0, # approved by owner?
+  `car_ride_car_reservation_id` INT NOT NULL, -- also primary key
+  `car_ride_status` BIT(1) NOT NULL DEFAULT 0, -- approved by owner?
   `car_ride_start_mileage` DECIMAL(10,1),
   `car_ride_end_mileage` DECIMAL(10,1),
   `car_ride_damage` BIT(1) NOT NULL DEFAULT 0,
@@ -258,7 +255,7 @@ CREATE TABLE `refuels` (
 	`refuel_car_ride_id` INT NOT NULL,
 	`refuel_file_id` INT,
 	`refuel_amount` DECIMAL(19,4),
-	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', #approved by owner
+	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', --approved by owner
 	`refuel_billed` DATE DEFAULT NULL,
    	`refuel_created_at` DATETIME,
    	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -296,7 +293,7 @@ CREATE TABLE `damagelogs` (
 	FOREIGN KEY (`damage_log_damage_id`) REFERENCES damages(`damage_id`)
 );
 
-CREATE TABLE `messages` ( # from user to user != notifications
+CREATE TABLE `messages` ( -- from user to user != notifications
 	`message_id` INT NOT NULL AUTO_INCREMENT,
 	`message_from_user_id` INT NOT NULL,
 	`message_to_user_id` INT NOT NULL,
@@ -315,21 +312,21 @@ CREATE TABLE `templates` (
 	`template_title` VARCHAR(255) NOT NULL,
 	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
 	`template_body` TEXT NOT NULL,
-	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, # Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
-	`template_send_mail_changeable` BIT(1) NOT NULL DEFAULT 1, # Mag aangepast worden? Bv wachtwoord reset/verificatie niet!
+	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, -- Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
+	`template_send_mail_changeable` BIT(1) NOT NULL DEFAULT 1, -- Mag aangepast worden? Bv wachtwoord reset/verificatie niet!
 	`template_created_at` DATETIME,
 	`template_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`template_id`),
 	UNIQUE INDEX `template_title` (`template_title`)
 );
 
-CREATE TABLE `templatetags` ( # Welke tags kunnen we gebruiken in de templates
+CREATE TABLE `templatetags` ( -- Welke tags kunnen we gebruiken in de templates
 	`template_tag_id` INT NOT NULL AUTO_INCREMENT,
 	`template_tag_body` VARCHAR(255) NOT NULL,
 	PRIMARY KEY (`template_tag_id`)
 );
 
-CREATE TABLE `templatetagassociations` ( # Welke tags horen bij welke templates
+CREATE TABLE `templatetagassociations` ( -- Welke tags horen bij welke templates
 	`template_tag_association_id` INT NOT NULL AUTO_INCREMENT,
 	`template_tag_id` INT NOT NULL,
 	`template_id` INT NOT NULL,
@@ -347,7 +344,7 @@ CREATE TABLE `verifications` (
 	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `users` (`user_id`)
 );
 
-CREATE TABLE `notifications` ( # from system to user
+CREATE TABLE `notifications` ( -- from system to user
 	`notification_id` INT NOT NULL AUTO_INCREMENT,
 	`notification_user_id` INT NOT NULL,
 	`notification_read` BIT(1) NOT NULL DEFAULT 0,
@@ -438,17 +435,15 @@ BEGIN
   END IF;
 END $$
 
+CREATE TRIGGER cars_make AFTER INSERT ON cars FOR EACH ROW
+BEGIN
+  INSERT INTO technicalcardetails(details_id) VALUES (new.car_id);
+END $$
+
 CREATE TRIGGER carinsurances_ins BEFORE INSERT ON carinsurances FOR EACH ROW
 BEGIN
   IF new.insurance_created_at IS NULL THEN
     SET new.insurance_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER TechnicalcarsDetails_ins BEFORE INSERT ON technicalcardetails FOR EACH ROW
-BEGIN
-  IF new.details_created_at IS NULL THEN
-    SET new.details_created_at = now();
   END IF;
 END $$
 

@@ -64,7 +64,7 @@ class JDBCCarCostDAO implements CarCostDAO {
         if (getCarCostStatement == null) {
             getCarCostStatement = connection.prepareStatement("SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
                     "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
-                    "LEFT JOIN technicalcardetails ON car_technical_details = details_id " +
+                    "LEFT JOIN technicalcardetails ON car_id = details_id " +
                     "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
                     "WHERE car_cost_id=?");
         }
@@ -76,7 +76,7 @@ class JDBCCarCostDAO implements CarCostDAO {
             // TODO: replace * by actual fields
             getBillCarCostsStatement = connection.prepareStatement("SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
                     "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
-                    "LEFT JOIN technicalcardetails ON car_technical_details = details_id WHERE car_cost_billed = ? AND car_id = ?");
+                    "LEFT JOIN technicalcardetails ON car_id = details_id WHERE car_cost_billed = ? AND car_id = ?");
         }
         return getBillCarCostsStatement;
     }

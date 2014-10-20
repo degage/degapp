@@ -192,7 +192,7 @@
                                         <div class="form-group">
                                             <label class="col-md-12" for="registration">Inschrijvingsbewijs</label>
                                             <div class="col-md-12">
-                                                Huidig: @if(car == null || car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) {
+                                                Huidig: @if(car == null || car.getTechnicalCarDetails.getRegistration== null) {
                                                     Onbekend
                                                 } else {
                                                     <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)" target="_blank">Link</a>

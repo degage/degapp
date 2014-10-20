@@ -277,8 +277,8 @@ public class Cars extends Controller {
             Http.MultipartFormData body = request().body().asMultipartFormData();
             Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
             Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
-            File file = null;
-            File picture = null;
+            File registrationPictureFile = null;
+            File carPictureFile = null;
             if (registrationFile != null) {
                 String contentType = registrationFile.getContentType();
                 if (!FileHelper.isDocumentContentType(contentType)) {
@@ -288,7 +288,7 @@ public class Cars extends Controller {
                     try {
                         Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                         FileDAO fdao = context.getFileDAO();
-                        file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                        registrationPictureFile = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
                     } catch (IOException ex) {
                         throw new RuntimeException(ex); //no more checked catch -> error page!
                     }
@@ -303,15 +303,15 @@ public class Cars extends Controller {
                     try {
                         Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
                         FileDAO fdao = context.getFileDAO();
-                        picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                        carPictureFile = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
                     } catch (IOException ex) {
                         throw new RuntimeException(ex); //no more checked catch -> error page!
                     }
                 }
             }
             if ((model.licensePlate != null && !model.licensePlate.isEmpty())
-                    || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || file != null) {
-                technicalCarDetails = new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber);
+                    || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || registrationPictureFile != null) {
+                technicalCarDetails = new TechnicalCarDetails(model.licensePlate, registrationPictureFile, model.chassisNumber);
             }
             CarInsurance insurance = null;
             if ((model.insuranceName != null && !model.insuranceName.equals("")) || (model.expiration != null || (model.polisNr != null && model.polisNr != 0))
@@ -320,7 +320,7 @@ public class Cars extends Controller {
             }
             Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
-                    model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, picture);
+                    model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, carPictureFile);
 
 
             if (car != null) {
