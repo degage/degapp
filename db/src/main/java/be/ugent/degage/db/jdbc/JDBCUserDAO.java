@@ -16,8 +16,6 @@ import java.util.List;
  */
 class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = {"user_id"};
-
     static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email, users.user_status";
 
     private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM users";
@@ -176,14 +174,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             return null;
         }
 
-        User user = new User(rs.getInt(tableName + ".user_id"),
+        return new User(
+                rs.getInt(tableName + ".user_id"),
                 rs.getString(tableName + ".user_email"),
                 rs.getString(tableName + ".user_firstname"),
                 rs.getString(tableName + ".user_lastname"),
-                UserStatus.valueOf(rs.getString(tableName + ".user_status"))
-                );
-
-        return user;
+                UserStatus.valueOf(rs.getString(tableName + ".user_status")
+                )
+        );
     }
 
     private LazyStatement getUserByEmailStatement = new LazyStatement(

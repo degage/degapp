@@ -139,15 +139,8 @@ class JDBCTemplateDAO extends AbstractDAO implements TemplateDAO {
     @Override
     public List<EmailTemplate> getTemplateList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = null;
-            switch(orderBy) {
-                default: // TEMPLATE_NAME
-                    ps = asc ? getTemplateListPageByTitleAscStatement.value() : getTemplateListPageByTitleDescStatement.value();
-                    break;
-            }
-            if(ps == null) {
-                throw new DataAccessException("Could not create getTemplateList statement");
-            }
+            // currently only filter on name is supported
+            PreparedStatement ps = asc ? getTemplateListPageByTitleAscStatement.value() : getTemplateListPageByTitleDescStatement.value();
 
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;

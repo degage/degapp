@@ -15,8 +15,6 @@ import java.util.List;
  */
 class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = {"message_id"};
-
     // TODO: reduce output from this query * -> actual fields
     private static final String MESSAGE_QUERY = "SELECT * FROM messages " +
             "JOIN users AS Sender ON message_from_user_id = Sender.user_id " +
@@ -49,11 +47,16 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
 
                   
     public static Message populateMessage(ResultSet rs) throws SQLException {
-        Message message = new Message(rs.getInt("message_id"), JDBCUserDAO.populateUserPartial(rs, "Sender"),
-                JDBCUserDAO.populateUserPartial(rs, "Receiver"), rs.getBoolean("message_read"),
-                rs.getString("message_subject"), rs.getString("message_body"),
-                new DateTime(rs.getTimestamp("message_created_at")));
-        return message;
+        return new Message(
+                rs.getInt("message_id"),
+                JDBCUserDAO.populateUserPartial(rs, "Sender"),
+                JDBCUserDAO.populateUserPartial(rs, "Receiver"),
+                rs.getBoolean("message_read"),
+                rs.getString("message_subject"),
+                rs.getString("message_body"),
+                new DateTime(rs.getTimestamp("message_created_at")
+                )
+        );
     }
 
     private LazyStatement getAmountOfMessagesStatement = new LazyStatement (

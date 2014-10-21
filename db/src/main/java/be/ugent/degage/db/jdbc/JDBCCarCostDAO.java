@@ -17,8 +17,6 @@ import java.util.List;
  */
 class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = {"carcost_id"};
-
             // TODO: replace * by actual fields
     public static final String CAR_COST_QUERY = "SELECT * FROM carcosts " +
             "JOIN cars ON car_cost_car_id = car_id ";

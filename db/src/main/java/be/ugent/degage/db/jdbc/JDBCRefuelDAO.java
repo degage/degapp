@@ -13,8 +13,6 @@ import java.util.List;
  */
 class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = {"refuel_id"};
-
     // TODO: reduce output from this query * -> actual fields
     private static final String REFUEL_QUERY = "SELECT * FROM refuels " +
             "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
@@ -221,16 +219,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     @Override
     public List<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = null;
-            switch(orderBy) { // TODO: more to orderBy, asc/desc
-                default:
-                    ps = getRefuelsStatement.value();
-                    break;
-            }
-            if(ps == null) {
-                throw new DataAccessException("Could not create getRefuels statement");
-            }
-
+            // TODO: more to orderBy, asc/desc
+            PreparedStatement ps = getRefuelsStatement.value();
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
             ps.setInt(5, first);

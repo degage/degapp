@@ -69,11 +69,17 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     );
 
     private Approval populateApproval(ResultSet rs) throws SQLException {
-        return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUserPartial(rs, "users"), JDBCUserDAO.populateUserPartial(rs, "admins"),
+        return new Approval(
+                rs.getInt("approval_id"),
+                JDBCUserDAO.populateUserPartial(rs, "users"),
+                JDBCUserDAO.populateUserPartial(rs, "admins"),
                 new DateTime(rs.getTimestamp("approval_submission").getTime()),
-                rs.getTimestamp("approval_date") != null ? new DateTime(rs.getTimestamp("approval_date").getTime()) : null,
-                rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs), Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
-                rs.getString("approval_user_message"), rs.getString("approval_admin_message"));
+                rs.getTimestamp("approval_date") == null ? null : new DateTime(rs.getTimestamp("approval_date").getTime()),
+                rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs),
+                Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
+                rs.getString("approval_user_message"),
+                rs.getString("approval_admin_message")
+        );
     }
 
     private List<Approval> getApprovalList(PreparedStatement ps){
@@ -143,11 +149,9 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                 else
                     throw new DataAccessException("Failed to get approval count. Empty resultset.");
 
-            } catch(SQLException ex) {
-                throw new DataAccessException("Failed to get approval count.", ex);
             }
         } catch(SQLException ex){
-            throw new DataAccessException("Failed to prepare count query.", ex);
+            throw new DataAccessException("Failed to get approval count.", ex);
         }
     }
 
@@ -170,14 +174,12 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             PreparedStatement ps = getApprovalByIdStatement.value();
             ps.setInt(1, approvalId);
 
-            try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
                     return populateApproval(rs);
                 else return null;
-            } catch(SQLException ex){
-                throw new DataAccessException("Failed to read approval resultset.", ex);
             }
-        } catch(SQLException ex){
+        } catch (SQLException ex) {
             throw new DataAccessException("Failed to get approvals for user.", ex);
         }
     }
@@ -212,8 +214,6 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 return new Approval(keys.getInt(1), user, null, date, null, session, Approval.ApprovalStatus.PENDING, userMessage, null);
-            } catch(SQLException ex){
-                throw new DataAccessException("Failed to create approval.", ex);
             }
         } catch(SQLException ex){
             throw new DataAccessException("Failed to create approval request", ex);
@@ -231,19 +231,25 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         try {
             PreparedStatement ps = getUpdateApprovalStatement.value();
             ps.setInt(1, approval.getUser().getId());
-            if(approval.getAdmin() == null) ps.setNull(2, Types.INTEGER);
-            else ps.setInt(2, approval.getAdmin().getId());
-            if(approval.getReviewed() == null) ps.setNull(3, Types.TIMESTAMP);
-            else ps.setTimestamp(3, new Timestamp(approval.getReviewed().getMillis()));
+            if (approval.getAdmin() == null)
+                ps.setNull(2, Types.INTEGER);
+            else
+                ps.setInt(2, approval.getAdmin().getId());
+            if (approval.getReviewed() == null)
+                ps.setNull(3, Types.TIMESTAMP);
+            else
+                ps.setTimestamp(3, new Timestamp(approval.getReviewed().getMillis()));
             ps.setString(4, approval.getStatus().toString());
-            if(approval.getSession() == null) ps.setNull(5, Types.INTEGER);
-            else ps.setInt(5, approval.getSession().getId());
+            if (approval.getSession() == null)
+                ps.setNull(5, Types.INTEGER);
+            else
+                ps.setInt(5, approval.getSession().getId());
             ps.setString(6, approval.getUserMessage());
             ps.setString(7, approval.getAdminMessage());
 
             ps.setInt(8, approval.getId());
 
-            if(ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0)
                 throw new DataAccessException("Approval update affected 0 rows.");
 
         } catch (SQLException ex) {
