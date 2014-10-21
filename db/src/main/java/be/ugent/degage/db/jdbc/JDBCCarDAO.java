@@ -393,7 +393,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         PreparedStatement ps = updateTechnicalCarDetailsStatement.value();
 
         ps.setString(1, technicalCarDetails.getLicensePlate());
-        ps.setInt(2, technicalCarDetails.getRegistration().getId());
+        if (technicalCarDetails.getRegistration() == null) {
+            ps.setNull(2, Types.INTEGER);
+        } else {
+            ps.setInt(2, technicalCarDetails.getRegistration().getId());
+        }
         ps.setString(3, technicalCarDetails.getChassisNumber());
         ps.setInt(4, id);
 
