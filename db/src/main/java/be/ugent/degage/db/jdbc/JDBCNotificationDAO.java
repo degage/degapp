@@ -13,100 +13,69 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 15/03/14.
  */
-class JDBCNotificationDAO implements NotificationDAO {
+class JDBCNotificationDAO extends AbstractDAO implements NotificationDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = {"notification_id"};
-
-    private Connection connection;
-    private PreparedStatement createNotificationStatement;
-    private PreparedStatement getNotificationListByUseridStatement;
-    private PreparedStatement getNumberOfUnreadNotificationsStatement;
-    private PreparedStatement getNotificationListPageByUseridDescStatement;
-    private PreparedStatement getGetAmountOfNotificationsStatement;
-    private PreparedStatement setReadStatement;
-    private PreparedStatement setAllReadStatement;
-
-    public static final String NOTIFICATION_QUERY = "SELECT * FROM notifications JOIN users ON " +
-            "notification_user_id= user_id";
+    public static final String NOTIFICATION_QUERY = 
+            "SELECT * FROM notifications JOIN users ON notification_user_id= user_id";
 
     public static final String FILTER_FRAGMENT = " WHERE notification_user_id=? AND notification_read = ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
-        if(filter == null) {
+        if (filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
         ps.setString(start, filter.getValue(FilterField.USER_ID));
-        ps.setString(start+1, filter.getValue(FilterField.NOTIFICATION_READ));
+        ps.setString(start + 1, filter.getValue(FilterField.NOTIFICATION_READ));
     }
 
-    public JDBCNotificationDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCNotificationDAO(JDBCDataAccessContext context) {
+        super(context);
     }
 
-    private PreparedStatement getCreateNotificationStatement() throws SQLException {
-        if (createNotificationStatement == null) {
-            createNotificationStatement = connection.prepareStatement("INSERT INTO notifications (notification_user_id, " +
+    private LazyStatement createNotificationStatement = new LazyStatement(
+            "INSERT INTO notifications (notification_user_id, " +
                     "notification_read, notification_subject,"
-                    + "notification_body) VALUES (?,?,?,?)", AUTO_GENERATED_KEYS);
-        }
-        return createNotificationStatement;
-    }
+                    + "notification_body) VALUES (?,?,?,?)",
+            "notification_id"
+    );
 
-    private PreparedStatement getGetNotificationListByUseridStatement() throws SQLException {
-        if (getNotificationListByUseridStatement == null) {
-            getNotificationListByUseridStatement = connection.prepareStatement("SELECT * FROM notifications JOIN users ON " +
-                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_created_at DESC;");
-        }
-        return getNotificationListByUseridStatement;
-    }
+    private LazyStatement getNotificationListByUseridStatement = new LazyStatement(
+            "SELECT * FROM notifications JOIN users ON " +
+                    "notification_user_id= user_id WHERE notification_user_id=? ORDER BY notification_created_at DESC"
+    );
 
-    private PreparedStatement getNotificationListPageByTimestampDescStatement() throws SQLException {
-        if(getNotificationListPageByUseridDescStatement == null) {
-            getNotificationListPageByUseridDescStatement = connection.prepareStatement(NOTIFICATION_QUERY + FILTER_FRAGMENT +" ORDER BY notification_created_at desc LIMIT ?, ?");
-        }
-        return getNotificationListPageByUseridDescStatement;
-    }
+    private LazyStatement getNotificationListPageByTimestampDescStatement = new LazyStatement(
+            NOTIFICATION_QUERY + FILTER_FRAGMENT + " ORDER BY notification_created_at desc LIMIT ?, ?"
+    );
 
-    private PreparedStatement getNumberOfUnreadNotificationsStatement() throws SQLException {
-        if (getNumberOfUnreadNotificationsStatement == null) {
-            getNumberOfUnreadNotificationsStatement = connection.prepareStatement("SELECT COUNT(*) AS unread_number FROM notifications JOIN users ON " +
-                    "notification_user_id= user_id WHERE notification_user_id=? AND notification_read=0;");
-        }
-        return getNumberOfUnreadNotificationsStatement;
-    }
+    private LazyStatement getNumberOfUnreadNotificationsStatement = new LazyStatement(
+            "SELECT COUNT(*) AS unread_number FROM notifications JOIN users ON " +
+                    "notification_user_id= user_id WHERE notification_user_id=? AND notification_read=0"
+    );
 
-    private PreparedStatement getGetAmountOfNotificationsStatement() throws SQLException {
-        if(getGetAmountOfNotificationsStatement == null) {
-            getGetAmountOfNotificationsStatement = connection.prepareStatement("SELECT count(*) as amount_of_notifications FROM notifications JOIN users ON " +
-                    "notification_user_id= user_id" + FILTER_FRAGMENT);
-        }
-        return getGetAmountOfNotificationsStatement;
-    }
+    private LazyStatement getAmountOfNotificationsStatement = new LazyStatement(
+            "SELECT count(*) as amount_of_notifications FROM notifications JOIN users ON " +
+                    "notification_user_id= user_id" + FILTER_FRAGMENT
+    );
 
-    private PreparedStatement getSetReadStatement() throws SQLException {
-        if (setReadStatement == null) {
-            setReadStatement = connection.prepareStatement("UPDATE notifications SET notification_read = ? WHERE notification_id = ?;");
-        }
-        return setReadStatement;
-    }
+    private LazyStatement setReadStatement = new LazyStatement(
+            "UPDATE notifications SET notification_read = ? WHERE notification_id = ?"
+    );
 
-    private PreparedStatement getSetAllReadStatement() throws SQLException {
-        if (setAllReadStatement == null) {
-            setAllReadStatement = connection.prepareStatement("UPDATE notifications SET notification_read = ? WHERE notification_user_id = ?;");
-        }
-        return setAllReadStatement;
-    }
+    private LazyStatement setAllReadStatement = new LazyStatement(
+            "UPDATE notifications SET notification_read = ? WHERE notification_user_id = ?"
+    );
 
 
     @Override
     public int getAmountOfNotifications(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfNotificationsStatement();
+            PreparedStatement ps = getAmountOfNotificationsStatement.value();
             fillFragment(ps, filter, 1);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
+                if (rs.next())
                     return rs.getInt("amount_of_notifications");
                 else return 0;
 
@@ -121,10 +90,10 @@ class JDBCNotificationDAO implements NotificationDAO {
     @Override
     public List<Notification> getNotificationListForUser(int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetNotificationListByUseridStatement();
+            PreparedStatement ps = getNotificationListByUseridStatement.value();
             ps.setInt(1, userId);
             return getNotificationList(ps);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to retrieve the list of notifications", e);
         }
     }
@@ -132,10 +101,10 @@ class JDBCNotificationDAO implements NotificationDAO {
     @Override
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getNotificationListPageByTimestampDescStatement();
+            PreparedStatement ps = getNotificationListPageByTimestampDescStatement.value();
 
             fillFragment(ps, filter, 1);
-            int first = (page-1)*pageSize;
+            int first = (page - 1) * pageSize;
             ps.setInt(3, first);
             ps.setInt(4, pageSize);
             return getNotificationList(ps);
@@ -147,33 +116,33 @@ class JDBCNotificationDAO implements NotificationDAO {
     @Override
     public int getNumberOfUnreadNotifications(int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getNumberOfUnreadNotificationsStatement();
+            PreparedStatement ps = getNumberOfUnreadNotificationsStatement.value();
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return rs.getInt("unread_number");
-                }else{
+                } else {
                     return 0;
                 }
-            }catch (SQLException e){
+            } catch (SQLException e) {
                 throw new DataAccessException("Error while reading notification number resultset", e);
 
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to retrieve the number of unread notifications", e);
         }
     }
 
     @Override
     public Notification createNotification(User user, String subject, String body) throws DataAccessException {
-        try{
-            PreparedStatement ps = getCreateNotificationStatement();
+        try {
+            PreparedStatement ps = createNotificationStatement.value();
             ps.setInt(1, user.getId());
             ps.setBoolean(2, false);
             ps.setString(3, subject);
-            ps.setString(4,body);
+            ps.setString(4, body);
 
-            if(ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating notification.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -183,7 +152,7 @@ class JDBCNotificationDAO implements NotificationDAO {
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new notification.", ex);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to create notification", e);
         }
     }
@@ -191,10 +160,10 @@ class JDBCNotificationDAO implements NotificationDAO {
     @Override
     public void markNotificationAsRead(int notificationId) throws DataAccessException {
         try {
-            PreparedStatement ps = getSetReadStatement();
+            PreparedStatement ps = setReadStatement.value();
             ps.setBoolean(1, true);
-            ps.setInt(2,notificationId);
-            if(ps.executeUpdate() == 0)
+            ps.setInt(2, notificationId);
+            if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating notification.");
         } catch (SQLException e) {
             throw new DataAccessException("Unable to mark notification as read", e);
@@ -204,9 +173,9 @@ class JDBCNotificationDAO implements NotificationDAO {
     @Override
     public void markAllNotificationsAsRead(int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getSetAllReadStatement();
+            PreparedStatement ps = setAllReadStatement.value();
             ps.setBoolean(1, true);
-            ps.setInt(2,userId);
+            ps.setInt(2, userId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to mark notification as read", e);

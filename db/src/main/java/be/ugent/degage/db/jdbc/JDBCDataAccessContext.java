@@ -102,7 +102,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public TemplateDAO getTemplateDAO() {
         if(templateDAO == null){
-            templateDAO = new JDBCTemplateDAO(connection);
+            templateDAO = new JDBCTemplateDAO(this);
         }
         return templateDAO;
     }
@@ -110,7 +110,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public NotificationDAO getNotificationDAO() {
         if(notificationDAO == null){
-            notificationDAO = new JDBCNotificationDAO(connection);
+            notificationDAO = new JDBCNotificationDAO(this);
         }
         return notificationDAO;
     }
@@ -118,7 +118,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public MessageDAO getMessageDAO() {
         if(messageDAO == null){
-            messageDAO = new JDBCMessageDAO(connection);
+            messageDAO = new JDBCMessageDAO(this);
         }
         return messageDAO;
     }
@@ -134,7 +134,7 @@ class JDBCDataAccessContext implements DataAccessContext {
 	@Override
 	public CarDAO getCarDAO() {
 		if(carDAO == null){
-            carDAO = new JDBCCarDAO(connection);
+            carDAO = new JDBCCarDAO(this);
         }
         return carDAO;
 	}
@@ -142,7 +142,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public CarCostDAO getCarCostDAO() {
         if(carCostDAO == null){
-            carCostDAO = new JDBCCarCostDAO(connection);
+            carCostDAO = new JDBCCarCostDAO(this);
         }
         return carCostDAO;
     }
@@ -150,7 +150,7 @@ class JDBCDataAccessContext implements DataAccessContext {
 	@Override
 	public ReservationDAO getReservationDAO() {
 		if(reservationDAO == null){
-            reservationDAO = new JDBCReservationDAO(connection);
+            reservationDAO = new JDBCReservationDAO(this);
         }
         return reservationDAO;
 	}
@@ -166,7 +166,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public DamageLogDAO getDamageLogDAO() {
         if(damageLogDAO == null){
-            damageLogDAO = new JDBCDamageLogDAO(connection);
+            damageLogDAO = new JDBCDamageLogDAO(this);
         }
         return damageLogDAO;
     }
@@ -182,7 +182,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public CarRideDAO getCarRideDAO() {
         if(carRideDAO == null){
-            carRideDAO = new JDBCCarRideDAO(connection);
+            carRideDAO = new JDBCCarRideDAO(this);
         }
         return carRideDAO;
     }
@@ -190,7 +190,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public RefuelDAO getRefuelDAO() {
         if(refuelDAO == null){
-            refuelDAO = new JDBCRefuelDAO(connection);
+            refuelDAO = new JDBCRefuelDAO(this);
         }
         return refuelDAO;
     }
@@ -198,7 +198,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public SchedulerDAO getSchedulerDAO() {
         if(schedulerDAO == null){
-            schedulerDAO = new JDBCSchedulerDAO(connection);
+            schedulerDAO = new JDBCSchedulerDAO(this);
         }
         return schedulerDAO;
     }
@@ -206,7 +206,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public ApprovalDAO getApprovalDAO() {
         if(approvalDAO == null){
-            approvalDAO = new JDBCApprovalDAO(connection);
+            approvalDAO = new JDBCApprovalDAO(this);
         }
         return approvalDAO;
     }
@@ -214,7 +214,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public JobDAO getJobDAO() {
         if(jobDAO == null){
-            jobDAO = new JDBCJobDAO(connection);
+            jobDAO = new JDBCJobDAO(this);
         }
         return jobDAO;
     }
@@ -238,7 +238,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public ReceiptDAO getReceiptDAO() {
         if(receiptDAO == null){
-            receiptDAO = new JDBCReceiptDAO(connection);
+            receiptDAO = new JDBCReceiptDAO(this);
         }
         return receiptDAO;
     }

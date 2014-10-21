@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by Cedric on 3/30/2014.
  */
-class JDBCApprovalDAO implements ApprovalDAO {
+class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +
             "approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
@@ -27,85 +27,46 @@ class JDBCApprovalDAO implements ApprovalDAO {
             "LEFT JOIN users admins ON approval_admin = admins.user_id " +
             "LEFT JOIN infosessions ON approval_infosession = infosession_id ";
 
-    private Connection connection;
-
-    private PreparedStatement createApprovalStatement;
-    private PreparedStatement getApprovalByIdStatement;
-    private PreparedStatement getApprovalByUserStatement;
-    private PreparedStatement getPendingUserApprovalStatement;
-    private PreparedStatement getPendingApprovalStatement;
-    private PreparedStatement updateApprovalStatement;
-    private PreparedStatement getPagedApprovalsStatement;
-    private PreparedStatement countApprovalsStatement;
-    private PreparedStatement setApprovalAdminStatement;
-
-    public JDBCApprovalDAO(Connection connection){
-        this.connection = connection;
+    public JDBCApprovalDAO(JDBCDataAccessContext context){
+        super (context);
     }
 
-    private PreparedStatement getSetApprovalAdminStatement() throws SQLException {
-        if(setApprovalAdminStatement == null){
-            setApprovalAdminStatement = connection.prepareStatement("UPDATE approvals SET approval_admin=? WHERE approval_id=?");
-        }
-        return setApprovalAdminStatement;
-    }
+    private LazyStatement setApprovalAdminStatement = new LazyStatement (
+            "UPDATE approvals SET approval_admin=? WHERE approval_id=?"
+    );
 
-    private PreparedStatement getCountApprovalsStatement() throws SQLException {
-        if(countApprovalsStatement == null){
-            countApprovalsStatement = connection.prepareStatement("SELECT COUNT(*) FROM approvals");
-        }
-        return countApprovalsStatement;
-    }
-    private PreparedStatement getGetPagedApprovalsStatement() throws SQLException {
-        if(getPagedApprovalsStatement == null){
-            getPagedApprovalsStatement = connection.prepareStatement(APPROVAL_QUERY + " ORDER BY approval_submission DESC LIMIT ? OFFSET ?");
-        }
-        return getPagedApprovalsStatement;
-    }
+    private LazyStatement countApprovalsStatement = new LazyStatement ("SELECT COUNT(*) FROM approvals");
+    private LazyStatement getPagedApprovalsStatement = new LazyStatement (
+            APPROVAL_QUERY + " ORDER BY approval_submission DESC LIMIT ? OFFSET ?"
+    );
 
-    private PreparedStatement getGetPendingApprovalStatement() throws SQLException {
-        if (getPendingApprovalStatement == null) {
-            getPendingApprovalStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_status = 'PENDING'");
-        }
-        return getPendingApprovalStatement;
-    }
+    private LazyStatement getPendingApprovalStatement = new LazyStatement (
+            APPROVAL_QUERY + "WHERE approval_status = 'PENDING'"
+    );
 
-    private PreparedStatement getGetApprovalByUserStatement() throws SQLException {
-        if(getApprovalByUserStatement == null){
-            getApprovalByUserStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_user = ?");
-        }
-        return getApprovalByUserStatement;
-    }
+    private LazyStatement getApprovalByUserStatement = new LazyStatement (
+            APPROVAL_QUERY + "WHERE approval_user = ?"
+    );
 
-    private PreparedStatement getGetPendingUserApprovalStatement() throws SQLException {
-        if(getPendingUserApprovalStatement == null){
-            getPendingUserApprovalStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_user = ? AND approval_status = 'PENDING'");
-        }
-        return getPendingUserApprovalStatement;
-    }
+    private LazyStatement getPendingUserApprovalStatement = new LazyStatement (
+            APPROVAL_QUERY + "WHERE approval_user = ? AND approval_status = 'PENDING'"
+    );
 
-    private PreparedStatement getGetApprovalByIdStatement() throws SQLException {
-        if(getApprovalByIdStatement == null){
-            getApprovalByIdStatement = connection.prepareStatement(APPROVAL_QUERY + "WHERE approval_id = ?");
-        }
-        return getApprovalByIdStatement;
-    }
+    private LazyStatement getApprovalByIdStatement = new LazyStatement (
+            APPROVAL_QUERY + "WHERE approval_id = ?"
+    );
 
-    private PreparedStatement getCreateApprovalStatement() throws SQLException {
-        if(createApprovalStatement == null){
-            createApprovalStatement = connection.prepareStatement("INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message, approval_submission) " +
-                    "VALUES(?,?,?,?,?)", new String[]{"approval_id"});
-        }
-        return createApprovalStatement;
-    }
+    private LazyStatement getCreateApprovalStatement = new LazyStatement (
+            "INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message, approval_submission) " +
+                    "VALUES(?,?,?,?,?)",
+            "approval_id"
+    );
 
-    private PreparedStatement getUpdateApprovalStatement() throws SQLException {
-        if(updateApprovalStatement == null){
-            updateApprovalStatement = connection.prepareStatement("UPDATE Approvals SET approval_user=?, approval_admin=?, " +
-                    "approval_date=?, approval_status=?, approval_infosession=?,approval_user_message=?,approval_admin_message=? WHERE approval_id = ?");
-        }
-        return updateApprovalStatement;
-    }
+    private LazyStatement getUpdateApprovalStatement = new LazyStatement (
+            "UPDATE Approvals SET approval_user=?, approval_admin=?, " +
+                "approval_date=?, approval_status=?, approval_infosession=?," +
+                "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
+    );
 
     private Approval populateApproval(ResultSet rs) throws SQLException {
         return new Approval(rs.getInt("approval_id"), JDBCUserDAO.populateUserPartial(rs, "users"), JDBCUserDAO.populateUserPartial(rs, "admins"),
@@ -130,7 +91,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public List<Approval> getApprovals(User user) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetApprovalByUserStatement();
+            PreparedStatement ps = getApprovalByUserStatement.value();
             ps.setInt(1, user.getId());
             return getApprovalList(ps);
         } catch(SQLException ex){
@@ -141,7 +102,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public List<Approval> getPendingApprovals(User user) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetPendingUserApprovalStatement();
+            PreparedStatement ps = getPendingUserApprovalStatement.value();
             ps.setInt(1, user.getId());
 
             return getApprovalList(ps);
@@ -153,7 +114,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public List<Approval> getPendingApprovals() throws DataAccessException {
         try {
-            PreparedStatement ps = getGetPendingApprovalStatement();
+            PreparedStatement ps = getPendingApprovalStatement.value();
             return getApprovalList(ps);
         } catch(SQLException ex){
             throw new DataAccessException("Failed to get approvals for user.", ex);
@@ -163,7 +124,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public List<Approval> getApprovals(int page, int pageSize) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetPagedApprovalsStatement();
+            PreparedStatement ps = getPagedApprovalsStatement.value();
             ps.setInt(1, pageSize);
             ps.setInt(2, (page - 1) * pageSize);
             return getApprovalList(ps);
@@ -175,7 +136,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public int getApprovalCount() throws DataAccessException {
         try {
-            PreparedStatement ps = getCountApprovalsStatement();
+            PreparedStatement ps = countApprovalsStatement.value();
             try(ResultSet rs = ps.executeQuery()){
                 if(rs.next())
                     return rs.getInt(1);
@@ -193,7 +154,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public void setApprovalAdmin(Approval approval, User admin) throws DataAccessException {
         try {
-            PreparedStatement ps = getSetApprovalAdminStatement();
+            PreparedStatement ps = setApprovalAdminStatement.value();
             ps.setInt(1, admin.getId());
             ps.setInt(2, approval.getId());
             if(ps.executeUpdate() == 0)
@@ -206,7 +167,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public Approval getApproval(int approvalId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetApprovalByIdStatement();
+            PreparedStatement ps = getApprovalByIdStatement.value();
             ps.setInt(1, approvalId);
 
             try(ResultSet rs = ps.executeQuery()) {
@@ -232,7 +193,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
         try {
             DateTime date = new DateTime();
 
-            PreparedStatement ps = getCreateApprovalStatement();
+            PreparedStatement ps = getCreateApprovalStatement.value();
             ps.setInt(1, user.getId());
             ps.setString(2, Approval.ApprovalStatus.PENDING.name());
 
@@ -268,7 +229,7 @@ class JDBCApprovalDAO implements ApprovalDAO {
     @Override
     public void updateApproval(Approval approval) throws DataAccessException {
         try {
-            PreparedStatement ps = getUpdateApprovalStatement();
+            PreparedStatement ps = getUpdateApprovalStatement.value();
             ps.setInt(1, approval.getUser().getId());
             if(approval.getAdmin() == null) ps.setNull(2, Types.INTEGER);
             else ps.setInt(2, approval.getAdmin().getId());

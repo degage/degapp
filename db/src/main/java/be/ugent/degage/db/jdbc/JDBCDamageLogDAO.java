@@ -13,48 +13,24 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 04/05/14.
  */
-class JDBCDamageLogDAO implements DamageLogDAO {
+class JDBCDamageLogDAO extends AbstractDAO implements DamageLogDAO {
 
-    private static final String[] AUTO_GENERATED_KEYS = {"damage_log_id"};
-    private Connection connection;
-    private PreparedStatement createDamageLogStatement;
-    private PreparedStatement getDamageLogsStatement;
-
-    public JDBCDamageLogDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCDamageLogDAO(JDBCDataAccessContext context) {
+        super(context);
     }
 
-    private PreparedStatement getCreateDamageLogStatement() throws SQLException {
-        if (createDamageLogStatement == null) {
-            createDamageLogStatement = connection.prepareStatement("INSERT INTO damagelogs " +
+    private LazyStatement createDamageLogStatement = new LazyStatement(
+            "INSERT INTO damagelogs " +
                     "(damage_log_damage_id, damage_log_description, damage_log_created_at) " +
-                    "VALUES(?, ?, ?)", AUTO_GENERATED_KEYS);
-        }
-        return createDamageLogStatement;
-    }
-
-    private PreparedStatement getGetDamageLogsStatement() throws SQLException {
-        if (getDamageLogsStatement == null) {
-            // TODO: replace * by actual fields
-            getDamageLogsStatement = connection.prepareStatement("SELECT * FROM damagelogs " +
-                "JOIN damages ON damage_log_damage_id = damage_id " +
-                "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
-                "JOIN carreservations ON damage_car_ride_id = reservation_id " +
-                "LEFT JOIN filegroups ON damage_filegroup_id = file_group_id " +
-                "JOIN cars ON reservation_car_id = car_id " +
-                "JOIN users ON reservation_user_id = user_id " +
-                "WHERE damage_log_damage_id = ? ORDER BY damage_log_created_at DESC"
-            );
-        }
-        return getDamageLogsStatement;
-    }
-
+                    "VALUES(?, ?, ?)",
+            "damage_log_id"
+    );
 
     @Override
     public DamageLog createDamageLog(Damage damage, String description) throws DataAccessException {
         DateTime created = new DateTime();
         try {
-            PreparedStatement ps = getCreateDamageLogStatement();
+            PreparedStatement ps = createDamageLogStatement.value();
             ps.setInt(1, damage.getId());
             ps.setString(2, description);
             ps.setTimestamp(3, new Timestamp(created.getMillis()));
@@ -72,10 +48,22 @@ class JDBCDamageLogDAO implements DamageLogDAO {
         }
     }
 
+    private LazyStatement getDamageLogsStatement = new LazyStatement(
+            "SELECT * FROM damagelogs " +
+                "JOIN damages ON damage_log_damage_id = damage_id " +
+                "JOIN carrides ON damage_car_ride_id = car_ride_car_reservation_id " +
+                "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+                "LEFT JOIN filegroups ON damage_filegroup_id = file_group_id " +
+                "JOIN cars ON reservation_car_id = car_id " +
+                "JOIN users ON reservation_user_id = user_id " +
+                "WHERE damage_log_damage_id = ? ORDER BY damage_log_created_at DESC"
+            );
+
+
     @Override
     public List<DamageLog> getDamageLogsForDamage(int damageId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetDamageLogsStatement();
+            PreparedStatement ps = getDamageLogsStatement.value();
             ps.setInt(1, damageId);
             return getDamageLogList(ps);
         } catch (SQLException e) {

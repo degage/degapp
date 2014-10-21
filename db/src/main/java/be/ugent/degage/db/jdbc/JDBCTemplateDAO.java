@@ -7,7 +7,6 @@ import be.ugent.degage.db.dao.TemplateDAO;
 import be.ugent.degage.db.models.EmailTemplate;
 import be.ugent.degage.db.models.MailType;
 
-import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -17,7 +16,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 01/03/14.
  */
-class JDBCTemplateDAO implements TemplateDAO {
+class JDBCTemplateDAO extends AbstractDAO implements TemplateDAO {
 
     private String TEMPLATE_QUERY = "SELECT template_id, template_title, template_body, template_subject, template_send_mail, template_send_mail_changeable " +
             "FROM templates ";
@@ -32,70 +31,47 @@ class JDBCTemplateDAO implements TemplateDAO {
         ps.setString(start, filter.getValue(FilterField.TEMPLATE_NAME));
     }
 
-    private Connection connection;
-    private PreparedStatement getTemplateByIdStatement;
-    private PreparedStatement getTagsByTemplateIdStatement;
-    private PreparedStatement updateTemplateStatement;
-    private PreparedStatement getGetTemplateListPageByTitleAscStatement;
-    private PreparedStatement getGetTemplateListPageByTitleDescStatement;
-    private PreparedStatement getGetAmountOfTemplatesStatement;
-
-    public JDBCTemplateDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCTemplateDAO(JDBCDataAccessContext context) {
+        super (context);
     }
 
-    private PreparedStatement getTemplateByTitleStatement() throws SQLException {
-        if (getTemplateByIdStatement == null) {
-            getTemplateByIdStatement = connection.prepareStatement("SELECT template_id, template_title, template_subject, template_body, template_send_mail, template_send_mail_changeable " +
-                    "FROM templates WHERE template_id = ?;");
-        }
-        return getTemplateByIdStatement;
-    }
+    private LazyStatement getTemplateStatement = new LazyStatement (
+            "SELECT template_id, template_title, template_subject, template_body, template_send_mail, template_send_mail_changeable " +
+                    "FROM templates WHERE template_id = ?;"
+    );
 
-    private PreparedStatement getGetAmountOfTemplatesStatement() throws SQLException {
-        if(getGetAmountOfTemplatesStatement == null) {
-            getGetAmountOfTemplatesStatement = connection.prepareStatement("SELECT count(template_id) as amount_of_templates " +
-                    "FROM templates " + FILTER_FRAGMENT);
-        }
-        return getGetAmountOfTemplatesStatement;
-    }
+    private LazyStatement getAmountOfTemplatesStatement = new LazyStatement (
+            "SELECT count(template_id) as amount_of_templates FROM templates " + FILTER_FRAGMENT
+    );
 
-    private PreparedStatement getGetTemplateListPageByTitleAscStatement() throws SQLException {
-        if(getGetTemplateListPageByTitleAscStatement == null) {
-            getGetTemplateListPageByTitleAscStatement = connection.prepareStatement(TEMPLATE_QUERY + FILTER_FRAGMENT + " ORDER BY template_title asc LIMIT ?, ?");
-        }
-        return getGetTemplateListPageByTitleAscStatement;
-    }
-    private PreparedStatement getGetTemplateListPageByTitleDescStatement() throws SQLException {
-        if(getGetTemplateListPageByTitleDescStatement == null) {
-            getGetTemplateListPageByTitleDescStatement = connection.prepareStatement(TEMPLATE_QUERY + FILTER_FRAGMENT + " ORDER BY template_title desc LIMIT ?, ?");
-        }
-        return getGetTemplateListPageByTitleDescStatement;
-    }
+    private LazyStatement getTemplateListPageByTitleAscStatement = new LazyStatement (
+            TEMPLATE_QUERY + FILTER_FRAGMENT + " ORDER BY template_title asc LIMIT ?, ?"
+    );
+    private LazyStatement getTemplateListPageByTitleDescStatement = new LazyStatement (
+            TEMPLATE_QUERY + FILTER_FRAGMENT + " ORDER BY template_title desc LIMIT ?, ?"
+    );
 
-    private PreparedStatement getUpdateTemplateStatement() throws SQLException {
-        if (updateTemplateStatement == null) {
-            updateTemplateStatement = connection.prepareStatement("UPDATE templates SET template_subject = ?, template_body = ?, template_send_mail = ? WHERE template_id = ?;");
-        }
-        return updateTemplateStatement;
-    }
+    private LazyStatement getUpdateTemplateStatement = new LazyStatement (
+            "UPDATE templates SET template_subject = ?, template_body = ?, template_send_mail = ? WHERE template_id = ?"
+    );
 
     public EmailTemplate populateEmailTemplate(ResultSet rs) throws SQLException {
-        return new EmailTemplate(rs.getInt("template_id"), rs.getString("template_title"), rs.getString("template_body"), getUsableTags(rs.getInt("template_id")), rs.getString("template_subject"), rs.getBoolean("template_send_mail"), rs.getBoolean("template_send_mail_changeable"));
+        return new EmailTemplate(
+                rs.getInt("template_id"), rs.getString("template_title"), rs.getString("template_body"),
+                getUsableTags(rs.getInt("template_id")), rs.getString("template_subject"),
+                rs.getBoolean("template_send_mail"), rs.getBoolean("template_send_mail_changeable")
+        );
     }
 
-    private PreparedStatement getTagsByTemplateIdStatement() throws SQLException {
-        if (getTagsByTemplateIdStatement == null) {
-            getTagsByTemplateIdStatement = connection.prepareStatement("SELECT template_tag_body " +
+    private LazyStatement getTagsByTemplateIdStatement = new LazyStatement (
+            "SELECT template_tag_body " +
                     "FROM templatetagassociations JOIN templatetags ON templatetagassociations.template_tag_id = templatetags.template_tag_id"
-                    + " WHERE template_id = ?;");
-        }
-        return getTagsByTemplateIdStatement;
-    }
+                    + " WHERE template_id = ?"
+    );
 
     private List<String> getUsableTags(int templateId) throws DataAccessException {
         try {
-            PreparedStatement ps = getTagsByTemplateIdStatement();
+            PreparedStatement ps = getTagsByTemplateIdStatement.value();
             ps.setInt(1,templateId);
             try (ResultSet rs = ps.executeQuery()) {
                 return populateTagList(rs);
@@ -120,7 +96,7 @@ class JDBCTemplateDAO implements TemplateDAO {
     @Override
     public EmailTemplate getTemplate(int templateID) throws DataAccessException {
         try {
-            PreparedStatement ps = getTemplateByTitleStatement();
+            PreparedStatement ps = getTemplateStatement.value();
             ps.setInt(1,templateID);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -144,7 +120,7 @@ class JDBCTemplateDAO implements TemplateDAO {
     @Override
     public int getAmountOfTemplates(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfTemplatesStatement();
+            PreparedStatement ps = getAmountOfTemplatesStatement.value();
             fillFragment(ps, filter, 1);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -166,7 +142,7 @@ class JDBCTemplateDAO implements TemplateDAO {
             PreparedStatement ps = null;
             switch(orderBy) {
                 default: // TEMPLATE_NAME
-                    ps = asc ? getGetTemplateListPageByTitleAscStatement() : getGetTemplateListPageByTitleDescStatement();
+                    ps = asc ? getTemplateListPageByTitleAscStatement.value() : getTemplateListPageByTitleDescStatement.value();
                     break;
             }
             if(ps == null) {
@@ -186,7 +162,7 @@ class JDBCTemplateDAO implements TemplateDAO {
     @Override
     public void updateTemplate(int templateID, String templateBody, String templateSubject, boolean templateSendMail) throws DataAccessException {
         try {
-            PreparedStatement ps = getUpdateTemplateStatement();
+            PreparedStatement ps = getUpdateTemplateStatement.value();
             ps.setString(1, templateSubject);
             ps.setString(2, templateBody);
             ps.setBoolean(3, templateSendMail);

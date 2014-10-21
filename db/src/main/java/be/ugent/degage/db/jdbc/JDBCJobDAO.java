@@ -13,62 +13,13 @@ import java.util.List;
 /**
  * Created by Cedric on 5/3/2014.
  */
-class JDBCJobDAO implements JobDAO {
+class JDBCJobDAO extends AbstractDAO implements JobDAO {
 
     private static final String JOB_FIELDS = "job_id, job_type, job_ref_id, job_time, job_finished";
 
-    private Connection connection;
-    private PreparedStatement getUnfinishedJobsAfterStatement;
-    private PreparedStatement createJobStatement;
-    private PreparedStatement deleteJobByTypeStatement;
-    private PreparedStatement deleteJobByIdStatement;
-    private PreparedStatement updateJobStatement;
-    private PreparedStatement getLastJobByTypeStatement;
 
-    public JDBCJobDAO(Connection connection){
-        this.connection = connection;
-    }
-
-    private PreparedStatement getGetLastJobByTypeStatement() throws SQLException {
-        if(getLastJobByTypeStatement == null){
-            getLastJobByTypeStatement = connection.prepareStatement("SELECT "+JOB_FIELDS+" FROM jobs WHERE job_type=? ORDER BY job_time DESC LIMIT 1");
-        }
-        return getLastJobByTypeStatement;
-    }
-
-    private PreparedStatement getGetUnfinishedJobsAfterStatement() throws SQLException {
-        if(getUnfinishedJobsAfterStatement == null){
-            getUnfinishedJobsAfterStatement = connection.prepareStatement("SELECT "+JOB_FIELDS+" FROM jobs WHERE job_finished=0 AND job_time <= ?");
-        }
-        return getUnfinishedJobsAfterStatement;
-    }
-
-    private PreparedStatement getUpdateJobStatement() throws SQLException {
-        if(updateJobStatement == null){
-            updateJobStatement = connection.prepareStatement("UPDATE jobs SET job_finished=? WHERE job_id=?");
-        }
-        return updateJobStatement;
-    }
-
-    private PreparedStatement getCreateJobStatement() throws SQLException {
-        if(createJobStatement == null){
-            createJobStatement = connection.prepareStatement("INSERT INTO jobs(job_type, job_ref_id, job_time, job_finished) VALUES(?,?,?,?)", new String[] { "job_id" });
-        }
-        return createJobStatement;
-    }
-
-    private PreparedStatement getDeleteJobByTypeStatement() throws SQLException {
-        if(deleteJobByTypeStatement == null){
-            deleteJobByTypeStatement = connection.prepareStatement("DELETE FROM jobs WHERE job_type=? AND job_ref_id=? AND job_finished=0");
-        }
-        return deleteJobByTypeStatement;
-    }
-
-    private PreparedStatement getDeleteJobByIdStatement() throws SQLException {
-        if(deleteJobByIdStatement == null){
-            deleteJobByIdStatement = connection.prepareStatement("DELETE FROM jobs WHERE job_id=?");
-        }
-        return deleteJobByIdStatement;
+    public JDBCJobDAO(JDBCDataAccessContext context) {
+        super(context);
     }
 
     private Job populateJob(ResultSet rs) throws SQLException {
@@ -76,10 +27,14 @@ class JDBCJobDAO implements JobDAO {
                 new DateTime(rs.getTimestamp("job_time").getTime()), rs.getBoolean("job_finished"), rs.getObject("job_ref_id") == null ? -1 : rs.getInt("job_ref_id"));
     }
 
+    private LazyStatement getUnfinishedJobsAfterStatement = new LazyStatement(
+            "SELECT "+JOB_FIELDS+" FROM jobs WHERE job_finished=0 AND job_time <= ?"
+    );
+
     @Override
     public List<Job> getUnfinishedBefore(DateTime time) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetUnfinishedJobsAfterStatement();
+            PreparedStatement ps = getUnfinishedJobsAfterStatement.value();
             ps.setTimestamp(1, new Timestamp(time.getMillis()));
             List<Job> jobs = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()){
@@ -95,10 +50,15 @@ class JDBCJobDAO implements JobDAO {
         }
     }
 
+    private LazyStatement createJobStatement = new LazyStatement(
+            "INSERT INTO jobs(job_type, job_ref_id, job_time, job_finished) VALUES(?,?,?,?)",
+            "job_id"
+    );
+
     @Override
     public Job createJob(JobType type, int refId, DateTime when) throws DataAccessException {
         try {
-            PreparedStatement ps = getCreateJobStatement();
+            PreparedStatement ps = createJobStatement.value();
             ps.setString(1, type.name());
             ps.setInt(2, refId);
             ps.setTimestamp(3, new Timestamp(when.getMillis()));
@@ -119,10 +79,12 @@ class JDBCJobDAO implements JobDAO {
         }
     }
 
+    private LazyStatement deleteJobByIdStatement = new LazyStatement("DELETE FROM jobs WHERE job_id=?");
+
     @Override
     public void deleteJob(long jobId) throws DataAccessException {
         try {
-            PreparedStatement ps = getDeleteJobByIdStatement();
+            PreparedStatement ps = deleteJobByIdStatement.value();
             ps.setLong(1, jobId);
             if(ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to delete job by id. No rows affected.");
@@ -131,10 +93,14 @@ class JDBCJobDAO implements JobDAO {
         }
     }
 
+    private LazyStatement deleteJobByTypeStatement = new LazyStatement(
+            "DELETE FROM jobs WHERE job_type=? AND job_ref_id=? AND job_finished=0"
+    );
+
     @Override
     public void deleteJob(JobType type, int refId) throws DataAccessException {
         try {
-            PreparedStatement ps = getDeleteJobByTypeStatement();
+            PreparedStatement ps = deleteJobByTypeStatement.value();
             ps.setString(1, type.name());
             ps.setInt(2, refId);
             ps.executeUpdate();
@@ -143,10 +109,14 @@ class JDBCJobDAO implements JobDAO {
         }
     }
 
+    private LazyStatement updateJobStatement = new LazyStatement(
+            "UPDATE jobs SET job_finished=? WHERE job_id=?"
+    );
+
     @Override
     public void setJobStatus(long jobId, boolean finished) throws DataAccessException {
         try {
-            PreparedStatement ps = getUpdateJobStatement();
+            PreparedStatement ps = updateJobStatement.value();
             ps.setBoolean(1, finished);
             ps.setLong(2, jobId);
 
@@ -157,10 +127,14 @@ class JDBCJobDAO implements JobDAO {
         }
     }
 
+    private LazyStatement getLastJobByTypeStatement = new LazyStatement(
+            "SELECT "+JOB_FIELDS+" FROM jobs WHERE job_type=? ORDER BY job_time DESC LIMIT 1"
+    );
+
     @Override
     public Job getLastJobForType(JobType type) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetLastJobByTypeStatement();
+            PreparedStatement ps = getLastJobByTypeStatement.value();
             ps.setString(1, type.name());
 
             try(ResultSet rs = ps.executeQuery()){

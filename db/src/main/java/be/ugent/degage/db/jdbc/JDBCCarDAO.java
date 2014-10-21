@@ -20,11 +20,9 @@ import java.util.List;
  *
  * @author Laurent
  */
-class JDBCCarDAO implements CarDAO{
+class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
-    private static final String[] AUTO_GENERATED_KEYS = {"car_id"};
-
-            // TODO: replace * by actual fields
+    // TODO: replace * by actual fields
     public static final String CAR_QUERY = "SELECT * FROM cars " +
             "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
             "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
@@ -126,30 +124,8 @@ class JDBCCarDAO implements CarDAO{
         ps.setString(start+28, filter.getValue(FilterField.FROM));
     }
 
-    private Connection connection;
-    private PreparedStatement createCarStatement;
-    private PreparedStatement updateCarStatement;
-    private PreparedStatement getCarStatement;
-    private PreparedStatement getCarsOfUserStatement;
-    private PreparedStatement getGetCarListPageByNameAscStatement;
-    private PreparedStatement getGetCarListPageByNameDescStatement;
-    private PreparedStatement getGetCarListPageByBrandAscStatement;
-    private PreparedStatement getGetCarListPageByBrandDescStatement;
-    private PreparedStatement getGetAmountOfCarsStatement;
-    private PreparedStatement updateTechnicalCarDetailsStatement;
-    private PreparedStatement createTechnicalCarDetailsStatement;
-    private PreparedStatement updateInsuranceStatement;
-    private PreparedStatement createInsuranceStatement;
-    private PreparedStatement getAvailabilitiesStatement;
-    private PreparedStatement createAvailabilityStatement;
-    private PreparedStatement updateAvailabilityStatement;
-    private PreparedStatement deleteAvailabilityStatement;
-    private PreparedStatement getPrivilegedStatement;
-    private PreparedStatement createPrivilegedStatement;
-    private PreparedStatement deletePrivilegedStatement;
-
-    public JDBCCarDAO(Connection connection) {
-        this.connection = connection;
+    public JDBCCarDAO(JDBCDataAccessContext context) {
+        super (context);
     }
 
     public static Car populateCar(ResultSet rs, boolean withRest) throws SQLException {
@@ -230,205 +206,112 @@ class JDBCCarDAO implements CarDAO{
         }
     }
 
-    private PreparedStatement createCarStatement() throws SQLException {
-        if (createCarStatement == null) {
-            createCarStatement = connection.prepareStatement("INSERT INTO cars(car_name, car_type, car_brand, car_location, " +
+    private LazyStatement createCarStatement = new LazyStatement (
+            "INSERT INTO cars(car_name, car_type, car_brand, car_location, " +
                     "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", AUTO_GENERATED_KEYS);
-        }
-        return createCarStatement;
-    }
+                    "car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "car_id");
     
-    private PreparedStatement updateCarStatement() throws SQLException {
-        if (updateCarStatement == null) {
-            updateCarStatement = connection.prepareStatement("UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
+    private LazyStatement updateCarStatement = new LazyStatement(
+            "UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
                     "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
-        }
-        return updateCarStatement;
-    }
     
-    private PreparedStatement getCarStatement() throws SQLException {
-        if (getCarStatement == null) {
-            getCarStatement = connection.prepareStatement(CAR_QUERY + " WHERE car_id=?");
-        }
-        return getCarStatement;
-    }
+    private LazyStatement getCarStatement = new LazyStatement(CAR_QUERY + " WHERE car_id=?");
 
-    private PreparedStatement getGetCarsOfUserStatement() throws SQLException {
-        if (getCarsOfUserStatement == null) {
-            getCarsOfUserStatement = connection.prepareStatement(CAR_QUERY + " WHERE user_id=?");
-        }
-        return getCarsOfUserStatement;
-    }
+    private LazyStatement getCarsOfUserStatement = new LazyStatement (CAR_QUERY + " WHERE user_id=?");
 
 
-    private PreparedStatement getGetCarListPageByNameAscStatement() throws SQLException {
-        if(getGetCarListPageByNameAscStatement == null) {
-            getGetCarListPageByNameAscStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?");
-        }
-        return getGetCarListPageByNameAscStatement;
-    }
+    private LazyStatement getCarListPageByNameAscStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
+    );
+    private LazyStatement getCarListPageByNameDescStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + " ORDER BY car_name desc LIMIT ?, ?"
+    );
+    private LazyStatement getCarListPageByBrandAscStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?"
+    );
 
-    private PreparedStatement getGetCarListPageByNameDescStatement() throws SQLException {
-        if(getGetCarListPageByNameDescStatement == null) {
-            getGetCarListPageByNameDescStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT +"ORDER BY car_name desc LIMIT ?, ?");
-        }
-        return getGetCarListPageByNameDescStatement;
-    }
-    private PreparedStatement getGetCarListPageByBrandAscStatement() throws SQLException {
-        if(getGetCarListPageByBrandAscStatement == null) {
-            getGetCarListPageByBrandAscStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?");
-        }
-        return getGetCarListPageByBrandAscStatement;
-    }
+    private LazyStatement getCarListPageByBrandDescStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?"
+    );
 
-    private PreparedStatement getGetCarListPageByBrandDescStatement() throws SQLException {
-        if(getGetCarListPageByBrandDescStatement == null) {
-            getGetCarListPageByBrandDescStatement = connection.prepareStatement(CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?");
-        }
-        return getGetCarListPageByBrandDescStatement;
-    }
+    private LazyStatement listCarsPageByNameAscStatement = new LazyStatement (LIST_CAR_QUERY +  "ORDER BY car_name asc LIMIT ?, ?");
+    private LazyStatement listCarsPageByNameDescStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_name desc LIMIT ?, ?");
+    private LazyStatement listCarsPageByBrandAscStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_brand asc LIMIT ?, ?");
+    private LazyStatement listCarsPageByBrandDescStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_brand desc LIMIT ?, ?");
 
-    private  PreparedStatement getListCarsPageByBrandAscStatement;
-    private  PreparedStatement getListCarsPageByBrandDescStatement;
-    private  PreparedStatement getListCarsPageByNameAscStatement;
-    private  PreparedStatement getListCarsPageByNameDescStatement;
+// TODO: only join with tables tht can be filtered upon
+    private LazyStatement getAmountOfCarsStatement = new LazyStatement(
+        "SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
+                "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
+                "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+                "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
+                "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
+                "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT
+    );
 
-    private PreparedStatement getListCarsPageByNameAscStatement() throws SQLException {
-        if(getListCarsPageByNameAscStatement == null) {
-            getListCarsPageByNameAscStatement = connection.prepareStatement(LIST_CAR_QUERY +  "ORDER BY car_name asc LIMIT ?, ?");
-        }
-        return getListCarsPageByNameAscStatement;
-    }
+    private LazyStatement countCarsStatement = new LazyStatement (
+                    "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
+    );
 
-    private PreparedStatement getListCarsPageByNameDescStatement() throws SQLException {
-        if(getListCarsPageByNameDescStatement == null) {
-            getListCarsPageByNameDescStatement = connection.prepareStatement(LIST_CAR_QUERY + "ORDER BY car_name desc LIMIT ?, ?");
-        }
-        return getListCarsPageByNameDescStatement;
-    }
-    private PreparedStatement getListCarsPageByBrandAscStatement() throws SQLException {
-        if(getListCarsPageByBrandAscStatement == null) {
-            getListCarsPageByBrandAscStatement = connection.prepareStatement(LIST_CAR_QUERY + "ORDER BY car_brand asc LIMIT ?, ?");
-        }
-        return getListCarsPageByBrandAscStatement;
-    }
+    private LazyStatement updateInsuranceStatement = new LazyStatement (
+            "UPDATE carinsurances SET insurance_name=?, insurance_expiration=?, " +
+                    "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?"
+    );
 
-    private PreparedStatement getListCarsPageByBrandDescStatement() throws SQLException {
-        if (getListCarsPageByBrandDescStatement == null) {
-            getListCarsPageByBrandDescStatement = connection.prepareStatement(LIST_CAR_QUERY + "ORDER BY car_brand desc LIMIT ?, ?");
-        }
-        return getListCarsPageByBrandDescStatement;
-    }
-
-    private PreparedStatement getGetAmountOfCarsStatement() throws SQLException {
-        if (getGetAmountOfCarsStatement == null) {
-            // TODO: only join with tables tht can be filtered upon
-            getGetAmountOfCarsStatement = connection.prepareStatement("SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
-                    "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
-                    "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
-                    "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
-                    "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
-                    "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT);
-        }
-        return getGetAmountOfCarsStatement;
-    }
-
-    private PreparedStatement getCountCarsStatement;
-
-    private PreparedStatement getCountCarsStatement() throws SQLException {
-        if (getCountCarsStatement == null) {
-            getCountCarsStatement = connection.prepareStatement(
-                    "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?");
-        }
-        return getCountCarsStatement;
-    }
-
-    private PreparedStatement updateInsuranceStatement() throws SQLException {
-        if (updateInsuranceStatement == null) {
-            updateInsuranceStatement = connection.prepareStatement("UPDATE carinsurances SET insurance_name=?, insurance_expiration=?, " +
-                    "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?");
-        }
-        return updateInsuranceStatement;
-    }
-
-    private PreparedStatement updateTechnicalCarDetailsStatement() throws SQLException {
-        if (updateTechnicalCarDetailsStatement == null) {
-            updateTechnicalCarDetailsStatement = connection.prepareStatement("UPDATE technicalcardetails SET details_car_license_plate=?, " +
+    private LazyStatement updateTechnicalCarDetailsStatement = new LazyStatement (
+            "UPDATE technicalcardetails SET details_car_license_plate=?, " +
                     "details_car_registration=?, details_car_chassis_number=? WHERE details_id = ?");
-        }
-        return updateTechnicalCarDetailsStatement;
-    }
 
-    private PreparedStatement getAvailabilitiesStatement() throws SQLException {
-        if (getAvailabilitiesStatement == null) {
-            getAvailabilitiesStatement = connection.prepareStatement("SELECT * FROM caravailabilities WHERE car_availability_car_id=?");
-        }
-        return getAvailabilitiesStatement;
-    }
+    private LazyStatement getAvailabilitiesStatement = new LazyStatement (
+            "SELECT * FROM caravailabilities WHERE car_availability_car_id=?"
+    );
 
-    private PreparedStatement createAvailabilityStatement() throws SQLException {
-        if (createAvailabilityStatement == null) {
-            createAvailabilityStatement = connection.prepareStatement("INSERT INTO caravailabilities(car_availability_car_id, " +
+    private LazyStatement createAvailabilityStatement = new LazyStatement (
+            "INSERT INTO caravailabilities(car_availability_car_id, " +
                     "car_availability_begin_day_of_week, car_availability_begin_time, car_availability_end_day_of_week, car_availability_end_time) " +
-                    "VALUES (?,?,?,?,?)", new String[] {"car_availability_id"});
-        }
-        return createAvailabilityStatement;
-    }
+                    "VALUES (?,?,?,?,?)",
+            "car_availability_id"
+    );
 
-    private PreparedStatement updateAvailabilityStatement() throws SQLException {
-        if (updateAvailabilityStatement == null) {
-            updateAvailabilityStatement = connection.prepareStatement("UPDATE caravailabilities SET car_availability_car_id=?, " +
+    private LazyStatement updateAvailabilityStatement = new LazyStatement (
+            "UPDATE caravailabilities SET car_availability_car_id=?, " +
                     "car_availability_begin_day_of_week=?, car_availability_begin_time=?, car_availability_end_day_of_week=?, car_availability_end_time=? " +
-                    "WHERE car_availability_id = ?");
-        }
-        return updateAvailabilityStatement;
-    }
+                    "WHERE car_availability_id = ?"
+    );
 
-    private PreparedStatement deleteAvailabilityStatement() throws SQLException {
-        if (deleteAvailabilityStatement == null) {
-            deleteAvailabilityStatement = connection.prepareStatement("DELETE FROM caravailabilities WHERE car_availability_id = ?");
-        }
-        return deleteAvailabilityStatement;
-    }
+    private LazyStatement deleteAvailabilityStatement = new LazyStatement (
+            "DELETE FROM caravailabilities WHERE car_availability_id = ?"
+    );
 
-    private PreparedStatement getPrivilegedStatement() throws SQLException {
-        if (getPrivilegedStatement == null) {
-            // TODO: replace * by actual fields
-            getPrivilegedStatement = connection.prepareStatement("SELECT * FROM carprivileges " +
-                    "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?");
-        }
-        return getPrivilegedStatement;
-    }
+    // TODO: replace * by actual fields
+    private LazyStatement getPrivilegedStatement = new LazyStatement (
+            "SELECT * FROM carprivileges " +
+                "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?"
+    );
 
-    private PreparedStatement createPrivilegedStatement() throws SQLException {
-        if (createPrivilegedStatement == null) {
-            createPrivilegedStatement = connection.prepareStatement("INSERT INTO carprivileges(car_privilege_user_id, " +
-                    "car_privilege_car_id) " +
-                    "VALUES (?,?)");
-        }
-        return createPrivilegedStatement;
-    }
+    private LazyStatement createPrivilegedStatement = new LazyStatement (
+            "INSERT INTO carprivileges(car_privilege_user_id, car_privilege_car_id) VALUES (?,?)"
+    );
 
-    private PreparedStatement deletePrivilegedStatement() throws SQLException {
-        if (deletePrivilegedStatement == null) {
-            deletePrivilegedStatement = connection.prepareStatement("DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?");
-        }
-        return deletePrivilegedStatement;
-    }
-    
+    private LazyStatement deletePrivilegedStatement = new LazyStatement (
+        "DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?"
+    );
+
     @Override
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                          TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active, File photo) throws DataAccessException {
         try {
-            PreparedStatement ps = createCarStatement();
+            PreparedStatement ps = createCarStatement.value();
             ps.setString(1, name);
             ps.setString(2, type);
             ps.setString(3, brand);
+            // TODO: make sure location is never null
+
             if(location != null) {
                 ps.setInt(4, location.getId());
             } else {
@@ -507,7 +390,7 @@ class JDBCCarDAO implements CarDAO{
 
     private void updateTechnicalCarDetails(int id, TechnicalCarDetails technicalCarDetails) throws SQLException {
 
-        PreparedStatement ps = updateTechnicalCarDetailsStatement();
+        PreparedStatement ps = updateTechnicalCarDetailsStatement.value();
 
         ps.setString(1, technicalCarDetails.getLicensePlate());
         ps.setInt(2, technicalCarDetails.getRegistration().getId());
@@ -520,7 +403,7 @@ class JDBCCarDAO implements CarDAO{
     }
 
     private void updateInsurance(int id, CarInsurance insurance) throws SQLException {
-        PreparedStatement ps = updateInsuranceStatement();
+        PreparedStatement ps = updateInsuranceStatement.value();
         ps.setString(1, insurance.getName());
         if (insurance.getExpiration() == null) {
             ps.setDate (2, null);
@@ -547,7 +430,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public void updateCar(Car car) throws DataAccessException {
         try {
-            PreparedStatement ps = updateCarStatement();
+            PreparedStatement ps = updateCarStatement.value();
             ps.setString(1, car.getName());
             ps.setString(2, car.getType());
             ps.setString(3, car.getBrand());
@@ -623,7 +506,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public Car getCar(int id) throws DataAccessException {
         try {
-            PreparedStatement ps = getCarStatement();
+            PreparedStatement ps = getCarStatement.value();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
@@ -641,7 +524,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public List<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException {
         try {
-            PreparedStatement ps = getAvailabilitiesStatement();
+            PreparedStatement ps = getAvailabilitiesStatement.value();
             ps.setInt(1, carId);
             List<CarAvailabilityInterval> availabilities = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
@@ -677,7 +560,7 @@ class JDBCCarDAO implements CarDAO{
         try {
             for(CarAvailabilityInterval availability : availabilities) {
                 if(availability.getId() == null) { // create
-                    PreparedStatement ps = createAvailabilityStatement();
+                    PreparedStatement ps = createAvailabilityStatement.value();
                     setAvailabilityVariables(ps, car.getId(), availability);
 
                     if(ps.executeUpdate() == 0)
@@ -690,7 +573,7 @@ class JDBCCarDAO implements CarDAO{
                         throw new DataAccessException("Failed to get primary key for new availability.", ex);
                     }
                 } else { // update
-                    PreparedStatement ps = updateAvailabilityStatement();
+                    PreparedStatement ps = updateAvailabilityStatement.value();
                     setAvailabilityVariables(ps, car.getId(), availability);
 
                     ps.setInt(6, availability.getId());
@@ -712,7 +595,7 @@ class JDBCCarDAO implements CarDAO{
                 if(availability.getId() == null) {
                     throw new DataAccessException("No id is available to availability.");
                 } else {
-                    PreparedStatement ps = deleteAvailabilityStatement();
+                    PreparedStatement ps = deleteAvailabilityStatement.value();
 
                     ps.setInt(1, availability.getId());
 
@@ -728,7 +611,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public Iterable<User> getPrivileged(int carId) throws DataAccessException {
         try {
-            PreparedStatement ps = getPrivilegedStatement();
+            PreparedStatement ps = getPrivilegedStatement.value();
             ps.setInt(1, carId);
             List<User> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
@@ -748,7 +631,7 @@ class JDBCCarDAO implements CarDAO{
     public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException {
         try {
             for(User user : users) {
-                PreparedStatement ps = createPrivilegedStatement();
+                PreparedStatement ps = createPrivilegedStatement.value();
                 ps.setInt(1, user.getId());
                 ps.setInt(2, carId);
 
@@ -764,7 +647,7 @@ class JDBCCarDAO implements CarDAO{
     public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException {
         try {
             for(User user : users) {
-                PreparedStatement ps = deletePrivilegedStatement();
+                PreparedStatement ps = deletePrivilegedStatement.value();
 
                 ps.setInt(1, user.getId());
                 ps.setInt(2, carId);
@@ -786,7 +669,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public int getAmountOfCars(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfCarsStatement();
+            PreparedStatement ps = getAmountOfCarsStatement.value();
             fillFragment(ps, filter, 1);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -810,7 +693,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public int countCars(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getCountCarsStatement();
+            PreparedStatement ps = countCarsStatement.value();
             ps.setString (1, filter.getValue(FilterField.CAR_NAME));
             ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
 
@@ -851,10 +734,10 @@ class JDBCCarDAO implements CarDAO{
             PreparedStatement ps = null;
             switch(orderBy) {
                 case CAR_NAME:
-                    ps = asc ? getGetCarListPageByNameAscStatement() : getGetCarListPageByNameDescStatement();
+                    ps = asc ? getCarListPageByNameAscStatement.value() : getCarListPageByNameDescStatement.value();
                     break;
                 case CAR_BRAND:
-                    ps = asc ? getGetCarListPageByBrandAscStatement() : getGetCarListPageByBrandDescStatement();
+                    ps = asc ? getCarListPageByBrandAscStatement.value() : getCarListPageByBrandDescStatement.value();
                     break;
             }
             if(ps == null) {
@@ -885,10 +768,10 @@ class JDBCCarDAO implements CarDAO{
             PreparedStatement ps = null;
             switch(orderBy) {
                 case CAR_NAME:
-                    ps = asc ? getListCarsPageByNameAscStatement() : getListCarsPageByNameDescStatement();
+                    ps = asc ? listCarsPageByNameAscStatement.value() : listCarsPageByNameDescStatement.value();
                     break;
                 case CAR_BRAND:
-                    ps = asc ? getListCarsPageByBrandAscStatement() : getListCarsPageByBrandDescStatement();
+                    ps = asc ? listCarsPageByBrandAscStatement.value() : listCarsPageByBrandDescStatement.value();
                     break;
             }
             if(ps == null) {
@@ -931,7 +814,7 @@ class JDBCCarDAO implements CarDAO{
     @Override
     public List<Car> getCarsOfUser(int user_id) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetCarsOfUserStatement();
+            PreparedStatement ps = getCarsOfUserStatement.value();
             ps.setInt(1, user_id);
             return getCars(ps);
         } catch (SQLException ex) {

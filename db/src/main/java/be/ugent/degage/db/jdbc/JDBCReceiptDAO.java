@@ -12,22 +12,15 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class JDBCReceiptDAO implements ReceiptDAO {
+class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
 
-    private Connection connection;
-    public JDBCReceiptDAO(Connection connection) {
-        this.connection = connection;
-    }
 
     // TODO: more fields to filter on
-    public static final String USER_FRAGMENT = 
-	" receipts.receipt_userID LIKE ? ";
+    public static final String USER_FRAGMENT =	" receipts.receipt_userID LIKE ? ";
 
-    public static final String DATE_FRAGMENT1 =
-        " receipts.receipt_date BETWEEN ? AND ? ";
+    public static final String DATE_FRAGMENT1 = " receipts.receipt_date BETWEEN ? AND ? ";
 
-    public static final String DATE_FRAGMENT2 =
-        " receipts.receipt_date <= ? ";
+    public static final String DATE_FRAGMENT2 = " receipts.receipt_date <= ? ";
 
     private static final String RECEIPT_FIELDS = " receipt_id, receipt_name, receipt_date, receipt_fileID, receipt_userID ";
 
@@ -38,35 +31,14 @@ class JDBCReceiptDAO implements ReceiptDAO {
     public static final String FILTER_FRAGMENT =
         " WHERE "+ USER_FRAGMENT + " AND "+ DATE_FRAGMENT2;
 
-    private PreparedStatement getGetAmountOfReceiptsStatement;
-    private PreparedStatement getReceiptsListStatement;
-    private PreparedStatement createReceiptStatement;
+    public JDBCReceiptDAO(JDBCDataAccessContext context) {
+        super(context);
+    }
 
-
-    private PreparedStatement getGetAmountOfReceiptsStatement() throws SQLException {
-        if(getGetAmountOfReceiptsStatement == null) {
-            getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM receipts " + FILTER_FRAGMENT+ ";");
+    private LazyStatement getGetAmountOfReceiptsStatement = new LazyStatement(
+            "SELECT COUNT(receipt_id) AS amount_of_receipts FROM receipts " + FILTER_FRAGMENT
+    );
 	    //getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts WHERE receipts.receipt_date<=?;");
-        }
-        return getGetAmountOfReceiptsStatement;
-    }
-    
-    private PreparedStatement getReceiptsListStatement() throws SQLException {
-        if(getReceiptsListStatement == null) {
-            getReceiptsListStatement = connection.prepareStatement(RECEIPT_QUERY + FILTER_FRAGMENT + " ORDER BY receipts.receipt_date asc LIMIT ?, ? ;");
-        }
-        return getReceiptsListStatement;
-    }
-
-    private PreparedStatement getCreateReceiptStatement() throws SQLException {
-        if (createReceiptStatement == null) {
-            createReceiptStatement = connection.prepareStatement("INSERT INTO receipts (receipt_name, receipt_date ,receipt_fileID,receipt_userID,receipt_price) VALUES (?,?,?,?,?);",
-                    new String[]{"receipt_id"});
-        }
-        return createReceiptStatement;
-    }
-
-
     /**
      * @param filter The filter to apply to
      * @return The amount of filtered cars
@@ -75,7 +47,7 @@ class JDBCReceiptDAO implements ReceiptDAO {
     @Override
     public int getAmountOfReceipts(Filter filter, User user) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfReceiptsStatement();
+            PreparedStatement ps = getGetAmountOfReceiptsStatement.value();
             fillFragment(ps, filter, 1, user);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -91,9 +63,13 @@ class JDBCReceiptDAO implements ReceiptDAO {
         }
     }
 
+    private LazyStatement getReceiptsListStatement = new LazyStatement(
+            RECEIPT_QUERY + FILTER_FRAGMENT + " ORDER BY receipts.receipt_date asc LIMIT ?, ? "
+    );
+
     public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, User user){
         try {
-            PreparedStatement ps = getReceiptsListStatement();
+            PreparedStatement ps = getReceiptsListStatement.value();
             fillFragment(ps, filter, 1, user);
             int first = (page-1)*pageSize;
             ps.setInt(3, first);
@@ -160,6 +136,11 @@ class JDBCReceiptDAO implements ReceiptDAO {
         return receipt;
     }
 
+    private LazyStatement getCreateReceiptStatement = new LazyStatement(
+            "INSERT INTO receipts (receipt_name, receipt_date ,receipt_fileID,receipt_userID,receipt_price) VALUES (?,?,?,?,?)",
+            "receipt_id"
+    );
+
     @Override
     public Receipt createReceipt(String name, DateTime date, File file, User user, BigDecimal price) throws DataAccessException {
 	//(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments)
@@ -173,7 +154,7 @@ class JDBCReceiptDAO implements ReceiptDAO {
             throw new DataAccessException("Tried to create receipt without receipt file");
 	}
         try {
-            PreparedStatement ps = getCreateReceiptStatement();
+            PreparedStatement ps = getCreateReceiptStatement.value();
             ps.setString(1, name);
             ps.setTimestamp(2, new Timestamp(date.getMillis())); //TODO: timezones?? convert to datetime see below
 	        ps.setInt(3, file.getId());

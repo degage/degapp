@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by Stefaan Vermassen on 26/04/14.
  */
-class JDBCRefuelDAO implements RefuelDAO {
+class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private static final String[] AUTO_GENERATED_KEYS = {"refuel_id"};
 
@@ -25,6 +25,10 @@ class JDBCRefuelDAO implements RefuelDAO {
             "LEFT JOIN files ON refuel_file_id = file_id ";
 
     private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND car_id LIKE ? AND refuel_status <> ?";
+
+    public JDBCRefuelDAO(JDBCDataAccessContext context) {
+        super(context);
+    }
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if(filter == null) {
@@ -52,133 +56,6 @@ class JDBCRefuelDAO implements RefuelDAO {
         ps.setString(start+3, filter.getValue(FilterField.REFUEL_NOT_STATUS));
     }
 
-    private Connection connection;
-    private PreparedStatement createRefuelStatement;
-    private PreparedStatement statusRefuelStatement;
-    private PreparedStatement deleteRefuelStatement;
-    private PreparedStatement getRefuelsForUserStatement;
-    private PreparedStatement getRefuelsForOwnerStatement;
-    private PreparedStatement getRefuelStatement;
-    private PreparedStatement updateRefuelStatement;
-    private PreparedStatement getRefuelsStatement;
-    private PreparedStatement getGetAmountOfRefuelsStatement;
-    private PreparedStatement getGetAmountOfRefuelsWithStatusStatement;
-    private PreparedStatement endPeriodStatement;
-    private PreparedStatement getBillRefuelsForLoanerStatement;
-    private PreparedStatement getBillRefuelsForCarStatement;
-
-    public JDBCRefuelDAO(Connection connection) {
-        this.connection = connection;
-    }
-
-    private PreparedStatement getGetRefuelStatement() throws SQLException {
-        if (getRefuelStatement == null) {
-            getRefuelStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE refuel_id = ? ");
-        }
-        return getRefuelStatement;
-    }
-
-    private PreparedStatement getUpdateRefuelStatement() throws SQLException {
-        if (updateRefuelStatement == null) {
-            updateRefuelStatement = connection.prepareStatement("UPDATE refuels SET refuel_file_id = ? , refuel_amount = ? , refuel_status = ?"
-                    + " WHERE refuel_id = ?");
-        }
-        return updateRefuelStatement;
-    }
-
-    private PreparedStatement getCreateRefuelStatement() throws SQLException {
-        if (createRefuelStatement == null) {
-            createRefuelStatement = connection.prepareStatement("INSERT INTO refuels (refuel_car_ride_id) VALUES (?)", AUTO_GENERATED_KEYS);
-        }
-        return createRefuelStatement;
-    }
-
-    private PreparedStatement getStatusRefuelStatement() throws SQLException {
-        if (statusRefuelStatement == null) {
-            statusRefuelStatement = connection.prepareStatement("UPDATE refuels SET refuel_status = ?"
-                    + " WHERE refuel_id = ?");
-        }
-        return statusRefuelStatement;
-    }
-
-    private PreparedStatement getDeleteRefuelStatement() throws SQLException {
-        if (deleteRefuelStatement == null) {
-            deleteRefuelStatement = connection.prepareStatement("DELETE FROM refuels WHERE refuel_id = ?");
-        }
-        return deleteRefuelStatement;
-    }
-
-    private PreparedStatement getGetAmountOfRefuelsStatement() throws SQLException {
-        if(getGetAmountOfRefuelsStatement == null) {
-            getGetAmountOfRefuelsStatement = connection.prepareStatement("SELECT count(refuel_id) AS amount_of_refuels FROM refuels " +
-                    "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-                    "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
-                    "LEFT JOIN cars ON reservation_car_id = car_id " +
-                    "LEFT JOIN users ON reservation_user_id = user_id " +
-                    "LEFT JOIN files ON refuel_file_id = file_id " + FILTER_FRAGMENT);
-        }
-        return getGetAmountOfRefuelsStatement;
-    }
-
-    private PreparedStatement getGetAmountOfRefuelsWithStatusStatement() throws SQLException {
-        if(getGetAmountOfRefuelsWithStatusStatement == null) {
-            getGetAmountOfRefuelsWithStatusStatement = connection.prepareStatement("SELECT COUNT(*) AS amount_of_refuels " +
-                    "FROM refuels JOIN carreservations ON refuel_car_ride_id = reservation_id " +
-                    "WHERE refuel_status = ? AND reservation_user_id = ?");
-        }
-        return getGetAmountOfRefuelsWithStatusStatement;
-    }
-
-    private PreparedStatement getGetRefuelsStatement() throws SQLException {
-        if (getRefuelsStatement == null) {
-            getRefuelsStatement = connection.prepareStatement(REFUEL_QUERY + FILTER_FRAGMENT +
-                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 4 END ASC LIMIT ?,?");
-        }
-        return getRefuelsStatement;
-    }
-
-    private PreparedStatement getGetRefuelsForUserStatement() throws SQLException {
-        if (getRefuelsForUserStatement == null) {
-            getRefuelsForUserStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE reservation_user_id = ? " +
-                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 4 END");
-        }
-        return getRefuelsForUserStatement;
-    }
-
-    private PreparedStatement getGetRefuelsForOwnerStatement() throws SQLException {
-        if (getRefuelsForOwnerStatement == null) {
-            getRefuelsForOwnerStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE car_owner_user_id = ? AND refuel_status <> 'CREATED' " +
-                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 1 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 2 END");
-        }
-        return getRefuelsForOwnerStatement;
-    }
-
-    private PreparedStatement getEndPeriodStatement() throws SQLException {
-        if (endPeriodStatement == null) {
-            endPeriodStatement = connection.prepareStatement("UPDATE refuels SET refuel_billed = CURDATE() " +
-                    "FROM refuels INNER JOIN carrides ON refuels.refuel_car_ride_id = carrides.car_ride_car_reservation_id INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
-                    "WHERE refuels.refuel_billed = NULL AND refuels.refuel_status = 'ACCEPTED' AND carreservation.reservation_to < CURDATE()");
-        }
-        return endPeriodStatement;
-    }
-
-    private PreparedStatement getGetBillRefuelsForLoanerStatement() throws SQLException {
-        if (getBillRefuelsForLoanerStatement == null) {
-            getBillRefuelsForLoanerStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_user_id = ?");
-        }
-        return getBillRefuelsForLoanerStatement;
-    }
-
-    private PreparedStatement getGetBillRefuelsForCarStatement() throws SQLException {
-        if (getBillRefuelsForCarStatement == null) {
-            getBillRefuelsForCarStatement = connection.prepareStatement(REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_car_id = ?");
-        }
-        return getBillRefuelsForCarStatement;
-    }
-
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
         Refuel refuel;
         if(rs.getString("refuel_status").equals("CREATED")){
@@ -196,10 +73,15 @@ class JDBCRefuelDAO implements RefuelDAO {
 
 
 
+    private LazyStatement createRefuelStatement= new LazyStatement (
+            "INSERT INTO refuels (refuel_car_ride_id) VALUES (?)",
+            "refuel_id"
+    );
+
     @Override
     public Refuel createRefuel(CarRide carRide) throws DataAccessException {
         try{
-            PreparedStatement ps = getCreateRefuelStatement();
+            PreparedStatement ps = createRefuelStatement.value();
             ps.setInt(1, carRide.getReservation().getId());
 
             if(ps.executeUpdate() == 0)
@@ -216,10 +98,14 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getStatusRefuelStatement= new LazyStatement (
+            "UPDATE refuels SET refuel_status = ? WHERE refuel_id = ?"
+    );
+
     @Override
     public void acceptRefuel(int refuelId) throws DataAccessException {
         try {
-            PreparedStatement ps = getStatusRefuelStatement();
+            PreparedStatement ps = getStatusRefuelStatement.value();
             ps.setString(1, RefuelStatus.ACCEPTED.toString());
             ps.setInt(2, refuelId);
             if(ps.executeUpdate() == 0)
@@ -232,7 +118,7 @@ class JDBCRefuelDAO implements RefuelDAO {
     @Override
     public void rejectRefuel(int refuelId) throws DataAccessException {
         try {
-            PreparedStatement ps = getStatusRefuelStatement();
+            PreparedStatement ps = getStatusRefuelStatement.value();
             ps.setString(1, RefuelStatus.REFUSED.toString());
             ps.setInt(2, refuelId);
             if(ps.executeUpdate() == 0)
@@ -242,10 +128,14 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement deleteRefuelStatement= new LazyStatement (
+            "DELETE FROM refuels WHERE refuel_id = ?"
+    );
+
     @Override
     public void deleteRefuel(int refuelId) throws DataAccessException {
         try {
-            PreparedStatement ps = getDeleteRefuelStatement();
+            PreparedStatement ps = deleteRefuelStatement.value();
             ps.setInt(1, refuelId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when deleting refuel.");
@@ -255,10 +145,12 @@ class JDBCRefuelDAO implements RefuelDAO {
 
     }
 
+    private LazyStatement getRefuelStatement= new LazyStatement (REFUEL_QUERY + " WHERE refuel_id = ? ");
+
     @Override
     public Refuel getRefuel(int refuelId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetRefuelStatement();
+            PreparedStatement ps = getRefuelStatement.value();
             ps.setInt(1, refuelId);
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
@@ -272,10 +164,14 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement updateRefuelStatement= new LazyStatement (
+            "UPDATE refuels SET refuel_file_id = ? , refuel_amount = ? , refuel_status = ? WHERE refuel_id = ?"
+    );
+
     @Override
     public void updateRefuel(Refuel refuel) throws DataAccessException {
         try {
-            PreparedStatement ps = getUpdateRefuelStatement();
+            PreparedStatement ps = updateRefuelStatement.value();
             ps.setInt(1, refuel.getProof().getId());
             ps.setBigDecimal(2, refuel.getAmount());
             ps.setString(3, refuel.getStatus().toString());
@@ -288,10 +184,19 @@ class JDBCRefuelDAO implements RefuelDAO {
 
     }
 
+    private LazyStatement getAmountOfRefuelsStatement= new LazyStatement (
+             "SELECT count(refuel_id) AS amount_of_refuels FROM refuels " +
+                     "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
+                     "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                     "LEFT JOIN cars ON reservation_car_id = car_id " +
+                     "LEFT JOIN users ON reservation_user_id = user_id " +
+                     "LEFT JOIN files ON refuel_file_id = file_id " + FILTER_FRAGMENT
+     );
+
     @Override
     public int getAmountOfRefuels(Filter filter) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfRefuelsStatement();
+            PreparedStatement ps = getAmountOfRefuelsStatement.value();
             fillFragment(ps, filter, 1);
 
             try (ResultSet rs = ps.executeQuery()) {
@@ -307,13 +212,19 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getRefuelsStatement= new LazyStatement (
+            REFUEL_QUERY + FILTER_FRAGMENT +
+                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
+                    "WHEN 'ACCEPTED' THEN 4 END ASC LIMIT ?,?"
+    );
+
     @Override
     public List<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) { // TODO: more to orderBy, asc/desc
                 default:
-                    ps = getGetRefuelsStatement();
+                    ps = getRefuelsStatement.value();
                     break;
             }
             if(ps == null) {
@@ -330,21 +241,33 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getRefuelsForUserStatement= new LazyStatement (
+            REFUEL_QUERY + " WHERE reservation_user_id = ? " +
+                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
+                    "WHEN 'ACCEPTED' THEN 4 END"
+    );
+
     @Override
     public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetRefuelsForUserStatement();
+            PreparedStatement ps = getRefuelsForUserStatement.value();
             ps.setInt(1, userId);
             return getRefuelList(ps);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
         }
     }
+
+    private LazyStatement getRefuelsForOwnerStatement= new LazyStatement (
+            REFUEL_QUERY + " WHERE car_owner_user_id = ? AND refuel_status <> 'CREATED' " +
+                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 1 WHEN 'REFUSED' THEN 3 " +
+                    "WHEN 'ACCEPTED' THEN 2 END"
+    );
 
     @Override
     public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetRefuelsForOwnerStatement();
+            PreparedStatement ps = getRefuelsForOwnerStatement.value();
             ps.setInt(1, userId);
             return getRefuelList(ps);
         } catch (SQLException e){
@@ -352,10 +275,16 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getAmountOfRefuelsWithStatusStatement= new LazyStatement (
+            "SELECT COUNT(*) AS amount_of_refuels " +
+                    "FROM refuels JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                    "WHERE refuel_status = ? AND reservation_user_id = ?"
+    );
+
     @Override
     public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetAmountOfRefuelsWithStatusStatement();
+            PreparedStatement ps = getAmountOfRefuelsWithStatusStatement.value();
             ps.setString(1, status.name());
             ps.setInt(2, userId);
 
@@ -384,10 +313,17 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement endPeriodStatement = new LazyStatement (
+            "UPDATE refuels SET refuel_billed = CURDATE() " +
+                    "FROM refuels INNER JOIN carrides ON refuels.refuel_car_ride_id = carrides.car_ride_car_reservation_id " +
+                    "             INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
+                    "WHERE refuels.refuel_billed = NULL AND refuels.refuel_status = 'ACCEPTED' AND carreservation.reservation_to < CURDATE()"
+    );
+
     @Override
     public void endPeriod() throws DataAccessException {
         try {
-            PreparedStatement ps = getEndPeriodStatement();
+            PreparedStatement ps = endPeriodStatement.value();
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Refuel update affected 0 rows.");
@@ -396,10 +332,14 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getBillRefuelsForLoanerStatement= new LazyStatement (
+            REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_user_id = ?"
+    );
+
     @Override
     public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetBillRefuelsForLoanerStatement();
+            PreparedStatement ps = getBillRefuelsForLoanerStatement.value();
             ps.setDate(1, date);
             ps.setInt(2, user);
             return getRefuelList(ps);
@@ -408,10 +348,14 @@ class JDBCRefuelDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getBillRefuelsForCarStatement= new LazyStatement (
+            REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_car_id = ?"
+    );
+
     @Override
     public List<Refuel> getBillRefuelsForCar(Date date, int car) throws DataAccessException {
         try {
-            PreparedStatement ps = getGetBillRefuelsForCarStatement();
+            PreparedStatement ps = getBillRefuelsForCarStatement.value();
             ps.setDate(1, date);
             ps.setInt(2, car);
             return getRefuelList(ps);
