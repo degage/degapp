@@ -367,6 +367,8 @@ public class Cars extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         CarDAO dao = context.getCarDAO();
         Car car = dao.getCar(carId);
+        // TODO: only needed here: id, owner id and file numbers for photo's
+        // but first: remove all 'badrequests' and replace by redirects
 
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
@@ -388,34 +390,17 @@ public class Cars extends Controller {
         car.setName(model.name);
         car.setBrand(model.brand);
         car.setType(model.type);
-        if (model.doors != null)
-            car.setDoors(model.doors);
-        else
-            car.setDoors(null);
-        if (model.seats != null)
-            car.setSeats(model.seats);
-        else
-            car.setSeats((null));
+        car.setDoors(model.doors);
+        car.setSeats(model.seats);
         car.setManual(model.manual);
         car.setGps(model.gps);
         car.setHook(model.hook);
         car.setFuel(CarFuel.getFuelFromString(model.fuel));
-        if (model.year != null)
-            car.setYear(model.year);
-        else
-            car.setYear(null);
-        if (model.fuelEconomy != null)
-            car.setFuelEconomy(model.fuelEconomy);
-        else
-            car.setFuelEconomy(null);
-        if (model.estimatedValue != null)
-            car.setEstimatedValue(model.estimatedValue);
-        else
-            car.setEstimatedValue(null);
-        if (model.ownerAnnualKm != null)
-            car.setOwnerAnnualKm(model.ownerAnnualKm);
-        else
-            car.setOwnerAnnualKm(null);
+        car.setYear(model.year);
+        car.setFuelEconomy(model.fuelEconomy);
+        car.setEstimatedValue(model.estimatedValue);
+        car.setOwnerAnnualKm(model.ownerAnnualKm);
+
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
         Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
@@ -452,46 +437,20 @@ public class Cars extends Controller {
                 }
             }
         }
-        if (car.getTechnicalCarDetails() == null) {
-            if ((model.licensePlate != null && !model.licensePlate.equals(""))
-                    || (model.chassisNumber != null && !model.chassisNumber.isEmpty()) || file != null)
-                car.setTechnicalCarDetails(new TechnicalCarDetails(model.licensePlate, file, model.chassisNumber));
-        } else {
-            if (model.licensePlate != null && !model.licensePlate.equals(""))
-                car.getTechnicalCarDetails().setLicensePlate(model.licensePlate);
-            else
-                car.getTechnicalCarDetails().setLicensePlate(null);
 
-            car.getTechnicalCarDetails().setRegistration(null);
-            if (model.chassisNumber != null && !model.chassisNumber.isEmpty())
-                car.getTechnicalCarDetails().setChassisNumber(model.chassisNumber);
-            else
-                car.getTechnicalCarDetails().setChassisNumber(null);
-            if (file != null)
-                car.getTechnicalCarDetails().setRegistration(file);
-        }
-        if (car.getInsurance() == null) {
-            if (model.insuranceName != null && !model.insuranceName.equals("") || (model.expiration != null) || (model.bonusMalus != null && model.bonusMalus != 0)
-                    || (model.polisNr != null && model.polisNr != 0))
-                car.setInsurance(new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr));
-        } else {
-            if (model.insuranceName != null && !model.insuranceName.equals(""))
-                car.getInsurance().setName(model.insuranceName);
-            else
-                car.getInsurance().setName(null);
-            if (model.expiration != null)
-                car.getInsurance().setExpiration(model.expiration);
-            else
-                car.getInsurance().setExpiration(null);
-            if (model.bonusMalus != null && model.bonusMalus != 0)
-                car.getInsurance().setBonusMalus(model.bonusMalus);
-            else
-                car.getInsurance().setBonusMalus(null);
-            if (model.polisNr != null && model.polisNr != 0)
-                car.getInsurance().setPolisNr(model.polisNr);
-            else
-                car.getInsurance().setPolisNr(null);
-        }
+
+        TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
+        technicalCarDetails.setLicensePlate(model.licensePlate);
+        technicalCarDetails.setChassisNumber(model.chassisNumber);
+        if (file != null)
+            technicalCarDetails.setRegistration(file);
+
+        CarInsurance insurance = car.getInsurance();
+        insurance.setName(model.insuranceName);
+        insurance.setExpiration(model.expiration);
+        insurance.setBonusMalus(model.bonusMalus);
+        insurance.setPolisNr(model.polisNr);
+
         AddressDAO adao = context.getAddressDAO();
         Address address = car.getLocation();
         car.setLocation(modifyAddress(model.address, address, adao));

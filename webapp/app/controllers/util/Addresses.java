@@ -81,6 +81,7 @@ public class Addresses  {
      * @return The changed or null if deleted
      */
     public static Address modifyAddress(EditAddressModel model, Address address, AddressDAO dao) {
+        // TODO: no checks needed for null + modify address always?
         if (address == null) {
             // User entered new address in fields
             address = dao.createAddress(model.country, model.zipCode, model.city, model.street, model.number, model.bus);

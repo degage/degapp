@@ -508,23 +508,10 @@ class JDBCCarDAO implements CarDAO{
     private void updateTechnicalCarDetails(int id, TechnicalCarDetails technicalCarDetails) throws SQLException {
 
         PreparedStatement ps = updateTechnicalCarDetailsStatement();
-        // TODO: remove these types of if/else in the string case (but first check)
 
-        if(technicalCarDetails.getLicensePlate() != null)
-            ps.setString(1, technicalCarDetails.getLicensePlate());
-        else
-            ps.setNull(1, Types.VARCHAR);
-        if(technicalCarDetails.getRegistration() != null) {
-            ps.setInt(2, technicalCarDetails.getRegistration().getId());
-        }
-        // do not override existing field with zero!
-        // TODO: create table which holds these pictures at a fixed index
-
-        if(technicalCarDetails.getChassisNumber() != null)
-            ps.setString(3, technicalCarDetails.getChassisNumber());
-        else
-            ps.setNull(3, Types.INTEGER);
-
+        ps.setString(1, technicalCarDetails.getLicensePlate());
+        ps.setInt(2, technicalCarDetails.getRegistration().getId());
+        ps.setString(3, technicalCarDetails.getChassisNumber());
         ps.setInt(4, id);
 
         if (ps.executeUpdate() == 0) {
@@ -551,6 +538,7 @@ class JDBCCarDAO implements CarDAO{
             ps.setNull(4, Types.INTEGER);
         }
         ps.setInt(5, id);
+
         if (ps.executeUpdate() == 0) {
             throw new DataAccessException("No rows were affected when updating carInsurance.");
         }
