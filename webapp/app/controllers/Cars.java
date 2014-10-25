@@ -170,16 +170,18 @@ public class Cars extends Controller {
     @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result showUserCars() {
-        return ok(userCarList());
+        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        Iterable<Car> listOfCars = dao.listCarsOfUser(CurrentUser.getId());
+
+        return ok(cars.render(listOfCars));
     }
 
     // should only be used with injected context
     // TODO: called in lots of badRequest calls - change to redirection!
     private static Html userCarList() {
-        User user = DataProvider.getUserProvider().getUser();
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
         // Doesn't need to be paginated, because a single user will never have a lot of cars
-        List<Car> listOfCars = dao.getCarsOfUser(user.getId());
+        List<Car> listOfCars = dao.getCarsOfUser(CurrentUser.getId());
         return views.html.cars.cars.render(listOfCars);
 
     }

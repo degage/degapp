@@ -39,4 +39,6 @@ public interface CarDAO {
 
 
     public List<Car> getCarsOfUser(int user_id) throws DataAccessException;
+    // newer version - uses shorter SQL
+    public Iterable<Car> listCarsOfUser (int userId)  throws DataAccessException;
 }

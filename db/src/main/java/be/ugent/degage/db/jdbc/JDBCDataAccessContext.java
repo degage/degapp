@@ -145,7 +145,7 @@ class JDBCDataAccessContext implements DataAccessContext {
 		if(availabilityDAO == null){
             availabilityDAO = new JDBCAvailabilityDAO(this);
         }
-        return getAvailabilityDAO();
+        return availabilityDAO;
 	}
 
     @Override

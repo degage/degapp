@@ -9,7 +9,6 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
-import org.joda.time.LocalTime;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -212,73 +211,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
                     "car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             "car_id");
-    
-    private LazyStatement updateCarStatement = new LazyStatement(
-            "UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
-                    "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
-                    "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
-    
-    private LazyStatement getCarStatement = new LazyStatement(CAR_QUERY + " WHERE car_id=?");
-
-    private LazyStatement getCarsOfUserStatement = new LazyStatement (CAR_QUERY + " WHERE user_id=?");
-
-
-    private LazyStatement getCarListPageByNameAscStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
-    );
-    private LazyStatement getCarListPageByNameDescStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + " ORDER BY car_name desc LIMIT ?, ?"
-    );
-    private LazyStatement getCarListPageByBrandAscStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?"
-    );
-
-    private LazyStatement getCarListPageByBrandDescStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?"
-    );
-
-    private LazyStatement listCarsPageByNameAscStatement = new LazyStatement (LIST_CAR_QUERY +  "ORDER BY car_name asc LIMIT ?, ?");
-    private LazyStatement listCarsPageByNameDescStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_name desc LIMIT ?, ?");
-    private LazyStatement listCarsPageByBrandAscStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_brand asc LIMIT ?, ?");
-    private LazyStatement listCarsPageByBrandDescStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_brand desc LIMIT ?, ?");
-
-// TODO: only join with tables tht can be filtered upon
-    private LazyStatement getAmountOfCarsStatement = new LazyStatement(
-        "SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
-                "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
-                "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
-                "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
-                "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
-                "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT
-    );
-
-    private LazyStatement countCarsStatement = new LazyStatement (
-                    "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
-    );
-
-    private LazyStatement updateInsuranceStatement = new LazyStatement (
-            "UPDATE carinsurances SET insurance_name=?, insurance_expiration=?, " +
-                    "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?"
-    );
-
-    private LazyStatement updateTechnicalCarDetailsStatement = new LazyStatement (
-            "UPDATE technicalcardetails SET details_car_license_plate=?, " +
-                    "details_car_registration=?, details_car_chassis_number=? WHERE details_id = ?");
-
-    // TODO: replace * by actual fields
-    private LazyStatement getPrivilegedStatement = new LazyStatement (
-            "SELECT * FROM carprivileges " +
-                "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?"
-    );
-
-    private LazyStatement createPrivilegedStatement = new LazyStatement (
-            "INSERT INTO carprivileges(car_privilege_user_id, car_privilege_car_id) VALUES (?,?)"
-    );
-
-    private LazyStatement deletePrivilegedStatement = new LazyStatement (
-        "DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?"
-    );
 
     @Override
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
@@ -367,6 +299,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private LazyStatement updateTechnicalCarDetailsStatement = new LazyStatement (
+            "UPDATE technicalcardetails SET details_car_license_plate=?, " +
+                    "details_car_registration=?, details_car_chassis_number=? WHERE details_id = ?");
+
+
     private void updateTechnicalCarDetails(int id, TechnicalCarDetails technicalCarDetails) throws SQLException {
 
         PreparedStatement ps = updateTechnicalCarDetailsStatement.value();
@@ -384,6 +321,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("No rows were affected when updating technicalCarDetails.");
         }
     }
+
+    private LazyStatement updateInsuranceStatement = new LazyStatement (
+            "UPDATE carinsurances SET insurance_name=?, insurance_expiration=?, " +
+                    "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?"
+    );
 
     private void updateInsurance(int id, CarInsurance insurance) throws SQLException {
         PreparedStatement ps = updateInsuranceStatement.value();
@@ -409,6 +351,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("No rows were affected when updating carInsurance.");
         }
     }
+
+    private LazyStatement updateCarStatement = new LazyStatement(
+            "UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
+                    "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
+                    "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
+                    "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
 
     @Override
     public void updateCar(Car car) throws DataAccessException {
@@ -486,6 +434,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private LazyStatement getCarStatement = new LazyStatement(CAR_QUERY + " WHERE car_id=?");
+
     @Override
     public Car getCar(int id) throws DataAccessException {
         try {
@@ -503,6 +453,14 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
     }
+
+    // TODO: split off into separate DAO
+
+    // TODO: replace * by actual fields
+    private LazyStatement getPrivilegedStatement = new LazyStatement (
+            "SELECT * FROM carprivileges " +
+                "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?"
+    );
 
     @Override
     public Iterable<User> getPrivileged(int carId) throws DataAccessException {
@@ -523,6 +481,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private LazyStatement createPrivilegedStatement = new LazyStatement (
+            "INSERT INTO carprivileges(car_privilege_user_id, car_privilege_car_id) VALUES (?,?)"
+    );
+
     @Override
     public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException {
         try {
@@ -538,6 +500,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Failed to create new privileged");
         }
     }
+
+    private LazyStatement deletePrivilegedStatement = new LazyStatement (
+        "DELETE FROM carprivileges WHERE car_privilege_user_id = ? AND car_privilege_car_id=?"
+    );
 
     @Override
     public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException {
@@ -556,6 +522,16 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Failed to delete privileged");
         }
     }
+
+// TODO: only join with tables tht can be filtered upon
+    private LazyStatement getAmountOfCarsStatement = new LazyStatement(
+        "SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
+                "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
+                "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+                "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
+                "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
+                "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT
+    );
 
     /**
      * @param filter The filter to apply to
@@ -580,6 +556,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Could not get count of cars", ex);
         }
     }
+
+    private LazyStatement countCarsStatement = new LazyStatement (
+                    "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
+    );
 
     /**
      * @param filter The filter to apply to
@@ -616,6 +596,20 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         return getCarList(FilterField.CAR_NAME, true, page, pageSize, null);
     }
 
+    private LazyStatement getCarListPageByNameAscStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
+    );
+    private LazyStatement getCarListPageByNameDescStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + " ORDER BY car_name desc LIMIT ?, ?"
+    );
+    private LazyStatement getCarListPageByBrandAscStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?"
+    );
+
+    private LazyStatement getCarListPageByBrandDescStatement = new LazyStatement (
+            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?"
+    );
+
     /**
      * @param orderBy The field you want to order by
      * @param asc Ascending
@@ -649,6 +643,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Could not retrieve a list of cars", ex);
         }
     }
+
+    private LazyStatement listCarsPageByNameAscStatement = new LazyStatement (LIST_CAR_QUERY +  "ORDER BY car_name asc LIMIT ?, ?");
+    private LazyStatement listCarsPageByNameDescStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_name desc LIMIT ?, ?");
+    private LazyStatement listCarsPageByBrandAscStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_brand asc LIMIT ?, ?");
+    private LazyStatement listCarsPageByBrandDescStatement = new LazyStatement (LIST_CAR_QUERY + "ORDER BY car_brand desc LIMIT ?, ?");
 
     /**
      * @param orderBy The field you want to order by
@@ -693,6 +692,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                             owner,
                             null
                     );
+                    result.setActive(rs.getBoolean("car_active"));
                     cars.add(result);
                 }
                 return cars;
@@ -701,22 +701,57 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Could not retrieve a list of cars", ex);
         }
     }
+
+    private LazyStatement getCarsOfUserStatement = new LazyStatement (CAR_QUERY + " WHERE user_id=?");
+
+
     /**
      *
-     * @param user_id The id of the user
+     * @param userId The id of the user
      * @return The cars of the user (without pagination)
      * @throws DataAccessException
      */
     @Override
-    public List<Car> getCarsOfUser(int user_id) throws DataAccessException {
+    public List<Car> getCarsOfUser(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getCarsOfUserStatement.value();
-            ps.setInt(1, user_id);
+            ps.setInt(1, userId);
             return getCars(ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars for user with id " + user_id, ex);
+            throw new DataAccessException("Could not retrieve a list of cars for user with id " + userId, ex);
         }
     }
+
+    private LazyStatement listCarsOfUserStatement = new LazyStatement (
+            "SELECT car_id, car_name, car_brand, car_active " +
+            "FROM cars WHERE car_owner_user_id = ?");
+
+    @Override
+    public Iterable<Car> listCarsOfUser(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = listCarsOfUserStatement.value();
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                Collection<Car> cars = new ArrayList<>();
+                while (rs.next()) {
+                    Car result = new Car (
+                            rs.getInt ("car_id"),
+                            rs.getString ("car_name"),
+                            rs.getString ("car_brand"),
+                            null, null, null, null, null, false, false, false, null, null, null, null, null, null,
+                            null, null
+                    );
+                    result.setActive(rs.getBoolean("car_active"));
+                    cars.add(result);
+                }
+                return cars;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars for user with id " + userId, ex);
+        }
+    }
+
+
 
     private List<Car> getCars(PreparedStatement ps) {
         List<Car> cars = new ArrayList<>();

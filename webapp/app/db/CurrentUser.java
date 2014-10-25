@@ -24,7 +24,6 @@ public class CurrentUser {
      * @param user partially filled in user object
      */
     public static void set (User user, Set<UserRole> roleSet) {
-        // TODO: add roles
         Controller.session("id", Integer.toString(user.getId()));
         Controller.session("email", user.getEmail());
         Controller.session("fullName", user.getFullName());
