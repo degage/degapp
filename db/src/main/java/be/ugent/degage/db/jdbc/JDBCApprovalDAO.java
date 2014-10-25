@@ -9,7 +9,7 @@ import org.joda.time.DateTime;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Created by Cedric on 3/30/2014.
@@ -82,9 +82,9 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         );
     }
 
-    private List<Approval> getApprovalList(PreparedStatement ps){
+    private Iterable<Approval> getApprovalList(PreparedStatement ps){
         try(ResultSet rs = ps.executeQuery()) {
-            List<Approval> approvals = new ArrayList<>();
+            Collection<Approval> approvals = new ArrayList<>();
             while(rs.next()){
                 approvals.add(populateApproval(rs));
             }
@@ -95,10 +95,10 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public List<Approval> getApprovals(User user) throws DataAccessException {
+    public Iterable<Approval> getApprovals(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getApprovalByUserStatement.value();
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
             return getApprovalList(ps);
         } catch(SQLException ex){
             throw new DataAccessException("Failed to get approvals for user.", ex);
@@ -106,10 +106,10 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public List<Approval> getPendingApprovals(User user) throws DataAccessException {
+    public Iterable<Approval> getPendingApprovals(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getPendingUserApprovalStatement.value();
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
 
             return getApprovalList(ps);
         } catch(SQLException ex){
@@ -118,7 +118,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public List<Approval> getPendingApprovals() throws DataAccessException {
+    public Iterable<Approval> getPendingApprovals() throws DataAccessException {
         try {
             PreparedStatement ps = getPendingApprovalStatement.value();
             return getApprovalList(ps);
@@ -128,7 +128,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public List<Approval> getApprovals(int page, int pageSize) throws DataAccessException {
+    public Iterable<Approval> getApprovals(int page, int pageSize) throws DataAccessException {
         try {
             PreparedStatement ps = getPagedApprovalsStatement.value();
             ps.setInt(1, pageSize);
@@ -156,11 +156,11 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public void setApprovalAdmin(Approval approval, User admin) throws DataAccessException {
+    public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException {
         try {
             PreparedStatement ps = setApprovalAdminStatement.value();
-            ps.setInt(1, admin.getId());
-            ps.setInt(2, approval.getId());
+            ps.setInt(1, adminId);
+            ps.setInt(2, approvalId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Failed to update approval admin, no rows affected.");
         } catch(SQLException ex){
@@ -192,6 +192,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
      */
     @Override
     public Approval createApproval(User user, InfoSession session, String userMessage) {
+        // TODO: change user into userId, session into sessionId
         try {
             DateTime date = new DateTime();
 

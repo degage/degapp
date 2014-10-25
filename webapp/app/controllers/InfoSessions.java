@@ -547,9 +547,8 @@ public class InfoSessions extends Controller {
             return redirect(routes.Dashboard.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
-            ApprovalDAO dao = context.getApprovalDAO();
-            List<Approval> approvals = dao.getPendingApprovals(user);
-            if (!approvals.isEmpty()) {
+            Iterable<Approval> approvals = context.getApprovalDAO().getPendingApprovals(user.getId());
+            if (approvals.iterator().hasNext()) {
                 flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                 return redirect(routes.Dashboard.index());
             } else {
@@ -567,15 +566,6 @@ public class InfoSessions extends Controller {
         }
     }
 
-    // used in injected context
-    // TODO: used in Dashboard only
-    public static boolean approvalRequestSent() {
-        User user = DataProvider.getUserProvider().getUser();
-        ApprovalDAO dao = DataAccess.getInjectedContext().getApprovalDAO();
-        List<Approval> approvals = dao.getPendingApprovals(user);
-        return !approvals.isEmpty();
-    }
-
     @AllowRoles
     @InjectContext
     public static Result requestApprovalPost() {
@@ -587,9 +577,8 @@ public class InfoSessions extends Controller {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
             if (form.hasErrors()) {
                 User currentUser = context.getUserDAO().getUserPartial(CurrentUser.getId());
-                ApprovalDAO dao = context.getApprovalDAO();
-                List<Approval> approvals = dao.getPendingApprovals(currentUser);
-                if (!approvals.isEmpty()) {
+                Iterable<Approval> approvals = context.getApprovalDAO().getPendingApprovals(CurrentUser.getId());
+                if (approvals.iterator().hasNext()) {
                     flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                     return redirect(routes.Dashboard.index());
                 } else {
@@ -634,7 +623,7 @@ public class InfoSessions extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         int pageSize = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosessions_page_size")); // should be application constant?
         ApprovalDAO dao = context.getApprovalDAO();
-        List<Approval> approvalsList = dao.getApprovals(page, pageSize);
+        Iterable<Approval> approvalsList = dao.getApprovals(page, pageSize);
         int amountOfResults = dao.getApprovalCount();
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
@@ -754,7 +743,7 @@ public class InfoSessions extends Controller {
                 if (userRoles.contains(UserRole.INFOSESSION_ADMIN) || userRoles.contains(UserRole.SUPER_USER)) {
                     // TODO: introduce hasRole method in DAO
                     app.setAdmin(contractManager);
-                    adao.setApprovalAdmin(app, contractManager);
+                    adao.setApprovalAdmin(id, userId);
 
                     Notifier.sendContractManagerAssignedMail(app.getUser(), app);
                     flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
@@ -847,7 +836,7 @@ public class InfoSessions extends Controller {
     public static boolean didUserGoToInfoSession() {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
+        final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user); // TODO: use userId instead of user
         return enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !user.hasFullStatus();
     }
 

@@ -3,6 +3,7 @@
 .settings
 .idea
 .idea_modules
+/etc/
 /lib/
 /logs/
 /modules

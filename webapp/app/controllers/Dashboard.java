@@ -19,13 +19,16 @@ public class Dashboard extends Controller {
     @InjectContext
     public static Result index() {
         User currentUser = DataProvider.getUserProvider().getUser();
-        ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-        List<Reservation> reservations = dao.getReservationListForUser(currentUser.getId());
-        return ok (
-            dashboard.render(currentUser, reservations, Form.form(Reserve.IndexModel.class),
-                Profile.getProfileCompleteness(currentUser), InfoSessions.didUserGoToInfoSession(),
-                InfoSessions.approvalRequestSent())
-            );
+        return ok(
+                dashboard.render(
+                        currentUser,
+                        DataAccess.getInjectedContext().getReservationDAO().getReservationListForUser(currentUser.getId()),
+                        Form.form(Reserve.IndexModel.class),
+                        Profile.getProfileCompleteness(currentUser),
+                        InfoSessions.didUserGoToInfoSession(),
+                        DataAccess.getInjectedContext().getApprovalDAO().getPendingApprovals(currentUser.getId()).iterator().hasNext()
+                )
+        );
     }
 
 }
