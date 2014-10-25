@@ -25,7 +25,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +
             "LEFT JOIN users users ON approval_user = users.user_id " +
             "LEFT JOIN users admins ON approval_admin = admins.user_id " +
-            "LEFT JOIN infosessions ON approval_infosession = infosession_id ";
+            "LEFT JOIN infosessions AS ses ON approval_infosession = infosession_id ";
 
     public JDBCApprovalDAO(JDBCDataAccessContext context) {
         super(context);
@@ -42,7 +42,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     );
 
     private LazyStatement getUpdateApprovalStatement = new LazyStatement(
-            "UPDATE Approvals SET approval_user=?, approval_admin=?, " +
+            "UPDATE approvals SET approval_user=?, approval_admin=?, " +
                     "approval_date=?, approval_status=?, approval_infosession=?," +
                     "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
     );

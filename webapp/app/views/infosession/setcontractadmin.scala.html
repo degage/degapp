@@ -1,11 +1,11 @@
 @(approval: Approval, enrollStatus: EnrollementStatus, admin: User)
     @stylesheets = {
-        <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
-        <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+        <link href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")' rel="stylesheet">
+        <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
     }
     @scripts = {
-        <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
-        <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+        <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
+        <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
     }
 
 @app("Goedkeuringsaanvraag", stylesheets, scripts) {
