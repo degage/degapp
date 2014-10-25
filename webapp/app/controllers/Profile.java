@@ -485,7 +485,7 @@ public class Profile extends Controller {
                 }
 
                 flash("success", "Jouw identiteitskaart werd succesvol bijgewerkt.");
-                return ok(identitycard.render(user, form, listOfFiles));
+                return redirect(routes.Profile.editIdentityCard (userId));
             } catch (DataAccessException | IOException ex) { //IO or database error causes a rollback
                 context.rollback();
                 throw new RuntimeException(ex); //unchecked
@@ -587,8 +587,8 @@ public class Profile extends Controller {
                     udao.updateUser(user);
                 }
 
-                flash("success", "Je rijbewijs werd succesvol bijgewerkt.");
-                return ok(driverslicense.render(user, form, listOfFiles));
+                flash("success", "Je rijbewijs werd met succes bijgewerkt.");
+                return redirect(routes.Profile.editDriversLicense(userId));
             } catch (IOException ex) { //IO or database error causes a rollback
                 throw new RuntimeException(ex); //unchecked
             }
@@ -690,7 +690,7 @@ public class Profile extends Controller {
             } else {
                 flash("warning", "De gebruiker had reeds de opgegeven status.");
             }
-            return ok(editstatus.render(user));
+            return redirect(routes.Profile.editUserStatus(userId));
         }
     }
 

@@ -40,7 +40,8 @@ public class Mailer {
         if(!Play.isDev()) {
             mail.sendHtml(html);
         } else {
-            Logger.debug("Sent mail: " + html);
+            // TODO: use different mailer instead of logging
+            // Logger.debug("Sent mail: " + html);
         }
     }
 
