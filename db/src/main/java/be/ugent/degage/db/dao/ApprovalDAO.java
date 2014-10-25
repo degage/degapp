@@ -12,12 +12,10 @@ import java.util.List;
  */
 public interface ApprovalDAO {
 
-    public Iterable<Approval> getPendingApprovals(int userId) throws DataAccessException;
-    public Iterable<Approval> getPendingApprovals() throws DataAccessException;
+    public boolean hasApprovalPending (int userId) throws DataAccessException;
     public Iterable<Approval> getApprovals(int page, int pageSize) throws DataAccessException;
     public int getApprovalCount() throws DataAccessException;
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException;
-    public Iterable<Approval> getApprovals(int userId) throws DataAccessException;
     public Approval getApproval(int approvalId) throws DataAccessException;
     public Approval createApproval(User user, InfoSession session, String userMessage) throws DataAccessException;
     public void updateApproval(Approval approval) throws DataAccessException;

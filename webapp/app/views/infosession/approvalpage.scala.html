@@ -19,14 +19,18 @@
                     case Approval.ApprovalStatus.ACCEPTED => { <span class="label label-success">Goedgekeurd</span> }
                 }
             </td>
-            <td>@if(approval.getAdmin != null) {
-                <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin</a>
-            } else { / }</td>
+            <td>
+                @if(approval.getAdmin != null) {
+                    <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin</a>
+                } else {
+                    /
+                }
+            </td>
             <td>@approval.getSubmitted.toString("dd-MM-YYYY")</td>
             <td>
                 <div class="btn-group btn-group-xs">
                     <a class="btn btn-info" href="@routes.InfoSessions.approvalAdmin(approval.getId)">Admin toewijzen</a>
-                    @if(approval.getAdmin == null){
+                    @if(approval.getAdmin == null) {
                         <button class="btn btn-primary" disabled>Afronden</button>
                     } else {
                         <a class="btn btn-primary" href="@routes.InfoSessions.approvalDetails(approval.getId)">

@@ -547,8 +547,7 @@ public class InfoSessions extends Controller {
             return redirect(routes.Dashboard.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
-            Iterable<Approval> approvals = context.getApprovalDAO().getPendingApprovals(user.getId());
-            if (approvals.iterator().hasNext()) {
+            if (context.getApprovalDAO().hasApprovalPending(user.getId())){
                 flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                 return redirect(routes.Dashboard.index());
             } else {
@@ -577,8 +576,7 @@ public class InfoSessions extends Controller {
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
             if (form.hasErrors()) {
                 User currentUser = context.getUserDAO().getUserPartial(CurrentUser.getId());
-                Iterable<Approval> approvals = context.getApprovalDAO().getPendingApprovals(CurrentUser.getId());
-                if (approvals.iterator().hasNext()) {
+                if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())){
                     flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                     return redirect(routes.Dashboard.index());
                 } else {

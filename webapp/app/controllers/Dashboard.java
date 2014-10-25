@@ -26,7 +26,7 @@ public class Dashboard extends Controller {
                         Form.form(Reserve.IndexModel.class),
                         Profile.getProfileCompleteness(currentUser),
                         InfoSessions.didUserGoToInfoSession(),
-                        DataAccess.getInjectedContext().getApprovalDAO().getPendingApprovals(currentUser.getId()).iterator().hasNext()
+                        DataAccess.getInjectedContext().getApprovalDAO().hasApprovalPending(currentUser.getId())
                 )
         );
     }
