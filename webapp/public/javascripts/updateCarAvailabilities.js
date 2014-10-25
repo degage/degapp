@@ -61,7 +61,7 @@ function newRow() {
         '</td>' +
         '<td>' +
             '<form class="form-inline">' +
-            '<select class="endDayOfWeek">' +
+            '<select class="endDayOfWeek form-control">' +
                 '<option value="2" >Maandag</option>' +
                 '<option value="3" >Dinsdag</option>' +
                 '<option value="4" >Woensdag</option>' +

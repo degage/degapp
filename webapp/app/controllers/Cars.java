@@ -313,9 +313,7 @@ public class Cars extends Controller {
 
 
             if (car != null) {
-                return redirect(
-                        routes.Cars.showCars()
-                );
+                return redirect( routes.Cars.detail(car.getId()) );
             } else {
                 carForm.error("Failed to add the car to the database. Contact administrator.");
                 // not needed?
@@ -484,11 +482,6 @@ public class Cars extends Controller {
         AvailabilityDAO availabilityDAO = DataAccess.getInjectedContext().getAvailabilityDAO();
         Car car = dao.getCar(carId);
 
-        if (car == null) {
-            flash("danger", "Car met ID=" + carId + " bestaat niet.");
-            return badRequest(userCarList());
-        }
-
         if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest(userCarList());
@@ -496,8 +489,9 @@ public class Cars extends Controller {
 
         String[] values = valuesString.split(";");
 
-        List<CarAvailabilityInterval> availabilitiesToAddOrUpdate = new ArrayList<>();
-        List<CarAvailabilityInterval> availabilitiesToDelete = new ArrayList<>();
+        List<CarAvailabilityInterval> availabilitiesToCreate = new ArrayList<>();
+        List<CarAvailabilityInterval> availabilitiesToUpdate = new ArrayList<>();
+        List<Integer> availabilitiesToDelete = new ArrayList<>();
 
         for (String value : values) {
             String[] vs = value.split(",");
@@ -514,11 +508,11 @@ public class Cars extends Controller {
                 String[] endHM = vs[4].split(":");
                 LocalTime endTime = new LocalTime(Integer.parseInt(endHM[0]), Integer.parseInt(endHM[1]));
                 if (id == 0) { // create
-                    availabilitiesToAddOrUpdate.add(new CarAvailabilityInterval(beginDay, beginTime, endDay, endTime));
+                    availabilitiesToCreate.add(new CarAvailabilityInterval(null, beginDay, beginTime, endDay, endTime));
                 } else if (id > 0) { // update
-                    availabilitiesToAddOrUpdate.add(new CarAvailabilityInterval(id, beginDay, beginTime, endDay, endTime));
+                    availabilitiesToUpdate.add(new CarAvailabilityInterval(id, beginDay, beginTime, endDay, endTime));
                 } else { // delete
-                    availabilitiesToDelete.add(new CarAvailabilityInterval(-id, beginDay, beginTime, endDay, endTime));
+                    availabilitiesToDelete.add(id);
                 }
             } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
                 flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
@@ -526,9 +520,12 @@ public class Cars extends Controller {
             }
         }
 
-        boolean autoMerge = mergeOverlappingAvailabilities(availabilitiesToAddOrUpdate, availabilitiesToDelete);
+        boolean autoMerge = false;
+        // TODO: check overlapping
+        // mergeOverlappingAvailabilities(availabilitiesToAddOrUpdate, availabilitiesToDelete);
 
-        availabilityDAO.addOrUpdateAvailabilities(car, availabilitiesToAddOrUpdate);
+        availabilityDAO.createAvailabilities(carId, availabilitiesToCreate);
+        availabilityDAO.updateAvailabilities(carId, availabilitiesToUpdate);
         availabilityDAO.deleteAvailabilties(availabilitiesToDelete);
 
         flash("success", "Je wijzigingen werden succesvol toegepast." + (autoMerge ? "<br />Overlappende intervallen werden automatisch samengevoegd." : ""));

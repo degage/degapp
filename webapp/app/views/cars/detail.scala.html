@@ -7,13 +7,13 @@
         <script>
         var route = myJsRoutes.controllers.Cars.showCarCostsPage;
         </script>
-        <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+        <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
         <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
         <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 
         <!-- For maps: -->
         <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
-        <script src="@routes.Assets.at("javascripts/maps-custom.js")" type="text/javascript"></script>
+        <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
 
         <script>
         function loadModal ( carId ) {
@@ -45,13 +45,13 @@
             });
         </script>
 
-        <script src="@routes.Assets.at("javascripts/updateCarAvailabilities.js")"></script>
+        <script src='@routes.Assets.at("javascripts/updateCarAvailabilities.js")'></script>
         <script>
             userpickerRoute = "@routes.UserPicker.getList()"
         </script>
-        <script src="@routes.Assets.at("javascripts/updateCarPrivileges.js")"></script>
+        <script src='@routes.Assets.at("javascripts/updateCarPrivileges.js")'></script>
         <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
-        <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+        <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
     }
     @stylesheets = {
         <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
@@ -74,24 +74,20 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Autodetails</h1>
-                @defining(DataProvider.getUserProvider().getUser()) { user =>
-                    @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
-                        @flashes()
+                @flashes()
 
-                        @if(car.getOwner.getId == CurrentUser.getId) {
-                            <div class="alert alert-info alert-dismissable">
-                                U bent eigenaar.
-                            </div>
-                        }
-                        @if(isAdmin || car.getOwner.getId == CurrentUser.getId) {
-                            <div class="panel panel-default">
-                                <div class="panel-body">
-                                    <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
-                                    <a class="btn btn-default btn-sm" href="@routes.Reports.getReservationsForOwner">Exporteer ritten</a>
-                                </div>
-                            </div>
-                        }
-                    }
+                @if(car.getOwner.getId == CurrentUser.getId) {
+                    <div class="alert alert-info alert-dismissable">
+                        U bent eigenaar.
+                    </div>
+                }
+                @if(CurrentUser.hasRole(UserRole.CAR_ADMIN) || car.getOwner.getId == CurrentUser.getId) {
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
+                            <a class="btn btn-default btn-sm" href="@routes.Reports.getReservationsForOwner">Exporteer ritten</a>
+                        </div>
+                    </div>
                 }
 
                 @detailPartial(car, mapDetails)
@@ -118,61 +114,61 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    @if(!availabilities.iterator.hasNext) {
-                                        <tr>
-                                            <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
-                                                Zolang je geen beschikbaarheid opgeeft, kan je auto steeds gereserveerd worden.
+                                    @foreach.trOrElse(availabilities){availability =>
+
+                                    @* TODO: a lot of the code below is repeated in javascripts/updateCarAvailabilities *@
+                                            <td class="hidden">
+                                                <input class="availability_id hidden" value="@availability.getId">
                                             </td>
-                                        </tr>
-                                    } else {
-                                        @foreach.tr(availabilities){availability =>
-                                                <td class="hidden">
-                                                    <input class="availability_id hidden" value="@availability.getId">
-                                                </td>
-                                                <td>
-                                                    <form class="form-inline">
-                                                        <select class="beginDayOfWeek form-control">
-                                                            <option value="2" @if(availability.getBeginDayOfWeek.getI == 2) { selected }>Maandag</option>
-                                                            <option value="3" @if(availability.getBeginDayOfWeek.getI == 3) { selected }>Dinsdag</option>
-                                                            <option value="4" @if(availability.getBeginDayOfWeek.getI == 4) { selected }>Woensdag</option>
-                                                            <option value="5" @if(availability.getBeginDayOfWeek.getI == 5) { selected }>Donderdag</option>
-                                                            <option value="6" @if(availability.getBeginDayOfWeek.getI == 6) { selected }>Vrijdag</option>
-                                                            <option value="7" @if(availability.getBeginDayOfWeek.getI == 7) { selected }>Zaterdag</option>
-                                                            <option value="1" @if(availability.getBeginDayOfWeek.getI == 1) { selected }>Zondag</option>
-                                                        </select>
-                                                    </form>
-                                                </td>
-                                                <td>
-                                                    <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">
-                                                        <input class="beginTime form-control input-md" size="5" type="text" value="@availability.getBeginTime.toString("HH:mm")" readonly>
-                                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <form class="form-inline">
-                                                        <select class="endDayOfWeek form-control">
-                                                            <option value="2" @if(availability.getEndDayOfWeek.getI == 2) { selected }>Maandag</option>
-                                                            <option value="3" @if(availability.getEndDayOfWeek.getI == 3) { selected }>Dinsdag</option>
-                                                            <option value="4" @if(availability.getEndDayOfWeek.getI == 4) { selected }>Woensdag</option>
-                                                            <option value="5" @if(availability.getEndDayOfWeek.getI == 5) { selected }>Donderdag</option>
-                                                            <option value="6" @if(availability.getEndDayOfWeek.getI == 6) { selected }>Vrijdag</option>
-                                                            <option value="7" @if(availability.getEndDayOfWeek.getI == 7) { selected }>Zaterdag</option>
-                                                            <option value="1" @if(availability.getEndDayOfWeek.getI == 1) { selected }>Zondag</option>
-                                                        </select>
-                                                    </form>
-                                                </td>
-                                                <td>
-                                                    <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">
-                                                        <input class="endTime form-control input-md" size="5" type="text" value='@availability.getEndTime.toString("HH:mm")' readonly>
-                                                        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group btn-group-xs">
-                                                        <button type="button" class="btn btn-danger" onclick="deleteAvailability(this)">Verwijderen</button>
-                                                    </div>
-                                                </td>
-                                        }
+                                            <td>
+                                                <form class="form-inline">
+                                                    <select class="beginDayOfWeek form-control">
+                                                        <option value="2" @if(availability.getBeginDayOfWeek.getI == 2) { selected }>Maandag</option>
+                                                        <option value="3" @if(availability.getBeginDayOfWeek.getI == 3) { selected }>Dinsdag</option>
+                                                        <option value="4" @if(availability.getBeginDayOfWeek.getI == 4) { selected }>Woensdag</option>
+                                                        <option value="5" @if(availability.getBeginDayOfWeek.getI == 5) { selected }>Donderdag</option>
+                                                        <option value="6" @if(availability.getBeginDayOfWeek.getI == 6) { selected }>Vrijdag</option>
+                                                        <option value="7" @if(availability.getBeginDayOfWeek.getI == 7) { selected }>Zaterdag</option>
+                                                        <option value="1" @if(availability.getBeginDayOfWeek.getI == 1) { selected }>Zondag</option>
+                                                    </select>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">
+                                                    <input class="beginTime form-control input-md" size="5" type="text" value='@availability.getBeginTime.toString("HH:mm")' readonly>
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <form class="form-inline">
+                                                    <select class="endDayOfWeek form-control">
+                                                        <option value="2" @if(availability.getEndDayOfWeek.getI == 2) { selected }>Maandag</option>
+                                                        <option value="3" @if(availability.getEndDayOfWeek.getI == 3) { selected }>Dinsdag</option>
+                                                        <option value="4" @if(availability.getEndDayOfWeek.getI == 4) { selected }>Woensdag</option>
+                                                        <option value="5" @if(availability.getEndDayOfWeek.getI == 5) { selected }>Donderdag</option>
+                                                        <option value="6" @if(availability.getEndDayOfWeek.getI == 6) { selected }>Vrijdag</option>
+                                                        <option value="7" @if(availability.getEndDayOfWeek.getI == 7) { selected }>Zaterdag</option>
+                                                        <option value="1" @if(availability.getEndDayOfWeek.getI == 1) { selected }>Zondag</option>
+                                                    </select>
+                                                </form>
+                                            </td>
+                                            <td>
+                                                <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">
+                                                    <input class="endTime form-control input-md" size="5" type="text" value='@availability.getEndTime.toString("HH:mm")' readonly>
+                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group btn-group-xs">
+                                                    <button type="button" class="btn btn-danger" onclick="deleteAvailability(this)">Verwijderen</button>
+                                                </div>
+                                            </td>
+                                    } {
+                                    <tr>
+                                        <td style="text-align : center ; background-color : #F0F0F0 ; padding : 8 px ;" colspan="7">
+                                            Zolang je geen explicieter beschikbaarheid opgeeft, kan je auto op elk moment gereserveerd worden.
+                                        </td>
+                                    </tr>
                                     }
                                     <tr>
                                         <td colspan="5">

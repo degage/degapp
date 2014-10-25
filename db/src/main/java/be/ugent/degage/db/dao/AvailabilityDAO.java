@@ -11,8 +11,9 @@ public interface AvailabilityDAO {
 
     public Iterable<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException;
 
-    public void addOrUpdateAvailabilities(Car car, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
+    public void updateAvailabilities(int carId, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
+    public void createAvailabilities(int carId, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
 
-    public void deleteAvailabilties(Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
+    public void deleteAvailabilties(Iterable<Integer> availabilities) throws DataAccessException;
 
 }
