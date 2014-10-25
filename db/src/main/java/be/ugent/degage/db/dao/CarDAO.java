@@ -23,10 +23,6 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
 
-    public Iterable<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException;
-    public void addOrUpdateAvailabilities(Car car, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
-    public void deleteAvailabilties(Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;
-
     public Iterable<User> getPrivileged(int carId) throws DataAccessException;
     public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException;
     public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException;

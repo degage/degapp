@@ -4,10 +4,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.AddressDAO;
-import be.ugent.degage.db.dao.CarCostDAO;
-import be.ugent.degage.db.dao.CarDAO;
-import be.ugent.degage.db.dao.FileDAO;
+import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import com.google.common.collect.Iterables;
 import controllers.util.Addresses;
@@ -482,6 +479,7 @@ public class Cars extends Controller {
     @InjectContext
     public static Result updateAvailabilities(int carId, String valuesString) {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        AvailabilityDAO availabilityDAO = DataAccess.getInjectedContext().getAvailabilityDAO();
         Car car = dao.getCar(carId);
 
         if (car == null) {
@@ -528,8 +526,8 @@ public class Cars extends Controller {
 
         boolean autoMerge = mergeOverlappingAvailabilities(availabilitiesToAddOrUpdate, availabilitiesToDelete);
 
-        dao.addOrUpdateAvailabilities(car, availabilitiesToAddOrUpdate);
-        dao.deleteAvailabilties(availabilitiesToDelete);
+        availabilityDAO.addOrUpdateAvailabilities(car, availabilitiesToAddOrUpdate);
+        availabilityDAO.deleteAvailabilties(availabilitiesToDelete);
 
         flash("success", "Je wijzigingen werden succesvol toegepast." + (autoMerge ? "<br />Overlappende intervallen werden automatisch samengevoegd." : ""));
         return redirect(routes.Cars.detail(car.getId()));
@@ -758,12 +756,13 @@ public class Cars extends Controller {
     public static Result detail(int carId) {
 
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        AvailabilityDAO availabilityDAO = DataAccess.getInjectedContext().getAvailabilityDAO();
         final Car car = dao.getCar(carId);
 
         if (car == null) {
             return badRequest(userCarList());
         } else {
-            return ok(detail.render(car, dao.getAvailabilities(carId), dao.getPrivileged(carId), null));
+            return ok(detail.render(car, availabilityDAO.getAvailabilities(carId), dao.getPrivileged(carId), null));
         }
     }
 
