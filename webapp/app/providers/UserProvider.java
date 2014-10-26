@@ -5,11 +5,8 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
-import be.ugent.degage.db.models.UserStatus;
 import db.CurrentUser;
 import play.cache.Cache;
-import play.mvc.Controller;
-import play.mvc.Http;
 
 /**
  * Created by Cedric on 2/20/14.

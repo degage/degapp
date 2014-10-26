@@ -8,6 +8,7 @@ import be.ugent.degage.db.models.Setting;
 import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -100,7 +101,7 @@ class JDBCSettingDAO extends AbstractDAO implements SettingDAO {
     public Iterable<Setting> getSettings() throws DataAccessException {
         try (Statement stat = createStatement();
                 ResultSet rs = stat.executeQuery(GET_SETTINGS_STATEMENT)){
-            List<Setting> settings = new ArrayList<>();
+            Collection<Setting> settings = new ArrayList<>();
             while (rs.next()) {
                 settings.add(
                         new Setting(rs.getString("setting_name"),

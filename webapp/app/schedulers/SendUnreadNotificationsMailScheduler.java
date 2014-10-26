@@ -1,11 +1,9 @@
 package schedulers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.SchedulerDAO;
 import be.ugent.degage.db.models.User;
 import notifiers.Notifier;
-import providers.DataProvider;
 
 import java.util.List;
 

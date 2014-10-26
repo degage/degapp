@@ -1,7 +1,6 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarAvailabilityInterval;
 
 /**

@@ -3,10 +3,7 @@ package be.ugent.degage.db.jdbc;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
@@ -53,7 +50,7 @@ class JDBCUserRoleDAO extends AbstractDAO implements UserRoleDAO {
             PreparedStatement ps = getUsersByRoleStatement.value();
             ps.setString(1, userRole.name());
             try (ResultSet rs = ps.executeQuery()) {
-                List<User> userList = new ArrayList<>();
+                Collection<User> userList = new ArrayList<>();
                 while (rs.next()) {
                     userList.add(JDBCUserDAO.populateUserPartial(rs, "users"));
                 }

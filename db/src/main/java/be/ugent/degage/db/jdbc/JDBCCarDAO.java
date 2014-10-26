@@ -467,7 +467,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         try {
             PreparedStatement ps = getPrivilegedStatement.value();
             ps.setInt(1, carId);
-            List<User> users = new ArrayList<>();
+            Collection<User> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     users.add(JDBCUserDAO.populateUserPartial(rs));

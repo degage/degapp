@@ -73,8 +73,7 @@ public class CommunicationProvider {
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 NotificationDAO dao = context.getNotificationDAO();
-                int unread_number = -1;
-                unread_number = dao.getNumberOfUnreadNotifications(userId);
+                int unread_number =  dao.getNumberOfUnreadNotifications(userId);
                 if (unread_number != -1) {
                     Cache.set(key, unread_number);
                     return unread_number;
@@ -146,8 +145,7 @@ public class CommunicationProvider {
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 MessageDAO dao = context.getMessageDAO();
-                int unread_number = -1;
-                unread_number = dao.getNumberOfUnreadMessages(userId);
+                int unread_number =  dao.getNumberOfUnreadMessages(userId);
                 if (unread_number != -1) {
                     Cache.set(key, unread_number);
                     return unread_number;

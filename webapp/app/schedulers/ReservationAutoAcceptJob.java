@@ -6,7 +6,6 @@ import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationStatus;
 import notifiers.Notifier;
-import providers.DataProvider;
 
 /**
  * Created by Cedric on 5/7/2014.

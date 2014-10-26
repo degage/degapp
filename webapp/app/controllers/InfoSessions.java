@@ -1,13 +1,10 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
 import controllers.util.FormHelper;
-import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -16,10 +13,8 @@ import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
 import play.data.DynamicForm;
 import play.data.Form;
-import play.libs.F;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.infosession.*;
 
@@ -873,7 +868,7 @@ public class InfoSessions extends Controller {
 
             for (InfoSession s : sessions) {
                 if (enrolled.getId() == s.getId()) {
-                    enrolled = s;
+                    enrolled = s; // TODO: what is happening here?
                     break;
                 }
             }
@@ -903,7 +898,7 @@ public class InfoSessions extends Controller {
 
             for (InfoSession s : sessions) {
                 if (enrolled.getId() == s.getId()) {
-                    enrolled = s;
+                    enrolled = s; //
                     break;
                 }
             }

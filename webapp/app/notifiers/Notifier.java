@@ -1,7 +1,6 @@
 package notifiers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.routes;
@@ -10,8 +9,6 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
 import providers.DataProvider;
-
-import java.util.List;
 
 
 /**

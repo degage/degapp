@@ -1,7 +1,6 @@
 package notifiers;
 import com.typesafe.plugin.MailerAPI;
 import com.typesafe.plugin.MailerPlugin;
-import play.Logger;
 import play.Play;
 
 /**

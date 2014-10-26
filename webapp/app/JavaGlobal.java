@@ -28,8 +28,9 @@ public class JavaGlobal {
             TemplateDAO dao = context.getTemplateDAO();
             StringBuilder sb = new StringBuilder();
             for (MailType type : MailType.values()) {
-                if (dao.getTemplate(type) == null)
-                    sb.append(type + ", ");
+                if (dao.getTemplate(type) == null) {
+                    sb.append(type).append(", ");
+                }
             }
             if (sb.length() > 0)
                 throw new RuntimeException("Missing database templates for: " + sb.toString());
