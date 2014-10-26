@@ -1,0 +1,11 @@
+@(value: String, options: (String,String)*)
+
+@* Options to be put inside a select-tag.
+
+// note: the original Play! implementation does not work, the value of the 'selected'-attribute is not generated
+// correctly.
+*@
+
+@options.map { v =>
+    @option(value,v._1){@v._2}
+}

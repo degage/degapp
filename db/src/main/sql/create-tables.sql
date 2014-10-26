@@ -199,10 +199,8 @@ CREATE VIEW `infosessions_extended` AS
 CREATE TABLE `caravailabilities` (
 	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
 	`car_availability_car_id` INT NOT NULL,
-	`car_availability_begin_day_of_week` INT NOT NULL,
-	`car_availability_begin_time` TIME NOT NULL,
-	`car_availability_end_day_of_week` INT NOT NULL,
-	`car_availability_end_time` TIME NOT NULL,
+	`car_availability_start` INT NOT NULL, -- seconds in range 0-604800
+	`car_availability_end` INT NOT NULL,  -- seconds in range ...start-1209600
 	PRIMARY KEY (`car_availability_id`),
 	FOREIGN KEY (`car_availability_car_id`) REFERENCES cars(`car_id`)
 );

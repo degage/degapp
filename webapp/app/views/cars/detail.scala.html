@@ -1,4 +1,4 @@
-@(car: Car, availabilities: Iterable[CarAvailabilityInterval], privilegedUsers: Iterable[User], mapDetails: Maps.MapDetails = null)
+@(car: Car, availabilities: Iterable[Availabilities.Availability], overlap: Boolean, privilegedUsers: Iterable[User], mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider
 @import db.CurrentUser
     @scripts = {
@@ -36,7 +36,7 @@
                 $('.datepicker').datetimepicker({
                     language: 'nl',
                     autoclose: 1,
-                    todayHighlight: 1,
+                    todayHighlight: 0,
                     startView: 1,
                     forceParse: 0,
                     showMeridian: 1,
@@ -59,6 +59,21 @@
         <link rel="stylesheet" href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")'>
         <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' >
     }
+
+    @dayOptions(value: String) = {
+       @options(value, "0" -> "Zondag", "1" -> "Maandag", "2" -> "Dinsdag", "3" -> "Woensdag", "4" -> "Donderdag", "5" -> "Vrijdag", "6" -> "Zaterdag")
+    }
+
+    @overlapMessage = {
+        @if(overlap){
+            <div class="alert alert-warning alert-dismissable">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                De opgegeven beschikbaarheid van de auto bevat overlappende gedeelten. Gelieve dit
+                te corrigeren.
+            </div>
+        }
+    }
+
 @app("Details Auto", stylesheets, scripts) {
     @defining(DataProvider.getUserProvider().getUser()) { user =>
 
@@ -75,7 +90,7 @@
             <div class="col-lg-12">
                 <h1 class="page-header">Autodetails</h1>
                 @flashes()
-
+                @overlapMessage
                 @if(car.getOwner.getId == CurrentUser.getId) {
                     <div class="alert alert-info alert-dismissable">
                         U bent eigenaar.
@@ -114,47 +129,36 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+
                                     @foreach.trOrElse(availabilities){availability =>
 
                                     @* TODO: a lot of the code below is repeated in javascripts/updateCarAvailabilities *@
                                             <td class="hidden">
-                                                <input class="availability_id hidden" value="@availability.getId">
+                                                <input class="availability_id hidden" value="@availability.id">
                                             </td>
                                             <td>
                                                 <form class="form-inline">
                                                     <select class="beginDayOfWeek form-control">
-                                                        <option value="2" @if(availability.getBeginDayOfWeek.getI == 2) { selected }>Maandag</option>
-                                                        <option value="3" @if(availability.getBeginDayOfWeek.getI == 3) { selected }>Dinsdag</option>
-                                                        <option value="4" @if(availability.getBeginDayOfWeek.getI == 4) { selected }>Woensdag</option>
-                                                        <option value="5" @if(availability.getBeginDayOfWeek.getI == 5) { selected }>Donderdag</option>
-                                                        <option value="6" @if(availability.getBeginDayOfWeek.getI == 6) { selected }>Vrijdag</option>
-                                                        <option value="7" @if(availability.getBeginDayOfWeek.getI == 7) { selected }>Zaterdag</option>
-                                                        <option value="1" @if(availability.getBeginDayOfWeek.getI == 1) { selected }>Zondag</option>
+                                                        @dayOptions(availability.startDay)
                                                     </select>
                                                 </form>
                                             </td>
                                             <td>
                                                 <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">
-                                                    <input class="beginTime form-control input-md" size="5" type="text" value='@availability.getBeginTime.toString("HH:mm")' readonly>
+                                                    <input class="beginTime form-control input-md" size="5" type="text" value='@availability.startTime' readonly>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 </div>
                                             </td>
                                             <td>
                                                 <form class="form-inline">
                                                     <select class="endDayOfWeek form-control">
-                                                        <option value="2" @if(availability.getEndDayOfWeek.getI == 2) { selected }>Maandag</option>
-                                                        <option value="3" @if(availability.getEndDayOfWeek.getI == 3) { selected }>Dinsdag</option>
-                                                        <option value="4" @if(availability.getEndDayOfWeek.getI == 4) { selected }>Woensdag</option>
-                                                        <option value="5" @if(availability.getEndDayOfWeek.getI == 5) { selected }>Donderdag</option>
-                                                        <option value="6" @if(availability.getEndDayOfWeek.getI == 6) { selected }>Vrijdag</option>
-                                                        <option value="7" @if(availability.getEndDayOfWeek.getI == 7) { selected }>Zaterdag</option>
-                                                        <option value="1" @if(availability.getEndDayOfWeek.getI == 1) { selected }>Zondag</option>
+                                                        @dayOptions(availability.endDay)
                                                     </select>
                                                 </form>
                                             </td>
                                             <td>
                                                 <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">
-                                                    <input class="endTime form-control input-md" size="5" type="text" value='@availability.getEndTime.toString("HH:mm")' readonly>
+                                                    <input class="endTime form-control input-md" size="5" type="text" value='@availability.endTime' readonly>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 </div>
                                             </td>
@@ -172,6 +176,7 @@
                                     }
                                     <tr>
                                         <td colspan="5">
+                                            @overlapMessage
                                             <div class="btn-group btn-group-xs">
                                                 <button type="button" class="btn btn-default" onclick="newAvailability(this)">Nieuw</button>
                                             </div>

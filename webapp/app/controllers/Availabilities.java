@@ -14,12 +14,90 @@ import play.mvc.Controller;
 import play.mvc.Result;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
  * Controller which is responsible for processing car availabilities. Works in concert with Cars controller.
  */
 public class Availabilities extends Controller {
+
+    private static final int SECONDS_IN_MINUTE = 60;
+    private static final int SECONDS_IN_HOUR = 3600;
+    private static final int SECONDS_IN_DAY = 24*SECONDS_IN_HOUR;
+    private static final int SECONDS_IN_WEEK = 7* SECONDS_IN_DAY;
+
+    /**
+     * Transfer object for use in 'detail' view
+     */
+    public static class Availability {
+        public String id;
+        public String startDay; // 0 is sunday
+        public String startTime;
+        public String endDay;
+        public String endTime;
+
+        /**
+         * Convert a CarAvailabilityInterval to an object of this type
+         */
+        public Availability (CarAvailabilityInterval interval) {
+            int minutes; // temporary variable
+
+            id = Integer.toString(interval.getId());
+
+            int start = interval.getStart();
+            startDay = Integer.toString ((start / SECONDS_IN_DAY) % 7);
+            minutes = (start % SECONDS_IN_DAY) / 60;
+            startTime = String.format("%02d:%02d", minutes / 60, minutes % 60);
+
+            int end = interval.getEnd();
+            endDay = Integer.toString ((end / SECONDS_IN_DAY) % 7);
+            minutes = (end % SECONDS_IN_DAY) / 60;
+            endTime = String.format("%02d:%02d", minutes / 60, minutes % 60);
+        }
+    }
+
+    static Iterable<Availability> convertToView (Iterable<CarAvailabilityInterval> list) {
+
+        Collection<Availability> result = new ArrayList<>();
+        for (CarAvailabilityInterval interval : list) {
+            result.add (new Availability(interval));
+        }
+        return result;
+    }
+
+    /**
+     * Create an interval from a string produced by javascript/updateCarAvailabilities.js
+     * @param str
+     * @return
+     */
+    private static CarAvailabilityInterval createInterval(String str) {
+        String[] vs = str.split(",");
+        if (vs.length != 5) {
+            return null;
+        }
+
+        int startDay = Integer.parseInt(vs[1]);
+        String[] startHM = vs[2].split(":");
+        int start = SECONDS_IN_DAY * startDay
+                + SECONDS_IN_HOUR * Integer.parseInt(startHM[0])
+                + SECONDS_IN_MINUTE * Integer.parseInt(startHM[1]);
+        int endDay = Integer.parseInt(vs[3]);
+        String[] endHM = vs[4].split(":");
+        int end = SECONDS_IN_DAY * endDay
+                + SECONDS_IN_HOUR * Integer.parseInt(endHM[0])
+                + SECONDS_IN_MINUTE * Integer.parseInt(endHM[1]);
+
+        if (end <= start) {
+            end += SECONDS_IN_WEEK;
+        }
+
+        return new CarAvailabilityInterval(
+                Integer.parseInt(vs[0]),
+                start,
+                end
+        );
+    }
 
     /**
      * Method: POST
@@ -40,162 +118,34 @@ public class Availabilities extends Controller {
 
         String[] values = valuesString.split(";");
 
-        List<CarAvailabilityInterval> availabilitiesToCreate = new ArrayList<>();
-        List<CarAvailabilityInterval> availabilitiesToUpdate = new ArrayList<>();
-        List<Integer> availabilitiesToDelete = new ArrayList<>();
+        Collection<CarAvailabilityInterval> availabilitiesToCreate = new ArrayList<>();
+        Collection<CarAvailabilityInterval> availabilitiesToUpdate = new ArrayList<>();
+        Collection<Integer> availabilitiesToDelete = new ArrayList<>();
+
 
         for (String value : values) {
-            String[] vs = value.split(",");
-            if (vs.length != 5) {
-                flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
-                return redirect(routes.Cars.detail(carId));
-            }
             try {
-                int id = Integer.parseInt(vs[0]);
-                DayOfWeek beginDay = DayOfWeek.getDayFromInt(Integer.parseInt(vs[1]));
-                String[] beginHM = vs[2].split(":");
-                LocalTime beginTime = new LocalTime(Integer.parseInt(beginHM[0]), Integer.parseInt(beginHM[1]));
-                DayOfWeek endDay = DayOfWeek.getDayFromInt(Integer.parseInt(vs[3]));
-                String[] endHM = vs[4].split(":");
-                LocalTime endTime = new LocalTime(Integer.parseInt(endHM[0]), Integer.parseInt(endHM[1]));
+                CarAvailabilityInterval interval = createInterval(value);
+                int id = interval.getId();
                 if (id == 0) { // create
-                    availabilitiesToCreate.add(new CarAvailabilityInterval(null, beginDay, beginTime, endDay, endTime));
+                    availabilitiesToCreate.add(interval);
                 } else if (id > 0) { // update
-                    availabilitiesToUpdate.add(new CarAvailabilityInterval(id, beginDay, beginTime, endDay, endTime));
+                    availabilitiesToUpdate.add(interval);
                 } else { // delete
-                    availabilitiesToDelete.add(id);
+                    availabilitiesToDelete.add(- id);
                 }
-            } catch (ArrayIndexOutOfBoundsException | NumberFormatException e) {
+            } catch (Exception e) {
                 flash("error", "Er is een fout gebeurd bij het doorgeven van de beschikbaarheidswaarden.");
                 return redirect(routes.Cars.detail(carId));
             }
         }
-
-        boolean autoMerge = false;
-        // TODO: check overlapping
-        // mergeOverlappingAvailabilities(availabilitiesToAddOrUpdate, availabilitiesToDelete);
 
         availabilityDAO.createAvailabilities(carId, availabilitiesToCreate);
         availabilityDAO.updateAvailabilities(carId, availabilitiesToUpdate);
         availabilityDAO.deleteAvailabilties(availabilitiesToDelete);
 
-        flash("success", "Je wijzigingen werden succesvol toegepast." + (autoMerge ? "<br />Overlappende intervallen werden automatisch samengevoegd." : ""));
-        return redirect(routes.Cars.detail(car.getId()));
-    }
-
-    private static boolean mergeOverlappingAvailabilities(List<CarAvailabilityInterval> addOrUpdate, List<CarAvailabilityInterval> delete) {
-        boolean adapted = false;
-        boolean repeat = true;
-
-        while (repeat) {
-            repeat = false;
-            repeatLoop:
-            for (int i = 0; i < addOrUpdate.size(); i++) {
-                for (int j = i + 1; j < addOrUpdate.size(); j++) {
-                    CarAvailabilityInterval interval1 = addOrUpdate.get(i);
-                    CarAvailabilityInterval interval2 = addOrUpdate.get(j);
-
-                    CarAvailabilityInterval merged = mergeIntervals(interval1, interval2);
-
-                    if (merged != null) {
-                        if (interval1.getId() != null)
-                            delete.add(interval1);
-
-                        if (interval2.getId() != null)
-                            delete.add(interval2);
-
-                        addOrUpdate.remove(interval1);
-                        addOrUpdate.remove(interval2);
-
-                        addOrUpdate.add(merged);
-
-                        adapted = true;
-                        repeat = true;
-                        break repeatLoop;
-                    }
-                }
-            }
-        }
-
-        return adapted;
-    }
-
-    private static CarAvailabilityInterval mergeIntervals(CarAvailabilityInterval interval1, CarAvailabilityInterval interval2) {
-        int[] interval1Days = {interval1.getBeginDayOfWeek().getI(), interval1.getEndDayOfWeek().getI()};
-        LocalTime[] interval1Times = {interval1.getBeginTime(), interval1.getEndTime()};
-
-        int[] interval2Days = {interval2.getBeginDayOfWeek().getI(), interval2.getEndDayOfWeek().getI()};
-        LocalTime[] interval2Times = {interval2.getBeginTime(), interval2.getEndTime()};
-
-        interval1Days = refactorWeekDays(interval1Days, interval1Times);
-        interval2Days = refactorWeekDays(interval2Days, interval2Times);
-
-        // Interval covers any time span
-        if (interval1Days[0] == interval1Days[1] && interval1Times[0].equals(interval1Times[1]))
-            return interval1;
-        if (interval2Days[0] == interval2Days[1] && interval2Times[0].equals(interval2Times[1]))
-            return interval2;
-
-        if (isAfter(interval1Days[1], interval1Times[1], interval2Days[0], interval2Times[0], true)) {
-            if (isBefore(interval1Days[0], interval1Times[0], interval2Days[0], interval2Times[0], true)) {
-                if (isAfter(interval1Days[1], interval1Times[1], interval2Days[1], interval2Times[1], true)) {
-                    // Interval 1 comprises interval 2
-                    return interval1;
-                } else if (interval2Days[1] < 7 || isAfter(interval1Days[0], interval1Times[0], interval2Days[1] % 7, interval2Times[1], false)) {
-                    // End of interval 1 overlaps with beginning of interval 2
-                    return new CarAvailabilityInterval(interval1.getBeginDayOfWeek(), interval1.getBeginTime(), interval2.getEndDayOfWeek(), interval2.getEndTime());
-                } else {
-                    // Combination of intervals covers any time span
-                    return new CarAvailabilityInterval(interval1.getBeginDayOfWeek(), interval1.getBeginTime(), interval1.getBeginDayOfWeek(), interval1.getBeginTime());
-                }
-            } else if (isAfter(interval1Days[0], interval1Times[0], interval2Days[1], interval2Times[1], false)) {
-                if (interval1Days[1] > 6 && isAfter(interval1Days[1] % 7, interval1Times[1], interval2Days[0], interval2Times[0], true)) {
-                    // End of interval 1 overlaps with beginning of interval 2
-                    return new CarAvailabilityInterval(interval1.getBeginDayOfWeek(), interval1.getBeginTime(), interval2.getEndDayOfWeek(), interval2.getEndTime());
-                } else {
-                    // Intervals do not overlap
-                    return null;
-                }
-            } else if (isAfter(interval1Days[1], interval1Times[1], interval2Days[1], interval2Times[1], false)) {
-                // End of interval 2 overlaps with beginning of interval 1
-                return new CarAvailabilityInterval(interval2.getBeginDayOfWeek(), interval2.getBeginTime(), interval1.getEndDayOfWeek(), interval1.getEndTime());
-            } else {
-                // Interval 2 comprises interval 1
-                return interval2;
-            }
-        } else if (interval2Days[1] > 6 && isBefore(interval1Days[0], interval1Times[0], interval2Days[1] % 7, interval2Times[1], true)) {
-            // End of interval 2 overlaps with beginning of interval 1
-            return new CarAvailabilityInterval(interval2.getBeginDayOfWeek(), interval2.getBeginTime(), interval1.getEndDayOfWeek(), interval1.getEndTime());
-        } else {
-            // Intervals do not overlap
-            return null;
-        }
-    }
-
-    // Is day1 - time1 before (or equal to) day2 - time2
-    private static boolean isBefore(int day1, LocalTime time1, int day2, LocalTime time2, boolean orEqual) {
-        return day1 < day2 || (day1 == day2 && (time1.isBefore(time2) || (orEqual && time1.equals(time2))));
-    }
-
-    private static boolean isBefore(int day1, LocalTime time1, int day2, LocalTime time2) {
-        return isBefore(day1, time1, day2, time2, false);
-    }
-
-    // Is day1 - time1 after (or equal to) day2 - time2
-    private static boolean isAfter(int day1, LocalTime time1, int day2, LocalTime time2, boolean orEqual) {
-        return !isBefore(day1, time1, day2, time2, !orEqual);
-    }
-
-    private static boolean isAfter(int day1, LocalTime time1, int day2, LocalTime time2) {
-        return isAfter(day1, time1, day2, time2, false);
-    }
-
-    private static int[] refactorWeekDays(int[] days, LocalTime[] times) {
-        days[0]--;
-        days[1]--; // Easier for modular arithmetic
-        if (isAfter(days[0], times[0], days[1], times[1]))
-            days[1] += 7;
-        return days;
+        flash("success", "Je wijzigingen werden met success toegepast.");
+        return redirect(routes.Cars.detail(carId));
     }
 
 }

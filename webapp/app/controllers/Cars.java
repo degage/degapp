@@ -581,9 +581,17 @@ public class Cars extends Controller {
         final Car car = dao.getCar(carId);
 
         if (car == null) {
-            return badRequest(userCarList());
+            return badRequest();
         } else {
-            return ok(detail.render(car, availabilityDAO.getAvailabilities(carId), dao.getPrivileged(carId), null));
+            Iterable<CarAvailabilityInterval> list = availabilityDAO.getAvailabilities(carId);
+
+            return ok(detail.render(
+                    car,
+                    Availabilities.convertToView(list),
+                    CarAvailabilityInterval.containsOverlap (list),
+                    dao.getPrivileged(carId),
+                    null)
+            );
         }
     }
 

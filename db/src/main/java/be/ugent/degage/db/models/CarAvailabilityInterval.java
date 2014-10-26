@@ -3,25 +3,19 @@ package be.ugent.degage.db.models;
 import org.joda.time.LocalTime;
 
 /**
- * Created by HannesM on 28/04/14.
+ * Represents an interval a car may be available
  */
 public class CarAvailabilityInterval {
-    private Integer id;
-    private DayOfWeek beginDayOfWeek;
-    private LocalTime beginTime;
-    private DayOfWeek endDayOfWeek;
-    private LocalTime endTime;
 
-    public CarAvailabilityInterval(DayOfWeek beginDayOfWeek, LocalTime beginTime, DayOfWeek endDayOfWeek, LocalTime endTime) {
-        this(null, beginDayOfWeek, beginTime, endDayOfWeek, endTime);
-    }
+    private int id;
 
-    public CarAvailabilityInterval(Integer id, DayOfWeek beginDayOfWeek, LocalTime beginTime, DayOfWeek endDayOfWeek, LocalTime endTime) {
+    private int start; // start time, in seconds sinds sunday 00:00
+    private int end;   // end time, in seconds since sunday 00:00
+
+    public CarAvailabilityInterval(int id, int start, int end) {
         this.id = id;
-        this.beginDayOfWeek = beginDayOfWeek;
-        this.beginTime = beginTime;
-        this.endDayOfWeek = endDayOfWeek;
-        this.endTime = endTime;
+        this.start = start;
+        this.end = end;
     }
 
     public Integer getId() {
@@ -32,37 +26,43 @@ public class CarAvailabilityInterval {
         this.id = id;
     }
 
-    public DayOfWeek getBeginDayOfWeek() {
-        return beginDayOfWeek;
+    public int getStart() {
+        return start;
     }
 
-    public void setBeginDayOfWeek(DayOfWeek beginDayOfWeek) {
-        this.beginDayOfWeek = beginDayOfWeek;
+    public int getEnd() {
+        return end;
     }
 
-    public LocalTime getBeginTime() {
-        return beginTime;
+    /**
+     * Check whether this interval overlaps with the given interval
+     */
+    public boolean overlaps (CarAvailabilityInterval other) {
+        return other.start < this.end && this.start < other.end;
     }
 
-    public void setBeginTime(LocalTime beginTime) {
-        this.beginTime = beginTime;
+    public static final int SECONDS_IN_WEEK = 7*24*3600;
+
+    /**
+     * Check whether this interval overlaps cyclically with the given interval
+     */
+    public boolean overlapsCyclically(CarAvailabilityInterval other) {
+        return other.start < this.end && this.start < other.end
+                || other.start + SECONDS_IN_WEEK < this.end && this.start < other.end + SECONDS_IN_WEEK
+                || other.start < this.end + SECONDS_IN_WEEK && this.start + SECONDS_IN_WEEK < other.end;
     }
 
-    public DayOfWeek getEndDayOfWeek() {
-        return endDayOfWeek;
+    /**
+     * Check whether there is a (cyclic) overlap within a (short) list of intervals
+     */
+    public static boolean containsOverlap (Iterable<CarAvailabilityInterval> list) {
+        for (CarAvailabilityInterval interval1 : list) {
+            for (CarAvailabilityInterval interval2 : list) {
+                if (interval1 != interval2 && interval1.overlapsCyclically(interval2)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
-
-    public void setEndDayOfWeek(DayOfWeek endDayOfWeek) {
-        this.endDayOfWeek = endDayOfWeek;
-    }
-
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-
 }

@@ -26,7 +26,7 @@ function newAvailability(e) {
     $('.datepicker').datetimepicker({
         language: 'nl',
         autoclose: 1,
-        todayHighlight: 1,
+        todayHighlight: 0,
         startView: 1,
         forceParse: 0,
         showMeridian: 1,
@@ -43,13 +43,13 @@ function newRow() {
         '<td>' +
             '<form class="form-inline">' +
             '<select class="beginDayOfWeek form-control">' +
-                '<option value="2" >Maandag</option>' +
-                '<option value="3" >Dinsdag</option>' +
-                '<option value="4" >Woensdag</option>' +
-                '<option value="5" >Donderdag</option>' +
-                '<option value="6" >Vrijdag</option>' +
-                '<option value="7" >Zaterdag</option>' +
-                '<option value="1" >Zondag</option>' +
+                '<option value="0" >Zondag</option>' +
+                '<option value="1" >Maandag</option>' +
+                '<option value="2" >Dinsdag</option>' +
+                '<option value="3" >Woensdag</option>' +
+                '<option value="4" >Donderdag</option>' +
+                '<option value="5" >Vrijdag</option>' +
+                '<option value="6" >Zaterdag</option>' +
             '</select>' +
             '</form>' +
         '</td>' +
@@ -62,13 +62,13 @@ function newRow() {
         '<td>' +
             '<form class="form-inline">' +
             '<select class="endDayOfWeek form-control">' +
-                '<option value="2" >Maandag</option>' +
-                '<option value="3" >Dinsdag</option>' +
-                '<option value="4" >Woensdag</option>' +
-                '<option value="5" >Donderdag</option>' +
-                '<option value="6" >Vrijdag</option>' +
-                '<option value="7" >Zaterdag</option>' +
-                '<option value="1" >Zondag</option>' +
+                '<option value="0" >Zondag</option>' +
+                '<option value="1" >Maandag</option>' +
+                '<option value="2" >Dinsdag</option>' +
+                '<option value="3" >Woensdag</option>' +
+                '<option value="4" >Donderdag</option>' +
+                '<option value="5" >Vrijdag</option>' +
+                '<option value="6" >Zaterdag</option>' +
             '</select>' +
             '</form>' +
         '</td>' +
@@ -104,7 +104,7 @@ function updateCarAvailabilities(carId) {
         values = addValue(values, value);
     }
 
-     myJsRoutes.controllers.Cars.updateAvailabilities(carId, values).ajax({
+     myJsRoutes.controllers.Availabilities.updateAvailabilities(carId, values).ajax({
          success : function() {
              location.reload();
              scroll(0,0);
