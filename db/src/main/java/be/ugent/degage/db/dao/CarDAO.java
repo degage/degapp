@@ -27,10 +27,13 @@ public interface CarDAO {
     public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException;
     public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException;
 
+    /**
+     * Return a list of all cars, with full information (in order to export it to a spread sheet)
+     */
+    public Iterable<Car> listAllCars () throws DataAccessException;
+
     public int getAmountOfCars(Filter filter) throws DataAccessException;
 
-    // TODO: List -> Iterable
-    public List<Car> getCarList(int page, int pageSize) throws DataAccessException;
     public List<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     // newer version - uses shorter SQL

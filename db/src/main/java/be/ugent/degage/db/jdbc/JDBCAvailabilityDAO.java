@@ -3,13 +3,10 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.AvailabilityDAO;
 import be.ugent.degage.db.models.CarAvailabilityInterval;
-import be.ugent.degage.db.models.DayOfWeek;
-import org.joda.time.LocalTime;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Time;
 import java.util.ArrayList;
 import java.util.List;
 

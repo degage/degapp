@@ -1,7 +1,5 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.LocalTime;
-
 /**
  * Represents an interval a car may be available
  */

@@ -37,6 +37,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "FROM cars JOIN users ON car_owner_user_id = user_id " +
             "WHERE car_name LIKE ? AND car_brand LIKE ? ";
 
+
     public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
             "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
             "AND cars.car_gps >= ? AND cars.car_hook >= ? AND cars.car_seats >= ? AND addresses.address_zipcode LIKE ? AND cars.car_fuel LIKE ? " +
@@ -585,17 +586,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
-    /**
-     * Get a carlist, with the default ordering and without filtering
-     * @param page The page you want to see
-     * @param pageSize The page size
-     * @return The page of list of cars
-     */
-    @Override
-    public List<Car> getCarList(int page, int pageSize) throws DataAccessException {
-        return getCarList(FilterField.CAR_NAME, true, page, pageSize, null);
-    }
-
     private LazyStatement getCarListPageByNameAscStatement = new LazyStatement (
             CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
     );
@@ -701,6 +691,70 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             throw new DataAccessException("Could not retrieve a list of cars", ex);
         }
     }
+
+    public static final String LIST_ALL_CARS_QUERY =
+            "SELECT car_id, car_name, car_brand, car_type," +
+                "address_id, address_city, address_zipcode, address_street, " +
+                "address_street_number, address_street_bus, address_country, " +
+                "car_seats, car_doors, car_year, car_manual, car_gps, car_hook," +
+                "car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km," +
+                "car_comments, car_active, " +
+                "insurance_id, insurance_name, insurance_expiration, " +
+                "insurance_contract_id, insurance_bonus_malus, " +
+                "details_id, details_car_license_plate, details_car_chassis_number, " +
+                "user_id, user_firstname, user_lastname, user_phone, user_email, user_status " +
+            "FROM cars " +
+            "LEFT JOIN addresses ON address_id=car_location " +
+            "LEFT JOIN users ON user_id=car_owner_user_id " +
+            "LEFT JOIN technicalcardetails ON details_id = car_id " +
+            "LEFT JOIN carinsurances ON insurance_id = car_id " +
+            "ORDER BY car_name";
+
+    @Override
+    public Iterable<Car> listAllCars() throws DataAccessException {
+        try (Statement stat = createStatement();
+             ResultSet rs = stat.executeQuery(LIST_ALL_CARS_QUERY)) {
+            Collection<Car> cars = new ArrayList<>();
+            while (rs.next()) {
+                Car result = new Car(
+                        rs.getInt("car_id"),
+                        rs.getString("car_name"),
+                        rs.getString("car_brand"),
+                        rs.getString("car_type"),
+                        JDBCAddressDAO.populateAddress(rs),
+                        rs.getObject("car_seats", Integer.class),
+                        rs.getObject("car_doors", Integer.class),
+                        rs.getObject("car_year", Integer.class),
+                        rs.getBoolean ("car_manual"),
+                        rs.getBoolean ("car_gps"),
+                        rs.getBoolean ("car_hook"),
+                        CarFuel.valueOf(rs.getString("car_fuel")),
+                        rs.getObject("car_fuel_economy", Integer.class),
+                        rs.getObject("car_estimated_value", Integer.class),
+                        rs.getObject("car_owner_annual_km", Integer.class),
+                        new TechnicalCarDetails(
+                                rs.getString("details_car_license_plate"),
+                                null,
+                                rs.getString("details_car_chassis_number")
+                        ),
+                        new CarInsurance(
+                                rs.getString("insurance_name"),
+                                rs.getDate("insurance_expiration"),
+                                rs.getObject("insurance_bonus_malus", Integer.class),
+                                rs.getObject("insurance_contract_id", Integer.class)
+                        ),
+                        JDBCUserDAO.populateUserPartial(rs),
+                        rs.getString ("car_comments")
+                );
+                result.setActive(rs.getBoolean("car_active"));
+                cars.add(result);
+            }
+            return cars;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
+
 
     private LazyStatement getCarsOfUserStatement = new LazyStatement (CAR_QUERY + " WHERE user_id=?");
 

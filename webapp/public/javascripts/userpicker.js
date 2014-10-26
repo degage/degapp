@@ -1,5 +1,7 @@
 $(document).ready(initUserPicker());
 
+// note: this is also used for cars
+
 function initUserPicker() {
     $(".userpicker > input[type=text]").on("input", function() {
         var userpicker = $(this).parent();

@@ -7,6 +7,7 @@ import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.dao.UserDAO;
+import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
 import db.DataAccess;
@@ -21,6 +22,7 @@ import views.html.reports;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -228,15 +230,14 @@ public class Reports extends Controller {
     @InjectContext
     public static Result getCars() {
         File file = new File("cars.xlsx");
-        CarDAO carDAO = DataAccess.getContext().getCarDAO();
-        Filter filter = Pagination.parseFilter("");
-        List<Car> carList = carDAO.getCarList(FilterField.CAR_NAME, true, 1, carDAO.getAmountOfCars(filter), filter);
+        Iterable<Car> carList = DataAccess.getContext().getCarDAO().listAllCars();
         try (FileOutputStream out = new FileOutputStream(file)) {
             Workbook wb = new XSSFWorkbook();
             CreationHelper createHelper = wb.getCreationHelper();
-            Sheet s = wb.createSheet("Gebruikers");
-            int rNum = 0;
-            Row row = s.createRow(rNum);
+            Sheet s = wb.createSheet("Auto's");
+
+            // header
+            Row row = s.createRow(0);
             String[] header = {"Id", "Naam", "Merk", "Type", "Straat (locatie)", "Huisnummer (locatie)",
                     "Postcode (locatie)", "Stad (locatie)", "Plaatsen", "Deuren", "Bouwjaar", "Manueel", "Gps",
                     "Trekhaak", "Brandstof", "Verbuik (l/100km)", "Geschatte marktprijs",
@@ -247,24 +248,22 @@ public class Reports extends Controller {
                 Cell cell = row.createCell(i);
                 cell.setCellValue(header[i]);
             }
-            rNum++;
-            Car car = null;
-            for (int i = 0; i < carList.size(); i++) {
-                car = carList.get(i);
-                row = s.createRow(i + 1);
+
+            // contents
+            int rowNumber = 1;
+            for (Car car : carList) {
+                row = s.createRow(rowNumber);
+
                 int j = 0;
                 row.createCell(j++).setCellValue(car.getId());
                 row.createCell(j++).setCellValue(car.getName());
                 row.createCell(j++).setCellValue(car.getBrand());
                 row.createCell(j++).setCellValue(car.getType());
-                if (car.getLocation() != null) {
-                    row.createCell(j++).setCellValue(car.getLocation().getStreet());
-                    row.createCell(j++).setCellValue(car.getLocation().getNumber());
-                    row.createCell(j++).setCellValue(car.getLocation().getZip());
-                    row.createCell(j++).setCellValue(car.getLocation().getCity());
-                } else {
-                    j += 4;
-                }
+
+                row.createCell(j++).setCellValue(car.getLocation().getStreet());
+                row.createCell(j++).setCellValue(car.getLocation().getNumber());
+                row.createCell(j++).setCellValue(car.getLocation().getZip());
+                row.createCell(j++).setCellValue(car.getLocation().getCity());
 
                 row.createCell(j++).setCellValue(car.getSeats());
                 row.createCell(j++).setCellValue(car.getDoors());
@@ -276,28 +275,33 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getFuelEconomy()).toString());
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getEstimatedValue()).toString());
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getOwnerAnnualKm()).toString());
-                if (car.getTechnicalCarDetails() != null) {
-                    row.createCell(j++).setCellValue(car.getTechnicalCarDetails().getLicensePlate());
-                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getTechnicalCarDetails().getChassisNumber()).toString());
+
+                row.createCell(j++).setCellValue(car.getTechnicalCarDetails().getLicensePlate());
+                row.createCell(j++).setCellValue(checkNotNullOrZero(car.getTechnicalCarDetails().getChassisNumber()).toString());
+
+                row.createCell(j++).setCellValue(car.getInsurance().getName());
+                row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getPolisNr()).toString());
+
+                // format as date
+
+                CellStyle cellStyle = wb.createCellStyle();
+                cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
+                Cell cell = row.createCell(j++);
+                Date expiration = car.getInsurance().getExpiration();
+                if (expiration != null) {
+                    cell.setCellValue(expiration);
                 } else {
-                    j += 2;
+                    cell.setCellValue("");
                 }
-                if (car.getInsurance() != null) {
-                    row.createCell(j++).setCellValue(car.getInsurance().getName());
-                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getPolisNr()).toString());
-                    Cell cell;
-                    CellStyle cellStyle = wb.createCellStyle();
-                    cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
-                    cell = row.createCell(j++);
-                    cell.setCellValue(car.getInsurance().getExpiration());
-                    cell.setCellStyle(cellStyle);
-                    row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getBonusMalus()).toString());
-                } else {
-                    j += 4;
-                }
+                cell.setCellStyle(cellStyle);
+
+                row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getBonusMalus()).toString());
+
                 row.createCell(j++).setCellValue(car.getOwner().getId());
                 row.createCell(j++).setCellValue(car.getComments());
                 row.createCell(j++).setCellValue(car.isActive());
+
+                rowNumber++;
             }
             wb.write(out);
             return ok(file, file.getName());
