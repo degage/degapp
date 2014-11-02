@@ -1,7 +1,7 @@
 package be.ugent.degage.db.models;
 
 /**
- * Represents an interval a car may be available
+ * Represents an interval in which a car is not available
  */
 public class CarAvailabilityInterval {
 

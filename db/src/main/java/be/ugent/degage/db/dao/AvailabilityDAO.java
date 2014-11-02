@@ -8,6 +8,9 @@ import be.ugent.degage.db.models.CarAvailabilityInterval;
  */
 public interface AvailabilityDAO {
 
+    /**
+     * Returns the intervals a car is <b>not</b> available
+     */
     public Iterable<CarAvailabilityInterval> getAvailabilities(int carId) throws DataAccessException;
 
     public void updateAvailabilities(int carId, Iterable<CarAvailabilityInterval> availabilities) throws DataAccessException;

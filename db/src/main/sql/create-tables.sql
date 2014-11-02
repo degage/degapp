@@ -196,6 +196,7 @@ CREATE VIEW `infosessions_extended` AS
         LEFT JOIN infosessionenrollees USING (infosession_id)
     GROUP BY infosession_id;
 
+-- Keeps track of intervals where cars are NOT available
 CREATE TABLE `caravailabilities` (
 	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
 	`car_availability_car_id` INT NOT NULL,
