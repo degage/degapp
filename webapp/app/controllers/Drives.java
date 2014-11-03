@@ -561,21 +561,12 @@ public class Drives extends Controller {
      * Private method to determine whether the user is owner of the car belonging to a reservation.
      *
      * @param context     the data access context required to communicate with the database
-     * @param userId        the user who is possibly the owner of the car
+     * @param userId      the user who is possibly the owner of the car
      * @param reservation the reservation containing the car
      * @return true if the user is the owner, false otherwise
      */
     private static boolean isOwnerOfReservedCar(DataAccessContext context, int userId, Reservation reservation) {
-        CarDAO cdao = context.getCarDAO();
-        List<Car> cars = cdao.getCarsOfUser(userId);
-        boolean isOwner = false;
-        int index = 0;
-        while (!isOwner && index < cars.size()) {
-            if (cars.get(index).getId() == reservation.getCar().getId())
-                isOwner = true;
-            index++;
-        }
-        return isOwner;
+        return context.getCarDAO().isCarOfUser(reservation.getCar().getId(), userId);
     }
 
     private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, int userId, Reservation reservation) {
@@ -593,7 +584,7 @@ public class Drives extends Controller {
      * Private method to determine whether the user is loaner of the car belonging to a reservation.
      *
      * @param reservation the reservation containing the car
-     * @param userId        the user who is possibly the loaner of the car
+     * @param userId      the user who is possibly the loaner of the car
      * @return true if the user is the owner, false otherwise
      */
     private static boolean isLoaner(Reservation reservation, int userId) {

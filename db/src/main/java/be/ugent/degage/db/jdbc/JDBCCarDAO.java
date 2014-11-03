@@ -13,7 +13,6 @@ import be.ugent.degage.db.models.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  *
@@ -21,23 +20,13 @@ import java.util.List;
  */
 class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
-    // TODO: replace * by actual fields
-    public static final String CAR_QUERY = "SELECT * FROM cars " +
-            "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
-            "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
-            "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
-            "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
-            "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
-            "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
-            "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id"; // TODO: multiple records in caravailabilities
-
     public static final String LIST_CAR_QUERY =
             "SELECT car_id, car_name, car_brand, car_active, " +
             "       user_id, user_firstname, user_lastname, user_phone, user_email, user_status " +
             "FROM cars JOIN users ON car_owner_user_id = user_id " +
             "WHERE car_name LIKE ? AND car_brand LIKE ? ";
 
-
+/*
     public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
             "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
             "AND cars.car_gps >= ? AND cars.car_hook >= ? AND cars.car_seats >= ? AND addresses.address_zipcode LIKE ? AND cars.car_fuel LIKE ? " +
@@ -123,7 +112,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         ps.setString(start+27, filter.getValue(FilterField.FROM));
         ps.setString(start+28, filter.getValue(FilterField.FROM));
     }
-
+*/
     public JDBCCarDAO(JDBCDataAccessContext context) {
         super (context);
     }
@@ -435,7 +424,16 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
-    private LazyStatement getCarStatement = new LazyStatement(CAR_QUERY + " WHERE car_id=?");
+    private LazyStatement getCarStatement = new LazyStatement(
+            "SELECT * FROM cars " +
+            "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
+            "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+            "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
+            "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
+            "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
+            "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
+            "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id " +
+            "WHERE car_id=?");
 
     @Override
     public Car getCar(int id) throws DataAccessException {
@@ -524,40 +522,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
-// TODO: only join with tables tht can be filtered upon
-    private LazyStatement getAmountOfCarsStatement = new LazyStatement(
-        "SELECT COUNT(car_id) AS amount_of_cars FROM cars " +
-                "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
-                "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
-                "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
-                "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
-                "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id" + FILTER_FRAGMENT
-    );
-
-    /**
-     * @param filter The filter to apply to
-     * @return The amount of filtered cars
-     * @throws DataAccessException
-     */
-    @Override
-    public int getAmountOfCars(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfCarsStatement.value();
-            fillFragment(ps, filter, 1);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return rs.getInt("amount_of_cars");
-                else return 0;
-
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of cars", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of cars", ex);
-        }
-    }
-
     private LazyStatement countCarsStatement = new LazyStatement (
                     "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
     );
@@ -586,18 +550,27 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private String NEW_CAR_QUERY =
+            "SELECT car_id, car_name, car_type, car_brand, car_seats, car_doors, " +
+                    "car_manual, car_gps, car_hook, car_active, " +
+                    "address_id, address_city, address_zipcode, address_street, " +
+                    "address_street_number, address_street_bus, address_country " +
+            "FROM cars JOIN addresses ON address_id=car_location ";
+
+    private String NEW_FILTER_FRAGMENT = ""; // TODO
+
     private LazyStatement getCarListPageByNameAscStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
+            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
     );
     private LazyStatement getCarListPageByNameDescStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + " ORDER BY car_name desc LIMIT ?, ?"
+            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_name desc LIMIT ?, ?"
     );
     private LazyStatement getCarListPageByBrandAscStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?"
+            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?"
     );
 
     private LazyStatement getCarListPageByBrandDescStatement = new LazyStatement (
-            CAR_QUERY + FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?"
+            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?"
     );
 
     /**
@@ -609,7 +582,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public List<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
@@ -624,13 +597,63 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 throw new DataAccessException("Could not create getCarList statement");
             }
 
-            fillFragment(ps, filter, 1);
+            // TODO: filter
             int first = (page-1)*pageSize;
-            ps.setInt(30, first);
-            ps.setInt(31, pageSize);
-            return getCars(ps);
+            ps.setInt(1, first);     // TODO: change numbers
+            ps.setInt(2, pageSize);  // TODO: change numbers
+
+            try (ResultSet rs = ps.executeQuery()) {
+                Collection<Car> cars = new ArrayList<>();
+                while (rs.next()) {
+
+                    Car result = new Car (
+                            rs.getInt ("car_id"),
+                            rs.getString ("car_name"),
+                            rs.getString ("car_brand"),
+                            rs.getString ("car_type"),
+                            JDBCAddressDAO.populateAddress(rs),
+                            rs.getObject("car_seats", Integer.class),
+                            rs.getObject("car_doors", Integer.class),
+                            null,
+                            rs.getBoolean("car_manual"),
+                            rs.getBoolean("car_gps"),
+                            rs.getBoolean("car_hook"),
+                            null, null, null, null, null, null,
+                            null, null
+                    );
+                    result.setActive(rs.getBoolean("car_active"));
+                    cars.add(result);
+                }
+                return cars;
+            }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
+        }
+    }
+
+    private LazyStatement getAmountOfCarsStatement = new LazyStatement(
+        "SELECT count(*) AS amount_of_cars FROM cars " + NEW_FILTER_FRAGMENT
+    );
+
+
+    /**
+     * @param filter The filter to apply to
+     * @return The amount of filtered cars
+     * @throws DataAccessException
+     */
+    @Override
+    public int getAmountOfCars(Filter filter) throws DataAccessException {
+        try {
+            PreparedStatement ps = getAmountOfCarsStatement.value();
+            // TODO: add filter
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next())
+                    return rs.getInt("amount_of_cars");
+                else
+                    return 0;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get count of cars", ex);
         }
     }
 
@@ -756,26 +779,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     }
 
 
-    private LazyStatement getCarsOfUserStatement = new LazyStatement (CAR_QUERY + " WHERE user_id=?");
-
-
-    /**
-     *
-     * @param userId The id of the user
-     * @return The cars of the user (without pagination)
-     * @throws DataAccessException
-     */
-    @Override
-    public List<Car> getCarsOfUser(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getCarsOfUserStatement.value();
-            ps.setInt(1, userId);
-            return getCars(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars for user with id " + userId, ex);
-        }
-    }
-
     private LazyStatement listCarsOfUserStatement = new LazyStatement (
             "SELECT car_id, car_name, car_brand, car_active " +
             "FROM cars WHERE car_owner_user_id = ?");
@@ -805,17 +808,22 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private LazyStatement isCarOfUserStatement = new LazyStatement(
+            " SELECT 1 FROM cars WHERE car_id = ? AND car_owner_user_id = ?"
+    );
 
-
-    private List<Car> getCars(PreparedStatement ps) {
-        List<Car> cars = new ArrayList<>();
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                cars.add(populateCar(rs, true));
+    @Override
+    public boolean isCarOfUser (int carId, int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = isCarOfUserStatement.value();
+            ps.setInt (1, carId);
+            ps.setInt (2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next ();
             }
-            return cars;
         } catch (SQLException ex) {
-            throw new DataAccessException("Error reading cars resultset", ex);
+            throw new DataAccessException("Could not determine car onwerschip");
         }
     }
+
 }

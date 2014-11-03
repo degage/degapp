@@ -147,7 +147,7 @@ public class Receipts extends Controller {
 
             DataAccessContext context = DataAccess.getContext();
             // TODO: inject context
-            for (Car car : context.getCarDAO().getCarsOfUser(user.getId())) {
+            for (Car car : context.getCarDAO().listCarsOfUser(user.getId())) {
                 getCarBillData(date, car.getId());
                 saldo = saldo.add(createCarTable(document, car.getName(), costInfo));
             }

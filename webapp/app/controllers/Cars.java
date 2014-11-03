@@ -174,16 +174,6 @@ public class Cars extends Controller {
         return ok(cars.render(listOfCars));
     }
 
-    // should only be used with injected context
-    // TODO: called in lots of badRequest calls - change to redirection!
-    private static Html userCarList() {
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        // Doesn't need to be paginated, because a single user will never have a lot of cars
-        List<Car> listOfCars = dao.getCarsOfUser(CurrentUser.getId());
-        return views.html.cars.cars.render(listOfCars);
-
-    }
-
     /**
      * @param page         The page in the carlists
      * @param ascInt       An integer representing ascending (1) or descending (0)
@@ -311,11 +301,11 @@ public class Cars extends Controller {
 
 
             if (car != null) {
-                return redirect( routes.Cars.detail(car.getId()) );
+                return redirect(routes.Cars.detail(car.getId()));
             } else {
                 carForm.error("Failed to add the car to the database. Contact administrator.");
                 // not needed?
-                flash ("danger", "unexpected error");
+                flash("danger", "unexpected error");
                 return badRequest(edit.render(carForm, null, getCountryList(), getFuelList()));
             }
         }
@@ -333,7 +323,7 @@ public class Cars extends Controller {
 
         if (car == null) {
             flash("danger", "Auto met ID=" + carId + " bestaat niet.");
-            return badRequest(userCarList());
+            return badRequest();
         } else {
             if (car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
 
@@ -344,7 +334,7 @@ public class Cars extends Controller {
                 return ok(edit.render(editForm, car, getCountryList(), getFuelList()));
             } else {
                 flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-                return badRequest(userCarList());
+                return badRequest();  // TODO: redirect
             }
         }
     }
@@ -373,12 +363,12 @@ public class Cars extends Controller {
         }
         if (car == null) {
             flash("danger", "Car met ID=" + carId + " bestaat niet.");
-            return badRequest(userCarList());
+            return badRequest();
         }
 
         if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-            return badRequest(userCarList());
+            return badRequest();
         }
 
         CarModel model = editForm.get();
@@ -483,12 +473,12 @@ public class Cars extends Controller {
 
         if (car == null) {
             flash("danger", "Car met ID=" + carId + " bestaat niet.");
-            return badRequest(userCarList());
+            return badRequest();
         }
 
         if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
             flash("danger", "Je heeft geen rechten tot het bewerken van deze wagen.");
-            return badRequest(userCarList());
+            return badRequest();
         }
 
         String[] values = valuesString.split(";");
@@ -586,11 +576,11 @@ public class Cars extends Controller {
             Iterable<CarAvailabilityInterval> list = availabilityDAO.getAvailabilities(carId);
 
             return ok(detail.render(
-                    car,
-                    Availabilities.convertToView(list),
-                    CarAvailabilityInterval.containsOverlap (list),
-                    dao.getPrivileged(carId),
-                    null)
+                            car,
+                            Availabilities.convertToView(list),
+                            CarAvailabilityInterval.containsOverlap(list),
+                            dao.getPrivileged(carId),
+                            null)
             );
         }
     }
@@ -710,25 +700,17 @@ public class Cars extends Controller {
         // Check if admin or car owner
         if (!CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             String carIdString = filter.getValue(FilterField.CAR_ID);
-            int carId;
+            // TODO: not from filter??
+
             if (carIdString.equals("")) {
-                carId = -1;
-            } else {
-                carId = Integer.parseInt(carIdString);
+                return badRequest();
             }
+            int carId = Integer.parseInt(carIdString);
+
             CarDAO carDAO = DataAccess.getInjectedContext().getCarDAO();
-            List<Car> listOfCars = carDAO.getCarsOfUser(CurrentUser.getId());
-            // Check if carId in cars
-            boolean isCarOfUser = false;
-            for (Car c : listOfCars) {
-                if (c.getId() == carId) {
-                    isCarOfUser = true;
-                    break;
-                }
-            }
-            if (!isCarOfUser) {
+            if (!carDAO.isCarOfUser(carId, CurrentUser.getId())) {
                 flash("danger", "Je bent niet de eigenaar van deze auto.");
-                return badRequest(userCarList());
+                return badRequest();   // TODO: redirect
             }
 
         }

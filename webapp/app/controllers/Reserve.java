@@ -288,7 +288,7 @@ public class Reserve extends Controller {
         }
         filter.putValue(FilterField.CAR_ACTIVE, "1");
 
-        List<Car> listOfCars = dao.getCarList(field, asc, page, pageSize, filter);
+        Iterable<Car> listOfCars = dao.getCarList(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfCars(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
