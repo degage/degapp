@@ -23,23 +23,14 @@ public class CommunicationProvider {
     private static final String MESSAGES_BY_ID = "message:id:%d";
     private static final String MESSAGE_NUMBER_BY_ID = "notification_number:id:%d";
     private DataAccessProvider provider;
-    private UserProvider userProvider;
 
-    public CommunicationProvider(DataAccessProvider provider, UserProvider userProvider) {
+    public CommunicationProvider(DataAccessProvider provider) {
         this.provider = provider;
-        this.userProvider = userProvider;
     }
 
     public List<Notification> getNotifications(int userId) {
-        return getNotifications(userId, true);
-    }
-
-    public List<Notification> getNotifications(int userId, boolean cached) {
         String key = String.format(NOTIFICATIONS_BY_ID, userId);
-        Object obj = null;
-        if (cached) {
-            obj = Cache.get(key);
-        }
+        Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 NotificationDAO dao = context.getNotificationDAO();
@@ -49,10 +40,8 @@ public class CommunicationProvider {
                 List<Notification> notifications = dao.getNotificationList(null, false, 1, AMOUNT_OF_VISIBLE_NOTIFICATIONS, filter);
                 if (notifications != null) {
                     Cache.set(key, notifications);
-                    return notifications;
-                } else {
-                    return null;
                 }
+                return notifications;
             } catch (DataAccessException ex) {
                 throw ex;
             }
@@ -61,25 +50,17 @@ public class CommunicationProvider {
         }
     }
 
-    public int getNumberOfUnreadNotifications(int userId){
-        return getNumberOfUnreadNotifications(userId, true);
-    }
-    public int getNumberOfUnreadNotifications(int userId, boolean cached){
+    public int getNumberOfUnreadNotifications(int userId) {
         String key = String.format(NOTIFICATION_NUMBER_BY_ID, userId);
-        Object obj = null;
-        if (cached) {
-            obj = Cache.get(key);
-        }
+        Object obj =  Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 NotificationDAO dao = context.getNotificationDAO();
                 int unread_number =  dao.getNumberOfUnreadNotifications(userId);
                 if (unread_number != -1) {
                     Cache.set(key, unread_number);
-                    return unread_number;
-                } else {
-                    return -1;
                 }
+                return unread_number;
             } catch (DataAccessException ex) {
                 throw ex;
             }
@@ -98,15 +79,8 @@ public class CommunicationProvider {
 
 
     public List<Message> getMessages(int userId) {
-        return getMessages(userId, true);
-    }
-
-    public List<Message> getMessages(int userId, boolean cached) {
         String key = String.format(MESSAGES_BY_ID, userId);
-        Object obj = null;
-        if (cached) {
-            obj = Cache.get(key);
-        }
+        Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 MessageDAO dao = context.getMessageDAO();
@@ -116,10 +90,8 @@ public class CommunicationProvider {
                 List<Message> messages = dao.getMessageList(null, false, 1, AMOUNT_OF_VISIBLE_MESSAGES, filter);
                 if (messages != null) {
                     Cache.set(key, messages);
-                    return messages;
-                } else {
-                    return null;
                 }
+                return messages;
             } catch (DataAccessException ex) {
                 throw ex;
             }
@@ -133,25 +105,17 @@ public class CommunicationProvider {
     }
 
 
-    public int getNumberOfUnreadMessages(int userId){
-        return getNumberOfUnreadMessages(userId, true);
-    }
-    public int getNumberOfUnreadMessages(int userId, boolean cached){
+    public int getNumberOfUnreadMessages(int userId) {
         String key = String.format(MESSAGE_NUMBER_BY_ID, userId);
-        Object obj = null;
-        if (cached) {
-            obj = Cache.get(key);
-        }
+        Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 MessageDAO dao = context.getMessageDAO();
                 int unread_number =  dao.getNumberOfUnreadMessages(userId);
                 if (unread_number != -1) {
                     Cache.set(key, unread_number);
-                    return unread_number;
-                } else {
-                    return -1;
                 }
+                return unread_number;
             } catch (DataAccessException ex) {
                 throw ex;
             }

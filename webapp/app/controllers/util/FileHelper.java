@@ -230,16 +230,12 @@ public class FileHelper {
             return Controller.badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
-        try {
-            be.ugent.degage.db.models.File file = action.getFile(fileId, user, fdao, context);
-            if (file == null) {
-                Controller.flash("danger", "Bestand niet gevonden.");
-                return action.failAction(user);
-            } else {
-                return action.process(file, fdao, context);
-            }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+        be.ugent.degage.db.models.File file = action.getFile(fileId, user, fdao);
+        if (file == null) {
+            Controller.flash("danger", "Bestand niet gevonden.");
+            return action.failAction(user);
+        } else {
+            return action.process(file, fdao);
         }
     }
 

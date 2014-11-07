@@ -6,7 +6,7 @@ import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Costs;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.User;
-import controllers.Receipts;
+import reports.ReportGeneration;
 
 import java.sql.Date;
 import java.time.Instant;
@@ -31,7 +31,7 @@ public class ReportGenerationJob implements ScheduledJob.Executor {
 
         Costs costInfo = context.getSettingDAO().getCostSettings(Instant.now());
         for (User user : users) {
-            Receipts.generateReceipt(user, new Date(Instant.now().toEpochMilli()), costInfo);
+            ReportGeneration.generateReceipt(context, user, Instant.now(), costInfo);
         }
     }
 }

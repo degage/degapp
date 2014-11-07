@@ -312,12 +312,12 @@ public class Profile extends Controller {
 
         return FileHelper.genericFileAction(userId, fileId, new FileAction() {
             @Override
-            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+            public Result process(File file, FileDAO dao) throws DataAccessException {
                 return FileHelper.getFileStreamResult(dao, file.getId());
             }
 
             @Override
-            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+            public File getFile(int fileId, User user, FileDAO dao) throws DataAccessException {
                 if (!canEditProfile(user))
                     return null;
 
@@ -375,10 +375,9 @@ public class Profile extends Controller {
 
         return FileHelper.genericFileAction(userId, fileId, new FileAction() {
             @Override
-            public Result process(File file, FileDAO dao, DataAccessContext context) throws IOException, DataAccessException {
+            public Result process(File file, FileDAO dao) throws DataAccessException {
                 dao.deleteFile(file.getId());
                 FileHelper.deleteFile(Paths.get(file.getPath()));
-                context.commit();
 
                 flash("success", file.getFileName() + " werd met succes verwijderd.");
                 switch (type) {
@@ -391,7 +390,7 @@ public class Profile extends Controller {
             }
 
             @Override
-            public File getFile(int fileId, User user, FileDAO dao, DataAccessContext context) throws DataAccessException {
+            public File getFile(int fileId, User user, FileDAO dao) throws DataAccessException {
                 if (!canEditProfile(user))
                     return null;
 

@@ -22,7 +22,7 @@ public class DataProvider {
 
     public static CommunicationProvider getCommunicationProvider() {
         if (communicationProvider == null) {
-            communicationProvider = new CommunicationProvider(getDataAccessProvider(), getUserProvider());
+            communicationProvider = new CommunicationProvider(getDataAccessProvider());
         }
         return communicationProvider;
     }
