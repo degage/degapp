@@ -34,10 +34,11 @@ public class JDBCFilter implements Filter {
     @Override
     public String getValue(FilterField field) {
         String value = "";
-        if(content.containsKey(field))
-            value =  content.get(field);
-        if(field.useExactValue())
+        if (content.containsKey(field))
+            value = content.get(field);
+        if (field.useExactValue())
             return value;
-        return "%" + value + "%";
+        else
+            return "%" + value + "%";
     }
 }

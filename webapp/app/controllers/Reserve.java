@@ -286,7 +286,6 @@ public class Reserve extends Controller {
         } catch (IllegalArgumentException ex) {
             return ok(reservationspage.render(new ArrayList<>(), page, 0, 0, false));
         }
-        filter.putValue(FilterField.CAR_ACTIVE, "1");
 
         Iterable<Car> listOfCars = dao.getCarList(field, asc, page, pageSize, filter);
 

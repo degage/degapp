@@ -32,9 +32,16 @@ public interface CarDAO {
      */
     public Iterable<Car> listAllCars () throws DataAccessException;
 
-    public int getAmountOfCars(Filter filter) throws DataAccessException;
 
+    /**
+     * Returns a filtered list of cars. Only <i>active</i> cars are shown.
+     */
     public Iterable<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+
+    /**
+     * Number of cars that can be returned by equivalent call to {@link #getCarList}
+     */
+    public int getAmountOfCars(Filter filter) throws DataAccessException;
 
     // newer version - uses shorter SQL
     public Iterable<Car> listCars (FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;

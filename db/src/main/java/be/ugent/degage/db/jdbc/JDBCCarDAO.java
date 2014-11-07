@@ -550,28 +550,58 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private static void appendCarFilter (StringBuilder builder, Filter filter) {
+        // filter on car id
+        String carId = filter.getValue(FilterField.CAR_ID);
+        if(! carId.isEmpty()) {
+            Integer.parseInt(carId); // check that this is an integer - avoid SQL injection
+            builder.append (" AND car_id = ").append(carId);
+        }
+
+        // filter on car_seats
+        String carSeats = filter.getValue(FilterField.CAR_SEATS);
+        if (!carSeats.isEmpty()) {
+            Integer.parseInt(carSeats); // check that this is an integer - avoid SQL injection
+            builder.append (" AND car_seats >= ").append(carSeats);
+        }
+
+        // filter on car_fuel
+        String carFuel =  filter.getValue(FilterField.CAR_FUEL);
+        if (! carFuel.isEmpty() && ! carFuel.equals("ALL")) {
+            CarFuel.valueOf(carFuel);  // protects against SQL injection
+            builder.append(" AND car_fuel = '").append(carFuel).append('\'');
+        }
+
+        // filter on gps
+        if (filter.getValue(FilterField.CAR_GPS).equals("1")) {
+            builder.append (" AND car_gps ");
+        }
+
+        // filter on hook
+        if (filter.getValue(FilterField.CAR_HOOK).equals("1")) {
+            builder.append (" AND car_hook ");
+        }
+
+        // filter on manual
+        String manual = filter.getValue(FilterField.CAR_MANUAL);
+        if (! manual.isEmpty()) {
+            int man = Integer.parseInt(manual);
+            if (man > 0) {
+                builder.append (" AND car_manual ");
+            }
+            else if (man == 0) {
+                builder.append (" AND NOT car_manual ");
+            }
+        }
+
+    }
+
     private String NEW_CAR_QUERY =
             "SELECT car_id, car_name, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, " +
                     "address_id, address_city, address_zipcode, address_street, " +
                     "address_street_number, address_street_bus, address_country " +
             "FROM cars JOIN addresses ON address_id=car_location ";
-
-    private String NEW_FILTER_FRAGMENT = ""; // TODO
-
-    private LazyStatement getCarListPageByNameAscStatement = new LazyStatement (
-            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_name asc LIMIT ?, ?"
-    );
-    private LazyStatement getCarListPageByNameDescStatement = new LazyStatement (
-            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_name desc LIMIT ?, ?"
-    );
-    private LazyStatement getCarListPageByBrandAscStatement = new LazyStatement (
-            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_brand asc LIMIT ?, ?"
-    );
-
-    private LazyStatement getCarListPageByBrandDescStatement = new LazyStatement (
-            NEW_CAR_QUERY + NEW_FILTER_FRAGMENT + "ORDER BY car_brand desc LIMIT ?, ?"
-    );
 
     /**
      * @param orderBy The field you want to order by
@@ -583,24 +613,28 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
      */
     @Override
     public Iterable<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = null;
-            switch(orderBy) {
-                case CAR_NAME:
-                    ps = asc ? getCarListPageByNameAscStatement.value() : getCarListPageByNameDescStatement.value();
-                    break;
-                case CAR_BRAND:
-                    ps = asc ? getCarListPageByBrandAscStatement.value() : getCarListPageByBrandDescStatement.value();
-                    break;
-            }
-            if(ps == null) {
-                throw new DataAccessException("Could not create getCarList statement");
-            }
+        // build query
+        StringBuilder builder = new StringBuilder(NEW_CAR_QUERY);
+        builder.append (" WHERE car_active ");
 
-            // TODO: filter
+        appendCarFilter (builder, filter);
+
+        if (orderBy == FilterField.CAR_NAME) {
+            builder.append (" ORDER BY car_name ");
+            builder.append(asc ? "ASC" : "DESC");
+        } else if (orderBy == FilterField.CAR_BRAND) {
+            builder.append (" ORDER BY car_brand ");
+            builder.append (asc ? "ASC" : "DESC");
+        }
+        builder.append ( " LIMIT ?, ?");
+
+        //System.err.println("QUERY = " + builder.toString());
+
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+
             int first = (page-1)*pageSize;
-            ps.setInt(1, first);     // TODO: change numbers
-            ps.setInt(2, pageSize);  // TODO: change numbers
+            ps.setInt(1, first);
+            ps.setInt(2, pageSize);
 
             try (ResultSet rs = ps.executeQuery()) {
                 Collection<Car> cars = new ArrayList<>();
@@ -631,11 +665,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
-    private LazyStatement getAmountOfCarsStatement = new LazyStatement(
-        "SELECT count(*) AS amount_of_cars FROM cars " + NEW_FILTER_FRAGMENT
-    );
-
-
     /**
      * @param filter The filter to apply to
      * @return The amount of filtered cars
@@ -643,15 +672,20 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
      */
     @Override
     public int getAmountOfCars(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfCarsStatement.value();
-            // TODO: add filter
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return rs.getInt("amount_of_cars");
-                else
-                    return 0;
-            }
+        // build query
+        StringBuilder builder = new StringBuilder(
+                "SELECT count(*) AS amount_of_cars FROM cars "
+        );
+        builder.append(" WHERE car_active ");
+
+        appendCarFilter(builder, filter);
+
+        try (Statement stat = createStatement();
+             ResultSet rs = stat.executeQuery(builder.toString())) {
+            if (rs.next())
+                return rs.getInt("amount_of_cars");
+            else
+                return 0;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
         }

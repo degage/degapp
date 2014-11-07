@@ -51,6 +51,10 @@
                                 <div id="basicEnv" class="col-xs-12">
                                     <h4>@if(carId != -1) { @carName reserveren: } else { Auto's zoeken }</h4><hr />
                                     <input id="input_from_value" class="hidden searchTextField" name="from" value="" />
+                                    <div class="alert alert-danger">
+                                        Onderstaande datums en tijdstippen worden nog niet gebruikt bij het zoeken - in afwachting
+                                        van een betere user-interface voor reservaties.
+                                    </div>
                                     <div class="col-sm-6 col-xs-12">
                                         <label>Reservatie van: </label><br />
                                         <div class="datepicker from input-group date form_datetime" data-link-field="endDate">
@@ -112,28 +116,24 @@
                                             </div>
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                            <label>Postcode</label>
-                                            <input id="zipcode" class="searchTextField form-control" name="zipcode" type="number"  placeholder="Postcode"><br />
-                                        </div>
-                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                             <label>Aantal zitplaatsen</label>
                                             <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Min aantal plaatsen"><br />
                                         </div>
-                                        <input id="input_fuel" class="hidden searchTextField" name="fuel" value="All" />
+                                        <input id="input_fuel" class="hidden searchTextField" name="fuel" value="ALL" />
                                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                            <label for="">Brandstof</label><br />
-                                            <select id="selectFuel" class="form-control">
-                                                <option value="All">Alle</option>
-                                                <option value="Petrol">Benzine</option>
-                                                <option value="Diesel">Diesel</option>
-                                                <option value="Biodiesel">Biodiesel</option>
-                                                <option value="Gas">LPG</option>
-                                                <option value="Hybrid">Hybride</option>
-                                                <option value="Electric">Elektrisch</option>
+                                            <label for="selectFuel">Brandstof</label><br />
+                                            <select id="selectFuel" class="form-control">   @* TODO: use fuellist *@
+                                                <option value="ALL">Alle</option>
+                                                <option value="PETROL">Benzine</option>
+                                                <option value="DIESEL">Diesel</option>
+                                                <option value="BIODIESEL">Biodiesel</option>
+                                                <option value="GAS">LPG</option>
+                                                <option value="HYBRID">Hybride</option>
+                                                <option value="ELECTRIC">Elektrisch</option>
                                             </select>
                                         </div>
                                         <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                            <label for="">Extra</label><br />
+                                            <label>Extra</label><br />
                                             <label class="checkbox-inline" style="margin-left: 0px; margin-right: 10px">
                                                 <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">Gps aanwezig
                                             </label>
