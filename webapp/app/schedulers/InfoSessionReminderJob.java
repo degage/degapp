@@ -9,9 +9,9 @@ import notifiers.Notifier;
 import play.Logger;
 
 /**
- * Created by Cedric on 5/3/2014.
+ * Job that sends a reminder of an infosession to all participants
  */
-public class InfoSessionReminderJob implements ScheduledJobExecutor {
+public class InfoSessionReminderJob implements ScheduledJob.Executor {
     @Override
     public void execute(DataAccessContext context, Job job) {
         InfoSessionDAO dao = context.getInfoSessionDAO();

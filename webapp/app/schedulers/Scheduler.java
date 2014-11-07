@@ -1,100 +1,104 @@
 package schedulers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
+import be.ugent.degage.db.models.User;
 import db.DataAccess;
+import notifiers.Notifier;
 import org.joda.time.DateTime;
-import play.Logger;
+import org.joda.time.MutableDateTime;
 import play.libs.Akka;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.util.EnumMap;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 /**
- * Created by Stefaan Vermassen on 26/04/14.
- * Modified by Cedric Van Goethem on 3/5/14 for persistent scheduling
+ * Utility methods for jobs that are run repeatedly or in a future time
  */
-public class Scheduler implements Runnable {
+public final class Scheduler {
 
+    private static final ExecutorService CACHED_POOL = Executors.newCachedThreadPool();
 
-    private static final Map<JobType, ScheduledJobExecutor> EXECUTORS;
-
-    static {
-        EXECUTORS = new EnumMap<>(JobType.class);
-        EXECUTORS.put(JobType.IS_REMINDER, new InfoSessionReminderJob());
-        EXECUTORS.put(JobType.REPORT, new ReportGenerationJob());
-        EXECUTORS.put(JobType.RESERVE_ACCEPT, new ReservationAutoAcceptJob());
-    }
-
-    private static Scheduler scheduler;
-    private static Object lock = new Object();
-
-    private ExecutorService cachedPool;
-
-    private boolean isRunning = false;
-
-    public static Scheduler getInstance() {
-        if (scheduler == null) {
-            scheduler = new Scheduler(); //TODO thread safe singleton
-        }
-        return scheduler;
-    }
-
-    private ConcurrentHashMap<Long, Job> runningJobs;
-
-    public Scheduler() {
-        runningJobs = new ConcurrentHashMap<>();
-        cachedPool = Executors.newCachedThreadPool();
-    }
-
-    public void stop() {
-        if (isRunning) {
-            if (!(cachedPool.isTerminated() || cachedPool.isShutdown()))
-                cachedPool.shutdown();
-            runningJobs.clear();
-        }
-    }
-
-    public void start() {
-        if (!isRunning) {
-            checkInitialReports();
-            int refresh = Integer.parseInt(DataAccess.getContext().getSettingDAO().getSettingForNow("scheduler_interval")); // refresh rate in seconds
-            schedule(Duration.create(refresh, TimeUnit.SECONDS), this);
-            isRunning = true;
-        }
+    public static void stop() {
+        CACHED_POOL.shutdown();
     }
 
     /**
-     * Checks if there's a report already scheduled
+     * Start the scheduler and launch periodic tasks (runnables = periodic, jobs = once, persistent)
      */
-    private void checkInitialReports() {
-        try (DataAccessContext context = DataAccess.getContext()) {
-            JobDAO dao = context.getJobDAO();
-            Job reportJob = dao.getLastJobForType(JobType.REPORT);
-            if (reportJob == null) {
-                try {
-                    DateTime scheduledFor = Util.firstDayOfNextMonth();
-                    dao.createJob(JobType.REPORT, 0, scheduledFor);
-                    context.commit();
-                    Logger.info("Scheduled next report for " + scheduledFor.toString());
-                } catch (DataAccessException ex) {
-                    Logger.error("Failed to schedule report job", ex);
+    public static void start() {
+
+        // send notifications by email to users (check once every hour
+        schedule(Duration.create(1, TimeUnit.HOURS),
+                new RunnableInContext("Send reminder mails") {
+                    @Override
+                    public void runInContext(DataAccessContext context) {
+                        List<User> emailList = context.getSchedulerDAO().getReminderEmailList(0);
+                        for (User user : emailList) {
+                            Notifier.sendReminderMail(context, user);
+                        }
+                    }
                 }
-            }
-        }
+        );
+
+        // change ride status to finished for every ride with an end date later than now
+        // TODO: avoid this by looking at the date when querying the database
+        schedule(Duration.create(1, TimeUnit.MINUTES),
+                new RunnableInContext("Finish rides") {
+                    @Override
+                    public void runInContext(DataAccessContext context) {
+                        context.getReservationDAO().updateTable();
+                    }
+                });
+
+        // make sure that at least one report job is planned
+        checkInitialReports();
+
+        // schedule 'jobs' to be run at a fixed interval (standard: every five minutes)
+        int refresh = Integer.parseInt(DataAccess.getContext().getSettingDAO().getSettingForNow("scheduler_interval")); // refresh rate in seconds
+        schedule(Duration.create(refresh, TimeUnit.SECONDS),
+                new RunnableInContext("Job scheduler") {
+                    @Override
+                    public void runInContext(DataAccessContext context) {
+                        for (Job job : context.getJobDAO().listScheduledForNow()) {
+                            CACHED_POOL.submit(new ScheduledJob(job));
+                        }
+                    }
+                }
+        );
+
+
     }
 
-    public void schedule(FiniteDuration repeatDuration, Runnable task) {
+    /**
+     * Checks if there's a report already scheduled, and if not, schedule one
+     */
+    private static void checkInitialReports() {
+        new RunnableInContext("Launch initial reports") {
+            @Override
+            public void runInContext(DataAccessContext context) {
+                JobDAO dao = context.getJobDAO();
+                if (!dao.existsJobOfType(JobType.REPORT)) {
+                    // Determine first day of next month
+                    MutableDateTime mdt = new MutableDateTime();
+                    mdt.addMonths(1);
+                    mdt.setDayOfMonth(1);
+                    mdt.setMillisOfDay(0);
+                    DateTime scheduledFor = mdt.toDateTime();
+
+                    dao.createJob(JobType.REPORT, 0, scheduledFor);
+                }
+            }
+        }.run();
+    }
+
+    private static void schedule(FiniteDuration repeatDuration, Runnable task) {
         Akka.system().scheduler().schedule(
                 Duration.create(0, TimeUnit.MILLISECONDS), //Initial delay 0 milliseconds
                 repeatDuration,     //Frequency
@@ -103,52 +107,6 @@ public class Scheduler implements Runnable {
         );
     }
 
-    @Override
-    public void run() {
-        try (DataAccessContext context = DataAccess.getProvider().getDataAccessContext()) {
-            JobDAO dao = context.getJobDAO();
-            List<Job> jobs = dao.getUnfinishedBefore(new DateTime());
-            for (Job job : jobs) {
-                if (!runningJobs.contains(job)) {
-                    runningJobs.put(job.getId(), job); // Add the job to the already scheduled pool
-                    cachedPool.submit(new ScheduledJob(job));
-                }
-            }
-        } catch (DataAccessException ex) {
-            throw ex;
-        }
-    }
-
-    private class ScheduledJob implements Runnable {
-        private Job job;
-
-        public ScheduledJob(Job job) {
-            this.job = job;
-        }
-
-        @Override
-        public void run() {
-            try (DataAccessContext context = DataAccess.getContext()) {
-                ScheduledJobExecutor executor = EXECUTORS.get(job.getType());
-                if (executor == null) {
-                    Logger.error("No executor for type: " + job.getType());
-                } else {
-                    try {
-                        executor.execute(context, job);
-                        JobDAO dao = context.getJobDAO();
-                        dao.setJobStatus(job.getId(), true);
-                        context.commit();
-                        Logger.info("Finished job: " + job);
-                    } catch (Exception ex) {
-                        Logger.error("Error during " + job.toString() + ": " + ex.getMessage());
-                        context.rollback();
-                        throw ex;
-                    }
-                }
-            } finally {
-                runningJobs.remove(job.getId());
-            }
-        }
-    }
-
 }
+
+

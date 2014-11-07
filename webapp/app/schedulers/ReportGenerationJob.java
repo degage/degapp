@@ -13,22 +13,23 @@ import java.time.Instant;
 import java.util.List;
 
 /**
- * Created by Cedric on 5/3/2014.
+ * Job that generates a report
  */
-public class ReportGenerationJob implements ScheduledJobExecutor {
+public class ReportGenerationJob implements ScheduledJob.Executor {
     @Override
     public void execute(DataAccessContext context, Job job) {
 
+        /* TODO: verify that these statements do the correct thing
         context.getCarRideDAO().endPeriod();
         context.getRefuelDAO().endPeriod();
         context.getCarCostDAO().endPeriod();
+        */
 
         UserDAO dao = context.getUserDAO();
 
         List<User> users = dao.getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
 
         Costs costInfo = context.getSettingDAO().getCostSettings(Instant.now());
-        context.commit();
         for (User user : users) {
             Receipts.generateReceipt(user, new Date(Instant.now().toEpochMilli()), costInfo);
         }

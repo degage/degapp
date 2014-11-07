@@ -9,8 +9,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
-import java.util.List;
-
 /**
  *
  * @author Laurent

@@ -8,9 +8,9 @@ import be.ugent.degage.db.models.ReservationStatus;
 import notifiers.Notifier;
 
 /**
- * Created by Cedric on 5/7/2014.
+ * Job that automatically accepts reservations that are out of date
  */
-public class ReservationAutoAcceptJob implements ScheduledJobExecutor {
+public class ReservationAutoAcceptJob implements ScheduledJob.Executor {
     @Override
     public void execute(DataAccessContext context, Job job) {
         ReservationDAO dao = context.getReservationDAO();

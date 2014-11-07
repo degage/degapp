@@ -213,6 +213,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(3, brand);
             // TODO: make sure location is never null
 
+            // TODO: use ps.setObject
             if(location != null) {
                 ps.setInt(4, location.getId());
             } else {

@@ -8,14 +8,10 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.data.format.Formatters;
 import play.db.DB;
-import scala.concurrent.duration.Duration;
-import schedulers.CheckFinishedRidesJob;
 import schedulers.Scheduler;
-import schedulers.SendUnreadNotificationsMailScheduler;
 
 import java.text.ParseException;
 import java.util.Locale;
-import java.util.concurrent.TimeUnit;
 
 /**
  * Global settings. Called from Scala initializer class Global.scala
@@ -39,13 +35,6 @@ public class JavaGlobal {
         }
     }
 
-    private static void startScheduler() {
-        Scheduler scheduler = Scheduler.getInstance();
-        scheduler.start();
-        scheduler.schedule(Duration.create(1, TimeUnit.HOURS), new SendUnreadNotificationsMailScheduler()); // send notifications when enough
-        scheduler.schedule(Duration.create(1, TimeUnit.MINUTES), new CheckFinishedRidesJob()); // change ride status to finished
-    }
-
     private static void registerDateTimeFormatter() {
         play.data.format.Formatters.register(DateTime.class, new Formatters.SimpleFormatter<DateTime>() {
             private final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
@@ -63,7 +52,7 @@ public class JavaGlobal {
     }
 
     private static void onStop() {
-        Scheduler.getInstance().stop();
+        Scheduler.stop();
     }
 
     /**
@@ -87,11 +76,14 @@ public class JavaGlobal {
         onStop();
     }
 
+
+
     private static void onStartDevProd(String dataSourceName) {
         DataAccess.setProviderFromDataSource(DB.getDataSource(dataSourceName));
         testDatabase();
         registerDateTimeFormatter();
-        startScheduler();
+
+        Scheduler.start();
     }
 
     /**
@@ -114,6 +106,6 @@ public class JavaGlobal {
     public static void onStartTest() {
         DataAccess.setProviderForTesting();
         registerDateTimeFormatter();
-        startScheduler(); // TODO: needed in test mode?
+        Scheduler.start();
     }
 }
