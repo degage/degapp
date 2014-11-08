@@ -3,7 +3,6 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.util.ConfigurationHelper;
@@ -17,8 +16,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.twirl.api.Html;
-import providers.DataProvider;
 import views.html.damages.*;
 
 import java.io.IOException;
@@ -96,60 +93,27 @@ public class Damages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result showDamagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-
-        User user = DataProvider.getUserProvider().getUser();
-        filter.putValue(FilterField.DAMAGE_USER_ID, user.getId() + "");
-        filter.putValue(FilterField.DAMAGE_FINISHED, "-1");
-
-        return ok(damageList(page, pageSize, carField, asc, filter));
+        return ok(damagespage.render(DataAccess.getInjectedContext().getDamageDAO().listDamagesForDriver(CurrentUser.getId()), 0, 0, 0));
     }
 
     @AllowRoles
     @InjectContext
     public static Result showDamagesPageOwner(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-
-        User user = DataProvider.getUserProvider().getUser();
-        filter.putValue(FilterField.DAMAGE_OWNER_ID, user.getId() + "");
-        filter.putValue(FilterField.DAMAGE_FINISHED, "-1");
-
-        return ok(damageList(page, pageSize, carField, asc, filter));
+        return ok(damagespage.render(DataAccess.getInjectedContext().getDamageDAO().listDamagesForOwner(CurrentUser.getId()), 0, 0, 0));
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showDamagesPageAdmin(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy);
+        // TODO: orderBy, asc not used
 
-        boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(damageList(page, pageSize, carField, asc, filter));
-    }
-
-    // to be used with injected context
-    private static Html damageList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         DamageDAO dao = DataAccess.getInjectedContext().getDamageDAO();
-
-        if (orderBy == null) {
-            orderBy = FilterField.DAMAGE_FINISHED;
-        }
-
-        List<Damage> listOfResults = dao.getDamages(orderBy, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfDamages(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return damagespage.render(listOfResults, page, amountOfResults, amountOfPages);
+        return ok(damagespage.render( dao.getDamages(page, pageSize, filter), page, amountOfResults, amountOfPages));
     }
 
     /**
@@ -161,17 +125,15 @@ public class Damages extends Controller {
     @InjectContext
     public static Result showDamageDetails(int damageId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        DamageDAO dao = context.getDamageDAO();
-        UserDAO userDAO = context.getUserDAO();
-        CarDAO carDAO = context.getCarDAO();
-        DamageLogDAO damageLogDAO = context.getDamageLogDAO();
-        FileDAO fileDAO = context.getFileDAO();
-        Damage damage = dao.getDamage(damageId);
-        Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
-        Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
-        User owner = userDAO.getUser(damagedCar.getOwner().getId());
-        List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-        return ok(details.render(damage, owner, damagedCar, damageLogList, proofList));
+        Damage damage = context.getDamageDAO().getDamage(damageId);
+        Car damagedCar = context.getCarDAO().getCar(damage.getCarId());
+        return ok(details.render(
+                damage,
+                context.getUserDAO().getUser(damagedCar.getOwner().getId()),
+                damagedCar,
+                context.getDamageLogDAO().getDamageLogsForDamage(damageId),
+                context.getFileDAO().getDamageFiles(damageId)
+        ));
     }
 
     /**
@@ -190,7 +152,7 @@ public class Damages extends Controller {
             return badRequest();
         } else {
             //User currentUser = DataProvider.getUserProvider().getUser();
-            if ((damage.getCarRide().getReservation().getUser().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
+            if (damage.getDriverId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
 
                 DamageModel model = new DamageModel();
                 model.populate(damage);
@@ -243,20 +205,24 @@ public class Damages extends Controller {
             FileDAO fileDAO = context.getFileDAO();
             DamageLogDAO damageLogDAO = context.getDamageLogDAO();
             Damage damage = dao.getDamage(damageId);
-            Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
+            Car damagedCar = carDAO.getCar(damage.getCarId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId());
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
             Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
+            // TODO: use redirect
             flash("danger", "Beschrijving aanpassen mislukt.");
-            return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
+            return badRequest(details.render(
+                    damage,
+                    owner,
+                    damagedCar,
+                    damageLogList,
+                    proofList
+            ));
         } else {
 
             DamageDAO damageDAO = context.getDamageDAO();
-            Damage damage = damageDAO.getDamage(damageId);
             DamageModel model = damageForm.get();
-            damage.setDescription(model.description);
-            damage.setTime(model.time);
-            damageDAO.updateDamage(damage);
+            damageDAO.updateDamageDetails(damageId, model.description, model.time);
             flash("success", "De beschrijving werd gewijzigd.");
             return redirect(
                     routes.Damages.showDamageDetails(damageId)
@@ -282,10 +248,11 @@ public class Damages extends Controller {
             FileDAO fileDAO = context.getFileDAO();
             DamageLogDAO damageLogDAO = context.getDamageLogDAO();
             Damage damage = dao.getDamage(damageId);
-            Car damagedCar = carDAO.getCar(damage.getCarRide().getReservation().getCar().getId());
+            Car damagedCar = carDAO.getCar(damage.getCarId());
             User owner = userDAO.getUser(damagedCar.getOwner().getId()); // TODO: why is this not partial (and in other places?)
             List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
             Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
+            // TODO: use redirect
             flash("danger", "Status toevoegen mislukt.");
             return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
         } else {
@@ -297,9 +264,9 @@ public class Damages extends Controller {
             DamageLog damageLog = damageLogDAO.createDamageLog(damage, model.status);
             if (damageLog == null) {
                 flash("danger", "Kon de damagelog niet toevoegen aan de database.");
-                return redirect(routes.Damages.showDamageDetails(damageId));
+            } else {
+                flash("success", "De status werd toegevoegd.");
             }
-            flash("success", "De status werd toegevoegd.");
             return redirect(
                     routes.Damages.showDamageDetails(damageId)
             );
@@ -317,10 +284,7 @@ public class Damages extends Controller {
      */
     @InjectContext
     public static Result setDamageFinished(int damageId, int status) {
-        DamageDAO dao = DataAccess.getInjectedContext().getDamageDAO();
-        Damage damage = dao.getDamage(damageId);
-        damage.setFinished(status != 0);
-        dao.updateDamage(damage);
+        DataAccess.getInjectedContext().getDamageDAO().updateDamageFinished(damageId, status != 0);
         flash("success", "Status van schadedossier succesvol aangepast");
         return redirect(routes.Damages.showDamageDetails(damageId));
     }
@@ -394,14 +358,13 @@ public class Damages extends Controller {
     }
 
     /**
-     * Get the number of open damages
+     * Get the number of open damages. Used in the application menu
      *
      * @return The number of damages
      */
     // should only be used with injected context
+    // TODO: merge database call with other application menu items
     public static int openDamages() {
-        User user = DataProvider.getUserProvider().getUser();
-        DamageDAO dao = DataAccess.getInjectedContext().getDamageDAO();
-        return dao.getAmountOfOpenDamages(user.getId());
+        return DataAccess.getInjectedContext().getDamageDAO().getAmountOfOpenDamages(CurrentUser.getId());
     }
 }

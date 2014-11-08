@@ -1,20 +1,12 @@
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
-import com.itextpdf.text.*;
-import com.itextpdf.text.Font.FontFamily;
-import com.itextpdf.text.pdf.PdfPCell;
-import com.itextpdf.text.pdf.PdfPTable;
-import com.itextpdf.text.pdf.PdfWriter;
-import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import db.DataAccess;
 import db.InjectContext;
-import org.joda.time.DateTime;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -22,13 +14,6 @@ import providers.DataProvider;
 import views.html.receipts.receipts;
 import views.html.receipts.receiptspage;
 
-import java.io.FileOutputStream;
-import java.math.BigDecimal;
-import java.net.URL;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.Period;
 import java.util.List;
 
 public class Receipts extends Controller {

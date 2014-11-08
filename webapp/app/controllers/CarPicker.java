@@ -10,8 +10,6 @@ import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import java.util.List;
-
 public class CarPicker extends Controller {
 
     private static final int MAX_VISIBLE_RESULTS = 10;

@@ -1,13 +1,10 @@
 package controllers.util;
 
-import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.models.File;
 import be.ugent.degage.db.models.User;
 import play.mvc.Result;
-
-import java.io.IOException;
 
 /**
  * Created by Cedric on 4/15/2014.

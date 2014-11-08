@@ -71,4 +71,28 @@ public final class FilterUtils {
             builder.append('\'');
         }
     }
+
+    /**
+     * Append to a given builder the AND-clause for an integer
+     */
+    public static void appendIntFilter (StringBuilder builder, String key, String value) {
+        if(! value.isEmpty()) {
+            Integer.parseInt(value); // check that this is an integer - avoid SQL injection
+            builder.append (" AND ").append(key).append(" = ").append(value);
+        }
+    }
+
+    /**
+     * Append to a given builder the AND-clause for a tristate
+     */
+    public static void appendTristateFilter (StringBuilder builder, String key, String value) {
+        if(! value.isEmpty()) {
+            int v = Integer.parseInt(value);
+            if (v > 0) {
+                builder.append (" AND ").append(key);
+            } else if (v == 0) {
+                builder.append (" AND NOT ").append(key);
+            }
+        }
+    }
 }

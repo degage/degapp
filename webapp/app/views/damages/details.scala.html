@@ -1,7 +1,7 @@
 @(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog], proofList: Iterable[File])
 @import org.joda.time.format.DateTimeFormat
     @stylesheets = {
-        <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")">
+        <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
     }
 @scripts = {
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
@@ -166,13 +166,13 @@
                                     <!-- row -->
                                 <div class="row">
                                     <div class="col-sm-4">
-                                        <strong>Van:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getFrom)
+                                        <strong>Van:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getReservation.getFrom)
                                     </div>
                                     <div class="col-sm-4">
-                                        <strong>Tot:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getCarRide.getReservation.getTo)
+                                        <strong>Tot:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getReservation.getTo)
                                     </div>
                                     <div class="col-sm-4">
-                                        <strong>Status:</strong> @damage.getCarRide.getReservation.getStatus.getDescription
+                                        <strong>Status:</strong> @damage.getReservation.getStatus.getDescription
                                     </div>
 
 

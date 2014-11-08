@@ -8,7 +8,6 @@ import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.User;
 import reports.ReportGeneration;
 
-import java.sql.Date;
 import java.time.Instant;
 import java.util.List;
 

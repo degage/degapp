@@ -4,18 +4,15 @@ import be.ugent.degage.db.dao.AvailabilityDAO;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarAvailabilityInterval;
-import be.ugent.degage.db.models.DayOfWeek;
 import be.ugent.degage.db.models.UserRole;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
-import org.joda.time.LocalTime;
 import play.mvc.Controller;
 import play.mvc.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Controller which is responsible for processing car availabilities. Works in concert with Cars controller.

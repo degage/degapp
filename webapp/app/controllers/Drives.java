@@ -443,8 +443,7 @@ public class Drives extends Controller {
                 }
             }
             if (damaged) {
-                DamageDAO damageDAO = context.getDamageDAO();
-                damageDAO.createDamage(ride); // TODO: why is this? Delegate to database module?
+                context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
             }
         } else if (isOwner || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             // Owner is allowed to adjust the information
