@@ -83,6 +83,15 @@ public final class FilterUtils {
     }
 
     /**
+     * Append to a given builder the AND-clause for a boolean, when one
+     */
+    public static void appendWhenOneFilter (StringBuilder builder, String key, String value) {
+        if(value.equals("1")) {
+            builder.append (" AND ").append(key);
+        }
+    }
+
+    /**
      * Append to a given builder the AND-clause for a tristate
      */
     public static void appendTristateFilter (StringBuilder builder, String key, String value) {

@@ -552,12 +552,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     }
 
     private static void appendCarFilter (StringBuilder builder, Filter filter) {
-        // filter on car id
-        String carId = filter.getValue(FilterField.CAR_ID);
-        if(! carId.isEmpty()) {
-            Integer.parseInt(carId); // check that this is an integer - avoid SQL injection
-            builder.append (" AND car_id = ").append(carId);
-        }
+
+        FilterUtils.appendIntFilter(builder, "car_id", filter.getValue(FilterField.CAR_ID));
 
         // filter on car_seats
         String carSeats = filter.getValue(FilterField.CAR_SEATS);
@@ -573,28 +569,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             builder.append(" AND car_fuel = '").append(carFuel).append('\'');
         }
 
-        // filter on gps
-        if (filter.getValue(FilterField.CAR_GPS).equals("1")) {
-            builder.append (" AND car_gps ");
-        }
-
-        // filter on hook
-        if (filter.getValue(FilterField.CAR_HOOK).equals("1")) {
-            builder.append (" AND car_hook ");
-        }
-
-        // filter on manual
-        String manual = filter.getValue(FilterField.CAR_MANUAL);
-        if (! manual.isEmpty()) {
-            int man = Integer.parseInt(manual);
-            if (man > 0) {
-                builder.append (" AND car_manual ");
-            }
-            else if (man == 0) {
-                builder.append (" AND NOT car_manual ");
-            }
-        }
-
+        FilterUtils.appendWhenOneFilter(builder, "car_gps", filter.getValue(FilterField.CAR_GPS));
+        FilterUtils.appendWhenOneFilter(builder, "car_hook", filter.getValue(FilterField.CAR_HOOK));
+        FilterUtils.appendTristateFilter(builder, "car_manual", filter.getValue(FilterField.CAR_MANUAL));
     }
 
     private String NEW_CAR_QUERY =
