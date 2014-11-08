@@ -5,7 +5,7 @@
     <script>
     var route = myJsRoutes.controllers.Users.showUsersPage;
     </script>
-    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
@@ -23,6 +23,7 @@
         <div class="row">
             <div class="col-lg-12">
                 <h1 class="page-header">Gebruikers</h1>
+                @flashes()
                 <div class="panel panel-default">
                     <div class="panel-heading">
                         <i class="fa fa-bar-chart-o fa-fw"></i> Gebruikers zoeken

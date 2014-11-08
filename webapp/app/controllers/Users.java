@@ -75,10 +75,11 @@ public class Users extends Controller {
             Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
             if (userRoles.contains(UserRole.SUPER_USER)) {
                 flash("danger", "Je kan geen superuser impersoneren.");
+                return redirect(routes.Users.showUsers());
             } else {
                 CurrentUser.set(user, userRoles);
+                return redirect(routes.Dashboard.index());
             }
-            return redirect(routes.Dashboard.index());
         } else {
             flash("danger", "Deze gebruikersID bestaat niet.");
             return redirect(routes.Users.showUsers());
