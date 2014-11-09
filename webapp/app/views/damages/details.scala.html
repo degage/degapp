@@ -1,4 +1,4 @@
-@(damage: Damage, owner: User, car: Car, damageLogList: java.util.List[DamageLog], proofList: Iterable[File])
+@(damage: Damage, owner: User, car: Car, damageLogList: Iterable[DamageLog], proofList: Iterable[File])
 @import org.joda.time.format.DateTimeFormat
     @stylesheets = {
         <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
@@ -193,12 +193,11 @@
                                 <strong>Log:</strong>
                                 </p>
                                 <ul class="list-group">
-                                @for(damageLog <- damageLogList) {
+                                @foreach(damageLogList) { damageLog =>
                                     <li class="list-group-item">
                                         <strong class="list-group-item-heading">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damageLog.getCreated)</strong>
                                         <p class="list-group-item-text">@damageLog.getDescription</p>
                                     </li>
-
                                 }
                                 </ul>
                                 <p>

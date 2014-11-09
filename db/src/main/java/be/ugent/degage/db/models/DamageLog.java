@@ -7,32 +7,12 @@ import org.joda.time.DateTime;
  */
 public class DamageLog {
 
-    private Integer id;
-    private Damage damage;
     private String description;
     private DateTime created;
 
-    public DamageLog(Integer id, Damage damage, String description, DateTime created) {
-        this.id = id;
-        this.damage = damage;
+    public DamageLog(String description, DateTime created) {
         this.description = description;
         this.created = created;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Damage getDamage() {
-        return damage;
-    }
-
-    public void setDamage(Damage damage) {
-        this.damage = damage;
     }
 
     public String getDescription() {

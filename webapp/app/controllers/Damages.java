@@ -51,9 +51,11 @@ public class Damages extends Controller {
         public String status;
 
         public String validate() {
-            if ("".equals(status))
+            if (status == null || status.trim().isEmpty()) {
                 return "Geef aub een status op.";
-            return null;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -199,35 +201,17 @@ public class Damages extends Controller {
         Form<DamageModel> damageForm = Form.form(DamageModel.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         if (damageForm.hasErrors()) {
-            DamageDAO dao = context.getDamageDAO();
-            UserDAO userDAO = context.getUserDAO();
-            CarDAO carDAO = context.getCarDAO();
-            FileDAO fileDAO = context.getFileDAO();
-            DamageLogDAO damageLogDAO = context.getDamageLogDAO();
-            Damage damage = dao.getDamage(damageId);
-            Car damagedCar = carDAO.getCar(damage.getCarId());
-            User owner = userDAO.getUser(damagedCar.getOwner().getId());
-            List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
-            // TODO: use redirect
             flash("danger", "Beschrijving aanpassen mislukt.");
-            return badRequest(details.render(
-                    damage,
-                    owner,
-                    damagedCar,
-                    damageLogList,
-                    proofList
-            ));
         } else {
 
             DamageDAO damageDAO = context.getDamageDAO();
             DamageModel model = damageForm.get();
             damageDAO.updateDamageDetails(damageId, model.description, model.time);
             flash("success", "De beschrijving werd gewijzigd.");
-            return redirect(
-                    routes.Damages.showDamageDetails(damageId)
-            );
         }
+        return redirect(
+                routes.Damages.showDamageDetails(damageId)
+        );
     }
 
 
@@ -242,35 +226,17 @@ public class Damages extends Controller {
         Form<DamageStatusModel> damageStatusForm = Form.form(DamageStatusModel.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         if (damageStatusForm.hasErrors()) {
-            DamageDAO dao = context.getDamageDAO();
-            UserDAO userDAO = context.getUserDAO();
-            CarDAO carDAO = context.getCarDAO();
-            FileDAO fileDAO = context.getFileDAO();
-            DamageLogDAO damageLogDAO = context.getDamageLogDAO();
-            Damage damage = dao.getDamage(damageId);
-            Car damagedCar = carDAO.getCar(damage.getCarId());
-            User owner = userDAO.getUser(damagedCar.getOwner().getId()); // TODO: why is this not partial (and in other places?)
-            List<DamageLog> damageLogList = damageLogDAO.getDamageLogsForDamage(damageId);
-            Iterable<File> proofList = fileDAO.getDamageFiles(damageId);
-            // TODO: use redirect
-            flash("danger", "Status toevoegen mislukt.");
-            return badRequest(details.render(damage, owner, damagedCar, damageLogList, proofList));
+            flash("danger", "Logbericht mag niet blanko zijn");
         } else {
-
-            DamageDAO damageDAO = context.getDamageDAO();
             DamageLogDAO damageLogDAO = context.getDamageLogDAO();
-            Damage damage = damageDAO.getDamage(damageId);
             DamageStatusModel model = damageStatusForm.get();
-            DamageLog damageLog = damageLogDAO.createDamageLog(damage, model.status);
-            if (damageLog == null) {
-                flash("danger", "Kon de damagelog niet toevoegen aan de database.");
-            } else {
-                flash("success", "De status werd toegevoegd.");
-            }
-            return redirect(
-                    routes.Damages.showDamageDetails(damageId)
-            );
+            damageLogDAO.addDamageLog(damageId, model.status);
+            flash("success", "Het logbericht werd toegevoegd.");
         }
+        return redirect(
+                routes.Damages.showDamageDetails(damageId)
+        );
+
     }
 
 
