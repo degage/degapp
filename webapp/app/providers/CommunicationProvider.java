@@ -33,14 +33,11 @@ public class CommunicationProvider {
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
-                NotificationDAO dao = context.getNotificationDAO();
                 Filter filter = new JDBCFilter();
 
                 filter.putValue(FilterField.USER_ID, userId + "");
-                List<Notification> notifications = dao.getNotificationList(null, false, 1, AMOUNT_OF_VISIBLE_NOTIFICATIONS, filter);
-                if (notifications != null) {
-                    Cache.set(key, notifications);
-                }
+                List<Notification> notifications = context.getNotificationDAO().getNotificationList(null, false, 1, AMOUNT_OF_VISIBLE_NOTIFICATIONS, filter);
+                Cache.set(key, notifications);
                 return notifications;
             } catch (DataAccessException ex) {
                 throw ex;
@@ -52,14 +49,11 @@ public class CommunicationProvider {
 
     public int getNumberOfUnreadNotifications(int userId) {
         String key = String.format(NOTIFICATION_NUMBER_BY_ID, userId);
-        Object obj =  Cache.get(key);
+        Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
-                NotificationDAO dao = context.getNotificationDAO();
-                int unread_number =  dao.getNumberOfUnreadNotifications(userId);
-                if (unread_number != -1) {
-                    Cache.set(key, unread_number);
-                }
+                int unread_number = context.getNotificationDAO().getNumberOfUnreadNotifications(userId);
+                Cache.set(key, unread_number);
                 return unread_number;
             } catch (DataAccessException ex) {
                 throw ex;
@@ -69,62 +63,47 @@ public class CommunicationProvider {
         }
     }
 
-    public void invalidateNotifications(int userId){
+    public void invalidateNotifications(int userId) {
         Cache.remove(String.format(NOTIFICATIONS_BY_ID, userId));
     }
 
-    public void invalidateNotificationNumber(int userId){
+    public void invalidateNotificationNumber(int userId) {
         Cache.remove(String.format(NOTIFICATION_NUMBER_BY_ID, userId));
     }
 
-
-    public List<Message> getMessages(int userId) {
+    public Iterable<Message> getMessages(int userId) {
         String key = String.format(MESSAGES_BY_ID, userId);
         Object obj = Cache.get(key);
-        if (obj == null || !(obj instanceof List)) {
+        if (obj == null || !(obj instanceof Iterable)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
-                MessageDAO dao = context.getMessageDAO();
-                Filter filter = new JDBCFilter();
-
-                filter.putValue(FilterField.MESSAGE_RECEIVER_ID, userId + "");
-                List<Message> messages = dao.getMessageList(null, false, 1, AMOUNT_OF_VISIBLE_MESSAGES, filter);
-                if (messages != null) {
-                    Cache.set(key, messages);
-                }
+                Iterable<Message> messages = context.getMessageDAO().listUnreadMessagesTo(userId, AMOUNT_OF_VISIBLE_MESSAGES);
+                Cache.set(key, messages);
                 return messages;
-            } catch (DataAccessException ex) {
-                throw ex;
             }
         } else {
-            return (List<Message>) obj; //Type erasure problem from Java, works at runtime
+            return (Iterable<Message>) obj; //Type erasure problem from Java, works at runtime
         }
     }
 
-    public void invalidateMessages(int userId){
+    public void invalidateMessages(int userId) {
         Cache.remove(String.format(MESSAGES_BY_ID, userId));
     }
-
 
     public int getNumberOfUnreadMessages(int userId) {
         String key = String.format(MESSAGE_NUMBER_BY_ID, userId);
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
-                MessageDAO dao = context.getMessageDAO();
-                int unread_number =  dao.getNumberOfUnreadMessages(userId);
-                if (unread_number != -1) {
-                    Cache.set(key, unread_number);
-                }
+                int unread_number = context.getMessageDAO().countUnreadMessagesTo(userId);
+                Cache.set(key, unread_number);
                 return unread_number;
-            } catch (DataAccessException ex) {
-                throw ex;
             }
         } else {
             return (Integer) obj; //Type erasure problem from Java, works at runtime
         }
     }
 
-    public void invalidateMessageNumber(int userId){
+    public void invalidateMessageNumber(int userId) {
         Cache.remove(String.format(MESSAGE_NUMBER_BY_ID, userId));
     }
 }

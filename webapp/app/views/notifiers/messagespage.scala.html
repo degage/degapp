@@ -1,29 +1,25 @@
-@(messageList: java.util.List[Message], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(messageList: Iterable[Message], page : Int, amountOfResults : Int, amountOfPages : Int, userIsReceiver: Boolean)
 @import org.joda.time.format.DateTimeFormat
-@import providers.DataProvider;
 <ul class="chat">
-    @for((message, index) <- messageList.zipWithIndex) {
+    @foreach(messageList){ message =>
         <li>
             <div class="chat-body clearfix">
                 <div class="header">
-                    <!-- <img src="@routes.Assets.at("images/avatar.jpg")" alt="User Avatar" class="img-circle msg-avatar"> -->
-                    <strong class="primary-font"><a href="@routes.Profile.index(message.getSender.getId)">@message.getSender</a></strong>
+                    @* <!-- <img src='@routes.Assets.at("images/avatar.jpg")' alt="User Avatar" class="img-circle msg-avatar"> --> *@
+                    <strong class="primary-font"><a href="@routes.Profile.index(message.getUser.getId)">@message.getUser</a></strong>
                     <small class="text-muted">
                         - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(message.getTimestamp)
                     </small>
                 </div>
                 <div class="msg-body">
-                    <p>
-                    @Html(message.getBody)
-                    </p>
+                    <pre>@message.getBody
+                    </pre>
                 </div>
-                @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
-                    @if(message.getReceiver.getId == userId) {
-                        @if(!message.isRead) {
-                            <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>
-                        }
-                        <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.reply(message.getSender.getId)">Antwoorden</a>
+                @if(userIsReceiver) {
+                    @if(!message.isRead) {
+                        <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>
                     }
+                    <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.reply(message.getUser.getId)">Antwoorden</a>
                 }
             </div>
         </li>

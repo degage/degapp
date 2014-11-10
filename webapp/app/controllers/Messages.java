@@ -8,12 +8,12 @@ import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
@@ -58,38 +58,29 @@ public class Messages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result showReceivedMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        User user = DataProvider.getUserProvider().getUser();
-        FilterField field = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-
-        filter.putValue(FilterField.MESSAGE_RECEIVER_ID, user.getId() + "");
-        return ok(messageList(page, pageSize, field, asc, filter));
+        int userId = CurrentUser.getId();
+        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
+        return ok(messagespage.render(
+                        dao.listMessagesTo(userId, page, pageSize),
+                        page,
+                        dao.countMessagesTo(userId),
+                        (int) Math.ceil(dao.countMessagesFrom(userId) / (double) pageSize),
+                        true)
+        );
     }
 
     @AllowRoles
     @InjectContext
     public static Result showSentMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        User user = DataProvider.getUserProvider().getUser();
-        FilterField field = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-
-        filter.putValue(FilterField.MESSAGE_SENDER_ID, user.getId() + "");
-        return ok(messageList(page, pageSize, field, asc, filter));
-    }
-
-    // used in injected context
-    private static Html messageList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
+        int userId = CurrentUser.getId();
         MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
-        List<Message> messageList = dao.getMessageList(orderBy, asc, page, pageSize, filter);
-
-        int amountOfResults = dao.getAmountOfMessages(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
-
-        return messagespage.render(messageList, page, amountOfResults, amountOfPages);
+        return ok(messagespage.render(
+                        dao.listMessagesFrom(userId, page, pageSize),
+                        page,
+                        dao.countMessagesFrom(userId),
+                        (int) Math.ceil(dao.countMessagesFrom(userId) / (double) pageSize),
+                        false)
+        );
     }
 
     /**
@@ -147,19 +138,13 @@ public class Messages extends Controller {
             DataAccessContext context = DataAccess.getInjectedContext();
             MessageDAO dao = context.getMessageDAO();
 
-            User sender = DataProvider.getUserProvider().getUser();
-            User receiver = context.getUserDAO().getUserPartial(createForm.get().userId);
-            Message mes = dao.createMessage(sender, receiver, createForm.get().subject, createForm.get().body);
-            DataProvider.getCommunicationProvider().invalidateMessages(receiver.getId()); // invalidate the message
-            DataProvider.getCommunicationProvider().invalidateMessageNumber(receiver.getId());
-            if (mes != null) {
-                return redirect(
-                        routes.Messages.showMessages() // return to infosession list
-                );
-            } else {
-                createForm.error("Failed to create message in database. Contact administrator.");
-                return badRequest(addmessage.render(createForm));
-            }
+            int receiverId = createForm.get().userId;
+            dao.createMessage(CurrentUser.getId(), receiverId, createForm.get().subject, createForm.get().body);
+            DataProvider.getCommunicationProvider().invalidateMessages(receiverId); // invalidate the message
+            DataProvider.getCommunicationProvider().invalidateMessageNumber(receiverId);
+            return redirect(
+                    routes.Messages.showMessages() // return to infosession list
+            );
         }
     }
 

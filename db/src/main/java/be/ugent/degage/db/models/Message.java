@@ -8,8 +8,10 @@ import org.joda.time.DateTime;
 public class Message {
 
     private int id;
-    private User sender;
-    private User receiver;
+
+    // sender or receiver, depending on context
+    private User user;
+
     private boolean read;
     private String subject;
     private String body;
@@ -23,20 +25,12 @@ public class Message {
         this.id = id;
     }
 
-    public User getSender() {
-        return sender;
+    public User getUser() {
+        return user;
     }
 
-    public void setSender(User sender) {
-        this.sender = sender;
-    }
-
-    public User getReceiver() {
-        return receiver;
-    }
-
-    public void setReceiver(User receiver) {
-        this.receiver = receiver;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public boolean isRead() {
@@ -71,10 +65,9 @@ public class Message {
         this.timestamp = timestamp;
     }
 
-    public Message(int id, User sender, User receiver, boolean read, String subject, String body, DateTime timestamp){
+    public Message(int id, boolean read, User user, String subject, String body, DateTime timestamp){
         this.id = id;
-        this.sender = sender;
-        this.receiver = receiver;
+        this.user = user;
         this.read = read;
         this.subject = subject;
         this.body = body;

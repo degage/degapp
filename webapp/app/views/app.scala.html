@@ -50,9 +50,9 @@
         <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/main.css")'>
 
             <!--[if lt IE 9]>
-            <script src="@routes.Assets.at("javascripts/compatibility/html5shiv.min.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.at("javascripts/compatibility/css3-mediaqueries.js")" type="text/javascript"></script>
-        <script src="@routes.Assets.at("javascripts/compatibility/respond.min.js")" type="text/javascript"></script>
+            <script src='@routes.Assets.at("javascripts/compatibility/html5shiv.min.js")' type="text/javascript"></script>
+        <script src='@routes.Assets.at("javascripts/compatibility/css3-mediaqueries.js")' type="text/javascript"></script>
+        <script src='@routes.Assets.at("javascripts/compatibility/respond.min.js")' type="text/javascript"></script>
         <![endif]-->
     </head>
     <body>
@@ -79,29 +79,23 @@
                             }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
+                            @* TODO: fill this with AJAX? *@
                             @defining(DataProvider.getCommunicationProvider().getMessages(CurrentUser.getId)) { messages =>
-                                @for((message, index) <- messages.zipWithIndex) {
-                                    @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_MESSAGES){
-                                        <li>
-                                            <a href="@routes.Messages.showMessages()">
-                                                <div>
-                                                    @if(!message.isRead){
-                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName [ongelezen]</strong>
-                                                    }else{
-                                                        <strong>@message.getSender.getFirstName @message.getSender.getLastName</strong>
-                                                    }
-                                                    <span class="pull-right text-muted">
-                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
-                                                    </span>
-                                                </div>
-                                                @defining(message.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { message_body =>
-                                                    <div>@Html(message_body.substring(0,math.min(80,message_body.length)))...</div>
-                                                }
-
-                                            </a>
-                                        </li>
-                                        <li class="divider"></li>
-                                    }
+                                @foreach(messages){ message =>
+                                    <li>
+                                        <a href="@routes.Messages.showMessages()">
+                                            <div>
+                                                <strong>@message.getUser</strong> @* enkel ongelezen berichten *@
+                                                <span class="pull-right text-muted">
+                                                    <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
+                                                </span>
+                                            </div>
+                                            @defining(message.getBody.replaceAll("""\s+"""," ")) { message_body =>
+                                                <div>@message_body.substring(0,math.min(80,message_body.length))...</div>
+                                            }
+                                        </a>
+                                    </li>
+                                    <li class="divider"></li>
                                 }
                             }
                             <li>
@@ -124,6 +118,7 @@
                             }
                         </a>
                         <ul class="dropdown-menu dropdown-messages">
+                            @* TODO: fill this with AJAX? *@
                             @defining(DataProvider.getCommunicationProvider().getNotifications(CurrentUser.getId)) { notifications =>
                                 @for((notification, index) <- notifications.zipWithIndex) {
                                     @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
@@ -140,7 +135,7 @@
                                                     </span>
                                                 </div>
                                                 @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
-                                                    <div>@Html(notification_body.substring(0,math.min(80,notification_body.length)))...</div>
+                                                    <div>@notification_body.substring(0,math.min(80,notification_body.length))...</div>
                                                 }
 
                                             </a>
