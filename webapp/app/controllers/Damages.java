@@ -21,7 +21,6 @@ import views.html.damages.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 03/05/14.

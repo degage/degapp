@@ -58,5 +58,9 @@ public interface MessageDAO {
      */
     public void markAllMessagesAsRead(int userId) throws DataAccessException;
 
+    /**
+     * Return sender and subject of the given message. Used for sending a reply
+     */
+    public Message getReplyHeader (int messageId) throws DataAccessException;
 
 }

@@ -8,7 +8,6 @@ import org.joda.time.DateTime;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 22/03/14.
@@ -210,6 +209,34 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to mark message as read", e);
+        }
+    }
+
+    private LazyStatement getReplyHeaderStatement = new LazyStatement(
+            "SELECT message_subject,  " +
+                    "users.user_id, users.user_email, users.user_firstname, users.user_lastname, users.user_status " +
+            "FROM messages JOIN users ON user_id = message_from_user_id "  +
+            "WHERE message_id = ? "
+    );
+
+    @Override
+    public Message getReplyHeader(int messageId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getReplyHeaderStatement.value();
+            ps.setInt(1, messageId);
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return new Message(
+                        messageId,
+                        false,
+                        JDBCUserDAO.populateUserPartial(rs),
+                        rs.getString("message_subject"),
+                        null,
+                        null
+                );
+            }
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to retrieve message", e);
         }
     }
 }

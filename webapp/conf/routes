@@ -52,7 +52,7 @@ GET         /messages/sent/page                     controllers.Messages.showSen
 GET         /messages/markasread                    controllers.Messages.markMessageAsRead(messageId: Int)
 GET         /messages/markallasread                 controllers.Messages.markAllMessagesAsRead()
 GET         /messages/new                           controllers.Messages.newMessage()
-GET         /messages/reply                         controllers.Messages.reply(userId: Int)
+GET         /messages/reply                         controllers.Messages.reply(messageId: Int)
 POST        /messages/new                           controllers.Messages.createNewMessage()
 GET         /notifications                          controllers.Notifications.showNotifications()
 GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)

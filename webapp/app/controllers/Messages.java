@@ -1,25 +1,21 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.MessageDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
-import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
-
-import java.util.List;
 
 public class Messages extends Controller {
 
@@ -28,21 +24,22 @@ public class Messages extends Controller {
      * This model is used during the submission of a new message.
      */
     public static class MessageCreationModel {
+        @Constraints.Required
         public String subject;
+
+        @Constraints.Required
         public String body;
+
         public Integer userId;
 
         public String validate() {
-            if (userId == null || userId == 0 || "".equals(subject) || "".equals(body))
-                return "Vul alle velden in";
-
-            return null;
+            if (userId == null || userId == 0) {
+                return "Afzenderveld invullen a.u.b.";
+            } else {
+                return null;
+            }
         }
-
     }
-
-    public static int AUTOCOMPLETE_MAX = 10;
-
 
     /**
      * Method: GET
@@ -92,30 +89,27 @@ public class Messages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result newMessage() {
-        Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
-        return ok(addmessage.render(editForm));
+        return ok(addmessage.render(Form.form(MessageCreationModel.class), null));
     }
 
     /**
      * Method: GET
      *
-     * @return a new message form, with the user already filled in, for reply purposes
+     * @return a new message form, filled in with details for replying to the given message
      */
 
     @AllowRoles
     @InjectContext
-    public static Result reply(int userId) {
-        UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId); // TODO: full user needed?
-        if (user == null) {
-            flash("danger", "GebruikersID " + userId + " bestaat niet.");
-            return redirect(routes.Messages.showMessages());
-        }
+    public static Result reply(int messageId) {
+        Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
+        User initialReceiver = message.getUser();
         MessageCreationModel model = new MessageCreationModel();
-        model.userId = user.getId();
-        Form<MessageCreationModel> editForm = Form.form(MessageCreationModel.class);
-        return ok(addmessage.render(editForm.fill(model)));
-
+        model.userId = initialReceiver.getId();
+        model.subject = message.getSubject();
+        if (!model.subject.startsWith("Re: ")) {
+            model.subject = "Re: " + model.subject;
+        }
+        return ok(addmessage.render(Form.form(MessageCreationModel.class).fill(model), initialReceiver));
     }
 
 
@@ -132,7 +126,7 @@ public class Messages extends Controller {
     public static Result createNewMessage() {
         Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(addmessage.render(createForm));
+            return badRequest(); // TODO
         } else {
 
             DataAccessContext context = DataAccess.getInjectedContext();
