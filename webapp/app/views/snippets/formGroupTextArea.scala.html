@@ -3,15 +3,13 @@
 @* TODO: use FieldConverter? *@
 
 <div class="form-group @if(field.hasErrors) {has-error}">
-    <label class="col-md-1" for="@field.id">@label</label>
+    <label class="control-label" for="@field.id">@label</label>
 
-    <div class="col-md-12">
-        <textarea id="@field.id" name="@field.name"
-                  rows="@rows"
-                  class="form-control input-md" value="@field.value"
-        @toHtmlArgs(args.toMap)>@field.value</textarea>
+    <textarea id="@field.id" name="@field.name"
+              rows="@rows"
+              class="form-control input-md" value="@field.value"
+    @toHtmlArgs(args.toMap)>@field.value</textarea>
     @field.errors.map { error =>
-        <span class="help-block">@error</span>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
     }
-    </div>
 </div>

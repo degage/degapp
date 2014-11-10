@@ -5,12 +5,12 @@
 
 
 <div class="form-group @if(field.hasErrors) {has-error}">
-    <label for="@field.id">@label</label>
+    <label class="control-label" for="@field.id">@label</label>
 
     <input id="@field.id" name="@field.name" type="text"
            class="form-control input-md" value="@field.value"
            @toHtmlArgs(args.toMap)>
     @field.errors.map { error =>
-        <span class="help-block">@error</span>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
     }
 </div>

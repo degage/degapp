@@ -10,12 +10,16 @@ import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
 import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class Messages extends Controller {
 
@@ -32,9 +36,10 @@ public class Messages extends Controller {
 
         public Integer userId;
 
-        public String validate() {
+        // TODO: create a specific constraint
+        public List<ValidationError> validate() {
             if (userId == null || userId == 0) {
-                return "Afzenderveld invullen a.u.b.";
+                return Arrays.asList(new ValidationError ("userId", "Gelieve een bestemmeling aan te geven"));
             } else {
                 return null;
             }
@@ -126,18 +131,27 @@ public class Messages extends Controller {
     public static Result createNewMessage() {
         Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(); // TODO
+            // retrieve the user id
+
+            String userIdString  = createForm.data().get("userId");
+            if (userIdString != null && ! userIdString.isEmpty()) {
+                int userId = Integer.parseInt(userIdString);
+                if (userId != 0) {
+                    User initialReceiver = DataAccess.getInjectedContext().getUserDAO().getUserPartial(Integer.parseInt(userIdString));
+                    return ok(addmessage.render(createForm, initialReceiver));
+                }
+            }
+            return ok(addmessage.render(createForm, null));
         } else {
 
-            DataAccessContext context = DataAccess.getInjectedContext();
-            MessageDAO dao = context.getMessageDAO();
+            MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
 
             int receiverId = createForm.get().userId;
             dao.createMessage(CurrentUser.getId(), receiverId, createForm.get().subject, createForm.get().body);
             DataProvider.getCommunicationProvider().invalidateMessages(receiverId); // invalidate the message
             DataProvider.getCommunicationProvider().invalidateMessageNumber(receiverId);
             return redirect(
-                    routes.Messages.showMessages() // return to infosession list
+                    routes.Messages.showMessages() // return to message list
             );
         }
     }

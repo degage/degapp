@@ -3,14 +3,12 @@
 @* TODO: use FieldConverter? *@
 
 <div class="form-group @if(field.hasErrors) {has-error}">
-    <label class="col-md-12" for="@field.id">@label</label>
+    <label class="control-label" for="@field.id">@label</label>
 
-    <div class="col-md-12">
-        <input id="@field.id" name="@field.name" type="number"
-               class="form-control input-md" value="@field.value"
-               @toHtmlArgs(args.toMap)>
+    <input id="@field.id" name="@field.name" type="number"
+           class="form-control input-md" value="@field.value"
+           @toHtmlArgs(args.toMap)>
     @field.errors.map { error =>
         <span class="help-block">@error</span>
     }
-    </div>
 </div>

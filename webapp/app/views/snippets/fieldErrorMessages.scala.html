@@ -1,0 +1,5 @@
+@(field: play.api.data.Field)
+
+@field.errors.map { error =>
+<span class="help-block">@play.api.i18n.Messages(error.message)</span>
+}
