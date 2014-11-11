@@ -21,10 +21,6 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
 
-    public Iterable<User> getPrivileged(int carId) throws DataAccessException;
-    public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException;
-    public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException;
-
     /**
      * Return a list of all cars, with full information (in order to export it to a spread sheet)
      */

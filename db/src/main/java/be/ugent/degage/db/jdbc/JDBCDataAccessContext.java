@@ -19,6 +19,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     private AddressDAO addressDAO;
     private ReservationDAO reservationDAO;
     private CarDAO carDAO;
+    private PrivilegedDAO privilegedDAO;
     private AvailabilityDAO availabilityDAO;
     private CarCostDAO carCostDAO;
     private UserRoleDAO userRoleDAO;
@@ -140,7 +141,15 @@ class JDBCDataAccessContext implements DataAccessContext {
         return carDAO;
 	}
 
-	@Override
+    @Override
+    public PrivilegedDAO getPrivilegedDAO() {
+        if (privilegedDAO == null) {
+            privilegedDAO = new JDBCPrivilegedDAO(this);
+        }
+        return privilegedDAO;
+    }
+
+    @Override
 	public AvailabilityDAO getAvailabilityDAO() {
 		if(availabilityDAO == null){
             availabilityDAO = new JDBCAvailabilityDAO(this);

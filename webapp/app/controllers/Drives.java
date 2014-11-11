@@ -569,10 +569,10 @@ public class Drives extends Controller {
     }
 
     private static boolean isPrivilegedUserOfReservedCar(DataAccessContext context, int userId, Reservation reservation) {
-        CarDAO cdao = context.getCarDAO();
+
         boolean isPrivileged = false;
         // TODO: see also Reserve.confirmReservation
-        Iterator<User> iterator = cdao.getPrivileged(reservation.getCar().getId()).iterator();
+        Iterator<User> iterator = context.getPrivilegedDAO().getPrivileged(reservation.getCar().getId()).iterator();
         while (!isPrivileged && iterator.hasNext()) {
             isPrivileged = (userId == iterator.next().getId());
         }

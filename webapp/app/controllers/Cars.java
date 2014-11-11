@@ -477,13 +477,14 @@ public class Cars extends Controller {
         }
 
         if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
-            flash("danger", "Je heeft geen rechten tot het bewerken van deze wagen.");
+            flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest();
         }
 
         String[] values = valuesString.split(";");
 
-        Iterable<User> privileged = dao.getPrivileged(carId);
+        PrivilegedDAO pdao = context.getPrivilegedDAO();
+        Iterable<User> privileged = pdao.getPrivileged(carId);
 
         List<User> usersToAdd = new ArrayList<>();
         List<User> usersToDelete = new ArrayList<>();
@@ -510,8 +511,8 @@ public class Cars extends Controller {
             }
         }
 
-        dao.addPrivileged(carId, usersToAdd);
-        dao.deletePrivileged(carId, usersToDelete);
+        pdao.addPrivileged(carId, usersToAdd);
+        pdao.deletePrivileged(carId, usersToDelete);
 
         flash("success", "Je wijzigingen werden succesvol toegepast.");
         return redirect(routes.Cars.detail(car.getId()));
@@ -566,23 +567,20 @@ public class Cars extends Controller {
     @InjectContext
     public static Result detail(int carId) {
 
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        AvailabilityDAO availabilityDAO = DataAccess.getInjectedContext().getAvailabilityDAO();
-        final Car car = dao.getCar(carId);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarDAO dao = context.getCarDAO();
+        AvailabilityDAO availabilityDAO = context.getAvailabilityDAO();
+        Car car = dao.getCar(carId);
 
-        if (car == null) {
-            return badRequest();
-        } else {
-            Iterable<CarAvailabilityInterval> list = availabilityDAO.getAvailabilities(carId);
+        Iterable<CarAvailabilityInterval> list = availabilityDAO.getAvailabilities(carId);
 
-            return ok(detail.render(
-                            car,
-                            Availabilities.convertToView(list),
-                            CarAvailabilityInterval.containsOverlap(list),
-                            dao.getPrivileged(carId),
-                            null)
-            );
-        }
+        return ok(detail.render(
+                        car,
+                        Availabilities.convertToView(list),
+                        CarAvailabilityInterval.containsOverlap(list),
+                        context.getPrivilegedDAO().getPrivileged(carId),
+                        null)
+        );
     }
 
     /**

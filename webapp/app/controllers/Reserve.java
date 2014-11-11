@@ -5,6 +5,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.JobDAO;
+import be.ugent.degage.db.dao.PrivilegedDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
@@ -217,7 +218,7 @@ public class Reserve extends Controller {
                 }
             }
 
-            // Create the reservation
+            // Create the reservationCars
             User user = DataProvider.getUserProvider().getUser();
             Reservation reservation = rdao.createReservation(from, until, car, user, reservationForm.get().message);
 
@@ -228,13 +229,11 @@ public class Reserve extends Controller {
             autoAcceptDate.addMinutes(minutesAfterNow);
             jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
 
-            context.commit();
-
             // Check if user is owner or privileged
             // TODO: delegate this to db module
             boolean autoAccept = car.getOwner().getId() == user.getId();
             if (! autoAccept) {
-                Iterator<User> iterator = dao.getPrivileged(carId).iterator();
+                Iterator<User> iterator = context.getPrivilegedDAO().getPrivileged(carId).iterator();
                 while (! autoAccept && iterator.hasNext()) {
                     autoAccept = user.getId() == iterator.next().getId();
                 }
@@ -242,7 +241,6 @@ public class Reserve extends Controller {
             if (autoAccept) {
                 reservation.setStatus(ReservationStatus.ACCEPTED);
                 rdao.updateReservation(reservation);
-                context.commit();
             } else {
                 Notifier.sendReservationApproveRequestMail(car.getOwner(), reservation);
             }

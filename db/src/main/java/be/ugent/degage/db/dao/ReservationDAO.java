@@ -20,7 +20,13 @@ import java.util.List;
  * @author Laurent
  */
 public interface ReservationDAO {
+
+    /**
+     * Add a new reservation to the database. If the user is privileged for the car then the reservation is accepted automatically.
+     */
     public Reservation createReservation(DateTime from, DateTime to, Car car, User user, String message) throws DataAccessException;
+
+
     public void updateReservation(Reservation reservation) throws DataAccessException;
     public Reservation getReservation(int id) throws DataAccessException;
     public Reservation getNextReservation(Reservation reservation) throws DataAccessException;
