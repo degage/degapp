@@ -16,15 +16,13 @@ import org.joda.time.DateTime;
 import java.util.List;
 
 /**
- *
- * @author Laurent
  */
 public interface ReservationDAO {
 
     /**
      * Add a new reservation to the database. If the user is privileged for the car then the reservation is accepted automatically.
      */
-    public Reservation createReservation(DateTime from, DateTime to, Car car, User user, String message) throws DataAccessException;
+    public Reservation createReservation(DateTime from, DateTime to, int carId, int userId, String message) throws DataAccessException;
 
 
     public void updateReservation(Reservation reservation) throws DataAccessException;

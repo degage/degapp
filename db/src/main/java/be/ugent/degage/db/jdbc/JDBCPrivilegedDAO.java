@@ -21,8 +21,8 @@ public class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
 
     // TODO: replace * by actual fields
     private LazyStatement getPrivilegedStatement = new LazyStatement (
-            "SELECT * FROM carprivileges " +
-                "INNER JOIN users ON users.user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?"
+            "SELECT user_id, user_email, user_firstname, user_lastname, user_status FROM carprivileges " +
+                "INNER JOIN users ON user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?"
     );
 
     @Override
@@ -36,8 +36,6 @@ public class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
                     users.add(JDBCUserDAO.populateUserPartial(rs));
                 }
                 return users;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading privileged resultset", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of privileged", ex);
@@ -45,19 +43,18 @@ public class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
     }
 
     private LazyStatement createPrivilegedStatement = new LazyStatement (
-            "INSERT INTO carprivileges(car_privilege_user_id, car_privilege_car_id) VALUES (?,?)"
+            "INSERT INTO carprivileges(car_privilege_user_id, car_privilege_car_id) VALUES (?,?) " +
+                    "ON DUPLICATE KEY UPDATE car_privilege_car_id=car_privilege_car_id"  // = do nothing
     );
 
     @Override
-    public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException {
+    public void addPrivileged(int carId, Iterable<Integer> userIds) throws DataAccessException {
         try {
-            for(User user : users) {
+            for(int userId : userIds) {
                 PreparedStatement ps = createPrivilegedStatement.value();
-                ps.setInt(1, user.getId());
+                ps.setInt(1, userId);
                 ps.setInt(2, carId);
-
-                if(ps.executeUpdate() == 0)
-                    throw new DataAccessException("No rows were affected when creating privileged.");
+                ps.executeUpdate();
             }
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to create new privileged");
@@ -69,21 +66,40 @@ public class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
     );
 
     @Override
-    public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException {
+    public void deletePrivileged(int carId, Iterable<Integer> userIds) throws DataAccessException {
         try {
-            for(User user : users) {
+            for(int userId : userIds) {
                 PreparedStatement ps = deletePrivilegedStatement.value();
-
-                ps.setInt(1, user.getId());
+                ps.setInt(1, userId);
                 ps.setInt(2, carId);
-
-                if(ps.executeUpdate() == 0)
-                    throw new DataAccessException("No rows were affected when deleting privileged.");
-
+                ps.executeUpdate();
             }
         } catch(SQLException ex) {
             throw new DataAccessException("Failed to delete privileged");
         }
+    }
+
+    private LazyStatement isOwnerOrPrivilegedStatement = new LazyStatement(
+            " SELECT 1 FROM cars WHERE car_id = ? AND car_owner_user_id = ? " +
+            " UNION " +
+            " SELECT 1 FROM carprivileges WHERE car_privilege_car_id = ? AND car_privilege_user_id = ?"
+    );
+
+    @Override
+    public boolean isOwnerOrPrivileged(int carId, int userId) {
+        try {
+            PreparedStatement ps = isOwnerOrPrivilegedStatement.value();
+            ps.setInt (1, carId);
+            ps.setInt (2, userId);
+            ps.setInt (3, carId);
+            ps.setInt (4, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next ();
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not determine car onwerschip or privileges");
+        }
+
     }
 
 }

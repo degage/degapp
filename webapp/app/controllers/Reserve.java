@@ -9,6 +9,7 @@ import be.ugent.degage.db.dao.PrivilegedDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -90,15 +91,18 @@ public class Reserve extends Controller {
                 dateFrom = getTimeFrom();
                 dateUntil = getTimeUntil();
             } catch (IllegalArgumentException ex) {
-                if (dateFrom == null)
+                if (dateFrom == null) {
                     return "Ongeldig datum: van = " + from;
-                else
+                } else {
                     return "Ongeldig datum: tot = " + until;
+                }
             }
             if ("".equals(dateFrom) || "".equals(dateUntil)) // TODO string compared to date
+            {
                 return "Gelieve zowel een begin als einddatum te selecteren!";
-            else if (dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil))
+            } else if (dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
                 return "De einddatum kan niet voor de begindatum liggen!";
+            }
             return null;
         }
 
@@ -161,7 +165,7 @@ public class Reserve extends Controller {
      * Render the details page of a future reservation for a car where the user is able to
      * confirm the reservation and specify the start and end of the reservation
      *
-     * @param carId the id of the car for which the reservationsdetails ought to be rendered
+     * @param carId the id of the car for which the reservation details ought to be rendered
      * @param from  the string containing the date and time of the start of the reservation
      * @param until the string containing the date and time of the end of the reservation
      * @return the details page of a future reservation for a car
@@ -192,26 +196,18 @@ public class Reserve extends Controller {
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result confirmReservation(int carId) {
-        // Get the car object to test whether the operation is legal
-        Car car;
-        DataAccessContext context = DataAccess.getInjectedContext();
-        CarDAO dao = context.getCarDAO();
-        car = dao.getCar(carId);
-        if (car == null) {
-            flash("danger", "De reservatie van deze auto is onmogelijk: auto onbestaand!");
-            return badRequest(showIndex());
-        }
-        ReservationDAO rdao = context.getReservationDAO();
-        List<Reservation> res = rdao.getReservationListForCar(carId);
         // Request the form
         Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
         if (reservationForm.hasErrors()) {
             return badRequest(reservations.render(reservationForm.globalError().message(), "", -1, "", ""));
         } else {
+            DataAccessContext context = DataAccess.getInjectedContext();
+            Car car = context.getCarDAO().getCar(carId);
             // Test whether the reservation is valid
             DateTime from = reservationForm.get().getTimeFrom();
             DateTime until = reservationForm.get().getTimeUntil();
-            for (Reservation reservation : res) {
+            ReservationDAO rdao = context.getReservationDAO();
+            for (Reservation reservation : rdao.getReservationListForCar(carId)) {
                 if ((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                         (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
                     return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1, "", ""));
@@ -219,30 +215,20 @@ public class Reserve extends Controller {
             }
 
             // Create the reservationCars
-            User user = DataProvider.getUserProvider().getUser();
-            Reservation reservation = rdao.createReservation(from, until, car, user, reservationForm.get().message);
+            Reservation reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), reservationForm.get().message);
+            if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
+                // Schedule the auto accept
+                int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
+                MutableDateTime autoAcceptDate = new MutableDateTime();
+                autoAcceptDate.addMinutes(minutesAfterNow);
+                context.getJobDAO().createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
 
-            // Schedule the auto accept
-            JobDAO jdao = context.getJobDAO();
-            int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
-            MutableDateTime autoAcceptDate = new MutableDateTime();
-            autoAcceptDate.addMinutes(minutesAfterNow);
-            jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
 
-            // Check if user is owner or privileged
-            // TODO: delegate this to db module
-            boolean autoAccept = car.getOwner().getId() == user.getId();
-            if (! autoAccept) {
-                Iterator<User> iterator = context.getPrivilegedDAO().getPrivileged(carId).iterator();
-                while (! autoAccept && iterator.hasNext()) {
-                    autoAccept = user.getId() == iterator.next().getId();
-                }
-            }
-            if (autoAccept) {
-                reservation.setStatus(ReservationStatus.ACCEPTED);
-                rdao.updateReservation(reservation);
-            } else {
-                Notifier.sendReservationApproveRequestMail(car.getOwner(), reservation);
+                Notifier.sendReservationApproveRequestMail(
+                        car.getOwner(),
+                        reservation, // note: user contained in this record is null
+                        DataProvider.getUserProvider().getUser()
+                );
             }
             return redirect(routes.Drives.index());
         }

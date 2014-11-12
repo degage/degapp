@@ -180,18 +180,18 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendReservationApproveRequestMail(User user, Reservation carReservation) {
+    public static void sendReservationApproveRequestMail(User owner, Reservation carReservation, User driver) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
+        String mail = replaceUserTags(owner, template.getBody());
+        mail = replaceCarReservationTags(carReservation, mail, driver);
         mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
         NotificationDAO notificationDAO = context.getNotificationDAO();
-        createNotification(notificationDAO, user, template.getSubject(), mail);
+        createNotification(notificationDAO, owner, template.getSubject(), mail);
         if (template.getSendMail()) {
             setSubject(template.getSubject());
-            addRecipient(user.getEmail());
+            addRecipient(owner.getEmail());
             addFrom(NOREPLY);
             send(mail);
         }
@@ -203,7 +203,7 @@ public class Notifier extends Mailer {
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
         String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
+        mail = replaceCarReservationTags(carReservation, mail, carReservation.getUser());
         mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
         NotificationDAO notificationDAO = context.getNotificationDAO();
         createNotification(notificationDAO, user, template.getSubject(), mail);
@@ -224,7 +224,7 @@ public class Notifier extends Mailer {
         Car car = cdao.getCar(carReservation.getCar().getId());
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
         String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
+        mail = replaceCarReservationTags(carReservation, mail, carReservation.getUser());
         mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
         mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
         mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).toString());
@@ -244,7 +244,7 @@ public class Notifier extends Mailer {
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
         String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
+        mail = replaceCarReservationTags(carReservation, mail, carReservation.getUser());
         mail = mail.replace("%reservation_reason%", reason);
         NotificationDAO notificationDAO = context.getNotificationDAO();
         createNotification(notificationDAO, user, template.getSubject(), mail);
@@ -315,13 +315,13 @@ public class Notifier extends Mailer {
         return template;
     }
 
-    private static String replaceCarReservationTags(Reservation carReservation, String template) {
+    private static String replaceCarReservationTags(Reservation carReservation, String template, User driver) {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
         template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
         template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));
         template = template.replace("%comment%", carReservation.getMessage() == null ? "[Geen commentaar]" : carReservation.getMessage());
-        template = template.replace("%reservation_user_firstname%", carReservation.getUser().getFirstName());
-        template = template.replace("%reservation_user_lastname%", carReservation.getUser().getLastName());
+        template = template.replace("%reservation_user_firstname%", driver.getFirstName());
+        template = template.replace("%reservation_user_lastname%", driver.getLastName());
         return template;
     }
 

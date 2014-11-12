@@ -121,17 +121,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     public static User populateUser(ResultSet rs, String tableName) throws SQLException {
-        if (rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0) { //Fix for left join not returning nullable int
+        User user = populateUserPartial(rs);
+        if (user == null) {
             return null;
         }
-
-        // TODO: call populateUserPartial
-        User user = new User(
-                rs.getInt(tableName + ".user_id"),
-                rs.getString(tableName + ".user_email"),
-                rs.getString(tableName + ".user_firstname"),
-                rs.getString(tableName + ".user_lastname"),
-                UserStatus.valueOf(rs.getString(tableName + ".user_status")));
 
         user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
         user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));

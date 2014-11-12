@@ -28,6 +28,7 @@ import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -88,7 +89,9 @@ public class Cars extends Controller {
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public void populate(Car car) {
-            if (car == null) return;
+            if (car == null) {
+                return;
+            }
 
             userId = car.getOwner().getId();
 
@@ -115,8 +118,9 @@ public class Cars extends Controller {
 
             if (car.getInsurance() != null) {
                 insuranceName = car.getInsurance().getName();
-                if (car.getInsurance().getExpiration() != null)
+                if (car.getInsurance().getExpiration() != null) {
                     expiration = car.getInsurance().getExpiration();
+                }
                 bonusMalus = car.getInsurance().getBonusMalus();
                 polisNr = car.getInsurance().getPolisNr();
             }
@@ -135,21 +139,30 @@ public class Cars extends Controller {
         public String validate() {
             /* TODO: dit moeten Field Errors worden, en niet één global error */
             String error = "";
-            if (userId == null || userId == 0)
+            if (userId == null || userId == 0) {
                 error += "Geef een eigenaar op. ";
-            if (!address.enoughFilled())
+            }
+            if (!address.enoughFilled()) {
                 error += "Geef het adres op.";
-            if (name.length() <= 0)
+            }
+            if (name.length() <= 0) {
                 error += "Geef de autonaam op. ";
-            if (brand.length() <= 0)
+            }
+            if (brand.length() <= 0) {
                 error += "Geef het automerk op. ";
-            if (seats == null || seats < 2)
+            }
+            if (seats == null || seats < 2) {
                 error += "Een auto heeft minstens 2 zitplaatsen. ";
-            if (doors == null || doors < 2)
+            }
+            if (doors == null || doors < 2) {
                 error += "Een auto heeft minstens 2 deuren. ";
+            }
 
-            if ("".equals(error)) return null;
-            else return error;
+            if ("".equals(error)) {
+                return null;
+            } else {
+                return error;
+            }
         }
     }
 
@@ -427,8 +440,9 @@ public class Cars extends Controller {
         TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
         technicalCarDetails.setLicensePlate(model.licensePlate);
         technicalCarDetails.setChassisNumber(model.chassisNumber);
-        if (file != null)
+        if (file != null) {
             technicalCarDetails.setRegistration(file);
+        }
 
         CarInsurance insurance = car.getInsurance();
         insurance.setName(model.insuranceName);
@@ -468,8 +482,7 @@ public class Cars extends Controller {
     @InjectContext
     public static Result updatePrivileged(int carId, String valuesString) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        CarDAO dao = context.getCarDAO();
-        Car car = dao.getCar(carId);
+        Car car = context.getCarDAO().getCar(carId);
 
         if (car == null) {
             flash("danger", "Car met ID=" + carId + " bestaat niet.");
@@ -481,27 +494,17 @@ public class Cars extends Controller {
             return badRequest();
         }
 
-        String[] values = valuesString.split(";");
+        Collection<Integer> usersToAdd = new ArrayList<>();
+        Collection<Integer> usersToDelete = new ArrayList<>();
 
-        PrivilegedDAO pdao = context.getPrivilegedDAO();
-        Iterable<User> privileged = pdao.getPrivileged(carId);
-
-        List<User> usersToAdd = new ArrayList<>();
-        List<User> usersToDelete = new ArrayList<>();
-
-        for (String value : values) {
+        for (String value : valuesString.split(";")) {
             try {
                 int id = Integer.parseInt(value);
-                User user;
-                if (id > 0) { // create
-                    user = context.getUserDAO().getUserPartial(id);
-                    if (Iterables.find(privileged, x -> x.getId() == id, null) == null)
-                        usersToAdd.add(user);
-                } else { // delete
-                    user = context.getUserDAO().getUserPartial(-1 * id);
-                    usersToDelete.add(user);
-                }
-                if (user == null) {
+                if (id > 0) {
+                    usersToAdd.add(id);
+                } else if (id < 0) { // delete
+                    usersToDelete.add(-id);
+                } else {
                     flash("error", "De opgegeven gebruiker bestaat niet.");
                     return redirect(routes.Cars.detail(carId));
                 }
@@ -511,6 +514,7 @@ public class Cars extends Controller {
             }
         }
 
+        PrivilegedDAO pdao = context.getPrivilegedDAO();
         pdao.addPrivileged(carId, usersToAdd);
         pdao.deletePrivileged(carId, usersToDelete);
 
@@ -598,8 +602,9 @@ public class Cars extends Controller {
 
 
         public String validate() {
-            if ("".equals(description))
+            if ("".equals(description)) {
                 return "Geef aub een beschrijving op.";
+            }
             return null;
         }
 

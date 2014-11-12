@@ -8,10 +8,24 @@ import be.ugent.degage.db.models.User;
  */
 public interface PrivilegedDAO {
 
+    /**
+     * List all users with privileges for a certain car
+     */
     public Iterable<User> getPrivileged(int carId) throws DataAccessException;
 
-    public void addPrivileged(int carId, Iterable<User> users) throws DataAccessException;
+    /**
+     * Add new privileged users for the given car
+     */
+    public void addPrivileged(int carId, Iterable<Integer> userIds) throws DataAccessException;
 
-    public void deletePrivileged(int carId, Iterable<User> users) throws DataAccessException;
+    /**
+     * Remove a number of privileges for the given car
+     */
+    public void deletePrivileged(int carId, Iterable<Integer> userIds) throws DataAccessException;
+
+    /**
+     * Is the given user privileged to use the given car (or owner of that car)
+     */
+    public boolean isOwnerOrPrivileged (int carId, int userId);
 
 }

@@ -48,32 +48,50 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement createReservationStatement = new LazyStatement (
-            "INSERT INTO carreservations (reservation_user_id, reservation_car_id, reservation_status,"
-                    + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?,?)",
+            "INSERT INTO carreservations (reservation_user_id, reservation_car_id, "
+                    + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?)",
             "reservation_id"
     );
 
-    @Override
-    public Reservation createReservation(DateTime from, DateTime to, Car car, User user, String message) throws DataAccessException {
-        try{
-            PreparedStatement ps = createReservationStatement.value();
-            ps.setInt(1, user.getId());
-            ps.setInt(2, car.getId());
-            ps.setString(3, ReservationStatus.REQUEST.toString());
-            ps.setTimestamp(4, new Timestamp(from.getMillis()));
-            ps.setTimestamp(5, new Timestamp(to.getMillis()));
-            ps.setString(6, message);
+    private LazyStatement retreiveStatusStatement = new LazyStatement (
+            "SELECT reservation_status FROM carreservations WHERE reservation_id = ?"
+    );
 
-            if(ps.executeUpdate() == 0)
+    @Override
+    public Reservation createReservation(DateTime from, DateTime to, int carId, int userId, String message) throws DataAccessException {
+        try {
+            // TODO: find a way to do this with a single SQL statement
+            PreparedStatement ps = createReservationStatement.value();
+            ps.setInt(1, userId);
+            ps.setInt(2, carId);
+            ps.setTimestamp(3, new Timestamp(from.getMillis()));
+            ps.setTimestamp(4, new Timestamp(to.getMillis()));
+            ps.setString(5, message);
+
+            if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating reservation.");
-            
+
+            // create
+            int id;
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new Reservation(keys.getInt(1), car, user, from, to, message);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for new reservation.", ex);
+                id = keys.getInt(1);
             }
-        } catch (SQLException e){
+
+            // retrieve status
+            PreparedStatement ps2 = retreiveStatusStatement.value();
+            ps2.setInt(1, id);
+            try (ResultSet rs = ps2.executeQuery()) {
+                rs.next();
+                Reservation reservation = new Reservation(id,
+                        null, null,
+                        from,
+                        to,
+                        message);
+                reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+                return reservation;
+            }
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to create reservation", e);
         }
     }

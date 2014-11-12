@@ -206,10 +206,11 @@
                                     </tr>
                                 </thead>
                                 <tbody>
+                                    @* TODO: a lot of the code below is repeated in javascripts/updateCarAvailabilities *@
                                     @foreach.trOrElse(privilegedUsers) { user =>
                                                 <td>
                                                     @user.getFirstName @user.getLastName
-                                                    <input type="hidden" class="privilege_user_id" value="@CurrentUser.getId" />
+                                                    <input type="hidden" class="privilege_user_id" value="@user.getId" />
                                                 </td>
                                                 <td>
                                                     <div class="btn-group btn-group-xs">

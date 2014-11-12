@@ -26,7 +26,6 @@ public class Reservation {
         this.user = user;
         this.from = from;
         this.to = to;
-        this.status = ReservationStatus.REQUEST;
         this.message = message;
     }    
     

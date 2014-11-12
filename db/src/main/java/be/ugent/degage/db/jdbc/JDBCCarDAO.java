@@ -444,11 +444,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
                     return populateCar(rs, true);
-                } else return null;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading car resultset", ex);
+                } else {
+                    return null;
+                }
             }
-
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
