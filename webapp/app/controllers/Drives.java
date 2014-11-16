@@ -90,7 +90,7 @@ public class Drives extends Controller {
                 return "De kilometerstand voor de rit kan niet kleiner zijn dan deze na de rit";
             if (startMileage < 0 || endMileage < 0)
                 return "De kilometerstand kan niet negatief zijn";
-            if (refueling == null || refueling < 0)
+            if (refueling != null && refueling < 0)
                 return "Er werd een ongeldig aantal tankbeurten opgegeven";
             return null;
         }
@@ -431,10 +431,11 @@ public class Drives extends Controller {
         // Test if ride already exists
         CarRide ride = dao.getCarRide(reservationId);
         if (ride == null) {
-            int refueling = detailsForm.get().refueling;
+            Integer r = detailsForm.get().refueling;
+            int refueling = r == null ? 0 : r.intValue();
+
             boolean damaged = detailsForm.get().damaged;
-            ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage,
-                    damaged, refueling);
+            ride = dao.createCarRide(reservation, detailsForm.get().startMileage, detailsForm.get().endMileage, damaged, refueling);
             if (refueling > 0) {
                 RefuelDAO refuelDAO = context.getRefuelDAO();
                 for (int i = 0; i < refueling; i++) {

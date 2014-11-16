@@ -19,10 +19,10 @@ import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
+import data.EurocentAmount;
 import views.html.refuels.*;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -33,12 +33,16 @@ public class Refuels extends Controller {
 
     public static class RefuelModel {
 
-        public BigDecimal amount;
+        public EurocentAmount amount;
 
         public String validate() {
-            if (amount.compareTo(new BigDecimal(200)) == 1)
-                return "Bedrag te hoog";
-            return null;
+            int value = amount.getValue();
+            if (value < 0 || value > 20000) {
+                return "Bedrag moet liggen tussen 0 en 200 €";
+
+            } else {
+                return null;
+            }
         }
     }
 
@@ -181,7 +185,7 @@ public class Refuels extends Controller {
                         FileDAO fdao = context.getFileDAO();
                         try {
                             File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
-                            refuel.setAmount(model.amount);
+                            refuel.setEurocents(model.amount.getValue());
                             refuel.setStatus(RefuelStatus.REQUEST);
                             refuel.setProof(file);
                             dao.updateRefuel(refuel);

@@ -59,7 +59,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         if(rs.getString("refuel_status").equals("CREATED")){
             refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), RefuelStatus.valueOf(rs.getString("refuel_status")));
         }else{
-            refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), JDBCFileDAO.populateFile(rs), rs.getBigDecimal("refuel_amount"), RefuelStatus.valueOf(rs.getString("refuel_status")));
+            refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), JDBCFileDAO.populateFile(rs),
+                    rs.getInt("refuel_eurocents"), RefuelStatus.valueOf(rs.getString("refuel_status")));
         }
 
         refuel.setBilled(rs.getDate("refuel_billed"));
@@ -163,7 +164,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     }
 
     private LazyStatement updateRefuelStatement= new LazyStatement (
-            "UPDATE refuels SET refuel_file_id = ? , refuel_amount = ? , refuel_status = ? WHERE refuel_id = ?"
+            "UPDATE refuels SET refuel_file_id = ? , refuel_eurocents = ? , refuel_status = ? WHERE refuel_id = ?"
     );
 
     @Override
@@ -171,7 +172,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         try {
             PreparedStatement ps = updateRefuelStatement.value();
             ps.setInt(1, refuel.getProof().getId());
-            ps.setBigDecimal(2, refuel.getAmount());
+            ps.setInt(2, refuel.getEurocents());
             ps.setString(3, refuel.getStatus().toString());
             ps.setInt(4, refuel.getId());
             if(ps.executeUpdate() == 0)

@@ -4,6 +4,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.routes;
+import data.EurocentAmount;
 import db.DataAccess;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -336,7 +337,7 @@ public class Notifier extends Mailer {
 
     private static String replaceRefuelTags(Refuel refuel, String template) {
         template = template.replace("%car_name%", refuel.getCarRide().getReservation().getCar().getName());
-        template = template.replace("%amount%", refuel.getAmount().toPlainString() + " euro");
+        template = template.replace("%amount%", EurocentAmount.toString(refuel.getEurocents()) + " euro");
         return template;
     }
 

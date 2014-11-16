@@ -10,15 +10,15 @@ public class Refuel {
     private int id;
     private CarRide carRide;
     private File proof;
-    private BigDecimal amount;
+    private int eurocents;
     private RefuelStatus status;
     private Date billed;
 
-    public Refuel(int id, CarRide carRide, File proof, BigDecimal amount, RefuelStatus status) {
+    public Refuel(int id, CarRide carRide, File proof, int eurocents, RefuelStatus status) {
         this.id = id;
         this.carRide = carRide;
         this.proof = proof;
-        this.amount = amount;
+        this.eurocents = eurocents;
         this.status = status;
     }
 
@@ -52,12 +52,12 @@ public class Refuel {
         this.proof = proof;
     }
 
-    public BigDecimal getAmount() {
-        return amount;
+    public int getEurocents() {
+        return eurocents;
     }
 
-    public void setAmount(BigDecimal amount) {
-        this.amount = amount;
+    public void setEurocents(int eurocents) {
+        this.eurocents = eurocents;
     }
 
     public RefuelStatus getStatus() {

@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import controllers.util.FileHelper;
+import data.EurocentAmount;
 import org.joda.time.DateTime;
 
 import java.io.FileOutputStream;
@@ -173,38 +174,43 @@ public class ReportGeneration {
         add(carTable, "");
         add(carTable, "");
 
-        BigDecimal refuelOthers = BigDecimal.ZERO;
-        BigDecimal refuelOwner = BigDecimal.ZERO;
+        int refuelOthers = 0; // in euro cent
+        int refuelOwner = 0;
 
         for (Refuel refuel : refuels) {
             if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) == 0) {
-                refuelOwner = refuelOwner.add(refuel.getAmount());
+                refuelOwner += refuel.getEurocents();
             } else {
-                refuelOthers = refuelOthers.add(refuel.getAmount());
+                refuelOthers += refuel.getEurocents();
             }
         }
 
+        int refuelBoth = refuelOthers + refuelOwner;
         add(carTable, "Totaal brandstof:");
-        add(carTable, "€ " + (refuelOthers.add(refuelOwner)));
+        add(carTable, "€ " + EurocentAmount.toString(refuelBoth));
 
-        BigDecimal refuelTot = BigDecimal.ZERO;
+        BigDecimal refuelTot = BigDecimal.ZERO; // in eurocent
 
         if (loanerDist + othersDist > 0) {
             add(carTable, "Brandstof per kilometer:");
-            add(carTable, "€ " + refuelOthers.add(refuelOwner).divide(new BigDecimal(loanerDist + othersDist)));
+            add(carTable, "€ " + new BigDecimal(refuelBoth).divide(new BigDecimal(100))
+                    .divide(new BigDecimal(loanerDist + othersDist)));
             add(carTable, "Te betalen brandstof:");
-            add(carTable, "€ " + refuelOthers.add(refuelOwner).multiply(new BigDecimal(loanerDist)).divide(new BigDecimal(loanerDist + othersDist)));
+            BigDecimal toPay = new BigDecimal(refuelBoth).multiply(new BigDecimal(loanerDist)).divide(new BigDecimal(loanerDist + othersDist));
+            add(carTable, "€ " + EurocentAmount.toString(
+                    toPay.intValue()
+            ));
             add(carTable, "Brandstof reeds betaald:");
-            add(carTable, "€ " + refuelOwner);
-            refuelTot = refuelOwner.subtract(refuelOthers.add(refuelOwner).multiply(new BigDecimal(loanerDist)).divide(new BigDecimal(loanerDist + othersDist)));
+            add(carTable, "€ " + EurocentAmount.toString(refuelOwner));
+            refuelTot = new BigDecimal(refuelOwner).subtract(toPay);
             add(carTable, "Saldo brandstof:", true);
-            add(carTable, "€ " + refuelTot, true);
+            add(carTable, "€ " + EurocentAmount.toString(refuelTot.intValue()), true);
         }
 
         add(carTable, "");
         add(carTable, "");
 
-        BigDecimal total = recupCosts.add(refuelTot).add(new BigDecimal(deprecation));
+        BigDecimal total = recupCosts.add(refuelTot.divide(new BigDecimal(100))).add(new BigDecimal(deprecation));
         add(carTable, "SALDO WAGEN '" + carName + "'", true);
         add(carTable, "€ " + total, true);
 
@@ -328,22 +334,22 @@ public class ReportGeneration {
         add(refuelsTable, "Datum", true);
         add(refuelsTable, "Prijs", true);
 
-        BigDecimal refuelTotal = BigDecimal.ZERO;
+        int refuelTotal = 0; // in euro cent
 
         for (Refuel refuel : refuels) {
             add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
             add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
             if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) != 0) {
-                add(refuelsTable, "€ " + refuel.getAmount(), true);
-                refuelTotal = refuelTotal.add(refuel.getAmount());
+                add(refuelsTable, "€ " + EurocentAmount.toString(refuel.getEurocents()), true);
+                refuelTotal += refuel.getEurocents();
             } else {
-                add(refuelsTable, "-- € " + refuel.getAmount(), true);
+                add(refuelsTable, "-- € " + EurocentAmount.toString(refuel.getEurocents()), true);
             }
         }
 
         add(refuelsTable, "TOTAAL", true);
         add(refuelsTable, "");
-        add(refuelsTable, "€ " + refuelTotal, true);
+        add(refuelsTable, "€ " + EurocentAmount.toString(refuelTotal), true);
 
         document.add(refuelsTable);
 
@@ -356,12 +362,14 @@ public class ReportGeneration {
         add(totalTable, "SALDO", true);
 
         add(totalTable, "+ € " + totalCost);
-        add(totalTable, "- € " + refuelTotal);
-        add(totalTable, "€ " + totalCost.subtract(refuelTotal), true);
+        add(totalTable, "- € " + EurocentAmount.toString(refuelTotal));
+
+        BigDecimal result = totalCost.subtract(new BigDecimal(refuelTotal).divide(new BigDecimal(100)));
+        add(totalTable, "€ " + result, true);
 
         document.add(totalTable);
 
-        return totalCost.subtract(refuelTotal);
+        return result;
     }
 
     private static void add(PdfPTable table, String contents, boolean fat) {

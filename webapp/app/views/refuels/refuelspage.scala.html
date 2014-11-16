@@ -37,7 +37,7 @@
                             </td>
 
                         } else {
-                            <td>@refuel.getAmount</td>
+                            <td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
                             <td>
                                 @refuel.getStatus match {
                                     case RefuelStatus.ACCEPTED => {
