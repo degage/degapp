@@ -9,6 +9,7 @@ import org.joda.time.format.DateTimeFormatter;
 import play.data.format.Formatters;
 import play.db.DB;
 import schedulers.Scheduler;
+import data.EurocentAmount;
 
 import java.text.ParseException;
 import java.util.Locale;
@@ -35,8 +36,8 @@ public class JavaGlobal {
         }
     }
 
-    private static void registerDateTimeFormatter() {
-        play.data.format.Formatters.register(DateTime.class, new Formatters.SimpleFormatter<DateTime>() {
+    private static void registerFormatters() {
+        Formatters.register(DateTime.class, new Formatters.SimpleFormatter<DateTime>() {
             private final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
 
             @Override
@@ -47,6 +48,18 @@ public class JavaGlobal {
             @Override
             public String print(DateTime dateTime, Locale locale) {
                 return dateTime.toString(DATETIME_FORMATTER);
+            }
+        });
+
+        Formatters.register(EurocentAmount.class, new Formatters.SimpleFormatter<EurocentAmount>() {
+            @Override
+            public EurocentAmount parse(String s, Locale locale) throws ParseException {
+                return EurocentAmount.parse(s);
+            }
+
+            @Override
+            public String print(EurocentAmount eurocentAmount, Locale locale) {
+                return eurocentAmount.toString();
             }
         });
     }
@@ -81,8 +94,7 @@ public class JavaGlobal {
     private static void onStartDevProd(String dataSourceName) {
         DataAccess.setProviderFromDataSource(DB.getDataSource(dataSourceName));
         testDatabase();
-        registerDateTimeFormatter();
-
+        registerFormatters();
         Scheduler.start();
     }
 
@@ -105,7 +117,7 @@ public class JavaGlobal {
      */
     public static void onStartTest() {
         DataAccess.setProviderForTesting();
-        registerDateTimeFormatter();
+        registerFormatters();
         Scheduler.start();
     }
 }
