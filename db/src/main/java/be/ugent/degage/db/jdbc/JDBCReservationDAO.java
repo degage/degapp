@@ -8,13 +8,12 @@ import be.ugent.degage.db.*;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import be.ugent.degage.db.dao.ReservationDAO;
-import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationStatus;
-import be.ugent.degage.db.models.User;
 
 import org.joda.time.DateTime;
 
@@ -256,9 +255,9 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
     @Override
-    public List<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            Statement statement = context.getConnection().createStatement();            // TODO: do not use connection (also below)
+            Statement statement = createStatement();
             String sql = getReservationsPageStatement(filter);
             sql += " ORDER BY ";
             switch(orderBy) {
@@ -269,7 +268,11 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             }
             sql += " LIMIT " + (page-1)*pageSize + ", " + pageSize;
             try (ResultSet rs = statement.executeQuery(sql)) {
-                return getList(rs);
+                Collection<Reservation> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(populateReservation(rs));
+                }
+                return list;
             }
         } catch (Exception ex) {
             throw new DataAccessException("Could not retrieve a list of reservations", ex);
@@ -277,25 +280,20 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     @Override
-    public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsOwner, boolean userIsLoaner) {
-        try {
-            Statement statement = context.getConnection().createStatement();
+    public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsLoaner) {
+        try (Statement statement = createStatement()) {
             String sql = "SELECT COUNT(*) as result FROM carreservations " +
                     "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
                     "WHERE carreservations.reservation_status = '" + status.toString() + "'";
-            boolean both = userIsLoaner && userIsOwner;
-            if(both)
+            if(userIsLoaner)
                 sql += " AND (car_owner_user_id = " + userId + " OR reservation_user_id = " + userId + ")";
-            else if(userIsOwner)
+            else
                 sql += " AND car_owner_user_id = " + userId;
-            else if(userIsLoaner)
-                sql += " AND reservation_user_id = " + userId;
             try (ResultSet rs = statement.executeQuery(sql)) {
                 if(rs.next())
                     return rs.getInt("result");
-                else return 0;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of reservations", ex);
+                else
+                    return 0;
             }
         } catch(SQLException ex) {
             throw new DataAccessException("Could not count number of reservations");
@@ -307,17 +305,22 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     " INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id" +
                     " INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
                     " WHERE (car_owner_user_id = ? OR reservation_user_id = ? ) " +
-                    " AND reservation_status != '" + ReservationStatus.REFUSED.toString() +
-                    "' AND reservation_status != '" + ReservationStatus.CANCELLED.toString() + "'"
+                    " AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED'"
     );
 
     @Override
-    public List<Reservation> getReservationListForUser(int userID) throws DataAccessException {
+    public Iterable<Reservation> getReservationListForUser(int userID) throws DataAccessException {
         try {
             PreparedStatement ps = getReservationListByUseridStatement.value();
             ps.setInt(1, userID);
             ps.setInt(2, userID);
-            return getReservationList(ps);
+            try (ResultSet rs = ps.executeQuery()) {
+                Collection<Reservation> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(populateReservation(rs));
+                }
+                return list;
+            }
         } catch (Exception e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
         }
@@ -331,21 +334,19 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     @Override
-    public List<Reservation> getReservationListForCar(int carId) throws DataAccessException {
+    public Iterable<Reservation> getReservationListForCar(int carId) throws DataAccessException {
         try {
             PreparedStatement ps = getReservationListByCaridStatement.value();
             ps.setInt(1, carId);
-            return getReservationList(ps);
+            try (ResultSet rs = ps.executeQuery()) {
+                Collection<Reservation> list = new ArrayList<>();
+                while (rs.next()) {
+                    list.add(populateReservation(rs));
+                }
+                return list;
+            }
         } catch (Exception e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
-        }
-    }
-
-    private List<Reservation> getReservationList(PreparedStatement ps) throws DataAccessException {
-        try (ResultSet rs = ps.executeQuery()) {
-            return getList(rs);
-        } catch (Exception e){
-            throw new DataAccessException("Error while reading reservation resultset", e);
         }
     }
 
@@ -361,20 +362,16 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    private LazyStatement getUpdateTableStatement = new LazyStatement (
-            "UPDATE carreservations SET reservation_status=?" +
-                    " WHERE carreservations.reservation_to < NOW() AND carreservations.reservation_status = ?"
-    );
+    private static final String ADJUST_STATEMENT =
+            "UPDATE carreservations SET reservation_status='REQUEST_DETAILS' " +
+                    " WHERE reservation_to < NOW() AND reservation_status = 'ACCEPTED' ";
 
     @Override
-    public void updateTable() {
-        try {
-            PreparedStatement ps = getUpdateTableStatement.value();
-            ps.setString(1, ReservationStatus.REQUEST_DETAILS.toString());
-            ps.setString(2, ReservationStatus.ACCEPTED.toString());
-            ps.executeUpdate(); // it is possible that no records are affected
+    public void adjustReservationStatuses() {
+        try (Statement stat = createStatement()) {
+            stat.executeUpdate(ADJUST_STATEMENT); // it is possible that no records are affected
         } catch (SQLException ex) {
-            throw new DataAccessException("Error while updating the reservations table", ex);
+            throw new DataAccessException("Error while updating the reservations statuses", ex);
         }
     }
 }

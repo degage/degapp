@@ -32,10 +32,21 @@ public interface ReservationDAO {
     public void deleteReservation(Reservation reservation) throws DataAccessException;
 
     public int getAmountOfReservations(Filter filter) throws DataAccessException;
-    public List<Reservation> getReservationListForUser(int userID) throws DataAccessException;
-    public List<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
-    public List<Reservation> getReservationListForCar(int carID) throws DataAccessException;
-    public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsOwner, boolean userIsLoaner);
 
-    public void updateTable();
+    /**
+     * List of reservations (not cancelled not refused) where the given user is owner or driver
+     */
+    public Iterable<Reservation> getReservationListForUser(int userID) throws DataAccessException;
+
+
+    public Iterable<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    public Iterable<Reservation> getReservationListForCar(int carID) throws DataAccessException;
+
+
+    public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsLoaner);
+
+    /**
+     * Migrate reservations with status 'ACCEPTED' to status 'REQUEST_DETAILS' when the entire reservation is in the past
+     */
+    public void adjustReservationStatuses();
 }

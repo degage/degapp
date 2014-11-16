@@ -98,6 +98,7 @@ public class Reports extends Controller {
     @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result getReservationsForOwner() {
+        // TODO: factor out code in common with getReservations
         User user = DataProvider.getUserProvider().getUser();
         Filter filter = Pagination.parseFilter("");
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
@@ -105,23 +106,21 @@ public class Reports extends Controller {
         DataAccessContext context = DataAccess.getContext();
         ReservationDAO reservationDAO = context.getReservationDAO();
         CarRideDAO carRideDAO = context.getCarRideDAO();
-        List<Reservation> reservationList = reservationDAO.getReservationListPage(FilterField.FROM, true, 1, reservationDAO.getAmountOfReservations(filter), filter);
+        Iterable<Reservation> reservationList = reservationDAO.getReservationListPage(FilterField.FROM, true, 1, reservationDAO.getAmountOfReservations(filter), filter);
         try (FileOutputStream out = new FileOutputStream(file)) {
             Workbook wb = new XSSFWorkbook();
             CreationHelper createHelper = wb.getCreationHelper();
             Sheet s = wb.createSheet("Reservaties");
-            int rNum = 0;
-            Row row = s.createRow(rNum);
+            Row row = s.createRow(0);
             String[] header = {"Id", "Autonaam", "Lener(ID)", "Lener voornaam", "Lener familienaam", "Lener email", "Lener telefoon", "Lener gsm", "Van", "Tot", "Status", "Bericht", "Startkilometers", "Eindkilometers", "Schade", "Details goedgekeurd"};
             for (int i = 0; i < header.length; i++) {
                 Cell cell = row.createCell(i);
                 cell.setCellValue(header[i]);
             }
-            Reservation reservation = null;
-            CarRide carRide = null;
-            for (int i = 0; i < reservationList.size(); i++) {
-                reservation = reservationList.get(i);
-                row = s.createRow(i + 1);
+            int i = 0;
+            for (Reservation reservation : reservationList) {
+                i ++;
+                row = s.createRow(i);
                 int j = 0;
                 row.createCell(j++).setCellValue(reservation.getId());
                 row.createCell(j++).setCellValue(reservation.getCar().getName());
@@ -143,7 +142,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
                 row.createCell(j++).setCellValue(reservation.getMessage());
                 if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
-                    carRide = carRideDAO.getCarRide(reservation.getId());
+                    CarRide carRide = carRideDAO.getCarRide(reservation.getId());
                     row.createCell(j++).setCellValue(carRide.getStartMileage());
                     row.createCell(j++).setCellValue(carRide.getEndMileage());
                     row.createCell(j++).setCellValue(carRide.isDamaged());
@@ -169,24 +168,21 @@ public class Reports extends Controller {
         Filter filter = Pagination.parseFilter("");
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "");
         filter.putValue(FilterField.RESERVATION_CAR_ID, "");
-        List<Reservation> reservationList = reservationDAO.getReservationListPage(FilterField.RESERVATION_CAR_ID, true, 1, reservationDAO.getAmountOfReservations(filter), filter);
+        Iterable<Reservation> reservationList = reservationDAO.getReservationListPage(FilterField.RESERVATION_CAR_ID, true, 1, reservationDAO.getAmountOfReservations(filter), filter);
         try (FileOutputStream out = new FileOutputStream(file)) {
             Workbook wb = new XSSFWorkbook();
             CreationHelper createHelper = wb.getCreationHelper();
             Sheet s = wb.createSheet("Reservaties");
-            int rNum = 0;
-            Row row = s.createRow(rNum);
+            Row row = s.createRow(0);
             String[] header = {"Id", "Auto(ID)", "Autonaam", "Lener(ID)", "Lener voornaam", "Lener familienaam", "Lener email", "Lener telefoon", "Lener gsm", "Van", "Tot", "Status", "Bericht", "Startkilometers", "Eindkilometers", "Schade", "Details goedgekeurd"};
             for (int i = 0; i < header.length; i++) {
                 Cell cell = row.createCell(i);
                 cell.setCellValue(header[i]);
             }
-            rNum++;
-            Reservation reservation = null;
-            CarRide carRide = null;
-            for (int i = 0; i < reservationList.size(); i++) {
-                reservation = reservationList.get(i);
-                row = s.createRow(i + 1);
+            int i=0;
+            for (Reservation reservation : reservationList){
+                i ++;
+                row = s.createRow(i);
                 int j = 0;
                 row.createCell(j++).setCellValue(reservation.getId());
                 row.createCell(j++).setCellValue(reservation.getCar().getId());
@@ -209,7 +205,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
                 row.createCell(j++).setCellValue(reservation.getMessage());
                 if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
-                    carRide = carRideDAO.getCarRide(reservation.getId());
+                    CarRide carRide = carRideDAO.getCarRide(reservation.getId());
                     row.createCell(j++).setCellValue(carRide.getStartMileage());
                     row.createCell(j++).setCellValue(carRide.getEndMileage());
                     row.createCell(j++).setCellValue(carRide.isDamaged());

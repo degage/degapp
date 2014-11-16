@@ -33,8 +33,8 @@
                   </li>
                   <li id="tab_passed" @if(status != ReservationStatus.ACCEPTED && status != ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Voorbij
-                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
-                              Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { amount =>
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
+                              Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
                           @if(amount > 0) {
                               (@amount)
                           }
@@ -43,7 +43,7 @@
                   </li>
                   <li id="tab_request" @if(status == ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Aanvragen
-                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { amount =>
+                      @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
                           @if(amount > 0) {
                               (@amount)
                           }

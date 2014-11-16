@@ -1,4 +1,4 @@
-@(user: User, reservations: List[Reservation], form: play.data.Form[Reserve.IndexModel], completeness: Int = 0,
+@(user: User, reservations: Iterable[Reservation], form: play.data.Form[Reserve.IndexModel], completeness: Int = 0,
         userWentToInfoSession: Boolean = false, approvalRequestSent: Boolean = false)
 
         @* Always called with current user *@
@@ -9,7 +9,7 @@
         <script src='@routes.Assets.at("javascripts/plugins/calendar.js")' type="text/javascript"></script>
         <script>
         var events = [];    // global variable used by 'document ready'-event (cf. dashboard.js)
-        @for(reservation <- reservations) {
+        @foreach(reservations){ reservation =>
             events.push( registrationEvent(
             '@reservation.getFrom.toString("yyyy-MM-dd HH:mm")',
             '@reservation.getTo.toString("yyyy-MM-dd HH:mm")',

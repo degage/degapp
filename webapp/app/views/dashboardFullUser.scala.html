@@ -5,7 +5,7 @@
 @defining(CurrentUser.hasRole(UserRole.CAR_OWNER)) { owner =>
     <div class="row">
         @if(owner) {
-            @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false)) { requests =>
+            @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { requests =>
                 @dashboardTopPanel(
                     "col-lg-3",
                     "fa-car",
@@ -20,7 +20,7 @@
                 }
             }
         }
-        @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, false)) { requests =>
+        @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false)) { requests =>
             @dashboardTopPanel(
                 if(owner) "col-lg-3" else "col-lg-4",
                 "fa-edit",

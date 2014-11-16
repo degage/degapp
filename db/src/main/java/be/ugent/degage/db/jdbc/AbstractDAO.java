@@ -57,24 +57,24 @@ class AbstractDAO {
 
         private PreparedStatement preparedStatement;
 
-        private String primaryKey;
+        private String[] primaryKeys;
 
         public LazyStatement (String sql) {
             this.sql = sql;
-            this.primaryKey = null;
+            this.primaryKeys = null;
         }
 
-        public LazyStatement (String sql, String primaryKey) {
+        public LazyStatement (String sql, String... primaryKeys) {
             this.sql = sql;
-            this.primaryKey = primaryKey;
+            this.primaryKeys = primaryKeys;
         }
 
         public PreparedStatement value() throws SQLException {
             if (preparedStatement == null) {
-                if (primaryKey == null) {
+                if (primaryKeys == null) {
                     preparedStatement = prepareStatement(sql);
                 } else {
-                    preparedStatement = prepareStatement(sql, primaryKey);
+                    preparedStatement = prepareStatement(sql, primaryKeys);
                 }
             }
             return preparedStatement;
@@ -109,7 +109,7 @@ class AbstractDAO {
     /**
      * Convenience method for creating a prepared statement in the current context, with an auto generated primary key
      */
-    protected PreparedStatement prepareStatement(String sql, String primaryKey) throws SQLException {
-        return context.getConnection().prepareStatement(sql, new String[] { primaryKey});
+    protected PreparedStatement prepareStatement(String sql, String... primaryKeys) throws SQLException {
+        return context.getConnection().prepareStatement(sql, primaryKeys);
     }
 }

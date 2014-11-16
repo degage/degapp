@@ -193,9 +193,9 @@
                         <li @if(title == "Ritten") {class="active"}>
                             <a href="@routes.Drives.index"><i class="fa fa-car fa-fw"></i>
                                 Ritten
-                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, true, false) +
-                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true, true) +
-                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, true, false)) { requests =>
+                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false) +
+                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
+                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { requests =>
                                     @if(requests > 0) {
                                         <span class="sidenumber">@requests</span>
                                     }

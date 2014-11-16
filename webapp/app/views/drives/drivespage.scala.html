@@ -1,4 +1,4 @@
-@(userId: Int, form: play.data.Form[Drives.RemarksModel], reservations: List[Reservation], page : Int, amountOfResults : Int, amountOfPages : Int, asc : Int, orderBy : String, filter : String)
+@(userId: Int, form: play.data.Form[Drives.RemarksModel], reservations: Iterable[Reservation], page : Int, amountOfResults : Int, amountOfPages : Int, asc : Int, orderBy : String, filter : String)
 
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-drives">
     <thead>
@@ -12,62 +12,57 @@
         </tr>
     </thead>
     <tbody>
-        @if(reservations.isEmpty) {
-            <tr>
-                <td style="text-align: center; padding: 8px;" colspan="7">Geen ritten beschikbaar</td>
-            </tr>
-        } else {
-            @for(reservation <- reservations) {
-                <tr>
-                    <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
-                    <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
-                    <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
-                    @if(reservation.getUser.getId == userId) {
-                        <td><a href="@routes.Profile.index(reservation.getUser.getId)">Jij</a></td>
-                    } else {
-                        <td><a href="@routes.Profile.index(reservation.getUser.getId)">@reservation.getUser</a></td>
-                    }
-                    <td>
-                        @reservation.getStatus match {
-                            case ReservationStatus.ACCEPTED => {
-                                <span class="fa fa-check-circle"></span>
-                            }
-                            case ReservationStatus.REFUSED => {
-                                <span class="fa fa-minus-circle"></span>
-                            }
-                            case ReservationStatus.REQUEST => {
-                                <span class="fa fa-question-circle"></span>
-                            }
-                            case ReservationStatus.CANCELLED => {
-                                <span class="fa fa-times-circle"></span>
-                            }
-                            case ReservationStatus.REQUEST_DETAILS => {
-                                <span class="fa fa-question-circle"></span>
-                            }
-                            case ReservationStatus.FINISHED => {
-                                <span class="fa fa-check-circle"></span>
-                            }
-                            case _ => {}
+        @foreach.trOrElse(reservations){ reservation =>
+                <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
+                <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
+                @if(reservation.getUser.getId == userId) {
+                    <td><a href="@routes.Profile.index(reservation.getUser.getId)">Jij</a></td>
+                } else {
+                    <td><a href="@routes.Profile.index(reservation.getUser.getId)">@reservation.getUser</a></td>
+                }
+                <td>
+                    @reservation.getStatus match {
+                        case ReservationStatus.ACCEPTED => {
+                            <span class="fa fa-check-circle"></span>
                         }
-                        @reservation.getStatus.getDescription
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-xs">
-                                @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                    <a class="btn btn-danger btn-small" href="@routes.Drives.details(reservation.getId)">ritdetails toevoegen</a>
+                        case ReservationStatus.REFUSED => {
+                            <span class="fa fa-minus-circle"></span>
+                        }
+                        case ReservationStatus.REQUEST => {
+                            <span class="fa fa-question-circle"></span>
+                        }
+                        case ReservationStatus.CANCELLED => {
+                            <span class="fa fa-times-circle"></span>
+                        }
+                        case ReservationStatus.REQUEST_DETAILS => {
+                            <span class="fa fa-question-circle"></span>
+                        }
+                        case ReservationStatus.FINISHED => {
+                            <span class="fa fa-check-circle"></span>
+                        }
+                        case _ => {}
+                    }
+                    @reservation.getStatus.getDescription
+                </td>
+                <td>
+                    <div class="btn-group btn-group-xs">
+                            @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
+                                <a class="btn btn-danger btn-small" href="@routes.Drives.details(reservation.getId)">ritdetails toevoegen</a>
+                            } else {
+                                @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
+                                         reservation.getUser.getId != userId) {
+                                   <a class="btn btn-warning btn-small" href="@routes.Drives.details(reservation.getId)">goed- of afkeuren</a>
                                 } else {
-                                   @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
-                                            reservation.getUser.getId != userId) {
-                                       <a class="btn btn-warning btn-small" href="@routes.Drives.details(reservation.getId)">goed- of afkeuren</a>
-                                    } else {
-                                       <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">details</a>
-                                   }
+                                   <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">details</a>
                                 }
-
-                        </div>
-                    </td>
-                </tr>
-            }
+                            }
+                    </div>
+                </td>
+        }{
+        <tr>
+            <td style="text-align: center; padding: 8px;" colspan="7">Geen ritten beschikbaar</td>
+        </tr>
         }
     </tbody>
 </table>

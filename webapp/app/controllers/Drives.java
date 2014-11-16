@@ -551,15 +551,12 @@ public class Drives extends Controller {
      * Get the number of reservations having the provided status
      *
      * @param status       The status
-     * @param userIsOwner  Extra filtering specifying the user has to be owner
      * @param userIsLoaner Extra filtering specifying the user has to be loaner
      * @return The number of reservations
      */
     // must be used with injected context
-    public static int reservationsWithStatus(ReservationStatus status, boolean userIsOwner, boolean userIsLoaner) {
-        User user = DataProvider.getUserProvider().getUser();
-        ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-        return dao.numberOfReservationsWithStatus(status, user.getId(), userIsOwner, userIsLoaner);
+    public static int reservationsWithStatus(ReservationStatus status, boolean userIsLoaner) {
+        return DataAccess.getInjectedContext().getReservationDAO().numberOfReservationsWithStatus(status, CurrentUser.getId(), userIsLoaner);
     }
 
     // RENDERING THE PARTIAL
@@ -590,7 +587,7 @@ public class Drives extends Controller {
         // We only want reservations from the current user (or his car(s))
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
 
-        List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
+        Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfReservations(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
@@ -621,7 +618,7 @@ public class Drives extends Controller {
             field = FilterField.FROM;
         }
 
-        List<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
+        Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfReservations(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
