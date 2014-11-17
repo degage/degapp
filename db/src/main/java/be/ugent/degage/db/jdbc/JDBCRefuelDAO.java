@@ -339,17 +339,27 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private LazyStatement getBillRefuelsForCarStatement= new LazyStatement (
-            REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_car_id = ?"
+    private LazyStatement eurocentsSpentOnFuelStatement = new LazyStatement(
+            "SELECT SUM(refuel_eurocents) AS s, reservation_privileged " +
+            "FROM refuels JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                "WHERE refuel_billed = ? AND reservation_car_id = ? " +
+            "GROUP BY refuel_eurocents, reservation_privileged "
     );
 
-    @Override
-    public List<Refuel> getBillRefuelsForCar(Date date, int car) throws DataAccessException {
+    public int[] eurocentsSpentOnFuel (Date date, int carId) throws DataAccessException {
         try {
-            PreparedStatement ps = getBillRefuelsForCarStatement.value();
+            PreparedStatement ps = eurocentsSpentOnFuelStatement.value();
             ps.setDate(1, date);
-            ps.setInt(2, car);
-            return getRefuelList(ps);
+            ps.setInt(2, carId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                int[] result = new int[2];
+                while (rs.next()) {
+                    int index = rs.getBoolean ("reservation_privileged") ? 0 : 1;
+                    result[index] = rs.getInt("s");
+                }
+                return result;
+            }
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of refuels for car.", e);
         }

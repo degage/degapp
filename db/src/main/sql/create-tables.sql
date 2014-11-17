@@ -148,6 +148,7 @@ CREATE TABLE `carreservations` (
 	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', -- Reeds goedgekeurd?
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
+	`reservation_privileged`` BIT(1) NOT NULL DEFAULT 0,
 	`reservation_from` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`reservation_to` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
 	`reservation_message` VARCHAR(128),

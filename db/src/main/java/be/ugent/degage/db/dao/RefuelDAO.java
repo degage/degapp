@@ -27,5 +27,13 @@ public interface RefuelDAO {
     public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
     public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException;
-    public List<Refuel> getBillRefuelsForCar(Date date, int car) throws DataAccessException;
+
+
+    /**
+     * Return the total amount spent (in eurocent) for refuels for the given car billed at the given date
+     * @return two integers, first is for privileged drivers, second is for others
+     */
+    public int[] eurocentsSpentOnFuel (Date date, int carId) throws DataAccessException;
+
+
 }

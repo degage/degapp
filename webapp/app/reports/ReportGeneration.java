@@ -91,7 +91,7 @@ public class ReportGeneration {
 
                 saldo = saldo.add(createCarTable(
                         context.getCarRideDAO().getBillRidesForCar(date, carId),
-                        context.getRefuelDAO().getBillRefuelsForCar(date, carId),
+                        context.getRefuelDAO().eurocentsSpentOnFuel(date, carId),
                         context.getCarCostDAO().getBillCarCosts(date, carId),
                         document,
                         car.getName(),
@@ -110,7 +110,7 @@ public class ReportGeneration {
         return saldo;
     }
 
-    private static BigDecimal createCarTable(Iterable<CarRide> rides, Iterable<Refuel> refuels, Iterable<CarCost> carCosts, Document document, String carName, Costs costInfo)
+    private static BigDecimal createCarTable(Iterable<CarRide> rides, int[] eurocentsSpent, Iterable<CarCost> carCosts, Document document, String carName, Costs costInfo)
             throws DocumentException {
         document.newPage();
         document.add(new Paragraph("WAGEN: " + carName));
@@ -174,16 +174,8 @@ public class ReportGeneration {
         add(carTable, "");
         add(carTable, "");
 
-        int refuelOthers = 0; // in euro cent
-        int refuelOwner = 0;
-
-        for (Refuel refuel : refuels) {
-            if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) == 0) {
-                refuelOwner += refuel.getEurocents();
-            } else {
-                refuelOthers += refuel.getEurocents();
-            }
-        }
+        int refuelOthers = eurocentsSpent[1]; // in euro cent
+        int refuelOwner = eurocentsSpent[0];
 
         int refuelBoth = refuelOthers + refuelOwner;
         add(carTable, "Totaal brandstof:");
