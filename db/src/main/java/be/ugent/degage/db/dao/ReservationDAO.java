@@ -13,6 +13,7 @@ import be.ugent.degage.db.models.ReservationStatus;
 import be.ugent.degage.db.models.User;
 import org.joda.time.DateTime;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -27,8 +28,21 @@ public interface ReservationDAO {
 
     public void updateReservation(Reservation reservation) throws DataAccessException;
     public Reservation getReservation(int id) throws DataAccessException;
-    public Reservation getNextReservation(Reservation reservation) throws DataAccessException;
-    public Reservation getPreviousReservation(Reservation reservation) throws DataAccessException;
+
+    /**
+     * Return the first reservation that follows the given reservation, unless it is more
+     * than a day removed
+     */
+    public Reservation getNextReservation(int reservationId) throws DataAccessException;
+
+    /**
+     * Return the last reservation that preceeds the given reservation, unless it is more
+     * than a day removed
+     */
+    public Reservation getPreviousReservation(int reservationId) throws DataAccessException;
+
+
+
     public void deleteReservation(Reservation reservation) throws DataAccessException;
 
     public int getAmountOfReservations(Filter filter) throws DataAccessException;
@@ -49,4 +63,20 @@ public interface ReservationDAO {
      * Migrate reservations with status 'ACCEPTED' to status 'REQUEST_DETAILS' when the entire reservation is in the past
      */
     public void adjustReservationStatuses();
+
+    /**
+     * List of reservations for a certain car. Used in {@link #listCRInfo}
+     */
+    public static class CRInfo {
+        public Car car;
+
+        public Collection<Reservation> reservations;
+    }
+
+    /**
+     * Return information on all reservations (exceot those cancelled) during a certain period of time, ordered by car.
+     */
+    public Iterable<CRInfo> listCRInfo (DateTime from, DateTime to);
+
+
 }

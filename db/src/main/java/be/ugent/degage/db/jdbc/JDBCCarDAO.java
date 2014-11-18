@@ -117,13 +117,19 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         super (context);
     }
 
+    /**
+     * Retreive a car object from a result set storing only id and name
+     */
+    public static Car populateCarMinimal (ResultSet rs) throws SQLException {
+        return new Car(
+                rs.getInt("car_id"), rs.getString("car_name")
+        );
+    }
+
     public static Car populateCar(ResultSet rs, boolean withRest) throws SQLException {
         // Extra check if car actually exists
         if(rs.getObject("car_id") != null) {
-            Car car = new Car();
-            int id = rs.getInt("car_id");
-            car.setId(id);
-            car.setName(rs.getString("car_name"));
+            Car car = populateCarMinimal(rs);
             car.setBrand(rs.getString("car_brand"));
             car.setType(rs.getString("car_type"));
             Integer seats = rs.getInt("car_seats");

@@ -122,7 +122,7 @@ public class ReportGeneration {
         int othersDist = 0;
 
         for (CarRide ride : rides) {
-            if (ride.getReservation().getUser() == ride.getReservation().getCar().getOwner()) {
+            if (ride.getReservation().isPrivileged()) {
                 loanerDist += ride.getEndMileage() - ride.getStartMileage();
             } else {
                 othersDist += ride.getEndMileage() - ride.getStartMileage();

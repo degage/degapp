@@ -22,8 +22,6 @@ import org.joda.time.DateTime;
  * @author Laurent
  */
 class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
-
-
             // TODO: replace * by actual fields
     public static final String RESERVATION_QUERY = "SELECT * FROM carreservations " +
             "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
@@ -146,47 +144,76 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    private LazyStatement getNextReservationStatement = new LazyStatement (
-            RESERVATION_QUERY +
-                    " WHERE reservation_from >= ? AND reservation_id != ? AND reservation_status = 'ACCEPTED' "  +
-                    " ORDER BY reservation_to ASC LIMIT 1"
+
+    private Reservation populateNextPrevious (ResultSet rs) throws SQLException {
+        Reservation reservation = new Reservation(
+                rs.getInt("r.reservation_id"),
+                null,
+                JDBCUserDAO.populateUserPartial(rs),
+                new DateTime(rs.getTimestamp("r.reservation_from")),
+                new DateTime(rs.getTimestamp("r.reservation_to")),
+                null
+        );
+        return reservation;
+    }
+
+    private LazyStatement getNextReservationStatement = new LazyStatement(
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
+                    "user_id, user_email, user_firstname, user_lastname, user_status " +
+            "FROM carreservations AS r JOIN carreservations AS o " +
+                    "ON r.reservation_car_id = o.reservation_car_id " +
+            "JOIN users ON r.reservation_user_id = user_id " +
+                    "WHERE o.reservation_id = ? " +
+                    "AND r.reservation_status = 'ACCEPTED' " +
+                    "AND r.reservation_from > o.reservation_to  " +
+                    "AND r.reservation_from < o.reservation_to + INTERVAL 1 DAY " +
+                    "ORDER BY r.reservation_from ASC LIMIT 1"
     );
 
     @Override
-    public Reservation getNextReservation(Reservation reservation) throws DataAccessException {
+    public Reservation getNextReservation(int reservationId) throws DataAccessException {
         try {
             PreparedStatement ps = getNextReservationStatement.value();
-            ps.setTimestamp(1, new Timestamp(reservation.getTo().getMillis()));
-            ps.setInt(2, reservation.getId());
+            ps.setInt(1, reservationId);
             try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return populateReservation(rs);
-                return null;
+                if(rs.next()) {
+                    return populateNextPrevious(rs);
+                } else {
+                    return null;
+                }
             }
         } catch(SQLException ex) {
-            throw new DataAccessException("Error while retrieve the reservation following reservation with id" + reservation.getId(), ex);
+            throw new DataAccessException("Error while retrieve the reservation following reservation with id" + reservationId, ex);
         }
     }
 
-    private LazyStatement getPreviousReservationStatement = new LazyStatement (
-            RESERVATION_QUERY +
-                    " WHERE reservation_to <= ? AND reservation_id != ? AND reservation_status = 'ACCEPTED' " +
-                    " ORDER BY reservation_to DESC LIMIT 1"
+    private LazyStatement getPreviousReservationStatement = new LazyStatement(
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
+                    "user_id, user_email, user_firstname, user_lastname, user_status " +
+            "FROM carreservations AS r JOIN carreservations AS o " +
+                    "ON r.reservation_car_id = o.reservation_car_id " +
+            "JOIN users ON r.reservation_user_id = user_id " +
+                    "WHERE o.reservation_id = ? " +
+                    "AND r.reservation_status = 'ACCEPTED' " +
+                    "AND r.reservation_to < o.reservation_from  " +
+                    "AND r.reservation_to + INTERVAL 1 DAY > o.reservation_from " +
+                    "ORDER BY r.reservation_to DESC LIMIT 1"
     );
 
     @Override
-    public Reservation getPreviousReservation(Reservation reservation) throws DataAccessException {
+    public Reservation getPreviousReservation(int reservationId) throws DataAccessException {
         try {
             PreparedStatement ps = getPreviousReservationStatement.value();
-            ps.setTimestamp(1, new Timestamp(reservation.getFrom().getMillis()));
-            ps.setInt(2, reservation.getId());
+            ps.setInt(1, reservationId);
             try(ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return populateReservation(rs);
-                return null;
+                if(rs.next()) {
+                    return populateNextPrevious(rs);
+                } else {
+                    return null;
+                }
             }
         } catch(SQLException ex) {
-            throw new DataAccessException("Error while retrieve the reservation following reservation with id" + reservation.getId(), ex);
+            throw new DataAccessException("Error while retrieve the reservation preceeding reservation with id " + reservationId, ex);
         }
     }
     
@@ -376,4 +403,41 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             throw new DataAccessException("Error while updating the reservations statuses", ex);
         }
     }
+
+    private LazyStatement listCRInfoStatement = new LazyStatement(
+        "SELECT car_id, car_name,  FROM car LEFT JOIN carreservations ON reservation_car_id = car_id " +
+                "WHERE reservation_to >= ? AND reservation_from <= ? ORDER BY car_id, reservation_from"
+    );
+
+    public Iterable<CRInfo> listCRInfo (DateTime from, DateTime to) {
+        try {
+            PreparedStatement ps = listCRInfoStatement.value();
+            ps.setTimestamp(1, new Timestamp(to.getMillis()));
+            ps.setTimestamp(2, new Timestamp(from.getMillis()));
+            try (ResultSet rs = ps.executeQuery()) {
+                Collection<CRInfo> result = new ArrayList<>();
+                CRInfo crInfo = null;
+                int currentId = -1;
+                while (rs.next()) {
+                    int thisId = rs.getInt("car_id");
+                    if (thisId != currentId) {
+                        currentId = thisId;
+                        crInfo = new CRInfo();
+                        crInfo.car = JDBCCarDAO.populateCar(rs, false);  // TODO: minimal
+                        crInfo.reservations = new ArrayList<>();
+                        result.add(crInfo);
+                    }
+                    Integer reservationId = rs.getObject("reservation_id", Integer.class);
+                    if (reservationId != null) {
+                        crInfo.reservations.add(populateReservation(rs));
+                    }
+                }
+                return result;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException( "Could not retreive reservation information", ex);
+        }
+
+    }
+
 }

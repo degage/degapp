@@ -190,7 +190,7 @@ public class Refuels extends Controller {
                             refuel.setProof(file);
                             dao.updateRefuel(refuel);
                             context.commit();
-                            Notifier.sendRefuelRequest(refuel.getCarRide().getReservation().getCar().getOwner(), refuel);
+                            Notifier.sendRefuelRequest(refuel);
                             flash("success", "Uw tankbeurt wordt voorgelegd aan de auto-eigenaar.");
                             return redirect(routes.Refuels.showRefuels());
                         } catch (DataAccessException ex) {
@@ -232,8 +232,7 @@ public class Refuels extends Controller {
     public static Result refuseRefuel(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
         dao.rejectRefuel(refuelId);
-        Refuel refuel = dao.getRefuel(refuelId);
-        Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, false);
+        Notifier.sendRefuelStatusChanged(dao.getRefuel(refuelId), false);
         flash("success", "Tankbeurt succesvol geweigerd");
         return redirect(routes.Refuels.showOwnerRefuels());
     }
@@ -251,8 +250,7 @@ public class Refuels extends Controller {
     public static Result approveRefuel(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
         dao.acceptRefuel(refuelId);
-        Refuel refuel = dao.getRefuel(refuelId);
-        Notifier.sendRefuelStatusChanged(refuel.getCarRide().getReservation().getUser(), refuel, true);
+        Notifier.sendRefuelStatusChanged(dao.getRefuel(refuelId), true);
         flash("success", "Tankbeurt succesvol geaccepteerd");
         return redirect(routes.Refuels.showOwnerRefuels());
     }

@@ -204,8 +204,9 @@ public class Reserve extends Controller {
             DataAccessContext context = DataAccess.getInjectedContext();
             Car car = context.getCarDAO().getCar(carId);
             // Test whether the reservation is valid
-            DateTime from = reservationForm.get().getTimeFrom();
-            DateTime until = reservationForm.get().getTimeUntil();
+            ReservationModel formData = reservationForm.get();
+            DateTime from = formData.getTimeFrom();
+            DateTime until = formData.getTimeUntil();
             ReservationDAO rdao = context.getReservationDAO();
             for (Reservation reservation : rdao.getReservationListForCar(carId)) {
                 if ((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
@@ -215,7 +216,7 @@ public class Reserve extends Controller {
             }
 
             // Create the reservationCars
-            Reservation reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), reservationForm.get().message);
+            Reservation reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), formData.message);
             if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
                 // Schedule the auto accept
                 int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
@@ -223,11 +224,10 @@ public class Reserve extends Controller {
                 autoAcceptDate.addMinutes(minutesAfterNow);
                 context.getJobDAO().createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
 
-
+                // note: user contained in this record was null
+                reservation.setUser(DataProvider.getUserProvider().getUser());
                 Notifier.sendReservationApproveRequestMail(
-                        car.getOwner(),
-                        reservation, // note: user contained in this record is null
-                        DataProvider.getUserProvider().getUser()
+                        car.getOwner(), reservation
                 );
             }
             return redirect(routes.Drives.index());

@@ -7,6 +7,8 @@ import play.Play;
  * Created by Stefaan Vermassen on 16/02/14.
  */
 public class Mailer {
+
+    // TODO: do not use static here!
     private static MailerAPI mail = play.Play.application()
             .plugin(MailerPlugin.class).email();
 

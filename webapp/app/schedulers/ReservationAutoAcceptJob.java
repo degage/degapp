@@ -22,7 +22,7 @@ public class ReservationAutoAcceptJob implements ScheduledJob.Executor {
         if (reservation.getStatus() == ReservationStatus.REQUEST) {
             if (reservation.getFrom().isBeforeNow()) {
                 reservation.setStatus(ReservationStatus.ACCEPTED);
-                Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), "Automatisch goedgekeurd door systeem.", reservation);
+                Notifier.sendReservationApprovedByOwnerMail("Automatisch goedgekeurd door systeem.", reservation);
             } else {
                 reservation.setStatus(ReservationStatus.CANCELLED);
             }

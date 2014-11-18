@@ -31,13 +31,13 @@ public class Car {
     private boolean active;
     private File photo;
 
-    public Car() {
-        this(0, null, null, null, null, null, null, null, false, false, false, null, null, null, null, null, null, null, null);
+    public Car(int id, String name) {
+        this.id = id;
+        this.name = name;
     }
 
     public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments) {
-        this.id = id;
-        this.name = name;
+        this(id, name);
         this.brand = brand;
         this.type = type;
         this.location = location;

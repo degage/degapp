@@ -226,20 +226,24 @@ public class Drives extends Controller {
         if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus() == ReservationStatus.FINISHED)
             driveInfo = ddao.getCarRide(reservationId);
 
-        Reservation nextReservation = rdao.getNextReservation(reservation);
-        if (nextReservation != null)
-            nextReservation = nextReservation.getFrom().isBefore(reservation.getTo().plusDays(1)) ? nextReservation : null;
-        User nextLoaner = nextReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
-                udao.getUser(nextReservation.getUser().getId()) : null;
+        User previousLoaner = null;
+        User nextLoaner = null;
+        if (reservation.getStatus() == ReservationStatus.ACCEPTED)      {
+            Reservation nextReservation = rdao.getNextReservation(reservationId);
+            if (nextReservation != null) {
+                nextLoaner = nextReservation.getUser();
+            }
+            Reservation previousReservation = rdao.getPreviousReservation(reservationId);
+            if (previousReservation != null) {
+                previousLoaner = previousReservation.getUser();
+            }
+        }
 
-        Reservation previousReservation = rdao.getPreviousReservation(reservation);
-        if (previousReservation != null)
-            previousReservation = previousReservation.getTo().isAfter(reservation.getFrom().minusDays(1)) ? previousReservation : null;
-        User previousLoaner = previousReservation != null && reservation.getStatus() == ReservationStatus.ACCEPTED ?
-                udao.getUser(previousReservation.getUser().getId()) : null;
-
-        return driveDetails.render(adjustForm, refuseForm, detailsForm, reservation, driveInfo, car, owner, loaner,
-                previousLoaner, nextLoaner);
+        return driveDetails.render(
+                adjustForm, refuseForm, detailsForm,
+                reservation, driveInfo, car, owner, loaner,
+                previousLoaner, nextLoaner
+        );
     }
 
     /**
@@ -328,9 +332,9 @@ public class Drives extends Controller {
             return badRequest(showIndex());
         }
         if (status == ReservationStatus.REFUSED)
-            Notifier.sendReservationRefusedByOwnerMail(reservation.getUser(), remarks, reservation);
+            Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
         else
-            Notifier.sendReservationApprovedByOwnerMail(reservation.getUser(), remarks, reservation);
+            Notifier.sendReservationApprovedByOwnerMail(remarks, reservation);
         return details(reservationId);
     }
 

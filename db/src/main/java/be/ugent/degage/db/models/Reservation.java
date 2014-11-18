@@ -47,10 +47,6 @@ public class Reservation {
         return car;
     }
 
-    public void setCar(Car car) {
-        this.car = car;
-    }
-
     public User getUser() {
         return user;
     }

@@ -1,14 +1,12 @@
-@(refuseFrom: play.data.Form[Drives.RemarksModel], reservation: Reservation)
-@import providers.DataProvider;
+@(refuseFrom: play.data.Form[Drives.RemarksModel], reservation: Reservation, ownerId: Int)
+@import db.CurrentUser
 
 <!-- /row -->
 @if(reservation.getStatus == ReservationStatus.REQUEST) {
-    @defining(DataProvider.getUserProvider.getUser.getId) { userId =>
-        @if(reservation.getCar.getOwner.getId != userId) {
-            <div class="alert alert-warning alert-dismissable">
-                Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
-            </div>
-        }
+    @if(ownerId != CurrentUser.getId) {
+        <div class="alert alert-warning alert-dismissable">
+            Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
+        </div>
     }
     <div class="row">
         <div class="col-xs-12">
