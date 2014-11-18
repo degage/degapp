@@ -43,6 +43,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getString("reservation_message")
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+        reservation.setPrivileged(rs.getBoolean ("reservation_privileged"));
         return reservation;
     }
 
@@ -53,7 +54,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     private LazyStatement retreiveStatusStatement = new LazyStatement (
-            "SELECT reservation_status FROM carreservations WHERE reservation_id = ?"
+            "SELECT reservation_status, reservation_privileged FROM carreservations WHERE reservation_id = ?"
     );
 
     @Override
@@ -88,6 +89,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                         to,
                         message);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+                reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
                 return reservation;
             }
         } catch (SQLException e) {
@@ -146,8 +148,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private LazyStatement getNextReservationStatement = new LazyStatement (
             RESERVATION_QUERY +
-                    " WHERE reservation_from >= ? AND reservation_id != ? AND carreservations.reservation_status = '"
-                    + ReservationStatus.ACCEPTED.toString() + "' ORDER BY reservation_to ASC LIMIT 1"
+                    " WHERE reservation_from >= ? AND reservation_id != ? AND reservation_status = 'ACCEPTED' "  +
+                    " ORDER BY reservation_to ASC LIMIT 1"
     );
 
     @Override
@@ -168,8 +170,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private LazyStatement getPreviousReservationStatement = new LazyStatement (
             RESERVATION_QUERY +
-                    " WHERE reservation_to <= ? AND reservation_id != ? AND carreservations.reservation_status = '"
-                    + ReservationStatus.ACCEPTED.toString() + "' ORDER BY reservation_to DESC LIMIT 1"
+                    " WHERE reservation_to <= ? AND reservation_id != ? AND reservation_status = 'ACCEPTED' " +
+                    " ORDER BY reservation_to DESC LIMIT 1"
     );
 
     @Override

@@ -453,12 +453,10 @@ public class Drives extends Controller {
 
         if (isOwner) {
             Instant instant = reservation.getFrom().toDate().toInstant();
-            calculateDriveCost(ride,
-                    context.getPrivilegedDAO().isOwnerOrPrivileged(
-                            reservation.getCar().getId(),
-                            reservation.getUser().getId()
-                    ),
+            BigDecimal cost = calculateDriveCost(ride.getEndMileage() - ride.getStartMileage(),
+                    ride.getReservation().isPrivileged(),
                     context.getSettingDAO().getCostSettings(instant));
+            ride.setCost(cost);
             dao.updateCarRide(ride);
         } else {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
@@ -508,25 +506,22 @@ public class Drives extends Controller {
         }
         ride.setStatus(true);
         Instant instant = reservation.getFrom().toDate().toInstant();
-        calculateDriveCost(ride,
-                context.getPrivilegedDAO().isOwnerOrPrivileged(
-                        reservation.getCar().getId(),
-                        reservation.getUser().getId()
-                ),
+        BigDecimal cost =  calculateDriveCost(ride.getEndMileage() - ride.getStartMileage(),
+                ride.getReservation().isPrivileged(),
                 context.getSettingDAO().getCostSettings(instant)
         );
+        ride.setCost(cost);
         dao.updateCarRide(ride);
         reservation.setStatus(ReservationStatus.FINISHED);
         rdao.updateReservation(reservation);
         return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
     }
 
-    private static void calculateDriveCost(CarRide ride, boolean privileged, Costs costInfo) {
+    private static BigDecimal calculateDriveCost(int distance, boolean privileged, Costs costInfo) {
         if (privileged) {
-            ride.setCost(BigDecimal.ZERO);
+            return BigDecimal.ZERO;
         } else {
             double cost = 0;
-            int distance = ride.getEndMileage() - ride.getStartMileage();
             int levels = costInfo.getLevels();
             int lower = 0;
 
@@ -544,7 +539,7 @@ public class Drives extends Controller {
                 }
             }
 
-            ride.setCost(new BigDecimal(cost));
+            return new BigDecimal(cost);
         }
     }
 

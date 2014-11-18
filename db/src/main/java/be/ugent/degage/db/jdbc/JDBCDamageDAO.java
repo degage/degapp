@@ -6,6 +6,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.DamageDAO;
 import be.ugent.degage.db.models.Damage;
 import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationStatus;
 import org.joda.time.DateTime;
 
 import java.sql.*;
@@ -22,17 +23,21 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
     }
 
     public static Damage populateDamage(ResultSet rs) throws SQLException {
+        // TODO: use populateReservation?
+        Reservation reservation = new Reservation(
+                rs.getInt("reservation_id"),
+                null, null,
+                new DateTime(rs.getTimestamp("reservation_from")),
+                new DateTime(rs.getTimestamp("reservation_to")),
+                null
+        );
+        reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+        reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
         return new Damage(
                 rs.getInt("damage_id"),
                 rs.getInt("reservation_car_id"),
                 rs.getInt("reservation_user_id"),
-                new Reservation(
-                        rs.getInt("reservation_id"),
-                        null, null,
-                        new DateTime(rs.getTimestamp("reservation_from")),
-                        new DateTime(rs.getTimestamp("reservation_to")),
-                        null
-                ),
+                reservation,
                 rs.getString("damage_description"),
                 new DateTime(rs.getTimestamp("damage_time")),
                 rs.getBoolean("damage_finished"));
@@ -81,7 +86,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
     private LazyStatement getDamageStatement = new LazyStatement(
             "SELECT damage_id, damage_description, damage_time, damage_finished, " +
                     "reservation_id, reservation_car_id, reservation_user_id, " +
-                    "reservation_status, reservation_from, reservation_to " +
+                    "reservation_status, reservation_privileged, reservation_from, reservation_to " +
             "FROM damages JOIN carreservations ON damage_car_ride_id = reservation_id " +
             "WHERE damage_id = ?"
     );
@@ -142,7 +147,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
     private static final String LIST_DAMAGES_QUERY =
         "SELECT  damage_id, damage_description, damage_time, damage_finished, " +
                     "reservation_id, reservation_car_id, reservation_user_id, " +
-                    "reservation_status, reservation_from, reservation_to, " +
+                    "reservation_status, reservation_privileged, reservation_to, " +
                     "car_name, user_lastname, user_firstname " +
             "FROM damages " +
             "JOIN carreservations ON damage_car_ride_id = reservation_id " +

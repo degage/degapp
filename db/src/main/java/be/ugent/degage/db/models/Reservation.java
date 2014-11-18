@@ -19,6 +19,7 @@ public class Reservation {
     private DateTime from;
     private DateTime to;
     private String message;
+    private boolean privileged;
 
     public Reservation(int id, Car car, User user, DateTime from, DateTime to, String message) {
         this.id = id;
@@ -27,6 +28,7 @@ public class Reservation {
         this.from = from;
         this.to = to;
         this.message = message;
+
     }    
     
     public int getId() {
@@ -79,5 +81,13 @@ public class Reservation {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public boolean isPrivileged() {
+        return privileged;
+    }
+
+    public void setPrivileged(boolean privileged) {
+        this.privileged = privileged;
     }
 }
