@@ -5,6 +5,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 import controllers.util.Pagination;
 import db.CurrentUser;
@@ -70,7 +71,7 @@ public class Users extends Controller {
     @InjectContext
     public static Result impersonate(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        User user = context.getUserDAO().getUserPartial(userId);
+        UserHeader user = context.getUserDAO().getUserHeader(userId);
         if (user != null) {
             Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
             if (userRoles.contains(UserRole.SUPER_USER)) {

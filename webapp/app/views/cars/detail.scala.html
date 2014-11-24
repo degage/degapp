@@ -1,4 +1,4 @@
-@(car: Car, availabilities: Iterable[Availabilities.Availability], overlap: Boolean, privilegedUsers: Iterable[User], mapDetails: Maps.MapDetails = null)
+@(car: Car, availabilities: Iterable[Availabilities.Availability], overlap: Boolean, privilegedUsers: Iterable[UserHeader], mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider
 @import db.CurrentUser
     @scripts = {

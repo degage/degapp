@@ -14,6 +14,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
+
 /**
  *
  * @author Laurent
@@ -22,7 +24,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
     public static final String LIST_CAR_QUERY =
             "SELECT car_id, car_name, car_brand, car_active, " +
-            "       user_id, user_firstname, user_lastname, user_phone, user_email, user_status " +
+                    USER_HEADER_FIELDS +
             "FROM cars JOIN users ON car_owner_user_id = user_id " +
             "WHERE car_name LIKE ? AND car_brand LIKE ? ";
 
@@ -157,13 +159,13 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             car.setActive(rs.getBoolean("car_active"));
             File photo = null;
             Address location = null;
-            User user = null;
+            UserHeader user = null;
             TechnicalCarDetails technicalCarDetails = null;
             CarInsurance insurance = null;
             if(withRest) {
                 photo = JDBCFileDAO.populateFile(rs, "pictures");
                 location = JDBCAddressDAO.populateAddress(rs);
-                user = JDBCUserDAO.populateUserPartial(rs);
+                user = JDBCUserDAO.populateUserHeader(rs);
 
                 File registration = null;
                 rs.getInt("details_car_registration");
@@ -211,7 +213,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     @Override
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active, File photo) throws DataAccessException {
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, File photo) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement.value();
             ps.setString(1, name);
@@ -644,7 +646,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             try (ResultSet rs = ps.executeQuery()) {
                 Collection<Car> cars = new ArrayList<>();
                 while (rs.next()) {
-                    User owner = JDBCUserDAO.populateUserPartial(rs);
+                    UserHeader owner = JDBCUserDAO.populateUserHeader(rs);
                     // only header is really needed
                     Car result = new Car (
                             rs.getInt ("car_id"),
@@ -674,7 +676,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 "insurance_id, insurance_name, insurance_expiration, " +
                 "insurance_contract_id, insurance_bonus_malus, " +
                 "details_id, details_car_license_plate, details_car_chassis_number, " +
-                "user_id, user_firstname, user_lastname, user_phone, user_email, user_status " +
+                    USER_HEADER_FIELDS +
             "FROM cars " +
             "LEFT JOIN addresses ON address_id=car_location " +
             "LEFT JOIN users ON user_id=car_owner_user_id " +
@@ -715,7 +717,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                                 rs.getObject("insurance_bonus_malus", Integer.class),
                                 rs.getObject("insurance_contract_id", Integer.class)
                         ),
-                        JDBCUserDAO.populateUserPartial(rs),
+                        JDBCUserDAO.populateUserHeader(rs),
                         rs.getString ("car_comments")
                 );
                 result.setActive(rs.getBoolean("car_active"));

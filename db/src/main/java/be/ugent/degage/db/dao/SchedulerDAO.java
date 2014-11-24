@@ -1,7 +1,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 
 import java.util.List;
 
@@ -10,6 +10,6 @@ import java.util.List;
  */
 public interface SchedulerDAO {
 
-    public List<User> getReminderEmailList(int maxMessages) throws DataAccessException;
-    public void setReminded(User user) throws DataAccessException;
+    public Iterable<UserHeader> getReminderEmailList(int maxMessages) throws DataAccessException;
+    public void setReminded(int userId) throws DataAccessException;
 }

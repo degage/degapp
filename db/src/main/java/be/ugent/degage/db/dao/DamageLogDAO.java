@@ -1,10 +1,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.Damage;
 import be.ugent.degage.db.models.DamageLog;
-
-import java.util.List;
 
 /**
  *

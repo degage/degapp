@@ -8,7 +8,6 @@ import org.joda.time.DateTime;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 04/05/14.

@@ -10,7 +10,7 @@ public class Message {
     private int id;
 
     // sender or receiver, depending on context
-    private User user;
+    private UserHeader user;
 
     private boolean read;
     private String subject;
@@ -25,11 +25,11 @@ public class Message {
         this.id = id;
     }
 
-    public User getUser() {
+    public UserHeader getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserHeader user) {
         this.user = user;
     }
 
@@ -37,35 +37,19 @@ public class Message {
         return read;
     }
 
-    public void setRead(boolean read) {
-        this.read = read;
-    }
-
     public String getSubject() {
         return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
     }
 
     public String getBody() {
         return body;
     }
 
-    public void setBody(String body) {
-        this.body = body;
-    }
-
     public DateTime getTimestamp() {
         return timestamp;
     }
 
-    public void setTimestamp(DateTime timestamp) {
-        this.timestamp = timestamp;
-    }
-
-    public Message(int id, boolean read, User user, String subject, String body, DateTime timestamp){
+    public Message(int id, boolean read, UserHeader user, String subject, String body, DateTime timestamp){
         this.id = id;
         this.user = user;
         this.read = read;

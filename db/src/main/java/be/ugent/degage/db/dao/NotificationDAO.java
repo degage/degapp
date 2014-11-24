@@ -4,7 +4,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Notification;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 
 import java.util.List;
 
@@ -17,7 +17,7 @@ public interface NotificationDAO {
     public List<Notification> getNotificationListForUser(int userId) throws DataAccessException; // TODO: delete
     public List<Notification> getNotificationList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public int getNumberOfUnreadNotifications(int userId) throws DataAccessException;
-    public Notification createNotification(User user, String subject, String body) throws DataAccessException;
+    public Notification createNotification(UserHeader user, String subject, String body) throws DataAccessException;
     public void markNotificationAsRead(int notificationId) throws DataAccessException;
     public void markAllNotificationsAsRead(int userId) throws DataAccessException;
 }

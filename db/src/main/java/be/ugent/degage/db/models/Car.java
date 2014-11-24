@@ -26,7 +26,7 @@ public class Car {
     private Integer ownerAnnualKm;
     private TechnicalCarDetails technicalCarDetails;
     private CarInsurance insurance;
-    private User owner;
+    private UserHeader owner;
     private String comments;
     private boolean active;
     private File photo;
@@ -36,7 +36,7 @@ public class Car {
         this.name = name;
     }
 
-    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments) {
+    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments) {
         this(id, name);
         this.brand = brand;
         this.type = type;
@@ -189,11 +189,11 @@ public class Car {
         this.insurance = insurance;
     }
 
-    public User getOwner() {
+    public UserHeader getOwner() {
         return owner;
     }
 
-    public void setOwner(User owner) {
+    public void setOwner(UserHeader owner) {
         this.owner = owner;
     }
 
@@ -221,58 +221,4 @@ public class Car {
         this.photo = photo;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Car car = (Car) o;
-
-        if (gps != car.gps) return false;
-        if (hook != car.hook) return false;
-        if (id != car.id) return false;
-        if (brand != null ? !brand.equals(car.brand) : car.brand != null) return false;
-        if (comments != null ? !comments.equals(car.comments) : car.comments != null) return false;
-        if (doors != null ? !doors.equals(car.doors) : car.doors != null) return false;
-        if (estimatedValue != null ? !estimatedValue.equals(car.estimatedValue) : car.estimatedValue != null)
-            return false;
-        if (fuel != car.fuel) return false;
-        if (fuelEconomy != null ? !fuelEconomy.equals(car.fuelEconomy) : car.fuelEconomy != null) return false;
-        if (location != null ? !location.equals(car.location) : car.location != null) return false;
-        if (name != null ? !name.equals(car.name) : car.name != null) return false;
-        if (owner != null ? owner.getId() != car.owner.getId() : car.owner != null) return false;
-        if (ownerAnnualKm != null ? !ownerAnnualKm.equals(car.ownerAnnualKm) : car.ownerAnnualKm != null) return false;
-        if (seats != null ? !seats.equals(car.seats) : car.seats != null) return false;
-        if (technicalCarDetails != null ? !technicalCarDetails.equals(car.technicalCarDetails) : car.technicalCarDetails != null)
-            return false;
-        if (insurance != null ? !insurance.equals(car.insurance) : car.insurance != null)
-            return false;
-        if (type != null ? !type.equals(car.type) : car.type != null) return false;
-        if (year != null ? !year.equals(car.year) : car.year != null) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + (name != null ? name.hashCode() : 0);
-        result = 31 * result + (brand != null ? brand.hashCode() : 0);
-        result = 31 * result + (type != null ? type.hashCode() : 0);
-        result = 31 * result + (location != null ? location.hashCode() : 0);
-        result = 31 * result + (seats != null ? seats.hashCode() : 0);
-        result = 31 * result + (doors != null ? doors.hashCode() : 0);
-        result = 31 * result + (year != null ? year.hashCode() : 0);
-        result = 31 * result + (gps ? 1 : 0);
-        result = 31 * result + (hook ? 1 : 0);
-        result = 31 * result + (fuel != null ? fuel.hashCode() : 0);
-        result = 31 * result + (fuelEconomy != null ? fuelEconomy.hashCode() : 0);
-        result = 31 * result + (estimatedValue != null ? estimatedValue.hashCode() : 0);
-        result = 31 * result + (ownerAnnualKm != null ? ownerAnnualKm.hashCode() : 0);
-        result = 31 * result + (technicalCarDetails != null ? technicalCarDetails.hashCode() : 0);
-        result = 31 * result + (insurance != null ? insurance.hashCode() : 0);
-        result = 31 * result + (owner != null ? owner.getId() : 0);
-        result = 31 * result + (comments != null ? comments.hashCode() : 0);
-        return result;
-    }
 }

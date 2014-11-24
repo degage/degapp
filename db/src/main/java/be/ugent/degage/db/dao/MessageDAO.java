@@ -1,12 +1,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Message;
-import be.ugent.degage.db.models.User;
-
-import java.util.List;
 
 /**
  *

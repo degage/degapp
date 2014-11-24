@@ -7,24 +7,24 @@ package be.ugent.degage.db.models;
 import org.joda.time.DateTime;
 
 /**
- *
- * @author Laurent
+ * Contains the most essential information for reservations.
+ * @see be.ugent.degage.db.models.Reservation
  */
-public class Reservation {
-    
+public class ReservationHeader {
+
     private int id;
     private ReservationStatus status;
-    private Car car;
-    private UserHeader user;
+    private int carId;
+    private int userId;
     private DateTime from;
     private DateTime to;
     private String message;
     private boolean privileged;
 
-    public Reservation(int id, Car car, UserHeader user, DateTime from, DateTime to, String message) {
+    public ReservationHeader(int id, int carId, int userId, DateTime from, DateTime to, String message) {
         this.id = id;
-        this.car = car;
-        this.user = user;
+        this.carId = carId;
+        this.userId = userId;
         this.from = from;
         this.to = to;
         this.message = message;
@@ -39,49 +39,33 @@ public class Reservation {
         return status;
     }
 
-    public void setStatus(ReservationStatus status) {
-        this.status = status;
+    public int getCarId() {
+        return carId;
     }
 
-    public Car getCar() {
-        return car;
-    }
-
-    public UserHeader getUser() {
-        return user;
-    }
-
-    public void setUser(UserHeader user) {
-        this.user = user;
+    public int getUserId() {
+        return userId;
     }
 
     public DateTime getFrom() {
         return from;
     }
 
-    public void setFrom(DateTime from) {
-        this.from = from;
-    }
-
     public DateTime getTo() {
         return to;
-    }
-
-    public void setTo(DateTime to) {
-        this.to = to;
     }
 
     public String getMessage() {
         return message;
     }
 
-    public void setMessage(String message) {
-        this.message = message;
-    }
-
     public boolean isPrivileged() {
         return privileged;
     }
+
+    public void setStatus(ReservationStatus status) {
+            this.status = status;
+        }
 
     public void setPrivileged(boolean privileged) {
         this.privileged = privileged;

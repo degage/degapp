@@ -3,7 +3,7 @@ package be.ugent.degage.db.dao;
 import java.util.Set;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 
 /**
@@ -17,9 +17,9 @@ public interface UserRoleDAO {
 	public Set<UserRole> getUserRoles(int userId) throws DataAccessException;
 
     /**
-     * All users that have a certain role, including all super users. (Only partial information filled in.)
+     * All users that have a certain role, including all super users.
      */
-    public Iterable<User> getUsersByRole(UserRole userRole) throws DataAccessException;
+    public Iterable<UserHeader> getUsersByRole(UserRole userRole) throws DataAccessException;
 
     /**
      * Add a role to a user (unless that user already has that role)

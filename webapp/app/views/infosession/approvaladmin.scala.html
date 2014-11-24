@@ -1,4 +1,4 @@
-@(approval: Approval, enrollStatus: EnrollementStatus, reasons: List[String] = null, form: Form[InfoSessions.ApprovalAdminModel])
+@(approval: Approval, enrollStatus: EnrollementStatus, reasons: Iterable[String] = null, form: Form[InfoSessions.ApprovalAdminModel])
     @stylesheets = {
         <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
 
@@ -28,63 +28,61 @@
         </ol>
     </div>
 
-    @defining(reasons != null && !reasons.isEmpty) { hasErrors =>
-        <div id="page-wrapper">
-            <div>
-                @flashes()
-                @if(hasErrors) {
-                    <div class="panel panel-danger">
-                        <div class="panel-heading">
-                            <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
-                        </div>
-                        <div class="panel-body">
-                            <p>Er zijn mogelijks problemen met deze aanvraag:</p>
-                            <ul>
-                            @for(reason <- reasons) {
-                                <li>@reason</li>
-                            }
-                            </ul>
-                        </div>
+    <div id="page-wrapper">
+        <div>
+            @flashes()
+            @if(reasons.iterator.hasNext) {
+                <div class="panel panel-danger">
+                    <div class="panel-heading">
+                        <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
                     </div>
-                }
-            @approvaluserpartial(approval, enrollStatus)
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fa fa-pencil-square-o"></i> Aanvraag</h3>
+                    <div class="panel-body">
+                        <p>Er zijn mogelijks problemen met deze aanvraag:</p>
+                        <ul>
+                        @foreach(reasons){ reason =>
+                            <li>@reason</li>
+                        }
+                        </ul>
+                    </div>
                 </div>
-                <div class="panel-body">
-                @helper.form(routes.InfoSessions.approvalAdminAction(approval.getId), 'class -> "form-horizontal") {
-                    @if(form.hasGlobalErrors) {
-                        <div class="alert alert-danger alert-dismissable">
-                            <strong>Error!</strong> @form.globalError.message
-                        </div>
-                    }
+            }
+        @approvaluserpartial(approval, enrollStatus)
 
-                    
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            @helper.select(form("status"), helper.options(InfoSessions.ApprovalAdminModel.Action.values().map(i => i.name).toList), '_label -> "Actie", 'class-> "form-group")
-                            <div class="form-group">
-                                    <input type="checkbox" id="@form("user").id" name="@form("user").name" value="true" @if("true".equals(form("user").value)) { checked="checked" }>Autolener
-                            </div>
-                            <div class="form-group">
-                                    <input type="checkbox" id="@form("sharer").id" name="@form("sharer").name" value="true" @if("true".equals(form("sharer").value)) { checked="checked" }>Eigenaar
-                            </div>
-                            <textarea cols="4" style="width:100%;"name="@form("message").name" placeholder="Opmerkingen">@form("message").value</textarea>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="create"></label>
-                        <div class="col-md-12">
-                            <button type="submit" id="create" name="create" class="btn btn-block btn-success">
-                                Verzenden</button>
-                        </div>
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil-square-o"></i> Aanvraag</h3>
+            </div>
+            <div class="panel-body">
+            @helper.form(routes.InfoSessions.approvalAdminAction(approval.getId), 'class -> "form-horizontal") {
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
                     </div>
                 }
-            </div>
-            </div>
+
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        @helper.select(form("status"), helper.options(InfoSessions.ApprovalAdminModel.Action.values().map(i => i.name).toList), '_label -> "Actie", 'class-> "form-group")
+                        <div class="form-group">
+                                <input type="checkbox" id='@form("user").id' name='@form("user").name' value="true" @if("true".equals(form("user").value)) { checked="checked" }>Autolener
+                        </div>
+                        <div class="form-group">
+                                <input type="checkbox" id='@form("sharer").id' name='@form("sharer").name' value="true" @if("true".equals(form("sharer").value)) { checked="checked" }>Eigenaar
+                        </div>
+                        <textarea cols="4" style="width:100%;" name='@form("message").name' placeholder="Opmerkingen">@form("message").value</textarea>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="create"></label>
+                    <div class="col-md-12">
+                        <button type="submit" id="create" name="create" class="btn btn-block btn-success">
+                            Verzenden</button>
+                    </div>
+                </div>
+            }
         </div>
-    }
+        </div>
+    </div>
 }

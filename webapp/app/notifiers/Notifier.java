@@ -21,7 +21,8 @@ public class Notifier extends Mailer {
     public static final String NOREPLY = "Dégage <noreply@degage.be>";
 
     // to be used with injected context
-    public static void sendVerificationMail(User user, String verificationUrl) {
+    public static void sendVerificationMail(UserHeader user, String verificationUrl) {
+        // Remark: phone numbers are not filled in!
         setSubject("Verifieer jouw Dégage-account");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
@@ -44,14 +45,14 @@ public class Notifier extends Mailer {
      * @param subject
      * @param mail
      */
-    private static void createNotification(NotificationDAO dao, User user, String subject, String mail) {
+    private static void createNotification(NotificationDAO dao, UserHeader user, String subject, String mail) {
         dao.createNotification(user, subject, mail);
         DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
         DataProvider.getCommunicationProvider().invalidateNotificationNumber(user.getId());
     }
 
     // to be used with injected context
-    public static void sendWelcomeMail(User user) {
+    public static void sendWelcomeMail(UserHeader user) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.WELCOME);
@@ -67,7 +68,7 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendMembershipStatusChanged(User user, boolean approved, String comment) {
+    public static void sendMembershipStatusChanged(UserHeader user, boolean approved, String comment) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template;
@@ -89,7 +90,7 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendCarCostStatusChanged(User user, CarCost carCost, boolean approved) {
+    public static void sendCarCostStatusChanged(UserHeader user, CarCost carCost, boolean approved) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template;
@@ -113,7 +114,7 @@ public class Notifier extends Mailer {
 
     // to be used with injected context
     public static void sendRefuelStatusChanged(Refuel refuel, boolean approved) {
-        User user = refuel.getCarRide().getReservation().getUser();
+        UserHeader user = refuel.getCarRide().getReservation().getUser();
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template;
@@ -141,9 +142,8 @@ public class Notifier extends Mailer {
         EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
         UserRoleDAO userRoleDAO = context.getUserRoleDAO();
         NotificationDAO notificationDAO = context.getNotificationDAO();
-        Iterable<User> carAdminList = userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN);
         String mail = replaceCarCostTags(carCost, template.getBody());
-        for (User u : carAdminList) {
+        for (UserHeader u : userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN)) {
             createNotification(notificationDAO, u, template.getSubject(), replaceUserTags(u, mail));
         }
 
@@ -151,7 +151,7 @@ public class Notifier extends Mailer {
 
     // to be used with injected context
     public static void sendRefuelRequest(Refuel refuel) {
-        User user = refuel.getCarRide().getReservation().getCar().getOwner();
+        UserHeader user = refuel.getCarRide().getReservation().getCar().getOwner();
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.REFUEL_REQUEST);
@@ -167,7 +167,7 @@ public class Notifier extends Mailer {
         }
     }
 
-    public static void sendInfoSessionEnrolledMail(DataAccessContext context, User user, InfoSession infoSession) {
+    public static void sendInfoSessionEnrolledMail(DataAccessContext context, UserHeader user, InfoSession infoSession) {
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
         String mail = replaceUserTags(user, template.getBody());
@@ -183,7 +183,7 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendReservationApproveRequestMail(User owner, Reservation carReservation) {
+    public static void sendReservationApproveRequestMail(UserHeader owner, Reservation carReservation) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
@@ -201,7 +201,7 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendReservationDetailsProvidedMail(User user, Reservation carReservation) {
+    public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation carReservation) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
@@ -221,7 +221,7 @@ public class Notifier extends Mailer {
 
     // to be used with injected context
     public static void sendReservationApprovedByOwnerMail(String remarks, Reservation carReservation) {
-        User user = carReservation.getUser();
+        UserHeader user = carReservation.getUser();
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         CarDAO cdao = context.getCarDAO();
@@ -247,7 +247,7 @@ public class Notifier extends Mailer {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
-        User user = carReservation.getUser();
+        UserHeader user = carReservation.getUser();
         String mail = replaceUserTags(user, template.getBody());
         mail = replaceCarReservationTags(carReservation, mail);
         mail = mail.replace("%reservation_reason%", reason);
@@ -262,7 +262,7 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendContractManagerAssignedMail(User user, Approval approval) {
+    public static void sendContractManagerAssignedMail(UserHeader user, Approval approval) {
         DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.CONTRACTMANAGER_ASSIGNED);
@@ -279,7 +279,7 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendPasswordResetMail(User user, String verificationUrl) {
+    public static void sendPasswordResetMail(UserHeader user, String verificationUrl) {
         setSubject("Wachtwoord opnieuw instellen");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
@@ -294,7 +294,7 @@ public class Notifier extends Mailer {
         }
     }
 
-    public static void sendReminderMail(DataAccessContext context, User user) {
+    public static void sendReminderMail(DataAccessContext context, UserHeader user) {
         setSubject("Ongelezen berichten");
         addRecipient(user.getEmail());
         addFrom(NOREPLY);
@@ -303,10 +303,10 @@ public class Notifier extends Mailer {
         String mail = replaceUserTags(user, template.getBody());
         send(mail);
         SchedulerDAO sdao = context.getSchedulerDAO();
-        sdao.setReminded(user);
+        sdao.setReminded(user.getId());
     }
 
-    private static String replaceUserTags(User user, String template) {
+    private static String replaceUserTags(UserHeader user, String template) {
         template = template.replace("%user_firstname%", user.getFirstName());
         template = template.replace("%user_lastname%", user.getLastName());
         //TODO: replace address only when provided
@@ -321,7 +321,7 @@ public class Notifier extends Mailer {
     }
 
     private static String replaceCarReservationTags(Reservation carReservation, String template) {
-        User driver = carReservation.getUser();
+        UserHeader driver = carReservation.getUser();
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
         template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
         template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));

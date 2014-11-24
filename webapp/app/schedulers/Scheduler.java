@@ -5,6 +5,7 @@ import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import db.DataAccess;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
@@ -39,8 +40,7 @@ public final class Scheduler {
                 new RunnableInContext("Send reminder mails") {
                     @Override
                     public void runInContext(DataAccessContext context) {
-                        List<User> emailList = context.getSchedulerDAO().getReminderEmailList(0);
-                        for (User user : emailList) {
+                        for (UserHeader user : context.getSchedulerDAO().getReminderEmailList(0)) {
                             Notifier.sendReminderMail(context, user);
                         }
                     }

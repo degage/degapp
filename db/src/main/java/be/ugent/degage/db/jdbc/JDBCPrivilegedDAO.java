@@ -2,7 +2,7 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.PrivilegedDAO;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -21,19 +21,19 @@ public class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
 
     // TODO: replace * by actual fields
     private LazyStatement getPrivilegedStatement = new LazyStatement (
-            "SELECT user_id, user_email, user_firstname, user_lastname, user_status FROM carprivileges " +
-                "INNER JOIN users ON user_id = carprivileges.car_privilege_user_id WHERE car_privilege_car_id=?"
+            "SELECT " + JDBCUserDAO.USER_HEADER_FIELDS +
+            " FROM carprivileges INNER JOIN users ON user_id = car_privilege_user_id WHERE car_privilege_car_id=?"
     );
 
     @Override
-    public Iterable<User> getPrivileged(int carId) throws DataAccessException {
+    public Iterable<UserHeader> getPrivileged(int carId) throws DataAccessException {
         try {
             PreparedStatement ps = getPrivilegedStatement.value();
             ps.setInt(1, carId);
-            Collection<User> users = new ArrayList<>();
+            Collection<UserHeader> users = new ArrayList<>();
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    users.add(JDBCUserDAO.populateUserPartial(rs));
+                    users.add(JDBCUserDAO.populateUserHeader(rs));
                 }
                 return users;
             }

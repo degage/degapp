@@ -16,7 +16,7 @@ public interface InfoSessionDAO {
 
     // info session
 
-    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException;
+    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException;
     public InfoSession getInfoSession(int id) throws DataAccessException;
 
     public void updateInfoSession(InfoSession session) throws DataAccessException;
@@ -45,7 +45,7 @@ public interface InfoSessionDAO {
     public EnrollementStatus getUserEnrollmentStatus (int sessionId, int userId) throws DataAccessException;
     public void setUserEnrollmentStatus(int sessionId, int userId, EnrollementStatus status) throws DataAccessException;
 
-    public InfoSession getAttendingInfoSession(User user) throws DataAccessException;
+    public InfoSession getAttendingInfoSession(int userId) throws DataAccessException;
 
-    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(User user) throws DataAccessException;
+    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(int userId) throws DataAccessException;
 }

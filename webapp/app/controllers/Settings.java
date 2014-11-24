@@ -86,7 +86,7 @@ public class Settings extends Controller {
             User user = DataProvider.getUserProvider().getUser(false);
 
             if (dao.changePassword(user.getId(), model.oldpw, model.newpw)) {
-                DataProvider.getUserProvider().invalidateUser(user);
+                DataProvider.getUserProvider().invalidateUser(user.getId());
                 flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
                 return redirect(routes.Settings.index());
             } else {

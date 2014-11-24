@@ -262,12 +262,12 @@ public class Cars extends Controller {
             AddressDAO adao = context.getAddressDAO();
             Address address = modifyAddress(model.address, null, adao);
 
-            User owner;
+            UserHeader owner;
             if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
                 // User is permitted to add cars for other users
-                owner = context.getUserDAO().getUserPartial(model.userId);
+                owner = context.getUserDAO().getUserHeader(model.userId);
             } else {
-                owner = context.getUserDAO().getUserPartial(CurrentUser.getId()); // TODO: can this be avoided?
+                owner = context.getUserDAO().getUserHeader(CurrentUser.getId()); // TODO: can this be avoided?
             }
             Http.MultipartFormData body = request().body().asMultipartFormData();
             Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
@@ -463,7 +463,7 @@ public class Cars extends Controller {
 
         if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             // User is permitted to add cars for other users
-            car.setOwner(context.getUserDAO().getUserPartial(model.userId));
+            car.setOwner(context.getUserDAO().getUserHeader(model.userId));
         }
 
         dao.updateCar(car);

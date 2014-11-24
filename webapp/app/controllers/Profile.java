@@ -683,7 +683,7 @@ public class Profile extends Controller {
                 user.setStatus(status); // TODO: only partial update
                 udao.updateUser(user);
 
-                DataProvider.getUserProvider().invalidateUser(user); //wipe the status from ram
+                DataProvider.getUserProvider().invalidateUser(userId); //wipe the status from ram
 
                 flash("success", "De gebruikersstatus werd succesvol aangepast.");
             } else {
@@ -757,7 +757,7 @@ public class Profile extends Controller {
 
             flash("success", "Het profiel werd succesvol aangepast.");
 
-            DataProvider.getUserProvider().invalidateUser(user); //invalidate cache
+            DataProvider.getUserProvider().invalidateUser(userId); //invalidate cache
             return redirect(routes.Profile.index(userId));
         }
     }

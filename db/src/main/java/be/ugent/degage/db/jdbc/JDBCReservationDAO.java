@@ -9,19 +9,27 @@ import be.ugent.degage.db.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.ReservationStatus;
 
 import org.joda.time.DateTime;
+
+import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 
 /**
  *
  * @author Laurent
  */
 class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
+
+    public static final String RESERVATION_HEADER_FIELDS =
+            "reservation_id, reservation_car_id, reservation_user_id, reservation_from, reservation_to, " +
+                    "reservation_message, reservation_status, reservation_privileged ";
+
+
             // TODO: replace * by actual fields
     public static final String RESERVATION_QUERY = "SELECT * FROM carreservations " +
             "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
@@ -31,11 +39,25 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         super(context);
     }
 
+    public static ReservationHeader populateReservationHeader (ResultSet rs) throws SQLException {
+        ReservationHeader reservation = new ReservationHeader(
+                rs.getInt("reservation_id"),
+                rs.getInt("reservation_car_id"),
+                rs.getInt("reservation_user_id"),
+                new DateTime(rs.getTimestamp("reservation_from")),
+                new DateTime(rs.getTimestamp("reservation_to")),
+                rs.getString("reservation_message")
+        );
+        reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+        reservation.setPrivileged(rs.getBoolean ("reservation_privileged"));
+        return reservation;
+    }
+
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
         Reservation reservation = new Reservation(
                 rs.getInt("reservation_id"),
                 JDBCCarDAO.populateCar(rs, false),
-                JDBCUserDAO.populateUserPartial(rs),
+                JDBCUserDAO.populateUserHeader(rs),
                 new DateTime(rs.getTimestamp("reservation_from")),
                 new DateTime(rs.getTimestamp("reservation_to")),
                 rs.getString("reservation_message")
@@ -56,7 +78,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     @Override
-    public Reservation createReservation(DateTime from, DateTime to, int carId, int userId, String message) throws DataAccessException {
+    public ReservationHeader createReservation(DateTime from, DateTime to, int carId, int userId, String message) throws DataAccessException {
         try {
             // TODO: find a way to do this with a single SQL statement
             PreparedStatement ps = createReservationStatement.value();
@@ -81,10 +103,10 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             ps2.setInt(1, id);
             try (ResultSet rs = ps2.executeQuery()) {
                 rs.next();
-                Reservation reservation = new Reservation(id,
-                        null, null,
-                        from,
-                        to,
+                ReservationHeader reservation = new ReservationHeader (
+                        id,
+                        userId, carId,
+                        from, to,
                         message);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
                 reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
@@ -95,6 +117,22 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
+    private LazyStatement getUpdateReservationStatusStatement = new LazyStatement(
+            "UPDATE carreservations SET reservation_status =?  WHERE reservation_id = ?"
+    );
+
+    @Override
+    public void updateReservationStatus(int reservationId, ReservationStatus status) throws DataAccessException {
+        try {
+            PreparedStatement ps = getUpdateReservationStatusStatement.value();
+            ps.setString(1, status.toString());
+            ps.setInt(2, reservationId);
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to update reservation", e);
+        }
+    }
 
     private LazyStatement getUpdateReservationStatement = new LazyStatement (
             "UPDATE carreservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
@@ -146,20 +184,19 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
 
     private Reservation populateNextPrevious (ResultSet rs) throws SQLException {
-        Reservation reservation = new Reservation(
+        return new Reservation(
                 rs.getInt("r.reservation_id"),
                 null,
-                JDBCUserDAO.populateUserPartial(rs),
+                JDBCUserDAO.populateUserHeader(rs),
                 new DateTime(rs.getTimestamp("r.reservation_from")),
                 new DateTime(rs.getTimestamp("r.reservation_to")),
                 null
         );
-        return reservation;
     }
 
     private LazyStatement getNextReservationStatement = new LazyStatement(
             "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
-                    "user_id, user_email, user_firstname, user_lastname, user_status " +
+                    USER_HEADER_FIELDS +
             "FROM carreservations AS r JOIN carreservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
             "JOIN users ON r.reservation_user_id = user_id " +
@@ -189,7 +226,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private LazyStatement getPreviousReservationStatement = new LazyStatement(
             "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
-                    "user_id, user_email, user_firstname, user_lastname, user_status " +
+                    USER_HEADER_FIELDS +
             "FROM carreservations AS r JOIN carreservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
             "JOIN users ON r.reservation_user_id = user_id " +
@@ -356,38 +393,23 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getReservationListByCaridStatement = new LazyStatement (
-            "SELECT * FROM carreservations " +
-                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
-                    "INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
-                    "WHERE car_id=?"
+            "SELECT  " + RESERVATION_HEADER_FIELDS + "FROM carreservations WHERE car_id=?"
     );
 
     @Override
-    public Iterable<Reservation> getReservationListForCar(int carId) throws DataAccessException {
+    public Iterable<ReservationHeader> listReservationsForCar (int carId) throws DataAccessException {
         try {
             PreparedStatement ps = getReservationListByCaridStatement.value();
             ps.setInt(1, carId);
             try (ResultSet rs = ps.executeQuery()) {
-                Collection<Reservation> list = new ArrayList<>();
+                Collection<ReservationHeader> list = new ArrayList<>();
                 while (rs.next()) {
-                    list.add(populateReservation(rs));
+                    list.add(populateReservationHeader(rs));
                 }
                 return list;
             }
         } catch (Exception e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
-        }
-    }
-
-    private List<Reservation> getList(ResultSet rs) throws DataAccessException {
-        List<Reservation> list = new ArrayList<>();
-        try {
-            while (rs.next()) {
-                list.add(populateReservation(rs));
-            }
-            return list;
-        } catch (SQLException e){
-            throw new DataAccessException("Error while reading reservation resultset", e);
         }
     }
 

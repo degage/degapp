@@ -38,8 +38,8 @@ public class UserProvider {
     }
 
 
-    public void invalidateUser(User user) {
-        Cache.remove(String.format(USER_BY_ID, user.getId()));
+    public void invalidateUser(int userId) {
+        Cache.remove(String.format(USER_BY_ID, userId));
     }
 
     public User getUser(Integer userId) throws DataAccessException {

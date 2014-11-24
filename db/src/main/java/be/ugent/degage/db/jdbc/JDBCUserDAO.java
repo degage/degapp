@@ -16,11 +16,10 @@ import java.util.List;
  */
 class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
-    static final String SMALL_USER_FIELDS = "users.user_id, users.user_firstname, users.user_lastname, users.user_email, users.user_status";
+    static final String USER_HEADER_FIELDS =
+            "user_id, user_firstname, user_lastname, user_email, user_status, user_phone, user_cellphone ";
 
-    private static final String SMALL_USER_QUERY = "SELECT " + SMALL_USER_FIELDS + " FROM users";
-
-    private static final String USER_FIELDS = SMALL_USER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_gender, " +
+    private static final String USER_FIELDS = USER_HEADER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_gender, " +
             "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
             "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
             "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
@@ -57,10 +56,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public void deleteVerificationString(User user, VerificationType type) throws DataAccessException {
+    public void deleteVerificationString(int userId, VerificationType type) throws DataAccessException {
         try {
             PreparedStatement ps = deleteVerificationStatement.value();
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
             ps.setString(2, type.name());
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("Verification delete operation affected 0 rows.");
@@ -75,15 +74,15 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public String createVerificationString(User user, VerificationType type) throws DataAccessException {
+    public String createVerificationString(int userId, VerificationType type) throws DataAccessException {
         try {
             PreparedStatement ps = createVerificationStatement.value();
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
             ps.setString(2, type.name());
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("Verification string creation failed. Zero rows affected");
 
-            return getVerificationString(user, type); //TODO: this might throw an exception about 2 open connections?
+            return getVerificationString(userId, type);
 
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create verification string.", ex);
@@ -95,10 +94,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public String getVerificationString(User user, VerificationType type) throws DataAccessException {
+    public String getVerificationString(int userId, VerificationType type) throws DataAccessException {
         try {
             PreparedStatement ps = getVerificationStatement.value();
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
             ps.setString(2, type.name());
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next())
@@ -116,15 +115,39 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         return populateUser(rs, "users");
     }
 
-    public static User populateUserPartial(ResultSet rs) throws SQLException {
-        return populateUserPartial(rs, "users");
+    public static UserHeader populateUserHeader(ResultSet rs) throws SQLException {
+        return new UserHeader(
+                rs.getInt("user_id"),
+                rs.getString("user_email"),
+                rs.getString("user_firstname"),
+                rs.getString("user_lastname"),
+                UserStatus.valueOf(rs.getString("user_status")),
+                rs.getString ("user_phone"),
+                rs.getString ( "user_cellphone")
+        );
+    }
+
+    public static UserHeader populateUserHeader(ResultSet rs, String tableName) throws SQLException {
+        return new UserHeader(
+                rs.getInt(tableName+".user_id"),
+                rs.getString(tableName + ".user_email"),
+                rs.getString(tableName+".user_firstname"),
+                rs.getString(tableName+".user_lastname"),
+                UserStatus.valueOf(rs.getString(tableName + ".user_status")),
+                rs.getString(tableName + ".user_phone"),
+                rs.getString(tableName+".user_cellphone")
+        );
     }
 
     public static User populateUser(ResultSet rs, String tableName) throws SQLException {
-        User user = populateUserPartial(rs);
-        if (user == null) {
-            return null;
-        }
+        User user = new User(
+                rs.getInt("users.user_id"),
+                rs.getString("users.user_email"),
+                rs.getString("users.user_firstname"),
+                rs.getString("users.user_lastname"),
+                UserStatus.valueOf(rs.getString("users.user_status")
+                )
+        );
 
         user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
         user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
@@ -162,27 +185,12 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
 
-    public static User populateUserPartial(ResultSet rs, String tableName) throws SQLException {
-        if (rs.getObject(tableName + ".user_id") == null || rs.getInt(tableName + ".user_id") == 0) { //Fix for left join not returning nullable int
-            return null;
-        }
-
-        return new User(
-                rs.getInt(tableName + ".user_id"),
-                rs.getString(tableName + ".user_email"),
-                rs.getString(tableName + ".user_firstname"),
-                rs.getString(tableName + ".user_lastname"),
-                UserStatus.valueOf(rs.getString(tableName + ".user_status")
-                )
-        );
-    }
-
     private LazyStatement getUserByEmailStatement = new LazyStatement(
-            USER_QUERY + " WHERE users.user_email = ?"
+            "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_email = ?"
     );
 
     @Override
-    public User getUser(String email) {
+    public UserHeader getUserByEmail(String email) {
         if (email == null || email.isEmpty())
             return null;
 
@@ -191,7 +199,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next())
-                    return populateUser(rs);
+                    return populateUserHeader(rs);
                 else
                     return null;
             }
@@ -201,22 +209,19 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     private LazyStatement getUserByPasswordStatement = new LazyStatement(
-            "SELECT users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
-                    "users.user_password, users.user_status " +
-                    "FROM users WHERE users.user_email = ?"
+            "SELECT " + USER_HEADER_FIELDS + ", user_password FROM users WHERE user_email = ?"
     );
 
 
     @Override
-    public User getUserWithPassword(String email, String password) throws DataAccessException {
+    public UserHeader getUserWithPassword(String email, String password) throws DataAccessException {
         try {
             PreparedStatement ps = getUserByPasswordStatement.value();
             ps.setString(1, email);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    User result = populateUserPartial(rs);
-                    result.setStatus(UserStatus.valueOf(rs.getString("users.user_status")));
-                    if (BCrypt.checkpw(password, rs.getString("users.user_password"))) {
+                    UserHeader result = populateUserHeader(rs);
+                    if (BCrypt.checkpw(password, rs.getString("user_password"))) {
                         return result;
                     } else {
                         return null;
@@ -296,17 +301,17 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     private LazyStatement smallGetUserByIdStatement = new LazyStatement(
-            SMALL_USER_QUERY + " WHERE user_id = ?"
+            "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_id = ?"
     );
 
     @Override
-    public User getUserPartial(int userId) throws DataAccessException {
+    public UserHeader getUserHeader(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = smallGetUserByIdStatement.value();
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return populateUserPartial(rs);
+                    return populateUserHeader(rs);
                 } else
                     return null;
             }
@@ -323,7 +328,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public User createUser(String email, String password, String firstName, String lastName, UserStatus status) throws DataAccessException {
+    public UserHeader createUser(String email, String password, String firstName, String lastName,
+                                 UserStatus status, String phone, String cellPhone) throws DataAccessException {
         try {
             PreparedStatement ps = createUserStatement.value();
             ps.setString(1, email);
@@ -332,17 +338,32 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.setString(4, lastName);
             ps.setString(5, status.name());
 
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when creating user.");
+            ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new User(keys.getInt(1), email, firstName, lastName, status);
+                return new UserHeader(keys.getInt(1), email, firstName, lastName, status, phone, cellPhone);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to commit new user transaction.", ex);
         }
     }
 
+
+
+    private LazyStatement updateUserStatusStatement = new LazyStatement(
+            "UPDATE users SET user_status=? WHERE user_id = ?"
+    );
+
+    public void updateUserStatus(int userId, UserStatus status) throws DataAccessException {
+        try {
+            PreparedStatement ps = updateUserStatusStatement.value();
+            ps.setString(1, status.name());
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user status", ex);
+        }
+    }
     private LazyStatement updateUserStatement = new LazyStatement(
             "UPDATE users SET user_email=?, user_firstname=?, user_lastname=?, user_status=?, " +
                     "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, " +

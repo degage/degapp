@@ -14,19 +14,19 @@ public class ReservationAutoAcceptJob implements ScheduledJob.Executor {
     @Override
     public void execute(DataAccessContext context, Job job) {
         ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservation(job.getRefId());
+        Integer reservationId = job.getRefId();
+        Reservation reservation = dao.getReservation(reservationId);
         if (reservation == null) {
             return;
         }
 
         if (reservation.getStatus() == ReservationStatus.REQUEST) {
             if (reservation.getFrom().isBeforeNow()) {
-                reservation.setStatus(ReservationStatus.ACCEPTED);
+                dao.updateReservationStatus(reservationId, ReservationStatus.ACCEPTED);
                 Notifier.sendReservationApprovedByOwnerMail("Automatisch goedgekeurd door systeem.", reservation);
             } else {
-                reservation.setStatus(ReservationStatus.CANCELLED);
+                dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
             }
-            dao.updateReservation(reservation);
         }
 
     }

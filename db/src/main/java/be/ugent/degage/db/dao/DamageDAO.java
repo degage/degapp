@@ -2,12 +2,9 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Damage;
 import be.ugent.degage.db.models.Reservation;
 import org.joda.time.DateTime;
-
-import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 02/05/14.

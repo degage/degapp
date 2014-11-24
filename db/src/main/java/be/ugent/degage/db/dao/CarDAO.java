@@ -11,13 +11,12 @@ import be.ugent.degage.db.models.*;
 
 /**
  *
- * @author Laurent
  */
 public interface CarDAO {
 
     public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, User owner, String comments, boolean active, File photo) throws DataAccessException;
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, File photo) throws DataAccessException;
     public void updateCar(Car car) throws DataAccessException;
     public Car getCar(int id) throws DataAccessException;
 

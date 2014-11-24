@@ -1,6 +1,7 @@
 package db;
 
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.models.UserStatus;
 import play.mvc.Controller;
@@ -23,7 +24,7 @@ public class CurrentUser {
      * Register the given user as the current user. (As part of logging in or switching to another user.)
      * @param user partially filled in user object
      */
-    public static void set (User user, Set<UserRole> roleSet) {
+    public static void set (UserHeader user, Set<UserRole> roleSet) {
         Controller.session("id", Integer.toString(user.getId()));
         Controller.session("email", user.getEmail());
         Controller.session("fullName", user.getFullName());

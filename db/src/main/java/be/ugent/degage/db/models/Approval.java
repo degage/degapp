@@ -14,8 +14,8 @@ public class Approval {
     }
 
     private int id;
-    private User user;
-    private User admin;
+    private UserHeader user;
+    private UserHeader admin;
     private DateTime submitted;
     private DateTime reviewed;
     private InfoSession session;
@@ -23,7 +23,7 @@ public class Approval {
     private String userMessage;
     private String adminMessage;
 
-    public Approval(int id, User user, User admin, DateTime submitted, DateTime reviewed, InfoSession session, ApprovalStatus status, String userMessage, String adminMessage) {
+    public Approval(int id, UserHeader user, UserHeader admin, DateTime submitted, DateTime reviewed, InfoSession session, ApprovalStatus status, String userMessage, String adminMessage) {
         this.id = id;
         this.user = user;
         this.admin = admin;
@@ -56,19 +56,19 @@ public class Approval {
     }
 
 
-    public User getUser() {
+    public UserHeader getUser() {
         return user;
     }
 
-    public void setUser(User user) {
+    public void setUser(UserHeader user) {
         this.user = user;
     }
 
-    public User getAdmin() {
+    public UserHeader getAdmin() {
         return admin;
     }
 
-    public void setAdmin(User admin) {
+    public void setAdmin(UserHeader admin) {
         this.admin = admin;
     }
 

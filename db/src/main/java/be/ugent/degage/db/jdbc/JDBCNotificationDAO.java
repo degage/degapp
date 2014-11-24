@@ -3,7 +3,7 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.*;
 import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.Notification;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import org.joda.time.DateTime;
 
 import java.sql.*;
@@ -134,7 +134,7 @@ class JDBCNotificationDAO extends AbstractDAO implements NotificationDAO {
     }
 
     @Override
-    public Notification createNotification(User user, String subject, String body) throws DataAccessException {
+    public Notification createNotification(UserHeader user, String subject, String body) throws DataAccessException {
         try {
             PreparedStatement ps = createNotificationStatement.value();
             ps.setInt(1, user.getId());
@@ -189,7 +189,7 @@ class JDBCNotificationDAO extends AbstractDAO implements NotificationDAO {
             while (rs.next()) {
                 list.add(new Notification(
                         rs.getInt("notification_id"),
-                        JDBCUserDAO.populateUserPartial(rs),
+                        JDBCUserDAO.populateUserHeader(rs),
                         rs.getBoolean("notification_read"),
                         rs.getString("notification_subject"),
                         rs.getString("notification_body"),

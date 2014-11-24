@@ -1,4 +1,4 @@
-@(user: User, reasons: List[String] = null, form: Form[InfoSessions.RequestApprovalModel], terms: String = "", userWentToInfoSession: Boolean = false)
+@(reasons: Iterable[String], form: Form[InfoSessions.RequestApprovalModel], terms: String, userWentToInfoSession: Boolean)
 
 @app("Goedkeuringsaanvraag") {
     <div id="page-header-wrapper">
@@ -9,64 +9,63 @@
         </ol>
     </div>
 
-    @defining(reasons != null && !reasons.isEmpty) { hasErrors =>
-        <div id="page-wrapper">
-            @flashes()
-            @if(hasErrors) {
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
+    <div id="page-wrapper">
+        @flashes()
+        @if(reasons.iterator.hasNext) {
+            <div class="panel panel-danger">
+                <div class="panel-heading">
+                    <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
+                </div>
+                <div class="panel-body">
+                    <p>De volgende informatie is nog niet aangevuld op je profiel:</p>
+                    <ul>
+                    @foreach(reasons){ reason =>
+                        <li>@reason</li>
+                    }
+                    </ul>
+                    <a class="btn btn-default" href="@routes.Profile.edit(db.CurrentUser.getId)">Profiel aanvullen</a>
+                </div>
+            </div>
+        }
+
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Aanvraag indienen</h3>
+            </div>
+            <div class="panel-body">
+            @helper.form(routes.InfoSessions.requestApprovalPost, 'class -> "form-horizontal") {
+                @if(form.hasGlobalErrors) {
+                    <div class="alert alert-danger alert-dismissable">
+                        <strong>Error!</strong> @form.globalError.message
                     </div>
-                    <div class="panel-body">
-                        <p>De volgende informatie is nog niet aangevuld op je profiel:</p>
-                        <ul>
-                        @for(reason <- reasons) {
-                            <li>@reason</li>
-                        }
-                        </ul>
-                        <a class="btn btn-default" href="@routes.Profile.edit(user.getId)">Profiel aanvullen</a>
+                }
+
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <div class="col-md-12 well" style="overflow: auto; max-height:400px;">
+                         @Html(terms)    @*TODO: dangerous? *@
+                        </div>
+                        <input type="checkbox" id='@form("acceptsTerms").id' name=''@form("acceptsTerms").name' value="true" @if("true".equals(form("acceptsTerms").value)) { checked="checked" }> Ik aanvaard de algemene voorwaarden
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <div class="col-md-12">
+                        <textarea name='@form("message").name' rows="4" cols="50" placeholder="Opmerkingen">@form("message").value</textarea>
+                    </div>
+                </div>
+
+
+                <div class="form-group">
+                    <label class="col-md-1 control-label" for="create"></label>
+                    <div class="col-md-12">
+                        <button type="submit" id="create" name="create" class="btn btn-block btn-success">
+                            Aanvraag indienen</button>
                     </div>
                 </div>
             }
-
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title">Aanvraag indienen</h3>
-                </div>
-                <div class="panel-body">
-                @helper.form(routes.InfoSessions.requestApprovalPost, 'class -> "form-horizontal") {
-                    @if(form.hasGlobalErrors) {
-                        <div class="alert alert-danger alert-dismissable">
-                            <strong>Error!</strong> @form.globalError.message
-                        </div>
-                    }
-
-
-                            <div class="form-group">
-                                <div class="col-md-12">
-                                    <div class="col-md-12 well" style="overflow: auto; max-height:400px;">
-                                     @Html(terms)
-                                    </div>
-                                    <input type="checkbox" id="@form("acceptsTerms").id" name="@form("acceptsTerms").name" value="true" @if("true".equals(form("acceptsTerms").value)) { checked="checked" }> Ik aanvaard de algemene voorwaarden
-                                </div>
-                            </div>
-
-                    <div class="form-group">
-                        <div class="col-md-12">
-                            <textarea name="@form("message").name" rows="4" cols="50" placeholder="Opmerkingen">@form("message").value</textarea>
-                        </div>
-                    </div>
-
-
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="create"></label>
-                        <div class="col-md-12">
-                            <button type="submit" id="create" name="create" class="btn btn-block btn-success">
-                                Aanvraag indienen</button>
-                        </div>
-                    </div>
-                }
             </div>
         </div>
-    }
+    </div>
 }

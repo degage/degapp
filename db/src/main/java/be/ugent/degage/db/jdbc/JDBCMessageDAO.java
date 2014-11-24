@@ -9,6 +9,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
+
 /**
  * Created by Stefaan Vermassen on 22/03/14.
  */
@@ -22,7 +24,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
         return new Message(
                 rs.getInt("message_id"),
                 rs.getBoolean("message_read"),
-                JDBCUserDAO.populateUserPartial(rs),
+                JDBCUserDAO.populateUserHeader(rs),
                 rs.getString("message_subject"),
                 rs.getString("message_body"),
                 new DateTime(rs.getTimestamp("message_created_at")
@@ -65,7 +67,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
     private LazyStatement listMessagesFromStatement = new LazyStatement (
             "SELECT message_id, message_from_user_id, message_to_user_id, " +
                     "message_read, message_subject, message_body, message_created_at, " +
-                    "users.user_id, users.user_email, users.user_firstname, users.user_lastname, users.user_status " +
+                    USER_HEADER_FIELDS +
             "FROM messages JOIN users ON user_id = message_to_user_id "  +
             "WHERE message_from_user_id = ? " +
             "ORDER BY message_created_at DESC LIMIT ?,?"
@@ -90,7 +92,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
     private LazyStatement listMessagesToStatement = new LazyStatement (
             "SELECT message_id, message_from_user_id, message_to_user_id, " +
                     "message_read, message_subject, message_body, message_created_at, " +
-                    "users.user_id, users.user_email, users.user_firstname, users.user_lastname, users.user_status " +
+                    USER_HEADER_FIELDS +
             "FROM messages JOIN users ON user_id = message_from_user_id "  +
             "WHERE message_to_user_id = ? " +
             "ORDER BY message_created_at DESC LIMIT ?,?"
@@ -117,7 +119,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
     private LazyStatement listUnreadMessagesToStatement = new LazyStatement (
             "SELECT message_id, message_from_user_id, message_to_user_id, " +
                     "message_read, message_subject, message_body, message_created_at, " +
-                    "users.user_id, users.user_email, users.user_firstname, users.user_lastname, users.user_status " +
+                    USER_HEADER_FIELDS +
             "FROM messages JOIN users ON user_id = message_from_user_id "  +
             "WHERE message_to_user_id = ? AND NOT message_read " +
             "ORDER BY message_created_at DESC LIMIT ?"
@@ -213,8 +215,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
     }
 
     private LazyStatement getReplyHeaderStatement = new LazyStatement(
-            "SELECT message_subject,  " +
-                    "users.user_id, users.user_email, users.user_firstname, users.user_lastname, users.user_status " +
+            "SELECT message_subject, " + USER_HEADER_FIELDS +
             "FROM messages JOIN users ON user_id = message_from_user_id "  +
             "WHERE message_id = ? "
     );
@@ -229,7 +230,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
                 return new Message(
                         messageId,
                         false,
-                        JDBCUserDAO.populateUserPartial(rs),
+                        JDBCUserDAO.populateUserHeader(rs),
                         rs.getString("message_subject"),
                         null,
                         null

@@ -8,6 +8,7 @@ import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import org.apache.poi.ss.usermodel.*;
@@ -99,9 +100,8 @@ public class Reports extends Controller {
     @InjectContext
     public static Result getReservationsForOwner() {
         // TODO: factor out code in common with getReservations
-        User user = DataProvider.getUserProvider().getUser();
         Filter filter = Pagination.parseFilter("");
-        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
+        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, Integer.toString(CurrentUser.getId()));
         File file = new File("reservations.xlsx");
         DataAccessContext context = DataAccess.getContext();
         ReservationDAO reservationDAO = context.getReservationDAO();
@@ -122,14 +122,15 @@ public class Reports extends Controller {
                 i ++;
                 row = s.createRow(i);
                 int j = 0;
+                UserHeader user = reservation.getUser();
                 row.createCell(j++).setCellValue(reservation.getId());
                 row.createCell(j++).setCellValue(reservation.getCar().getName());
-                row.createCell(j++).setCellValue(reservation.getUser().getId());
-                row.createCell(j++).setCellValue(reservation.getUser().getFirstName());
-                row.createCell(j++).setCellValue(reservation.getUser().getLastName());
-                row.createCell(j++).setCellValue(reservation.getUser().getEmail());
-                row.createCell(j++).setCellValue(reservation.getUser().getPhone());
-                row.createCell(j++).setCellValue(reservation.getUser().getCellphone());
+                row.createCell(j++).setCellValue(user.getId());
+                row.createCell(j++).setCellValue(user.getFirstName());
+                row.createCell(j++).setCellValue(user.getLastName());
+                row.createCell(j++).setCellValue(user.getEmail());
+                row.createCell(j++).setCellValue(user.getPhone());
+                row.createCell(j++).setCellValue(user.getCellPhone());
                 Cell cell;
                 CellStyle cellStyle = wb.createCellStyle();
                 cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));
@@ -185,14 +186,16 @@ public class Reports extends Controller {
                 row = s.createRow(i);
                 int j = 0;
                 row.createCell(j++).setCellValue(reservation.getId());
-                row.createCell(j++).setCellValue(reservation.getCar().getId());
-                row.createCell(j++).setCellValue(reservation.getCar().getName());
-                row.createCell(j++).setCellValue(reservation.getUser().getId());
-                row.createCell(j++).setCellValue(reservation.getUser().getFirstName());
-                row.createCell(j++).setCellValue(reservation.getUser().getLastName());
-                row.createCell(j++).setCellValue(reservation.getUser().getEmail());
-                row.createCell(j++).setCellValue(reservation.getUser().getPhone());
-                row.createCell(j++).setCellValue(reservation.getUser().getCellphone());
+                Car car = reservation.getCar();
+                UserHeader user = reservation.getUser();
+                row.createCell(j++).setCellValue(car.getId());
+                row.createCell(j++).setCellValue(car.getName());
+                row.createCell(j++).setCellValue(user.getId());
+                row.createCell(j++).setCellValue(user.getFirstName());
+                row.createCell(j++).setCellValue(user.getLastName());
+                row.createCell(j++).setCellValue(user.getEmail());
+                row.createCell(j++).setCellValue(user.getPhone());
+                row.createCell(j++).setCellValue(user.getCellPhone());
                 Cell cell;
                 CellStyle cellStyle = wb.createCellStyle();
                 cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));

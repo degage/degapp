@@ -231,11 +231,11 @@ public class Drives extends Controller {
         if (reservation.getStatus() == ReservationStatus.ACCEPTED)      {
             Reservation nextReservation = rdao.getNextReservation(reservationId);
             if (nextReservation != null) {
-                nextLoaner = nextReservation.getUser();
+                nextLoaner = udao.getUser(nextReservation.getUser().getId()); // TODO: only phones needed
             }
             Reservation previousReservation = rdao.getPreviousReservation(reservationId);
             if (previousReservation != null) {
-                previousLoaner = previousReservation.getUser();
+                previousLoaner = udao.getUser(previousReservation.getUser().getId()); // TODO: only phones needed
             }
         }
 
@@ -398,12 +398,11 @@ public class Drives extends Controller {
                     }
             }
         }
-        reservation.setStatus(status);
-        dao.updateReservation(reservation);
+        dao.updateReservationStatus(reservationId, status);
 
         // Unschedule the job for auto accept
         JobDAO jdao = context.getJobDAO();
-        jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId());
+        jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId);
 
         return reservation;
     }
@@ -473,13 +472,12 @@ public class Drives extends Controller {
         }
         // Adjust the status of the reservation
         if (isOwner) { // TODO: bug? isOwner is always true at this point
-            reservation.setStatus(ReservationStatus.FINISHED);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
         } else {
-            reservation.setStatus(ReservationStatus.DETAILS_PROVIDED);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED);
             Notifier.sendReservationDetailsProvidedMail(carDAO.getCar(reservation.getCar().getId()).getOwner(), reservation);
         }
 
-        rdao.updateReservation(reservation);
         // Commit changes
         return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
     }
@@ -516,8 +514,7 @@ public class Drives extends Controller {
         );
         ride.setCost(cost);
         dao.updateCarRide(ride);
-        reservation.setStatus(ReservationStatus.FINISHED);
-        rdao.updateReservation(reservation);
+        rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
         return ok(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
     }
 

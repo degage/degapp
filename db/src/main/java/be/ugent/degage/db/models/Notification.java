@@ -8,13 +8,13 @@ import org.joda.time.DateTime;
 public class Notification {
 
     private int id;
-    private User user;
+    private UserHeader user;
     private boolean read;
     private String subject;
     private String body;
     private DateTime timestamp;
 
-    public Notification(int id, User user, boolean read, String subject, String body, DateTime timestamp){
+    public Notification(int id, UserHeader user, boolean read, String subject, String body, DateTime timestamp){
         this.id = id;
         this.user = user;
         this.read = read;
@@ -27,7 +27,7 @@ public class Notification {
         return id;
     }
 
-    public User getUser() {
+    public UserHeader getUser() {
         return user;
     }
 

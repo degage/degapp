@@ -5,7 +5,7 @@
 @scripts = {
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
-    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+    <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
 
 @* Source: https://github.com/smalot/bootstrap-datetimepicker, released under Apache v2 license *@
     <script>
@@ -91,7 +91,7 @@
                                                     <label class="col-md-12" for="host">Host</label>
                                                     @if(form("userId").value){
                                                          <!-- TODO: move this to controller -->
-                                                         @defining(db.DataAccess.getInjectedContext.getUserDAO.getUserPartial(form("userId").value.toInt)) { user =>
+                                                         @defining(db.DataAccess.getInjectedContext.getUserDAO.getUserHeader(form("userId").value.toInt)) { user =>
                                                             <div class="userpicker col-md-12" data-url="@routes.UserPicker.getList()">
                                                                 <input type="text" data-toggle="dropdown" class="form-control input-md" value="@user.getFullName" />
                                                                 <input type="hidden" name="userId" value="@user.getId" />

@@ -208,7 +208,8 @@ public class Reserve extends Controller {
             DateTime from = formData.getTimeFrom();
             DateTime until = formData.getTimeUntil();
             ReservationDAO rdao = context.getReservationDAO();
-            for (Reservation reservation : rdao.getReservationListForCar(carId)) {
+            // TODO: create 'checkOverlap'
+            for (ReservationHeader reservation : rdao.listReservationsForCar(carId)) {
                 if ((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
                         (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
                     return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1, "", ""));
@@ -216,7 +217,7 @@ public class Reserve extends Controller {
             }
 
             // Create the reservationCars
-            Reservation reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), formData.message);
+            ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), formData.message);
             if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
                 // Schedule the auto accept
                 int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
@@ -225,9 +226,10 @@ public class Reserve extends Controller {
                 context.getJobDAO().createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
 
                 // note: user contained in this record was null
-                reservation.setUser(DataProvider.getUserProvider().getUser());
+                // TODO: avoid having to retrieve the whole record
+                Reservation res = rdao.getReservation(reservation.getId());
                 Notifier.sendReservationApproveRequestMail(
-                        car.getOwner(), reservation
+                        car.getOwner(), res
                 );
             }
             return redirect(routes.Drives.index());

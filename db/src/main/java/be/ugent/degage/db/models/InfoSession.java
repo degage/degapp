@@ -16,12 +16,12 @@ public class InfoSession {
     private String typeAlternative;
     private DateTime time;
     private Address address;
-    private User host;
+    private UserHeader host;
     private int maxEnrollees;
     private int enrolleeCount;
     private String comments;
 
-    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, User host, int maxEnrollees, String comments) {
+    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, UserHeader host, int maxEnrollees, String comments) {
         this.id = id;
         this.type = type;
         this.time = time;
@@ -71,11 +71,11 @@ public class InfoSession {
         this.address = address;
     }
 
-    public User getHost() {
+    public UserHeader getHost() {
         return host;
     }
 
-    public void setHost(User host) {
+    public void setHost(UserHeader host) {
         this.host = host;
     }
 

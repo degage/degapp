@@ -5,6 +5,7 @@ import be.ugent.degage.db.dao.MessageDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -107,7 +108,7 @@ public class Messages extends Controller {
     @InjectContext
     public static Result reply(int messageId) {
         Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
-        User initialReceiver = message.getUser();
+        UserHeader initialReceiver = message.getUser();
         MessageCreationModel model = new MessageCreationModel();
         model.userId = initialReceiver.getId();
         model.subject = message.getSubject();
@@ -137,7 +138,7 @@ public class Messages extends Controller {
             if (userIdString != null && ! userIdString.isEmpty()) {
                 int userId = Integer.parseInt(userIdString);
                 if (userId != 0) {
-                    User initialReceiver = DataAccess.getInjectedContext().getUserDAO().getUserPartial(Integer.parseInt(userIdString));
+                    UserHeader initialReceiver = DataAccess.getInjectedContext().getUserDAO().getUserHeader(Integer.parseInt(userIdString));
                     return ok(addmessage.render(createForm, initialReceiver));
                 }
             }

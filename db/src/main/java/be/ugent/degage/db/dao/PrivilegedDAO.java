@@ -1,7 +1,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 
 /**
  * Handles privileged status for cars
@@ -11,7 +11,7 @@ public interface PrivilegedDAO {
     /**
      * List all users with privileges for a certain car
      */
-    public Iterable<User> getPrivileged(int carId) throws DataAccessException;
+    public Iterable<UserHeader> getPrivileged(int carId) throws DataAccessException;
 
     /**
      * Add new privileged users for the given car

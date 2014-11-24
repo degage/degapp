@@ -323,7 +323,7 @@ public class JDBCDAOTest {
 
     private void getUserByIdPartialTest(boolean withRest) {
         for(User user : users) {
-            User returnUser = userDAO.getUserPartial(user.getId());
+            User returnUser = userDAO.getUserHeader(user.getId());
 
             Assert.assertEquals(returnUser, user);
         }

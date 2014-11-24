@@ -3,6 +3,7 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserStatus;
 import be.ugent.degage.db.models.VerificationType;
 import db.CurrentUser;
@@ -102,15 +103,16 @@ public class Login extends Controller {
         //TODO: prevent people from spamming this URL as this might DDOS the mailserver (CRSF token and POST instead of GET)
 
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(email);
+        UserHeader user = dao.getUserByEmail(email);
         if (user == null) {
             return badRequest("Deze gebruiker bestaat niet."); //TODO: flash
         } else {
             if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
-                dao.deleteVerificationString(user, VerificationType.REGISTRATION);
-                String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
+                int userId = user.getId();
+                dao.deleteVerificationString(userId, VerificationType.REGISTRATION);
+                String verificationIdent = dao.createVerificationString(userId, VerificationType.REGISTRATION);
                 Notifier.sendVerificationMail(user, verificationIdent);
-                return ok(registrationok.render(user.getId(), verificationIdent, true));
+                return ok(registrationok.render(userId, verificationIdent, true));
             } else {
                 return badRequest("Deze gebruiker is reeds geactiveerd.");
             }
@@ -140,17 +142,18 @@ public class Login extends Controller {
             return badRequest(singlemailform.render(resetForm));
         } else {
             UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-            User user = dao.getUser(resetForm.get().email);
+            UserHeader user = dao.getUserByEmail(resetForm.get().email);
             if (user == null) {
                 resetForm.reject("Gebruiker met dit adres bestaat niet.");
                 return badRequest(singlemailform.render(resetForm));
             } else {
                 //TODO: this check should be implicit?
-                if (dao.getVerificationString(user, VerificationType.PWRESET) != null) {
-                    dao.deleteVerificationString(user, VerificationType.PWRESET);
+                int userId = user.getId();
+                if (dao.getVerificationString(userId, VerificationType.PWRESET) != null) {
+                    dao.deleteVerificationString(userId, VerificationType.PWRESET);
                 }
 
-                String newUuid = dao.createVerificationString(user, VerificationType.PWRESET);
+                String newUuid = dao.createVerificationString(userId, VerificationType.PWRESET);
                 Notifier.sendPasswordResetMail(user, newUuid);
                 return ok(pwresetrequestok.render(user.getId(), newUuid, user.getEmail()));
             }
@@ -163,23 +166,18 @@ public class Login extends Controller {
      *
      * @param userId The userId of the user who requested the reset
      * @param uuid   The unique reset code the user received to reset the password
-     * @return A status page whether reset was successfull or not
+     * @return A status page whether reset was successful or not
      */
     @InjectContext
     public static Result resetPassword(int userId, String uuid) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUserPartial(userId);
-        if (user == null) {
-            return badRequest("Deze user bestaat niet."); //TODO: flash
-        } else {
-            String ident = dao.getVerificationString(user, VerificationType.PWRESET);
-            if (ident == null) {
-                return badRequest("There was no password reset requested on this account.");
-            } else {
-                // Render the password reset page
 
-                return ok(pwreset.render(Form.form(PasswordResetModel.class), userId, uuid));
-            }
+        String ident = dao.getVerificationString(userId, VerificationType.PWRESET);
+        if (ident == null) {
+            return badRequest("There was no password reset requested on this account.");
+        } else {
+            // Render the password reset page
+            return ok(pwreset.render(Form.form(PasswordResetModel.class), userId, uuid));
         }
     }
 
@@ -199,25 +197,22 @@ public class Login extends Controller {
         } else {
             UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
             User user = dao.getUser(userId);
-            if (user == null) {
-                return badRequest("Deze user bestaat niet."); //TODO: flash
+
+            String ident = dao.getVerificationString(userId, VerificationType.PWRESET);
+            if (ident == null) {
+                return badRequest("There was no password reset requested on this account.");
+            } else if (ident.equals(uuid)) {
+                dao.deleteVerificationString(userId, VerificationType.PWRESET);
+                dao.updatePassword(userId, resetForm.get().password);
+
+                DataProvider.getUserProvider().invalidateUser(userId);
+                flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
+                LoginModel model = new LoginModel();
+                model.email = user.getEmail();
+
+                return ok(login.render(Form.form(LoginModel.class).fill(model), null));
             } else {
-                String ident = dao.getVerificationString(user, VerificationType.PWRESET);
-                if (ident == null) {
-                    return badRequest("There was no password reset requested on this account.");
-                } else if (ident.equals(uuid)) {
-                    dao.deleteVerificationString(user, VerificationType.PWRESET);
-                    dao.updatePassword(user.getId(), resetForm.get().password);
-
-                    DataProvider.getUserProvider().invalidateUser(user);
-                    flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
-                    LoginModel model = new LoginModel();
-                    model.email = user.getEmail();
-
-                    return ok(login.render(Form.form(LoginModel.class).fill(model), null));
-                } else {
-                    return badRequest("De verificatiecode komt niet overeen met onze gegevens.");
-                }
+                return badRequest("De verificatiecode komt niet overeen met onze gegevens.");
             }
         }
     }
@@ -236,7 +231,7 @@ public class Login extends Controller {
             return badRequest(login.render(loginForm, redirect));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
-            User user = context.getUserDAO().getUserWithPassword(loginForm.get().email, loginForm.get().password);
+            UserHeader user = context.getUserDAO().getUserWithPassword(loginForm.get().email, loginForm.get().password);
 
             if (user != null) {
                 if (user.getStatus() == UserStatus.EMAIL_VALIDATING) {
@@ -294,22 +289,21 @@ public class Login extends Controller {
     public static Result register_verification(int userId, String uuid) {
 
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-        User user = dao.getUser(userId);
+        UserHeader user = dao.getUserHeader(userId);
         if (user == null) {
             return badRequest("Deze user bestaat niet."); //TODO: flash
         } else if (user.getStatus() != UserStatus.EMAIL_VALIDATING) {
             flash("warning", "Deze gebruiker is reeds gevalideerd.");
             return badRequest(login.render(Form.form(LoginModel.class), null)); //We don't include a preset email address here since we could leak ID -> email to public
         } else {
-            String ident = dao.getVerificationString(user, VerificationType.REGISTRATION);
+            String ident = dao.getVerificationString(userId, VerificationType.REGISTRATION);
             if (ident == null) {
                 return badRequest("Oops something went wrong. Missing identifier in database?!!!!! Anyway, contact an administrator.");
             } else if (ident.equals(uuid)) {
-                dao.deleteVerificationString(user, VerificationType.REGISTRATION);
-                user.setStatus(UserStatus.REGISTERED);
+                dao.deleteVerificationString(userId, VerificationType.REGISTRATION);
 
-                dao.updateUser(user);
-                DataProvider.getUserProvider().invalidateUser(user);
+                dao.updateUserStatus(userId, UserStatus.REGISTERED);
+                DataProvider.getUserProvider().invalidateUser(userId);
 
                 flash("success", "Je email werd succesvol geverifieerd. Gelieve aan te melden.");
                 LoginModel model = new LoginModel();
@@ -335,17 +329,17 @@ public class Login extends Controller {
             return badRequest(register.render(registerForm));
         } else {
             CurrentUser.clear();
-            User otherUser = DataAccess.getInjectedContext().getUserDAO().getUser(registerForm.get().email);
-            if (otherUser != null) {
+            UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
+            if (dao.getUserByEmail(registerForm.get().email) != null) {
                 registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
                 return badRequest(register.render(registerForm));
             } else {
-                UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-                User user = dao.createUser(registerForm.get().email, registerForm.get().password,
-                        registerForm.get().firstName, registerForm.get().lastName, UserStatus.EMAIL_VALIDATING);
+                UserHeader user = dao.createUser(registerForm.get().email, registerForm.get().password,
+                        registerForm.get().firstName, registerForm.get().lastName, UserStatus.EMAIL_VALIDATING,
+                        null, null);
 
                 // Now we create a registration UUID
-                String verificationIdent = dao.createVerificationString(user, VerificationType.REGISTRATION);
+                String verificationIdent = dao.createVerificationString(user.getId(), VerificationType.REGISTRATION);
                 Notifier.sendVerificationMail(user, verificationIdent);
 
                 return ok(registrationok.render(user.getId(), verificationIdent, true));
@@ -361,10 +355,7 @@ public class Login extends Controller {
      * @return Redirect to index page
      */
     public static Result logout() {
-        User user = DataProvider.getUserProvider().getUser();
-        if (user != null) {
-            DataProvider.getUserProvider().invalidateUser(user);
-        }
+        DataProvider.getUserProvider().invalidateUser(CurrentUser.getId());
         CurrentUser.clear();
         return redirect(routes.Application.index());
     }

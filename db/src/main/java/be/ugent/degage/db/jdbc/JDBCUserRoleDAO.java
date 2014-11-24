@@ -5,7 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.UserRoleDAO;
@@ -39,20 +39,20 @@ class JDBCUserRoleDAO extends AbstractDAO implements UserRoleDAO {
     }
 
     private LazyStatement getUsersByRoleStatement = new LazyStatement(
-            "SELECT " + JDBCUserDAO.SMALL_USER_FIELDS + " FROM userroles " +
+            "SELECT " + JDBCUserDAO.USER_HEADER_FIELDS + " FROM userroles " +
                     "JOIN users ON userrole_userid = user_id " +
                     "WHERE userrole_role = ? OR userrole_role = 'SUPER_USER'"
     );
 
     @Override
-    public Iterable<User> getUsersByRole(UserRole userRole) throws DataAccessException {
+    public Iterable<UserHeader> getUsersByRole(UserRole userRole) throws DataAccessException {
         try {
             PreparedStatement ps = getUsersByRoleStatement.value();
             ps.setString(1, userRole.name());
             try (ResultSet rs = ps.executeQuery()) {
-                Collection<User> userList = new ArrayList<>();
+                Collection<UserHeader> userList = new ArrayList<>();
                 while (rs.next()) {
-                    userList.add(JDBCUserDAO.populateUserPartial(rs, "users"));
+                    userList.add(JDBCUserDAO.populateUserHeader(rs));
                 }
                 return userList;
             }

@@ -11,6 +11,8 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
+
 /**
  * JDBC implementation of {@link be.ugent.degage.db.dao.InfoSessionDAO}
  */
@@ -18,7 +20,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_FIELDS = "ses.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_firstname, user_lastname, user_phone, user_email, user_status";
+            USER_HEADER_FIELDS ;
 
     private static String SUBTTOTAL_QUERY =
                 "LEFT JOIN (SELECT COUNT(*) AS total, infosession_id " +
@@ -32,7 +34,8 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     private static String INFOSESSION_QUERY = "SELECT sub.total, ses.infosession_id AS infosession_id, ses.infosession_type AS infosession_type, ses.infosession_type_alternative infosession_type_alternative, " +
             "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees, ses.infosession_comments infosession_comments, " +
             "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-            "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessions AS ses " +
+            USER_HEADER_FIELDS +
+            "FROM infosessions AS ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id " + SUBTTOTAL_QUERY;
 
@@ -63,7 +66,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     public static InfoSession populateInfoSession(ResultSet rs)  throws SQLException {
         InfoSession result = populateInfoSessionPartial(rs);
         result.setAddress(JDBCAddressDAO.populateAddress(rs));
-        result.setHost(JDBCUserDAO.populateUserPartial(rs));
+        result.setHost(JDBCUserDAO.populateUserHeader(rs));
         result.setEnrolleeCount(rs.getInt("sub.total"));
         return result;
     }
@@ -98,7 +101,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     );
 
     @Override
-    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException {
+    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException {
         if (host.getId() == 0 || address.getId() == 0)
             throw new DataAccessException("Tried to create infosession without user or address");
 
@@ -223,8 +226,8 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             "SELECT infosession_id, infosession_type, infosession_type_alternative, " +
                     "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status, " +
-                    "enrollee_count " +
+                    USER_HEADER_FIELDS +
+                    ", enrollee_count " +
                     "FROM infosessions_extended ";
 
     private static String GET_INFO_SESSIONS_ALL =
@@ -245,14 +248,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 rs.getString("address_street_bus")
         );
 
-        User host = new User (
-                rs.getInt("user_id"),
-                rs.getString("user_email"), // not used
-                rs.getString("user_firstname"),
-                rs.getString("user_lastname"),
-                UserStatus.valueOf(rs.getString("user_status")) // not used
-        );
-        // user_phone also not used
+        UserHeader host = JDBCUserDAO.populateUserHeader(rs);
 
         InfoSession infoSession = new InfoSession(
                 rs.getInt("infosession_id"),
@@ -372,14 +368,14 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     );
 
     /**
-     * @param user The user
+     * @param userId The user
      * @return The infosession after this time, the user is enrolled in
      * @throws DataAccessException
      */
     @Override
-    public InfoSession getAttendingInfoSession(User user) throws DataAccessException {
+    public InfoSession getAttendingInfoSession(int userId) throws DataAccessException {
         try (PreparedStatement ps = getAttendingInfosessionStatement.value()) {
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -431,7 +427,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     private LazyStatement getLastInfoSessionForUserStatement = new LazyStatement(
             "SELECT sub.total, ie.infosession_enrollment_status status, ses.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
-                    "user_id, user_firstname, user_lastname, user_phone, user_email, user_status FROM infosessionenrollees ie " +
+                    USER_HEADER_FIELDS + " FROM infosessionenrollees ie " +
                     "JOIN infosessions AS ses ON ie.infosession_id = ses.infosession_id " +
                     "JOIN users ON infosession_host_user_id = user_id " +
                     "JOIN addresses ON infosession_address_id = address_id " +
@@ -441,10 +437,10 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     );
 
     @Override
-    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(User user) throws DataAccessException {
+    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getLastInfoSessionForUserStatement.value();
-            ps.setInt(1, user.getId());
+            ps.setInt(1, userId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -459,7 +455,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getAttendeesForSessionStatement = new LazyStatement(
-            "SELECT user_id, user_firstname, user_email, user_lastname, infosession_enrollment_status, user_status " +
+            "SELECT " + USER_HEADER_FIELDS +
                     "FROM infosessionenrollees " +
                     "INNER JOIN users ON user_id = infosession_enrollee_id " +
                     "WHERE infosession_id = ?"
@@ -474,7 +470,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 Collection<Enrollee> list = new ArrayList<>();
                 while (rs.next()) {
                     list.add(new Enrollee(
-                            JDBCUserDAO.populateUserPartial(rs),
+                            JDBCUserDAO.populateUserHeader(rs),
                             EnrollementStatus.valueOf(rs.getString("infosession_enrollment_status"))
                     ));
                 }

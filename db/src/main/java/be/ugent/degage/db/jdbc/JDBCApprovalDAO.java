@@ -2,9 +2,7 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.dao.ApprovalDAO;
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.Approval;
-import be.ugent.degage.db.models.InfoSession;
-import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.*;
 import org.joda.time.DateTime;
 
 import java.sql.*;
@@ -16,10 +14,18 @@ import java.util.Collection;
  */
 class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
+    private static final String USERS_USER_HEADER_FIELDS =
+            "users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
+            "       users.user_status, users.user_phone, users.user_cellphone ";
+
+    private static final String ADMINS_USER_HEADER_FIELDS =
+            "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, " +
+            "       admins.user_status, admins.user_phone, admins.user_cellphone ";
+
+
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +
             "approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
-            "users.user_id, users.user_firstname, users.user_lastname, users.user_email, users.user_status, " +
-            "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, admins.user_status, " +
+            USERS_USER_HEADER_FIELDS + "," + ADMINS_USER_HEADER_FIELDS + "," +
             "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_type_alternative, infosession_comments ";
 
     private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +
@@ -47,25 +53,11 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                     "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
     );
 
-    private Approval populateApproval(ResultSet rs) throws SQLException {
-        return new Approval(
-                rs.getInt("approval_id"),
-                JDBCUserDAO.populateUserPartial(rs, "users"),
-                JDBCUserDAO.populateUserPartial(rs, "admins"),
-                new DateTime(rs.getTimestamp("approval_submission").getTime()),
-                rs.getTimestamp("approval_date") == null ? null : new DateTime(rs.getTimestamp("approval_date").getTime()),
-                rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs),
-                Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
-                rs.getString("approval_user_message"),
-                rs.getString("approval_admin_message")
-        );
-    }
-
     private Approval populateApprovalPartial (ResultSet rs) throws SQLException {
         return new Approval(
                 rs.getInt("approval_id"),
-                JDBCUserDAO.populateUserPartial(rs, "users"),
-                JDBCUserDAO.populateUserPartial(rs, "admins"),
+                JDBCUserDAO.populateUserHeader(rs, "users"),
+                JDBCUserDAO.populateUserHeader(rs, "admins"),
                 new DateTime(rs.getTimestamp("approval_submission").getTime()),
                 null,
                 null,
@@ -95,8 +87,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     private LazyStatement getPagedApprovalsStatement = new LazyStatement(
             "SELECT approval_id, approval_submission, approval_status, " +
-                    "users.user_id, users.user_firstname, users.user_lastname, users.user_email, users.user_status, " +
-                    "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, admins.user_status " +
+                    USERS_USER_HEADER_FIELDS + ","  + ADMINS_USER_HEADER_FIELDS +
             "FROM approvals " +
             "LEFT JOIN users users ON approval_user = users.user_id " +
             "LEFT JOIN users admins ON approval_admin = admins.user_id " +
@@ -166,7 +157,18 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
-                    return populateApproval(rs);
+
+                    return new Approval(
+                            rs.getInt("approval_id"),
+                            JDBCUserDAO.populateUserHeader(rs, "users"),
+                            JDBCUserDAO.populateUserHeader(rs, "admins"),
+                            new DateTime(rs.getTimestamp("approval_submission").getTime()),
+                            rs.getTimestamp("approval_date") == null ? null : new DateTime(rs.getTimestamp("approval_date").getTime()),
+                            rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs),
+                            Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
+                            rs.getString("approval_user_message"),
+                            rs.getString("approval_admin_message")
+                    );
                 } else {
                     return null;
                 }
@@ -184,7 +186,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
      * @return
      */
     @Override
-    public Approval createApproval(User user, InfoSession session, String userMessage) {
+    public Approval createApproval(UserHeader user, InfoSession session, String userMessage) {
         // TODO: change user into userId, session into sessionId
         try {
             DateTime date = new DateTime();
