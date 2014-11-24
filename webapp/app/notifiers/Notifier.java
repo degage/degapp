@@ -218,11 +218,8 @@ public class Notifier extends Mailer {
         }
     }
 
-
-    // to be used with injected context
-    public static void sendReservationApprovedByOwnerMail(String remarks, Reservation carReservation) {
+    public static void sendReservationApprovedByOwnerMail(DataAccessContext context, String remarks, Reservation carReservation) {
         UserHeader user = carReservation.getUser();
-        DataAccessContext context = DataAccess.getInjectedContext();
         TemplateDAO dao = context.getTemplateDAO();
         CarDAO cdao = context.getCarDAO();
         Car car = cdao.getCar(carReservation.getCar().getId());

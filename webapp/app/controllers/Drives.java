@@ -334,7 +334,7 @@ public class Drives extends Controller {
         if (status == ReservationStatus.REFUSED)
             Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
         else
-            Notifier.sendReservationApprovedByOwnerMail(remarks, reservation);
+            Notifier.sendReservationApprovedByOwnerMail(DataAccess.getInjectedContext(), remarks, reservation);
         return details(reservationId);
     }
 
