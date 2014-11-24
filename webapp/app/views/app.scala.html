@@ -90,6 +90,9 @@
                                                     <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
                                                 </span>
                                             </div>
+                                            <div>
+                                                <strong>@message.getSubject</strong>
+                                            </div>
                                             @defining(message.getBody.replaceAll("""\s+"""," ")) { message_body =>
                                                 <div>@message_body.substring(0,math.min(80,message_body.length))...</div>
                                             }
@@ -126,10 +129,10 @@
                                             <a href="@routes.Notifications.showNotifications()">
                                                 <div>
                                                     @if(!notification.getRead){
-                                                    <strong>Dégage (ongelezen)</strong>
-                                                        }else{
-                                                    Dégage
-                                                        }
+                                                    <strong>@notification.getSubject (ongelezen)</strong>
+                                                    }else{
+                                                        @notification.getSubject
+                                                    }
                                                     <span class="pull-right text-muted">
                                                         <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
                                                     </span>
