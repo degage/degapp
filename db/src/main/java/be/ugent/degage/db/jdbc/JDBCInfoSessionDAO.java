@@ -455,7 +455,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getAttendeesForSessionStatement = new LazyStatement(
-            "SELECT " + USER_HEADER_FIELDS +
+            "SELECT " + USER_HEADER_FIELDS +  ", infosession_enrollment_status " +
                     "FROM infosessionenrollees " +
                     "INNER JOIN users ON user_id = infosession_enrollee_id " +
                     "WHERE infosession_id = ?"
