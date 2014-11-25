@@ -53,7 +53,7 @@
                                 <label class="h4">Domicilie-adres</label>
                                 @defining(user.getAddressDomicile) { address =>
                                     @if(address != null) {
-                                        <p class="form-control-static">@address.getStreet @address.getNumber,
+                                        <p class="form-control-static">@address.getStreet @address.getNum,
                                             <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
                                     } else {
                                         <p>Niet gespecifieerd.</p>
@@ -64,7 +64,7 @@
                                 <label class="h4">Verblijfsadres</label>
                                 @defining(user.getAddressResidence) { address =>
                                     @if(address != null) {
-                                        <p class="form-control-static">@address.getStreet @address.getNumber,
+                                        <p class="form-control-static">@address.getStreet @address.getNum,
                                             <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
                                     } else {
                                         <p>Niet gespecifieerd.</p>

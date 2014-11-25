@@ -138,12 +138,11 @@
                                 <div class="panel-body">
                                     <fieldset>
                                         @formGroupTextField(form("address.street"), "Straat", 'placeholder->"Verplicht")
-                                        @formGroupTextField(form("address.number"), "Nummer", 'placeholder->"Verplicht")
-                                        @formGroupTextField(form("address.bus"), "Bus")
+                                        @formGroupTextField(form("address.num"), "Nummer", 'placeholder->"Verplicht")
                                         @formGroupTextField(form("address.zipCode"), "Postcode", 'placeholder->"Verplicht")
                                         @formGroupTextField(form("address.city"), "Stad", 'placeholder->"Verplicht")
                                         @* TODO: landen niet nodig *@
-                                        <div class="col-md-12">
+                                        <div>
                                             @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
                                         </div>
                                     </fieldset>

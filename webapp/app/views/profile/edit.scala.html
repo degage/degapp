@@ -6,10 +6,9 @@
         function onSameAddressChange() {
             if($('#sameAddress').is(':checked')) {
                 $('#residenceAddress_street').val($('#domicileAddress_street').val());
-                $('#residenceAddress_nr').val($('#domicileAddress_nr').val());
+                $('#residenceAddress_num').val($('#domicileAddress_num').val());
                 $('#residenceAddress_city').val($('#domicileAddress_city').val());
                 $('#residenceAddress_zip').val($('#domicileAddress_zip').val());
-                $('#residenceAddress_bus').val($('#domicileAddress_bus').val());
                 $('#residenceAddress_country').val($('#domicileAddress_country').val());
 
                 $("#residenceAdressWrap" ).hide();
@@ -21,10 +20,9 @@
         $(document).ready(function() {
             // Check if domicile == residence
             var sameAddresses = $('#residenceAddress_street').val() == $('#domicileAddress_street').val() &&
-                $('#residenceAddress_nr').val() == $('#domicileAddress_nr').val() &&
+                $('#residenceAddress_num').val() == $('#domicileAddress_num').val() &&
                 $('#residenceAddress_city').val() == $('#domicileAddress_city').val() &&
                 $('#residenceAddress_zip').val() == $('#domicileAddress_zip').val() &&
-                $('#residenceAddress_bus').val() == $('#domicileAddress_bus').val() &&
                 $('#residenceAddress_country').val() == $('#domicileAddress_country').val();
             if(sameAddresses) {
                 $('#sameAddress').attr('checked', true);
@@ -94,30 +92,16 @@
                                     <div class="panel-heading">
                                         <h3 class="panel-title">Domicilieadres</h3>
                                     </div>
-                                    <div class="panel-body">
-                                        <label class="col-md-12">Straat</label>
-                                        <div class="col-md-12">
-                                            <input id="domicileAddress_street" name="domicileAddress.street" type="text" class="form-control input-md" value="@form("domicileAddress.street").value">
-                                        </div>
-                                        <label class="col-md-12">Nummer</label>
-                                        <div class="col-md-12">
-                                            <input id="domicileAddress_nr" name="domicileAddress.number" type="text" class="form-control input-md" value="@form("domicileAddress.number").value">
-                                        </div>
-                                        <label class="col-md-12">Stad</label>
-                                        <div class="col-md-12">
-                                            <input id="domicileAddress_city" name="domicileAddress.city" type="text" class="form-control input-md" value="@form("domicileAddress.city").value">
-                                        </div>
-                                        <label class="col-md-12">Postcode</label>
-                                        <div class="col-md-12">
-                                            <input id="domicileAddress_zip" name="domicileAddress.zipCode" type="text" class="form-control input-md" value="@form("domicileAddress.zipCode").value">
-                                        </div>
-                                        <label class="col-md-12">Bus</label>
-                                        <div class="col-md-12">
-                                            <input id="domicileAddress_bus" name="domicileAddress.bus" type="text" class="form-control input-md" value="@form("domicileAddress.bus").value">
-                                        </div>
-                                        <div class="col-md-12">
-                                            @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land", 'id -> "domicileAddress_country", 'class -> "form-control")
-                                        </div>
+                                     <div class="panel-body">
+                                        <fieldset>
+                                            @formGroupTextField(form("domicileAddress.street"), "Straat", 'placeholder->"Verplicht")
+                                            @formGroupTextField(form("domicileAddress.num"), "Nummer", 'placeholder->"Verplicht")
+                                            @formGroupTextField(form("domicileAddress.zipCode"), "Postcode", 'placeholder->"Verplicht")
+                                            @formGroupTextField(form("domicileAddress.city"), "Stad", 'placeholder->"Verplicht")
+                                            <div>
+                                                @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
+                                            </div>
+                                        </fieldset>
                                     </div>
                                 </div>
                             </div>
@@ -128,32 +112,20 @@
                                         <h3 class="panel-title">Verblijfsadres</h3>
                                     </div>
                                     <div class="panel-body">
-                                        <input id="sameAddress" type="checkbox" onchange="onSameAddressChange()"> Zelfde als domicilieadres
-                                        <div id="residenceAdressWrap">
-                                            <hr />
-                                            <label class="col-md-12">Straat</label>
-                                            <div class="col-md-12">
-                                                <input id="residenceAddress_street" name="residenceAddress.street" type="text" class="form-control input-md" value="@form("residenceAddress.street").value">
-                                            </div>
-                                            <label class="col-md-12">Nummer</label>
-                                            <div class="col-md-12">
-                                                <input id="residenceAddress_nr" name="residenceAddress.number" type="text" class="form-control input-md" value="@form("residenceAddress.number").value">
-                                            </div>
-                                            <label class="col-md-12">Stad</label>
-                                            <div class="col-md-12">
-                                                <input id="residenceAddress_city" name="residenceAddress.city" type="text" class="form-control input-md" value="@form("residenceAddress.city").value">
-                                            </div>
-                                            <label class="col-md-12">Postcode</label>
-                                            <div class="col-md-12">
-                                                <input id="residenceAddress_zip" name="residenceAddress.zipCode" type="text" class="form-control input-md" value="@form("residenceAddress.zipCode").value">
-                                            </div>
-                                            <label class="col-md-12">Bus</label>
-                                            <div class="col-md-12">
-                                                <input id="residenceAddress_bus" name="residenceAddress.bus" type="text" class="form-control input-md" value="@form("residenceAddress.bus").value">
-                                            </div>
-                                            <div class="col-md-12">
-                                            @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land", 'id -> "residenceAddress_country", 'class -> "form-control")
-                                            </div>
+                                         <div class="panel-body">
+                                            <fieldset>
+                                                <input id="sameAddress" type="checkbox" onchange="onSameAddressChange()"> Zelfde als domicilieadres
+                                                <hr />
+                                                <div id="residenceAdressWrap">
+                                                    @formGroupTextField(form("residenceAddress.street"), "Straat", 'placeholder->"Verplicht")
+                                                    @formGroupTextField(form("residenceAddress.num"), "Nummer", 'placeholder->"Verplicht")
+                                                    @formGroupTextField(form("residenceAddress.zipCode"), "Postcode", 'placeholder->"Verplicht")
+                                                    @formGroupTextField(form("residenceAddress.city"), "Stad", 'placeholder->"Verplicht")
+                                                    <div>
+                                                        @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
+                                                    </div>
+                                                </div>
+                                            </fieldset>
                                         </div>
                                     </div>
                                 </div>
@@ -166,9 +138,11 @@
                                     </div>
                                     <div class="panel-body">
                                         @if(CurrentUser.hasRole(UserRole.PROFILE_ADMIN)){
-                                            <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Waarborg betaald
+                                            <input type="checkbox" id='@form("paidDeposit").id'
+                                                   name='@form("paidDeposit").name' value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Waarborg betaald
                                         } else {
-                                            <input type="checkbox" id="@form("paidDeposit").id" name="@form("paidDeposit").name" value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Waarborg betaald
+                                            <input type="checkbox" id='@form("paidDeposit").id'
+                                                   name='@form("paidDeposit").name' value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Waarborg betaald
                                         }
                                     </div>
                                 </div>

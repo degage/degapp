@@ -16,7 +16,7 @@ public interface AddressDAO {
     /**
      * Create a new address record
      */
-    public Address createAddress(String country, String zip, String city, String street, String number, String bus) throws DataAccessException;
+    public Address createAddress(String country, String zip, String city, String street, String num) throws DataAccessException;
 
     /**
      * Update the address record with the given id.

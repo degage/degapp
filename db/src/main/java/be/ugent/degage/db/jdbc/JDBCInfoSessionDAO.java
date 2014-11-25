@@ -19,7 +19,7 @@ import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_FIELDS = "ses.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-            "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+            "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
             USER_HEADER_FIELDS ;
 
     private static String SUBTTOTAL_QUERY =
@@ -33,7 +33,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
     private static String INFOSESSION_QUERY = "SELECT sub.total, ses.infosession_id AS infosession_id, ses.infosession_type AS infosession_type, ses.infosession_type_alternative infosession_type_alternative, " +
             "ses.infosession_timestamp infosession_timestamp, ses.infosession_max_enrollees infosession_max_enrollees, ses.infosession_comments infosession_comments, " +
-            "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+            "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
             USER_HEADER_FIELDS +
             "FROM infosessions AS ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
@@ -225,7 +225,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     private static String GET_INFO_SESSIONS_HEAD =
             "SELECT infosession_id, infosession_type, infosession_type_alternative, " +
                     "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+                    "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
                     USER_HEADER_FIELDS +
                     ", enrollee_count " +
                     "FROM infosessions_extended ";
@@ -244,8 +244,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 rs.getString("address_zipcode"),
                 rs.getString("address_city"),
                 rs.getString("address_street"),
-                rs.getString("address_street_number"),
-                rs.getString("address_street_bus")
+                rs.getString("address_number")
         );
 
         UserHeader host = JDBCUserDAO.populateUserHeader(rs);
@@ -426,7 +425,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
     private LazyStatement getLastInfoSessionForUserStatement = new LazyStatement(
             "SELECT sub.total, ie.infosession_enrollment_status status, ses.infosession_id, infosession_type, infosession_type_alternative, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus, " +
+                    "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
                     USER_HEADER_FIELDS + " FROM infosessionenrollees ie " +
                     "JOIN infosessions AS ses ON ie.infosession_id = ses.infosession_id " +
                     "JOIN users ON infosession_host_user_id = user_id " +

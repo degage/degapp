@@ -67,7 +67,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(user.getCellphone());
                 if (user.getAddressDomicile() != null) {
                     row.createCell(j++).setCellValue(user.getAddressDomicile().getStreet());
-                    row.createCell(j++).setCellValue(user.getAddressDomicile().getNumber());
+                    row.createCell(j++).setCellValue(user.getAddressDomicile().getNum());
                     row.createCell(j++).setCellValue(user.getAddressDomicile().getZip());
                     row.createCell(j++).setCellValue(user.getAddressDomicile().getCity());
                     row.createCell(j++).setCellValue(user.getAddressDomicile().getCountry());
@@ -76,7 +76,7 @@ public class Reports extends Controller {
                 }
                 if (user.getAddressResidence() != null) {
                     row.createCell(j++).setCellValue(user.getAddressResidence().getStreet());
-                    row.createCell(j++).setCellValue(user.getAddressResidence().getNumber());
+                    row.createCell(j++).setCellValue(user.getAddressResidence().getNum());
                     row.createCell(j++).setCellValue(user.getAddressResidence().getZip());
                     row.createCell(j++).setCellValue(user.getAddressResidence().getCity());
                     row.createCell(j++).setCellValue(user.getAddressResidence().getCountry());
@@ -258,7 +258,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(car.getType());
 
                 row.createCell(j++).setCellValue(car.getLocation().getStreet());
-                row.createCell(j++).setCellValue(car.getLocation().getNumber());
+                row.createCell(j++).setCellValue(car.getLocation().getNum());
                 row.createCell(j++).setCellValue(car.getLocation().getZip());
                 row.createCell(j++).setCellValue(car.getLocation().getCity());
 

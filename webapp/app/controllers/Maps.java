@@ -93,7 +93,7 @@ public class Maps extends Controller {
         Address address = dao.getAddress(addressId);
         if (address != null) {
             return WS.url(ADDRESS_RESOLVER)
-                    .setQueryParameter("street", address.getNumber() + " " + address.getStreet())
+                    .setQueryParameter("street", address.getNum() + " " + address.getStreet())
                     .setQueryParameter("city", address.getCity())
                     .setQueryParameter("country", "Belgium")
                             // TODO: uncomment postalcode line, it's only commented for test data purposes

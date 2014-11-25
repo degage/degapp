@@ -27,13 +27,19 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
         if(rs.getObject(tableName + ".address_id") == null)
             return null;
         else
-            return new Address(rs.getInt(tableName + ".address_id"), rs.getString(tableName + ".address_country"), rs.getString(tableName + ".address_zipcode"), rs.getString(tableName + ".address_city"), rs.getString(tableName + ".address_street"), rs.getString(tableName + ".address_street_number"), rs.getString(tableName + ".address_street_bus"));
+            return new Address(
+                    rs.getInt(tableName + ".address_id"),
+                    rs.getString(tableName + ".address_country"),
+                    rs.getString(tableName + ".address_zipcode"),
+                    rs.getString(tableName + ".address_city"),
+                    rs.getString(tableName + ".address_street"),
+                    rs.getString(tableName + ".address_number")
+            );
     }
 
 
     private LazyStatement getAddressStatement = new LazyStatement(
-            "SELECT address_id, address_city, address_zipcode, address_street, " +
-                    "address_street_number, address_street_bus, address_country " +
+            "SELECT address_id, address_city, address_zipcode, address_street, address_number, address_country " +
                     "FROM addresses WHERE address_id = ?");
 
     @Override
@@ -53,22 +59,20 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
     }
 
     private LazyStatement createAddressStatement = new LazyStatement(
-            "INSERT INTO addresses(address_city, address_zipcode, address_street, " +
-                    "address_street_number, address_street_bus, address_country) " +
+            "INSERT INTO addresses(address_city, address_zipcode, address_street, address_number, address_country) " +
                     "VALUES (?,?,?,?,?,?)",
             "address_id"
     );
 
     @Override
-    public Address createAddress(String country, String zip, String city, String street, String number, String bus) throws DataAccessException {
+    public Address createAddress(String country, String zip, String city, String street, String num) throws DataAccessException {
         try {
             PreparedStatement ps = createAddressStatement.value(); // reused so should not be auto-closed
             ps.setString(1, city);
             ps.setString(2, zip);
             ps.setString(3, street);
-            ps.setString(4, number);
-            ps.setString(5, bus);
-            ps.setString(6, country);
+            ps.setString(4, num);
+            ps.setString(5, country);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating address.");
@@ -76,7 +80,7 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
 
-                return new Address(keys.getInt(1), country, zip, city, street, number, bus);
+                return new Address(keys.getInt(1), country, zip, city, street, num);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create address.", ex);
@@ -103,7 +107,7 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
 
     private LazyStatement updateAddressStatement = new LazyStatement(
             "UPDATE addresses SET address_city = ?, address_zipcode = ?, address_street = ?, " +
-                    "address_street_number = ?, address_street_bus = ?, address_country=? " +
+                    "address_number = ?, address_country=? " +
                     "WHERE address_id = ?"
     );
 
@@ -114,11 +118,10 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
             ps.setString(1, address.getCity());
             ps.setString(2, address.getZip());
             ps.setString(3, address.getStreet());
-            ps.setString(4, address.getNumber());
-            ps.setString(5, address.getBus());
-            ps.setString(6, address.getCountry());
+            ps.setString(4, address.getNum());
+            ps.setString(5, address.getCountry());
 
-            ps.setInt(7, address.getId());
+            ps.setInt(6, address.getId());
 			
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update affected 0 rows.");

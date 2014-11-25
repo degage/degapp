@@ -142,7 +142,7 @@ public class Cars extends Controller {
             if (userId == null || userId == 0) {
                 error += "Geef een eigenaar op. ";
             }
-            if (!address.enoughFilled()) {
+            if (address.isEmpty()) {
                 error += "Geef het adres op.";
             }
             if (name.length() <= 0) {

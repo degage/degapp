@@ -33,12 +33,10 @@ CREATE TABLE `addresses` (
   `address_city` VARCHAR(64) NOT NULL,
   `address_zipcode` VARCHAR(12) NOT NULL,
   `address_street` VARCHAR(64) NOT NULL DEFAULT '',
-  `address_street_number` VARCHAR(8) NOT NULL DEFAULT '',
-  `address_street_bus` VARCHAR(4),
+  `address_number` VARCHAR(12) NOT NULL DEFAULT '',
   `address_created_at` DATETIME,
   `address_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`address_id`),
-  INDEX `address_place_zip` (`address_city`)     -- TODO: is this needed?
+  PRIMARY KEY (`address_id`)
 );
 
 CREATE TABLE `users` (
@@ -188,7 +186,7 @@ CREATE VIEW `infosessions_extended` AS
     SELECT
         infosession_id, infosession_type, infosession_type_alternative,
         infosession_timestamp, infosession_max_enrollees, infosession_comments,
-        address_id, address_country, address_city, address_zipcode, address_street, address_street_number, address_street_bus,
+        address_id, address_country, address_city, address_zipcode, address_street, address_number,
         user_id, user_firstname, user_lastname, user_phone, user_email, user_status, user_cellphone,
         count(infosession_enrollee_id) AS enrollee_count
     FROM infosessions AS ses

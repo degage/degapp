@@ -16,9 +16,8 @@ public class Addresses  {
     public static class EditAddressModel {
 
         public String city;
-        public String number;
+        public String num;
         public String street;
-        public String bus;
         public String zipCode;
         public String country;
 
@@ -29,20 +28,14 @@ public class Addresses  {
             }
 
             city = address.getCity();
-            number = address.getNumber();
+            num = address.getNum();
             street = address.getStreet();
-            bus = address.getBus();
             zipCode = address.getZip();
             country = address.getCountry();
         }
 
         public boolean isEmpty() {
-            return nullOrEmpty(bus) && nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(number);
-        }
-
-        public boolean enoughFilled() {
-            // bus can be empty, rest not
-            return !nullOrEmpty(zipCode) && !nullOrEmpty(city) && !nullOrEmpty(street) && !nullOrEmpty(number);
+            return nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(num);
         }
     }
 
@@ -84,7 +77,7 @@ public class Addresses  {
         // TODO: no checks needed for null + modify address always?
         if (address == null) {
             // User entered new address in fields
-            address = dao.createAddress(model.country, model.zipCode, model.city, model.street, model.number, model.bus);
+            address = dao.createAddress(model.country, model.zipCode, model.city, model.street, model.num);
         } else {
             // User changed existing address
 
@@ -93,14 +86,13 @@ public class Addresses  {
                     (model.zipCode != null && !model.zipCode.equals(address.getZip())) ||
                     (model.city != null && !model.city.equals(address.getCity())) ||
                     (model.street != null && !model.street.equals(address.getStreet())) ||
-                    (model.number != null && !model.number.equals(address.getNumber())) ||
-                    (model.bus != null && !model.bus.equals(address.getBus()))) {
+                    (model.num != null && !model.num.equals(address.getNum()))
+                    ) {
                 address.setCountry(model.country);
                 address.setZip(model.zipCode);
                 address.setCity(model.city);
                 address.setStreet(model.street);
-                address.setNumber(model.number);
-                address.setBus(model.bus);
+                address.setNum(model.num);
                 dao.updateAddress(address);
             }
         }

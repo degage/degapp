@@ -517,7 +517,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "SELECT car_id, car_name, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, " +
                     "address_id, address_city, address_zipcode, address_street, " +
-                    "address_street_number, address_street_bus, address_country " +
+                    "address_number, address_country " +
             "FROM cars JOIN addresses ON address_id=car_location ";
 
     /**
@@ -669,7 +669,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     public static final String LIST_ALL_CARS_QUERY =
             "SELECT car_id, car_name, car_brand, car_type," +
                 "address_id, address_city, address_zipcode, address_street, " +
-                "address_street_number, address_street_bus, address_country, " +
+                "address_number, address_country, " +
                 "car_seats, car_doors, car_year, car_manual, car_gps, car_hook," +
                 "car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km," +
                 "car_comments, car_active, " +

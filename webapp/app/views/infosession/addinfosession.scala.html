@@ -147,50 +147,22 @@
                                         </div>
                                     </div>
 
-                                    <div class="panel panel-default">
-                                        <div class="panel-heading">
-                                            <h3 class="panel-title">Adres</h3>
-                                        </div>
-                                        <div class="panel-body">
-                                            <fieldset>
-                                                <div class="form-group">
-                                                    <label class="col-md-12" for="address.street">Straat</label>
-                                                    <div class="col-md-12">
-                                                        <input id="address.street" name="address.street" type="text" class="form-control input-md" value="@form("address.street").value">
+                                    <div class="form-group">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">
+                                                Adres
+                                            </div>
+                                            <div class="panel-body">
+                                                <fieldset>
+                                                    @formGroupTextField(form("address.street"), "Straat")
+                                                    @formGroupTextField(form("address.num"), "Nummer")
+                                                    @formGroupTextField(form("address.zipCode"), "Postcode")
+                                                    @formGroupTextField(form("address.city"), "Stad")
+                                                    <div>
+                                                        @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
                                                     </div>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="col-md-12" for="address.number">Nummer</label>
-                                                    <div class="col-md-12">
-                                                        <input id="address.number" maxlength="9" name="address.number" type="text" class="form-control input-md" value="@form("address.number").value">
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="col-md-12" for="address.bus">Bus</label>
-                                                    <div class="col-md-12">
-                                                        <input id="address.bus" maxlength="3" name="address.bus" type="text" class="form-control input-md" value="@form("address.bus").value">
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="col-md-12" for="address.zipCode">Postcode</label>
-                                                    <div class="col-md-12">
-                                                        <input id="address.zipCode" maxlength="11" name="address.zipCode" type="text" class="form-control input-md" value="@form("address.zipCode").value">
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="col-md-12" for="address.city">Stad</label>
-                                                    <div class="col-md-12">
-                                                        <input id="address.city" name="address.city" type="text" class="form-control input-md" value="@form("address.city").value">
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-12">
-                                                    @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
-                                                </div>
-                                            </fieldset>
+                                                </fieldset>
+                                            </div>
                                         </div>
                                     </div>
 

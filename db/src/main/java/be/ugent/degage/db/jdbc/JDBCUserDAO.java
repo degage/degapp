@@ -20,8 +20,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             "user_id, user_firstname, user_lastname, user_email, user_status, user_phone, user_cellphone ";
 
     private static final String USER_FIELDS = USER_HEADER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_gender, " +
-            "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_street_number, domicileAddresses.address_street_bus, " +
-            "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_street_number, residenceAddresses.address_street_bus, " +
+            "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
+            "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
             "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
             "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_image_id";
 
