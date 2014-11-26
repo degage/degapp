@@ -338,7 +338,7 @@ public class Cars extends Controller {
             flash("danger", "Auto met ID=" + carId + " bestaat niet.");
             return badRequest();
         } else {
-            if (car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+            if (CurrentUser.is(car.getOwner().getId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
 
                 CarModel model = new CarModel();
                 model.populate(car);
@@ -379,7 +379,7 @@ public class Cars extends Controller {
             return badRequest();
         }
 
-        if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
+        if (CurrentUser.isNot(car.getOwner().getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest();
         }
@@ -489,7 +489,7 @@ public class Cars extends Controller {
             return badRequest();
         }
 
-        if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
+        if (CurrentUser.isNot(car.getOwner().getId()) && ! CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest();
         }

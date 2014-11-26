@@ -123,7 +123,7 @@ public class Profile extends Controller {
         user = dao.getUser(userId);
 
         // Check if the userId exists
-        if (user == null || CurrentUser.getId() != user.getId() && !CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {
+        if (user == null || CurrentUser.isNot(user.getId()) && !CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 
@@ -243,7 +243,7 @@ public class Profile extends Controller {
      * @return A boolean when the profile can be edited
      */
     private static boolean canEditProfile(User user) {
-        return CurrentUser.getId() == user.getId() || CurrentUser.hasRole(UserRole.PROFILE_ADMIN);
+        return CurrentUser.is(user.getId()) || CurrentUser.hasRole(UserRole.PROFILE_ADMIN);
     }
 
     public static class EditIdentityCardForm {
@@ -710,7 +710,7 @@ public class Profile extends Controller {
 
         boolean isProfileAdmin = CurrentUser.hasRole(UserRole.PROFILE_ADMIN);
 
-        if (CurrentUser.getId() != user.getId() && !isProfileAdmin) {
+        if (CurrentUser.isNot(user.getId()) && !isProfileAdmin) {
             return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
         }
 

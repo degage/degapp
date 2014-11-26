@@ -24,7 +24,7 @@
     <!-- row -->
     <!-- /row -->
     @if(reservation.getStatus == ReservationStatus.ACCEPTED || reservation.getStatus == ReservationStatus.REQUEST) {
-            @if(reservation.getUser.getId != CurrentUser.getId) {
+            @if(CurrentUser isNot reservation.getUser.getId) {
                 <div class="alert alert-warning alert-dismissable">
                     Pas op! Je bent niet de bestuurder, maar ziet onderstaande knoppen toch omdat je admin bent!
                 </div>

@@ -108,7 +108,7 @@ public class Availabilities extends Controller {
         AvailabilityDAO availabilityDAO = DataAccess.getInjectedContext().getAvailabilityDAO();
         Car car = dao.getCar(carId);
 
-        if (!(car.getOwner().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN))) {
+        if (CurrentUser.isNot(car.getOwner().getId()) && ! CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return redirect(routes.Cars.detail(carId));
         }

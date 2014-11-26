@@ -153,7 +153,7 @@ public class Damages extends Controller {
             return badRequest();
         } else {
             //User currentUser = DataProvider.getUserProvider().getUser();
-            if (damage.getDriverId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+            if (CurrentUser.is(damage.getDriverId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
 
                 DamageModel model = new DamageModel();
                 model.populate(damage);

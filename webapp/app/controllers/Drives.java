@@ -217,7 +217,7 @@ public class Drives extends Controller {
             flash("Error", "De reservatie bevat ongeldige gegevens");
             return null;
         }
-        if (!(reservation.getUser().getId() == CurrentUser.getId()) && !context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
+        if (CurrentUser.isNot(reservation.getUser().getId())&& !context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
                 && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("Error", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
@@ -270,7 +270,7 @@ public class Drives extends Controller {
             adjustForm.reject("Er is een fout gebeurt bij het opvragen van de rit.");
             return badRequest(showIndex());
         }
-        if (!(reservation.getUser().getId() == CurrentUser.getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+        if (CurrentUser.isNot(reservation.getUser().getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             adjustForm.reject("Je bent niet gemachtigd deze actie uit te voeren.");
             return badRequest(showIndex());
         }
@@ -378,7 +378,7 @@ public class Drives extends Controller {
             switch (status) {
                 // Only the loaner is allowed to cancel a reservation at any time
                 case CANCELLED:
-                    if (reservation.getUser().getId() == CurrentUser.getId() || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+                    if (CurrentUser.is(reservation.getUser().getId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
                         if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
                             flash("Error", "De reservatie is niet meer in aanvraag en is niet goedgekeurd!");
                             return null;
@@ -427,7 +427,7 @@ public class Drives extends Controller {
         }
         // Test if user is authorized
         boolean isOwner = context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId());
-        if (!(reservation.getUser().getId() == CurrentUser.getId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+        if (CurrentUser.isNot(reservation.getUser().getId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
             return badRequest(detailsPage(reservationId, adjustForm, refuseForm, detailsForm));
         }

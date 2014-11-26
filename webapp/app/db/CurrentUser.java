@@ -41,11 +41,29 @@ public class CurrentUser {
     }
 
     /**
-     * Retrieve the id of the current user, or null if there is no current user
+     * Retrieve the id of the current user, or null if there is no current user.
+     *
+     * Important, do not compare this result with ==, use {@link #is} or {2link #isNot} instead
      */
     public static Integer getId () {
         String idString = Controller.session("id");
         return idString == null ? null : Integer.parseInt(idString);
+    }
+
+    /**
+     * Check whether the given user correspond to the current user
+     */
+    public static boolean is(int userId) {
+        String idString = Controller.session("id");
+        return idString != null && Integer.parseInt(idString) == userId;
+    }
+
+    /**
+     * Short for <code>! is(userId)</code>
+     */
+    public static boolean isNot(int userId) {
+        String idString = Controller.session("id");
+        return idString == null || Integer.parseInt(idString) != userId;
     }
 
     /**

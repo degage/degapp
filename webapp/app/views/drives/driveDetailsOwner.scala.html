@@ -3,7 +3,7 @@
 
 <!-- /row -->
 @if(reservation.getStatus == ReservationStatus.REQUEST) {
-    @if(ownerId != CurrentUser.getId) {
+    @if(CurrentUser isNot ownerId) {
         <div class="alert alert-warning alert-dismissable">
             Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
         </div>

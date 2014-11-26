@@ -104,11 +104,11 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
     </div><br />
     <!-- /row -->
     <!-- loaner specific content -->
-    @if(loaner.getId == CurrentUser.getId || isAdmin) {
+    @if((CurrentUser is loaner.getId) || isAdmin) {
         @views.html.drives.driveDetailsLoaner(adjustForm, reservation)
     }
     <!-- owner specific content -->
-    @if(owner.getId == CurrentUser.getId || isAdmin) {
+    @if((CurrentUser is owner.getId) || isAdmin) {
         @views.html.drives.driveDetailsOwner(refuseForm, reservation, owner.getId)
     }
     <!-- /well -->
@@ -120,7 +120,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         <div class="well">
             <strong>Eigenaar</strong><hr />
             <p>
-                @if(owner.getId == CurrentUser.getId ||
+                @if((CurrentUser is owner.getId) ||
                 reservation.getStatus != ReservationStatus.REFUSED ||
                 reservation.getStatus != ReservationStatus.REQUEST ||
                 reservation.getStatus != ReservationStatus.CANCELLED
@@ -166,7 +166,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         <div class="well">
             <strong>Ontlener voor u</strong><hr />
             <p>
-                @if((owner.getId == CurrentUser.getId ||
+                @if(((CurrentUser is owner.getId) ||
                 reservation.getStatus != ReservationStatus.REFUSED ||
                 reservation.getStatus != ReservationStatus.REQUEST ||
                 reservation.getStatus != ReservationStatus.CANCELLED) &&
@@ -200,7 +200,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         <div class="well">
             <strong>Ontlener na u</strong><hr />
             <p>
-                @if((owner.getId == CurrentUser.getId ||
+                @if(((CurrentUser is owner.getId) ||
                 reservation.getStatus != ReservationStatus.REFUSED ||
                 reservation.getStatus != ReservationStatus.REQUEST ||
                 reservation.getStatus != ReservationStatus.CANCELLED) &&
@@ -249,7 +249,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         </div>
     </div>
     <div class="row">
-        @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && (owner.getId == CurrentUser.getId || isAdmin)) {
+        @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && ((CurrentUser is owner.getId) || isAdmin)) {
             @if(owner.getId != CurrentUser.getId) {
                 <div class="alert alert-warning alert-dismissable">
                     Pas op! Je bent niet de eigenaar, maar ziet onderstaand formulier toch omdat je admin bent!
