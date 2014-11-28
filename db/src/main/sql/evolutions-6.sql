@@ -1,4 +1,5 @@
 -- changes to address table
+-- changes to carrides table
 
 ALTER TABLE addresses DROP INDEX address_place_zip;
 
@@ -21,3 +22,13 @@ CREATE VIEW `infosessions_extended` AS
                    JOIN addresses ON infosession_address_id = address_id
                    LEFT JOIN infosessionenrollees USING (infosession_id)
                GROUP BY infosession_id;
+
+ALTER TABLE carrides ADD COLUMN car_ride_start_km INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE carrides ADD COLUMN car_ride_end_km INTEGER NOT NULL DEFAULT 0;
+
+UPDATE carrides SET car_ride_start_km = car_ride_start_mileage;
+UPDATE carrides SET car_ride_end_km = car_ride_end_mileage;
+
+ALTER TABLE carrides DROP COLUMN car_ride_start_mileage;
+ALTER TABLE carrides DROP COLUMN car_ride_end_mileage;
+

@@ -19,12 +19,14 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     }
 
     public static CarRide populateCarRide(ResultSet rs) throws SQLException {
-        CarRide carRide = new CarRide(JDBCReservationDAO.populateReservation(rs));
-        carRide.setStatus(rs.getBoolean("car_ride_status"));
-        carRide.setStartMileage(rs.getInt("car_ride_start_mileage"));
-        carRide.setEndMileage(rs.getInt("car_ride_end_mileage"));
-        carRide.setDamaged(rs.getBoolean("car_ride_damage"));
-        carRide.setRefueling(rs.getInt("car_ride_refueling"));
+        CarRide carRide = new CarRide(
+                JDBCReservationDAO.populateReservation(rs),
+                rs.getInt("car_ride_start_km"),
+                rs.getInt("car_ride_end_km"),
+                rs.getBoolean("car_ride_status"),
+                rs.getBoolean("car_ride_damage"),
+                rs.getInt("car_ride_refueling")
+        );
         carRide.setCost(rs.getBigDecimal("car_ride_cost"));
         carRide.setBilled(rs.getDate("car_ride_billed"));
 
@@ -32,24 +34,24 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     }
 
     private LazyStatement createCarRideStatement = new LazyStatement(
-            "INSERT INTO carrides (car_ride_car_reservation_id, car_ride_start_mileage, " +
-                    "car_ride_end_mileage, car_ride_damage, car_ride_refueling) VALUE (?, ?, ?, ?, ?)"
+            "INSERT INTO carrides (car_ride_car_reservation_id, car_ride_start_km, " +
+                    "car_ride_end_km, car_ride_damage, car_ride_refueling) VALUE (?, ?, ?, ?, ?)"
     );
     
     @Override
-    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage, boolean damaged, int refueling) throws DataAccessException {
+    public CarRide createCarRide(Reservation reservation, int startKm, int endKm, boolean damaged, int numberOfRefuels) throws DataAccessException {
         try{
             PreparedStatement ps = createCarRideStatement.value();
             ps.setInt(1, reservation.getId());
-            ps.setInt(2, startMileage);
-            ps.setInt(3, endMileage);
+            ps.setInt(2, startKm);
+            ps.setInt(3, endKm);
             ps.setBoolean(4, damaged);
-            ps.setInt(5, refueling);
+            ps.setInt(5, numberOfRefuels);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car ride.");
 
-                return new CarRide(reservation);
+            return new CarRide(reservation, startKm, endKm, false, damaged, numberOfRefuels);
         } catch (SQLException e){
             throw new DataAccessException("Unable to create car ride", e);
         }
@@ -80,8 +82,8 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     }
 
     private LazyStatement updateCarRideStatement = new LazyStatement(
-            "UPDATE carrides SET car_ride_status = ? , car_ride_start_mileage = ? , " +
-                    "car_ride_end_mileage = ? , car_ride_damage = ? , car_ride_refueling = ? , car_ride_cost = ? , car_ride_billed = ? " +
+            "UPDATE carrides SET car_ride_status = ? , car_ride_start_km = ? , " +
+                    "car_ride_end_km = ? , car_ride_damage = ? , car_ride_refueling = ? , car_ride_cost = ? , car_ride_billed = ? " +
                     "WHERE car_ride_car_reservation_id = ?"
     );
 
@@ -89,11 +91,11 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     public void updateCarRide(CarRide carRide) throws DataAccessException {
         try {
             PreparedStatement ps = updateCarRideStatement.value();
-            ps.setBoolean(1, carRide.isStatus());
-            ps.setInt(2, carRide.getStartMileage());
-            ps.setInt(3, carRide.getEndMileage());
+            ps.setBoolean(1, carRide.isApprovedByOwner());
+            ps.setInt(2, carRide.getStartKm());
+            ps.setInt(3, carRide.getEndKm());
             ps.setBoolean(4, carRide.isDamaged());
-            ps.setInt(5, carRide.getRefueling());
+            ps.setInt(5, carRide.getNumberOfRefuels());
             ps.setBigDecimal(6, carRide.getCost());
             ps.setDate(7, carRide.getBilled());
 

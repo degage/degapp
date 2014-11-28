@@ -1,48 +1,18 @@
-@(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide, cancelButton: Boolean)
+@(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, cancelButton: Boolean)
 @helper.form(routes.Drives.provideDriveInfo(reservation.getId), 'class -> "form-horizontal") {
     <div class="well">
-        <div class="form-group">
-            <label>Kilometerstand voor de rit:</label>
-            @if(!infoForm.hasGlobalErrors && driveInfo != null) {
-                <input name="startMileage" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@driveInfo.getStartMileage">
-            } else {
-                <input name="startMileage" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@infoForm("startMileage").value">
-            }
-        </div>
-        <div class="form-group">
-            <label>Kilometerstand na de rit:</label>
-            @if(!infoForm.hasGlobalErrors && driveInfo != null) {
-                <input name="endMileage" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@driveInfo.getEndMileage">
-            } else {
-                <input name="endMileage" class="form-control" type="number" min="0" placeholder="Kilometerstand" value="@infoForm("endMileage").value">
-            }
-        </div>
-        <div @if(!infoForm.hasGlobalErrors && driveInfo != null) { class="hidden" }>
-            <div class="form-group">
-                <label>Schade opvolging:</label>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="damaged" id="damaged" value="false" checked >
-                        De auto liep geen schade op
-                    </label>
-                </div>
-                <div class="radio">
-                    <label>
-                        <input type="radio" name="damaged" id="damaged" value="true">
-                        De auto liep schade op (<i>een schadedossier zal aangemaakt worden waarbij je om bijkomende
-                        informatie gevraagd wordt</i>)
-                    </label>
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Aantal tankbeuren:</label>
-                @if(!infoForm.hasGlobalErrors && driveInfo != null) {
-                    <input name="refueling" class="form-control" type="number" min="0" placeholder="Aantal tankbeurten" value="@driveInfo.getRefueling">
-                } else {
-                    <input name="refueling" class="form-control" type="number" min="0" placeholder="Aantal tankbeurten" value="@infoForm("refueling").value">
-                }
-            </div>
-        </div>
+        @formGroupNumberField(infoForm("startKm"), "Kilometerstand vóór de rit")
+        @formGroupNumberField(infoForm("endKm"), "Kilometerstand na de rit")
+        @formGroup(infoForm("damaged"), "Schade-opvolging") {
+              @radioItem(infoForm("damaged"), "false") {
+                 De auto liep geen schade op
+              }
+              @radioItem(infoForm("damaged"), "true") {
+                De auto liep schade op (<i>een schadedossier zal aangemaakt worden waarbij je om bijkomende
+                informatie gevraagd wordt</i>)
+              }
+        }
+        @formGroupNumberField(infoForm("numberOfRefuels"), "Aantal tankbeurten")
 
         <div id="infoButtons" class="form-group btn-group btn-group-xs">
             <button type="submit" class="btn btn-success">Verstuur details</button>

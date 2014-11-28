@@ -8,17 +8,22 @@ import java.sql.Date;
  */
 public class CarRide {
     private Reservation reservation; // reservation.getId() is CarRide-id
-    private boolean status;
-    private int startMileage;
-    private int endMileage;
+    private boolean approvedByOwner;
+    private int startKm;   // 0  when not filled in
+    private int endKm;
     private boolean damaged;
     private BigDecimal cost;
     private Date billed;
 
-    private int refueling;
+    private int numberOfRefuels;
 
-    public CarRide(Reservation reservation) {
+    public CarRide(Reservation reservation, int startKm, int endKm, boolean approvedByOwner, boolean damaged, int numberOfRefuels) {
         this.reservation = reservation;
+        this.startKm = startKm;
+        this.endKm = endKm;
+        this.approvedByOwner = approvedByOwner;
+        this.damaged = damaged;
+        this.numberOfRefuels = numberOfRefuels;
     }
 
     public Reservation getReservation() {
@@ -29,36 +34,36 @@ public class CarRide {
         this.reservation = reservation;
     }
 
-    public int getStartMileage() {
-        return startMileage;
+    public int getStartKm() {
+        return startKm;
     }
 
-    public void setStartMileage(int startMileage) {
-        this.startMileage = startMileage;
+    public void setStartKm(int startKm) {
+        this.startKm = startKm;
     }
 
-    public int getEndMileage() {
-        return endMileage;
+    public int getEndKm() {
+        return endKm;
     }
 
-    public void setEndMileage(int endMileage) {
-        this.endMileage = endMileage;
+    public void setEndKm(int endKm) {
+        this.endKm = endKm;
     }
 
-    public boolean isStatus() {
-        return status;
+    public boolean isApprovedByOwner() {
+        return approvedByOwner;
     }
 
-    public void setStatus(boolean status) {
-        this.status = status;
+    public void setApprovedByOwner(boolean approvedByOwner) {
+        this.approvedByOwner = approvedByOwner;
     }
 
-    public int getRefueling() {
-        return refueling;
+    public int getNumberOfRefuels() {
+        return numberOfRefuels;
     }
 
-    public void setRefueling(int refueling) {
-        this.refueling = refueling;
+    public void setNumberOfRefuels(int numberOfRefuels) {
+        this.numberOfRefuels = numberOfRefuels;
     }
 
     public boolean isDamaged() {

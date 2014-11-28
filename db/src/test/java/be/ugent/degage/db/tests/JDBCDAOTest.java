@@ -612,7 +612,7 @@ public class JDBCDAOTest {
 
             // TODO: assertEquals of the actual reservations, and not only ID's?
             Assert.assertEquals(carRide.getReservation().getId(),returncarRide.getReservation().getId());
-            Assert.assertEquals(carRide.isStatus(),returncarRide.isStatus());
+            Assert.assertEquals(carRide.isApprovedByOwner(),returncarRide.isApprovedByOwner());
             Assert.assertEquals(carRide.getStartMileage(),returncarRide.getStartMileage());
             Assert.assertEquals(carRide.getEndMileage(),returncarRide.getEndMileage());
         }
@@ -629,7 +629,7 @@ public class JDBCDAOTest {
         for(CarRide carRide : carRides) {
             int statusInt = sc.nextInt();
             boolean status = statusInt == 1;
-            carRide.setStatus(status);
+            carRide.setApprovedByOwner(status);
 
             int start = sc.nextInt();
             carRide.setStartMileage(start);

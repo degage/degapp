@@ -1,4 +1,4 @@
-@(adjustForm: play.data.Form[Reserve.ReservationModel], reservation: Reservation)
+@(reservation: Reservation)
 @import db.CurrentUser
 
 @helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {

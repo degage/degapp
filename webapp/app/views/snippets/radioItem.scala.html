@@ -1,0 +1,12 @@
+@(field: play.api.data.Field, value: String)(body: => Html)
+
+@currentValue=@{field.value.getOrElse("").toString}
+
+@* Displays a single radio button group item, selected according to whether the
+   current value is equal to the tag value. *@
+
+<div class="radio">
+<label>
+<input type="radio" name="@field.name" value="@currentValue" @if(value==currentValue){checked}/>@body
+</label>
+</div>

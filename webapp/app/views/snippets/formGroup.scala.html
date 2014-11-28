@@ -1,0 +1,9 @@
+@(field: play.api.data.Field, label: String)(body: => Html)
+
+<div class="form-group @if(field.hasErrors) {has-error}">
+    <label class="control-label">@label</label>
+    @body
+    @field.errors.map { error =>
+        <span class="help-block">@error</span>
+    }
+</div>

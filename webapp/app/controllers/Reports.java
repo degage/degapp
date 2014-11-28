@@ -144,10 +144,10 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(reservation.getMessage());
                 if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
                     CarRide carRide = carRideDAO.getCarRide(reservation.getId());
-                    row.createCell(j++).setCellValue(carRide.getStartMileage());
-                    row.createCell(j++).setCellValue(carRide.getEndMileage());
+                    row.createCell(j++).setCellValue(carRide.getStartKm());
+                    row.createCell(j++).setCellValue(carRide.getEndKm());
                     row.createCell(j++).setCellValue(carRide.isDamaged());
-                    row.createCell(j++).setCellValue(carRide.isStatus());
+                    row.createCell(j++).setCellValue(carRide.isApprovedByOwner());
                 }
             }
             wb.write(out);
@@ -209,10 +209,10 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(reservation.getMessage());
                 if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
                     CarRide carRide = carRideDAO.getCarRide(reservation.getId());
-                    row.createCell(j++).setCellValue(carRide.getStartMileage());
-                    row.createCell(j++).setCellValue(carRide.getEndMileage());
+                    row.createCell(j++).setCellValue(carRide.getStartKm());
+                    row.createCell(j++).setCellValue(carRide.getEndKm());
                     row.createCell(j++).setCellValue(carRide.isDamaged());
-                    row.createCell(j++).setCellValue(carRide.isStatus());
+                    row.createCell(j++).setCellValue(carRide.isApprovedByOwner());
                 }
             }
             wb.write(out);

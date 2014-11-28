@@ -1,5 +1,4 @@
-@(adjustForm: play.data.Form[Reserve.ReservationModel], refuseForm: play.data.Form[Drives.RemarksModel],
-infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
+@(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
 car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 @import db.CurrentUser
 
@@ -26,9 +25,9 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 </script>
 }
 @stylesheets = {
-<link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")">
+<link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
 }
-@app("Rit details", stylesheets, scripts) {
+@app("Ritdetails", stylesheets, scripts) {
 
 @defining(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
 <div id="page-header-wrapper">
@@ -54,24 +53,13 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 </div>
 <!-- panel-body -->
 <div class="panel-body">
-<!-- error while adjusting the reservation -->
-@if(adjustForm.hasGlobalErrors) {
-    <div class="alert alert-danger alert-dismissable">
-        <strong>Error!</strong> @adjustForm.globalError.message
-    </div>
-}
-<!-- error while refusing the reservation -->
-@if(refuseForm.hasGlobalErrors) {
-    <div class="alert alert-danger alert-dismissable">
-        <strong>Error!</strong> @refuseForm.globalError.message
-    </div>
-}
 <!-- error while providing drive information -->
 @if(infoForm.hasGlobalErrors) {
     <div class="alert alert-danger alert-dismissable">
         <strong>Error!</strong> @infoForm.globalError.message
     </div>
 }
+@flashes()
 <!-- well -->
 <div class="well">
     <!-- row -->
@@ -105,11 +93,11 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
     <!-- /row -->
     <!-- loaner specific content -->
     @if((CurrentUser is loaner.getId) || isAdmin) {
-        @views.html.drives.driveDetailsLoaner(adjustForm, reservation)
+        @views.html.drives.driveDetailsLoaner(reservation)
     }
     <!-- owner specific content -->
     @if((CurrentUser is owner.getId) || isAdmin) {
-        @views.html.drives.driveDetailsOwner(refuseForm, reservation, owner.getId)
+        @views.html.drives.driveDetailsOwner(reservation, owner.getId)
     }
     <!-- /well -->
 </div>
@@ -231,7 +219,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 </div>
 <!-- Both loaner and owner can edit this -->
 @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-    @views.html.drives.driveInfo(infoForm, reservation, driveInfo, false)
+    @views.html.drives.driveInfo(infoForm, reservation, false)
 }
 @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
 <!-- row -->
@@ -239,10 +227,10 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 <div class="well">
     <div class="row">
         <div class="col-sm-4">
-            <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartMileage
+            <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartKm
         </div>
         <div class="col-sm-4">
-            <strong>Kilometerstand na rit:</strong> @driveInfo.getEndMileage
+            <strong>Kilometerstand na rit:</strong> @driveInfo.getEndKm
         </div>
         <div class="col-sm-4">
             <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
@@ -272,7 +260,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 </div>
 </div>
 <div id="adjustEnv" @if(!infoForm.hasGlobalErrors) { class="hidden" }>
-@views.html.drives.driveInfo(infoForm, reservation, driveInfo, true)
+@views.html.drives.driveInfo(infoForm, reservation, true)
 </div>
 </div>
 <!-- /panel-body -->

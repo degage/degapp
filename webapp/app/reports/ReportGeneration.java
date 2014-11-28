@@ -122,10 +122,11 @@ public class ReportGeneration {
         int othersDist = 0;
 
         for (CarRide ride : rides) {
+            // TODO: what if mileages are blank?
             if (ride.getReservation().isPrivileged()) {
-                loanerDist += ride.getEndMileage() - ride.getStartMileage();
+                loanerDist += ride.getEndKm() - ride.getStartKm();
             } else {
-                othersDist += ride.getEndMileage() - ride.getStartMileage();
+                othersDist += ride.getEndKm() - ride.getStartKm();
             }
         }
 
@@ -259,7 +260,7 @@ public class ReportGeneration {
 
         for (CarRide ride : rides) {
 
-            int distance = ride.getEndMileage() - ride.getStartMileage();
+            int distance = ride.getEndKm() - ride.getStartKm();
             totalDistance += distance;
 
             add(drivesTable, ride.getReservation().getCar().getName());
