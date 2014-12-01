@@ -34,7 +34,7 @@ POST        /reserve                                controllers.Reserve.indexWit
 GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
 GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
-POST        /reserve/reservation                    controllers.Reserve.confirmReservation(cardId: Int)
+POST        /reserve/reservation                    controllers.Reserve.confirmReservation(carId: Int)
 
 
 # Receipts

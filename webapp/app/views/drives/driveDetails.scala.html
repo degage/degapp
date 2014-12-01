@@ -44,7 +44,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 <div class="row">
 <!-- col-lg-12 -->
 <div class="col-lg-12">
-<h1 class="page-header">Rit details</h1>
+<h1 class="page-header">Ritdetails</h1>
 <div class="panel panel-default">
 <!-- panel-heading -->
 <div class="panel-heading">
@@ -54,11 +54,6 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 <!-- panel-body -->
 <div class="panel-body">
 <!-- error while providing drive information -->
-@if(infoForm.hasGlobalErrors) {
-    <div class="alert alert-danger alert-dismissable">
-        <strong>Error!</strong> @infoForm.globalError.message
-    </div>
-}
 @flashes()
 <!-- well -->
 <div class="well">
@@ -109,8 +104,8 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
             <strong>Eigenaar</strong><hr />
             <p>
                 @if((CurrentUser is owner.getId) ||
-                reservation.getStatus != ReservationStatus.REFUSED ||
-                reservation.getStatus != ReservationStatus.REQUEST ||
+                reservation.getStatus != ReservationStatus.REFUSED &&
+                reservation.getStatus != ReservationStatus.REQUEST &&
                 reservation.getStatus != ReservationStatus.CANCELLED
                 ) {
                 <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
@@ -152,11 +147,11 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
     <div class="col-lg-6">
         <!-- well -->
         <div class="well">
-            <strong>Ontlener voor u</strong><hr />
+            <strong>Ontlener vóór u</strong><hr />
             <p>
                 @if(((CurrentUser is owner.getId) ||
-                reservation.getStatus != ReservationStatus.REFUSED ||
-                reservation.getStatus != ReservationStatus.REQUEST ||
+                reservation.getStatus != ReservationStatus.REFUSED &&
+                reservation.getStatus != ReservationStatus.REQUEST &&
                 reservation.getStatus != ReservationStatus.CANCELLED) &&
                 previousLoaner != null
                 ) {
@@ -189,8 +184,8 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
             <strong>Ontlener na u</strong><hr />
             <p>
                 @if(((CurrentUser is owner.getId) ||
-                reservation.getStatus != ReservationStatus.REFUSED ||
-                reservation.getStatus != ReservationStatus.REQUEST ||
+                reservation.getStatus != ReservationStatus.REFUSED &&
+                reservation.getStatus != ReservationStatus.REQUEST &&
                 reservation.getStatus != ReservationStatus.CANCELLED) &&
                 nextLoaner != null
                 ) {
@@ -223,7 +218,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 }
 @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
 <!-- row -->
-<div id="showEnv" @if(infoForm.hasGlobalErrors) { class="hidden" }>
+<div id="showEnv" @if(infoForm.hasErrors) { class="hidden" }>
 <div class="well">
     <div class="row">
         <div class="col-sm-4">
@@ -259,7 +254,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
     <br />
 </div>
 </div>
-<div id="adjustEnv" @if(!infoForm.hasGlobalErrors) { class="hidden" }>
+<div id="adjustEnv" @if(!infoForm.hasErrors) { class="hidden" }>
 @views.html.drives.driveInfo(infoForm, reservation, true)
 </div>
 </div>
