@@ -60,7 +60,7 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
 
     private LazyStatement createAddressStatement = new LazyStatement(
             "INSERT INTO addresses(address_city, address_zipcode, address_street, address_number, address_country) " +
-                    "VALUES (?,?,?,?,?,?)",
+                    "VALUES (?,?,?,?,?)",
             "address_id"
     );
 
