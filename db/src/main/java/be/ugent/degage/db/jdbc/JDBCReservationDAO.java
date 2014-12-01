@@ -393,7 +393,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getReservationListByCaridStatement = new LazyStatement (
-            "SELECT  " + RESERVATION_HEADER_FIELDS + "FROM carreservations WHERE car_id=?"
+            "SELECT  " + RESERVATION_HEADER_FIELDS + "FROM carreservations WHERE reservation_car_id=?"
     );
 
     @Override
