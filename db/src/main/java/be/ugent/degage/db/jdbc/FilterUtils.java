@@ -92,6 +92,15 @@ public final class FilterUtils {
     }
 
     /**
+     * Append to a given builder the AND-clause for a boolean, when not one
+     */
+    public static void appendNotWhenOneFilter (StringBuilder builder, String key, String value) {
+        if(value.equals("1")) {
+            builder.append (" AND NOT ").append(key);
+        }
+    }
+
+    /**
      * Append to a given builder the AND-clause for a tristate
      */
     public static void appendTristateFilter (StringBuilder builder, String key, String value) {

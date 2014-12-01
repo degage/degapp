@@ -69,7 +69,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
         ps.setString(start+2, filter.getValue(FilterField.CAR_BRAND));
 
-        String manual = filter.getValue(FilterField.CAR_MANUAL);
+        String manual = filter.getValue(FilterField.CAR_AUTOMATIC);
         ps.setString(start+3, manual);
         String s = ""; // This will match nothing
         if(manual.equals("-1") || manual.equals("")) { // Not very nice programming, but works :D
@@ -510,7 +510,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
         FilterUtils.appendWhenOneFilter(builder, "car_gps", filter.getValue(FilterField.CAR_GPS));
         FilterUtils.appendWhenOneFilter(builder, "car_hook", filter.getValue(FilterField.CAR_HOOK));
-        FilterUtils.appendTristateFilter(builder, "car_manual", filter.getValue(FilterField.CAR_MANUAL));
+        FilterUtils.appendNotWhenOneFilter(builder, "car_manual", filter.getValue(FilterField.CAR_AUTOMATIC));
     }
 
     private String NEW_CAR_QUERY =

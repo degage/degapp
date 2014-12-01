@@ -1,13 +1,9 @@
 @(error: String, carName: String, carId: Int, from: String, until: String)
 @scripts = {
     <script>
-        var yesImage = '@routes.Assets.at("images/tristate-checkbox/yes.png")';
-        var noImage = '@routes.Assets.at("images/tristate-checkbox/no.png")';
-        var noneImage = '@routes.Assets.at("images/tristate-checkbox/none.png")';
         var from = '@from'
         var until = '@until'
     </script>
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/plugins/tristate-checkbox/main.js")'></script>
     <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/app/reservations.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
@@ -132,18 +128,19 @@
                                                 <option value="ELECTRIC">Elektrisch</option>
                                             </select>
                                         </div>
-                                        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                            <label>Extra</label><br />
-                                            <label class="checkbox-inline" style="margin-left: 0px; margin-right: 10px">
-                                                <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">Gps aanwezig
-                                            </label>
-                                            <label class="checkbox-inline" style="margin-left: 0px; margin-right: 10px">
-                                                <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">Trekhaak aanwezig
-                                            </label>
-                                            <label class="checkbox-inline" style="margin-left: 0px; margin-right: 10px">
-                                                <span class="tristate" id="manual"></span>
-                                                Manueel?
-                                            </label>
+                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
+                                            <label>Toon enkel auto's met</label>
+                                            <div>
+                                                <label class="checkbox-inline">
+                                                    <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">GPS
+                                                </label>
+                                                <label class="checkbox-inline">
+                                                    <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">Trekhaak
+                                                </label>
+                                                <label class="checkbox-inline">
+                                                    <input id="automatic" class="searchTextField" name="automatic" type="checkbox" value="0">Automatische versnellingsbak
+                                                </label>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

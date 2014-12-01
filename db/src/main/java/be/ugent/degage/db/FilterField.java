@@ -9,7 +9,7 @@ package be.ugent.degage.db;
  */
 public enum FilterField {
 
-    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_MANUAL(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true), CAR_ACTIVE(true),
+    CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_AUTOMATIC(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true), CAR_ACTIVE(true),
     CAR_COST_STATUS(false), CAR_COST_DATE(true),
     REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true), REFUEL_NOT_STATUS(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
@@ -56,8 +56,8 @@ public enum FilterField {
             case "seats":
                 field = CAR_SEATS;
                 break;
-            case "manual":
-                field = CAR_MANUAL;
+            case "automatic":
+                field = CAR_AUTOMATIC;
                 break;
             case "gps":
                 field = CAR_GPS;
