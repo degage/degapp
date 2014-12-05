@@ -1,8 +1,6 @@
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.MessageDAO;
-import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;

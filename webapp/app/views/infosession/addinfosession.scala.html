@@ -48,8 +48,8 @@
 }
 
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")">
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
+    <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
 }
 
 @app(if (editId == 0) "Nieuwe infosessie" else "Bewerk infosessie", stylesheets, scripts) {

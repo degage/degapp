@@ -1,0 +1,9 @@
+@(label: String, href: Call = null)
+
+@* Single breadcrumb in a list of breadcrumbs. *@
+
+@if(href==null){
+<li class="active">@label</li>
+} else {
+<li><a href="@href">@label</a></li>
+}

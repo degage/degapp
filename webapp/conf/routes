@@ -30,12 +30,14 @@ GET         /drives-cancelled                       controllers.Drives.cancelRes
 
 # Reservations
 GET         /reserve                                controllers.Reserve.index()
-POST        /reserve                                controllers.Reserve.indexWithDate()
 GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
-GET         /reserve/cars                           controllers.Reserve.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
 POST        /reserve/reservation                    controllers.Reserve.confirmReservation(carId: Int)
 
+# Reservations (new code)
+GET         /reserve/list                           controllers.Reserve.listAvailableCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /reserve/car                            controllers.Reserve.reserveCar(carId: Int, from: String, until: String)
+POST        /reserve/car                            controllers.Reserve.doReservation(carId: Int)
 
 # Receipts
 GET         /receipts                                  controllers.Receipts.index()

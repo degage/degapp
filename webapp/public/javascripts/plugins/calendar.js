@@ -18,6 +18,9 @@
  *
  * Created by Benjamin on 27/04/2014.
  *
+ * -------------------------------------------
+ * TODO: Currently not used
+ * Based on http://fullcalendar.io ?
  */
 !function ($) {
     /**

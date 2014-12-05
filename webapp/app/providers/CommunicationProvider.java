@@ -37,8 +37,6 @@ public class CommunicationProvider {
                 List<Notification> notifications = context.getNotificationDAO().getNotificationList(null, false, 1, AMOUNT_OF_VISIBLE_NOTIFICATIONS, filter);
                 Cache.set(key, notifications);
                 return notifications;
-            } catch (DataAccessException ex) {
-                throw ex;
             }
         } else {
             return (List<Notification>) obj; //Type erasure problem from Java, works at runtime
@@ -53,8 +51,6 @@ public class CommunicationProvider {
                 int unread_number = context.getNotificationDAO().getNumberOfUnreadNotifications(userId);
                 Cache.set(key, unread_number);
                 return unread_number;
-            } catch (DataAccessException ex) {
-                throw ex;
             }
         } else {
             return (Integer) obj; //Type erasure problem from Java, works at runtime

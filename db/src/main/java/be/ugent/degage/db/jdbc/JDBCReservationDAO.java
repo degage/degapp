@@ -426,16 +426,19 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
+
     private LazyStatement listCRInfoStatement = new LazyStatement(
         "SELECT car_id, car_name,  FROM car LEFT JOIN carreservations ON reservation_car_id = car_id " +
-                "WHERE reservation_to >= ? AND reservation_from <= ? ORDER BY car_id, reservation_from"
+                "WHERE reservation_to >= ? AND reservation_from <= ? " + // TODO: same where clause appears several times
+                "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
+                "ORDER BY car_id, reservation_from"
     );
 
     public Iterable<CRInfo> listCRInfo (DateTime from, DateTime to) {
         try {
             PreparedStatement ps = listCRInfoStatement.value();
-            ps.setTimestamp(1, new Timestamp(to.getMillis()));
-            ps.setTimestamp(2, new Timestamp(from.getMillis()));
+            ps.setTimestamp(1, new Timestamp(from.getMillis()));
+            ps.setTimestamp(2, new Timestamp(to.getMillis()));
             try (ResultSet rs = ps.executeQuery()) {
                 Collection<CRInfo> result = new ArrayList<>();
                 CRInfo crInfo = null;
@@ -462,4 +465,25 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     }
 
+    private LazyStatement hasOverlapStatement = new LazyStatement(
+        "SELECT count(*) FROM carreservations " +
+                "WHERE reservation_car_id = ? AND reservation_to >= ? AND reservation_from <= ? " +
+                "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' "
+    );
+
+    @Override
+    public boolean hasOverlap(int carId, DateTime from, DateTime until) {
+        try {
+            PreparedStatement ps = hasOverlapStatement.value();
+            ps.setInt (1, carId);
+            ps.setTimestamp(2, new Timestamp(from.getMillis()));
+            ps.setTimestamp(3, new Timestamp(until.getMillis()));
+            try (ResultSet rs = ps.executeQuery()) {
+                rs.next();
+                return rs.getInt(1) != 0;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException( "Could not obtain reservation overlap information", ex);
+        }
+    }
 }

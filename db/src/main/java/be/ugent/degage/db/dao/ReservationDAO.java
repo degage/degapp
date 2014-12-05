@@ -40,6 +40,11 @@ public interface ReservationDAO {
      */
     public Reservation getPreviousReservation(int reservationId) throws DataAccessException;
 
+    /**
+     * Is there any reservation that overlaps the given period?
+     */
+    public boolean hasOverlap (int carId, DateTime from, DateTime until);
+
 
 
     public void deleteReservation(Reservation reservation) throws DataAccessException;
@@ -75,7 +80,7 @@ public interface ReservationDAO {
     }
 
     /**
-     * Return information on all reservations (exceot those cancelled) during a certain period of time, ordered by car.
+     * Return information on all reservations (except those cancelled) during a certain period of time, ordered by car.
      */
     public Iterable<CRInfo> listCRInfo (DateTime from, DateTime to);
 

@@ -1,6 +1,5 @@
 package db;
 
-import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.models.UserStatus;

@@ -1,0 +1,8 @@
+@(name: String, label: String, css: String = "col-lg-12")
+
+@*  Number field for use in a search context *@
+
+<div class="form-group @css">
+    <label class="control-label" for="@name">@label</label>
+    <input id="@name" name="@name" type="number" class="searchTextField form-control" >
+</div>

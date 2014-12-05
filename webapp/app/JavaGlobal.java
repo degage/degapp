@@ -38,7 +38,7 @@ public class JavaGlobal {
 
     private static void registerFormatters() {
         Formatters.register(DateTime.class, new Formatters.SimpleFormatter<DateTime>() {
-            private final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss"); //ISO time without miliseconds
+            private final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormat.forPattern("yyyy-MM-dd HH:mm"); //ISO time without miliseconds
 
             @Override
             public DateTime parse(String s, Locale locale) throws ParseException {

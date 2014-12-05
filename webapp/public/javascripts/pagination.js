@@ -53,6 +53,9 @@ var buttonsAroundPage = 2;
 if(typeof autoLoad == 'undefined') {
     autoLoad = 0;
 }
+if (typeof initialLoad == 'undefined') {
+    initialLoad = 1;
+}
 if(typeof beginPage == 'undefined') {
     var beginPage = 1;
 }
@@ -74,7 +77,9 @@ var intervalLoading;
 var goingLeft = true;
 
 // Initially, we load the first page in ascending order, ordered by the default column, without filtering
-$(document).ready(loadPage(beginPage, beginPageSize, beginAsc, beginOrder, beginFilter));
+if (initialLoad) {
+    $(document).ready(loadPage(beginPage, beginPageSize, beginAsc, beginOrder, beginFilter));
+}
 
 /*
  * Filtering

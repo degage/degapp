@@ -1,8 +1,9 @@
 @(sessions: Iterable[InfoSession])
 @import providers.DataProvider;
 @scripts = {
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script>
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker-adapted.js")'></script> @* TODO: avoid this *@
+    @* <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script> *@
+    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
+    @* <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker-adapted.js")'></script> TODO: does this still work? *@
     <script type="text/javascript" src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
     <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
 }

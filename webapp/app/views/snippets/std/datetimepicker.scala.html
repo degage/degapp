@@ -1,0 +1,19 @@
+@(field: Field, label: String, css: String="col-xs-12")
+
+@* datetime picker input component for use in a form context *@
+
+@* TODO: make width variable, also introduce a version which takes a field as argument *@
+
+<div class="form-group @css @if(field.hasErrors) {has-error}">
+    <label class="control-label" for="@field.id-container">@label</label>
+    <div id="@field.id-container" class="input-group date datetimepicker-input">
+        <input type="hidden" name="@field.name" value="@field.value">
+        @* hidden field is needed, because disabled input field values are not send with a form *@
+        <input class="form-control" type="text" value="@field.value" disabled>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                @* datetime picker does not work with fa icons *@
+    </div>
+    @field.errors.map { error =>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+    }
+</div>

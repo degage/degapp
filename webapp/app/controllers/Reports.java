@@ -15,7 +15,6 @@ import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import play.mvc.Controller;
 import play.mvc.Result;
-import providers.DataProvider;
 import views.html.reports;
 
 import java.io.File;

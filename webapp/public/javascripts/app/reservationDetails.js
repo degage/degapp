@@ -49,7 +49,7 @@ $(document).ready(function() {
             var date = new Date(evt.date);
             var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
                 date.getMinutes(), 0);
-            $('#datetimepickeruntil').datetimepicker('setEndDateToNextDisabled', correctedDate);
+            // needs adapted date time picker $('#datetimepickeruntil').datetimepicker('setEndDateToNextDisabled', correctedDate);
             correctedDate.setHours(correctedDate.getHours() - 2);
             correctedDate.setMinutes(correctedDate.getMinutes() + 5);
             $('#datetimepickeruntil').datetimepicker('setStartDate', correctedDate);
@@ -60,6 +60,7 @@ $(document).ready(function() {
             $('#datetimepickeruntil').datetimepicker('setEndDate', Infinity);
         }
     });
+    /*
     // When datetimepicker until is changed, make sure the user can't select a date after until
     // in datetimepicker until
     $('#datetimepickeruntil').datetimepicker().on('changeDate', function(evt) {
@@ -67,7 +68,7 @@ $(document).ready(function() {
             var date = new Date(evt.date);
             var correctedDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(),
                 date.getMinutes(), 0);
-            $('#datetimepickerfrom').datetimepicker('setStartDateToPreviousDisabled', correctedDate, new Date());
+            // needs adapted date time picker $('#datetimepickerfrom').datetimepicker('setStartDateToPreviousDisabled', correctedDate, new Date());
             correctedDate.setHours(correctedDate.getHours() - 2);
             correctedDate.setMinutes(correctedDate.getMinutes() - 5);
             $('#datetimepickerfrom').datetimepicker('setEndDate', correctedDate);
@@ -77,4 +78,5 @@ $(document).ready(function() {
             $('#datetimepickerfrom').datetimepicker('setEndDate', Infinity);
         }
     });
+    */
 });

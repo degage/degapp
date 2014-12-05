@@ -3,14 +3,15 @@
     <script>
         var from = '@from'
         var until = '@until'
+
     </script>
     <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/app/reservations.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script>
+    @* <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script> *@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/userpicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/plugins/datetimepicker/bootstrap-datetimepicker-adapted.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 }
 @stylesheets = {
@@ -44,43 +45,30 @@
                     <div class="panel-body">
                         <div class="">
                             <div class="row">
-                                <div id="basicEnv" class="col-xs-12">
                                     <h4>@if(carId != -1) { @carName reserveren: } else { Auto's zoeken }</h4><hr />
                                     <input id="input_from_value" class="hidden searchTextField" name="from" value="" />
                                     <div class="alert alert-danger">
-                                        Onderstaande datums en tijdstippen worden nog niet gebruikt bij het zoeken - in afwachting
+                                        Onderstaande werkt nog niet - in afwachting
                                         van een betere user-interface voor reservaties.
                                     </div>
-                                    <div class="col-sm-6 col-xs-12">
-                                        <label>Reservatie van: </label><br />
-                                        <div class="datepicker from input-group date form_datetime" data-link-field="endDate">
-                                            <input id="input_from_date" class="endDate form-control input-md" size="5" type="text">
+                                    <div class="form-group col-lg-4">
+                                        <label>Reservatie van:</label>
+                                        <div id="reservation_from" class="input-group date datetimepicker-input">
+                                            <input class="form-control"
+                                                   type="text" name="reservationFrom">
                                             <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                         </div>
                                     </div>
-                                    <div class="col-sm-6 col-xs-12">
-                                        <label>Tijdstip van: </label><br />
-                                        <div class="timepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">
-                                            <input id="input_from_time" class="beginTime form-control input-md" size="5" type="text">
+                                    <div class="form-group col-lg-4">
+                                        <label>Reservatie tot:</label>
+                                        <div id="reservation_until" class="input-group date datetimepicker-input">
+                                            <input class="form-control"
+                                                   type="text" name="reservationUntil">
                                             <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                         </div>
                                     </div>
-                                    <input id="input_to_value" class="hidden searchTextField" name="until" value="" />
-                                    <div class="col-sm-6 col-xs-12">
-                                        <label>Reservatie tot: </label><br />
-                                        <div class="datepicker until input-group date form_datetime" data-link-field="endDate">
-                                            <input id="input_to_date" class="endDate form-control input-md" size="5" type="text">
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                        </div>
-                                    </div>
-                                    <div class="col-sm-6 col-xs-12">
-                                        <label>Tijdstip tot: </label><br />
-                                        <div class="timepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">
-                                            <input id="input_to_time" class="endTime form-control input-md" size="5" type="text">
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                        </div>
-                                    </div>
-                                    <div id="filterbuttons" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+
+                                    <div id="filterbuttons" class="col-lg-4">
                                         <br />
                                         <div class="btn-group btn-group-sm">
                                             <button id="searchButton" type="button" class="btn btn-success">

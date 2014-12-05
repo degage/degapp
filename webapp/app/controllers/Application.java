@@ -37,7 +37,7 @@ public class Application extends Controller {
                         javascript.Damages.editDamage(),
                         javascript.Damages.addStatus(),
                         javascript.Damages.addProof(),
-                        javascript.Reserve.showCarsPage(),
+                        javascript.Reserve.listAvailableCarsPage(),
                         javascript.Users.showUsersPage(),
                         javascript.UserRoles.showUsersPage(),
                         javascript.EmailTemplates.showExistingTemplatesPage(),

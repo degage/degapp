@@ -63,8 +63,9 @@ $(document).ready(function() {
         showMeridian: 1,
         linkFormat: "yyyy-mm-dd HH:ii"
     });
-    $("#input_from").datetimeinput();
-    $("#input_until").datetimeinput();
+    // TODO: can these be avoided?
+    //$("#input_from").datetimeinput();
+    //$("#input_until").datetimeinput();
 
     // Disable all dates excepted those within the reservation dates
     $('#datetimepickerfrom').datetimepicker('setStartDate', correctedFrom);

@@ -66,23 +66,30 @@ $(document).ready(function() {
         pickerPosition: 'bottom-left'
     });
 
+    $('.datetimepicker-input').datetimepicker({
+        autoclose: 1,
+        pickerPosition: 'bottom-left',
+        format: "yyyy-mm-dd hh:ii",
+        minuteStep: 15
+    });
+
     $('.datetimepicker-hours .table-condensed thead').html('').append($('<tr>').append(
         $('<th>').css('width', '180px').text('Selecteer het uur')));
     $('.datetimepicker-minutes .table-condensed thead').html('').append($('<tr>').append(
         $('<th>').css('width', '180px').text('Selecteer de minuten')));
-
-    inputFrom.datetimeinput({
-        formatString: dateFormat
-    });
-    inputTo.datetimeinput({
-        formatString: dateFormat
-    });
-    fromTime.datetimeinput({
-        formatString: timeFormat
-    });
-    toTime.datetimeinput({
-        formatString: timeFormat
-    });
+//
+//    inputFrom.datetimeinput({
+//        formatString: dateFormat
+//    });
+//    inputTo.datetimeinput({
+//        formatString: dateFormat
+//    });
+//    fromTime.datetimeinput({
+//        formatString: timeFormat
+//    });
+//    toTime.datetimeinput({
+//        formatString: timeFormat
+//    });
 
     $('#extraButton').on('click', function() {
         if(!$('#extraFiltering').hasClass('in')) {

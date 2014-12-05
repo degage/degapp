@@ -4,8 +4,6 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarDAO;
-import be.ugent.degage.db.dao.JobDAO;
-import be.ugent.degage.db.dao.PrivilegedDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
@@ -18,16 +16,19 @@ import org.joda.time.MutableDateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import play.data.Form;
+import play.data.format.Formatters;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import providers.DataProvider;
 import views.html.reserve.reservationDetailsPartial;
 import views.html.reserve.reservations;
-import views.html.reserve.reservationspage;
+import views.html.reserve.start;
+import views.html.reserve.availablecarspage;
+import views.html.errortablerow;
 
-import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -111,45 +112,12 @@ public class Reserve extends Controller {
     /**
      * Method: GET
      *
-     * @return the reservation index page containing all cars
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result index() {
-        return ok(showIndex());
-    }
-
-    /**
-     * Method: GET
-     *
      * @return the reservation index page containing one specific car
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result indexWithCar(String carName, int id) {
-        return ok(showIndex(carName, "", "", id));
-    }
-
-    /**
-     * Method: GET
-     *
-     * @return the reservation index page containing one specific car
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result indexWithDate() {
-        Form<IndexModel> form = Form.form(IndexModel.class).bindFromRequest();
-        if (form.hasErrors()) {
-            return ok(showIndex());
-        }
-        return ok(showIndex("", form.get().from, form.get().until, -1));
-    }
-
-    /**
-     * @return The html context of the reservations index page with date from and until and car added
-     */
-    private static Html showIndex(String carName, String from, String until, int id) {
-        return reservations.render("", carName, id, from, until);
+        return ok(reservations.render("", carName, id, "", ""));
     }
 
     /**
@@ -236,48 +204,147 @@ public class Reserve extends Controller {
         }
     }
 
-    // Partial
 
     /**
-     * Method: GET
-     * <p>
-     * Method to render a partial page containing an amount of cars for reservation that ought to be displayed
-     * corresponding a:
-     * - a search string
-     * - the number of cars to be rendered per page
-     * - the page that's being rendered
-     *
-     * @param page         the page to be rendered
-     * @param ascInt       boolean int, if 1 the records are ordered ascending
-     * @param orderBy      the string designating the filterfield on which to order
-     * @param searchString the string containing all search information
-     * @return the requested page of cars for reservation
+     * Show an initial page with a reservation search form. This page uses Ajax to show all cars available for
+     * reservation in a certain period
+     * @return
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
-    public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+    public static Result index() {
+        return ok(start.render());
+    }
+
+    /**
+     * Ajax call as a result of the 'search' button in  str=art.
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result listAvailableCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
 
         FilterField field = FilterField.stringToField(orderBy);
-
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-
         if (field == null) {
             field = FilterField.CAR_NAME;
         }
+
+        boolean asc = Pagination.parseBoolean(ascInt);
+
+        Filter filter = Pagination.parseFilter(searchString);
+
+        String validationError = null;
+        String fromString = filter.getValue(FilterField.FROM);
+        String untilString = filter.getValue(FilterField.UNTIL);
         try {
-            DATETIMEFORMATTER.parseDateTime(filter.getValue(FilterField.FROM));
-            DATETIMEFORMATTER.parseDateTime(filter.getValue(FilterField.UNTIL));
+            DateTime from = DATETIMEFORMATTER.parseDateTime(fromString);
+            DateTime until = DATETIMEFORMATTER.parseDateTime(untilString);
+            if (!until.isAfter(from)) {
+                validationError = "Het einde van de periode moet na het begin van de periode liggen";
+            }
         } catch (IllegalArgumentException ex) {
-            return ok(reservationspage.render(new ArrayList<>(), page, 0, 0, false));
+            validationError = "Gelieve geldige datums in te geven";
+        }
+        if (validationError != null) {
+            return ok (errortablerow.render(validationError));
         }
 
+        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
         Iterable<Car> listOfCars = dao.getCarList(field, asc, page, pageSize, filter);
 
-        int amountOfResults = dao.getAmountOfCars(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+        int numberOfResults = dao.getAmountOfCars(filter);
+        int numberOfPages = (int) Math.ceil(numberOfResults / (double) pageSize);
 
-        return ok(reservationspage.render(listOfCars, page, amountOfResults, amountOfPages, true));
+        return ok(availablecarspage.render(listOfCars, page, numberOfResults, numberOfPages, fromString, untilString));
     }
+
+    public static class ReservationData {
+        @Constraints.Required
+        public DateTime from;
+
+        @Constraints.Required
+        public DateTime until;
+
+        public String message;
+
+        public List<ValidationError> validate () {
+            if (! from.isBefore(until)) {
+                return Arrays.asList(new ValidationError("until", "Het einde van de periode moet na het begin van de periode liggen"));
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Show the page to make a reservation for a specific car during a specific period
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result reserveCar(int carId, String fromString, String untilString) {
+        Car car = DataAccess.getContext().getCarDAO().getCar(carId);
+
+        // use spring binder to do conversions   (query string binders are quite complicated to write :-()
+        ReservationData data = new ReservationData();
+        data.from = Formatters.parse (fromString, DateTime.class);
+        data.until = Formatters.parse (untilString, DateTime.class);
+        Form<ReservationData> form = new Form<>(ReservationData.class).fill(data);
+
+        // alternative
+        //Form<ReservationData> form = new Form<>(ReservationData.class)
+        //        .bind(ImmutableMap.<String, String>builder().put("from", fromString).put("until", untilString).build());
+        return ok (views.html.reserve.reservation.render(form,car));
+    }
+
+    /**
+     * Process the reservation made in {@link #reserveCar}
+     * @param carId
+     * @return
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result doReservation(int carId) {
+        Form<ReservationData> form = new Form<>(ReservationData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            Car car = DataAccess.getContext().getCarDAO().getCar(carId);
+            return ok (views.html.reserve.reservation.render(form,car));
+        }
+
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        // Test whether the reservation is valid
+        ReservationData data = form.get();
+        DateTime from = data.from;
+        DateTime until = data.until;
+        ReservationDAO rdao = context.getReservationDAO();
+        if (rdao.hasOverlap(carId, data.from, data.until))  {
+            String errorMessage = "De reservatie overlapt met een bestaande reservatie";
+            form.reject ("from", errorMessage);
+            form.reject ("until", errorMessage);
+            return ok (views.html.reserve.reservation.render(form,car));
+        }
+
+        ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), data.message);
+        if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
+            // Reservations by the owner were accepted automatically
+
+            // Schedule the auto accept
+            int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
+            MutableDateTime autoAcceptDate = new MutableDateTime();
+            autoAcceptDate.addMinutes(minutesAfterNow);
+            context.getJobDAO().createJob(
+                    JobType.RESERVE_ACCEPT, reservation.getId(),
+                    DateTime.now().plusMinutes(Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
+            );
+
+            // note: user contained in this record was null
+            // TODO: avoid having to retrieve the whole record
+            Reservation res = rdao.getReservation(reservation.getId());
+            Notifier.sendReservationApproveRequestMail(
+                    car.getOwner(), res
+            );
+        }
+        return redirect(routes.Drives.index());
+    }
+
 }

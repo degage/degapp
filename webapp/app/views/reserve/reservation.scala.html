@@ -1,0 +1,52 @@
+@(form: play.data.Form[Reserve.ReservationData], car: Car)
+
+@* Form which allows you to make an actual reservation *@
+
+@scripts = {
+    <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
+    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
+    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
+
+    <script type='text/javascript' language="javascript">
+    // execute when loaded:
+    $(document).ready(function() {
+        $('.datetimepicker-input').datetimepicker({
+            autoclose: 1,
+            pickerPosition: 'bottom-left',
+            format: "yyyy-mm-dd hh:ii",
+            minuteStep: 15
+        });
+    });
+    </script>
+}
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
+}
+@app("Reserveer", stylesheets, scripts) {
+
+    @breadcrumbs{
+        @breadcrumb("Dashboard",routes.Dashboard.index)
+        @breadcrumb("Start reservatie",routes.Reserve.index)
+        @breadcrumb("Reserveer")
+    }
+
+    @maincontent("Reserveer"){
+        @panel("Reserveer " + car.getName, "fa-pencil"){
+            @helper.form(routes.Reserve.doReservation(car.getId)) {
+                @std.datetimepicker(form("from"), "Van:", "col-md-6")
+                @std.datetimepicker(form("until"), "Tot:", "col-md-6")
+                @std.textArea(form("message"), "Opmerkingen",3, 'maxLength -> 128)
+                @submitButton("Vraag reservatie aan")
+            }
+        }
+        @panel("Auto ", "fa-car"){
+            <div class="col-lg-12">
+                <strong>Naam:</strong> @car.getName<br>
+                <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a><br>
+                <strong>Merk / type:</strong> @car.getBrand / @car.getType<br>
+                <strong>Standplaats:</strong> @car.getLocation
+            </div>
+        }
+    }
+
+}

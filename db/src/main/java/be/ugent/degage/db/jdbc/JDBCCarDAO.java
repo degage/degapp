@@ -511,6 +511,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         FilterUtils.appendWhenOneFilter(builder, "car_gps", filter.getValue(FilterField.CAR_GPS));
         FilterUtils.appendWhenOneFilter(builder, "car_hook", filter.getValue(FilterField.CAR_HOOK));
         FilterUtils.appendNotWhenOneFilter(builder, "car_manual", filter.getValue(FilterField.CAR_AUTOMATIC));
+
+
+
     }
 
     private String NEW_CAR_QUERY =
@@ -519,6 +522,13 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                     "address_id, address_city, address_zipcode, address_street, " +
                     "address_number, address_country " +
             "FROM cars JOIN addresses ON address_id=car_location ";
+
+    private String SELECT_NOT_OVERLAP =
+            "AND car_id NOT IN (" +
+                "SELECT reservation_car_id FROM carreservations " +
+                    "WHERE reservation_to >= ? AND reservation_from <= ? " +
+                    "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
+            ") ";
 
     /**
      * @param orderBy The field you want to order by
@@ -536,6 +546,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
         appendCarFilter (builder, filter);
 
+        builder.append (SELECT_NOT_OVERLAP);
+
         if (orderBy == FilterField.CAR_NAME) {
             builder.append (" ORDER BY car_name ");
             builder.append(asc ? "ASC" : "DESC");
@@ -543,15 +555,18 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             builder.append (" ORDER BY car_brand ");
             builder.append (asc ? "ASC" : "DESC");
         }
+
         builder.append ( " LIMIT ?, ?");
 
         //System.err.println("QUERY = " + builder.toString());
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
 
+            ps.setString (1, filter.getValue(FilterField.FROM));
+            ps.setString (2, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
             int first = (page-1)*pageSize;
-            ps.setInt(1, first);
-            ps.setInt(2, pageSize);
+            ps.setInt(3, first);
+            ps.setInt(4, pageSize);
 
             try (ResultSet rs = ps.executeQuery()) {
                 Collection<Car> cars = new ArrayList<>();

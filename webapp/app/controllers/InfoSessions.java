@@ -11,7 +11,6 @@ import db.InjectContext;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
 import org.joda.time.MutableDateTime;
-import org.omg.CORBA.Current;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
@@ -365,7 +364,6 @@ public class InfoSessions extends Controller {
             return redirect(routes.InfoSessions.detail(sessionId));
         }
         DataAccessContext context = DataAccess.getInjectedContext();
-        UserDAO udao = context.getUserDAO();
         InfoSessionDAO idao = context.getInfoSessionDAO();
         // TODO: loop in database
         for (Enrollee others : idao.getEnrollees(sessionId)) {
@@ -833,23 +831,22 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result showUpcomingSessions() {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
-        User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         Tuple<InfoSession, EnrollementStatus> tuple = dao.getLastInfoSession(CurrentUser.getId());
 
         InfoSession enrolled = dao.getAttendingInfoSession(CurrentUser.getId());
 
         Iterable<InfoSession> sessions = dao.getInfoSessions(true);
-        if (enrolled != null) {
-            //TODO: what is happening here?
-
-            for (InfoSession s : sessions) {
-                if (enrolled.getId() == s.getId()) {
-                    enrolled = s;
-                    break;
-                }
-            }
-        }
+//        if (enrolled != null) {
+//            //TODO: what is happening here?
+//
+//            for (InfoSession s : sessions) {
+//                if (enrolled.getId() == s.getId()) {
+//                    enrolled = s;
+//                    break;
+//                }
+//            }
+//        }
 
         return ok(infosessions.render(sessions, tuple == null ? null : tuple.getFirst(), null, didUserGoToInfoSession()));
 

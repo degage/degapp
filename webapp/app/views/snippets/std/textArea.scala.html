@@ -1,13 +1,13 @@
 @(field: play.api.data.Field, label: String, rows: Int, args: (Symbol, Any)*)
 
-@* TODO: use FieldConverter? *@
+@* text area, for use in a form context *@
 
 <div class="form-group col-xs-12 @if(field.hasErrors) {has-error}">
     <label class="control-label" for="@field.id">@label</label>
 
     <textarea id="@field.id" name="@field.name"
               rows="@rows"
-              class="form-control input-md" value="@field.value"
+              class="form-control input-md"
     @toHtmlArgs(args.toMap)>@field.value</textarea>
     @field.errors.map { error =>
         <span class="help-block">@play.api.i18n.Messages(error.message)</span>

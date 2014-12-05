@@ -4,7 +4,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 
 @scripts = {
 <script type="text/javascript" src='@routes.Assets.at("javascripts/app/driveDetails.js")'></script>
-<script src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")' type="text/javascript"></script>
+@*  <script src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")' type="text/javascript"></script> *@
 <script src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")' type="text/javascript"></script>
 <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 <script>
@@ -237,7 +237,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
                 <div class="alert alert-warning alert-dismissable">
                     Pas op! Je bent niet de eigenaar, maar ziet onderstaand formulier toch omdat je admin bent!
                 </div>
-runrun            }
+            }
         <div class="col-sm-4 btn-group btn-group-xs">
             <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
             <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
