@@ -313,7 +313,7 @@ public class Notifier extends Mailer {
 
     private static String replaceInfoSessionTags(InfoSession infoSession, String template) {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
-        template = template.replace("%infosession_date%", Utils.toLocalString(infoSession.getTime()));
+        template = template.replace("%infosession_date%", Utils.toLocalizedString(infoSession.getTime()));
         template = template.replace("%infosession_address%", infoSession.getAddress().toString());
         return template;
     }

@@ -20,6 +20,8 @@ import views.html.reports;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.List;
 
@@ -283,9 +285,11 @@ public class Reports extends Controller {
                 CellStyle cellStyle = wb.createCellStyle();
                 cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy"));
                 Cell cell = row.createCell(j++);
-                Date expiration = car.getInsurance().getExpiration();
+                LocalDate expiration = car.getInsurance().getExpiration();
                 if (expiration != null) {
-                    cell.setCellValue(expiration);
+                    cell.setCellValue(
+                            Date.from (expiration.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                    );
                 } else {
                     cell.setCellValue("");
                 }

@@ -187,7 +187,13 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 if (rs.wasNull()) {
                     contractId = null;
                 }
-                insurance = new CarInsurance(rs.getString("insurance_name"), rs.getDate("insurance_expiration"), bonusMalus, contractId);
+
+                Date insuranceExpiration = rs.getDate("insurance_expiration");
+                insurance = new CarInsurance(
+                        rs.getString("insurance_name"),
+                        insuranceExpiration == null ? null : insuranceExpiration.toLocalDate(),
+                        bonusMalus,
+                        contractId);
             }
             car.setPhoto(photo);
             car.setLocation(location);
@@ -330,20 +336,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         PreparedStatement ps = updateInsuranceStatement.value();
         ps.setString(1, insurance.getName());
         if (insurance.getExpiration() == null) {
-            ps.setDate (2, null);
+            ps.setDate(2, null);
         } else {
-            ps.setDate(2, new Date(insurance.getExpiration().getTime()));
+            ps.setDate(2, Date.valueOf(insurance.getExpiration()));
         }
-        if (insurance.getPolisNr() != null) {
-            ps.setInt(3, insurance.getPolisNr());
-        } else {
-            ps.setNull(3, Types.INTEGER);
-        }
-        if (insurance.getBonusMalus() != null) {
-            ps.setInt(4, insurance.getBonusMalus());
-        } else {
-            ps.setNull(4, Types.INTEGER);
-        }
+        ps.setObject(3, insurance.getPolisNr(), Types.INTEGER);
+        ps.setObject(4, insurance.getBonusMalus(), Types.INTEGER);
         ps.setInt(5, id);
 
         if (ps.executeUpdate() == 0) {
@@ -705,6 +703,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
              ResultSet rs = stat.executeQuery(LIST_ALL_CARS_QUERY)) {
             Collection<Car> cars = new ArrayList<>();
             while (rs.next()) {
+                Date insuranceExpiration = rs.getDate("insurance_expiration"); // can be null and must be converted
                 Car result = new Car(
                         rs.getInt("car_id"),
                         rs.getString("car_name"),
@@ -728,7 +727,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                         ),
                         new CarInsurance(
                                 rs.getString("insurance_name"),
-                                rs.getDate("insurance_expiration"),
+                                insuranceExpiration == null ? null : insuranceExpiration.toLocalDate(),
                                 rs.getObject("insurance_bonus_malus", Integer.class),
                                 rs.getObject("insurance_contract_id", Integer.class)
                         ),

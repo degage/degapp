@@ -1,15 +1,15 @@
 package be.ugent.degage.db.models;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 public class CarInsurance {
 
     private String name;
-	private Date expiration;
+	private LocalDate expiration;
 	private Integer bonusMalus;
 	private Integer polisNr;
 
-	public CarInsurance(String name, Date expiration, Integer bonusMalus, Integer polisNr) {
+	public CarInsurance(String name, LocalDate expiration, Integer bonusMalus, Integer polisNr) {
         this.name = name;
 		this.expiration = expiration;
 		this.bonusMalus = bonusMalus;
@@ -17,7 +17,7 @@ public class CarInsurance {
 	}
 	
 	
-	public Date getExpiration() {
+	public LocalDate getExpiration() {
 		return expiration;
 	}
 	public Integer getPolisNr() {
@@ -28,7 +28,7 @@ public class CarInsurance {
 		this.polisNr = polisNr;
 	}
 
-	public void setExpiration(Date expiration) {
+	public void setExpiration(LocalDate expiration) {
 		this.expiration = expiration;
 	}
 	public Integer getBonusMalus() {

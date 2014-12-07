@@ -9,7 +9,6 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
-import org.joda.time.DateTime;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
@@ -403,7 +402,7 @@ public class InfoSessions extends Controller {
                         (alreadyAttending == null ?
                         "Je bent met succes ingeschreven voor de infosessie op " :
                         "Je bent van infosessie veranderd naar ")
-                                + Utils.toLocalString(session.getTime())+ ".");
+                                + Utils.toLocalizedString(session.getTime())+ ".");
 
                 // TODO: avoid this?
                 UserHeader user = context.getUserDAO().getUserHeader(CurrentUser.getId());

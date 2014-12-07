@@ -10,23 +10,11 @@
 
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
-    <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
-    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+    <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
+    <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
     <script>
         $(document).ready(function() {
-
-            $('#datepicker').datetimepicker({
-                minView: 2,
-                weekStart: 1,
-                language: 'nl',
-                todayBtn:  1,
-                autoclose: 1,
-                todayHighlight: 1,
-                startView: 2,
-                forceParse: 0,
-                showMeridian: 1,
-                startDate: new Date()
-            });
+            @js.datepicker()
         });
     </script>
 
@@ -221,17 +209,7 @@
                                                 <input id="insuranceName" name="insuranceName" type="text" class="form-control input-md" value="@form("insuranceName").value">
                                             </div>
                                         </div>
-                                        <div class="form-group">
-                                            <label class="col-md-12" for="expiration">Vervaldatum</label>
-                                            <div class="col-md-4">
-                                                <div id="datepicker" class="input-group date form_date" data-date-format="dd MM yyyy" data-link-field="expiration">
-                                                    <input class="form-control input-md" size="16" type="text" value="@form("expiration").value"readonly>
-                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                                </div>
-                                                <input type="text" class="hidden" id="expiration" name="expiration" value="@form("expiration").value" />
-                                            </div>
-                                        </div>
+                                        @std.datetimepicker(form("expiration"), "Vervaldatum", "col-md-4")
 
                                         <div class="form-group">
                                             <label class="col-md-12" for="bonusMalus">Bonus Malus</label>

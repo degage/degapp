@@ -30,7 +30,7 @@
                     : @session.getTypeAlternative
                     }
                 </td>
-                <td>@Utils.toLocalString(session.getTime)</td>
+                <td>@Utils.toLocalizedString(session.getTime)</td>
                 @if(session.getMaxEnrollees != 0) {
                     @if(session.getEnrolleeCount == session.getMaxEnrollees) {
                         <td><strong>Volzet</strong></td>

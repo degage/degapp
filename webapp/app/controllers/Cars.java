@@ -26,9 +26,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 import static controllers.util.Addresses.getCountryList;
@@ -81,7 +81,7 @@ public class Cars extends Controller {
 
         // Insurance
         public String insuranceName;
-        public Date expiration;
+        public LocalDate expiration;
         public Integer bonusMalus;
         public Integer polisNr;
 
