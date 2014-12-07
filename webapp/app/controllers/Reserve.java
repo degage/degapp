@@ -28,6 +28,7 @@ import views.html.reserve.start;
 import views.html.reserve.availablecarspage;
 import views.html.errortablerow;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -188,10 +189,11 @@ public class Reserve extends Controller {
             ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), formData.message);
             if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
                 // Schedule the auto accept
-                int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
-                MutableDateTime autoAcceptDate = new MutableDateTime();
-                autoAcceptDate.addMinutes(minutesAfterNow);
-                context.getJobDAO().createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+                context.getJobDAO().createJob(    // TODO: number of minutes after now as parameter?
+                        JobType.RESERVE_ACCEPT,
+                        reservation.getId(),
+                        Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
+                    );
 
                 // note: user contained in this record was null
                 // TODO: avoid having to retrieve the whole record
@@ -334,7 +336,7 @@ public class Reserve extends Controller {
             autoAcceptDate.addMinutes(minutesAfterNow);
             context.getJobDAO().createJob(
                     JobType.RESERVE_ACCEPT, reservation.getId(),
-                    DateTime.now().plusMinutes(Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
+                    Instant.now().plusSeconds(60*Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
             );
 
             // note: user contained in this record was null

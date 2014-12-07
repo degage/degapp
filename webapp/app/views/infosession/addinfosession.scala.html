@@ -31,18 +31,7 @@
                 }
             });
 
-            $('#datepicker').datetimepicker({
-                weekStart: 1,
-                language: 'nl',
-                todayBtn:  1,
-                autoclose: 1,
-                todayHighlight: 1,
-                startView: 2,
-                forceParse: 0,
-                showMeridian: 1,
-                pickerPosition: 'bottom-left',
-                startDate: new Date()
-            });
+            @js.datetimepicker()
         });
     </script>
 }
@@ -71,15 +60,11 @@
                     </div>
                     <!-- /.panel-heading -->
                     <div class="panel-body">
+                        @flashes()
                         <div class="row">
                             <div class="col-md-12">
                                 @helper.form(if (editId == 0) routes.InfoSessions.createNewSession else routes.InfoSessions.editSessionPost(editId), 'class -> "form-horizontal") {
-                                    @if(form.hasGlobalErrors) {
-                                        <div class="alert alert-danger alert-dismissable">
-                                            <strong>Error!</strong> @form.globalError.message
-                                        </div>
-                                    }
-                                    @flashes()
+                                    @formErrors(form)
 
                                     <div class="panel panel-default">
                                         <div class="panel-heading">
@@ -88,7 +73,7 @@
                                         <div class="panel-body">
                                             <fieldset>
                                                 <div class="form-group">
-                                                    <label class="col-md-12" for="host">Host</label>
+                                                    <label class="col-md-12">Host</label>
                                                     @if(form("userId").value){
                                                          <!-- TODO: move this to controller -->
                                                          @defining(db.DataAccess.getInjectedContext.getUserDAO.getUserHeader(form("userId").value.toInt)) { user =>
@@ -108,41 +93,21 @@
                                                         </div>
                                                 }
                                                 </div>
+                                                @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
+                                                @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
                                                 <div class="form-group">
-                                                    <label class="col-md-12" for="time">Tijdstip</label>
                                                     <div class="col-md-4">
-                                                        <div id="datepicker" class="input-group date form_datetime" data-date-format="dd MM yyyy - HH:ii p" data-link-field="time">
-                                                            <input class="form-control input-md" size="16" type="text" value="@form("time").value" placeholder="Tijdstip"readonly>
-                                                            <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                                        </div>
-                                                        <input type="text" class="hidden" id="time" name="time" value="@form("time").value" />
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group">
-                                                    <label class="col-md-12" for="max_enrollees">Maximum aantal deelnemers (0 = onbeperkt)</label>
-                                                    <div class="col-md-12">
-                                                        <input id="max_enrollees" name="max_enrollees" type="number"class="form-control input-md" value="@form("max_enrollees").value">
-                                                    </div>
-                                                </div>
-                                                <div class="form-group">
-                                                    <div class="col-md-12">
                                                         @helper.select(form("type"), helper.options(typeList), '_label -> "Type", 'class -> "form-control", 'id -> "infosession_type_select", 'onchange -> "onInfoSessionTypeChange()")
                                                     </div>
                                                     <div id="type_alternative_wrap">
                                                         <label class="col-md-12" for="type_alternative">Specifieer type</label>
                                                         <div class="col-md-12">
-                                                            <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" placeholder="Verplicht" value="@form("type_alternative").value">
+                                                            <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" placeholder="Verplicht"
+                                                                   value='@form("type_alternative").value'>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div class="form-group">
-                                                    <label class="col-md-1" for="comments">Commentaar</label>
-                                                    <div class="col-md-12">
-                                                        <textarea id="comments" name="comments" class="form-control input-md" rows="6" maxlength="256">@form("comments").value</textarea>
-                                                    </div>
-                                                </div>
+                                                @std.textArea(form("comments"), "Commentaar", 6, 'maxlength -> 512)
                                             </fieldset>
                                         </div>
                                     </div>

@@ -3,6 +3,7 @@ package notifiers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
+import controllers.Utils;
 import controllers.routes;
 import data.EurocentAmount;
 import db.DataAccess;
@@ -312,7 +313,7 @@ public class Notifier extends Mailer {
 
     private static String replaceInfoSessionTags(InfoSession infoSession, String template) {
         DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
-        template = template.replace("%infosession_date%", fmt.print(infoSession.getTime()));
+        template = template.replace("%infosession_date%", Utils.toLocalString(infoSession.getTime()));
         template = template.replace("%infosession_address%", infoSession.getAddress().toString());
         return template;
     }

@@ -10,7 +10,6 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.MutableDateTime;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
@@ -18,6 +17,7 @@ import play.mvc.Result;
 import providers.DataProvider;
 import views.html.infosession.*;
 
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -46,24 +46,12 @@ public class InfoSessions extends Controller {
 
     public static class InfoSessionCreationModel {
         public Integer userId;
-        public DateTime time;
+        public Instant time;
         public Integer max_enrollees;
         public String type;
         public String type_alternative;
         public String comments;
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
-
-        public Addresses.EditAddressModel getAddress() {
-            return address;
-        }
-
-        public void setAddress(Addresses.EditAddressModel address) {
-            this.address = address;
-        }
-
-        public static int getInt(Integer i) {
-            return i == null ? 0 : i;
-        }
 
         public String validate() {
             String error = "";
@@ -194,18 +182,18 @@ public class InfoSessions extends Controller {
             session.setAddress(newAddress);
 
             // update time
-            DateTime time = editForm.get().time.withSecondOfMinute(0);
+            Instant time = editForm.get().time;
             if (!session.getTime().equals(time)) {
                 session.setTime(time);
 
                 // Schedule the reminder
                 JobDAO jdao = context.getJobDAO();
                 jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
-
-                int minutesBefore = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder"));
-                MutableDateTime reminderDate = new MutableDateTime(session.getTime());
-                reminderDate.addMinutes(-minutesBefore);
-                jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
+                jdao.createJob(
+                        JobType.IS_REMINDER,
+                        session.getId(),
+                        session.getTime().minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                );
             }
 
             // check if amountOfAttendees < new max
@@ -406,13 +394,16 @@ public class InfoSessions extends Controller {
                 flash("danger", "Deze infosessie zit reeds vol.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
-                if (alreadyAttending != null && alreadyAttending.getTime().isAfter(DateTime.now())) {
+                if (alreadyAttending != null && alreadyAttending.getTime().isAfter(Instant.now())) {
                     dao.unregisterUser(alreadyAttending.getId(), CurrentUser.getId());
                 }
                 dao.registerUser(sessionId, CurrentUser.getId()); // TODO: disallow registration when full
 
-                flash("success", alreadyAttending == null ? ("Je bent met succes ingeschreven voor de infosessie op " + session.getTime().toString("dd-MM-yyyy") + ".") :
-                        "Je bent van infosessie veranderd naar " + session.getTime().toString("dd-MM-yyyy") + ".");
+                flash("success",
+                        (alreadyAttending == null ?
+                        "Je bent met succes ingeschreven voor de infosessie op " :
+                        "Je bent van infosessie veranderd naar ")
+                                + Utils.toLocalString(session.getTime())+ ".");
 
                 // TODO: avoid this?
                 UserHeader user = context.getUserDAO().getUserHeader(CurrentUser.getId());
@@ -450,14 +441,14 @@ public class InfoSessions extends Controller {
 
             UserDAO udao = context.getUserDAO();
             UserHeader host = udao.getUserHeader(createForm.get().userId);
-            InfoSession session = dao.createInfoSession(type, typeAlternative, host, address, createForm.get().time.withSecondOfMinute(0), FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments); //TODO: allow other hosts
+            InfoSession session = dao.createInfoSession(type, typeAlternative, host, address, createForm.get().time, FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments); //TODO: allow other hosts
 
             // Schedule the reminder
-            JobDAO jdao = context.getJobDAO();
-            int minutesBefore = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder"));
-            MutableDateTime reminderDate = new MutableDateTime(session.getTime());
-            reminderDate.addMinutes(-minutesBefore);
-            jdao.createJob(JobType.IS_REMINDER, session.getId(), reminderDate.toDateTime());
+            context.getJobDAO().createJob(
+                    JobType.IS_REMINDER,
+                    session.getId(),
+                    session.getTime().minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+            );
 
 
             return redirect(

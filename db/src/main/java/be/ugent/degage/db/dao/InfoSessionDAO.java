@@ -7,7 +7,8 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.models.*;
-import org.joda.time.DateTime;
+
+import java.time.Instant;
 
 /**
  * Data access object for information sessions
@@ -16,7 +17,8 @@ public interface InfoSessionDAO {
 
     // info session
 
-    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException;
+    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address,
+                                         Instant time, int maxEnrollees, String comments) throws DataAccessException;
     public InfoSession getInfoSession(int id) throws DataAccessException;
 
     public void updateInfoSession(InfoSession session) throws DataAccessException;

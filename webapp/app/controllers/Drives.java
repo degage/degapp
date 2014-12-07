@@ -11,7 +11,6 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import org.joda.time.DateTime;
-import org.joda.time.MutableDateTime;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
@@ -345,10 +344,11 @@ public class Drives extends Controller {
             // Remove old reservation auto accept and add new
             JobDAO jdao = context.getJobDAO();
             jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId()); //remove the old job
-            int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
-            MutableDateTime autoAcceptDate = new MutableDateTime();
-            autoAcceptDate.addMinutes(minutesAfterNow);
-            jdao.createJob(JobType.RESERVE_ACCEPT, reservation.getId(), autoAcceptDate.toDateTime());
+            jdao.createJob(
+                    JobType.RESERVE_ACCEPT,
+                    reservation.getId(),
+                    Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
+            );
         }
 
         return ok(detailsPageOld(reservationId, detailsForm));

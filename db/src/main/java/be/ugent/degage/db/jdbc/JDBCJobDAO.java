@@ -7,6 +7,7 @@ import be.ugent.degage.db.models.JobType;
 import org.joda.time.DateTime;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -54,12 +55,13 @@ class JDBCJobDAO extends AbstractDAO implements JobDAO {
     /**
      * Create a new job for the scheduler to be executed at the requested time.
      */
-    public Job createJob(JobType type, Integer refId, DateTime when) throws DataAccessException {
+    @Override
+    public Job createJob(JobType type, Integer refId, Instant when) throws DataAccessException {
         try {
             PreparedStatement ps = createJobStatement.value();
             ps.setString(1, type.name());
             ps.setObject(2, refId, Types.INTEGER);
-            ps.setTimestamp(3, new Timestamp(when.getMillis()));
+            ps.setTimestamp(3, Timestamp.from(when));
 
             if (ps.executeUpdate() != 1) {
                 throw new DataAccessException("New job record failed. No rows affected.");

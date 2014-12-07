@@ -1,0 +1,13 @@
+@(field: play.api.data.Field, label: String, css: String="col-xs-12")
+
+@* TODO: Distinguish between integers / doubles / positive number *@
+
+<div class="form-group @css @if(field.hasErrors) {has-error}">
+    <label class="control-label" for="@field.id">@label</label>
+
+    <input id="@field.id" name="@field.name" type="number"
+           class="form-control input-md" value="@field.value" >
+    @field.errors.map { error =>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+    }
+</div>

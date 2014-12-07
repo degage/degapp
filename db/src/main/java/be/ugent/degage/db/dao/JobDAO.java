@@ -3,7 +3,8 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
-import org.joda.time.DateTime;
+
+import java.time.Instant;
 
 public interface JobDAO {
 
@@ -11,7 +12,7 @@ public interface JobDAO {
     public Iterable<Job> listScheduledForNow() throws DataAccessException;
 
     /** Create a new job for the scheduler to execute at the requested time. */
-    public Job createJob(JobType type, Integer refId, DateTime when) throws DataAccessException;
+    public Job createJob(JobType type, Integer refId, Instant when) throws DataAccessException;
 
     /**
      * Delete the job of the given type and reference id.

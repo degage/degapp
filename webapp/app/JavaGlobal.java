@@ -2,6 +2,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.TemplateDAO;
 import be.ugent.degage.db.models.MailType;
+import controllers.Utils;
 import db.DataAccess;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -12,6 +13,7 @@ import schedulers.Scheduler;
 import data.EurocentAmount;
 
 import java.text.ParseException;
+import java.time.Instant;
 import java.util.Locale;
 
 /**
@@ -48,6 +50,20 @@ public class JavaGlobal {
             @Override
             public String print(DateTime dateTime, Locale locale) {
                 return dateTime.toString(DATETIME_FORMATTER);
+            }
+        });
+
+        Formatters.register(Instant.class, new Formatters.SimpleFormatter<Instant>() {
+
+            @Override
+            public Instant parse(String s, Locale locale) throws ParseException {
+                return Utils.toInstant(s);
+            }
+
+            @Override
+            public String print(Instant instant, Locale locale) {
+                // ignores locale!
+                return Utils.toString(instant);
             }
         });
 

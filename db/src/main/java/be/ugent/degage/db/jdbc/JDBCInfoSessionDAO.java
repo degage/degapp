@@ -8,6 +8,7 @@ import be.ugent.degage.db.models.*;
 import org.joda.time.DateTime;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -72,18 +73,18 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     public static InfoSession populateInfoSessionPartial(ResultSet rs) throws SQLException {
-        int id = rs.getInt("ses.infosession_id");
-        InfoSessionType type = InfoSessionType.valueOf(rs.getString("infosession_type"));
-        String typeAlternative = rs.getString("infosession_type_alternative");
-        DateTime timestamp = new DateTime(rs.getTimestamp("infosession_timestamp"));
 
-        int maxEnrollees = rs.getInt("infosession_max_enrollees");
-
-        String commentaar = rs.getString("infosession_comments");
-        InfoSession infoSession;
-
-        infoSession = new InfoSession(id, type, timestamp, null, null, maxEnrollees, commentaar);
-        infoSession.setTypeAlternative(typeAlternative);
+        InfoSession infoSession = new InfoSession(
+                rs.getInt("ses.infosession_id"),
+                InfoSessionType.valueOf(rs.getString("infosession_type")),
+                rs.getTimestamp("infosession_timestamp").toInstant(),
+                null,
+                null,
+                rs.getInt("infosession_max_enrollees"),
+                rs.getString("infosession_comments"));
+        infoSession.setTypeAlternative(
+                rs.getString("infosession_type_alternative")
+        );
 
         return infoSession;
     }
@@ -101,7 +102,8 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     );
 
     @Override
-    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address, DateTime time, int maxEnrollees, String comments) throws DataAccessException {
+    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address,
+                                         Instant time, int maxEnrollees, String comments) throws DataAccessException {
         if (host.getId() == 0 || address.getId() == 0)
             throw new DataAccessException("Tried to create infosession without user or address");
 
@@ -113,7 +115,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             } else {
                 ps.setNull(2, Types.VARCHAR);
             }
-            ps.setTimestamp(3, new Timestamp(time.getMillis())); //TODO: timezones?? convert to datetime see below
+            ps.setTimestamp(3, Timestamp.from(time));
             ps.setInt(4, address.getId());
             ps.setInt(5, host.getId());
             ps.setInt(6, maxEnrollees);
@@ -252,7 +254,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         InfoSession infoSession = new InfoSession(
                 rs.getInt("infosession_id"),
                 InfoSessionType.valueOf(rs.getString("infosession_type")),
-                new DateTime(rs.getTimestamp("infosession_timestamp")),
+                rs.getTimestamp("infosession_timestamp").toInstant(),
                 address, host,
                 rs.getInt("infosession_max_enrollees"),
                 rs.getString("infosession_comments")
@@ -411,7 +413,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 ps.setNull(2, Types.VARCHAR);
             }
             ps.setInt(3, session.getMaxEnrollees());
-            ps.setTimestamp(4, new Timestamp(session.getTime().getMillis()));
+            ps.setTimestamp(4, Timestamp.from(session.getTime()));
             ps.setInt(5, session.getAddress().getId());
             ps.setInt(6, session.getHost().getId());
             ps.setString(7, session.getComments());

@@ -7,12 +7,12 @@ import be.ugent.degage.db.models.JobType;
 import be.ugent.degage.db.models.UserHeader;
 import db.DataAccess;
 import notifiers.Notifier;
-import org.joda.time.DateTime;
-import org.joda.time.MutableDateTime;
 import play.libs.Akka;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
+import java.time.Instant;
+import java.time.temporal.TemporalAdjusters;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -84,14 +84,7 @@ public final class Scheduler {
             public void runInContext(DataAccessContext context) {
                 JobDAO dao = context.getJobDAO();
                 if (!dao.existsJobOfType(JobType.REPORT)) {
-                    // Determine first day of next month
-                    MutableDateTime mdt = new MutableDateTime();
-                    mdt.addMonths(1);
-                    mdt.setDayOfMonth(1);
-                    mdt.setMillisOfDay(0);
-                    DateTime scheduledFor = mdt.toDateTime();
-
-                    dao.createJob(JobType.REPORT, 0, scheduledFor);
+                    dao.createJob(JobType.REPORT, 0, Instant.now().with(TemporalAdjusters.firstDayOfNextMonth()));
                 }
             }
         }.run();

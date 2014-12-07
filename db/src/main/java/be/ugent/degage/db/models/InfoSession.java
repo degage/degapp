@@ -4,7 +4,7 @@
  */
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+import java.time.Instant;
 
 /**
  * Information about an information session
@@ -14,14 +14,14 @@ public class InfoSession {
     private int id;
     private InfoSessionType type;
     private String typeAlternative;
-    private DateTime time;
+    private Instant time;
     private Address address;
     private UserHeader host;
     private int maxEnrollees;
     private int enrolleeCount;
     private String comments;
 
-    public InfoSession(int id, InfoSessionType type, DateTime time, Address address, UserHeader host, int maxEnrollees, String comments) {
+    public InfoSession(int id, InfoSessionType type, Instant time, Address address, UserHeader host, int maxEnrollees, String comments) {
         this.id = id;
         this.type = type;
         this.time = time;
@@ -55,11 +55,11 @@ public class InfoSession {
         this.typeAlternative = typeAlternative;
     }
 
-    public DateTime getTime() {
+    public Instant getTime() {
         return time;
     }
 
-    public void setTime(DateTime time) {
+    public void setTime(Instant time) {
         this.time = time;
     }
 

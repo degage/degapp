@@ -1,0 +1,6 @@
+@(form: Form[_])
+@if(form.hasGlobalErrors) {
+    <div class="alert alert-danger alert-dismissable">
+        <strong>Fout!</strong> @form.globalError.message
+    </div>
+}

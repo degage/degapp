@@ -65,15 +65,12 @@ object Global extends GlobalSettings {
    */
   override def onStart(app: Application) {
     app.mode match {
-      case Mode.Dev => {
+      case Mode.Dev =>
         JavaGlobal.onStartDev()
-      }
-      case Mode.Prod => {
+      case Mode.Prod =>
         JavaGlobal.onStartProd()
-      }
-      case Mode.Test => {
+      case Mode.Test =>
         JavaGlobal.onStartTest()
-      }
     }
 
   }
@@ -83,15 +80,12 @@ object Global extends GlobalSettings {
    */
   override def onStop(app: Application) {
     app.mode match {
-      case Mode.Dev => {
+      case Mode.Dev =>
         JavaGlobal.onStopDev()
-      }
-      case Mode.Prod => {
+      case Mode.Prod =>
         JavaGlobal.onStopProd()
-      }
-      case Mode.Test => {
+      case Mode.Test =>
         JavaGlobal.onStopTest()
-      }
     }
   }
 

@@ -12,8 +12,7 @@
                 <br>
 
                 <strong>Type:</strong> @infoSession.getType.getDescription @if(infoSession.getType.equals(InfoSessionType.OTHER)) { : @infoSession.getTypeAlternative } <br>
-                <strong>Datum:</strong> @infoSession.getTime.toString("dd-MM-yyyy")<br>
-                <strong>Tijdstip:</strong> @infoSession.getTime.toString("HH:mm")<br>
+                <strong>Wanneer?</strong> @Utils.toLocalString(infoSession.getTime)<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
                 @if(infoSession.getMaxEnrollees == 0){
                     <strong># deelnemers:</strong> @infoSession.getEnrolleeCount (onbeperkt)
