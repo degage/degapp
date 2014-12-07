@@ -18,6 +18,9 @@ public final class Utils {
     public static DateTimeFormatter DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
+    public static DateTimeFormatter LOCAL_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("eee dd MMM yyyy", NL_be).withZone(ZoneId.systemDefault());
+
     public static DateTimeFormatter LOCAL_DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern("eee dd MMM yyyy HH:mm", NL_be).withZone(ZoneId.systemDefault());
 
@@ -27,6 +30,10 @@ public final class Utils {
 
     public static String toLocalString (Instant instant) {
         return LOCAL_DATETIME_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
+    }
+
+    public static String toLocalDateString (Instant instant) {
+        return LOCAL_DATE_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
     }
 
     public static String toLocalString (LocalDateTime dateTime) {

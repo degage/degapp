@@ -5,7 +5,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.InfoSessionDAO;
 import be.ugent.degage.db.models.*;
-import org.joda.time.DateTime;
 
 import java.sql.*;
 import java.time.Instant;

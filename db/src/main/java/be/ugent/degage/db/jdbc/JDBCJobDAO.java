@@ -4,7 +4,6 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
-import org.joda.time.DateTime;
 
 import java.sql.*;
 import java.time.Instant;

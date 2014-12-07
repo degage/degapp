@@ -568,7 +568,7 @@ public class InfoSessions extends Controller {
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
                     // TODO: user is retrieved as header AND in full
-                    dao.createApproval(udao.getUserHeader(CurrentUser.getId()), lastSession.getFirst(), form.get().message);
+                    dao.createApproval(CurrentUser.getId(), lastSession.getFirst().getId(), form.get().message);
                     udao.getUserHeader(CurrentUser.getId()).setStatus(UserStatus.FULL_VALIDATING); //set to validation
                     udao.updateUser(udao.getUser(CurrentUser.getId())); //full update   // TODO: partial update?
                     return redirect(routes.Dashboard.index());
@@ -730,7 +730,6 @@ public class InfoSessions extends Controller {
 
         UserDAO udao = context.getUserDAO();
         ap.setAdmin(udao.getUserHeader(CurrentUser.getId()));
-        ap.setReviewed(new DateTime());
         ap.setAdminMessage(m.message);
 
         if (action == ApprovalAdminModel.Action.ACCEPT) {

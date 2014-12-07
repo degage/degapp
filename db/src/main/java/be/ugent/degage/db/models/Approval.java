@@ -1,6 +1,6 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+import java.time.Instant;
 
 /**
  * Created by Cedric on 3/30/2014.
@@ -16,14 +16,14 @@ public class Approval {
     private int id;
     private UserHeader user;
     private UserHeader admin;
-    private DateTime submitted;
-    private DateTime reviewed;
+    private Instant submitted;
+    private Instant reviewed;
     private InfoSession session;
     private ApprovalStatus status;
     private String userMessage;
     private String adminMessage;
 
-    public Approval(int id, UserHeader user, UserHeader admin, DateTime submitted, DateTime reviewed, InfoSession session, ApprovalStatus status, String userMessage, String adminMessage) {
+    public Approval(int id, UserHeader user, UserHeader admin, Instant submitted, Instant reviewed, InfoSession session, ApprovalStatus status, String userMessage, String adminMessage) {
         this.id = id;
         this.user = user;
         this.admin = admin;
@@ -72,19 +72,19 @@ public class Approval {
         this.admin = admin;
     }
 
-    public DateTime getSubmitted() {
+    public Instant getSubmitted() {
         return submitted;
     }
 
-    public void setSubmitted(DateTime submitted) {
+    public void setSubmitted(Instant submitted) {
         this.submitted = submitted;
     }
 
-    public DateTime getReviewed() {
+    public Instant getReviewed() {
         return reviewed;
     }
 
-    public void setReviewed(DateTime reviewed) {
+    public void setReviewed(Instant reviewed) {
         this.reviewed = reviewed;
     }
 
