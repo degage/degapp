@@ -32,9 +32,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
             "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
             "AND cars.car_gps >= ? AND cars.car_hook >= ? AND cars.car_seats >= ? AND addresses.address_zipcode LIKE ? AND cars.car_fuel LIKE ? " +
-            "AND cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM cars INNER JOIN carreservations " +
-            "ON carreservations.reservation_car_id = cars.car_id " +
-            "WHERE ? < carreservations.reservation_to AND ? > carreservations.reservation_from) " +
+            "AND cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM cars INNER JOIN reservations " +
+            "ON reservations.reservation_car_id = cars.car_id " +
+            "WHERE ? < reservations.reservation_to AND ? > reservations.reservation_from) " +
             "AND ( cars.car_active = ? OR cars.car_active LIKE ? )" +
             // FILTER ON CAR AVAILABILITY
             // We want all cars or car doesn't have any availabilities specified
@@ -525,7 +525,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
     private String SELECT_NOT_OVERLAP =
             "AND car_id NOT IN (" +
-                "SELECT reservation_car_id FROM carreservations " +
+                "SELECT reservation_car_id FROM reservations " +
                     "WHERE reservation_to >= ? AND reservation_from <= ? " +
                     "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
             ") ";

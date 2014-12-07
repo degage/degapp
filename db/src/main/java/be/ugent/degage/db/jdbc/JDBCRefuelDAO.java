@@ -16,7 +16,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     // TODO: reduce output from this query * -> actual fields
     private static final String REFUEL_QUERY = "SELECT * FROM refuels " +
             "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-            "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+            "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id " +
             "LEFT JOIN cars ON reservation_car_id = car_id " +
             "LEFT JOIN users ON reservation_user_id = user_id " +
             "LEFT JOIN users AS owners ON car_owner_user_id = owners.user_id " +
@@ -186,7 +186,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     private LazyStatement getAmountOfRefuelsStatement= new LazyStatement (
              "SELECT count(refuel_id) AS amount_of_refuels FROM refuels " +
                      "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-                     "LEFT JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                     "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id " +
                      "LEFT JOIN cars ON reservation_car_id = car_id " +
                      "LEFT JOIN users ON reservation_user_id = user_id " +
                      "LEFT JOIN files ON refuel_file_id = file_id " + FILTER_FRAGMENT
@@ -268,7 +268,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private LazyStatement getAmountOfRefuelsWithStatusStatement= new LazyStatement (
             "SELECT COUNT(*) AS amount_of_refuels " +
-                    "FROM refuels JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+                    "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
                     "WHERE refuel_status = ? AND reservation_user_id = ?"
     );
 
@@ -307,7 +307,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     private LazyStatement endPeriodStatement = new LazyStatement (
             "UPDATE refuels SET refuel_billed = CURDATE() " +
                     "FROM refuels INNER JOIN carrides ON refuels.refuel_car_ride_id = carrides.car_ride_car_reservation_id " +
-                    "             INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
+                    "             INNER JOIN reservations ON carrides.car_ride_car_reservation_id = reservations.reservation_id " +
                     "WHERE refuels.refuel_billed = NULL AND refuels.refuel_status = 'ACCEPTED' AND carreservation.reservation_to < CURDATE()"
     );
 
@@ -341,7 +341,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private LazyStatement eurocentsSpentOnFuelStatement = new LazyStatement(
             "SELECT SUM(refuel_eurocents) AS s, reservation_privileged " +
-            "FROM refuels JOIN carreservations ON refuel_car_ride_id = reservation_id " +
+            "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
                 "WHERE refuel_billed = ? AND reservation_car_id = ? " +
             "GROUP BY refuel_eurocents, reservation_privileged "
     );

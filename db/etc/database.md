@@ -1,6 +1,6 @@
 # Installatie database #
 
-Gebruikt mysql server (5.5)
+Gebruikt mysql server versie 5.7. **Opgelet**, dit is niet de standaardversie die op Debian geïnstalleerd is.
 
 ## Aanmaken database ##
 

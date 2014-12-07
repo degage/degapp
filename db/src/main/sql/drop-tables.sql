@@ -20,7 +20,7 @@ DROP TABLE carprivileges;
 DROP TABLE caravailabilities;
 DROP TABLE infosessionenrollees;
 DROP TABLE infosessions;
-DROP TABLE carreservations;
+DROP TABLE reservations;
 DROP TABLE cars;
 DROP TABLE technicalcardetails;
 DROP TABLE carinsurances;

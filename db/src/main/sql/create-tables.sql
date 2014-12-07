@@ -1,5 +1,15 @@
 -- Creates the database tables
 
+-- Note we use TIMESTAMP only for registering changes in the database
+-- User visible dates and times are represented by DATETIME, and have no timezone. For example, if from England you
+-- make a reservation of a car, you should do this in Belgian time. Reservation intervals across a daylight saving time border,
+-- may be one hour off.
+--
+-- All times displayed by the web application should therefore be regarded as with respect to a fixed time zone,
+-- the time zone of the server. The corresponding Java type is LocalDateTime.
+--
+-- This choice is not without difficulties, but we think this is the behaviour which the user expects,
+
 SET names utf8;
 SET default_storage_engine=INNODB;
 
@@ -21,8 +31,8 @@ CREATE TABLE `files` (
   `file_path` VARCHAR(255) NOT NULL,
   `file_name` VARCHAR(128) NULL,
   `file_content_type` VARCHAR(64) NULL,
-  `file_created_at` DATETIME,
-  `file_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `file_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `file_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`file_id`)
 );
 
@@ -34,8 +44,8 @@ CREATE TABLE `addresses` (
   `address_zipcode` VARCHAR(12) NOT NULL,
   `address_street` VARCHAR(64) NOT NULL DEFAULT '',
   `address_number` VARCHAR(12) NOT NULL DEFAULT '',
-  `address_created_at` DATETIME,
-  `address_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `address_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `address_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`address_id`)
 );
 
@@ -58,9 +68,9 @@ CREATE TABLE `users` (
 	`user_payed_deposit` BIT(1),
 	`user_agree_terms` BIT(1),
 	`user_image_id` INT,
-	`user_created_at` DATETIME,
-	`user_last_notified` DATETIME,
-	`user_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`user_last_notified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`user_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`user_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`user_id`),
 	FOREIGN KEY (`user_address_domicile_id`) REFERENCES addresses(`address_id`),
 	FOREIGN KEY (`user_address_residence_id`) REFERENCES addresses(`address_id`),
@@ -97,7 +107,7 @@ CREATE TABLE `carinsurances` (
 	`insurance_expiration` DATE,
 	`insurance_contract_id` INT, -- Polisnr
 	`insurance_bonus_malus` INT,
-	`insurance_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`insurance_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`insurance_id`)
 );
 
@@ -106,7 +116,7 @@ CREATE TABLE `technicalcardetails` (
 	`details_car_license_plate` VARCHAR(64),
 	`details_car_registration` INT,
 	`details_car_chassis_number` VARCHAR(17),
-	`details_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`details_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`details_id`),
 	UNIQUE INDEX `ix_details` (`details_car_license_plate`, `details_car_chassis_number`),
 	FOREIGN KEY (`details_car_registration`) REFERENCES files(`file_id`)
@@ -133,41 +143,41 @@ CREATE TABLE `cars` (
 	`car_comments` VARCHAR(256),
 	`car_active` BIT(1) NOT NULL DEFAULT 0,
 	`car_images_id` INT,
-	`car_created_at` DATETIME,
-	`car_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`car_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`car_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_id`),
 	FOREIGN KEY (`car_owner_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_location`) REFERENCES addresses(`address_id`) ON DELETE CASCADE,
 	FOREIGN KEY (`car_images_id`) REFERENCES files(`file_id`)
 );
 
-CREATE TABLE `carreservations` (
+CREATE TABLE `reservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST', -- Reeds goedgekeurd?
+	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST',
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
-	`reservation_privileged`` BIT(1) NOT NULL DEFAULT 0,
-	`reservation_from` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
-	`reservation_to` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`reservation_privileged` BIT(1) NOT NULL DEFAULT 0,
+	`reservation_from` DATETIME NOT NULL,
+	`reservation_to` DATETIME NOT NULL,
 	`reservation_message` VARCHAR(128),
-	`reservation_created_at` DATETIME,
-	`reservation_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`reservation_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`reservation_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
-	FOREIGN KEY (`reservation_car_id`) REFERENCES cars(`car_id`), -- Wat moet er gebeuren als de auto verwijderd wordt?
-	FOREIGN KEY (`reservation_user_id`) REFERENCES users(`user_id`) ON DELETE CASCADE
+	FOREIGN KEY (`reservation_car_id`) REFERENCES cars(`car_id`),
+	FOREIGN KEY (`reservation_user_id`) REFERENCES users(`user_id`)
 );
 
 CREATE TABLE `infosessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
 	`infosession_type` ENUM('NORMAL', 'OWNER', 'OTHER') NOT NULL DEFAULT 'NORMAL',
 	`infosession_type_alternative` VARCHAR(64),
-	`infosession_timestamp` TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
+	`infosession_timestamp` TIMESTAMP NULL,
 	`infosession_address_id` INT NOT NULL,
 	`infosession_host_user_id` INT,
 	`infosession_max_enrollees` INT,
 	`infosession_comments` VARCHAR(256),
-	`infosession_created_at` DATETIME,
-	`infosession_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`infosession_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`infosession_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`infosession_id`),
 	FOREIGN KEY (`infosession_host_user_id`) REFERENCES users(`user_id`),
 	FOREIGN KEY (`infosession_address_id`) REFERENCES addresses(`address_id`)
@@ -220,11 +230,11 @@ CREATE TABLE `carcosts` (
 	`car_cost_amount` DECIMAL(19,4) NOT NULL,
 	`car_cost_description` TEXT,
 	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
-	`car_cost_time` DATETIME,
+	`car_cost_time` DATE,
 	`car_cost_mileage` DECIMAL(10,1),
 	`car_cost_billed` DATE DEFAULT NULL,
-	`car_cost_created_at` DATETIME,
-	`car_cost_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`car_cost_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`car_cost_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
 	FOREIGN KEY (`car_cost_car_id`) REFERENCES cars(`car_id`),
 	FOREIGN KEY (`car_cost_proof`) REFERENCES files(`file_id`)
@@ -236,13 +246,16 @@ CREATE TABLE `carrides` (
   `car_ride_start_km` INTEGER NOT NULL DEFAULT 0,
   `car_ride_end_km` INTEGER NOT NULL DEFAULT 0,
   `car_ride_damage` BIT(1) NOT NULL DEFAULT 0,
-  `car_ride_refueling` INT NOT NULL,
+  `car_ride_refueling` INT NOT NULL,ALTER TABLE infosessions MODIFY COLUMN infosession_updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE infosessions MODIFY COLUMN infosession_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+DROP TRIGGER infosessions_ins;
+
   `car_ride_cost` DECIMAL(19,4) DEFAULT NULL,
   `car_ride_billed` DATE DEFAULT NULL,
-  `car_ride_created_at` DATETIME,
-  `car_ride_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `car_ride_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `car_ride_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`car_ride_car_reservation_id`),
-  FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES carreservations(`reservation_id`)
+  FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES reservations(`reservation_id`)
 );
 
 CREATE TABLE `refuels` (
@@ -253,8 +266,8 @@ CREATE TABLE `refuels` (
 	`refuel_eurocents` INT,
 	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', --approved by owner
 	`refuel_billed` DATE DEFAULT NULL,
-   	`refuel_created_at` DATETIME,
-   	`refuel_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   	`refuel_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   	`refuel_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),
 	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`),
 	FOREIGN KEY (`refuel_file_id`) REFERENCES files(`file_id`)
@@ -265,9 +278,9 @@ CREATE TABLE `damages` (
 	`damage_car_ride_id` INT NOT NULL,
 	`damage_description` TEXT,
 	`damage_finished` BIT(1) NOT NULL DEFAULT 0,
-	`damage_time` DATETIME NOT NULL,
-   	`damage_created_at` DATETIME,
-   	`damage_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`damage_time` DATE,
+   	`damage_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   	`damage_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_id`),
 	FOREIGN KEY (`damage_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`)
 );
@@ -284,7 +297,8 @@ CREATE TABLE `damagelogs` (
 	`damage_log_id` INT NOT NULL AUTO_INCREMENT,
 	`damage_log_damage_id` INT NOT NULL,
 	`damage_log_description` TEXT,
-   	`damage_log_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   	`damage_log_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   	`damage_log_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 	PRIMARY KEY (`damage_log_id`),
 	FOREIGN KEY (`damage_log_damage_id`) REFERENCES damages(`damage_id`)
 );
@@ -296,8 +310,8 @@ CREATE TABLE `messages` ( -- from user to user != notifications
 	`message_read` BIT(1) NOT NULL DEFAULT 0,
 	`message_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van een Dégage-gebruiker',
 	`message_body` TEXT NOT NULL,
-   `message_created_at` DATETIME,
-   `message_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   `message_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   `message_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`message_id`),
 	FOREIGN KEY (`message_from_user_id`) REFERENCES users(`user_id`),
 	FOREIGN KEY (`message_to_user_id`) REFERENCES users(`user_id`)
@@ -310,8 +324,8 @@ CREATE TABLE `templates` (
 	`template_body` TEXT NOT NULL,
 	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, -- Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
 	`template_send_mail_changeable` BIT(1) NOT NULL DEFAULT 1, -- Mag aangepast worden? Bv wachtwoord reset/verificatie niet!
-	`template_created_at` DATETIME,
-	`template_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`template_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	`template_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`template_id`),
 	UNIQUE INDEX `template_title` (`template_title`)
 );
@@ -335,7 +349,8 @@ CREATE TABLE `verifications` (
 	`verification_ident` CHAR(37) NOT NULL,
 	`verification_user_id` INT NOT NULL,
 	`verification_type` ENUM('REGISTRATION','PWRESET') NOT NULL DEFAULT 'REGISTRATION',
-	`verification_created_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`verification_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`verification_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	PRIMARY KEY (`verification_user_id`, `verification_type`),
 	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `users` (`user_id`)
 );
@@ -346,8 +361,8 @@ CREATE TABLE `notifications` ( -- from system to user
 	`notification_read` BIT(1) NOT NULL DEFAULT 0,
 	`notification_subject` VARCHAR(255),
 	`notification_body` TEXT,
-   `notification_created_at` DATETIME,
-   `notification_updated_at` TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+   `notification_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   `notification_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`notification_id`),
 	FOREIGN KEY (`notification_user_id`) REFERENCES users(`user_id`)
 );
@@ -356,8 +371,8 @@ CREATE TABLE `approvals` (
   `approval_id` INT NOT NULL AUTO_INCREMENT,
   `approval_user` INT NULL DEFAULT NULL,
   `approval_admin` INT NULL DEFAULT NULL,
-  `approval_submission` DATETIME NOT NULL,
-  `approval_date` DATETIME NULL DEFAULT NULL,
+  `approval_submission` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  `approval_date` TIMESTAMP NULL DEFAULT NULL,
   `approval_status` ENUM('PENDING','ACCEPTED','DENIED') NOT NULL DEFAULT 'PENDING',
   `approval_infosession` INT NULL DEFAULT NULL,
   `approval_user_message` TEXT NULL,
@@ -375,7 +390,7 @@ CREATE TABLE `jobs` (
   `job_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
   `job_type` ENUM('IS_REMINDER','RES_REMINDER','REPORT', 'RESERVE_ACCEPT', 'DRIVE_FINISH') NOT NULL DEFAULT 'REPORT',
   `job_ref_id` INT NULL DEFAULT '0',
-  `job_time` DATETIME NOT NULL,
+  `job_time` TIMESTAMP,
   `job_finished` BIT(1) NOT NULL DEFAULT b'0',
   PRIMARY KEY (`job_id`)
 );
@@ -384,7 +399,7 @@ CREATE TABLE `jobs` (
 CREATE TABLE `receipts` (
   `receipt_id` INT NOT NULL AUTO_INCREMENT,
   `receipt_name` CHAR(32) NOT NULL,
-  `receipt_date` DATETIME NULL DEFAULT NULL,
+  `receipt_date` DATE NULL DEFAULT NULL,
   `receipt_fileID` INT NULL DEFAULT NULL,
   `receipt_userID` INT NOT NULL,
   `receipt_price` DECIMAL(19,4),
@@ -400,44 +415,13 @@ CREATE TABLE `receipts` (
 
 DELIMITER $$
 
-CREATE TRIGGER files_ins BEFORE INSERT ON files FOR EACH ROW
-BEGIN
-  IF new.file_created_at IS NULL THEN
-    SET new.file_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER addresses_ins BEFORE INSERT ON addresses FOR EACH ROW
-BEGIN
-  IF new.address_created_at IS NULL THEN
-    SET new.address_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER users_ins BEFORE INSERT ON users FOR EACH ROW
-BEGIN
-  IF new.user_created_at IS NULL THEN
-    SET new.user_created_at = now();
-  END IF;
-  IF new.user_last_notified IS NULL THEN
-    SET new.user_last_notified = now();
-  END IF;
-END $$
-
-CREATE TRIGGER cars_ins BEFORE INSERT ON cars FOR EACH ROW
-BEGIN
-  IF new.car_created_at IS NULL THEN
-    SET new.car_created_at = now();
-  END IF;
-END $$
-
 CREATE TRIGGER cars_make AFTER INSERT ON cars FOR EACH ROW
 BEGIN
   INSERT INTO technicalcardetails(details_id) VALUES (new.car_id);
   INSERT INTO carinsurances(insurance_id) VALUES (new.car_id);
 END $$
 
-CREATE TRIGGER carreservations_ins BEFORE INSERT ON carreservations FOR EACH ROW
+CREATE TRIGGER reservations_ins BEFORE INSERT ON reservations FOR EACH ROW
 BEGIN
     DECLARE privileged int default 0;
 
@@ -458,60 +442,5 @@ BEGIN
     END IF;
 END $$
 
-CREATE TRIGGER infosessions_ins BEFORE INSERT ON infosessions FOR EACH ROW
-BEGIN
-  IF new.infosession_created_at IS NULL THEN
-    SET new.infosession_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER carcosts_ins BEFORE INSERT ON carcosts FOR EACH ROW
-BEGIN
-  IF new.car_cost_created_at IS NULL THEN
-    SET new.car_cost_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER refuels_ins BEFORE INSERT ON refuels FOR EACH ROW
-BEGIN
-  IF new.refuel_created_at IS NULL THEN
-    SET new.refuel_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER damages_ins BEFORE INSERT ON damages FOR EACH ROW
-BEGIN
-  IF new.damage_created_at IS NULL THEN
-    SET new.damage_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER carrides_ins BEFORE INSERT ON carrides FOR EACH ROW
-BEGIN
-  IF new.car_ride_created_at IS NULL THEN
-    SET new.car_ride_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER templates_ins BEFORE INSERT ON templates FOR EACH ROW
-BEGIN
-  IF new.template_created_at IS NULL THEN
-    SET new.template_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER messages_ins BEFORE INSERT ON messages FOR EACH ROW
-BEGIN
-  IF new.message_created_at IS NULL THEN
-    SET new.message_created_at = now();
-  END IF;
-END $$
-
-CREATE TRIGGER notifications_ins BEFORE INSERT ON notifications FOR EACH ROW
-BEGIN
-  IF new.notification_created_at IS NULL THEN
-    SET new.notification_created_at = now();
-  END IF;
-END $$
 DELIMITER ;
 

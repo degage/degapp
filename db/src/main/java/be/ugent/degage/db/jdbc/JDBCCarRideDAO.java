@@ -58,8 +58,8 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     }
 
     private LazyStatement getCarRideStatement = new LazyStatement (
-            "SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
-                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+            "SELECT * FROM carrides INNER JOIN reservations ON carrides.car_ride_car_reservation_id = reservations.reservation_id " +
+                    "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
                     " WHERE car_ride_car_reservation_id = ?"
     );
 
@@ -110,7 +110,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
 
     private LazyStatement getEndPeriodStatement = new LazyStatement (
             "UPDATE carrides" +
-                    "  INNER JOIN carreservations ON car_ride_car_reservation_id = reservation_id " +
+                    "  INNER JOIN reservations ON car_ride_car_reservation_id = reservation_id " +
                     "  SET car_ride_billed = CURDATE() " +
                     "  WHERE car_ride_billed IS NULL AND car_ride_status = 1 AND reservation_to < CURDATE() " 
     );
@@ -128,8 +128,8 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     }
 
     private LazyStatement getBillRidesForLoanerStatement = new LazyStatement(
-            "SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
-                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+            "SELECT * FROM carrides INNER JOIN reservations ON carrides.car_ride_car_reservation_id = reservations.reservation_id " +
+                    "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
                     "WHERE car_ride_billed = ? AND reservation_user_id = ?"
     );
 
@@ -151,8 +151,8 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     }
 
     private LazyStatement getBillRidesForCarStatement = new LazyStatement(
-            "SELECT * FROM carrides INNER JOIN carreservations ON carrides.car_ride_car_reservation_id = carreservations.reservation_id " +
-                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+            "SELECT * FROM carrides INNER JOIN reservations ON carrides.car_ride_car_reservation_id = reservations.reservation_id " +
+                    "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
                     "WHERE car_ride_billed = ? AND reservation_car_id = ?"
     );
 

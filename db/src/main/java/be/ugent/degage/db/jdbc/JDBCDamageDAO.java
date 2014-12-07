@@ -87,7 +87,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
             "SELECT damage_id, damage_description, damage_time, damage_finished, " +
                     "reservation_id, reservation_car_id, reservation_user_id, " +
                     "reservation_status, reservation_privileged, reservation_from, reservation_to " +
-            "FROM damages JOIN carreservations ON damage_car_ride_id = reservation_id " +
+            "FROM damages JOIN reservations ON damage_car_ride_id = reservation_id " +
             "WHERE damage_id = ?"
     );
 
@@ -150,7 +150,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
                     "reservation_status, reservation_privileged, reservation_from, reservation_to, " +
                     "car_name, user_lastname, user_firstname " +
             "FROM damages " +
-            "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+            "JOIN reservations ON damage_car_ride_id = reservation_id " +
             "JOIN cars ON car_id = reservation_car_id " +
             "JOIN users ON user_id = reservation_user_id ";
 
@@ -243,7 +243,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
    private static final String COUNT_DAMAGES_QUERY =
         "SELECT  count(*) AS amount_of_damages " +
             "FROM damages " +
-            "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+            "JOIN reservations ON damage_car_ride_id = reservation_id " +
             "JOIN cars ON car_id = reservation_car_id " +
             "JOIN users ON user_id = reservation_user_id ";
 
@@ -272,7 +272,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
 
     private LazyStatement getAmountOfOpenDamagesStatement = new LazyStatement(
             "SELECT COUNT(*) AS amount_of_damages FROM damages " +
-                "JOIN carreservations ON damage_car_ride_id = reservation_id " +
+                "JOIN reservations ON damage_car_ride_id = reservation_id " +
                 "WHERE NOT damage_finished AND reservation_user_id = ?"
     );
 

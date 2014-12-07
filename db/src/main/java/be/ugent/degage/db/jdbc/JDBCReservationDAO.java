@@ -31,9 +31,9 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
 
             // TODO: replace * by actual fields
-    public static final String RESERVATION_QUERY = "SELECT * FROM carreservations " +
-            "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
-            "INNER JOIN users ON carreservations.reservation_user_id = users.user_id ";
+    public static final String RESERVATION_QUERY = "SELECT * FROM reservations " +
+            "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
+            "INNER JOIN users ON reservations.reservation_user_id = users.user_id ";
 
     public JDBCReservationDAO(JDBCDataAccessContext context) {
         super(context);
@@ -68,13 +68,13 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement createReservationStatement = new LazyStatement (
-            "INSERT INTO carreservations (reservation_user_id, reservation_car_id, "
+            "INSERT INTO reservations (reservation_user_id, reservation_car_id, "
                     + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?)",
             "reservation_id"
     );
 
     private LazyStatement retreiveStatusStatement = new LazyStatement (
-            "SELECT reservation_status, reservation_privileged FROM carreservations WHERE reservation_id = ?"
+            "SELECT reservation_status, reservation_privileged FROM reservations WHERE reservation_id = ?"
     );
 
     @Override
@@ -118,7 +118,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getUpdateReservationStatusStatement = new LazyStatement(
-            "UPDATE carreservations SET reservation_status =?  WHERE reservation_id = ?"
+            "UPDATE reservations SET reservation_status =?  WHERE reservation_id = ?"
     );
 
     @Override
@@ -135,7 +135,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getUpdateReservationStatement = new LazyStatement (
-            "UPDATE carreservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
+            "UPDATE reservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
                     + "reservation_from=? , reservation_to=?, reservation_message = ? WHERE reservation_id = ?"
     );
 
@@ -159,9 +159,9 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getReservationStatement = new LazyStatement (
-            "SELECT * FROM carreservations" +
-                    " INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id" +
-                    " INNER JOIN users ON carreservations.reservation_user_id = users.user_id" +
+            "SELECT * FROM reservations" +
+                    " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
+                    " INNER JOIN users ON reservations.reservation_user_id = users.user_id" +
                     " WHERE reservation_id=?"
     );
 
@@ -197,7 +197,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     private LazyStatement getNextReservationStatement = new LazyStatement(
             "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
                     USER_HEADER_FIELDS +
-            "FROM carreservations AS r JOIN carreservations AS o " +
+            "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
             "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
@@ -227,7 +227,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     private LazyStatement getPreviousReservationStatement = new LazyStatement(
             "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
                     USER_HEADER_FIELDS +
-            "FROM carreservations AS r JOIN carreservations AS o " +
+            "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
             "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
@@ -255,7 +255,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
     
     private LazyStatement deleteReservationStatement = new LazyStatement (
-            "DELETE FROM carreservations WHERE reservation_id=?"
+            "DELETE FROM reservations WHERE reservation_id=?"
     );
 
     @Override
@@ -286,8 +286,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
             // TODO: replace * by actual fields
         String sql = "SELECT " + (getAmount ? " COUNT(reservation_id) AS " + amount : " * ") +
-                " FROM carreservations INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
-                " INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+                " FROM reservations INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
+                " INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
                 " WHERE (car_owner_user_id LIKE " + id +
                 " OR reservation_user_id LIKE " + id + ") AND " +
                 " reservation_car_id LIKE " + carId + " AND ";
@@ -348,9 +348,9 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     @Override
     public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsLoaner) {
         try (Statement statement = createStatement()) {
-            String sql = "SELECT COUNT(*) as result FROM carreservations " +
-                    "INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id " +
-                    "WHERE carreservations.reservation_status = '" + status.toString() + "'";
+            String sql = "SELECT COUNT(*) as result FROM reservations " +
+                    "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
+                    "WHERE reservations.reservation_status = '" + status.toString() + "'";
             if(userIsLoaner)
                 sql += " AND (car_owner_user_id = " + userId + " OR reservation_user_id = " + userId + ")";
             else
@@ -367,9 +367,9 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getReservationListByUseridStatement = new LazyStatement (
-            "SELECT * FROM carreservations" +
-                    " INNER JOIN cars ON carreservations.reservation_car_id = cars.car_id" +
-                    " INNER JOIN users ON carreservations.reservation_user_id = users.user_id " +
+            "SELECT * FROM reservations" +
+                    " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
+                    " INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
                     " WHERE (car_owner_user_id = ? OR reservation_user_id = ? ) " +
                     " AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED'"
     );
@@ -393,7 +393,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getReservationListByCaridStatement = new LazyStatement (
-            "SELECT  " + RESERVATION_HEADER_FIELDS + "FROM carreservations WHERE reservation_car_id=?"
+            "SELECT  " + RESERVATION_HEADER_FIELDS + "FROM reservations WHERE reservation_car_id=?"
     );
 
     @Override
@@ -414,7 +414,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private static final String ADJUST_STATEMENT =
-            "UPDATE carreservations SET reservation_status='REQUEST_DETAILS' " +
+            "UPDATE reservations SET reservation_status='REQUEST_DETAILS' " +
                     " WHERE reservation_to < NOW() AND reservation_status = 'ACCEPTED' ";
 
     @Override
@@ -428,7 +428,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
 
     private LazyStatement listCRInfoStatement = new LazyStatement(
-        "SELECT car_id, car_name,  FROM car LEFT JOIN carreservations ON reservation_car_id = car_id " +
+        "SELECT car_id, car_name,  FROM car LEFT JOIN reservations ON reservation_car_id = car_id " +
                 "WHERE reservation_to >= ? AND reservation_from <= ? " + // TODO: same where clause appears several times
                 "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
                 "ORDER BY car_id, reservation_from"
@@ -466,7 +466,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement hasOverlapStatement = new LazyStatement(
-        "SELECT count(*) FROM carreservations " +
+        "SELECT count(*) FROM reservations " +
                 "WHERE reservation_car_id = ? AND reservation_to >= ? AND reservation_from <= ? " +
                 "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' "
     );
