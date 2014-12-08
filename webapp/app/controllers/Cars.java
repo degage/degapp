@@ -597,8 +597,7 @@ public class Cars extends Controller {
         public String description;
         public BigDecimal amount;
         public BigDecimal mileage;
-        public DateTime time;
-
+        public LocalDate time;
 
         public String validate() {
             if ("".equals(description)) {

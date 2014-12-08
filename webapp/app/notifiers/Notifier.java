@@ -328,8 +328,7 @@ public class Notifier extends Mailer {
     }
 
     private static String replaceCarCostTags(CarCost carCost, String template) {
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
-        template = template.replace("%car_cost_time%", fmt.print(carCost.getTime()));
+        template = template.replace("%car_cost_time%", Utils.toLocalizedDateString(carCost.getDate()));
         template = template.replace("%car_name%", carCost.getCar().getName());
         template = template.replace("%amount%", carCost.getAmount().toPlainString() + " euro");
         template = template.replace("%car_cost_description%", carCost.getDescription());

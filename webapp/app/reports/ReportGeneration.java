@@ -17,6 +17,7 @@ import java.net.URL;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.Period;
 
 /**
@@ -61,6 +62,7 @@ public class ReportGeneration {
             document.add(image);
 
             Date date = new Date(java.util.Date.from(report).getTime());
+            LocalDate localDate = LocalDate.from(report);
 
             PdfPTable table = new PdfPTable(3);
             add(table, "Afrekening n°:");
@@ -90,10 +92,11 @@ public class ReportGeneration {
             for (Car car : context.getCarDAO().listCarsOfUser(userId)) {
                 int carId = car.getId();
 
+                // TODO: use localDate everywhere
                 saldo = saldo.add(createCarTable(
                         context.getCarRideDAO().getBillRidesForCar(date, carId),
                         context.getRefuelDAO().eurocentsSpentOnFuel(date, carId),
-                        context.getCarCostDAO().getBillCarCosts(date, carId),
+                        context.getCarCostDAO().getBillCarCosts(localDate, carId),
                         document,
                         car.getName(),
                         costInfo));

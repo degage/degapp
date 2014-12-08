@@ -1,19 +1,23 @@
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.models.*;
-import org.joda.time.DateTime;
+import be.ugent.degage.db.dao.CarCostDAO;
+import be.ugent.degage.db.models.Car;
+import be.ugent.degage.db.models.CarCost;
+import be.ugent.degage.db.models.CarCostStatus;
 
 import java.math.BigDecimal;
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by Stefaan Vermassen on 15/04/14.
  */
 class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
@@ -42,9 +46,16 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
 
     public static CarCost populateCarCost(ResultSet rs, Car car) throws SQLException {
-        CarCost carCost = new CarCost(rs.getInt("car_cost_id"), car, rs.getBigDecimal("car_cost_amount"), rs.getBigDecimal("car_cost_mileage"), rs.getString("car_cost_description"), new DateTime(rs.getTimestamp("car_cost_time")), rs.getInt("car_cost_proof"));
+        CarCost carCost = new CarCost(
+                rs.getInt("car_cost_id"),
+                car,
+                rs.getBigDecimal("car_cost_amount"),
+                rs.getBigDecimal("car_cost_mileage"),
+                rs.getString("car_cost_description"),
+                rs.getDate("car_cost_time").toLocalDate(),
+                rs.getInt("car_cost_proof"));
         carCost.setStatus(CarCostStatus.valueOf(rs.getString("car_cost_status")));
-        carCost.setBilled(rs.getDate("car_cost_billed"));
+        carCost.setBilled(rs.getDate("car_cost_billed").toLocalDate());
         return carCost;
     }
 
@@ -55,13 +66,13 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     );
 
     @Override
-    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time, int fileId) throws DataAccessException {
+    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, LocalDate date, int fileId) throws DataAccessException {
         try{
             PreparedStatement ps = createCarCostStatement.value();
             ps.setInt(1, car.getId());
             ps.setBigDecimal(2, amount);
             ps.setString(3, description);
-            ps.setTimestamp(4, new Timestamp(time.getMillis()));
+            ps.setDate(4, Date.valueOf(date));
             ps.setBigDecimal(5, mileage);
             ps.setInt(6, fileId);
             if(ps.executeUpdate() == 0)
@@ -69,7 +80,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new CarCost(keys.getInt(1), car, amount, mileage, description, time, fileId);
+                return new CarCost(keys.getInt(1), car, amount, mileage, description, date, fileId);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for carcost.", ex);
             }
@@ -141,7 +152,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.setBigDecimal(1, carCost.getAmount());
             ps.setString(2, carCost.getDescription());
             ps.setString(3, carCost.getStatus().toString());
-            ps.setTimestamp(4, new Timestamp(carCost.getTime().getMillis()));
+            ps.setDate(4, Date.valueOf(carCost.getDate()));
             ps.setBigDecimal(5, carCost.getMileage());
             ps.setInt(6, carCost.getId());
             if(ps.executeUpdate() == 0)
@@ -214,11 +225,11 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     );
 
     @Override
-    public List<CarCost> getBillCarCosts(Date date, int car) throws DataAccessException {
+    public List<CarCost> getBillCarCosts(LocalDate date, int car) throws DataAccessException {
         List<CarCost> list = new ArrayList<>();
         try {
             PreparedStatement ps = getBillCarCostsStatement.value();
-            ps.setDate(1, date);
+            ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, car);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {

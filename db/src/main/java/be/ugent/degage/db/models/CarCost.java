@@ -1,9 +1,7 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
-
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * Created by Stefaan Vermassen on 15/04/14.
@@ -13,12 +11,12 @@ public class CarCost {
     private int id;
     private Car car;
     private BigDecimal amount;
-    private DateTime time;
+    private LocalDate date;
     private BigDecimal mileage;
     private String description;
     private CarCostStatus status;
     private int proofId;
-    private Date billed;
+    private LocalDate billed;
 
     public int getId() {
         return id;
@@ -60,12 +58,12 @@ public class CarCost {
         this.description = description;
     }
 
-    public DateTime getTime() {
-        return time;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setTime(DateTime time) {
-        this.time = time;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public CarCostStatus getStatus() {
@@ -84,17 +82,17 @@ public class CarCost {
         this.proofId = proofId;
     }
 
-    public Date getBilled() { return billed; }
+    public LocalDate getBilled() { return billed; }
 
-    public void setBilled(Date billed) { this.billed = billed; }
+    public void setBilled(LocalDate billed) { this.billed = billed; }
 
-    public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, DateTime time, int proofId){
+    public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, LocalDate date, int proofId){
         this.id = id;
         this.car = car;
         this.amount = amount;
         this.mileage = mileage;
         this.description = description;
-        this.time = time;
+        this.date = date;
         this.status = CarCostStatus.REQUEST;
         this.proofId = proofId;
     }

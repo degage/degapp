@@ -1,7 +1,7 @@
 @(form: Form[Cars.CarCostModel], car: Car)
 <!-- Large modal -->
 <script>
-$('#costtime').datetimepicker({"autoclose": true, language: 'nl'});
+@js.datepicker()
 </script>
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div id=" " class="modal-dialog modal-lg">
@@ -12,55 +12,28 @@ $('#costtime').datetimepicker({"autoclose": true, language: 'nl'});
             </div>
 
             @helper.form(routes.Cars.addNewCarCost(car.getId()), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
-                @if(form.hasGlobalErrors) {
-                    <div class="alert alert-danger alert-dismissable">
-                        <strong>Error!</strong> @form.globalError.message
-                    </div>
-                }
+                @formErrors(form)
                 <fieldset>
                     <div id="modalBody" class="modal-body">
                         <div class="panel-body">
 
-
-                            <div class="form-group">
-                                <label class="col-md-1 control-label" for="description"></label>
-                                <div class="col-md-12">
-                                    <input id="description" name="description" type="text" placeholder="Beschrijving" class="form-control input-md" value="@form("description").value" required>
-                                </div>
+                            @std.textField(form("description"), "Beschrijving")
+                            <div class="form-group col-md-6">
+                                <label class="control-label" for="amount">Bedrag</label>
+                                <input id="amount" name="amount" type="text" pattern="[0-9]+([,\.][0-9]+)?" title="Geef een (komma)getal in" placeholder="In euro" class="form-control input-md" value='@form("amount").value' required>
                             </div>
 
-                            <div class="form-group">
-                                <label class="col-md-1 control-label" for="amount"></label>
-                                <div class="col-md-12">
-                                    <input id="amount" name="amount" type="text" pattern="[0-9]+([,\.][0-9]+)?" title="Geef een (komma)getal in" placeholder="Bedrag in euro" class="form-control input-md" value="@form("amount").value" required>
-                                </div>
+                            <div class="form-group col-md-6">
+                                <label class="control-label" for="mileage">Kilometerstand</label>
+                                <input id="mileage" name="mileage" type="text" pattern="[0-9]+" title="Geef een (komma)getal in" placeholder="Kilometerstand" class="form-control input-md" value='@form("mileage").value' required>
                             </div>
 
-                            <div class="form-group">
-                                <label class="col-md-1 control-label" for="mileage"></label>
-                                <div class="col-md-12">
-                                    <input id="mileage" name="mileage" type="text" pattern="[0-9]+([,\.][0-9]+)?" title="Geef een (komma)getal in" placeholder="Kilometerstand" class="form-control input-md" value="@form("mileage").value" required>
-                                </div>
-                            </div>
+                            @std.datetimepicker(form("time"),"Datum", "col-md-6")
 
-                            <div class="form-group">
-                                <div id="costtime" class="input-group date form_datetime col-md-5" data-link-field="input_time">
-                                    <label class="col-md-1 control-label" for="time"></label>
-                                    <div class="col-md-12">
-                                    <input id="input_time" name="time" placeholder="Datum" class="form-control input-md"  type="text" value="@form("time").value" required>
-                                    </div>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                </div>
+                            <div class="form-group col-md-6">
+                                <label class="control-label" for="picture">Bewijsmateriaal</label>
+                                <input id="picture" name="picture" type="file" class="form-control input-md" required>
                             </div>
-
-                            <div class="form-group">
-                                <label class="col-md-1 control-label" for="picture">Bewijsmateriaal</label>
-                                <div class="col-md-12">
-                                    <input id="picture" name="picture" type="file" class="form-control input-md" required>
-                                </div>
-                            </div>
-
                         </div>
                     </div>
                     <div class="modal-footer">
