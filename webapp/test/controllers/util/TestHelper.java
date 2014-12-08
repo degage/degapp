@@ -19,10 +19,8 @@ import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.models.*;
 import db.DataAccess;
-import org.joda.time.DateTime;
 import org.mindrot.jbcrypt.BCrypt;
 
-import be.ugent.degage.db.mocking.TestDataAccessProvider;
 import play.mvc.Http.Cookie;
 import play.mvc.Result;
 import providers.DataProvider;

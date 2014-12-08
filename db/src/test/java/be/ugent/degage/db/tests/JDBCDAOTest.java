@@ -6,7 +6,6 @@ import be.ugent.degage.db.DataAccessProvider;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.jdbc.JDBCDataAccess;
 import be.ugent.degage.db.models.*;
-import org.joda.time.DateTime;
 import org.junit.Assert;
 import org.junit.Before;
 

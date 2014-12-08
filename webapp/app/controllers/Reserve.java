@@ -11,10 +11,6 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
-import org.joda.time.DateTime;
-import org.joda.time.MutableDateTime;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
@@ -36,10 +32,6 @@ import java.util.List;
  * Controller responsible to display and filter cars for reservation and to enable a user to reserve a car.
  */
 public class Reserve extends Controller {
-
-    // Formatter to translate a string to a datetime
-    private static final DateTimeFormatter DATETIMEFORMATTER =
-            DateTimeFormat.forPattern("yyyy-MM-dd HH:mm");
 
     public static class IndexModel {
         // Date from
@@ -238,8 +230,9 @@ public class Reserve extends Controller {
         String fromString = filter.getValue(FilterField.FROM);
         String untilString = filter.getValue(FilterField.UNTIL);
         try {
-            DateTime from = DATETIMEFORMATTER.parseDateTime(fromString);
-            DateTime until = DATETIMEFORMATTER.parseDateTime(untilString);
+
+            LocalDateTime from = Utils.toLocalDateTime(fromString);
+            LocalDateTime until = Utils.toLocalDateTime(untilString);
             if (!until.isAfter(from)) {
                 validationError = "Het einde van de periode moet na het begin van de periode liggen";
             }
@@ -329,8 +322,7 @@ public class Reserve extends Controller {
 
             // Schedule the auto accept
             int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
-            MutableDateTime autoAcceptDate = new MutableDateTime();
-            autoAcceptDate.addMinutes(minutesAfterNow);
+
             context.getJobDAO().createJob(
                     JobType.RESERVE_ACCEPT, reservation.getId(),
                     Instant.now().plusSeconds(60*Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
