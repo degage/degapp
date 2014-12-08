@@ -25,6 +25,8 @@ import views.html.drives.drivespage;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -326,9 +328,9 @@ public class Drives extends Controller {
             flash("danger", "Je bent niet gemachtigd deze actie uit te voeren.");
             return redirect(routes.Drives.index());
         }
-        DateTime from = adjustForm.get().getTimeFrom();
-        DateTime until = adjustForm.get().getTimeUntil();
-        if (from.isBefore(reservation.getFrom()) || until.isAfter(reservation.getTo())) {
+        LocalDateTime from = adjustForm.get().getTimeFrom();
+        LocalDateTime until = adjustForm.get().getTimeUntil();
+        if (from.isBefore(reservation.getFrom()) || until.isAfter(reservation.getUntil())) {
             flash("danger", "Het is niet toegestaan de reservatie te verlengen.");
             return badRequest(detailsPageOld(reservationId, detailsForm));
         }
@@ -337,7 +339,7 @@ public class Drives extends Controller {
             return redirect(routes.Drives.index());
         }
         reservation.setFrom(from);
-        reservation.setTo(until);
+        reservation.setUntil(until);
         rdao.updateReservation(reservation);
 
         if (reservation.getStatus() == ReservationStatus.REQUEST) {
@@ -501,7 +503,7 @@ public class Drives extends Controller {
         }
 
         //if (isOwner) {  // TODO: compute cost only at time of invoice
-        Instant instant = reservation.getFrom().toDate().toInstant();
+        Instant instant = Instant.from(reservation.getFrom());
         BigDecimal cost = calculateDriveCost(ride.getEndKm() - ride.getStartKm(),
                 ride.getReservation().isPrivileged(),
                 context.getSettingDAO().getCostSettings(instant));
@@ -547,7 +549,7 @@ public class Drives extends Controller {
             return badRequest(detailsPageOld(reservationId, detailsForm));
         }
         ride.setApprovedByOwner(true);
-        Instant instant = reservation.getFrom().toDate().toInstant();
+        Instant instant = Instant.from(reservation.getFrom());
         // TODO: what if mileages are blank?
         BigDecimal cost = calculateDriveCost(ride.getEndKm() - ride.getStartKm(),
                 ride.getReservation().isPrivileged(),

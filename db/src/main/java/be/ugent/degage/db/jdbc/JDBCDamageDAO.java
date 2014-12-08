@@ -7,9 +7,9 @@ import be.ugent.degage.db.dao.DamageDAO;
 import be.ugent.degage.db.models.Damage;
 import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationStatus;
-import org.joda.time.DateTime;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -27,8 +27,8 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
         Reservation reservation = new Reservation(
                 rs.getInt("reservation_id"),
                 null, null,
-                new DateTime(rs.getTimestamp("reservation_from")),
-                new DateTime(rs.getTimestamp("reservation_to")),
+                rs.getTimestamp("reservation_from").toLocalDateTime(),
+                rs.getTimestamp("reservation_to").toLocalDateTime(),
                 null
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
@@ -39,7 +39,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
                 rs.getInt("reservation_user_id"),
                 reservation,
                 rs.getString("damage_description"),
-                new DateTime(rs.getTimestamp("damage_time")),
+                rs.getDate("damage_time").toLocalDate(),
                 rs.getBoolean("damage_finished"));
     }
 
@@ -62,7 +62,8 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
         try {
             PreparedStatement ps = createDamageStatement.value();
             ps.setInt(1, reservation.getId());
-            ps.setTimestamp(2, new Timestamp(reservation.getFrom().getMillis()));
+            LocalDate damageDate = reservation.getFrom().toLocalDate();
+            ps.setDate(2, Date.valueOf(damageDate));
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating damage.");
 
@@ -74,7 +75,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
                         reservation.getUser().getId(),
                         reservation,
                         null,
-                        reservation.getFrom(),
+                        damageDate,
                         false
                 );
             }
@@ -113,12 +114,12 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
     );
 
     @Override
-    public void updateDamageDetails(int damageId, String description, DateTime time) throws DataAccessException {
+    public void updateDamageDetails(int damageId, String description, LocalDate date) throws DataAccessException {
 
         try {
             PreparedStatement ps = updateDamageDetailsStatement.value();
             ps.setString(1, description);
-            ps.setTimestamp(2, new Timestamp(time.getMillis()));
+            ps.setDate(2, Date.valueOf(date));
             ps.setInt(3, damageId);
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("Damage update affected 0 rows.");

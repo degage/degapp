@@ -4,7 +4,8 @@
  */
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+
+import java.time.LocalDateTime;
 
 /**
  * Contains the most essential information for reservations.
@@ -16,17 +17,17 @@ public class ReservationHeader {
     private ReservationStatus status;
     private int carId;
     private int userId;
-    private DateTime from;
-    private DateTime to;
+    private LocalDateTime from;
+    private LocalDateTime until;
     private String message;
     private boolean privileged;
 
-    public ReservationHeader(int id, int carId, int userId, DateTime from, DateTime to, String message) {
+    public ReservationHeader(int id, int carId, int userId, LocalDateTime from, LocalDateTime until, String message) {
         this.id = id;
         this.carId = carId;
         this.userId = userId;
         this.from = from;
-        this.to = to;
+        this.until = until;
         this.message = message;
 
     }    
@@ -47,12 +48,12 @@ public class ReservationHeader {
         return userId;
     }
 
-    public DateTime getFrom() {
+    public LocalDateTime getFrom() {
         return from;
     }
 
-    public DateTime getTo() {
-        return to;
+    public LocalDateTime getUntil() {
+        return until;
     }
 
     public String getMessage() {

@@ -6,6 +6,7 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import controllers.Utils;
 import controllers.util.FileHelper;
 import data.EurocentAmount;
 import org.joda.time.DateTime;
@@ -264,7 +265,7 @@ public class ReportGeneration {
             totalDistance += distance;
 
             add(drivesTable, ride.getReservation().getCar().getName());
-            add(drivesTable, new SimpleDateFormat("dd-MM-yyyy").format(ride.getReservation().getFrom().toDate()));
+            add(drivesTable, Utils.toLocalizedDateString(ride.getReservation().getFrom()));
             add(drivesTable, distance + " km");
 
             int level;
@@ -331,7 +332,7 @@ public class ReportGeneration {
 
         for (Refuel refuel : refuels) {
             add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
-            add(refuelsTable, new SimpleDateFormat("dd-MM-yyyy").format(refuel.getCarRide().getReservation().getFrom().toDate()));
+            add(refuelsTable, Utils.toLocalizedDateString(refuel.getCarRide().getReservation().getFrom()));
             if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) != 0) {
                 add(refuelsTable, "€ " + EurocentAmount.toString(refuel.getEurocents()), true);
                 refuelTotal += refuel.getEurocents();

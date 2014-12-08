@@ -1,6 +1,6 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+import java.time.LocalDate;
 
 /**
  * Registers damage that occurred during a car ride
@@ -14,7 +14,7 @@ public class Damage {
     private int driverId;
 
     private String description;
-    private DateTime time;
+    private LocalDate date;
     private boolean finished;
 
     private String carName; // not always filled in
@@ -23,12 +23,12 @@ public class Damage {
     private Reservation reservation; // only partially filled in
 
     public Damage(Integer id, int carId, int driverId, Reservation reservation,
-                  String description, DateTime time, boolean finished) {
+                  String description, LocalDate date, boolean finished) {
         this.id = id;
         this.carId = carId;
         this.driverId = driverId;
         this.description = description;
-        this.time = time;
+        this.date = date;
         this.finished = finished;
         this.reservation = reservation;
     }
@@ -82,12 +82,12 @@ public class Damage {
         this.description = description;
     }
 
-    public DateTime getTime() {
-        return time;
+    public LocalDate getDate() {
+        return date;
     }
 
-    public void setTime(DateTime time) {
-        this.time = time;
+    public void setDate(LocalDate date) {
+        this.date = date;
     }
 
     public boolean getFinished() {

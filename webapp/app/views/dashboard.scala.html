@@ -12,8 +12,8 @@
         var events = [];    // global variable used by 'document ready'-event (cf. dashboard.js)
         @foreach(reservations){ reservation =>
             events.push( registrationEvent(
-            '@reservation.getFrom.toString("yyyy-MM-dd HH:mm")',
-            '@reservation.getTo.toString("yyyy-MM-dd HH:mm")',
+            '@Utils.toString(reservation.getFrom)',
+            '@Utils.toString(reservation.getUntil)',
             "@reservation.getCar.getName",
             "@routes.Drives.details(reservation.getId).toString()"
             ) );

@@ -551,7 +551,7 @@ public class JDBCDAOTest {
 
             Assert.assertEquals(reservation.getCar().getId(),returnReservation.getCar().getId());
             Assert.assertEquals(reservation.getUser().getId(),returnReservation.getUser().getId());
-            Assert.assertEquals(reservation.getTo(),returnReservation.getTo());
+            Assert.assertEquals(reservation.getUntil(),returnReservation.getUntil());
             Assert.assertEquals(reservation.getFrom(),returnReservation.getFrom());
             Assert.assertEquals(reservation.getStatus(), returnReservation.getStatus());
         }
@@ -565,7 +565,7 @@ public class JDBCDAOTest {
             reservation.setCar(cars.get((reservation.getCar().getId() + 1) % 100));
             reservation.setUser(users.get((reservation.getUser().getId() + 1) % 100));
             reservation.setFrom(reservation.getFrom().plusHours(1));
-            reservation.setTo(reservation.getTo().plusHours(1));
+            reservation.setUntil(reservation.getUntil().plusHours(1));
 
             reservationDAO.updateReservation(reservation);
         }
@@ -752,7 +752,7 @@ public class JDBCDAOTest {
     private void getInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
             InfoSession returnInfoSession = infoSessionDAO.getInfoSession(infoSession.getId(), true);
-            Assert.assertEquals(infoSession.getTime(), returnInfoSession.getTime());
+            Assert.assertEquals(infoSession.getDate(), returnInfoSession.getDate());
             Assert.assertEquals(infoSession.getAddress().getId(), returnInfoSession.getAddress().getId());
             Assert.assertEquals(infoSession.getHost().getId(), returnInfoSession.getHost().getId());
 
@@ -780,7 +780,7 @@ public class JDBCDAOTest {
     private void updateInfoSessionTest() {
         for(InfoSession infoSession : infoSessions) {
 
-            infoSession.setTime(infoSession.getTime().plusHours(1));
+            infoSession.setDate(infoSession.getDate().plusHours(1));
             infoSession.setAddress(addresses.get((infoSession.getAddress().getId() + 1) % 100));
             Enrollee delete = infoSession.getEnrolled().get(0);
             infoSession.deleteEnrollee(delete);

@@ -7,6 +7,7 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.*;
 
 import java.sql.*;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -15,13 +16,11 @@ import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.ReservationStatus;
 
-import org.joda.time.DateTime;
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 
 /**
  *
- * @author Laurent
  */
 class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
@@ -44,8 +43,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getInt("reservation_id"),
                 rs.getInt("reservation_car_id"),
                 rs.getInt("reservation_user_id"),
-                new DateTime(rs.getTimestamp("reservation_from")),
-                new DateTime(rs.getTimestamp("reservation_to")),
+                rs.getTimestamp("reservation_from").toLocalDateTime(),
+                rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message")
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
@@ -58,8 +57,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getInt("reservation_id"),
                 JDBCCarDAO.populateCar(rs, false),
                 JDBCUserDAO.populateUserHeader(rs),
-                new DateTime(rs.getTimestamp("reservation_from")),
-                new DateTime(rs.getTimestamp("reservation_to")),
+                rs.getTimestamp("reservation_from").toLocalDateTime(),
+                rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message")
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
@@ -78,14 +77,14 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     @Override
-    public ReservationHeader createReservation(DateTime from, DateTime to, int carId, int userId, String message) throws DataAccessException {
+    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId, String message) throws DataAccessException {
         try {
             // TODO: find a way to do this with a single SQL statement
             PreparedStatement ps = createReservationStatement.value();
             ps.setInt(1, userId);
             ps.setInt(2, carId);
-            ps.setTimestamp(3, new Timestamp(from.getMillis()));
-            ps.setTimestamp(4, new Timestamp(to.getMillis()));
+            ps.setTimestamp(3, Timestamp.valueOf(from));
+            ps.setTimestamp(4, Timestamp.valueOf(until));
             ps.setString(5, message);
 
             if (ps.executeUpdate() == 0)
@@ -106,7 +105,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 ReservationHeader reservation = new ReservationHeader (
                         id,
                         userId, carId,
-                        from, to,
+                        from, until,
                         message);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
                 reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
@@ -146,8 +145,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             ps.setInt(1, reservation.getUser().getId());
             ps.setInt(2, reservation.getCar().getId());
             ps.setString(3, reservation.getStatus().toString());
-            ps.setTimestamp(4, new Timestamp(reservation.getFrom().getMillis()));
-            ps.setTimestamp(5, new Timestamp(reservation.getTo().getMillis()));
+            ps.setTimestamp(4, Timestamp.valueOf(reservation.getFrom()));
+            ps.setTimestamp(5, Timestamp.valueOf(reservation.getUntil()));
             ps.setString(6, reservation.getMessage());
             ps.setInt(7, reservation.getId());
 
@@ -188,8 +187,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getInt("r.reservation_id"),
                 null,
                 JDBCUserDAO.populateUserHeader(rs),
-                new DateTime(rs.getTimestamp("r.reservation_from")),
-                new DateTime(rs.getTimestamp("r.reservation_to")),
+                rs.getTimestamp("r.reservation_from").toLocalDateTime(),
+                rs.getTimestamp("r.reservation_to").toLocalDateTime(),
                 null
         );
     }
@@ -434,11 +433,11 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 "ORDER BY car_id, reservation_from"
     );
 
-    public Iterable<CRInfo> listCRInfo (DateTime from, DateTime to) {
+    public Iterable<CRInfo> listCRInfo (LocalDateTime from, LocalDateTime until) {
         try {
             PreparedStatement ps = listCRInfoStatement.value();
-            ps.setTimestamp(1, new Timestamp(from.getMillis()));
-            ps.setTimestamp(2, new Timestamp(to.getMillis()));
+            ps.setTimestamp(1, Timestamp.valueOf(from));
+            ps.setTimestamp(2, Timestamp.valueOf(until));
             try (ResultSet rs = ps.executeQuery()) {
                 Collection<CRInfo> result = new ArrayList<>();
                 CRInfo crInfo = null;
@@ -472,12 +471,12 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     @Override
-    public boolean hasOverlap(int carId, DateTime from, DateTime until) {
+    public boolean hasOverlap(int carId, LocalDateTime from, LocalDateTime until) {
         try {
             PreparedStatement ps = hasOverlapStatement.value();
             ps.setInt (1, carId);
-            ps.setTimestamp(2, new Timestamp(from.getMillis()));
-            ps.setTimestamp(3, new Timestamp(until.getMillis()));
+            ps.setTimestamp(2, Timestamp.valueOf(from));
+            ps.setTimestamp(3, Timestamp.valueOf(until));
             try (ResultSet rs = ps.executeQuery()) {
                 rs.next();
                 return rs.getInt(1) != 0;

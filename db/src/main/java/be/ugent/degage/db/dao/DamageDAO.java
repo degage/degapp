@@ -4,7 +4,8 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.models.Damage;
 import be.ugent.degage.db.models.Reservation;
-import org.joda.time.DateTime;
+
+import java.time.LocalDate;
 
 /**
  * Created by Stefaan Vermassen on 02/05/14.
@@ -15,7 +16,7 @@ public interface DamageDAO {
     public Damage getDamage(int damageId) throws DataAccessException;
 
     public void updateDamageFinished(int damageId, boolean finished) throws DataAccessException;
-    public void updateDamageDetails (int damageId, String description, DateTime time) throws DataAccessException;
+    public void updateDamageDetails (int damageId, String description, LocalDate date) throws DataAccessException;
 
     public int getAmountOfOpenDamages(int userId) throws DataAccessException;
 

@@ -7,7 +7,7 @@
             <br />
             <strong>Reservatie van:</strong>
             <div id="datetimepickerfrom" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_from">
-                <input id="input_from" name="from" class="form-control searchTextField" size="16" value='@reservation.getFrom.toString("yyyy-MM-dd HH:mm")'>
+                <input id="input_from" name="from" class="form-control searchTextField" size="16" value='@Utils.toString(reservation.getFrom)'>
                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                 <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
             </div><br />
@@ -15,7 +15,7 @@
         <div id="untiladjust" class="form-group hidden col-sm-10">
             <strong>Reservatie tot:</strong>
             <div id="datetimepickeruntil" class="input-group date form_datetime" data-date-format="yyyy-MM-dd hh:mm p" data-link-field="input_until">
-                <input id="input_until" name="until" class="form-control searchTextField" size="16" value='@reservation.getTo.toString("yyyy-MM-dd HH:mm")'>
+                <input id="input_until" name="until" class="form-control searchTextField" size="16" value='@Utils.toString(reservation.getUntil)'>
                 <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
                 <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
             </div>

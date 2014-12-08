@@ -46,7 +46,7 @@ public class TestReservationDAO implements ReservationDAO{
 	public Reservation getReservation(int id) throws DataAccessException {
 		for(Reservation reservation : reservations){
 			if(reservation.getId()==id){
-                Reservation r = new Reservation(reservation.getId(), reservation.getCar(), reservation.getUser(), reservation.getFrom(), reservation.getTo(), reservation.getMessage());
+                Reservation r = new Reservation(reservation.getId(), reservation.getCar(), reservation.getUser(), reservation.getFrom(), reservation.getUntil(), reservation.getMessage());
                 r.setStatus(reservation.getStatus());
                 return r;
 			}

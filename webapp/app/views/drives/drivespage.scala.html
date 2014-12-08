@@ -14,8 +14,8 @@
     <tbody>
         @foreach.trOrElse(reservations){ reservation =>
                 <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
-                <td>@reservation.getFrom.toString("yyyy-MM-dd HH:mm:ss")</td>
-                <td>@reservation.getTo.toString("yyyy-MM-dd HH:mm:ss")</td>
+                <td>@Utils.toLocalizedString(reservation.getFrom)</td>
+                <td>@Utils.toLocalizedString(reservation.getUntil)</td>
                 @if(reservation.getUser.getId == userId) {
                     <td><a href="@routes.Profile.index(reservation.getUser.getId)">Jij</a></td>
                 } else {

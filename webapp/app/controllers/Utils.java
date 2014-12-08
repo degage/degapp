@@ -33,11 +33,19 @@ public final class Utils {
         return LOCALIZED_DATETIME_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
     }
 
+    public static String toLocalizedString(LocalDateTime dateTime) {
+        return LOCALIZED_DATETIME_FORMATTER.format(dateTime);
+    }
+
     private static DateTimeFormatter LOCALIZED_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("eee dd MMM yyyy", NL_be).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedDateString(Instant instant) {
         return LOCALIZED_DATE_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
+    }
+
+    public static String toLocalizedDateString(LocalDateTime dateTime) {
+        return LOCALIZED_DATE_FORMATTER.format(dateTime);
     }
 
     private static DateTimeFormatter LOCALIZED_LONG_DATE_FORMATTER =
@@ -53,5 +61,8 @@ public final class Utils {
 
     public static LocalDate toLocalDate(String string) {
         return LocalDate.parse(string, DATE_FORMATTER);
+    }
+    public static LocalDateTime toLocalDateTime(String string) {
+        return LocalDateTime.parse(string, DATETIME_FORMATTER);
     }
 }

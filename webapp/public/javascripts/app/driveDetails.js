@@ -85,7 +85,7 @@ $(document).ready(function() {
             correctedDate.setMinutes(correctedDate.getMinutes() + 5);
             $('#datetimepickeruntil').datetimepicker('setStartDate', correctedDate);
         } else {
-            $("#input_from").val('@reservation.getFrom.toString("yyyy-MM-dd HH:mm")');
+            $("#input_from").val('@Utils.toString(reservation.getFrom)');
             $('#datetimepickeruntil').datetimepicker('setStartDate', adjustedFrom);
         }
     });
@@ -100,7 +100,7 @@ $(document).ready(function() {
             correctedDate.setMinutes(correctedDate.getMinutes() - 5);
             $('#datetimepickerfrom').datetimepicker('setEndDate', correctedDate);
         } else {
-            $("#input_until").val('@reservation.getTo.toString("yyyy-MM-dd HH:mm")');
+            $("#input_until").val('@Utils.toString(reservation.getUntil)');
             $('#datetimepickerfrom').datetimepicker('setEndDate', adjustedUntil);
         }
     });

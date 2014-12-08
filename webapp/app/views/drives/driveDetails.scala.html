@@ -9,14 +9,14 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 <script>
     // Determine the dates of the reservation
-    var from = new Date("@reservation.getFrom.toString("yyyy-MM-dd HH:mm")");
+    var from = new Date("@Utils.toString(reservation.getFrom)");
     var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
             from.getMinutes(), 0);
     var adjustedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
             from.getMinutes(), 0);
     adjustedFrom.setMinutes(adjustedFrom.getMinutes() + 5);
 
-    var until = new Date("@reservation.getTo.toString("yyyy-MM-dd HH:mm")");
+    var until = new Date("@Utils.toString(reservation.getUntil)");
     var correctedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
             until.getMinutes(), 0);
     var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
@@ -74,10 +74,10 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
             <strong>Status:</strong> @reservation.getStatus.getDescription
         </div>
         <div class="col-sm-4">
-            <strong>Reservatie van:</strong> @reservation.getFrom.toString("yyyy-MM-dd HH:mm")
+            <strong>Reservatie van:</strong> @Utils.toLocalizedString(reservation.getFrom)
         </div>
         <div class="col-sm-4">
-            <strong>Reservatie tot:</strong> @reservation.getTo.toString("yyyy-MM-dd HH:mm")
+            <strong>Reservatie tot:</strong> @Utils.toLocalizedString(reservation.getUntil)
         </div>
     </div> <br />
     <div class="row">

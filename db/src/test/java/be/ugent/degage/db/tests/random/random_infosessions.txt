@@ -1,4 +1,4 @@
-time	address	host	enrollee1	enrollee2	enrollee3	enrollee4	enrollee5
+date	address	host	enrollee1	enrollee2	enrollee3	enrollee4	enrollee5
 11/22/2014 12:55	42	91	38	46	80	61	13
 08/10/2014 07:28	15	68	20	98	60	79	48
 02/16/2014 13:33	58	74	84	56	40	85	50

@@ -21,6 +21,7 @@ import views.html.damages.*;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
 
 /**
  * Created by Stefaan Vermassen on 03/05/14.
@@ -30,7 +31,7 @@ public class Damages extends Controller {
     public static class DamageModel {
 
         public String description;
-        public DateTime time;
+        public LocalDate time;
 
         public String validate() {
             if ("".equals(description))
@@ -41,7 +42,7 @@ public class Damages extends Controller {
         public void populate(Damage damage) {
             if (damage == null) return;
             description = damage.getDescription();
-            time = damage.getTime();
+            time = damage.getDate();
         }
     }
 

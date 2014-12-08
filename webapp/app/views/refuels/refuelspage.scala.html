@@ -27,7 +27,7 @@
                 @for(refuel <- refuelList) {
                     <tr>
                         <td><a href="@routes.Cars.detail(refuel.getCarRide.getReservation.getCar.getId)">@refuel.getCarRide.getReservation.getCar.getName</a></td>
-                        <td><a href="@routes.Drives.details(refuel.getCarRide.getReservation.getId)">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(refuel.getCarRide.getReservation.getFrom)</a></td>
+                        <td><a href="@routes.Drives.details(refuel.getCarRide.getReservation.getId)">@Utils.toLocalizedDateString(refuel.getCarRide.getReservation.getFrom)</a></td>
                         <td><a href="@routes.Profile.index(refuel.getCarRide.getReservation.getUser.getId)">@refuel.getCarRide.getReservation.getUser</a></td>
                         @if(refuel.getStatus == RefuelStatus.CREATED) {
                             <td colspan="4">

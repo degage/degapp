@@ -20,6 +20,7 @@ import views.html.reports;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -136,10 +137,10 @@ public class Reports extends Controller {
                 CellStyle cellStyle = wb.createCellStyle();
                 cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));
                 cell = row.createCell(j++);
-                cell.setCellValue(reservation.getFrom().toDate());
+                cell.setCellValue(Date.from(Instant.from(reservation.getFrom())));
                 cell.setCellStyle(cellStyle);
                 cell = row.createCell(j++);
-                cell.setCellValue(reservation.getTo().toDate());
+                cell.setCellValue(Date.from(Instant.from(reservation.getUntil())));
                 cell.setCellStyle(cellStyle);
                 row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
                 row.createCell(j++).setCellValue(reservation.getMessage());
@@ -201,10 +202,10 @@ public class Reports extends Controller {
                 CellStyle cellStyle = wb.createCellStyle();
                 cellStyle.setDataFormat(createHelper.createDataFormat().getFormat("dd/mm/yyyy hh:mm"));
                 cell = row.createCell(j++);
-                cell.setCellValue(reservation.getFrom().toDate());
+                cell.setCellValue(Date.from(Instant.from(reservation.getFrom())));
                 cell.setCellStyle(cellStyle);
                 cell = row.createCell(j++);
-                cell.setCellValue(reservation.getTo().toDate());
+                cell.setCellValue(Date.from(Instant.from(reservation.getUntil())));
                 cell.setCellStyle(cellStyle);
                 row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
                 row.createCell(j++).setCellValue(reservation.getMessage());
@@ -288,7 +289,7 @@ public class Reports extends Controller {
                 LocalDate expiration = car.getInsurance().getExpiration();
                 if (expiration != null) {
                     cell.setCellValue(
-                            Date.from (expiration.atStartOfDay(ZoneId.systemDefault()).toInstant())
+                            Date.from (Instant.from(expiration))
                     );
                 } else {
                     cell.setCellValue("");

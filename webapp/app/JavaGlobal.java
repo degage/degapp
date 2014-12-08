@@ -15,6 +15,7 @@ import data.EurocentAmount;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Locale;
 
 /**
@@ -65,6 +66,20 @@ public class JavaGlobal {
             public String print(Instant instant, Locale locale) {
                 // ignores locale!
                 return Utils.toString(instant);
+            }
+        });
+
+        Formatters.register(LocalDateTime.class, new Formatters.SimpleFormatter<LocalDateTime>() {
+
+            @Override
+            public LocalDateTime parse(String s, Locale locale) throws ParseException {
+                return Utils.toLocalDateTime(s);
+            }
+
+            @Override
+            public String print(LocalDateTime dateTime, Locale locale) {
+                // ignores locale!
+                return Utils.toString(dateTime);
             }
         });
 

@@ -7,6 +7,8 @@ import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationStatus;
 import notifiers.Notifier;
 
+import java.time.LocalDateTime;
+
 /**
  * Job that automatically accepts reservations that are out of date
  */
@@ -21,7 +23,7 @@ public class ReservationAutoAcceptJob implements ScheduledJob.Executor {
         }
 
         if (reservation.getStatus() == ReservationStatus.REQUEST) {
-            if (reservation.getFrom().isBeforeNow()) {
+            if (reservation.getFrom().isBefore(LocalDateTime.now())) {
                 dao.updateReservationStatus(reservationId, ReservationStatus.ACCEPTED);
                 Notifier.sendReservationApprovedByOwnerMail(context, "Automatisch goedgekeurd door systeem.", reservation);
             } else {

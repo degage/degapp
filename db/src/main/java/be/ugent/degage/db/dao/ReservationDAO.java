@@ -8,8 +8,8 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
-import org.joda.time.DateTime;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 
 /**
@@ -19,7 +19,7 @@ public interface ReservationDAO {
     /**
      * Add a new reservation to the database. If the user is privileged for the car then the reservation is accepted automatically.
      */
-    public ReservationHeader createReservation(DateTime from, DateTime to, int carId, int userId, String message) throws DataAccessException;
+    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId, String message) throws DataAccessException;
 
 
     public Reservation getReservation (int id) throws DataAccessException;
@@ -43,7 +43,7 @@ public interface ReservationDAO {
     /**
      * Is there any reservation that overlaps the given period?
      */
-    public boolean hasOverlap (int carId, DateTime from, DateTime until);
+    public boolean hasOverlap (int carId, LocalDateTime from, LocalDateTime until);
 
 
 
@@ -82,7 +82,7 @@ public interface ReservationDAO {
     /**
      * Return information on all reservations (except those cancelled) during a certain period of time, ordered by car.
      */
-    public Iterable<CRInfo> listCRInfo (DateTime from, DateTime to);
+    public Iterable<CRInfo> listCRInfo (LocalDateTime from, LocalDateTime to);
 
 
 }

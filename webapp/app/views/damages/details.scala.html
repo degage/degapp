@@ -62,7 +62,7 @@
                 @flashes()
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <button class="btn btn-default" onclick="loadDescriptionModal(@damage.getId)">Tijd/beschrijving aanpassen</button>
+                        <button class="btn btn-default" onclick="loadDescriptionModal(@damage.getId)">Datum/beschrijving aanpassen</button>
                         <button class="btn btn-default" onclick="loadStatusModal(@damage.getId)">Nieuwe status</button>
                         <button class="btn btn-default" onclick="loadProofModal(@damage.getId)">Nieuw bewijsstuk</button>
                         @if(!damage.getFinished){
@@ -165,10 +165,10 @@
                                     <!-- row -->
                                 <div class="row">
                                     <div class="col-sm-4">
-                                        <strong>Van:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getReservation.getFrom)
+                                        <strong>Van:</strong> @Utils.toLocalizedString(damage.getReservation.getFrom)
                                     </div>
                                     <div class="col-sm-4">
-                                        <strong>Tot:</strong> @DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damage.getReservation.getTo)
+                                        <strong>Tot:</strong> @Utils.toLocalizedString(damage.getReservation.getUntil)
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Status:</strong> @damage.getReservation.getStatus.getDescription
@@ -179,9 +179,8 @@
                             </div>
                             Schadedossier:
                             <div class="well">
-                                <p><strong>Tijd:</strong>
-                                <br>
-                                @DateTimeFormat.forPattern("dd/MM/YYYY HH:mm").print(damage.getTime)
+                                <p><strong>Datum:</strong>
+                                @Utils.toLocalizedDateString(damage.getDate)
                                 </p>
                                 <p>
                                 <strong>Beschrijving:</strong>

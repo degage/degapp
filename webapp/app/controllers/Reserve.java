@@ -29,6 +29,7 @@ import views.html.reserve.availablecarspage;
 import views.html.errortablerow;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 
@@ -67,15 +68,15 @@ public class Reserve extends Controller {
         /**
          * @return the start datetime of the reservation
          */
-        public DateTime getTimeFrom() {
-            return DATETIMEFORMATTER.parseDateTime(from).withSecondOfMinute(0);
+        public LocalDateTime getTimeFrom() {
+            return Utils.toLocalDateTime(from);
         }
 
         /**
          * @return the end datetime of the reservation
          */
-        public DateTime getTimeUntil() {
-            return DATETIMEFORMATTER.parseDateTime(until).withSecondOfMinute(0);
+        public LocalDateTime getTimeUntil() {
+            return Utils.toLocalDateTime(until);
         }
 
         /**
@@ -87,8 +88,8 @@ public class Reserve extends Controller {
          * @return an error string or null
          */
         public String validate() {
-            DateTime dateFrom = null;
-            DateTime dateUntil;
+            LocalDateTime dateFrom = null;
+            LocalDateTime dateUntil;
             try {
                 dateFrom = getTimeFrom();
                 dateUntil = getTimeUntil();
@@ -174,13 +175,13 @@ public class Reserve extends Controller {
             Car car = context.getCarDAO().getCar(carId);
             // Test whether the reservation is valid
             ReservationModel formData = reservationForm.get();
-            DateTime from = formData.getTimeFrom();
-            DateTime until = formData.getTimeUntil();
+            LocalDateTime from = formData.getTimeFrom();
+            LocalDateTime until = formData.getTimeUntil();
             ReservationDAO rdao = context.getReservationDAO();
             // TODO: create 'checkOverlap'
             for (ReservationHeader reservation : rdao.listReservationsForCar(carId)) {
                 if ((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
-                        (from.isBefore(reservation.getTo()) && until.isAfter(reservation.getFrom()))) {
+                        (from.isBefore(reservation.getUntil()) && until.isAfter(reservation.getFrom()))) {
                     return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1, "", ""));
                 }
             }
@@ -261,10 +262,10 @@ public class Reserve extends Controller {
 
     public static class ReservationData {
         @Constraints.Required
-        public DateTime from;
+        public LocalDateTime from;
 
         @Constraints.Required
-        public DateTime until;
+        public LocalDateTime until;
 
         public String message;
 
@@ -285,15 +286,12 @@ public class Reserve extends Controller {
     public static Result reserveCar(int carId, String fromString, String untilString) {
         Car car = DataAccess.getContext().getCarDAO().getCar(carId);
 
-        // use spring binder to do conversions   (query string binders are quite complicated to write :-()
+        // query string binders are quite complicated to write :-(
         ReservationData data = new ReservationData();
-        data.from = Formatters.parse (fromString, DateTime.class);
-        data.until = Formatters.parse (untilString, DateTime.class);
+        data.from = Utils.toLocalDateTime(fromString);
+        data.until = Utils.toLocalDateTime(untilString);
         Form<ReservationData> form = new Form<>(ReservationData.class).fill(data);
 
-        // alternative
-        //Form<ReservationData> form = new Form<>(ReservationData.class)
-        //        .bind(ImmutableMap.<String, String>builder().put("from", fromString).put("until", untilString).build());
         return ok (views.html.reserve.reservation.render(form,car));
     }
 
@@ -316,10 +314,10 @@ public class Reserve extends Controller {
         Car car = context.getCarDAO().getCar(carId);
         // Test whether the reservation is valid
         ReservationData data = form.get();
-        DateTime from = data.from;
-        DateTime until = data.until;
+        LocalDateTime from = data.from;
+        LocalDateTime until = data.until;
         ReservationDAO rdao = context.getReservationDAO();
-        if (rdao.hasOverlap(carId, data.from, data.until))  {
+        if (rdao.hasOverlap(carId, from, until))  {
             String errorMessage = "De reservatie overlapt met een bestaande reservatie";
             form.reject ("from", errorMessage);
             form.reject ("until", errorMessage);

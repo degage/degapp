@@ -312,7 +312,6 @@ public class Notifier extends Mailer {
     }
 
     private static String replaceInfoSessionTags(InfoSession infoSession, String template) {
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
         template = template.replace("%infosession_date%", Utils.toLocalizedString(infoSession.getTime()));
         template = template.replace("%infosession_address%", infoSession.getAddress().toString());
         return template;
@@ -320,9 +319,8 @@ public class Notifier extends Mailer {
 
     private static String replaceCarReservationTags(Reservation carReservation, String template) {
         UserHeader driver = carReservation.getUser();
-        DateTimeFormatter fmt = DateTimeFormat.forPattern("E, d MMM yyyy HH:mm");
-        template = template.replace("%reservation_from%", fmt.print(carReservation.getFrom()));
-        template = template.replace("%reservation_to%", fmt.print(carReservation.getTo()));
+        template = template.replace("%reservation_from%", Utils.toLocalizedString(carReservation.getFrom()));
+        template = template.replace("%reservation_to%", Utils.toLocalizedString(carReservation.getUntil()));
         template = template.replace("%comment%", carReservation.getMessage() == null ? "[Geen commentaar]" : carReservation.getMessage());
         template = template.replace("%reservation_user_firstname%", driver.getFirstName());
         template = template.replace("%reservation_user_lastname%", driver.getLastName());

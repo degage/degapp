@@ -1,14 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 
 /**
  *
- * @author Laurent
  */
 public class Reservation {
     
@@ -16,20 +11,19 @@ public class Reservation {
     private ReservationStatus status;
     private Car car;
     private UserHeader user;
-    private DateTime from;
-    private DateTime to;
+    private LocalDateTime from;
+    private LocalDateTime until;
     private String message;
     private boolean privileged;
 
-    public Reservation(int id, Car car, UserHeader user, DateTime from, DateTime to, String message) {
+    public Reservation(int id, Car car, UserHeader user, LocalDateTime from, LocalDateTime until, String message) {
         this.id = id;
         this.car = car;
         this.user = user;
         this.from = from;
-        this.to = to;
+        this.until = until;
         this.message = message;
-
-    }    
+    }
     
     public int getId() {
         return id;
@@ -55,20 +49,20 @@ public class Reservation {
         this.user = user;
     }
 
-    public DateTime getFrom() {
+    public LocalDateTime getFrom() {
         return from;
     }
 
-    public void setFrom(DateTime from) {
+    public void setFrom(LocalDateTime from) {
         this.from = from;
     }
 
-    public DateTime getTo() {
-        return to;
+    public LocalDateTime getUntil() {
+        return until;
     }
 
-    public void setTo(DateTime to) {
-        this.to = to;
+    public void setUntil(LocalDateTime until) {
+        this.until = until;
     }
 
     public String getMessage() {
