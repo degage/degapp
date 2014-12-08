@@ -1,7 +1,7 @@
 package be.ugent.degage.db.models;
 
 import java.math.BigDecimal;
-import java.sql.Date;
+import java.time.LocalDate;
 
 /**
  * Created by HannesM on 10/03/14.
@@ -13,7 +13,7 @@ public class CarRide {
     private int endKm;
     private boolean damaged;
     private BigDecimal cost;
-    private Date billed;
+    private LocalDate billed;
 
     private int numberOfRefuels;
 
@@ -78,7 +78,7 @@ public class CarRide {
 
     public void setCost(BigDecimal cost) { this.cost = cost; }
 
-    public Date getBilled() { return billed; }
+    public LocalDate getBilled() { return billed; }
 
-    public void setBilled(Date billed) { this.billed = billed; }
+    public void setBilled(LocalDate billed) { this.billed = billed; }
 }

@@ -1,11 +1,15 @@
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.models.CarRide;
 import be.ugent.degage.db.models.Reservation;
 
-import java.sql.*;
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +32,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
                 rs.getInt("car_ride_refueling")
         );
         carRide.setCost(rs.getBigDecimal("car_ride_cost"));
-        carRide.setBilled(rs.getDate("car_ride_billed"));
+        carRide.setBilled(rs.getDate("car_ride_billed").toLocalDate());
 
         return carRide;
     }
@@ -97,7 +101,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             ps.setBoolean(4, carRide.isDamaged());
             ps.setInt(5, carRide.getNumberOfRefuels());
             ps.setBigDecimal(6, carRide.getCost());
-            ps.setDate(7, carRide.getBilled());
+            ps.setDate(7, Date.valueOf(carRide.getBilled()));
 
             ps.setInt(8, carRide.getReservation().getId());
 
@@ -134,11 +138,11 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     );
 
     @Override
-    public List<CarRide> getBillRidesForLoaner(Date date, int user) throws DataAccessException {
+    public List<CarRide> getBillRidesForLoaner(LocalDate date, int user) throws DataAccessException {
         List<CarRide> list = new ArrayList<>();
         try {
             PreparedStatement ps = getBillRidesForLoanerStatement.value();
-            ps.setDate(1, date);
+            ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, user);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
@@ -157,11 +161,11 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     );
 
     @Override
-    public List<CarRide> getBillRidesForCar(Date date, int car) throws DataAccessException {
+    public List<CarRide> getBillRidesForCar(LocalDate date, int car) throws DataAccessException {
         List<CarRide> list = new ArrayList<>();
         try {
             PreparedStatement ps = getBillRidesForCarStatement.value();
-            ps.setDate(1, date);
+            ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, car);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {

@@ -4,7 +4,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.CarRide;
 import be.ugent.degage.db.models.Reservation;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -15,6 +15,6 @@ public interface CarRideDAO {
     public CarRide getCarRide(int id) throws DataAccessException;
     public void updateCarRide(CarRide carRide) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
-    public List<CarRide> getBillRidesForLoaner(Date date, int user) throws DataAccessException;
-    public List<CarRide> getBillRidesForCar(Date date, int car) throws DataAccessException;
+    public List<CarRide> getBillRidesForLoaner(LocalDate date, int user) throws DataAccessException;
+    public List<CarRide> getBillRidesForCar(LocalDate date, int car) throws DataAccessException;
 }

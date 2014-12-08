@@ -84,7 +84,7 @@ public class ReportGeneration {
 
             int userId = user.getId();
             saldo = createLoanerTable(
-                    context.getCarRideDAO().getBillRidesForLoaner(date, userId),
+                    context.getCarRideDAO().getBillRidesForLoaner(localDate, userId),
                     context.getRefuelDAO().getBillRefuelsForLoaner(date, userId),
                     document,
                     costInfo);
@@ -94,7 +94,7 @@ public class ReportGeneration {
 
                 // TODO: use localDate everywhere
                 saldo = saldo.add(createCarTable(
-                        context.getCarRideDAO().getBillRidesForCar(date, carId),
+                        context.getCarRideDAO().getBillRidesForCar(localDate, carId),
                         context.getRefuelDAO().eurocentsSpentOnFuel(date, carId),
                         context.getCarCostDAO().getBillCarCosts(localDate, carId),
                         document,
