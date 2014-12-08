@@ -193,7 +193,7 @@
                                 <ul class="list-group">
                                 @foreach(damageLogList) { damageLog =>
                                     <li class="list-group-item">
-                                        <strong class="list-group-item-heading">@DateTimeFormat.forPattern("HH:mm dd/MM/YYYY").print(damageLog.getCreated)</strong>
+                                        <strong class="list-group-item-heading">@Utils.toLocalizedString(damageLog.getCreated)</strong>
                                         <p class="list-group-item-text">@damageLog.getDescription</p>
                                     </li>
                                 }

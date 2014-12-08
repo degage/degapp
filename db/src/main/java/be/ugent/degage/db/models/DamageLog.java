@@ -1,6 +1,6 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+import java.time.Instant;
 
 /**
  * Created by Stefaan Vermassen on 04/05/14.
@@ -8,9 +8,9 @@ import org.joda.time.DateTime;
 public class DamageLog {
 
     private String description;
-    private DateTime created;
+    private Instant created;
 
-    public DamageLog(String description, DateTime created) {
+    public DamageLog(String description, Instant created) {
         this.description = description;
         this.created = created;
     }
@@ -23,11 +23,11 @@ public class DamageLog {
         this.description = description;
     }
 
-    public DateTime getCreated() {
+    public Instant getCreated() {
         return created;
     }
 
-    public void setCreated(DateTime created) {
+    public void setCreated(Instant created) {
         this.created = created;
     }
 }

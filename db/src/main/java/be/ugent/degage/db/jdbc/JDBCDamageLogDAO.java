@@ -3,7 +3,6 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.dao.DamageLogDAO;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.DamageLog;
-import org.joda.time.DateTime;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ class JDBCDamageLogDAO extends AbstractDAO implements DamageLogDAO {
                 while (rs.next()) {
                     list.add(new DamageLog(
                                     rs.getString("damage_log_description"),
-                                    new DateTime(rs.getTimestamp("damage_log_created_at"))
+                                    rs.getTimestamp("damage_log_created_at").toInstant()
                             )
                     );
                 }
