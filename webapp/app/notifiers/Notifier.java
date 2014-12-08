@@ -7,8 +7,6 @@ import controllers.Utils;
 import controllers.routes;
 import data.EurocentAmount;
 import db.DataAccess;
-import org.joda.time.format.DateTimeFormat;
-import org.joda.time.format.DateTimeFormatter;
 import play.mvc.Http;
 import providers.DataProvider;
 

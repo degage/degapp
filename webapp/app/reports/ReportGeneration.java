@@ -14,11 +14,7 @@ import org.joda.time.DateTime;
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.Date;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.Period;
 
 /**
  * Generates PDF
@@ -27,10 +23,10 @@ public class ReportGeneration {
 
     // TODO: do not use static methods but use an object instead of parameters
     // TODO: move to db module or separate pdf module?
-    public static void generateReceipt(DataAccessContext context, User user, Instant date, Costs costInfo) {
+    public static void generateReceipt(DataAccessContext context, User user, LocalDate date, Costs costInfo) {
         try {
             Document document = new Document();
-            String name = user.getId() + "." + date;
+            String name = user.getId() + "." + Utils.toDateString(date);
             String filename = FileHelper.getGeneratedFilesPath(name + ".pdf", "receipts");
             PdfWriter.getInstance(document, new FileOutputStream(filename));
             document.open();
@@ -49,7 +45,7 @@ public class ReportGeneration {
 
     }
 
-    private static BigDecimal generatePDF(DataAccessContext context, User user, Instant report, Document document, Costs costInfo) {
+    private static BigDecimal generatePDF(DataAccessContext context, User user, LocalDate date, Document document, Costs costInfo) {
 
         // TODO: reduce the number of data base access calls
         BigDecimal saldo = BigDecimal.ZERO;
@@ -61,12 +57,9 @@ public class ReportGeneration {
             image.scaleAbsolute(60f, 60f);
             document.add(image);
 
-            Date date = new Date(java.util.Date.from(report).getTime());
-            LocalDate localDate = LocalDate.from(report);
-
             PdfPTable table = new PdfPTable(3);
             add(table, "Afrekening n°:");
-            add(table, user.getId() + "." + date, true);
+            add(table, user.getId() + "." + Utils.toDateString(date), true);
             add(table, "");
             add(table, "Naam:");
             add(table, "" + user, true);
@@ -75,8 +68,8 @@ public class ReportGeneration {
             add(table, "" + user.getAddressDomicile(), true);
             add(table, "");
             add(table, "Periode:", false, false);
-            add(table, "vanaf " + new SimpleDateFormat("dd-MM-yyyy").format(report.minus(Period.ofMonths(3))), false, false);
-            add(table, "t.e.m. " + new SimpleDateFormat("dd-MM-yyyy").format(report.minus(Period.ofDays(1))), false, false);
+            add(table, "vanaf " + Utils.toLocalizedDateString(date.minusMonths(3L)), false, false);
+            add(table, "t.e.m. " + Utils.toLocalizedDateString(date.minusDays(1L)), false, false);
 
             table.setSpacingAfter(20);
 
@@ -84,7 +77,7 @@ public class ReportGeneration {
 
             int userId = user.getId();
             saldo = createLoanerTable(
-                    context.getCarRideDAO().getBillRidesForLoaner(localDate, userId),
+                    context.getCarRideDAO().getBillRidesForLoaner(date, userId),
                     context.getRefuelDAO().getBillRefuelsForLoaner(date, userId),
                     document,
                     costInfo);
@@ -94,9 +87,9 @@ public class ReportGeneration {
 
                 // TODO: use localDate everywhere
                 saldo = saldo.add(createCarTable(
-                        context.getCarRideDAO().getBillRidesForCar(localDate, carId),
+                        context.getCarRideDAO().getBillRidesForCar(date, carId),
                         context.getRefuelDAO().eurocentsSpentOnFuel(date, carId),
-                        context.getCarCostDAO().getBillCarCosts(localDate, carId),
+                        context.getCarCostDAO().getBillCarCosts(date, carId),
                         document,
                         car.getName(),
                         costInfo));
@@ -106,7 +99,7 @@ public class ReportGeneration {
             Font f2 = new Font(Font.FontFamily.COURIER, 6);
             document.add(new Paragraph("Rekeningnummer 523-080452986-86 -IBAN BE78 5230 8045 -BIC Code TRIOBEBB", f));
             document.add(new Paragraph("Degage! vzw - Fuchsiastraat 81, 9000 Gent", f));
-            document.add(new Paragraph("Gelieve de afrekening te betalen voor " + new SimpleDateFormat("dd-MM-yyyy").format(report.plus(Period.ofMonths(3))), f));
+            document.add(new Paragraph("Gelieve de afrekening te betalen vóór " + Utils.toLocalizedDateString(date.plusMonths(3L)), f));
             document.add(new Paragraph("Bij betaling, gelieve het nummer van de afrekening te vermelden", f2));
         } catch (Exception e) {
             e.printStackTrace();

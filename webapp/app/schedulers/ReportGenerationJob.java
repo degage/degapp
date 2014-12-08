@@ -9,6 +9,7 @@ import be.ugent.degage.db.models.User;
 import reports.ReportGeneration;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -30,7 +31,7 @@ public class ReportGenerationJob implements ScheduledJob.Executor {
 
         Costs costInfo = context.getSettingDAO().getCostSettings(Instant.now());
         for (User user : users) {
-            ReportGeneration.generateReceipt(context, user, Instant.now(), costInfo);
+            ReportGeneration.generateReceipt(context, user, LocalDate.now(), costInfo);
         }
     }
 }

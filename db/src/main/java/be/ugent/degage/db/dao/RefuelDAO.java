@@ -5,7 +5,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
-import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -26,14 +26,14 @@ public interface RefuelDAO {
     public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException;
     public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
-    public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException;
+    public List<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException;
 
 
     /**
      * Return the total amount spent (in eurocent) for refuels for the given car billed at the given date
      * @return two integers, first is for privileged drivers, second is for others
      */
-    public int[] eurocentsSpentOnFuel (Date date, int carId) throws DataAccessException;
+    public int[] eurocentsSpentOnFuel (LocalDate date, int carId) throws DataAccessException;
 
 
 }

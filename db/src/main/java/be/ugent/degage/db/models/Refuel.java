@@ -1,6 +1,7 @@
 package be.ugent.degage.db.models;
 
-import java.sql.Date;
+
+import java.time.LocalDate;
 
 /**
  * Created by Stefaan Vermassen on 26/04/14.
@@ -11,7 +12,7 @@ public class Refuel {
     private File proof;
     private int eurocents;
     private RefuelStatus status;
-    private Date billed;
+    private LocalDate billed;
 
     public Refuel(int id, CarRide carRide, File proof, int eurocents, RefuelStatus status) {
         this.id = id;
@@ -67,7 +68,7 @@ public class Refuel {
         this.status = status;
     }
 
-    public Date getBilled() { return billed; }
+    public LocalDate getBilled() { return billed; }
 
-    public void setBilled(Date billed) { this.billed = billed; }
+    public void setBilled(LocalDate billed) { this.billed = billed; }
 }

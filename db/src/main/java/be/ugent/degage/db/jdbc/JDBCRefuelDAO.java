@@ -5,6 +5,7 @@ import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.*;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -63,7 +64,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                     rs.getInt("refuel_eurocents"), RefuelStatus.valueOf(rs.getString("refuel_status")));
         }
 
-        refuel.setBilled(rs.getDate("refuel_billed"));
+        refuel.setBilled(rs.getDate("refuel_billed").toLocalDate());
 
         refuel.getCarRide().getReservation().getCar().setOwner(JDBCUserDAO.populateUserHeader(rs, "owners"));
 
@@ -328,10 +329,10 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     );
 
     @Override
-    public List<Refuel> getBillRefuelsForLoaner(Date date, int user) throws DataAccessException {
+    public List<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException {
         try {
             PreparedStatement ps = getBillRefuelsForLoanerStatement.value();
-            ps.setDate(1, date);
+            ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, user);
             return getRefuelList(ps);
         } catch (SQLException e){
@@ -346,10 +347,10 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             "GROUP BY refuel_eurocents, reservation_privileged "
     );
 
-    public int[] eurocentsSpentOnFuel (Date date, int carId) throws DataAccessException {
+    public int[] eurocentsSpentOnFuel (LocalDate date, int carId) throws DataAccessException {
         try {
             PreparedStatement ps = eurocentsSpentOnFuelStatement.value();
-            ps.setDate(1, date);
+            ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, carId);
 
             try (ResultSet rs = ps.executeQuery()) {
