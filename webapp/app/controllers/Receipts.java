@@ -9,11 +9,11 @@ import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.receipts.receipts;
 import views.html.receipts.receiptspage;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public class Receipts extends Controller {
@@ -43,25 +43,23 @@ public class Receipts extends Controller {
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(date);
-        return ok(receiptsList(page, receiptsField, asc, filter));
-    }
-
-    // used within inject context
-    private static Html receiptsList(int page, FilterField orderBy, boolean asc, Filter filter) {
         User currentUser = DataProvider.getUserProvider().getUser();
         ReceiptDAO dao = DataAccess.getInjectedContext().getReceiptDAO();
 
-        if (orderBy == null) {
-            orderBy = FilterField.RECEIPT_DATE;
+        if (receiptsField == null) {
+            receiptsField = FilterField.RECEIPT_DATE;
         }
-        List<Receipt> listOfReceipts = dao.getReceiptsList(orderBy, asc, page, PAGE_SIZE, filter, currentUser);
+        String filterString = filter.getValue(FilterField.RECEIPT_DATE);
+        LocalDate localDate = filterString.isEmpty() ? null : Utils.toLocalDate(filterString);
 
-        int amountOfResults = dao.getAmountOfReceipts(filter, currentUser);
+        List<Receipt> listOfReceipts = dao.getReceiptsList(receiptsField, asc, page, PAGE_SIZE, localDate, currentUser);
+
+        int amountOfResults = dao.getAmountOfReceipts(localDate, currentUser);
         //int amountOfResults = listOfReceipts.size();
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) PAGE_SIZE);
 
         //if(){rendernew()}
-        return receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages);
+        return ok(receiptspage.render(listOfReceipts, page, amountOfResults, amountOfPages));
     }
 
 

@@ -9,6 +9,7 @@ import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,15 +41,15 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
     );
 	    //getGetAmountOfReceiptsStatement = connection.prepareStatement("SELECT COUNT(receipt_id) AS amount_of_receipts FROM Receipts WHERE receipts.receipt_date<=?;");
     /**
-     * @param filter The filter to apply to
+     * @param filterDate Date to use for filtering
      * @return The amount of filtered cars
      * @throws be.ugent.degage.db.DataAccessException
      */
     @Override
-    public int getAmountOfReceipts(Filter filter, User user) throws DataAccessException {
+    public int getAmountOfReceipts(LocalDate filterDate, User user) throws DataAccessException {
         try {
             PreparedStatement ps = getGetAmountOfReceiptsStatement.value();
-            fillFragment(ps, filter, 1, user);
+            fillFragment(ps, filterDate, user);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next())
@@ -67,16 +68,16 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
             RECEIPT_QUERY + FILTER_FRAGMENT + " ORDER BY receipts.receipt_date asc LIMIT ?, ? "
     );
 
-    public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, User user){
+    public List<Receipt> getReceiptsList(FilterField orderBy, boolean asc, int page, int pageSize, LocalDate filterDate, User user){
         try {
             PreparedStatement ps = getReceiptsListStatement.value();
-            fillFragment(ps, filter, 1, user);
+            fillFragment(ps, filterDate, user);
             int first = (page-1)*pageSize;
             ps.setInt(3, first);
             ps.setInt(4, pageSize);
             return getReceipts(ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of reciepts", ex);
+            throw new DataAccessException("Could not retrieve a list of receipts", ex);
         }
     }
 
@@ -92,25 +93,14 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
         }
     }
 
-    private void fillFragment(PreparedStatement ps, Filter filter, int start, User user) throws SQLException {
-	
-	ps.setInt(start, user.getId());        
+    private void fillFragment(PreparedStatement ps, LocalDate filterDate, User user) throws SQLException {
 
-	if(filter == null) {
-            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = new JDBCFilter();
+        ps.setInt(1, user.getId());
+
+        if (filterDate == null) {
+            filterDate = LocalDate.now();
         }
-	String string_date=filter.getValue(FilterField.RECEIPT_DATE);
-	//string_date="2036-10-29 11:42:32";
-        Timestamp date;
-	if(string_date.equals("")){
-	    java.util.Date now= new java.util.Date();
-	    date = new Timestamp(now.getTime());
-	    //date=DateTime.now().toString();
-	} else{
-            date= Timestamp.valueOf(string_date);
-        }
-        ps.setTimestamp(start+1, date);
+        ps.setDate (2, Date.valueOf(filterDate));
     }
 
     public static Receipt populateReceipt(ResultSet rs, boolean withDate, boolean withFiles) throws SQLException {
@@ -127,10 +117,10 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
         if(withFiles) {
 	    receipt.setFiles(JDBCFileDAO.populateFile(rs, "files"));
 	}
-        if(withDate) {
-	    Object date = rs.getObject(tableName + ".receipt_date");
-            if(date!=null){
-                receipt.setDate(new DateTime(date));
+        if (withDate) {
+            LocalDate date = rs.getDate(tableName + ".receipt_date").toLocalDate();
+            if (date != null) {
+                receipt.setDate(date);
             }
         }
         return receipt;
@@ -142,7 +132,7 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
     );
 
     @Override
-    public Receipt createReceipt(String name, DateTime date, File file, User user, BigDecimal price) throws DataAccessException {
+    public Receipt createReceipt(String name, LocalDate date, File file, User user, BigDecimal price) throws DataAccessException {
 	//(InfoSessionType type, String typeAlternative, User host, Address address, DateTime time, int maxEnrollees, String comments)
 	if(name==null){
 	    throw new DataAccessException("Tried to create receipt without a name");
@@ -156,7 +146,7 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
         try {
             PreparedStatement ps = getCreateReceiptStatement.value();
             ps.setString(1, name);
-            ps.setTimestamp(2, new Timestamp(date.getMillis())); //TODO: timezones?? convert to datetime see below
+            ps.setDate(2, Date.valueOf(date));
 	        ps.setInt(3, file.getId());
             ps.setInt(4, user.getId());
             ps.setBigDecimal(5, price);

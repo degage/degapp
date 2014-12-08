@@ -9,7 +9,6 @@ import com.itextpdf.text.pdf.PdfWriter;
 import controllers.Utils;
 import controllers.util.FileHelper;
 import data.EurocentAmount;
-import org.joda.time.DateTime;
 
 import java.io.FileOutputStream;
 import java.math.BigDecimal;
@@ -33,7 +32,7 @@ public class ReportGeneration {
 
             context.getReceiptDAO().createReceipt(
                     name,
-                    new DateTime(date),
+                    date,
                     context.getFileDAO().createFile(filename, name, "pdf"),
                     user,
                     generatePDF(context, user, date, document, costInfo)

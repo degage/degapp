@@ -1,19 +1,19 @@
 package be.ugent.degage.db.models;
-import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 
 public class Receipt {
 
     private int id;
     private String name;
     private File files;
-    private DateTime date;
+    private LocalDate date;
     private User user;
     private BigDecimal price;
 
-    public Receipt(int id, String name, File files, DateTime date, User user, BigDecimal price) {
+    public Receipt(int id, String name, File files, LocalDate date, User user, BigDecimal price) {
         this.id = id;
         this.name = name;
         this.files = files;
@@ -52,15 +52,11 @@ public class Receipt {
         this.files = files;
     }
 
-    public DateTime getDate() {
+    public LocalDate getDate() {
         return date;
     }
 
-    public String getDateString() {
-        return new SimpleDateFormat("dd-MM-yyyy").format(date.toDate());
-    }
-
-    public void setDate(DateTime date) {
+    public void setDate(LocalDate date) {
         this.date = date;
     }
 
