@@ -4,9 +4,9 @@ import be.ugent.degage.db.*;
 import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.Notification;
 import be.ugent.degage.db.models.UserHeader;
-import org.joda.time.DateTime;
 
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -148,7 +148,7 @@ class JDBCNotificationDAO extends AbstractDAO implements NotificationDAO {
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 // new DateTime() is not exactly correct, if you want the exact timestamp, do a getNotification()
-                return new Notification(keys.getInt(1), user, false, subject, body, new DateTime());
+                return new Notification(keys.getInt(1), user, false, subject, body, Instant.now());
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new notification.", ex);
             }
@@ -193,8 +193,7 @@ class JDBCNotificationDAO extends AbstractDAO implements NotificationDAO {
                         rs.getBoolean("notification_read"),
                         rs.getString("notification_subject"),
                         rs.getString("notification_body"),
-                        new DateTime(rs.getTimestamp("notification_created_at")
-                        )
+                        rs.getTimestamp("notification_created_at").toInstant()
                 ));
             }
             return list;

@@ -11,7 +11,7 @@
                         <strong class="primary-font">@notification.getSubject</strong>
                     }
                     <small class="text-muted">
-                        - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(notification.getTimestamp)
+                        - @Utils.toLocalizedString(notification.getTimestamp)
                     </small>
                     @if(!notification.getRead){
                         <a type="button" class="close" aria-hidden="true" href="@routes.Notifications.markNotificationAsRead(notification.getId)"><small><i class="fa fa-eye fa-fw"></i></small></a>

@@ -87,7 +87,7 @@
                                             <div>
                                                 <strong>@message.getUser</strong> @* enkel ongelezen berichten *@
                                                 <span class="pull-right text-muted">
-                                                    <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(message.getTimestamp)</em>
+                                                    <em>@Utils.toLocalizedString(message.getTimestamp)/em>
                                                 </span>
                                             </div>
                                             <div>
@@ -134,7 +134,7 @@
                                                         @notification.getSubject
                                                     }
                                                     <span class="pull-right text-muted">
-                                                        <em>@DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss").print(notification.getTimestamp)</em>
+                                                        <em>@Utils.toLocalizedString(notification.getTimestamp)</em>
                                                     </span>
                                                 </div>
                                                 @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>

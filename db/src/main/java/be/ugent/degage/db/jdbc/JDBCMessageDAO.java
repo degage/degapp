@@ -3,7 +3,6 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.*;
 import be.ugent.degage.db.dao.MessageDAO;
 import be.ugent.degage.db.models.Message;
-import org.joda.time.DateTime;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -27,8 +26,7 @@ class JDBCMessageDAO extends AbstractDAO implements MessageDAO {
                 JDBCUserDAO.populateUserHeader(rs),
                 rs.getString("message_subject"),
                 rs.getString("message_body"),
-                new DateTime(rs.getTimestamp("message_created_at")
-                )
+                rs.getTimestamp("message_created_at").toInstant()
         );
     }
 

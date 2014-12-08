@@ -8,7 +8,7 @@
                     @* <!-- <img src='@routes.Assets.at("images/avatar.jpg")' alt="User Avatar" class="img-circle msg-avatar"> --> *@
                     <strong class="primary-font"><a href="@routes.Profile.index(message.getUser.getId)">@message.getUser</a></strong>
                     <small class="text-muted">
-                        - @DateTimeFormat.forPattern("HH:mm dd-MM-yyyy").print(message.getTimestamp)
+                        - @Utils.toLocalizedString(message.getTimestamp)
                     </small>
                 </div>
                 <div class="msg-subject">@message.getSubject</div>

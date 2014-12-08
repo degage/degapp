@@ -1,6 +1,7 @@
 package be.ugent.degage.db.models;
 
-import org.joda.time.DateTime;
+
+import java.time.Instant;
 
 /**
  * Created by stefaan on 22/03/14.
@@ -15,7 +16,7 @@ public class Message {
     private boolean read;
     private String subject;
     private String body;
-    private DateTime timestamp;
+    private Instant timestamp;
 
     public int getId() {
         return id;
@@ -45,11 +46,11 @@ public class Message {
         return body;
     }
 
-    public DateTime getTimestamp() {
+    public Instant getTimestamp() {
         return timestamp;
     }
 
-    public Message(int id, boolean read, UserHeader user, String subject, String body, DateTime timestamp){
+    public Message(int id, boolean read, UserHeader user, String subject, String body, Instant timestamp){
         this.id = id;
         this.user = user;
         this.read = read;

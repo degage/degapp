@@ -5,7 +5,6 @@ import be.ugent.degage.db.dao.ReceiptDAO;
 import be.ugent.degage.db.models.Receipt;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.File;
-import org.joda.time.DateTime;
 
 import java.math.BigDecimal;
 import java.sql.*;
