@@ -64,7 +64,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                     rs.getInt("refuel_eurocents"), RefuelStatus.valueOf(rs.getString("refuel_status")));
         }
 
-        refuel.setBilled(rs.getDate("refuel_billed").toLocalDate());
+        Date refuelBilled = rs.getDate("refuel_billed");
+        refuel.setBilled(refuelBilled == null ? null : refuelBilled.toLocalDate());
 
         refuel.getCarRide().getReservation().getCar().setOwner(JDBCUserDAO.populateUserHeader(rs, "owners"));
 

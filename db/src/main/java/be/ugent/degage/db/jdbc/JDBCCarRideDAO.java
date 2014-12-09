@@ -32,7 +32,8 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
                 rs.getInt("car_ride_refueling")
         );
         carRide.setCost(rs.getBigDecimal("car_ride_cost"));
-        carRide.setBilled(rs.getDate("car_ride_billed").toLocalDate());
+        Date carRideBilled = rs.getDate("car_ride_billed");
+        carRide.setBilled(carRideBilled == null ? null : carRideBilled.toLocalDate());
 
         return carRide;
     }

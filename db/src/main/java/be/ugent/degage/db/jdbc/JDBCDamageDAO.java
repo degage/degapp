@@ -33,13 +33,14 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
+        Date damageTime = rs.getDate("damage_time");
         return new Damage(
                 rs.getInt("damage_id"),
                 rs.getInt("reservation_car_id"),
                 rs.getInt("reservation_user_id"),
                 reservation,
                 rs.getString("damage_description"),
-                rs.getDate("damage_time").toLocalDate(),
+                damageTime == null ? null : damageTime.toLocalDate(),
                 rs.getBoolean("damage_finished"));
     }
 

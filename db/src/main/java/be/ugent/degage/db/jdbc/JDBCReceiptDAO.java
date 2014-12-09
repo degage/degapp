@@ -117,9 +117,9 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
 	    receipt.setFiles(JDBCFileDAO.populateFile(rs, "files"));
 	}
         if (withDate) {
-            LocalDate date = rs.getDate(tableName + ".receipt_date").toLocalDate();
-            if (date != null) {
-                receipt.setDate(date);
+            Date receiptDate = rs.getDate(tableName + ".receipt_date");
+            if (receiptDate != null) {
+                receipt.setDate(receiptDate.toLocalDate());
             }
         }
         return receipt;

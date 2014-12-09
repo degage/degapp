@@ -46,16 +46,19 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
 
     public static CarCost populateCarCost(ResultSet rs, Car car) throws SQLException {
+        Date carCostTime = rs.getDate("car_cost_time");
         CarCost carCost = new CarCost(
                 rs.getInt("car_cost_id"),
                 car,
                 rs.getBigDecimal("car_cost_amount"),
                 rs.getBigDecimal("car_cost_mileage"),
                 rs.getString("car_cost_description"),
-                rs.getDate("car_cost_time").toLocalDate(),
+                carCostTime == null ? null : carCostTime.toLocalDate(),
                 rs.getInt("car_cost_proof"));
         carCost.setStatus(CarCostStatus.valueOf(rs.getString("car_cost_status")));
-        carCost.setBilled(rs.getDate("car_cost_billed").toLocalDate());
+
+        Date carCostBilled = rs.getDate("car_cost_billed");
+        carCost.setBilled(carCostBilled == null ? null : carCostBilled.toLocalDate());
         return carCost;
     }
 
