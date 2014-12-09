@@ -2,7 +2,7 @@
 @import db.CurrentUser
 
 @scripts = {
-    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    @js.usesajax()
     <script>
     var route = myJsRoutes.controllers.Cars.showCarsPage;
     </script>

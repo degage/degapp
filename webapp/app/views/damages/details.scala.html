@@ -1,8 +1,7 @@
 @(damage: Damage, owner: User, car: Car, damageLogList: Iterable[DamageLog], proofList: Iterable[File])
 @scripts = {
     @js.datetimepicker()
-
-    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    @js.usesajax()
     <script>
     function loadDescriptionModal ( damageId ) {
         myJsRoutes.controllers.Damages.editDamage ( damageId ).ajax ( {

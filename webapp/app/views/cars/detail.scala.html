@@ -3,8 +3,8 @@
 @import db.CurrentUser
     @scripts = {
         @js.datetimepicker()
+        @js.usesajax()
 
-        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
         <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
         <script>
         var route = myJsRoutes.controllers.Cars.showCarCostsPage;

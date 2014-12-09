@@ -2,11 +2,10 @@
 
 @scripts = {
     @js.datetimepicker()
+    @js.usesajax()
 
-    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
     <script>
     var route = myJsRoutes.controllers.Receipts.showReceiptsPage;
-	console.log(route);
     </script>
     <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
 }

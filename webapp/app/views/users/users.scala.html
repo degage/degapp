@@ -1,7 +1,7 @@
 @import providers.DataProvider;
 
 @scripts = {
-    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    @js.usesajax()
     <script>
     var route = myJsRoutes.controllers.Users.showUsersPage;
     </script>

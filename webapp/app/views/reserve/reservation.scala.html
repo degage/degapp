@@ -3,8 +3,8 @@
 @* Form which allows you to make an actual reservation *@
 
 @scripts = {
-    @js.datetimepicker();
-    <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
+    @js.datetimepicker()
+    @js.usesajax()
 }
 
 @app("Reserveer", scripts=scripts) {

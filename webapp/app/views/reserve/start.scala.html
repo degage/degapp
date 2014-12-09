@@ -1,6 +1,6 @@
 @()
 @scripts = {
-    <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
+    @js.usesajax()
     @js.datetimepicker()
 
     <script type='text/javascript' language="javascript">

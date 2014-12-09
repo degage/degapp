@@ -1,5 +1,5 @@
 @scripts = {
-    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    @js.usesajax()
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
     <script>
     var route = myJsRoutes.controllers.Drives.showDrivesAdminPage;

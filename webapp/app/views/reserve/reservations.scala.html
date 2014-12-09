@@ -1,15 +1,15 @@
 @(error: String, carName: String, carId: Int, from: String, until: String)
 @scripts = {
     @js.datetimepicker()
+    @js.usesajax()
     <script>
         var from = '@from'
         var until = '@until'
 
     </script>
-    <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
+
     <script type='text/javascript' src='@routes.Assets.at("javascripts/app/reservations.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
-    @* <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script> *@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/userpicker.js")'></script>
 }
