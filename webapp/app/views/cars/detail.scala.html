@@ -2,14 +2,14 @@
 @import providers.DataProvider
 @import db.CurrentUser
     @scripts = {
+        @js.datetimepicker()
+
         <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
         <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
         <script>
         var route = myJsRoutes.controllers.Cars.showCarCostsPage;
         </script>
         <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
-        <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-        <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 
         <!-- For maps: -->
         <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
@@ -31,20 +31,6 @@
         }
         </script>
 
-        <script>
-            $(document).ready(function() {
-                $('.datepicker').datetimepicker({
-                    language: 'nl',
-                    autoclose: 1,
-                    todayHighlight: 0,
-                    startView: 1,
-                    forceParse: 0,
-                    showMeridian: 1,
-                    pickerPosition: 'bottom-left'
-                });
-            });
-        </script>
-
         <script src='@routes.Assets.at("javascripts/updateCarAvailabilities.js")'></script>
         <script>
             userpickerRoute = "@routes.UserPicker.getList()"
@@ -54,7 +40,6 @@
         <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
     }
     @stylesheets = {
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
         <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
         <link rel="stylesheet" href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")'>
         <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' >
@@ -132,6 +117,7 @@
 
                                     @foreach.trOrElse(availabilities){availability =>
 
+                                    @* TODO: use a proper 'time picker' or a time input field *@
                                     @* TODO: a lot of the code below is repeated in javascripts/updateCarAvailabilities *@
                                             <td class="hidden">
                                                 <input class="availability_id hidden" value="@availability.id">
@@ -144,8 +130,10 @@
                                                 </form>
                                             </td>
                                             <td>
-                                                <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">
-                                                    <input class="beginTime form-control input-md" size="5" type="text" value='@availability.startTime' readonly>
+                                                <div class="datetimepicker-input input-group date" data-date-format="HH:ii"
+                                                     data-min-view="0" data-start-view="1">
+                                                    <input class="beginTime form-control input-md" size="5" type="text"
+                                                           value='@availability.startTime' readonly>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 </div>
                                             </td>
@@ -157,8 +145,10 @@
                                                 </form>
                                             </td>
                                             <td>
-                                                <div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">
-                                                    <input class="endTime form-control input-md" size="5" type="text" value='@availability.endTime' readonly>
+                                                <div class="datetimepicker-input input-group date" data-date-format="HH:ii"
+                                                     data-min-view="0" data-start-view="1">
+                                                    <input class="endTime form-control input-md" size="5" type="text"
+                                                           value='@availability.endTime' readonly>
                                                     <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 </div>
                                             </td>

@@ -1,12 +1,19 @@
-@(dest: String = ".datetimepicker-input", minuteStep: Int = 5)
-@* Added to the <script></script> on top of a page to install datetimepickers *@
+@(dest: String = ".datetimepicker-input")
+@* Add to header of a page to install datetimepickers *@
 
-$('@dest').datetimepicker({
-    language: 'nl',
-    autoclose: 1,
-    pickerPosition: 'bottom-left',
-    format: "yyyy-mm-dd hh:ii",
-    linkFormat: "yyyy-mm-dd hh:ii",
-    todayHighlight: 1,
-    minuteStep: @minuteStep
-});
+<script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
+<script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
+<link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
+<script type='text/javascript' language="javascript">
+
+installDateTimePickers = function() {
+    $('@dest').datetimepicker({
+        language: 'nl',
+        autoclose: 1,
+        pickerPosition: 'bottom-left',
+        todayHighlight: 1
+    });
+}
+
+$( installDateTimePickers )
+</script>

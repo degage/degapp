@@ -41,28 +41,6 @@ $(document).ready(function() {
     if($('#datetimepickerfrom') === undefined)
         return;
 
-    $('#datetimepickerfrom').datetimepicker({
-        weekStart: 1,
-        language: 'nl',
-        todayBtn: 0,
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-        linkFormat: "yyyy-mm-dd HH:ii"
-    });
-    $('#datetimepickeruntil').datetimepicker({
-        weekStart: 1,
-        language: 'nl',
-        todayBtn: 0,
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-        linkFormat: "yyyy-mm-dd HH:ii"
-    });
     // TODO: can these be avoided?
     //$("#input_from").datetimeinput();
     //$("#input_until").datetimeinput();

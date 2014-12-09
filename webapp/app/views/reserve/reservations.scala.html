@@ -1,5 +1,6 @@
 @(error: String, carName: String, carId: Int, from: String, until: String)
 @scripts = {
+    @js.datetimepicker()
     <script>
         var from = '@from'
         var until = '@until'
@@ -11,11 +12,8 @@
     @* <script type="text/javascript" src='@routes.Assets.at("javascripts/plugins/datetimeinput.js")'></script> *@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
     <script type='text/javascript' src='@routes.Assets.at("javascripts/userpicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
 }
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/timeinput.css")'>
     <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
@@ -51,24 +49,10 @@
                                         Onderstaande werkt nog niet - in afwachting
                                         van een betere user-interface voor reservaties.
                                     </div>
-                                    <div class="form-group col-lg-4">
-                                        <label>Reservatie van:</label>
-                                        <div id="reservation_from" class="input-group date datetimepicker-input">
-                                            <input class="form-control"
-                                                   type="text" name="reservationFrom">
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                        </div>
-                                    </div>
-                                    <div class="form-group col-lg-4">
-                                        <label>Reservatie tot:</label>
-                                        <div id="reservation_until" class="input-group date datetimepicker-input">
-                                            <input class="form-control"
-                                                   type="text" name="reservationUntil">
-                                            <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                        </div>
-                                    </div>
+                                        @search.datetimepicker("reservationFrom", "Van:", "col-md-4", minuteStep=15)
+                                        @search.datetimepicker("reservationUntil", "Tot:", "col-md-4", minuteStep=15)
 
-                                    <div id="filterbuttons" class="col-lg-4">
+                                    <div id="filterbuttons" class="col-md-4">
                                         <br />
                                         <div class="btn-group btn-group-sm">
                                             <button id="searchButton" type="button" class="btn btn-success">

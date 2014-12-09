@@ -3,11 +3,11 @@
 @import db.CurrentUser
 @* TODO: This file should be renamed since it's also used for editing *@
 @scripts = {
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
+
+    @js.datetimepicker()
+
     <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
 
-@* Source: https://github.com/smalot/bootstrap-datetimepicker, released under Apache v2 license *@
     <script>
         function onInfoSessionTypeChange() {
             if(document.getElementById("infosession_type_select").value === "Ander") {
@@ -31,13 +31,11 @@
                 }
             });
 
-            @js.datetimepicker()
         });
     </script>
 }
 
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
     <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
 }
 

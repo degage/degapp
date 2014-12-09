@@ -28,51 +28,6 @@ $(document).ready(function() {
     var fromTime = $('#input_from_time');
     var toTime = $('#input_to_time');
     var search = $('#searchButton');
-
-    $('.datepicker.from').datetimepicker({
-        language: 'nl',
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        minView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-        format: dateFormat,
-        initialDate: from,
-        pickerPosition: 'bottom-left'
-    });
-
-    $('.datepicker.until').datetimepicker({
-        language: 'nl',
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 2,
-        minView: 2,
-        forceParse: 0,
-        showMeridian: 1,
-        format: dateFormat,
-        initialDate: until,
-        pickerPosition: 'bottom-left'
-    });
-
-    $('.timepicker').datetimepicker({
-        language: 'nl',
-        autoclose: 1,
-        todayHighlight: 1,
-        startView: 1,
-        forceParse: 0,
-        showMeridian: 1,
-        format: timeFormat,
-        pickerPosition: 'bottom-left'
-    });
-
-    $('.datetimepicker-input').datetimepicker({
-        autoclose: 1,
-        pickerPosition: 'bottom-left',
-        format: "yyyy-mm-dd hh:ii",
-        minuteStep: 15
-    });
-
     $('.datetimepicker-hours .table-condensed thead').html('').append($('<tr>').append(
         $('<th>').css('width', '180px').text('Selecteer het uur')));
     $('.datetimepicker-minutes .table-condensed thead').html('').append($('<tr>').append(

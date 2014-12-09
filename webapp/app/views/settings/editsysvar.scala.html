@@ -1,24 +1,8 @@
 @(name: String, form: Form[Settings.EditSettingModel])
 
-    @scripts = {
-        <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-        <script>
-            $('#datepicker').datetimepicker({
-                pickerPosition: 'bottom-left',
-                weekStart: 1,
-                language: 'nl',
-                todayBtn:  false,
-                autoclose: 1,
-                todayHighlight: false,
-                startView: 2,
-                minView: 2,
-                forceParse: 0,
-                startDate: new Date(),
-                format: 'dd MM yyyy',
-                linkField: 'after'
-            });
-        </script>
-    }
+@scripts = {
+    @js.datetimepicker()
+}
 
 @app("Systeemvariabele bewerken", Html(""), scripts) {
     <div id="page-header-wrapper">
@@ -46,20 +30,9 @@
                     </div>
                     <div class="panel-body">
                         <fieldset>
-                            @formGroupTextField(form("value"),"Waarde")
-
-                            @*TODO: use snippet for date picker *@
-                            <div class="form-group">
-                                <label for="datepicker">Actief vanaf:</label>
-                                <div id="datepicker" class="input-group date form_date">
-                                    <input class="form-control input-md" type="text" value='@form("after").value'
-                                           placeholder="Tijdstip">
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-remove"></span></span>
-                                    <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                </div>
-                            </div>
-                            <button type="submit" name="save" class="btn btn-block btn-success">Opslaan</button>
-                            <input type="text" class="hidden" id='after' name='after' value='@form("after").value'/>
+                            @std.textField(form("value"),"Waarde","col-md-6")
+                            @std.datepicker(form("after"), "Actief vanaf:", "col-md-6")
+                            @std.submitButton("Opslaan")
                         </fieldset>
                     </div>
                 </div>

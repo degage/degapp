@@ -1,7 +1,7 @@
 @(form: Form[Cars.CarCostModel], car: Car)
 <!-- Large modal -->
 <script>
-@js.datepicker()
+@js.datetimepicker()
 </script>
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div id=" " class="modal-dialog modal-lg">
@@ -28,7 +28,7 @@
                                 <input id="mileage" name="mileage" type="text" pattern="[0-9]+" title="Geef een (komma)getal in" placeholder="Kilometerstand" class="form-control input-md" value='@form("mileage").value' required>
                             </div>
 
-                            @std.datetimepicker(form("time"),"Datum", "col-md-6")
+                            @std.datepicker(form("time"),"Datum", "col-md-6")
 
                             <div class="form-group col-md-6">
                                 <label class="control-label" for="picture">Bewijsmateriaal</label>

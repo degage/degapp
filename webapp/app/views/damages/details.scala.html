@@ -1,29 +1,26 @@
 @(damage: Damage, owner: User, car: Car, damageLogList: Iterable[DamageLog], proofList: Iterable[File])
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
-}
 @scripts = {
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
-        <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
-        <script>
-        function loadDescriptionModal ( damageId ) {
+    @js.datetimepicker()
+
+    <script type="text/javascript" src='@routes.Application.javascriptRoutes()'></script>
+    <script>
+    function loadDescriptionModal ( damageId ) {
         myJsRoutes.controllers.Damages.editDamage ( damageId ).ajax ( {
         success : function ( html ) {
-        $ ( "#resultModal" ).html ( html ) ;
-        $ ( '#detailsModal' ).modal ( 'show' ) ;
+            $ ( "#resultModal" ).html ( html ) ;
+            $ ( '#detailsModal' ).modal ( 'show' ) ;
         },
         error : function ( ) {
         // TODO: make clearer
-        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+            $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
         }
         } ) ;
         }
         function loadStatusModal ( damageId ) {
         myJsRoutes.controllers.Damages.addStatus ( damageId ).ajax ( {
         success : function ( html ) {
-        $ ( "#resultModal" ).html ( html ) ;
-        $ ( '#detailsModal' ).modal ( 'show' ) ;
+            $ ( "#resultModal" ).html ( html ) ;
+            $ ( '#detailsModal' ).modal ( 'show' ) ;
         },
         error : function ( ) {
         // TODO: make clearer
@@ -34,18 +31,18 @@
         function loadProofModal ( damageId ) {
         myJsRoutes.controllers.Damages.addProof ( damageId ).ajax ( {
         success : function ( html ) {
-        $ ( "#resultModal" ).html ( html ) ;
-        $ ( '#detailsModal' ).modal ( 'show' ) ;
+            $ ( "#resultModal" ).html ( html ) ;
+            $ ( '#detailsModal' ).modal ( 'show' ) ;
         },
         error : function ( ) {
         // TODO: make clearer
-        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+            $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
         }
         } ) ;
         }
-        </script>
+    </script>
 }
-@app("Schade details", stylesheets, scripts) {
+@app("Schade details", scripts=scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>

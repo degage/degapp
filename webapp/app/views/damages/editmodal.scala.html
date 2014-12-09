@@ -1,8 +1,5 @@
 @(form: Form[Damages.DamageModel], damageId: Integer)
 <!-- Large modal -->
-<script>
-@js.datepicker()
-</script>
 <div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
     <div id=" " class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -18,7 +15,7 @@
                         <div class="panel-body">
 
                             @std.textField(form("description"), "Beschrijving")
-                            @std.datetimepicker(form("time"),"Datum", "col-md-5")
+                            @std.datepicker(form("time"),"Datum", "col-md-5")
 
                         </div>
                     </div>
@@ -34,3 +31,5 @@
         </div>
     </div>
 </div>
+
+<script> installDateTimePickers () </script>

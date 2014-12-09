@@ -1,4 +1,4 @@
-@(name : String, label: String, css: String="col-lg-12", minuteStep: Int = 5)
+@(name : String, label: String, css: String="col-lg-12")
 
 @* datetime picker input component for use in a search context *@
 
@@ -7,7 +7,7 @@
 <div class="form-group @css">
     <label class="control-label" for="@name-container">@label</label>
     <div id="@name-container" class="input-group date datetimepicker-input"
-         data-date-format="yyyy-mm-dd hh:ii" data-minute-step="@minuteStep">
+         data-date-format="yyyy-mm-dd"  data-min-view="3" data-start-view="2">
         <input class="form-control searchTextField" type="text" name="@name" readonly>
         <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 @* datetime picker does not work with fa icons *@

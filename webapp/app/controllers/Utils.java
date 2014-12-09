@@ -56,13 +56,20 @@ public final class Utils {
     }
 
     public static Instant toInstant(String string) {
-        return ZonedDateTime.parse(string, DATETIME_FORMATTER).toInstant();
+        return (string == null || string.isEmpty())
+                ? null
+                : ZonedDateTime.parse(string, DATETIME_FORMATTER).toInstant();
     }
 
     public static LocalDate toLocalDate(String string) {
-        return LocalDate.parse(string, DATE_FORMATTER);
+        return (string == null || string.isEmpty())
+                ? null
+                : LocalDate.parse(string, DATE_FORMATTER);
     }
+
     public static LocalDateTime toLocalDateTime(String string) {
-        return LocalDateTime.parse(string, DATETIME_FORMATTER);
+        return (string == null || string.isEmpty())
+                ? null
+                : LocalDateTime.parse(string, DATETIME_FORMATTER);
     }
 }

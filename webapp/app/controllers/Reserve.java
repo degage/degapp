@@ -229,12 +229,17 @@ public class Reserve extends Controller {
         String validationError = null;
         String fromString = filter.getValue(FilterField.FROM);
         String untilString = filter.getValue(FilterField.UNTIL);
-        try {
 
-            LocalDateTime from = Utils.toLocalDateTime(fromString);
-            LocalDateTime until = Utils.toLocalDateTime(untilString);
-            if (!until.isAfter(from)) {
-                validationError = "Het einde van de periode moet na het begin van de periode liggen";
+        //System.err.printf("FromString = [%s], untilstring = [%s]\n", fromString, untilString);
+        try {
+            if (fromString.isEmpty() || untilString.isEmpty()) {
+                validationError = "Gelieve beide tijdstippen in te vullen";
+            }  else {
+                LocalDateTime from = Utils.toLocalDateTime(fromString);
+                LocalDateTime until = Utils.toLocalDateTime(untilString);
+                if (!until.isAfter(from)) {
+                    validationError = "Het einde van de periode moet na het begin van de periode liggen";
+                }
             }
         } catch (IllegalArgumentException ex) {
             validationError = "Gelieve geldige datums in te geven";

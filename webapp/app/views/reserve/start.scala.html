@@ -1,20 +1,9 @@
 @()
 @scripts = {
     <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
+    @js.datetimepicker()
 
     <script type='text/javascript' language="javascript">
-    // execute when loaded:
-    $(document).ready(function() {
-        $('.datetimepicker-input').datetimepicker({
-            autoclose: 1,
-            pickerPosition: 'bottom-left',
-            format: "yyyy-mm-dd hh:ii",
-            minuteStep: 15
-        });
-    });
-
     // for pagination
     var route=myJsRoutes.controllers.Reserve.listAvailableCarsPage;
     var initialLoad = false;
@@ -22,10 +11,7 @@
     </script>
     <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
 }
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
-}
-@app("Start reservatie", stylesheets, scripts) {
+@app("Start reservatie", scripts=scripts) {
 
     @breadcrumbs{
         @breadcrumb("Dashboard",routes.Dashboard.index)
@@ -35,8 +21,8 @@
     @maincontent("Start reservatie"){
         @panel("Zoek een auto die vrij is in tijdens de opgegeven periode", "fa-search"){
             <fieldset>
-                @search.datetimepicker("from", "Van:", "col-lg-6")
-                @search.datetimepicker("until", "Tot:", "col-lg-6")
+                @search.datetimepicker("from", "Van:", "col-lg-6", minuteStep=15)
+                @search.datetimepicker("until", "Tot:", "col-lg-6", minuteStep=15)
                 @search.numberField("seats", "Minimum aantal zitplaatsen", "col-lg-6")
                 <div class="form-group col-lg-6">
                     <label class="control-label" for="selectFuel">Brandstof</label>

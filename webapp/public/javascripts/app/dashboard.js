@@ -25,6 +25,7 @@ function registrationEvent (from, until, name, detailsLink) {
  * Fill calendar when document is loaded.
  * Uses global events variable!
  */
+ /*
 $(document).ready(function() {
     var inputFrom = $('#input_from');
     var inputUntil = $('#input_until');
@@ -54,3 +55,4 @@ $(document).ready(function() {
     });
 });
 
+ */

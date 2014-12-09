@@ -50,7 +50,7 @@ public class Receipts extends Controller {
             receiptsField = FilterField.RECEIPT_DATE;
         }
         String filterString = filter.getValue(FilterField.RECEIPT_DATE);
-        LocalDate localDate = filterString.isEmpty() ? null : Utils.toLocalDate(filterString);
+        LocalDate localDate = Utils.toLocalDate(filterString);
 
         List<Receipt> listOfReceipts = dao.getReceiptsList(receiptsField, asc, page, PAGE_SIZE, localDate, currentUser);
 

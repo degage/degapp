@@ -3,21 +3,11 @@
 @* Form which allows you to make an actual reservation *@
 
 @scripts = {
+    @js.datetimepicker();
     <script type='text/javascript' src='@routes.Application.javascriptRoutes()'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
+}
 
-    <script type='text/javascript' language="javascript">
-    // execute when loaded:
-    $(document).ready(function() {
-        @js.datetimepicker(minuteStep=15);
-    });
-    </script>
-}
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
-}
-@app("Reserveer", stylesheets, scripts) {
+@app("Reserveer", scripts=scripts) {
 
     @breadcrumbs{
         @breadcrumb("Dashboard",routes.Dashboard.index)
@@ -28,10 +18,10 @@
     @maincontent("Reserveer"){
         @panel("Reserveer " + car.getName, "fa-pencil"){
             @helper.form(routes.Reserve.doReservation(car.getId)) {
-                @std.datetimepicker(form("from"), "Van:", "col-md-6")
-                @std.datetimepicker(form("until"), "Tot:", "col-md-6")
+                @std.datetimepicker(form("from"), "Van:", "col-md-6", minuteStep=15)
+                @std.datetimepicker(form("until"), "Tot:", "col-md-6", minuteStep=15)
                 @std.textArea(form("message"), "Opmerkingen",3, 'maxLength -> 128)
-                @submitButton("Vraag reservatie aan")
+                @std.submitButton("Vraag reservatie aan")
             }
         }
         @panel("Auto ", "fa-car"){

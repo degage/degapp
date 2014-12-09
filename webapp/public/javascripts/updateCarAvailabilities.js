@@ -22,18 +22,10 @@ function deleteAvailability(e) {
 function newAvailability(e) {
     var currentRow = $(e).closest('tr');
     currentRow.before(newRow());
-    // We have to run this again, so the new datepickers will work
-    $('.datepicker').datetimepicker({
-        language: 'nl',
-        autoclose: 1,
-        todayHighlight: 0,
-        startView: 1,
-        forceParse: 0,
-        showMeridian: 1,
-        pickerPosition: 'bottom-left'
-    });
+    installDateTimePickers()
 }
 
+// TODO: clone a HTML-element?
 function newRow() {
     return '' +
         '<tr>' +
@@ -54,8 +46,10 @@ function newRow() {
             '</form>' +
         '</td>' +
         '<td>' +
-            '<div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="beginTime">' +
-                '<input class="beginTime form-control input-md" size="5" type="text" value="00:00" readonly>' +
+            '<div class="datetimepicker-input input-group date" data-date-format="HH:ii" ' +
+             ' data-min-view="0" data-start-view="1">' +
+                '<input class="beginTime form-control input-md" size="5" type="text" ' +
+                ' data-max-view="0" data-start-view="0"  value="00:00" readonly>' +
                 '<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>' +
             '</div>' +
         '</td>' +
@@ -73,8 +67,10 @@ function newRow() {
             '</form>' +
         '</td>' +
         '<td>' +
-            '<div class="datepicker input-group date form_datetime" data-date-format="HH:ii" data-link-field="endTime">' +
-                '<input class="endTime form-control input-md" size="5" type="text" value="01:00" readonly>' +
+            '<div class="datetimepicker-input input-group date" data-date-format="HH:ii" ' +
+             ' data-min-view="0" data-start-view="1" >' +
+                '<input class="endTime form-control input-md" size="5" type="text" ' +
+                '   value="01:00" readonly>' +
                 '<span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>' +
             '</div>' +
         '</td>' +
@@ -109,7 +105,7 @@ function updateCarAvailabilities(carId) {
              location.reload();
              scroll(0,0);
          },
-         error : function() { // Errormessage will come in flashes
+         error : function() { // Error message will come in flashes
              location.reload();
              scroll(0,0);
          }

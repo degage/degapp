@@ -2,21 +2,15 @@
 @import providers.DataProvider
 @import db.CurrentUser
 @stylesheets = {
-    <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap-datetimepicker/css/bootstrap-datetimepicker.css")'>
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+    <link href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")' rel="stylesheet">
+    <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
 }
 @scripts = {
 
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/bootstrap-datetimepicker.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap-datetimepicker/js/locales/bootstrap-datetimepicker.nl.js")'></script>
+    @js.datetimepicker()
+
     <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
     <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
-    <script>
-        $(document).ready(function() {
-            @js.datepicker()
-        });
-    </script>
 
 }
 
@@ -209,7 +203,7 @@
                                                 <input id="insuranceName" name="insuranceName" type="text" class="form-control input-md" value="@form("insuranceName").value">
                                             </div>
                                         </div>
-                                        @std.datetimepicker(form("expiration"), "Vervaldatum", "col-md-4")
+                                        @std.datepicker(form("expiration"), "Vervaldatum", "col-md-4")
 
                                         <div class="form-group">
                                             <label class="col-md-12" for="bonusMalus">Bonus Malus</label>
