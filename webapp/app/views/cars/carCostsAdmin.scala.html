@@ -1,10 +1,7 @@
 @scripts = {
     @js.usesajax()
+    @js.pagination("Cars.showCarCostsPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
-    <script>
-        var route = myJsRoutes.controllers.Cars.showCarCostsPage;
-    </script>
-    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">

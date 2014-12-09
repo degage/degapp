@@ -1,9 +1,6 @@
 /**
  * Created by Benjamin on 23/03/2014.
  */
-// Javascript route
-var route = myJsRoutes.controllers.Reserve.showCarsPage;
-
 function loadModal(carId) {
     myJsRoutes.controllers.Reserve.reserve(carId, $('#input_from_value' ).val(), $('#input_to_value' ).val()).ajax({
         success : function(html) {

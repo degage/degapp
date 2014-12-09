@@ -2,14 +2,7 @@
 @scripts = {
     @js.usesajax()
     @js.datetimepicker()
-
-    <script type='text/javascript' language="javascript">
-    // for pagination
-    var route=myJsRoutes.controllers.Reserve.listAvailableCarsPage;
-    var initialLoad = false;
-
-    </script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
+    @js.pagination("Reserve.listAvailableCarsPage", false)
 }
 @app("Start reservatie", scripts=scripts) {
 

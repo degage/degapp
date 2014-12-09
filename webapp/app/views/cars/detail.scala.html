@@ -4,12 +4,8 @@
     @scripts = {
         @js.datetimepicker()
         @js.usesajax()
-
+        @js.pagination("Cars.showCarCostsPage")
         <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
-        <script>
-        var route = myJsRoutes.controllers.Cars.showCarCostsPage;
-        </script>
-        <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
 
         <!-- For maps: -->
         <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>

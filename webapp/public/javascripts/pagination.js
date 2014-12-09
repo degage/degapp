@@ -151,8 +151,8 @@ function loadPage(page, pageSize, asc, orderBy, search) {
 
     intervalLoading = setInterval(moveLoadingIcon, 50);
 
-    route(page, pageSize, asc, orderBy, search).ajax({
-        success : function(html) {
+    $.ajax (route(page, pageSize, asc, orderBy, search))
+        .done( function(html) {
             if(autoLoad != 1)
                 $("#resultsTable").html(html);
             else {
@@ -282,12 +282,11 @@ function loadPage(page, pageSize, asc, orderBy, search) {
             }
 
             pageLoaded = true;
-        },
-        error : function() {
+        })
+        .fail( function() {
             // TODO: make clearer
             $("#resultsTable").html("Er ging iets mis...");
-        }
-    });
+        });
 }
 
 /*

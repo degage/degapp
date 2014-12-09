@@ -2,10 +2,7 @@
 
 @scripts = {
     @js.usesajax()
-    <script>
-    var route = myJsRoutes.controllers.Users.showUsersPage;
-    </script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
+    @js.pagination("Users.showUsersPage")
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">

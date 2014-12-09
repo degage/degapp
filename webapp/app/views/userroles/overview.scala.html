@@ -1,12 +1,9 @@
 @import providers.DataProvider;
 
-    @scripts = {
-        @js.usesajax()
-        <script>
-        var route = myJsRoutes.controllers.UserRoles.showUsersPage;
-        </script>
-        <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
-    }
+@scripts = {
+    @js.usesajax()
+    @js.pagination("UserRoles.showUsersPage")
+}
 @stylesheets = {
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/labels.css")">
     <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">

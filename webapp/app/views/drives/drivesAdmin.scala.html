@@ -1,11 +1,7 @@
 @scripts = {
     @js.usesajax()
+    @js.pagination("Drives.showDrivesAdminPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
-    <script>
-    var route = myJsRoutes.controllers.Drives.showDrivesAdminPage;
-    var beginFilter = "status=" + @ReservationStatus.ACCEPTED.toString();
-    </script>
-    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
     <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
 }
 @stylesheets = {

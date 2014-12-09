@@ -1,15 +1,12 @@
 @scripts = {
     @js.usesajax()
+    @js.pagination("Damages.showDamagesPageAdmin")
     <script>
         var yesImage = "@routes.Assets.at("images/tristate-checkbox/yes.png")";
         var noImage = "@routes.Assets.at("images/tristate-checkbox/no.png")";
         var noneImage = "@routes.Assets.at("images/tristate-checkbox/none.png")";
     </script>
     <script src='@routes.Assets.at("javascripts/plugins/tristate-checkbox/main.js")'></script>
-    <script>
-        var route = myJsRoutes.controllers.Damages.showDamagesPageAdmin;
-    </script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
     <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
 }
 @stylesheets = {

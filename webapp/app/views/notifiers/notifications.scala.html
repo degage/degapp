@@ -1,10 +1,7 @@
 @scripts = {
     @js.usesajax()
+    @js.pagination("Notifications.showNotificationsPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
-    <script>
-    var route = myJsRoutes.controllers.Notifications.showNotificationsPage;
-    </script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
 }
 @stylesheets = {
     <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">

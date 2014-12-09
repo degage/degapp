@@ -1,9 +1,6 @@
 @scripts = {
     @js.usesajax()
-    <script>
-        var route = myJsRoutes.controllers.InfoSessions.pendingApprovalListPaged;
-    </script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
+    @js.pagination("InfoSessions.pendingApprovalListPaged")
 
     <script>
         $(document).ready(function () {

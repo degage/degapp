@@ -1,9 +1,6 @@
 @scripts = {
     @js.usesajax()
-    <script>
-    var route = myJsRoutes.controllers.Refuels.showOwnerRefuelsPage;
-    </script>
-    <script src="@routes.Assets.at("javascripts/pagination.js")"></script>
+    @js.pagination("Refuels.showOwnerRefuelsPage")
     <script src="@routes.Assets.at("javascripts/app/refuelInfo.js")"></script>
 }
 @stylesheets = {

@@ -1,10 +1,22 @@
 @scripts = {
     @js.usesajax()
+    @js.pagination("Messages.showReceivedMessagesPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/messages.js")'></script>
-    <script>
-        var route = myJsRoutes.controllers.Messages.showReceivedMessagesPage;
-    </script>
-    <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
+
+// changing tab forces reloading of tables
+$(function() {
+    $('li[id^="tab"]').on('click', function() {
+        var id = $(this).attr("id");
+        if(id == "tab_received") {
+            route = myJsRoutes.controllers.Messages.showReceivedMessagesPage;
+        } else { // tab_sent
+            route = myJsRoutes.controllers.Messages.showSentMessagesPage;
+        }
+        $('#searchButton').click();
+    });
+});
+
+
 }
 @stylesheets = {
     <!-- <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet"> -->

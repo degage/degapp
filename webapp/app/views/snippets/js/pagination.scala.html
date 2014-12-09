@@ -1,0 +1,6 @@
+@(actionName: String, initialLoad: Boolean = true)
+<script>
+    var route = myJsRoutes.controllers.@actionName;
+    @if(!initialLoad) { initialLoad = false; }
+</script>
+<script src='@routes.Assets.at("javascripts/pagination.js")'></script>
