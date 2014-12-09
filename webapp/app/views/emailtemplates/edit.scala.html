@@ -60,10 +60,16 @@
     </script>
     <script>
         $ ("#create").click ( function () {
+            // TODO: use different syntax?
             $.ajax ( {
                 url: myJsRoutes.controllers.EmailTemplates.editTemplate( ).url,
                 type : 'POST',
-                data : { 'template_id':$ ( '#editor' ).data('status'), 'template_body' : $ ( '#editor' ).cleanHtml(), 'template_subject' : $ ( '#subject' ).val(), 'template_send_mail' : $("#sendMail").is(':checked') },
+                data : {
+                    'template_id':$ ( '#editor' ).data('status'),
+                    'template_body' : $ ( '#editor' ).cleanHtml(),
+                    'template_subject' : $ ( '#subject' ).val(),
+                    'template_send_mail' : $("#sendMail").is(':checked')
+                },
                 success: function(data, textStatus, request) {
                     // data.redirect contains the string URL to redirect to
                     window.location.href = data;

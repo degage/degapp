@@ -3,10 +3,7 @@
     @js.pagination("Notifications.showNotificationsPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
 }
-@stylesheets = {
-    <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet">
-}
-@app("Notificaties", stylesheets, scripts) {
+@app("Notificaties", scripts=scripts) {
 
     <div id="page-header-wrapper">
         <ol class="breadcrumb">

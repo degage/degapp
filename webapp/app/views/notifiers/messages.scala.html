@@ -15,13 +15,8 @@ $(function() {
         $('#searchButton').click();
     });
 });
-
-
 }
-@stylesheets = {
-    <!-- <link href="@routes.Assets.at("stylesheets/plugins/timeline/timeline.css")" rel="stylesheet"> -->
-}
-@app("Berichten", stylesheets, scripts) {
+@app("Berichten", scripts=scripts) {
 
 <div id="page-header-wrapper">
     <ol class="breadcrumb">

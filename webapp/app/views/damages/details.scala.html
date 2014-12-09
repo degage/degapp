@@ -4,41 +4,41 @@
     @js.usesajax()
     <script>
     function loadDescriptionModal ( damageId ) {
-        myJsRoutes.controllers.Damages.editDamage ( damageId ).ajax ( {
-        success : function ( html ) {
+
+        // TODO: avoid repetition
+        $.ajax(myJsRoutes.controllers.Damages.editDamage (damageId))
+        .done(function ( html ) {
             $ ( "#resultModal" ).html ( html ) ;
             $ ( '#detailsModal' ).modal ( 'show' ) ;
-        },
-        error : function ( ) {
-        // TODO: make clearer
+        })
+        .fail(function ( ) {
             $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
-        }
-        } ) ;
-        }
-        function loadStatusModal ( damageId ) {
-        myJsRoutes.controllers.Damages.addStatus ( damageId ).ajax ( {
-        success : function ( html ) {
+        });
+    }
+
+    function loadStatusModal ( damageId ) {
+
+        $.ajax(myJsRoutes.controllers.Damages.addStatus (damageId))
+        .done(function ( html ) {
             $ ( "#resultModal" ).html ( html ) ;
             $ ( '#detailsModal' ).modal ( 'show' ) ;
-        },
-        error : function ( ) {
-        // TODO: make clearer
-        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
-        }
-        } ) ;
-        }
-        function loadProofModal ( damageId ) {
-        myJsRoutes.controllers.Damages.addProof ( damageId ).ajax ( {
-        success : function ( html ) {
-            $ ( "#resultModal" ).html ( html ) ;
-            $ ( '#detailsModal' ).modal ( 'show' ) ;
-        },
-        error : function ( ) {
-        // TODO: make clearer
+        })
+        .fail(function ( ) {
             $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
-        }
-        } ) ;
-        }
+        });
+    }
+
+    function loadProofModal ( damageId ) {
+
+        $.ajax(myJsRoutes.controllers.Damages.addProof (damageId))
+        .done(function ( html ) {
+            $ ( "#resultModal" ).html ( html ) ;
+            $ ( '#detailsModal' ).modal ( 'show' ) ;
+        })
+        .fail(function ( ) {
+            $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        });
+    }
     </script>
 }
 @app("Schade details", scripts=scripts) {

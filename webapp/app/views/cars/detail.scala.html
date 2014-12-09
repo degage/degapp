@@ -13,17 +13,15 @@
 
         <script>
         function loadModal ( carId ) {
-        myJsRoutes.controllers.Cars.getCarCostModal ( carId ).ajax ( {
-        success : function ( html ) {
-        $ ( "#resultModal" ).html ( html ) ;
-        $ ( '#detailsModal' ).modal ( 'show' ) ;
-
-        },
-        error : function ( ) {
-        // TODO: make clearer
-        $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
-        }
-        } ) ;
+            $.ajax(myJsRoutes.controllers.Cars.getCarCostModal(carId))
+            .done (function (html) {
+                $ ("#resultModal").html (html) ;
+                $ ('#detailsModal').modal ('show') ;
+            })
+            .fail (function ( ) {
+                // TODO: make clearer
+                $ ( "#resultModal" ).html ("Er ging iets mis...") ;
+            });
         }
         </script>
 
