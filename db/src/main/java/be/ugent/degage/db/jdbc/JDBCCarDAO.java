@@ -514,15 +514,15 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
     }
 
-    private String NEW_CAR_QUERY =
+    private static final String NEW_CAR_QUERY =
             "SELECT car_id, car_name, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, " +
                     "address_id, address_city, address_zipcode, address_street, " +
                     "address_number, address_country " +
             "FROM cars JOIN addresses ON address_id=car_location ";
 
-    private String SELECT_NOT_OVERLAP =
-            "AND car_id NOT IN (" +
+    private static final String SELECT_NOT_OVERLAP =
+            " AND car_id NOT IN (" +
                 "SELECT reservation_car_id FROM reservations " +
                     "WHERE reservation_to >= ? AND reservation_from <= ? " +
                     "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
