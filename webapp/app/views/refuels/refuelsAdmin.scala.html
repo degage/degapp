@@ -1,12 +1,11 @@
 @scripts = {
     @js.usesajax()
     @js.pagination("Refuels.showAllRefuelsPage")
-    <script src="@routes.Assets.at("javascripts/app/refuelInfo.js")"></script>
-    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
+    @js.userpicker()
+    <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
 }
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
 }
 @app("Tankbeurten (Admin)", stylesheets, scripts) {
     <div id="page-header-wrapper">
@@ -35,38 +34,10 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-xs-6 col-md-4">
-                                <div class="userpicker" data-url="@routes.CarPicker.getList()">
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
-                                    <input type="hidden" class="searchTextField" name="refuel_car_id" value="" />
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-                            <div class="col-xs-6 col-md-4">
-                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Eigenaar"/>
-                                    <input type="hidden" class="searchTextField" name="refuel_owner_id" value="" />
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-                            <div class="col-xs-6 col-md-4">
-                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Bestuurder"/>
-                                    <input type="hidden" class="searchTextField" name="refuel_user_id" value="" />
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-                        </div><br />
-                        <hr />
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <div class="btn-group btn-group">
-                                    <button id="searchButton" class="btn btn-success">Zoek!</button>
-                                </div>
-                            </div>
+                            @search.carpicker("refuel_car_id", "Auto")
+                            @search.userpicker("refuel_owner_id", "Eigenaar")
+                            @search.userpicker("refuel_user_id", "Bestuurder")
+                            @search.button ("Zoek!")
                         </div>
                     </div>
                         <!-- /.panel-body -->

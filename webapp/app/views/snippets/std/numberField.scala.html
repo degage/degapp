@@ -1,4 +1,4 @@
-@(field: play.api.data.Field, label: String, css: String="col-xs-12")
+@(field: play.api.data.Field, label: String, css: String="col-xs-12", required: Boolean = false)
 
 @* TODO: Distinguish between integers / doubles / positive number *@
 
@@ -6,7 +6,7 @@
     <label class="control-label" for="@field.id">@label</label>
 
     <input id="@field.id" name="@field.name" type="number"
-           class="form-control input-md" value="@field.value" >
+           class="form-control input-md" value="@field.value"  @if(required) {placeholder="Verplicht"}>
     @field.errors.map { error =>
         <span class="help-block">@play.api.i18n.Messages(error.message)</span>
     }

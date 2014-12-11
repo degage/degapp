@@ -1,13 +1,13 @@
-@(infoSession: InfoSession, enrolled: InfoSession = null, enrollees: Iterable[Enrollee], map: Maps.MapDetails = null)
+@(infoSession: InfoSession, form: Form[InfoSessions.UserpickerData], enrolled: InfoSession = null, enrollees: Iterable[Enrollee], map: Maps.MapDetails = null)
 @import providers.DataProvider
 @import db.CurrentUser
 @scripts = {
     @js.usesajax()
+    @js.userpicker()
 
     <!-- For maps: -->
     <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
     <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
-    <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
     <script>
         $(document).ready(function() {
             $( "#deleteButton" ).click(function() {
@@ -21,7 +21,6 @@
 
 @stylesheets = {
     <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.js")' />
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 
 @app("Details Infosessie", stylesheets, scripts) {
@@ -52,22 +51,12 @@
                             <i class="fa fa-plus-square-o fa-fw"></i> Gebruiker toevoegen
                         </div>
                         <div class="panel-body">
-                            @helper.form(routes.InfoSessions.addUserToSession(infoSession.getId), 'class -> "form-horizontal") {
-                                <div class="form-group">
-                                    <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
-                                        <label for="userPickerBox">Gebruikersnaam:</label>
-                                        <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off" />
-                                        <input type="hidden" name="userid" value=""/>
-                                        <div class="viewId"></div>
-                                        <ul class="dropdown-menu" role="menu"></ul>
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                    <div class="col-md-4">
-                                        <button type="submit" id="create" name="create" class="btn btn-block btn-success">Toevoegen</button>
-                                    </div>
-                                </div>
+                            <row>    @* TODO: does not look good... *@
+                            @helper.form(routes.InfoSessions.addUserToSession(infoSession.getId)) {
+                                @std.userpicker(form("userId"), form("userIdAsString"), "Gebruiker")
+                                @std.submitButton("Toevoegen")
                             }
+                            </row>
                         </div>
                     </div>
                 }

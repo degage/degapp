@@ -1,14 +1,9 @@
-@(approval: Approval, enrollStatus: EnrollementStatus, admin: UserHeader)
-    @stylesheets = {
-        <link href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")' rel="stylesheet">
-        <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
-    }
+@(approval: Approval, enrollStatus: EnrollementStatus,form: Form[InfoSessions.UserpickerData])
     @scripts = {
-        <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
-        <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
+        @js.userpicker()
     }
 
-@app("Goedkeuringsaanvraag", stylesheets, scripts) {
+@app("Goedkeuringsaanvraag", scripts=scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
@@ -17,44 +12,22 @@
         </ol>
     </div>
 
-        <div id="page-wrapper">
-            <div class="">
-            @flashes()
+    <div id="page-wrapper">
+        @flashes()
 
-            @approvaluserpartial(approval, enrollStatus)
+        @approvaluserpartial(approval, enrollStatus)
 
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <h3 class="panel-title"><i class="fa fa-pencil-square-o"></i> Aanvraag</h3>
-                </div>
-                <div class="panel-body">
-                @helper.form(routes.InfoSessions.approvalAdminPost(approval.getId), 'class -> "form-horizontal") {
-                            <div class="form-group">
-                                <div class="userpicker col-md-4" data-url="@routes.UserPicker.getList()">
-                                    <label for="userPickerBox">Contractverantwoordelijke:</label>
-                                        @if(admin != null){
-                                            <input type="text" value="@admin.getFirstName @admin.getLastName" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off"/>
-                                            <input type="hidden" name="manager" value="@admin.getId"/>
-                                        } else {
-                                            <input type="text" data-toggle="dropdown" class="form-control input-md" id="userPickerBox" autocomplete="off" />
-                                            <input type="hidden" name="manager" value=""/>
-                                        }
-                                    <input type="hidden" name="manager" value=""/>
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="create"></label>
-                        <div class="col-md-14">
-                            <button type="submit" id="create" name="create" class="btn btn-block btn-success">
-                                Contractverantwoordelijke toewijzen</button>
-                        </div>
-                    </div>
-                </div>
-                }
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title"><i class="fa fa-pencil-square-o"></i> Aanvraag</h3>
             </div>
+            <div class="panel-body">
+            @helper.form(routes.InfoSessions.approvalAdminPost(approval.getId)) {
+                @std.userpicker(form("userId"), form("userIdAsString"), "Contractverantwoordelijke")
+                @std.submitButton("Contractverantwoordelijke toewijzen")
             </div>
+            }
         </div>
+        </div>
+    </div>
 }

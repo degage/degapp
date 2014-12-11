@@ -30,7 +30,7 @@ public class UserPicker extends Controller {
             filter.putValue(FilterField.USER_NAME, search);
             List<User> results = dao.getUserList(FilterField.USER_NAME, true, 1, MAX_VISIBLE_RESULTS, filter);
             for (User user : results) {
-                String value = user.getFirstName() + " " + user.getLastName();
+                String value = user.getFullName();
                 for (String part : search.split(" ")) {
                     value = value.replaceAll("(?i)\\b(" + part + ")", "<#>$1</#>");
                 }

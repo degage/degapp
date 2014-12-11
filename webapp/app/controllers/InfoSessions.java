@@ -11,16 +11,16 @@ import db.InjectContext;
 import notifiers.Notifier;
 import play.data.DynamicForm;
 import play.data.Form;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.infosession.*;
 
+import javax.validation.Constraint;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
@@ -44,38 +44,49 @@ public class InfoSessions extends Controller {
     }
 
     public static class InfoSessionCreationModel {
+
         public Integer userId;
+
+        @Constraints.Required
+        public String userIdAsString;
+
+        @Constraints.Required
         public Instant time;
         public Integer max_enrollees;
+
         public String type;
         public String type_alternative;
+
         public String comments;
+
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
-        public String validate() {
-            String error = "";
-            if (userId == null || userId == 0) {
-                error += "Gelieve een host te selecteren. ";
-            }
-            if (time == null) {
-                error += "Gelieve het tijdsveld in te vullen. ";
+        public List<ValidationError> validate() {
+            List<ValidationError> errors = new ArrayList<ValidationError>();
+            if (userId == null || userId <= 0) {
+                // needed for those cases where a string is input which does not correspond with a real person
+                errors.add (new ValidationError("userId","Gelieve een gastvrouw/gastheer te selecteren"));
             }
             if (InfoSessionType.getTypeFromString(type) == InfoSessionType.OTHER && (type_alternative == null || type_alternative.equals(""))) {
-                error += "Gelieve een alternatief type in te geven of een ander type te selecteren. ";
+                errors.add (new ValidationError("type_alternative","Gelieve een alternatief type in te geven of een ander type te selecteren. "));
             }
-            if ("".equals(error)) return null;
-            else return error;
+            if (errors.isEmpty())
+                return null;
+            else
+                return errors;
         }
 
         public void populate(InfoSession i) {
-            if (i == null) return;
 
             userId = i.getHost().getId();
+            userIdAsString = i.getHost().getFullName();
+
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
             type = i.getType().getDescription();
             type_alternative = i.getTypeAlternative();
             comments = i.getComments();
+
             address.populate(i.getAddress());
         }
 
@@ -90,14 +101,16 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result newSession() {
         User user = DataProvider.getUserProvider().getUser();
-        Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class);
 
         InfoSessionCreationModel model = new InfoSessionCreationModel();
         model.userId = user.getId();
+        model.userIdAsString = user.getFullName();
         model.address.populate(user.getAddressDomicile());
         model.type = InfoSessionType.NORMAL.getDescription();
-        editForm = editForm.fill(model);
-        return ok(addinfosession.render(editForm, 0, getCountryList(), getTypeList()));
+        return ok(addinfosession.render(
+                Form.form(InfoSessionCreationModel.class).fill(model),
+                getCountryList(), getTypeList())
+        );
     }
 
     /**
@@ -119,7 +132,7 @@ public class InfoSessions extends Controller {
             model.populate(is);
 
             Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-            return ok(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+            return ok(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
         }
     }
 
@@ -155,7 +168,7 @@ public class InfoSessions extends Controller {
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
-            return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+            return badRequest(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -171,7 +184,7 @@ public class InfoSessions extends Controller {
 
             if (host == null) {
                 editForm.reject("Infosessie gastheer bestaat niet.");
-                return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+                return badRequest(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
             }
             session.setHost(host);
 
@@ -199,7 +212,7 @@ public class InfoSessions extends Controller {
             int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
             if (editForm.get().max_enrollees != 0 && editForm.get().max_enrollees < amountOfAttendees) {
                 flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
-                return badRequest(addinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+                return badRequest(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
             } else {
                 session.setMaxEnrollees(editForm.get().max_enrollees);
             }
@@ -252,13 +265,14 @@ public class InfoSessions extends Controller {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         return ok(detail.render(
                 dao.getInfoSession(sessionId),
+                Form.form(UserpickerData.class),
                 dao.getAttendingInfoSession(CurrentUser.getId()),
                 dao.getEnrollees(sessionId), null));
     }
 
 
     /*
-    @RoleSecured.RoleAuthenticated()
+    @RoleSecured.RoleAuthenticated()                    detail.render
     @InjectContext
     public static F.Promise<Result> detail(int sessionId) {
         final User user = DataProvider.getUserProvider().getUser();
@@ -333,6 +347,31 @@ public class InfoSessions extends Controller {
         return redirect(routes.InfoSessions.detail(sessionId));
     }
 
+    // TODO: make this generally available for extension
+    public static class UserpickerData {
+        public Integer userId;
+
+        @Constraints.Required
+        public String userIdAsString;
+
+        public List<ValidationError> validate() {
+            if (userId == null || userId <= 0) {
+                // needed for those cases where a string is input which does not correspond with a real person
+                return Arrays.asList (new ValidationError("userId", "Gelieve een bestaande persoon te selecteren"));
+            } else {
+                return null;
+            }
+        }
+
+        public void populate (UserHeader user) {
+            if (user != null) {
+                userId = user.getId();
+                userIdAsString = user.getFullName();
+            }
+        }
+
+    }
+
     /**
      * Method: POST
      * Adds a user to the given infosession
@@ -343,28 +382,31 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result addUserToSession(int sessionId) {
-        int userId;
-        try {
-            userId = Integer.parseInt(Form.form().bindFromRequest().get("userid"));
-        } catch (Exception ex) {
-            flash("danger", "Gebruiker bestaat niet.");
-            return redirect(routes.InfoSessions.detail(sessionId));
-        }
         DataAccessContext context = DataAccess.getInjectedContext();
         InfoSessionDAO idao = context.getInfoSessionDAO();
-        // TODO: loop in database
-        for (Enrollee others : idao.getEnrollees(sessionId)) {
-            if (others.getUser().getId() == userId) {
-                flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
-                return redirect(routes.InfoSessions.detail(sessionId));
+        Form<UserpickerData> form = Form.form(UserpickerData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return ok(detail.render(
+                    idao.getInfoSession(sessionId),
+                    form,
+                    idao.getAttendingInfoSession(CurrentUser.getId()),
+                    idao.getEnrollees(sessionId), null));
+        } else {
+            // TODO: loop in database
+            int userId = form.get().userId;
+            for (Enrollee others : idao.getEnrollees(sessionId)) {
+                if (others.getUser().getId() == userId) {
+                    flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
+                    return redirect(routes.InfoSessions.detail(sessionId));
+                }
             }
+
+            // Now we enroll
+            idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
+
+            flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
+            return redirect(routes.InfoSessions.detail(sessionId));
         }
-
-        // Now we enroll
-        idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
-
-        flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
-        return redirect(routes.InfoSessions.detail(sessionId));
     }
 
     /**
@@ -424,7 +466,7 @@ public class InfoSessions extends Controller {
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(addinfosession.render(createForm, 0, getCountryList(), getTypeList()));
+            return badRequest(addinfosession.render(createForm, getCountryList(), getTypeList()));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -668,24 +710,32 @@ public class InfoSessions extends Controller {
             InfoSessionDAO idao = context.getInfoSessionDAO();
             status = idao.getUserEnrollmentStatus(ap.getSession().getId(), ap.getUser().getId());
         }
-
-        return ok(setcontractadmin.render(ap, status, ap.getAdmin()));
+        UserpickerData data = new UserpickerData();
+        data.populate (ap.getAdmin());
+        return ok(setcontractadmin.render(ap, status, Form.form(UserpickerData.class).fill(data)));
     }
 
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalAdminPost(int id) {
-        // TODO: use proper form
-        DynamicForm form = Form.form().bindFromRequest();
-        int userId = Integer.valueOf(form.get("manager"));
         DataAccessContext context = DataAccess.getInjectedContext();
         ApprovalDAO adao = context.getApprovalDAO();
         Approval app = adao.getApproval(id);
+        Form<UserpickerData> form = Form.form(UserpickerData.class).bindFromRequest();
+        if (form.hasErrors()) {
+                // TODO: code in common with approvalAdmin
+            EnrollementStatus status = EnrollementStatus.ABSENT;
+            if (app.getSession() != null) {
+                InfoSessionDAO idao = context.getInfoSessionDAO();
+                status = idao.getUserEnrollmentStatus(app.getSession().getId(), app.getUser().getId());
+            }
+            return ok(setcontractadmin.render(app, status, form));
+        } else {
+            int userId = form.get().userId;
 
-        UserDAO udao = context.getUserDAO();
-        UserHeader contractManager = udao.getUserHeader(userId);
+            UserDAO udao = context.getUserDAO();
+            UserHeader contractManager = udao.getUserHeader(userId);
 
-        if (contractManager != null) {
             Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
             if (userRoles.contains(UserRole.INFOSESSION_ADMIN) || userRoles.contains(UserRole.SUPER_USER)) {
                 // TODO: introduce hasRole method in DAO
@@ -699,9 +749,6 @@ public class InfoSessions extends Controller {
                 flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
                 return redirect(routes.InfoSessions.approvalAdmin(id));
             }
-        } else {
-            flash("danger", "Contractmanager ID bestaat niet.");
-            return redirect(routes.InfoSessions.approvalAdmin(id));
         }
     }
 

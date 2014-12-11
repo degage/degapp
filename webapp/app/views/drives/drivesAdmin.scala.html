@@ -1,12 +1,11 @@
 @scripts = {
     @js.usesajax()
     @js.pagination("Drives.showDrivesAdminPage")
+    @js.userpicker()
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
-    <script src="@routes.Assets.at("javascripts/userpicker.js")"></script>
 }
 @stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
 }
 
 @app("Ritten (admin)", stylesheets, scripts) {
@@ -33,30 +32,9 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-xs-6 col-md-6">
-                        <div class="userpicker" data-url="@routes.CarPicker.getList()">
-                            <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
-                            <input type="hidden" class="searchTextField" name="reservation_car_id" value="" />
-                            <div class="viewId"></div>
-                            <ul class="dropdown-menu" role="menu"></ul>
-                        </div>
-                    </div>
-                    <div class="col-xs-6 col-md-6">
-                        <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                            <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Gebruiker (eigenaar of bestuurder)"/>
-                            <input type="hidden" class="searchTextField" name="reservation_user_or_owner_id" value="" />
-                            <div class="viewId"></div>
-                            <ul class="dropdown-menu" role="menu"></ul>
-                        </div>
-                    </div>
-                </div>
-                <hr />
-                <div class="row">
-                    <div class="col-xs-4">
-                        <div class="btn-group btn-group">
-                            <button id="searchButton" class="btn btn-success">Zoek!</button>
-                        </div>
-                    </div>
+                    @search.carpicker("reservation_car_id", "Auto")
+                    @search.userpicker("reservation_user_or_owner_id", "Bestuurder / eigenaar")
+                    @search.button("Zoek!")
                 </div>
             </div>
                 <!-- /.panel-body -->

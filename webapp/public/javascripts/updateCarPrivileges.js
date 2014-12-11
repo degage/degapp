@@ -29,7 +29,7 @@ function newPrivilegeRow() {
     return '' +
         '<tr>' +
         '<td>' +
-            '<div class="userpicker col-md-12" data-url="' + userpickerRoute + '">' + // TODO: route to userpicker is hardcoded, find fix?
+            '<div class="userpicker col-md-12" data-url="' + userpickerRoute + '">' + @* TODO: route to userpicker is hardcoded, find fix? *@
                 '<input type="text" data-toggle="dropdown" class="form-control input-md" />' +
                 '<input type="hidden" class="privilege_user_id privilege_not_in_db" />' +
                 '<ul class="dropdown-menu" role="menu"></ul>' +

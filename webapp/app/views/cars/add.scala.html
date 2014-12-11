@@ -1,27 +1,24 @@
-@(form: Form[Cars.CarModel], car: Car, countryList: List[String], fuelList : List[String])
-@* TODO: a lot of code in common with add *@
-@import providers.DataProvider
-@import db.CurrentUser
+@(form: Form[Cars.CarModel], countryList: List[String], fuelList : List[String])
+@* TODO: a lot of code in common with edit *@
 
 @scripts = {
     @js.datetimepicker()
     @js.userpicker()
 }
 
-@app("Bewerk auto", scripts=scripts) {
-@breadcrumbs{
-    @breadcrumb("Dashboard",routes.Dashboard.index)
-    @breadcrumb("Bewerk auto")
-}
-@maincontent("Bewerk auto"){
-
-    @helper.form(routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+@app("Nieuwe auto", scripts=scripts) {
+    @breadcrumbs{
+        @breadcrumb("Dashboard",routes.Dashboard.index)
+        @breadcrumb("Nieuwe auto")
+    }
+    @maincontent("Nieuwe auto"){
+        @helper.form(routes.Cars.addNewCar(), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
         <div class="row">
             @formErrors(form)
             <div class="col-lg-3">
                 @panel("Algemeen", "fa-car"){
                     <div >
-                        <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
+                        <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
                     </div>
                     <fieldset>
                         <div class="form-group col-md-6">
@@ -46,6 +43,7 @@
                     </fieldset>
                 }
             </div>
+
             <div class="col-lg-9">
                 @panel("Standplaats", "fa-home"){
                     <fieldset>
@@ -84,13 +82,6 @@
                         @std.textField(form("chassisNumber"), "ChassisNumber", "col-md-6")
                         <div class="form-group col-md-6">
                             <label class="control-label" for="file">Inschrijvingsbewijs</label>
-                            <div>
-                                Huidig: @if(car.getTechnicalCarDetails.getRegistration== null) {
-                                    Onbekend
-                                } else {
-                                    <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)" target="_blank">Link</a>
-                                }
-                            </div>
                             <input id="file" name="file" type="file" class="form-control input-md">
                         </div>
                     </fieldset>
@@ -103,7 +94,7 @@
                         @std.numberField(form("polisNr"), "Polisnummer", "col-md-6")
                     </fieldset>
                 }
-                @std.submitButton("Wijzigingen opslaan")
+                @std.submitButton("Auto aanmaken")
             </div>
         </div>
         }

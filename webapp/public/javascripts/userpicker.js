@@ -1,6 +1,6 @@
-$(document).ready(initUserPicker());
+$(initUserPicker);
 
-// note: this is also used for cars
+// note: this is also used for cars and is therefore a slight misnomer
 
 function initUserPicker() {
     $(".userpicker > input[type=text]").on("input", function() {
@@ -49,7 +49,9 @@ function initUserPicker() {
         userpicker.find("input[type=hidden]").val($(this).data("uid"));
         userpicker.find("div").html($(this).data("uid"));
         userpicker.find(".dropdown-menu").html("<li data-uid=\"" + $(this).data("uid") + "\"><a href=\"javascript:void(0)\"><span><strong>" + $(this).find("span").text() + "</strong></span> (" + $(this).data("uid") + ")</a></li>");
-        $(":input:tabbable").eq($(":input:tabbable").index(userpicker.find("input[type=text]")) + 1).focus();
+        // :tabbable eeds jquery-ui
+        // $(":input:tabbable").eq($(":input:tabbable").index(userpicker.find("input[type=text]")) + 1).focus();
+        $(":input").eq($(":input").index(userpicker.find("input[type=text]")) + 1).focus();
     });
 
     $(".userpicker > .dropdown-menu").on("keydown", "li:first", function(e) {
@@ -75,9 +77,13 @@ function initUserPicker() {
             $(this).blur();
             $(this).dropdown("toggle");
             if (e.shiftKey) {
-                $(":input:tabbable").eq($(":input:tabbable").index($(this)) - 1).focus();
+                // :tabbable needs jquery-ui
+                // $(":input:tabbable").eq($(":input:tabbable").index($(this)) - 1).focus();
+                $(":input").eq($(":input").index($(this)) - 1).focus();
             } else {
-                $(":input:tabbable").eq($(":input:tabbable").index($(this)) + 1).focus();
+                // :tabbable needs jquery-ui
+                // $(":input:tabbable").eq($(":input:tabbable").index($(this)) + 1).focus();
+                $(":input").eq($(":input").index($(this)) + 1).focus();
             }
         } else if (e.which == 38) {
             e.preventDefault();

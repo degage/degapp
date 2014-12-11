@@ -3,6 +3,7 @@
     @js.datetimepicker()
     @js.usesajax()
     @js.pagination("Reserve.showCarsPage")
+    @js.userpicker()
     <script>
         var from = '@from'
         var until = '@until'
@@ -10,14 +11,9 @@
     </script>
 
     <script type='text/javascript' src='@routes.Assets.at("javascripts/app/reservations.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
-    <script type='text/javascript' src='@routes.Assets.at("javascripts/userpicker.js")'></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/timeinput.css")'>
-    <link href='@routes.Assets.at("stylesheets/plugins/userpicker.css")' rel="stylesheet">
 }
 @app("Reserveren", stylesheets, scripts) {
 
@@ -71,23 +67,12 @@
                                 </div>
                             </div>
                             <div id="extraFiltering" class="panel-collapse collapse">
-                                <br />
+                                <br />              ctivator
                                 <div class="row">
                                     <div id="extraEnv" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                         <h4>Extra filteropties</h4><hr />
-                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                            <label>Auto</label>
-                                            <div class="userpicker" data-url="@routes.CarPicker.getList()">
-                                                <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto" value="@carName"/>
-                                                <input type="hidden" class="searchTextField" name="car_id" value="@if(carId != -1){@carId}" />
-                                                <div class="viewId"></div>
-                                                <ul class="dropdown-menu" role="menu"></ul>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
-                                            <label>Aantal zitplaatsen</label>
-                                            <input id="seats" class="searchTextField form-control" name="seats" type="number" placeholder="Min aantal plaatsen"><br />
-                                        </div>
+                                        @search.carpicker("Auto","car_id", initialId=carId, initialName=carName)
+                                        @search.numberField("Min. aantal zitplaatsen", "seats", "cos-md-6")
                                         <input id="input_fuel" class="hidden searchTextField" name="fuel" value="ALL" />
                                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                             <label for="selectFuel">Brandstof</label><br />

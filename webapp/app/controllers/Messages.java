@@ -1,6 +1,7 @@
 package controllers;
 
 import be.ugent.degage.db.dao.MessageDAO;
+import be.ugent.degage.db.models.InfoSessionType;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
@@ -17,6 +18,7 @@ import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,15 +37,19 @@ public class Messages extends Controller {
 
         public Integer userId;
 
+        @Constraints.Required
+        public String userIdAsString;
+
         // TODO: create a specific constraint
         public List<ValidationError> validate() {
             if (userId == null || userId == 0) {
-                return Arrays.asList(new ValidationError ("userId", "Gelieve een bestemmeling aan te geven"));
+                // needed for those cases where a string is input which does not correspond with a real person
+                return Arrays.asList(new ValidationError ("userId", "Gelieve een bestemmeling te selecteren"));
             } else {
                 return null;
             }
         }
-    }
+}
 
     /**
      * Method: GET
@@ -93,7 +99,7 @@ public class Messages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result newMessage() {
-        return ok(addmessage.render(Form.form(MessageCreationModel.class), null));
+        return ok(addmessage.render(Form.form(MessageCreationModel.class)));
     }
 
     /**
@@ -109,11 +115,12 @@ public class Messages extends Controller {
         UserHeader initialReceiver = message.getUser();
         MessageCreationModel model = new MessageCreationModel();
         model.userId = initialReceiver.getId();
+        model.userIdAsString = initialReceiver.getFullName();
         model.subject = message.getSubject();
         if (!model.subject.startsWith("Re: ")) {
             model.subject = "Re: " + model.subject;
         }
-        return ok(addmessage.render(Form.form(MessageCreationModel.class).fill(model), initialReceiver));
+        return ok(addmessage.render(Form.form(MessageCreationModel.class).fill(model)));
     }
 
 
@@ -130,17 +137,7 @@ public class Messages extends Controller {
     public static Result createNewMessage() {
         Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            // retrieve the user id
-
-            String userIdString  = createForm.data().get("userId");
-            if (userIdString != null && ! userIdString.isEmpty()) {
-                int userId = Integer.parseInt(userIdString);
-                if (userId != 0) {
-                    UserHeader initialReceiver = DataAccess.getInjectedContext().getUserDAO().getUserHeader(Integer.parseInt(userIdString));
-                    return ok(addmessage.render(createForm, initialReceiver));
-                }
-            }
-            return ok(addmessage.render(createForm, null));
+            return ok(addmessage.render(createForm));
         } else {
 
             MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();

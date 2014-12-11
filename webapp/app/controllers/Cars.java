@@ -15,6 +15,7 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -52,14 +53,21 @@ public class Cars extends Controller {
         return fuelList;
     }
 
-
+    // TODO: extend form UserPickerData
     public static class CarModel {
 
         public Integer userId;
 
+        @Constraints.Required
+        public String userIdAsString;
+
+        @Constraints.Required
         public String name;
+        @Constraints.Required
         public String brand;
+        @Constraints.Required
         public String type;
+
         public Integer seats;
         public Integer doors;
         public boolean manual;
@@ -92,6 +100,7 @@ public class Cars extends Controller {
             }
 
             userId = car.getOwner().getId();
+            userIdAsString = car.getOwner().getFullName();
 
             name = car.getName();
             brand = car.getBrand();
@@ -239,7 +248,12 @@ public class Cars extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result newCar() {
-        return ok(views.html.cars.edit.render(Form.form(CarModel.class), null, getCountryList(), getFuelList()));
+        CarModel model = new CarModel();
+        model.userId = CurrentUser.getId();
+        model.userIdAsString = CurrentUser.getFullName();
+        return ok(views.html.cars.add.render(
+                Form.form(CarModel.class).fill(model),
+                getCountryList(), getFuelList()));
     }
 
     /**
@@ -252,7 +266,7 @@ public class Cars extends Controller {
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
-            return badRequest(views.html.cars.edit.render(carForm, null, getCountryList(), getFuelList()));
+            return badRequest(views.html.cars.add.render(carForm, getCountryList(), getFuelList()));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             CarDAO dao = context.getCarDAO();
@@ -276,7 +290,7 @@ public class Cars extends Controller {
                 String contentType = registrationFile.getContentType();
                 if (!FileHelper.isDocumentContentType(contentType)) {
                     flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(edit.render(carForm, null, getCountryList(), getFuelList()));
+                    return badRequest(add.render(carForm, getCountryList(), getFuelList()));
                 } else {
                     try {
                         Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
@@ -291,7 +305,7 @@ public class Cars extends Controller {
                 String contentType = photoFilePart.getContentType();
                 if (!FileHelper.isImageContentType(contentType)) {
                     flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(edit.render(carForm, null, getCountryList(), getFuelList()));
+                    return badRequest(add.render(carForm, getCountryList(), getFuelList()));
                 } else {
                     try {
                         Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
@@ -317,7 +331,7 @@ public class Cars extends Controller {
                 carForm.error("Failed to add the car to the database. Contact administrator.");
                 // not needed?
                 flash("danger", "unexpected error");
-                return badRequest(edit.render(carForm, null, getCountryList(), getFuelList()));
+                return badRequest(add.render(carForm, getCountryList(), getFuelList()));
             }
         }
     }

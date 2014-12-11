@@ -1,20 +1,18 @@
 @scripts = {
     @js.usesajax()
     @js.pagination("Damages.showDamagesPageAdmin")
+    @js.userpicker()
     <script>
         var yesImage = "@routes.Assets.at("images/tristate-checkbox/yes.png")";
         var noImage = "@routes.Assets.at("images/tristate-checkbox/no.png")";
         var noneImage = "@routes.Assets.at("images/tristate-checkbox/none.png")";
     </script>
     <script src='@routes.Assets.at("javascripts/plugins/tristate-checkbox/main.js")'></script>
-    <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>  @* needed by user picker *@
-    <script src='@routes.Assets.at("javascripts/userpicker.js")'></script>
 }
 @stylesheets = {
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
     <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/tristate-checkbox/main.css")"> -->
     @* TODO: remove tristate button and icons? *@
-    <link href="@routes.Assets.at("stylesheets/plugins/userpicker.css")" rel="stylesheet">
 }
 @app("Schadedossiers (Admin)", stylesheets, scripts) {
 
@@ -44,45 +42,16 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-xs-6 col-md-4">
-                                <div class="userpicker" data-url="@routes.CarPicker.getList()">
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Auto"/>
-                                    <input type="hidden" class="searchTextField" name="damage_car_id" value="" />
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-                            <div class="col-xs-6 col-md-4">
-                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Eigenaar"/>
-                                    <input type="hidden" class="searchTextField" name="damage_owner_id" value="" />
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-                            <div class="col-xs-6 col-md-4">
-                                <div class="userpicker" data-url="@routes.UserPicker.getList()">
-                                    <input type="text" data-toggle="dropdown" class="form-control input-md" placeholder="Bestuurder"/>
-                                    <input type="hidden" class="searchTextField" name="damage_user_id" value="" />
-                                    <div class="viewId"></div>
-                                    <ul class="dropdown-menu" role="menu"></ul>
-                                </div>
-                            </div>
-                        </div><br />
+                            @search.carpicker("damage_car_id", "Auto")
+                            @search.userpicker("damage_owner_id", "Eigenaar")
+                            @search.userpicker("damage_user_id", "Bestuurder")
+                        </div>
                         <div class="row">
                             <div class="col-md-12">
                                 <span class="tristate" id="damage_finished"></span>
-                                <label for="damage_finished">Afgelopen</label>
+                                <label for="damage_finished">Afgesloten</label>
                             </div>
-                        </div>
-
-                        <hr />
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <div class="btn-group btn-group">
-                                    <button id="searchButton" class="btn btn-success">Zoek!</button>
-                                </div>
-                            </div>
+                        @search.button("Zoek!")
                         </div>
                     </div>
                     <!-- /.panel-body -->

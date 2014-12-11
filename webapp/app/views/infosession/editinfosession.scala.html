@@ -1,5 +1,5 @@
-@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], countryList: List[String], typeList: List[String])
-@* TODO: shares lots of code with editinfosession *@
+@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], sessionId: Int , countryList: List[String], typeList: List[String])
+@* TODO: shares lots of code with addinfosession *@
 @scripts = {
 
     @js.datetimepicker()
@@ -32,19 +32,18 @@
     </script>
 }
 
-@app("Nieuwe infosessie", scripts=scripts) {
+@app("Bewerk infosessie", scripts=scripts) {
     @breadcrumbs{
         @breadcrumb("Dashboard",routes.Dashboard.index)
         @breadcrumb("Infosessies",routes.InfoSessions.showSessions)
-        @breadcrumb("Nieuwe infosessie")
+        @breadcrumb("Bewerk infosessie")
     }
 
     @maincontent("Nieuwe infosessie"){
         @flashes()
-        @helper.form(routes.InfoSessions.createNewSession) {
+        @helper.form(routes.InfoSessions.editSessionPost(sessionId)) {
             @formErrors(form)
-            @panel("Algemeen", "fa-bar-chart-o"){
-                    <fieldset>
+            @panel("Algemeen", "fa-bar-chart-o"){                     <fieldset>
                         @std.userpicker(form("userId"), form("userIdAsString"), "Gastvrouw / gastheer")
                         @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
                         @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
@@ -74,7 +73,7 @@
                         </div>
                     </fieldset>
             }
-            @std.submitButton("Infosessie aanmaken")
+            @std.submitButton("Wijzigingen opslaan")
         }
     }
 }

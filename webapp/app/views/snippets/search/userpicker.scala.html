@@ -1,0 +1,8 @@
+@(name: String, label: String, css: String = "col-xs-6 col-md-4", initialId: Int = -1, initialName: String = "")
+@* user picker component for use in a search environment *@
+<div class="form-group userpicker @css" data-url="@routes.UserPicker.getList()">
+    <label class="control-label" for="@name">@label</label>
+    <input type="text" data-toggle="dropdown" class="form-control input-md" value="@initialName" autocomplete="off"/>
+    <input type="hidden" class="searchTextField" id="@name" name="@name" value="@initialId" />
+    <div class="viewId"></div><ul class="dropdown-menu" role="menu"></ul>
+</div>
