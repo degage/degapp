@@ -1,0 +1,25 @@
+The Degage Web Application is Copyright Ⓒ 2014-2015 Universiteit Gent
+
+This application originated as a student project in 2014 at Ghent
+University, 3rd year Bachelor of Computer Science, Faculty of Science.
+The original authors of this application are
+
+Maryna Bardadym
+Hannes Belen
+Laurent Bulcke
+Karsten Goossens
+Hannes Mareen
+BenjaminTwechuizen
+Cedric Van Goethem
+Stefaan Vermassen
+
+After July 2014 the application has been thoroughly refactored and
+extended by 
+
+Kris Coolsaet
+Department of Applied Mathematics, Computer Science and Statistics
+Ghent University 
+Krijgslaan 281-S9
+B-9000 GENT Belgium
+
+who is currently the sole developer of the project
