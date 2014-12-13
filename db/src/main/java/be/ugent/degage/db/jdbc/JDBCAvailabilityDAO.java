@@ -40,8 +40,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by kc on 10/25/14.
- */
+ * JDBC implementation of availability {@link AvailabilityDAO}
+ *
+ * Currently not in use. May be removed later.
+ * */
 class JDBCAvailabilityDAO extends AbstractDAO implements AvailabilityDAO {
 
     public JDBCAvailabilityDAO(JDBCDataAccessContext context) {

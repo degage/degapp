@@ -69,7 +69,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public CarRideDAO getCarRideDAO();
 
-    public AvailabilityDAO getAvailabilityDAO();
+    // (Temporarily) disabled
+    // public AvailabilityDAO getAvailabilityDAO();
 
     public ApprovalDAO getApprovalDAO();
 

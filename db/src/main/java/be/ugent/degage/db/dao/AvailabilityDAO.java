@@ -33,7 +33,9 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.CarAvailabilityInterval;
 
 /**
- * DAO for availabilities of cars
+ * DAO for availabilities of cars.
+ *
+ * Currently not in use. May be removed later
  */
 public interface AvailabilityDAO {
 

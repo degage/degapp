@@ -178,6 +178,7 @@ class JDBCDataAccessContext implements DataAccessContext {
         return privilegedDAO;
     }
 
+    /* (Temporarily) disabled
     @Override
 	public AvailabilityDAO getAvailabilityDAO() {
 		if(availabilityDAO == null){
@@ -185,6 +186,7 @@ class JDBCDataAccessContext implements DataAccessContext {
         }
         return availabilityDAO;
 	}
+	*/
 
     @Override
     public CarCostDAO getCarCostDAO() {

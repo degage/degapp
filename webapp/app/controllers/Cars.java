@@ -614,15 +614,9 @@ public class Cars extends Controller {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         CarDAO dao = context.getCarDAO();
-        AvailabilityDAO availabilityDAO = context.getAvailabilityDAO();
         Car car = dao.getCar(carId);
-
-        Iterable<CarAvailabilityInterval> list = availabilityDAO.getAvailabilities(carId);
-
         return ok(detail.render(
                         car,
-                        Availabilities.convertToView(list),
-                        CarAvailabilityInterval.containsOverlap(list),
                         context.getPrivilegedDAO().getPrivileged(carId),
                         null)
         );
