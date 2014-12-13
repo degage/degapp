@@ -24,7 +24,7 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
 @(user: User)
@@ -50,7 +50,7 @@
                     <div class="form-group">
                         <label class="col-md-1 control-label" for="status">Status:</label>
                         <div class="col-md-4">
-                            <select name="status" class="form-control" style="padding-top : 4 px ;">
+                            <select id="status" name="status" class="form-control" style="padding-top : 4 px ;">
                             @for(status <- UserStatus.values()) {
                                 @if(user.getStatus == status) {
                                     <option value="@status" selected="selected">@status</option>
