@@ -48,10 +48,11 @@
                 @search.numberField("seats", "Minimum aantal zitplaatsen", "col-lg-6")
                 <div class="form-group col-lg-6">
                     <label class="control-label" for="selectFuel">Brandstof</label>
-                    <select id="selectFuel" name="fuel" class="form-control searchTextField">   @* TODO: use fuellist *@
+                    <select id="selectFuel" name="fuel" class="form-control searchTextField">
+                        @* TODO: use extra option in @selectEnum *@
                         <option value="ALL">(niet belangrijk)</option>
                         @for(item <- CarFuel.values) {
-                            @option("",item.name){ @item.getDescription }
+                            @option("",item.name){ @item }
                         }
                     </select>
                 </div>

@@ -31,13 +31,25 @@ package be.ugent.degage.db.models;
 
 /**
  * The various user statuses. (Database default: EMAIL_VALIDATING)
+ *
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum UserStatus {
-    EMAIL_VALIDATING,
-    REGISTERED,
-    FULL_VALIDATING,
-    FULL,
-    BLOCKED,
-    DROPPED,
-    INACTIVE
+    EMAIL_VALIDATING ("Registratie aangevraagd"),
+    REGISTERED ("Geregistreerd"),
+    FULL_VALIDATING ("Lidmaatschap aangevraagd"),
+    FULL ("Volwaardig lid"),
+    BLOCKED ("Geblokkeerd"),
+    DROPPED ("Verwijderd");
+
+    private String description;
+
+    private UserStatus(String description) {
+        this.description = description;
+    }
+
+    public String toString(){
+        return description;
+    }
 }

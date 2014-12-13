@@ -30,7 +30,8 @@
 package be.ugent.degage.db.models;
 
 /**
- * Created by Stefaan Vermassen on 26/04/14.
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum RefuelStatus {
     CREATED("Info verstrekken"),
@@ -45,7 +46,7 @@ public enum RefuelStatus {
         this.description = description;
     }
 
-    public String getDescription() {
+    public String toString() {
         return description;
     }
 }

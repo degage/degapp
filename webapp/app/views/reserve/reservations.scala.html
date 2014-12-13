@@ -108,7 +108,7 @@
                                             <select id="selectFuel" class="form-control">
                                                 <option value="ALL">(niet belangrijk)</option>
                                                 @for(item <- CarFuel.values) {
-                                                    @option("",item.name){ @item.getDescription }
+                                                    @option("",item.name){ @item }
                                                 }
                                             </select>
                                         </div>

@@ -31,7 +31,8 @@ package be.ugent.degage.db.models;
 
 /**
  *
- * @author Laurent
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum CarFuel {
     PETROL("Benzine"),
@@ -41,14 +42,13 @@ public enum CarFuel {
     HYBRID("Hybride"),
     ELECTRIC("Elektrisch");
 
-    // Enum implementation
     private String description;
 
     private CarFuel(String description) {
         this.description = description;
     }
 
-    public String getDescription(){
+    public String toString(){
         return description;
     }
 }

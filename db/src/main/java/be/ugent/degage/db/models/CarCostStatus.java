@@ -30,7 +30,8 @@
 package be.ugent.degage.db.models;
 
 /**
- * Created by stefaan on 16/04/14.
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum CarCostStatus {
     REQUEST("Wachten op goedkeuring"),
@@ -44,7 +45,8 @@ public enum CarCostStatus {
         this.description = description;
     }
 
-    public String getDescription() {
+    @Override
+    public String toString() {
         return description;
     }
 }

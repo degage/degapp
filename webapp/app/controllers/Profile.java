@@ -683,36 +683,37 @@ public class Profile extends Controller {
         return (int) (((float) total / 8) * 100); //9 records
     }
 
+    public static class UserStatusData {
+        public String status;
+    }
+
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result editUserStatus(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
-        User user = udao.getUser(userId);
-        if (user == null) {
-            flash("danger", "GebruikersID bestaat niet.");
-            return redirect(routes.Users.showUsers());
-        } else {
-            return ok(editstatus.render(user));
-        }
+        UserHeader user = udao.getUserHeader(userId);
+        UserStatusData data = new UserStatusData();
+        data.status = user.getStatus().name();
+        return ok(editstatus.render(Form.form(UserStatusData.class).fill(data),user));
     }
 
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result editUserStatusPost(int userId) {
+
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
-        User user = udao.getUser(userId);
-        if (user == null) {
-            flash("danger", "GebruikersID bestaat niet.");
-            return redirect(routes.Users.showUsers());
+        UserHeader user = udao.getUserHeader(userId);
+        Form<UserStatusData> form = Form.form(UserStatusData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            // TODO: almost the same as in editUserStatus
+            UserStatusData data = new UserStatusData();
+            data.status = user.getStatus().name();
+            return ok(editstatus.render(Form.form(UserStatusData.class), user));
         } else {
-            String strStatus = Form.form().bindFromRequest().get("status");
-            UserStatus status = Enum.valueOf(UserStatus.class, strStatus);
+            UserStatus status = UserStatus.valueOf(form.get().status);
             if (user.getStatus() != status) {
-                user.setStatus(status); // TODO: only partial update
-                udao.updateUser(user);
-
+                udao.updateUserStatus(user.getId(), status);
                 DataProvider.getUserProvider().invalidateUser(userId); //wipe the status from ram
-
                 flash("success", "De gebruikersstatus werd succesvol aangepast.");
             } else {
                 flash("warning", "De gebruiker had reeds de opgegeven status.");
@@ -720,7 +721,6 @@ public class Profile extends Controller {
             return redirect(routes.Profile.editUserStatus(userId));
         }
     }
-
 
     /**
      * Method: POST

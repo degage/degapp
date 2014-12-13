@@ -670,8 +670,19 @@ public class InfoSessions extends Controller {
         public boolean user;
 
         public enum Action {
-            ACCEPT,
-            DENY
+            ACCEPT("Aanvaarden"),
+            DENY("Verwerpen");
+
+            private String description;
+
+            private Action(String description) {
+                this.description = description;
+            }
+
+            @Override
+            public String toString() {
+                return description;
+            }
         }
 
         public Action getAction() {

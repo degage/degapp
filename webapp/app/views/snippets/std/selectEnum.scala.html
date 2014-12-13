@@ -1,4 +1,4 @@
-@* selectFuel.scala.html
+@* selectFromEnum.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,12 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(f: Field, label: String, css: String="col-md-6")
+@(e: Class[_ <: Enum[_]], f: Field, label: String, css: String="col-md-6")
 <div class="form-group @css @if(f.hasErrors) {has-error}" >
     <label class="control-label" for="@f.id">@label</label>
     <select name="@f.name" class="form-control" id="@f.id">
-        @for(item <- CarFuel.values) {
-            @option(f.value.getOrElse(""),item.name){ @item.getDescription }
+        @for(item <- e.getEnumConstants) {
+            @option(f.value.getOrElse(""),item.name){ @item.toString }
         }
     </select>
     @f.errors.map { error =>

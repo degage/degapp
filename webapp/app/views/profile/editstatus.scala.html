@@ -27,14 +27,13 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User)
-@import be.ugent.degage.db.models.UserStatus;
+@(form: Form[Profile.UserStatusData], user: UserHeader)
 @app("Gebruikersstatus wijzigen") {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Dashboard.index">Dashboard</a></li>
             <li><a href="@routes.Users.showUsers">Gebruikers</a></li>
-            <li><a href="@routes.Profile.index(user.getId)">@user</a></li>
+            <li><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></li>
             <li class="active">Gebruikersstatus wijzigen</li>
         </ol>
     </div>
@@ -44,29 +43,10 @@
         @flashes()
         <div class="row">
             <div class="col-lg-12">
-                <p>Status wijzigen voor <strong>@user</strong>.</p>
-                @helper.form(routes.Profile.editUserStatusPost(user.getId), 'class -> "form-horizontal") {
-
-                    <div class="form-group">
-                        <label class="col-md-1 control-label" for="status">Status:</label>
-                        <div class="col-md-4">
-                            <select id="status" name="status" class="form-control" style="padding-top : 4 px ;">
-                            @for(status <- UserStatus.values()) {
-                                @if(user.getStatus == status) {
-                                    <option value="@status" selected="selected">@status</option>
-                                } else {
-                                    <option value="@status">@status</option>
-                                }
-                            }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <div class="col-md-4">
-                            <button type="submit" class="btn btn-block btn-success">Status wijzigen</button>
-                        </div>
-                    </div>
+                <p>Status wijzigen voor <strong>@user.getFullName</strong>.</p>
+                @helper.form(routes.Profile.editUserStatusPost(user.getId)) {
+                    @std.selectEnum(classOf[UserStatus], form("status"), "Status")
+                    @std.submitButton("Wijzigen")
                 }
             </div>
         </div>

@@ -30,11 +30,22 @@
 package be.ugent.degage.db.models;
 
 /**
- *
- * @author Laurent
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum EnrollementStatus {
-    ENROLLED,
-    PRESENT,
-    ABSENT
+    ENROLLED("Ingeschreven"),
+    PRESENT("Aanwezig"),
+    ABSENT("Afwezig");
+
+    private String description;
+
+    private EnrollementStatus (String description) {
+        this.description = description;
+    }
+
+    @Override
+    public String toString() {
+        return description;
+    }
 }

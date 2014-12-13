@@ -34,20 +34,23 @@ import java.util.Set;
 
 /**
  * User roles recognized by the system.
+ *
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum UserRole {
 
-    // at most 36 values are allowed for toString to work properly
+    // at most 36 values are allowed for toString(Set) to work properly
 
-    USER("gebruiker"),
-    SUPER_USER("superuser"),
-    CAR_OWNER("auto-eigenaar"),
-    CAR_USER("autolener"),
-    INFOSESSION_ADMIN("infosessiebeheerder"),
-    MAIL_ADMIN("e-mailbeheerder"),
-    PROFILE_ADMIN("profielbeheerder"),
-    RESERVATION_ADMIN("reservatiebeheerder"),
-    CAR_ADMIN("autobeheerder");
+    USER("Gebruiker"),
+    SUPER_USER("Superuser"),
+    CAR_OWNER("Auto-eigenaar"),
+    CAR_USER("Autolener"),
+    INFOSESSION_ADMIN("Infosessiebeheerder"),
+    MAIL_ADMIN("E-mailbeheerder"),
+    PROFILE_ADMIN("Profielbeheerder"),
+    RESERVATION_ADMIN("Reservatiebeheerder"),
+    CAR_ADMIN("Autobeheerder");
 
     // Enum implementation
     private String description;
@@ -56,7 +59,7 @@ public enum UserRole {
         this.description = description;
     }
 
-    public String getDescription() {
+    public String toString() {
         return description;
     }
 
@@ -65,7 +68,7 @@ public enum UserRole {
      */
     public static String toString(Set<UserRole> set) {
         if (set == null) {
-            return  null;
+            return null;
         } else {
             StringBuilder builder = new StringBuilder();
             for (UserRole userRole : set) {
@@ -81,7 +84,7 @@ public enum UserRole {
      */
     public static Set<UserRole> fromString(String rolesString) {
         if (rolesString == null) {
-            return  null;
+            return null;
         } else {
             EnumSet<UserRole> set = EnumSet.noneOf(UserRole.class);
             for (int i = 0; i < rolesString.length(); i++) {

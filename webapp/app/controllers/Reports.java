@@ -170,7 +170,7 @@ public class Reports extends Controller {
                 cell = row.createCell(j++);
                 cell.setCellValue(Date.from(Instant.from(reservation.getUntil())));
                 cell.setCellStyle(cellStyle);
-                row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
+                row.createCell(j++).setCellValue(reservation.getStatus().toString());
                 row.createCell(j++).setCellValue(reservation.getMessage());
                 if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
                     CarRide carRide = carRideDAO.getCarRide(reservation.getId());
@@ -235,7 +235,7 @@ public class Reports extends Controller {
                 cell = row.createCell(j++);
                 cell.setCellValue(Date.from(Instant.from(reservation.getUntil())));
                 cell.setCellStyle(cellStyle);
-                row.createCell(j++).setCellValue(reservation.getStatus().getDescription());
+                row.createCell(j++).setCellValue(reservation.getStatus().toString());
                 row.createCell(j++).setCellValue(reservation.getMessage());
                 if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
                     CarRide carRide = carRideDAO.getCarRide(reservation.getId());
@@ -298,7 +298,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(car.isManual());
                 row.createCell(j++).setCellValue(car.isGps());
                 row.createCell(j++).setCellValue(car.isHook());
-                row.createCell(j++).setCellValue(car.getFuel().getDescription());
+                row.createCell(j++).setCellValue(car.getFuel().toString());
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getFuelEconomy()).toString());
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getEstimatedValue()).toString());
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getOwnerAnnualKm()).toString());

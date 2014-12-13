@@ -61,7 +61,7 @@
                         @if(refuel.getStatus == RefuelStatus.CREATED) {
                             <td colspan="4">
                                 <div class="btn-group btn-group-xs">
-                                    <button class="btn btn-primary" onclick="loadModal(@refuel.getId)">@refuel.getStatus.getDescription</button>
+                                    <button class="btn btn-primary" onclick="loadModal(@refuel.getId)">@refuel.getStatus</button>
                                 </div>
                             </td>
 
@@ -80,7 +80,7 @@
                                     }
                                     case _ => {}
                                 }
-                                @refuel.getStatus.getDescription
+                                @refuel.getStatus
                             </td>
                             <td>
                                 <div class="btn-group btn-group-xs">

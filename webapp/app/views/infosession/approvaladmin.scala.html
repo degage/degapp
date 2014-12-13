@@ -29,11 +29,11 @@
 
 @(approval: Approval, enrollStatus: EnrollementStatus, reasons: Iterable[String] = null, form: Form[InfoSessions.ApprovalAdminModel])
     @stylesheets = {
-        <link href="@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")" rel="stylesheet">
+        <link href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")' rel="stylesheet">
 
     }
     @scripts = {
-        <script src="@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")"></script>
+        <script src=''@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
         <script>
             $(document ).ready(function(){
                 $('#@form("status").id').change(function(e)
@@ -48,7 +48,6 @@
         </script>
     }
 
-@import providers.DataProvider;
 @app("Goedkeuringsaanvraag", stylesheets, scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
@@ -77,41 +76,18 @@
             }
         @approvaluserpartial(approval, enrollStatus)
 
-        <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title"><i class="fa fa-pencil-square-o"></i> Aanvraag</h3>
-            </div>
-            <div class="panel-body">
-            @helper.form(routes.InfoSessions.approvalAdminAction(approval.getId), 'class -> "form-horizontal") {
-                @if(form.hasGlobalErrors) {
-                    <div class="alert alert-danger alert-dismissable">
-                        <strong>Error!</strong> @form.globalError.message
+        @panel("Aanvraag", "fa-pencil-square-o"){
+            @helper.form(routes.InfoSessions.approvalAdminAction(approval.getId)) {
+                    @formErrors(form)
+                    @std.selectEnum(classOf[InfoSessions.ApprovalAdminModel.Action],form("status"),"Actie")
+                    <div class="form-group col-xs-12">
+                        @std.checkboxInline(form("user"),"Autolener")
+                        @std.checkboxInline(form("sharer"),"Eigenaar")
                     </div>
-                }
-
-
-                <div class="form-group">
-                    <div class="col-md-12">
-                        @helper.select(form("status"), helper.options(InfoSessions.ApprovalAdminModel.Action.values().map(i => i.name).toList), '_label -> "Actie", 'class-> "form-group")
-                        <div class="form-group">
-                                <input type="checkbox" id='@form("user").id' name='@form("user").name' value="true" @if("true".equals(form("user").value)) { checked="checked" }>Autolener
-                        </div>
-                        <div class="form-group">
-                                <input type="checkbox" id='@form("sharer").id' name='@form("sharer").name' value="true" @if("true".equals(form("sharer").value)) { checked="checked" }>Eigenaar
-                        </div>
-                        <textarea cols="4" style="width:100%;" name='@form("message").name' placeholder="Opmerkingen">@form("message").value</textarea>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label class="col-md-1 control-label" for="create"></label>
-                    <div class="col-md-12">
-                        <button type="submit" id="create" name="create" class="btn btn-block btn-success">
-                            Verzenden</button>
-                    </div>
-                </div>
+                    @std.textArea(form("message"),"Opmerkingen", 4)
+                    @std.submitButton("Verzenden")
             }
-        </div>
+        }
         </div>
     </div>
 }
