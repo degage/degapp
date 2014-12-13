@@ -69,19 +69,6 @@ import static controllers.util.Addresses.modifyAddress;
  */
 public class Cars extends Controller {
 
-    private static List<String> fuelList;
-
-    public static List<String> getFuelList() {
-        if (fuelList == null) {
-            fuelList = new ArrayList<>();
-            CarFuel[] types = CarFuel.values();
-            for (CarFuel f : types) {
-                fuelList.add(f.getDescription());
-            }
-        }
-        return fuelList;
-    }
-
     // TODO: extend form UserPickerData
     public static class CarModel {
 
@@ -140,7 +127,7 @@ public class Cars extends Controller {
             manual = car.isManual();
             gps = car.isGps();
             hook = car.isHook();
-            fuel = car.getFuel().getDescription();
+            fuel = car.getFuel().name();
             fuelEconomy = car.getFuelEconomy();
             estimatedValue = car.getEstimatedValue();
             ownerAnnualKm = car.getOwnerAnnualKm();
@@ -281,8 +268,7 @@ public class Cars extends Controller {
         model.userId = CurrentUser.getId();
         model.userIdAsString = CurrentUser.getFullName();
         return ok(views.html.cars.add.render(
-                Form.form(CarModel.class).fill(model),
-                getCountryList(), getFuelList()));
+                Form.form(CarModel.class).fill(model), getCountryList()));
     }
 
     /**
@@ -295,7 +281,7 @@ public class Cars extends Controller {
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
-            return badRequest(views.html.cars.add.render(carForm, getCountryList(), getFuelList()));
+            return badRequest(views.html.cars.add.render(carForm, getCountryList()));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             CarDAO dao = context.getCarDAO();
@@ -319,7 +305,7 @@ public class Cars extends Controller {
                 String contentType = registrationFile.getContentType();
                 if (!FileHelper.isDocumentContentType(contentType)) {
                     flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(add.render(carForm, getCountryList(), getFuelList()));
+                    return badRequest(add.render(carForm, getCountryList()));
                 } else {
                     try {
                         Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
@@ -334,7 +320,7 @@ public class Cars extends Controller {
                 String contentType = photoFilePart.getContentType();
                 if (!FileHelper.isImageContentType(contentType)) {
                     flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(add.render(carForm, getCountryList(), getFuelList()));
+                    return badRequest(add.render(carForm, getCountryList()));
                 } else {
                     try {
                         Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
@@ -350,7 +336,7 @@ public class Cars extends Controller {
             CarInsurance insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
 
             Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                    model.year, model.manual, model.gps, model.hook, CarFuel.getFuelFromString(model.fuel), model.fuelEconomy, model.estimatedValue,
+                    model.year, model.manual, model.gps, model.hook, CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
                     model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, carPictureFile);
 
 
@@ -360,7 +346,7 @@ public class Cars extends Controller {
                 carForm.error("Failed to add the car to the database. Contact administrator.");
                 // not needed?
                 flash("danger", "unexpected error");
-                return badRequest(add.render(carForm, getCountryList(), getFuelList()));
+                return badRequest(add.render(carForm, getCountryList()));
             }
         }
     }
@@ -385,7 +371,7 @@ public class Cars extends Controller {
                 model.populate(car);
 
                 Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
-                return ok(edit.render(editForm, car, getCountryList(), getFuelList()));
+                return ok(edit.render(editForm, car, getCountryList()));
             } else {
                 flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                 return badRequest();  // TODO: redirect
@@ -413,7 +399,7 @@ public class Cars extends Controller {
         if (editForm.hasErrors()) {
             // niet nodig?
             flash("danger", "Form has errors");
-            return badRequest(edit.render(editForm, car, getCountryList(), getFuelList()));
+            return badRequest(edit.render(editForm, car, getCountryList()));
         }
         if (car == null) {
             flash("danger", "Car met ID=" + carId + " bestaat niet.");
@@ -434,7 +420,7 @@ public class Cars extends Controller {
         car.setManual(model.manual);
         car.setGps(model.gps);
         car.setHook(model.hook);
-        car.setFuel(CarFuel.getFuelFromString(model.fuel));
+        car.setFuel(CarFuel.valueOf(model.fuel));
         car.setYear(model.year);
         car.setFuelEconomy(model.fuelEconomy);
         car.setEstimatedValue(model.estimatedValue);

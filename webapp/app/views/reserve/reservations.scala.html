@@ -96,7 +96,7 @@
                                 </div>
                             </div>
                             <div id="extraFiltering" class="panel-collapse collapse">
-                                <br />              ctivator
+                                <br />
                                 <div class="row">
                                     <div id="extraEnv" class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                         <h4>Extra filteropties</h4><hr />
@@ -105,14 +105,11 @@
                                         <input id="input_fuel" class="hidden searchTextField" name="fuel" value="ALL" />
                                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">
                                             <label for="selectFuel">Brandstof</label><br />
-                                            <select id="selectFuel" class="form-control">   @* TODO: use fuellist *@
-                                                <option value="ALL">Alle</option>
-                                                <option value="PETROL">Benzine</option>
-                                                <option value="DIESEL">Diesel</option>
-                                                <option value="BIODIESEL">Biodiesel</option>
-                                                <option value="GAS">LPG</option>
-                                                <option value="HYBRID">Hybride</option>
-                                                <option value="ELECTRIC">Elektrisch</option>
+                                            <select id="selectFuel" class="form-control">
+                                                <option value="ALL">(niet belangrijk)</option>
+                                                @for(item <- CarFuel.values) {
+                                                    @option("",item.name){ @item.getDescription }
+                                                }
                                             </select>
                                         </div>
                                         <div class="col-lg-6 col-md-6 col-sm-12 col-xs-12">

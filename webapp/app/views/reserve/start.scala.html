@@ -49,13 +49,10 @@
                 <div class="form-group col-lg-6">
                     <label class="control-label" for="selectFuel">Brandstof</label>
                     <select id="selectFuel" name="fuel" class="form-control searchTextField">   @* TODO: use fuellist *@
-                        <option value="ALL">Alle</option>
-                        <option value="PETROL">Benzine</option>
-                        <option value="DIESEL">Diesel</option>
-                        <option value="BIODIESEL">Biodiesel</option>
-                        <option value="GAS">LPG</option>
-                        <option value="HYBRID">Hybride</option>
-                        <option value="ELECTRIC">Elektrisch</option>
+                        <option value="ALL">(niet belangrijk)</option>
+                        @for(item <- CarFuel.values) {
+                            @option("",item.name){ @item.getDescription }
+                        }
                     </select>
                 </div>
                 <div class="form-group col-lg-6">

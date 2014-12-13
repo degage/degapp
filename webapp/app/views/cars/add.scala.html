@@ -27,7 +27,7 @@
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@(form: Form[Cars.CarModel], countryList: List[String], fuelList : List[String])
+@(form: Form[Cars.CarModel], countryList: List[String])
 @* TODO: a lot of code in common with edit *@
 
 @scripts = {
@@ -95,9 +95,7 @@
                             @std.checkboxInline(form("hook"),"Trekhaak aanwezig")
                             @std.checkboxInline(form("manual"),"Manuele versnellingsbak")
                         </div>
-                        <div class="form-group col-xs-12">
-                            @helper.select(form("fuel"), helper.options(fuelList), '_label -> "Brandstof", 'class -> "form-control")
-                        </div>
+                        @selectFuel(form("fuel"), "Brandstof")
                         @std.textField(form("year"),"Bouwjaar")
                         @std.textField(form("fuelEconomy"), "Gemiddeld verbruik (per 100 km)")
                         @std.textField(form("estimatedValue"), "Geschatte huidige waarde")
