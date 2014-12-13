@@ -27,7 +27,7 @@
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], sessionId: Int , countryList: List[String], typeList: List[String])
+@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], sessionId: Int, typeList: List[String])
 @* TODO: shares lots of code with addinfosession *@
 @scripts = {
 
@@ -97,9 +97,7 @@
                         @formGroupTextField(form("address.num"), "Nummer")
                         @formGroupTextField(form("address.zipCode"), "Postcode")
                         @formGroupTextField(form("address.city"), "Stad")
-                        <div>
-                            @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
-                        </div>
+                        @selectCountry(form("address.country"), "Land")
                     </fieldset>
             }
             @std.submitButton("Wijzigingen opslaan")

@@ -60,7 +60,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
 
 
@@ -267,8 +266,7 @@ public class Cars extends Controller {
         CarModel model = new CarModel();
         model.userId = CurrentUser.getId();
         model.userIdAsString = CurrentUser.getFullName();
-        return ok(views.html.cars.add.render(
-                Form.form(CarModel.class).fill(model), getCountryList()));
+        return ok(views.html.cars.add.render( Form.form(CarModel.class).fill(model) ));
     }
 
     /**
@@ -281,7 +279,7 @@ public class Cars extends Controller {
     public static Result addNewCar() {
         Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
         if (carForm.hasErrors()) {
-            return badRequest(views.html.cars.add.render(carForm, getCountryList()));
+            return badRequest(views.html.cars.add.render(carForm));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             CarDAO dao = context.getCarDAO();
@@ -305,7 +303,7 @@ public class Cars extends Controller {
                 String contentType = registrationFile.getContentType();
                 if (!FileHelper.isDocumentContentType(contentType)) {
                     flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(add.render(carForm, getCountryList()));
+                    return badRequest(add.render(carForm));
                 } else {
                     try {
                         Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
@@ -320,7 +318,7 @@ public class Cars extends Controller {
                 String contentType = photoFilePart.getContentType();
                 if (!FileHelper.isImageContentType(contentType)) {
                     flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(add.render(carForm, getCountryList()));
+                    return badRequest(add.render(carForm));
                 } else {
                     try {
                         Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
@@ -346,7 +344,7 @@ public class Cars extends Controller {
                 carForm.error("Failed to add the car to the database. Contact administrator.");
                 // not needed?
                 flash("danger", "unexpected error");
-                return badRequest(add.render(carForm, getCountryList()));
+                return badRequest(add.render(carForm));
             }
         }
     }
@@ -371,7 +369,7 @@ public class Cars extends Controller {
                 model.populate(car);
 
                 Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
-                return ok(edit.render(editForm, car, getCountryList()));
+                return ok(edit.render(editForm, car));
             } else {
                 flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
                 return badRequest();  // TODO: redirect
@@ -399,7 +397,7 @@ public class Cars extends Controller {
         if (editForm.hasErrors()) {
             // niet nodig?
             flash("danger", "Form has errors");
-            return badRequest(edit.render(editForm, car, getCountryList()));
+            return badRequest(edit.render(editForm, car));
         }
         if (car == null) {
             flash("danger", "Car met ID=" + carId + " bestaat niet.");

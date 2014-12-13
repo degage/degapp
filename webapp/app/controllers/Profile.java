@@ -53,7 +53,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
-import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
 
 public class Profile extends Controller {
@@ -644,7 +643,7 @@ public class Profile extends Controller {
 
         EditProfileModel model = new EditProfileModel();
         model.populate(user);
-        return ok(edit.render(Form.form(EditProfileModel.class).fill(model), user, getCountryList()));
+        return ok(edit.render(Form.form(EditProfileModel.class).fill(model), user));
     }
 
     /**
@@ -745,7 +744,7 @@ public class Profile extends Controller {
 
         Form<EditProfileModel> profileForm = Form.form(EditProfileModel.class).bindFromRequest();
         if (profileForm.hasErrors()) {
-            return badRequest(edit.render(profileForm, user, getCountryList()));
+            return badRequest(edit.render(profileForm, user));
         } else {
             EditProfileModel model = profileForm.get();
             AddressDAO adao = context.getAddressDAO();

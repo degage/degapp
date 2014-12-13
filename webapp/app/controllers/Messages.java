@@ -30,7 +30,6 @@
 package controllers;
 
 import be.ugent.degage.db.dao.MessageDAO;
-import be.ugent.degage.db.models.InfoSessionType;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
@@ -47,7 +46,6 @@ import views.html.notifiers.addmessage;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 

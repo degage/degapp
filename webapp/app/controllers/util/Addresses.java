@@ -31,16 +31,13 @@ package controllers.util;
 
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.models.Address;
+import controllers.Utils;
 
 import java.util.*;
 
 /**
- * Created by HannesM on 21/04/14.
  */
 public class Addresses  {
-
-    private static List<String> COUNTRIES;
-    private static final Locale COUNTRY_LANGUAGE = new Locale("nl", "BE");
 
     public static class EditAddressModel {
 
@@ -52,7 +49,7 @@ public class Addresses  {
 
         public void populate(Address address) {
             if (address == null) {
-                country = COUNTRY_LANGUAGE.getDisplayCountry(COUNTRY_LANGUAGE);
+                country = DEFAULT_COUNTRY_NAME;
                 return;
             }
 
@@ -73,25 +70,22 @@ public class Addresses  {
     }
 
     /**
-     * Lazy loads a country list in current configured locale
-     *
-     * @return A list of all countries enabled in the Java locale
+     * List of all country names. In Dutch.
      */
-    public static List<String> getCountryList() {
-        if (COUNTRIES == null) {
+    public static Iterable<String> COUNTRY_NAMES;
 
-            Set<String> countries = new HashSet<>(); // remove duplicates
-            Locale[] locales = Locale.getAvailableLocales();
-            for (Locale obj : locales) {
-                if ((obj.getDisplayCountry() != null) && (!"".equals(obj.getDisplayCountry()))) {
-                    countries.add(obj.getDisplayCountry(COUNTRY_LANGUAGE));
-                }
+    public static String DEFAULT_COUNTRY_NAME = Utils.DEFAULT_LOCALE.getDisplayCountry(Utils.DEFAULT_LOCALE);
+
+    static {
+        Set<String> countries = new TreeSet<>(); // remove duplicates and sort
+        Locale[] locales = Locale.getAvailableLocales();
+        for (Locale locale : locales) {
+            String name = locale.getDisplayCountry(Utils.DEFAULT_LOCALE);
+            if (name != null && !name.isEmpty()) {
+                countries.add(name);
             }
-
-            COUNTRIES = new ArrayList<>(countries);
-            Collections.sort(COUNTRIES);
         }
-        return COUNTRIES;
+        COUNTRY_NAMES = new ArrayList<> (countries);
     }
 
     /**

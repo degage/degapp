@@ -27,7 +27,7 @@
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
  *@
 
-@(form: Form[Profile.EditProfileModel], user: User, countryList: List[String])
+@(form: Form[Profile.EditProfileModel], user: User)
 @import providers.DataProvider
 @import db.CurrentUser
 @scripts = {
@@ -127,9 +127,7 @@
                                             @formGroupTextField(form("domicileAddress.num"), "Nummer", 'placeholder->"Verplicht")
                                             @formGroupTextField(form("domicileAddress.zipCode"), "Postcode", 'placeholder->"Verplicht")
                                             @formGroupTextField(form("domicileAddress.city"), "Stad", 'placeholder->"Verplicht")
-                                            <div>
-                                                @helper.select(form("domicileAddress.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
-                                            </div>
+                                            @selectCountry(form("domicileAddress.country"), "Land")
                                         </fieldset>
                                     </div>
                                 </div>
@@ -150,9 +148,7 @@
                                                     @formGroupTextField(form("residenceAddress.num"), "Nummer", 'placeholder->"Verplicht")
                                                     @formGroupTextField(form("residenceAddress.zipCode"), "Postcode", 'placeholder->"Verplicht")
                                                     @formGroupTextField(form("residenceAddress.city"), "Stad", 'placeholder->"Verplicht")
-                                                    <div>
-                                                        @helper.select(form("residenceAddress.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
-                                                    </div>
+                                                    @selectCountry(form("residenceAddress.country"), "Land")
                                                 </div>
                                             </fieldset>
                                         </div>
@@ -166,13 +162,10 @@
                                         <h3 class="panel-title">Waarborg</h3>
                                     </div>
                                     <div class="panel-body">
-                                        @if(CurrentUser.hasRole(UserRole.PROFILE_ADMIN)){
-                                            <input type="checkbox" id='@form("paidDeposit").id'
-                                                   name='@form("paidDeposit").name' value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" }> Waarborg betaald
-                                        } else {
-                                            <input type="checkbox" id='@form("paidDeposit").id'
-                                                   name='@form("paidDeposit").name' value="true" @if("true".equals(form("paidDeposit").value)) { checked="checked" } disabled> Waarborg betaald
-                                        }
+                                        <input type="checkbox" id='@form("paidDeposit").id'
+                                               name='@form("paidDeposit").name' value="true"
+                                               @if(form("paidDeposit").value == Some("true")) { checked="checked" }
+                                               @if(!CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {disabled}> Waarborg betaald
                                     </div>
                                 </div>
                             </div>

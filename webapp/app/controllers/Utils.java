@@ -39,7 +39,7 @@ import java.util.Locale;
  */
 public final class Utils {
 
-    private static Locale NL_be = new Locale("NL", "be");
+    public static Locale DEFAULT_LOCALE = new Locale("NL", "be");
 
     private static DateTimeFormatter DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
@@ -56,7 +56,7 @@ public final class Utils {
     }
 
     private static DateTimeFormatter LOCALIZED_DATETIME_FORMATTER =
-            DateTimeFormatter.ofPattern("eee dd MMM yyyy HH:mm", NL_be).withZone(ZoneId.systemDefault());
+            DateTimeFormatter.ofPattern("eee dd MMM yyyy HH:mm", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedString(Instant instant) {
         return LOCALIZED_DATETIME_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
@@ -67,7 +67,7 @@ public final class Utils {
     }
 
     private static DateTimeFormatter LOCALIZED_DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("eee dd MMM yyyy", NL_be).withZone(ZoneId.systemDefault());
+            DateTimeFormatter.ofPattern("eee dd MMM yyyy", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedDateString(Instant instant) {
         return LOCALIZED_DATE_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
@@ -78,7 +78,7 @@ public final class Utils {
     }
 
     private static DateTimeFormatter LOCALIZED_LONG_DATE_FORMATTER =
-            DateTimeFormatter.ofPattern("dd MMMM yyyy", NL_be).withZone(ZoneId.systemDefault());
+            DateTimeFormatter.ofPattern("dd MMMM yyyy", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedDateString(LocalDate localDate) {
         return LOCALIZED_LONG_DATE_FORMATTER.format(localDate);

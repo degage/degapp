@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Cars.CarModel], car: Car, countryList: List[String])
+@(form: Form[Cars.CarModel], car: Car)
 @* TODO: a lot of code in common with add *@
 @import providers.DataProvider
 @import db.CurrentUser
@@ -82,9 +82,7 @@
                         @std.textField(form("address.num"), "Nummer", required=true)
                         @std.textField(form("address.zipCode"), "Postcode", css="col-md-4", required=true)
                         @std.textField(form("address.city"), "Stad",  css="col-md-8", required=true)
-                        <div class="form-group col-md-6">
-                            @helper.select(form("address.country"), helper.options(countryList), '_label -> "Land", 'class -> "form-control")
-                        </div>
+                        @selectCountry(form("address.country"), "Land")
                     </fieldset>
                 }
                 @panel("Details", "fa-bar-chart-o"){

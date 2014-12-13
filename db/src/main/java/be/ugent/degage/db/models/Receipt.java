@@ -30,7 +30,6 @@
 package be.ugent.degage.db.models;
 
 import java.math.BigDecimal;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 
 public class Receipt {

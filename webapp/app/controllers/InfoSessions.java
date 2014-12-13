@@ -38,7 +38,6 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
-import play.data.DynamicForm;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
@@ -47,11 +46,9 @@ import play.mvc.Result;
 import providers.DataProvider;
 import views.html.infosession.*;
 
-import javax.validation.Constraint;
 import java.time.Instant;
 import java.util.*;
 
-import static controllers.util.Addresses.getCountryList;
 import static controllers.util.Addresses.modifyAddress;
 
 /**
@@ -91,7 +88,7 @@ public class InfoSessions extends Controller {
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public List<ValidationError> validate() {
-            List<ValidationError> errors = new ArrayList<ValidationError>();
+            List<ValidationError> errors = new ArrayList<>();
             if (userId == null || userId <= 0) {
                 // needed for those cases where a string is input which does not correspond with a real person
                 errors.add (new ValidationError("userId","Gelieve een gastvrouw/gastheer te selecteren"));
@@ -138,7 +135,7 @@ public class InfoSessions extends Controller {
         model.type = InfoSessionType.NORMAL.getDescription();
         return ok(addinfosession.render(
                 Form.form(InfoSessionCreationModel.class).fill(model),
-                getCountryList(), getTypeList())
+                getTypeList())
         );
     }
 
@@ -161,7 +158,7 @@ public class InfoSessions extends Controller {
             model.populate(is);
 
             Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-            return ok(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+            return ok(editinfosession.render(editForm, sessionId, getTypeList()));
         }
     }
 
@@ -197,7 +194,7 @@ public class InfoSessions extends Controller {
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
-            return badRequest(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+            return badRequest(editinfosession.render(editForm, sessionId, getTypeList()));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -213,7 +210,7 @@ public class InfoSessions extends Controller {
 
             if (host == null) {
                 editForm.reject("Infosessie gastheer bestaat niet.");
-                return badRequest(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+                return badRequest(editinfosession.render(editForm, sessionId, getTypeList()));
             }
             session.setHost(host);
 
@@ -241,7 +238,7 @@ public class InfoSessions extends Controller {
             int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
             if (editForm.get().max_enrollees != 0 && editForm.get().max_enrollees < amountOfAttendees) {
                 flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
-                return badRequest(editinfosession.render(editForm, sessionId, getCountryList(), getTypeList()));
+                return badRequest(editinfosession.render(editForm, sessionId, getTypeList()));
             } else {
                 session.setMaxEnrollees(editForm.get().max_enrollees);
             }
@@ -495,7 +492,7 @@ public class InfoSessions extends Controller {
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(addinfosession.render(createForm, getCountryList(), getTypeList()));
+            return badRequest(addinfosession.render(createForm, getTypeList()));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
