@@ -54,7 +54,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +
             "approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
             USERS_USER_HEADER_FIELDS + "," + ADMINS_USER_HEADER_FIELDS + "," +
-            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_type_alternative, infosession_comments ";
+            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_comments ";
 
     private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +
             "LEFT JOIN users users ON approval_user = users.user_id " +

@@ -30,30 +30,21 @@
 package be.ugent.degage.db.models;
 
 /**
- * Created by HannesM on 14/03/14.
+ * Note: by convention the value returned by {@link #toString} is used to display a description of the
+ * enum value in the web interface.
  */
 public enum InfoSessionType {
     NORMAL("Autolener"),
-    OWNER("Autoeigenaar"),
-    OTHER("Ander");
+    OWNER("Auto-eigenaar"),
+    OTHER("Andere (zie opmerkingen)");
 
-    // Enum implementation
     private String description;
 
     private InfoSessionType(String description) {
         this.description = description;
     }
 
-    public String getDescription(){
+    public String toString(){
         return description;
-    }
-
-    public static InfoSessionType getTypeFromString(String s) {
-        for(InfoSessionType t : values()) {
-            if(t.getDescription().equals(s)) {
-                return t;
-            }
-        }
-        return null;
     }
 }

@@ -42,7 +42,7 @@ public interface InfoSessionDAO {
 
     // info session
 
-    public InfoSession createInfoSession(InfoSessionType type, String typeAlternative, UserHeader host, Address address,
+    public InfoSession createInfoSession(InfoSessionType type, UserHeader host, Address address,
                                          Instant time, int maxEnrollees, String comments) throws DataAccessException;
     public InfoSession getInfoSession(int id) throws DataAccessException;
 

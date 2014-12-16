@@ -198,7 +198,6 @@ CREATE TABLE `reservations` (
 CREATE TABLE `infosessions` (
 	`infosession_id` INT NOT NULL AUTO_INCREMENT,
 	`infosession_type` ENUM('NORMAL', 'OWNER', 'OTHER') NOT NULL DEFAULT 'NORMAL',
-	`infosession_type_alternative` VARCHAR(64),
 	`infosession_timestamp` TIMESTAMP NULL,
 	`infosession_address_id` INT NOT NULL,
 	`infosession_host_user_id` INT,
@@ -222,7 +221,7 @@ CREATE TABLE `infosessionenrollees` ( -- Wie is ingeschreven?
 
 CREATE VIEW `infosessions_extended` AS
     SELECT
-        infosession_id, infosession_type, infosession_type_alternative,
+        infosession_id, infosession_type,
         infosession_timestamp, infosession_max_enrollees, infosession_comments,
         address_id, address_country, address_city, address_zipcode, address_street, address_number,
         user_id, user_firstname, user_lastname, user_phone, user_email, user_status, user_cellphone,

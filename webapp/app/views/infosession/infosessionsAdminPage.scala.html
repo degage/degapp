@@ -52,9 +52,7 @@
                 }
                 case _ => {}
             }
-            @session.getType.getDescription @if(session.getType.equals(InfoSessionType.OTHER)) {
-            : @session.getTypeAlternative
-            }
+            @session.getType
         </td>
         <td>@Utils.toLocalizedString(session.getTime)</td>
         @if(session.getMaxEnrollees != 0) {

@@ -40,7 +40,7 @@
                 }
                 <br>
 
-                <strong>Type:</strong> @infoSession.getType.getDescription @if(infoSession.getType.equals(InfoSessionType.OTHER)) { : @infoSession.getTypeAlternative } <br>
+                <strong>Type:</strong> @infoSession.getType<br>
                 <strong>Wanneer?</strong> @Utils.toLocalizedString(infoSession.getTime)<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
                 @if(infoSession.getMaxEnrollees == 0){
@@ -53,7 +53,7 @@
                         Volzet (Max. @infoSession.getMaxEnrollees)
                     }
                 } <br>
-                <strong>Commentaar:</strong> @infoSession.getComments<br>
+                <strong>Opmerkingen:</strong> @infoSession.getComments<br>
             </p>
         </div>
     </div>

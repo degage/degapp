@@ -38,7 +38,6 @@ public class InfoSession {
 
     private int id;
     private InfoSessionType type;
-    private String typeAlternative;
     private Instant time;
     private Address address;
     private UserHeader host;
@@ -70,14 +69,6 @@ public class InfoSession {
 
     public void setType(InfoSessionType type) {
         this.type = type;
-    }
-
-    public String getTypeAlternative() {
-        return typeAlternative;
-    }
-
-    public void setTypeAlternative(String typeAlternative) {
-        this.typeAlternative = typeAlternative;
     }
 
     public Instant getTime() {

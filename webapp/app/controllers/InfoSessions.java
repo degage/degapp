@@ -56,19 +56,6 @@ import static controllers.util.Addresses.modifyAddress;
  */
 public class InfoSessions extends Controller {
 
-    private static List<String> typeList = null;
-
-    private static List<String> getTypeList() {
-        if (typeList == null) {
-            typeList = new ArrayList<>();
-            InfoSessionType[] types = InfoSessionType.values();
-            for (InfoSessionType t : types) {
-                typeList.add(t.getDescription());
-            }
-        }
-        return typeList;
-    }
-
     public static class InfoSessionCreationModel {
 
         public Integer userId;
@@ -81,7 +68,6 @@ public class InfoSessions extends Controller {
         public Integer max_enrollees;
 
         public String type;
-        public String type_alternative;
 
         public String comments;
 
@@ -92,9 +78,6 @@ public class InfoSessions extends Controller {
             if (userId == null || userId <= 0) {
                 // needed for those cases where a string is input which does not correspond with a real person
                 errors.add (new ValidationError("userId","Gelieve een gastvrouw/gastheer te selecteren"));
-            }
-            if (InfoSessionType.getTypeFromString(type) == InfoSessionType.OTHER && (type_alternative == null || type_alternative.equals(""))) {
-                errors.add (new ValidationError("type_alternative","Gelieve een alternatief type in te geven of een ander type te selecteren. "));
             }
             if (errors.isEmpty())
                 return null;
@@ -109,8 +92,7 @@ public class InfoSessions extends Controller {
 
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
-            type = i.getType().getDescription();
-            type_alternative = i.getTypeAlternative();
+            type = i.getType().name();
             comments = i.getComments();
 
             address.populate(i.getAddress());
@@ -132,10 +114,9 @@ public class InfoSessions extends Controller {
         model.userId = user.getId();
         model.userIdAsString = user.getFullName();
         model.address.populate(user.getAddressDomicile());
-        model.type = InfoSessionType.NORMAL.getDescription();
+        model.type = "NORMAL";
         return ok(addinfosession.render(
-                Form.form(InfoSessionCreationModel.class).fill(model),
-                getTypeList())
+                Form.form(InfoSessionCreationModel.class).fill(model))
         );
     }
 
@@ -158,7 +139,7 @@ public class InfoSessions extends Controller {
             model.populate(is);
 
             Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
-            return ok(editinfosession.render(editForm, sessionId, getTypeList()));
+            return ok(editinfosession.render(editForm, sessionId));
         }
     }
 
@@ -194,7 +175,7 @@ public class InfoSessions extends Controller {
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
-            return badRequest(editinfosession.render(editForm, sessionId, getTypeList()));
+            return badRequest(editinfosession.render(editForm, sessionId));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
@@ -206,21 +187,22 @@ public class InfoSessions extends Controller {
 
             // Check the host field
             UserDAO udao = context.getUserDAO();
-            UserHeader host = udao.getUserHeader(editForm.get().userId);
+            InfoSessionCreationModel model = editForm.get();
+            UserHeader host = udao.getUserHeader(model.userId);
 
             if (host == null) {
                 editForm.reject("Infosessie gastheer bestaat niet.");
-                return badRequest(editinfosession.render(editForm, sessionId, getTypeList()));
+                return badRequest(editinfosession.render(editForm, sessionId));
             }
             session.setHost(host);
 
             // update address
             AddressDAO adao = context.getAddressDAO();
-            Address newAddress = modifyAddress(editForm.get().address, session.getAddress(), adao);
+            Address newAddress = modifyAddress(model.address, session.getAddress(), adao);
             session.setAddress(newAddress);
 
             // update time
-            Instant time = editForm.get().time;
+            Instant time = model.time;
             if (!session.getTime().equals(time)) {
                 session.setTime(time);
 
@@ -236,24 +218,19 @@ public class InfoSessions extends Controller {
 
             // check if amountOfAttendees < new max
             int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
-            if (editForm.get().max_enrollees != 0 && editForm.get().max_enrollees < amountOfAttendees) {
+            if (model.max_enrollees != 0 && model.max_enrollees < amountOfAttendees) {
                 flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
-                return badRequest(editinfosession.render(editForm, sessionId, getTypeList()));
+                return badRequest(editinfosession.render(editForm, sessionId));
             } else {
-                session.setMaxEnrollees(editForm.get().max_enrollees);
+                session.setMaxEnrollees(model.max_enrollees);
             }
 
             // type
-            InfoSessionType type = InfoSessionType.getTypeFromString(editForm.get().type);
+            InfoSessionType type = InfoSessionType.valueOf(model.type);
             session.setType(type);
-            String typeAlternative = null;
-            if (type.equals(InfoSessionType.OTHER)) {
-                typeAlternative = editForm.get().type_alternative;
-            }
-            session.setTypeAlternative(typeAlternative);
 
             // comments
-            session.setComments(editForm.get().comments);
+            session.setComments(model.comments);
 
             dao.updateInfoSession(session);
             flash("success", "Jouw wijzigingen werden succesvol toegepast.");
@@ -492,23 +469,20 @@ public class InfoSessions extends Controller {
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
         if (createForm.hasErrors()) {
-            return badRequest(addinfosession.render(createForm, getTypeList()));
+            return badRequest(addinfosession.render(createForm));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
 
             AddressDAO adao = context.getAddressDAO();
-            Address address = modifyAddress(createForm.get().address, null, adao);
+            InfoSessionCreationModel model = createForm.get();
+            Address address = modifyAddress(model.address, null, adao);
 
-            InfoSessionType type = InfoSessionType.getTypeFromString(createForm.get().type);
-            String typeAlternative = null;
-            if (type.equals(InfoSessionType.OTHER)) {
-                typeAlternative = createForm.get().type_alternative;
-            }
+            InfoSessionType type = InfoSessionType.valueOf(model.type);
 
             UserDAO udao = context.getUserDAO();
-            UserHeader host = udao.getUserHeader(createForm.get().userId);
-            InfoSession session = dao.createInfoSession(type, typeAlternative, host, address, createForm.get().time, FormHelper.toInt(createForm.get().max_enrollees), createForm.get().comments); //TODO: allow other hosts
+            UserHeader host = udao.getUserHeader(model.userId);
+            InfoSession session = dao.createInfoSession(type, host, address, model.time, FormHelper.toInt(model.max_enrollees), model.comments); //TODO: allow other hosts
 
             // Schedule the reminder
             context.getJobDAO().createJob(

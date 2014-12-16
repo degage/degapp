@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], sessionId: Int, typeList: List[String])
+@(form: play.data.Form[InfoSessions.InfoSessionCreationModel], sessionId: Int)
 @* TODO: shares lots of code with addinfosession *@
 @scripts = {
 
@@ -35,20 +35,8 @@
     @js.userpicker()
 
     <script>
-        function onInfoSessionTypeChange() {
-            if(document.getElementById("infosession_type_select").value === "Ander") {
-                $("#type_alternative_wrap" ).show();
-            } else {
-                $("#type_alternative_wrap" ).hide();
-            }
-        }
-
-        $(document).ready(function() {
-
-            onInfoSessionTypeChange();
-
-            $("input[name='addresstype']:radio").change(function(e)
-            {
+        $( function() {
+            $("input[name='addresstype']:radio").change(function(e) {
                 console.log('Address type changed!');
                 if(e.target.value === 'other'){
                     $('#otherAddress').show();
@@ -56,7 +44,6 @@
                     $('#otherAddress').hide();
                 }
             });
-
         });
     </script>
 }
@@ -76,19 +63,8 @@
                         @std.userpicker(form("userId"), form("userIdAsString"), "Gastvrouw / gastheer")
                         @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
                         @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
-                        <div class="form-group">
-                            <div class="col-md-4">
-                                @helper.select(form("type"), helper.options(typeList), '_label -> "Type", 'class -> "form-control", 'id -> "infosession_type_select", 'onchange -> "onInfoSessionTypeChange()")
-                            </div>
-                            <div id="type_alternative_wrap">
-                                <label class="col-md-12" for="type_alternative">Specifieer type</label>
-                                <div class="col-md-12">
-                                    <input id="type_alternative" name="type_alternative" type="text" class="form-control input-md" placeholder="Verplicht"
-                                           value='@form("type_alternative").value'>
-                                </div>
-                            </div>
-                        </div>
-                        @std.textArea(form("comments"), "Commentaar", 6, 'maxlength -> 512)
+                        @std.selectEnum(classOf[InfoSessionType], form("type"), "Type")
+                        @std.textArea(form("comments"), "Opmerkingen", 6, 'maxlength -> 512)
                     </fieldset>
             }
             @panel("Adres", "fa-home"){
