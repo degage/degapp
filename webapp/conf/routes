@@ -59,6 +59,8 @@ GET         /reserve                                controllers.Reserve.index()
 GET         /reserve_car                            controllers.Reserve.indexWithCar(carName: String, id: Int)
 GET         /reserve/reservation                    controllers.Reserve.reserve(carId: Int, from: String, until: String)
 POST        /reserve/reservation                    controllers.Reserve.confirmReservation(carId: Int)
+GET         /reserve/overview                       controllers.Reserve.overview(date: String ?= null)
+POST        /reserve/overview                       controllers.Reserve.overviewPost()
 
 # Reservations (new code)
 GET         /reserve/list                           controllers.Reserve.listAvailableCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")

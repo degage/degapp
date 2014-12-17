@@ -99,9 +99,11 @@ public interface ReservationDAO {
      * List of reservations for a certain car. Used in {@link #listCRInfo}
      */
     public static class CRInfo {
-        public Car car;
+        public int carId;
 
-        public Collection<Reservation> reservations;
+        public String carName;
+
+        public Collection<ReservationHeader> reservations;
     }
 
     /**

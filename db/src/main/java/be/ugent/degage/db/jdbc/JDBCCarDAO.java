@@ -276,7 +276,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setBoolean(8, manual);
             ps.setBoolean(9, gps);
             ps.setBoolean(10, hook);
-            ps.setString(11, fuel.toString());
+            ps.setString(11, fuel.name());
             if(fuelEconomy != null) {
                 ps.setInt(12, fuelEconomy);
             } else {
@@ -410,7 +410,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setBoolean(8, car.isManual());
             ps.setBoolean(9, car.isGps());
             ps.setBoolean(10, car.isHook());
-            ps.setString(11, car.getFuel().toString());
+            ps.setString(11, car.getFuel().name());
             if(car.getFuelEconomy() != null) {
                 ps.setInt(12, car.getFuelEconomy());
             } else {

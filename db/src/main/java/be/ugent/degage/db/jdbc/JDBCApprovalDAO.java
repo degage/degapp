@@ -248,7 +248,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             } else {
                 ps.setInt(2, approval.getAdmin().getId());
             }
-            ps.setString(3, approval.getStatus().toString());
+            ps.setString(3, approval.getStatus().name());
             if (approval.getSession() == null) {
                 ps.setNull(4, Types.INTEGER);
             } else {

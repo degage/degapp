@@ -136,7 +136,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     public void acceptRefuel(int refuelId) throws DataAccessException {
         try {
             PreparedStatement ps = getStatusRefuelStatement.value();
-            ps.setString(1, RefuelStatus.ACCEPTED.toString());
+            ps.setString(1, "ACCEPTED");
             ps.setInt(2, refuelId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("CarCost update affected 0 rows.");
@@ -149,7 +149,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     public void rejectRefuel(int refuelId) throws DataAccessException {
         try {
             PreparedStatement ps = getStatusRefuelStatement.value();
-            ps.setString(1, RefuelStatus.REFUSED.toString());
+            ps.setString(1, "REFUSED");
             ps.setInt(2, refuelId);
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("CarCost update affected 0 rows.");
@@ -204,7 +204,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             PreparedStatement ps = updateRefuelStatement.value();
             ps.setInt(1, refuel.getProof().getId());
             ps.setInt(2, refuel.getEurocents());
-            ps.setString(3, refuel.getStatus().toString());
+            ps.setString(3, refuel.getStatus().name());
             ps.setInt(4, refuel.getId());
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Refuel update affected 0 rows.");

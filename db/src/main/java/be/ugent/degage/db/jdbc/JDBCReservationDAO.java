@@ -149,7 +149,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     public void updateReservationStatus(int reservationId, ReservationStatus status) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateReservationStatusStatement.value();
-            ps.setString(1, status.toString());
+            ps.setString(1, status.name());
             ps.setInt(2, reservationId);
 
             ps.executeUpdate();
@@ -169,7 +169,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             PreparedStatement ps = getUpdateReservationStatement.value();
             ps.setInt(1, reservation.getUser().getId());
             ps.setInt(2, reservation.getCar().getId());
-            ps.setString(3, reservation.getStatus().toString());
+            ps.setString(3, reservation.getStatus().name());
             ps.setTimestamp(4, Timestamp.valueOf(reservation.getFrom()));
             ps.setTimestamp(5, Timestamp.valueOf(reservation.getUntil()));
             ps.setString(6, reservation.getMessage());
@@ -316,8 +316,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 " OR reservation_user_id LIKE " + id + ") AND " +
                 " reservation_car_id LIKE " + carId + " AND ";
         if("".equals(filter.getValue(FilterField.RESERVATION_STATUS)))
-            sql += " reservation_status != '" + ReservationStatus.ACCEPTED.toString() +
-                    "' AND reservation_status != '" + ReservationStatus.REQUEST.toString() + "' ";
+            sql += " reservation_status != 'ACCEPTED'  AND reservation_status != 'REQUEST' ";
         else
             sql += " reservation_status = '" + filter.getValue(FilterField.RESERVATION_STATUS) + "' ";
         return sql;
@@ -374,7 +373,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         try (Statement statement = createStatement()) {
             String sql = "SELECT COUNT(*) as result FROM reservations " +
                     "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
-                    "WHERE reservations.reservation_status = '" + status.toString() + "'";
+                    "WHERE reservations.reservation_status = '" + status.name() + "'";
             if(userIsLoaner)
                 sql += " AND (car_owner_user_id = " + userId + " OR reservation_user_id = " + userId + ")";
             else
@@ -452,10 +451,12 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
 
     private LazyStatement listCRInfoStatement = new LazyStatement(
-        "SELECT car_id, car_name,  FROM car LEFT JOIN reservations ON reservation_car_id = car_id " +
-                "WHERE reservation_to >= ? AND reservation_from <= ? " + // TODO: same where clause appears several times
-                "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
-                "ORDER BY car_id, reservation_from"
+        "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
+                "LEFT JOIN reservations ON reservation_car_id = car_id " +
+                    "AND reservation_to >= ? AND reservation_from <= ? " + // TODO: clause appears several times
+                    "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
+                "WHERE car_active "  +
+                "ORDER BY car_name, reservation_from"
     );
 
     public Iterable<CRInfo> listCRInfo (LocalDateTime from, LocalDateTime until) {
@@ -472,13 +473,14 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     if (thisId != currentId) {
                         currentId = thisId;
                         crInfo = new CRInfo();
-                        crInfo.car = JDBCCarDAO.populateCar(rs, false);  // TODO: minimal
+                        crInfo.carId = thisId;
+                        crInfo.carName = rs.getString ("car_name");     // TODO: add car info GPS, etc.
                         crInfo.reservations = new ArrayList<>();
                         result.add(crInfo);
                     }
-                    Integer reservationId = rs.getObject("reservation_id", Integer.class);
-                    if (reservationId != null) {
-                        crInfo.reservations.add(populateReservation(rs));
+                    rs.getInt("reservation_id");
+                    if (! rs.wasNull()) {
+                        crInfo.reservations.add(populateReservationHeader(rs));
                     }
                 }
                 return result;

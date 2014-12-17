@@ -1,0 +1,124 @@
+@* overview.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@import java.time.LocalDate
+@(form: Form[Reserve.DateData], lines: Iterable[Reserve.OverviewLine], date: LocalDate, prev: LocalDate, next: LocalDate)
+@* Displays an overview of available cars during subsequent days *@
+@scripts = {
+    @js.datetimepicker()
+}
+@stylesheets={
+<style>
+    table.overview td { border: 1px solid white; }
+    table.overview th.res-hour { border: 1px solid #e0e0e0; padding-left: 4px; }
+    table.overview th.res-car { border: 1px solid #e0e0e0; padding-left: 4px; }
+    table.overview th.res-date { text-align: center; }
+    .res-free       { background-color: #eeeeee; }
+    .res-free-even  { background-color: #e0e0e0; }
+    .res-notfree   { background-color: #ff8888; }
+    table.overview tr:nth-child(even) td.res-free   { background-color: #e0e0e0; }
+    table.overview td.res-free a { display:block; width: 100%; }
+    table.overview td.res-free a:hover { background-color: #d0ffd0; text-decoration: none; }
+    span.res-label { display:inline; padding:.2em .6em .3em; margin:.1em; font-size: 75%;}
+</style>
+}
+@datepickerWithButton(field: Field, caption: String)={
+<div class="col-md-4 @if(field.hasErrors) {has-error}">
+    <div id="@field.id-container" class="input-group date datetimepicker-input"
+         data-date-format="yyyy-mm-dd" data-min-view="3" data-start-view="2">
+        <span class="input-group-btn">
+            <button class="btn btn-primary" type="submit">@caption</button>
+        </span>
+        <input class="form-control" type="text" name="@field.name" value="@field.value" readonly>
+        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
+                                                @* datetime picker does not work with fa icons *@
+    </div>
+    @field.errors.map { error =>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+    }
+</div>
+}
+@app("Overzicht vrije perioden", stylesheets, scripts){
+
+    @breadcrumbs{
+        @breadcrumb("Dashboard",routes.Dashboard.index)
+        @breadcrumb("Overzicht reservaties")
+    }
+
+    @maincontent("Overzicht reservaties"){
+        @panel("Toon het overzicht voor een gegeven dag", "fa-search"){
+            @helper.form(routes.Reserve.overviewPost){
+                @datepickerWithButton(form("date"), "Toon overzicht")
+            }
+        }
+
+        @panel("Beschikbare auto's", "fa-car"){
+        <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
+        <table class="overview">
+            <tr>
+                <td>&nbsp;</td>
+                <td colspan="8"><a class="btn btn-sm"
+                        href="@routes.Reserve.overview(Utils.toDateString(prev))"><i class="fa fa-chevron-left"></i></a></td>
+                <th class="res-date" colspan="@(Reserve.OverviewLine.NUMBER_OF_INTERVALS-16)">@Utils.toLocalizedDateString(date)</th>
+                <td colspan="8" class="text-right"><a class="btn btn-sm"
+                        href="@routes.Reserve.overview(Utils.toDateString(next))"><i class="fa fa-chevron-right"></i></button></td>
+            </tr>
+            <tr>
+                <th class="res-car">&nbsp;</th>
+            @for(i <- 7 to 21) {
+                <th class="res-hour" colspan="@Reserve.OverviewLine.INTERVALS_PER_HOUR"
+                    width="@(75.0/(Reserve.OverviewLine.END_HOUR-Reserve.OverviewLine.START_HOUR))%">@i:00</th>
+            }
+            </tr>
+            @foreach.tr(lines) { line =>
+               <th class="res-car" width="25%">@line.carName</th>
+                @for(str <- line.freeTimes){
+                   <td class="@if(str==null){res-notfree}else{res-free}">
+                       @if(str!=null) {
+                            <a href='@routes.Reserve.reserveCar(line.carId,str,"")'>&nbsp;</a>
+                       }
+                   </td>
+                }
+            }
+            <tr>
+                <td colspan="@(Reserve.OverviewLine.NUMBER_OF_INTERVALS+1)" class="text-right">
+                    <b>Legende:</b>
+                    <span class="res-label res-free">Vrij</span>
+                    <span class="res-label res-free-even">Vrij</span>
+                    <span class="res-label res-notfree">Bezet</span>
+                </td>
+            </tr>
+        </table>
+
+
+        }
+
+    }
+
+}

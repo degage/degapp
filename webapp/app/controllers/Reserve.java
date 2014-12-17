@@ -52,9 +52,10 @@ import views.html.reserve.start;
 import views.html.reserve.availablecarspage;
 import views.html.errortablerow;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
+import java.time.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -315,7 +316,7 @@ public class Reserve extends Controller {
         // query string binders are quite complicated to write :-(
         ReservationData data = new ReservationData();
         data.from = Utils.toLocalDateTime(fromString);
-        data.until = Utils.toLocalDateTime(untilString);
+        data.until = untilString.isEmpty() ? null : Utils.toLocalDateTime(untilString);
         Form<ReservationData> form = new Form<>(ReservationData.class).fill(data);
 
         return ok (views.html.reserve.reservation.render(form,car));
@@ -370,6 +371,117 @@ public class Reserve extends Controller {
             );
         }
         return redirect(routes.Drives.index());
+    }
+
+    /**
+     * Represents a single line which can be displayed in an overview
+     */
+    public static class OverviewLine {
+
+        public static final int START_HOUR = 7;
+        public static final int END_HOUR = 22;
+        public static final int MINUTES_PER_INTERVAL = 15; // must be exactly divisible into 60
+        public static final int INTERVALS_PER_HOUR = 60/ MINUTES_PER_INTERVAL;
+        public static final int NUMBER_OF_INTERVALS = (END_HOUR-START_HOUR)*INTERVALS_PER_HOUR;
+
+        private static final LocalTime startTime = LocalTime.of(START_HOUR, 0);
+
+
+        public int carId;
+        public String carName;
+
+        // times for each 15-minute period. null means: not free
+        public String[] freeTimes = new String[NUMBER_OF_INTERVALS];
+
+        /**
+         * Populate this OverviewLine for the given date
+         */
+        public void populate (ReservationDAO.CRInfo info, LocalDate date) {
+            carId = info.carId;
+            carName = info.carName;
+
+            // by default all times are free
+            for (int i = 0; i < freeTimes.length; i++) {
+                LocalTime localTime = LocalTime.ofSecondOfDay(3600L * START_HOUR + 60L * i * MINUTES_PER_INTERVAL);
+                LocalDateTime time = date.atTime(localTime);
+                freeTimes[i] = Utils.toString(time);
+            }
+            // block all reserved times for this date
+            LocalDateTime startMoment = date.atTime(startTime);
+
+            for (ReservationHeader reservation : info.reservations) {
+                long startIndex = Duration.between(startMoment, reservation.getFrom()).toMinutes() / MINUTES_PER_INTERVAL;
+                long endIndex = (Duration.between(startMoment, reservation.getUntil()).toMinutes() + MINUTES_PER_INTERVAL-1) / MINUTES_PER_INTERVAL;
+                if (startIndex < 0) {
+                    startIndex = 0;
+                }
+                if (endIndex > freeTimes.length) {
+                    endIndex = freeTimes.length;
+                }
+                if (startIndex < freeTimes.length && endIndex > 0) {
+                    for (int i = (int)startIndex; i < (int)endIndex; i++) {
+                        freeTimes[i] = null;
+                    }
+                }
+            }
+        }
+
+        /**
+         * Is there still a free period on this line?
+         */
+        public boolean hasFree () {
+            for (String freeTime : freeTimes) {
+                if (freeTime != null) {
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+
+    public static class DateData {
+        @Constraints.Required
+        public String date;
+
+    }
+
+    /**
+     * Show an overview of reservations during a certain week. Do not show cars that are not available
+     * @return
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result overview (String dateString) {
+        LocalDate date = dateString == null ? LocalDate.now() : Utils.toLocalDate(dateString);
+        LocalDateTime from = date.atTime(OverviewLine.START_HOUR, 0);
+        LocalDateTime until = date.atTime(OverviewLine.END_HOUR, 0);
+
+        ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
+        Iterable<ReservationDAO.CRInfo> list = dao.listCRInfo(from,until);
+        Collection<OverviewLine> lines = new ArrayList<>();
+        for (ReservationDAO.CRInfo crInfo : list) {
+            OverviewLine line = new OverviewLine();
+            line.populate(crInfo, date);
+            if (line.hasFree()) {
+                 lines.add(line);
+            }
+        }
+
+        DateData data = new DateData();
+        data.date = Utils.toDateString(date); // cannot use dataString!, might be empty
+        return ok(views.html.reserve.overview.render(
+                Form.form(DateData.class).fill(data),
+                lines, date,
+                date.minusDays(1L), date.plusDays(1L)
+        ));
+
+    }
+
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result overviewPost () {
+        DateData data = Form.form(DateData.class).bindFromRequest().get();
+        return overview(data.date);
     }
 
 }

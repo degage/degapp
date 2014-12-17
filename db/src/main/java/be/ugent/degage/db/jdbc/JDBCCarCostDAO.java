@@ -183,7 +183,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             PreparedStatement ps = getUpdateCarCostStatement.value();
             ps.setBigDecimal(1, carCost.getAmount());
             ps.setString(2, carCost.getDescription());
-            ps.setString(3, carCost.getStatus().toString());
+            ps.setString(3, carCost.getStatus().name());
             ps.setDate(4, Date.valueOf(carCost.getDate()));
             ps.setBigDecimal(5, carCost.getMileage());
             ps.setInt(6, carCost.getId());

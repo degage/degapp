@@ -414,7 +414,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             throw new DataAccessException("Failed to update session. Session doesn't exist in be.ugent.degage.database.");
         try {
             PreparedStatement ps = updateInfoSessionStatement.value();
-            ps.setString(1, session.getType().toString());
+            ps.setString(1, session.getType().name());
             ps.setInt(2, session.getMaxEnrollees());
             ps.setTimestamp(3, Timestamp.from(session.getTime()));
             ps.setInt(4, session.getAddress().getId());
