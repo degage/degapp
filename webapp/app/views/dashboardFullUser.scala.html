@@ -40,8 +40,8 @@
                     "fa-car",
                     requests == 0,
                     if(requests>0) requests.toString else "",
-                    routes.Drives.indexWithStatus(ReservationStatus.REQUEST.toString),
-                    "Ga naar reservaties"
+                    routes.Drives.indexWithStatus("REQUEST"),
+                    "Ga naar reservatie-aanvragen"
                 ){
                     @if(requests == 0) { Geen nieuwe reservaties }
                     @if(requests == 1) { Nieuwe reservatie }
@@ -55,7 +55,7 @@
                 "fa-edit",
                 requests==0,
                 requests.toString,
-                if(requests > 0) routes.Drives.indexWithStatus(ReservationStatus.REQUEST_DETAILS.toString) else routes.Drives.index(),
+                if(requests > 0) routes.Drives.indexWithStatus("REQUEST_DETAILS") else routes.Drives.index(),
                 "Ga naar ritten"
             ){
                 @if(requests == 1) { Rit vereist } else { Ritten vereisen } details
@@ -91,12 +91,21 @@
         }
     </div>
 }
+
+@panel("Reserveren", "fa-pencil"){
+   <div class="form-group cl-xs-12">
+       <div class="button-group">
+           <a class="btn btn-default" href="@routes.Reserve.index">Zoek een auto die vrij is in een bepaalde periode</a>
+           <a class="btn btn-default" href="@routes.Reserve.overview(null)">Overzicht van reservaties voor een bepaalde dag</a>
+       </div>
+   </div>
+}
 <div class="row">
     <div class="col-lg-12">
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="alert alert-warning text-center">De inhoud van dit paneel is nog in de maak. Zal toelaten om
-                op diverse manieren een reservatie in te geven.</div>
+                <div class="alert alert-warning text-center">Het dashboard wordt nog aangevuld
+                    met andere panelen</div>
             </div>
         </div>
     </div>

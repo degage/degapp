@@ -53,7 +53,7 @@
     <div id="@field.id-container" class="input-group date datetimepicker-input"
          data-date-format="yyyy-mm-dd" data-min-view="3" data-start-view="2">
         <span class="input-group-btn">
-            <button class="btn btn-primary" type="submit">@caption</button>
+            <button class="btn btn-default" type="submit">@caption</button>
         </span>
         <input class="form-control" type="text" name="@field.name" value="@field.value" readonly>
         <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
@@ -72,14 +72,13 @@
     }
 
     @maincontent("Overzicht reservaties"){
-        @panel("Toon het overzicht voor een gegeven dag", "fa-search"){
+        @panel("Toon het overzicht voor een bepaalde dag", "fa-search"){
             @helper.form(routes.Reserve.overviewPost){
-                @datepickerWithButton(form("date"), "Toon overzicht")
+                @datepickerWithButton(form("date"), "Toon!")
             }
         }
 
         @panel("Beschikbare auto's", "fa-car"){
-        <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
         <table class="overview">
             <tr>
                 <td>&nbsp;</td>
@@ -115,8 +114,7 @@
                 </td>
             </tr>
         </table>
-
-
+        <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
         }
 
     }

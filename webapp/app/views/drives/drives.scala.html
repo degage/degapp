@@ -54,7 +54,7 @@
                 <ul class="nav nav-tabs">
                   <li id="tab_planned" @if(status == ReservationStatus.ACCEPTED) { class="active" } ><a href="#resultpanel" data-toggle="tab">
                       Gepland</a>
-                      <input name="status" value="@ReservationStatus.ACCEPTED.toString" class="searchTextField hidden">
+                      <input name="status" value="ACCEPTED" class="searchTextField hidden">
                   </li>
                   <li id="tab_passed" @if(status != ReservationStatus.ACCEPTED && status != ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Voorbij
@@ -74,7 +74,7 @@
                           }
                       }
                       </a>
-                      <input name="status" value="@ReservationStatus.REQUEST.toString" class="hidden">
+                      <input name="status" value="REQUEST" class="hidden">
                   </li>
                   <li class="hidden"><button id="searchButton"></button></li>
                 </ul>

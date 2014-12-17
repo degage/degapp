@@ -218,9 +218,6 @@
                         </li>
                         }
                         @if(CurrentUser.hasRole(UserRole.CAR_USER)){
-                        <li @if(title == "Reserveren") {class="active"}>
-                            <a href="@routes.Reserve.index"><i class="fa fa-pencil fa-fw"></i> Reserveren</a>
-                        </li>
                         <li @if(title == "Ritten") {class="active"}>
                             <a href="@routes.Drives.index"><i class="fa fa-car fa-fw"></i>
                                 Ritten
