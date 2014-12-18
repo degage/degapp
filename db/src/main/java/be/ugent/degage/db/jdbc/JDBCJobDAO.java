@@ -64,7 +64,7 @@ class JDBCJobDAO extends AbstractDAO implements JobDAO {
                     jobs.add(new Job(
                             rs.getLong("job_id"),
                             Enum.valueOf(JobType.class, rs.getString("job_type")),
-                            rs.getObject("job_ref_id", Integer.class)
+                            (Integer)rs.getObject("job_ref_id")
                     ));
                 }
                 return jobs;
