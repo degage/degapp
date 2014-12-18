@@ -71,7 +71,7 @@ public class Mailer {
             mail.sendHtml(html);
         } else {
             // TODO: use different mailer instead of logging
-            // Logger.debug("Sent mail: " + html);
+            System.err.println("Sent mail: " + html);
         }
     }
 

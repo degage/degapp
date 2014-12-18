@@ -36,7 +36,8 @@ import controllers.Utils;
 import controllers.routes;
 import data.EurocentAmount;
 import db.DataAccess;
-import play.mvc.Http;
+import play.Play;
+import play.api.mvc.Call;
 import providers.DataProvider;
 
 
@@ -48,6 +49,10 @@ public class Notifier extends Mailer {
 
     public static final String NOREPLY = "Dégage <noreply@degage.be>";
 
+    public static final String toFullURL (Call call) {
+        return Play.application().configuration().getString("application.hostUrl") + call.url();
+    }
+
     // to be used with injected context
     public static void sendVerificationMail(UserHeader user, String verificationUrl) {
         // Remark: phone numbers are not filled in!
@@ -57,12 +62,11 @@ public class Notifier extends Mailer {
         TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
         String mail = replaceUserTags(user, template.getBody());
-        String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.register_verification(user.getId(), verificationUrl).toString();
-        mail = mail.replace("%verification_url%", vUrl);
-
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
-        }
+        mail = mail.replace(
+                "%verification_url%",
+                toFullURL(routes.Login.register_verification(user.getId(), verificationUrl))
+        );
+        send (mail);
     }
 
     /**
@@ -217,7 +221,7 @@ public class Notifier extends Mailer {
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
         String mail = replaceUserTags(owner, template.getBody());
         mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
+        mail = mail.replace("%reservation_url%", toFullURL(routes.Drives.details(carReservation.getId())));
         NotificationDAO notificationDAO = context.getNotificationDAO();
         createNotification(notificationDAO, owner, template.getSubject(), mail);
         if (template.getSendMail()) {
@@ -235,7 +239,7 @@ public class Notifier extends Mailer {
         EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
         String mail = replaceUserTags(user, template.getBody());
         mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).url());
+        mail = mail.replace("%reservation_url%", toFullURL(routes.Drives.details(carReservation.getId())));
         NotificationDAO notificationDAO = context.getNotificationDAO();
         createNotification(notificationDAO, user, template.getSubject(), mail);
         if (template.getSendMail()) {
@@ -311,12 +315,11 @@ public class Notifier extends Mailer {
         TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.PASSWORD_RESET);
         String mail = replaceUserTags(user, template.getBody());
-        String vUrl = "http://" + Http.Context.current().request().host() + routes.Login.resetPassword(user.getId(), verificationUrl).toString();
-        mail = mail.replace("%password_reset_url%", vUrl);
-
-        if (!play.api.Play.isDev(play.api.Play.current())) {
-            send(mail);
-        }
+        mail = mail.replace(
+                "%password_reset_url%",
+                toFullURL(routes.Login.resetPassword(user.getId(), verificationUrl))
+        );
+        send(mail);
     }
 
     public static void sendReminderMail(DataAccessContext context, UserHeader user) {
