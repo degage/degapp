@@ -1,4 +1,4 @@
-@* selectCountry.scala.html
+@* addressFields.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(f: Field, label: String, css: String="col-md-3")
-<div class="form-group @css @if(f.hasErrors) {has-error}" >
-    <label class="control-label" for="@f.id">@label</label>
-    <select name="@f.name" class="form-control" id="@f.id">
-        @foreach(util.Addresses.COUNTRY_NAMES) { item =>
-            @option(f.value.getOrElse(util.Addresses.DEFAULT_COUNTRY_NAME),item){ @item }
-        }
-    </select>
-    @f.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-</div>
+@(form: Form[_], fieldPrefix: String = "address")
+
+@std.textField(form(fieldPrefix+".street"), "Straat", "col-md-9", required=true)
+@std.textField(form(fieldPrefix+".num"), "Nummer", "col-md-3", required=true)
+@std.textField(form(fieldPrefix+".zipCode"), "Postcode", "col-md-3", required=true)
+@std.textField(form(fieldPrefix+".city"), "Stad", "col-md-6", required=true)
+@selectCountry(form(fieldPrefix+".country"), "Land")

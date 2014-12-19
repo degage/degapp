@@ -76,11 +76,7 @@
             <div class="col-lg-9">
                 @panel("Standplaats", "fa-home"){
                     <fieldset>
-                        @std.textField(form("address.street"), "Straat", required=true)
-                        @std.textField(form("address.num"), "Nummer", required=true)
-                        @std.textField(form("address.zipCode"), "Postcode", css="col-md-4", required=true)
-                        @std.textField(form("address.city"), "Stad",  css="col-md-8", required=true)
-                        @selectCountry(form("address.country"), "Land")
+                        @addressFields(form)
                     </fieldset>
                 }
                 @panel("Details", "fa-bar-chart-o"){

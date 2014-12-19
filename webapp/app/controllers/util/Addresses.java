@@ -121,4 +121,13 @@ public class Addresses  {
         }
         return address;
     }
+
+    /**
+     * Updates an address in the database
+     */
+    public static void updateAddress(EditAddressModel model, int addressId, AddressDAO dao) {
+        dao.updateAddress(
+                new Address(addressId, model.country, model.zipCode, model.city, model.street, model.num)
+        );
+    }
 }

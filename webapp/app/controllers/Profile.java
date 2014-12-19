@@ -53,7 +53,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Set;
 
-import static controllers.util.Addresses.modifyAddress;
+import static controllers.util.Addresses.updateAddress;
 
 public class Profile extends Controller {
 
@@ -761,25 +761,11 @@ public class Profile extends Controller {
 
             // Because of constraints with FK we have to set them to NULL first in user before deleting them
 
-            // Check domicile address
-            Address domicileAddress = user.getAddressDomicile();
-            boolean deleteDomicile = model.domicileAddress.isEmpty() && domicileAddress != null;
-            user.setAddressDomicile(deleteDomicile || model.domicileAddress.isEmpty() ? null : modifyAddress(model.domicileAddress, domicileAddress, adao));
-
-            // Residence address
-            Address residenceAddress = user.getAddressResidence();
-            boolean deleteResidence = model.residenceAddress.isEmpty() && residenceAddress != null;
-            user.setAddressResidence(deleteResidence || model.residenceAddress.isEmpty() ? null : modifyAddress(model.residenceAddress, residenceAddress, adao));
+            // Update addresses
+            updateAddress(model.domicileAddress, user.getAddressDomicile().getId(), adao);
+            updateAddress(model.residenceAddress, user.getAddressResidence().getId(), adao);
 
             dao.updateUser(user); // Full update (includes FKs)
-
-            // Finally we can delete the addresses since there are no references left (this assumes all other code uses copies of addresses)
-            // TODO: soft-delete addresses and keep references
-            if (deleteDomicile)
-                adao.deleteAddress(domicileAddress.getId());
-
-            if (deleteResidence)
-                adao.deleteAddress(residenceAddress.getId());
 
             //TODO: identity card & numbers, profile picture
 

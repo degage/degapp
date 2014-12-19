@@ -32,32 +32,13 @@
 @import db.CurrentUser
 @scripts = {
     <script>
-        function onSameAddressChange() {
-            if($('#sameAddress').is(':checked')) {
-                $('#residenceAddress_street').val($('#domicileAddress_street').val());
-                $('#residenceAddress_num').val($('#domicileAddress_num').val());
-                $('#residenceAddress_city').val($('#domicileAddress_city').val());
-                $('#residenceAddress_zip').val($('#domicileAddress_zip').val());
-                $('#residenceAddress_country').val($('#domicileAddress_country').val());
-
-                $("#residenceAdressWrap" ).hide();
-            } else {
-                $("#residenceAdressWrap" ).show();
-            }
+        function copyAddress() {
+            $('#residenceAddress_street').val($('#domicileAddress_street').val());
+            $('#residenceAddress_num').val($('#domicileAddress_num').val());
+            $('#residenceAddress_zipCode').val($('#domicileAddress_zipCode').val());
+            $('#residenceAddress_city').val($('#domicileAddress_city').val());
+            $('#residenceAddress_country').val($('#domicileAddress_country').val());
         }
-
-        $(document).ready(function() {
-            // Check if domicile == residence
-            var sameAddresses = $('#residenceAddress_street').val() == $('#domicileAddress_street').val() &&
-                $('#residenceAddress_num').val() == $('#domicileAddress_num').val() &&
-                $('#residenceAddress_city').val() == $('#domicileAddress_city').val() &&
-                $('#residenceAddress_zip').val() == $('#domicileAddress_zip').val() &&
-                $('#residenceAddress_country').val() == $('#domicileAddress_country').val();
-            if(sameAddresses) {
-                $('#sameAddress').attr('checked', true);
-            }
-            onSameAddressChange();
-        });
     </script>
 }
     @app("Profiel bewerken", scripts) {
@@ -73,13 +54,8 @@
         <div id="page-wrapper">
             <h1 class="page-header">Profiel bewerken</h1>
             <div class="row">
-            @helper.form(routes.Profile.editPost(user.getId), 'class -> "form-horizontal") {
-                <div class="col-lg-3">
-                    @if(form.hasGlobalErrors) {
-                        <div class="alert alert-danger alert-dismissable">
-                            <strong>Error!</strong> @form.globalError.message
-                        </div>
-                    }
+            @helper.form(routes.Profile.editPost(user.getId)) {
+                <div class="col-md-3">
                     <div class="panel panel-default">
                             <!-- /.panel-heading -->
                         <div class="panel-body">
@@ -115,67 +91,41 @@
                     </div>
                 </div>
                 <div class="col-md-9">
-                    
-                            <div class="form-group">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h3 class="panel-title">Domicilieadres</h3>
-                                    </div>
-                                     <div class="panel-body">
-                                        <fieldset>
-                                            @formGroupTextField(form("domicileAddress.street"), "Straat", 'placeholder->"Verplicht")
-                                            @formGroupTextField(form("domicileAddress.num"), "Nummer", 'placeholder->"Verplicht")
-                                            @formGroupTextField(form("domicileAddress.zipCode"), "Postcode", 'placeholder->"Verplicht")
-                                            @formGroupTextField(form("domicileAddress.city"), "Stad", 'placeholder->"Verplicht")
-                                            @selectCountry(form("domicileAddress.country"), "Land")
-                                        </fieldset>
-                                    </div>
-                                </div>
+                    @formErrors(form)
+                    @panel("Domicilieadres", "fa-home") {
+                        <fieldset>
+                            @addressFields(form, "domicileAddress")
+                        </fieldset>
+                    }
+                    @panel("Verblijfsadres", "fa-home") {
+                        <fieldset>
+                            <div class="form-group col-xs-12">
+                                <button class="btn btn-default" type="button" onclick="copyAddress();">Copieer het domicilieadres naar het verblijfsadres</button>
                             </div>
+                            @addressFields(form, "residenceAddress")
+                        </fieldset>
+                    }
 
-                            <div class="form-group">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h3 class="panel-title">Verblijfsadres</h3>
-                                    </div>
-                                    <div class="panel-body">
-                                         <div class="panel-body">
-                                            <fieldset>
-                                                <input id="sameAddress" type="checkbox" onchange="onSameAddressChange()"> Zelfde als domicilieadres
-                                                <hr />
-                                                <div id="residenceAdressWrap">
-                                                    @formGroupTextField(form("residenceAddress.street"), "Straat", 'placeholder->"Verplicht")
-                                                    @formGroupTextField(form("residenceAddress.num"), "Nummer", 'placeholder->"Verplicht")
-                                                    @formGroupTextField(form("residenceAddress.zipCode"), "Postcode", 'placeholder->"Verplicht")
-                                                    @formGroupTextField(form("residenceAddress.city"), "Stad", 'placeholder->"Verplicht")
-                                                    @selectCountry(form("residenceAddress.country"), "Land")
-                                                </div>
-                                            </fieldset>
-                                        </div>
-                                    </div>
-                                </div>
+                    <div class="form-group">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                <h3 class="panel-title">Waarborg</h3>
                             </div>
-
-                            <div class="form-group">
-                                <div class="panel panel-default">
-                                    <div class="panel-heading">
-                                        <h3 class="panel-title">Waarborg</h3>
-                                    </div>
-                                    <div class="panel-body">
-                                        <input type="checkbox" id='@form("paidDeposit").id'
-                                               name='@form("paidDeposit").name' value="true"
-                                               @if(form("paidDeposit").value == Some("true")) { checked="checked" }
-                                               @if(!CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {disabled}> Waarborg betaald
-                                    </div>
-                                </div>
+                            <div class="panel-body">
+                                <input type="checkbox" id='@form("paidDeposit").id'
+                                       name='@form("paidDeposit").name' value="true"
+                                       @if(form("paidDeposit").value == Some("true")) { checked="checked" }
+                                       @if(!CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {disabled}> Waarborg betaald
                             </div>
-                            <div class="form-group">
-                                <div class="panel panel-default">
-                                    <div class="panel-body">
-                                        <button name="saveChanges" class="btn btn-block btn-success" onclick="onSameAddressChange()">Wijzigingen opslaan</button>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="panel panel-default">
+                            <div class="panel-body">
+                                <button name="saveChanges" class="btn btn-block btn-success" onclick="onSameAddressChange()">Wijzigingen opslaan</button>
                             </div>
+                        </div>
+                    </div>
                 </div>
                 <!-- /col-lg-9 -->
             }

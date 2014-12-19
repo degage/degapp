@@ -68,8 +68,8 @@ CREATE TABLE `files` (
 CREATE TABLE `addresses` (
   `address_id` INT NOT NULL AUTO_INCREMENT,
   `address_country` VARCHAR(64) NOT NULL DEFAULT 'Belgium',
-  `address_city` VARCHAR(64) NOT NULL,
-  `address_zipcode` VARCHAR(12) NOT NULL,
+  `address_city` VARCHAR(64) NOT NULL DEFAULT '',
+  `address_zipcode` VARCHAR(12) NOT NULL DEFAULT '',
   `address_street` VARCHAR(64) NOT NULL DEFAULT '',
   `address_number` VARCHAR(12) NOT NULL DEFAULT '',
   `address_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -441,6 +441,14 @@ CREATE TABLE `receipts` (
 -- TODO: can this not be done with a default value?
 
 DELIMITER $$
+
+CREATE TRIGGER users_make BEFORE INSERT ON users FOR EACH ROW
+BEGIN
+   INSERT INTO addresses VALUES ();
+   SET NEW.user_address_domicile_id = last_insert_id();
+   INSERT INTO addresses VALUES ();
+   SET NEW.user_address_residence_id = last_insert_id();
+END $$
 
 CREATE TRIGGER cars_make AFTER INSERT ON cars FOR EACH ROW
 BEGIN

@@ -59,22 +59,18 @@
         @helper.form(routes.InfoSessions.createNewSession) {
             @formErrors(form)
             @panel("Algemeen", "fa-bar-chart-o"){
-                    <fieldset>
-                        @std.userpicker(form("userId"), form("userIdAsString"), "Gastvrouw / gastheer")
-                        @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
-                        @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
-                        @std.selectEnum(classOf[InfoSessionType], form("type"), "Type")
-                        @std.textArea(form("comments"), "Opmerkingen", 6, 'maxlength -> 512)
-                    </fieldset>
+                <fieldset>
+                    @std.userpicker(form("userId"), form("userIdAsString"), "Gastvrouw / gastheer")
+                    @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
+                    @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
+                    @std.selectEnum(classOf[InfoSessionType], form("type"), "Type")
+                    @std.textArea(form("comments"), "Opmerkingen", 6, 'maxlength -> 512)
+                </fieldset>
             }
             @panel("Adres", "fa-home"){
-                    <fieldset>
-                        @formGroupTextField(form("address.street"), "Straat")
-                        @formGroupTextField(form("address.num"), "Nummer")
-                        @formGroupTextField(form("address.zipCode"), "Postcode")
-                        @formGroupTextField(form("address.city"), "Stad")
-                        @selectCountry(form("address.country"), "Land")
-                    </fieldset>
+                <fieldset>
+                    @addressFields(form)
+                </fieldset>
             }
             @std.submitButton("Infosessie aanmaken")
         }

@@ -395,8 +395,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
     private LazyStatement updateUserStatement = new LazyStatement(
             "UPDATE users SET user_email=?, user_firstname=?, user_lastname=?, user_status=?, " +
-                    "user_gender=?, user_phone=?, user_cellphone=?, user_address_domicile_id=?, " +
-                    "user_address_residence_id=?, user_damage_history=?, user_payed_deposit=?, " +
+                    "user_gender=?, user_phone=?, user_cellphone=?, user_damage_history=?, user_payed_deposit=?, " +
                     "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?,  " +
                     "user_identity_card_id=?, user_identity_card_registration_nr=? " +
                     "WHERE user_id = ?"
@@ -410,36 +409,34 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.setString(2, user.getFirstName());
             ps.setString(3, user.getLastName());
 
-
             ps.setString(4, user.getStatus().name());
             ps.setString(5, user.getGender().name());
             ps.setString(6, user.getPhone());
             ps.setString(7, user.getCellphone());
-            if (user.getAddressDomicile() == null) ps.setNull(8, Types.INTEGER);
-            else ps.setInt(8, user.getAddressDomicile().getId());
-            if (user.getAddressResidence() == null) ps.setNull(9, Types.INTEGER);
-            else ps.setInt(9, user.getAddressResidence().getId());
-            if (user.getDamageHistory() == null) ps.setNull(10, Types.VARCHAR);
-            else ps.setString(10, user.getDamageHistory());
-            ps.setBoolean(11, user.isPayedDeposit());
-            ps.setBoolean(12, user.isAgreeTerms());
 
-            if (user.getProfilePictureId() != -1) ps.setInt(13, user.getProfilePictureId());
-            else ps.setNull(13, Types.INTEGER);
-            ps.setString(14, user.getLicense());
+            ps.setString(8, user.getDamageHistory());
 
+            ps.setBoolean(9, user.isPayedDeposit());
+            ps.setBoolean(10, user.isAgreeTerms());
 
-            if (user.getIdentityCard() == null) {
-                ps.setNull(15, Types.VARCHAR);
-                ps.setNull(16, Types.VARCHAR);
-            } else {
-                ps.setString(15, user.getIdentityCard().getId());
-                ps.setString(16, user.getIdentityCard().getRegistrationNr());
+            if (user.getProfilePictureId() != -1) { // TODO: use NULL here
+                ps.setInt(11, user.getProfilePictureId());
+            }
+            else {
+                ps.setNull(11, Types.INTEGER);
             }
 
+            ps.setString(12, user.getLicense());
+
+            if (user.getIdentityCard() == null) {
+                ps.setString(13, null);
+                ps.setString(14, null);
+            } else {
+                ps.setString(13, user.getIdentityCard().getId());
+                ps.setString(14, user.getIdentityCard().getRegistrationNr());
+            }
 
             ps.setInt(17, user.getId());
-
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("User update affected 0 rows.");
