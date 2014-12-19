@@ -68,6 +68,8 @@ public class InfoSessions extends Controller {
 
         public String comments;
 
+        public String submit; // "default" or "copyOwnerAddress"
+
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public List<ValidationError> validate() {
@@ -175,60 +177,55 @@ public class InfoSessions extends Controller {
             return badRequest(editinfosession.render(editForm, sessionId));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
-            InfoSessionDAO dao = context.getInfoSessionDAO();
-            InfoSession session = dao.getInfoSession(sessionId);
-            if (session == null) {
-                flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
-                return redirect(routes.InfoSessions.showUpcomingSessions());
-            }
-
-            // Check the host field
             UserDAO udao = context.getUserDAO();
             InfoSessionCreationModel model = editForm.get();
-            UserHeader host = udao.getUserHeader(model.userId);
-
-            if (host == null) {
-                editForm.reject("Infosessie gastheer bestaat niet.");
-                return badRequest(editinfosession.render(editForm, sessionId));
-            }
-            session.setHost(host);
-
-            // update address
-            session.setAddress(model.address.toAddress());
-
-            // update time
-            Instant time = model.time;
-            if (!session.getTime().equals(time)) {
-                session.setTime(time);
-
-                // Schedule the reminder
-                JobDAO jdao = context.getJobDAO();
-                jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
-                jdao.createJob(
-                        JobType.IS_REMINDER,
-                        session.getId(),
-                        session.getTime().minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
-                );
-            }
-
-            // check if amountOfAttendees < new max
-            int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
-            if (model.max_enrollees != 0 && model.max_enrollees < amountOfAttendees) {
-                flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
-                return badRequest(editinfosession.render(editForm, sessionId));
+            if ("copyAddress".equals(model.submit)) {
+                User host = udao.getUser(model.userId);
+                model.address.populate(host.getAddressResidence());
+                return ok(addinfosession.render (Form.form(InfoSessionCreationModel.class).fill(model)));
             } else {
-                session.setMaxEnrollees(model.max_enrollees);
+                InfoSessionDAO dao = context.getInfoSessionDAO();
+                InfoSession session = dao.getInfoSession(sessionId);
+                UserHeader host = udao.getUserHeader(model.userId);
+                session.setHost(host);
+
+                // update address
+                session.setAddress(model.address.toAddress());
+
+                // update time
+                Instant time = model.time;
+                if (!session.getTime().equals(time)) {
+                    session.setTime(time);
+
+                    // Schedule the reminder
+                    JobDAO jdao = context.getJobDAO();
+                    jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
+                    jdao.createJob(
+                            JobType.IS_REMINDER,
+                            session.getId(),
+                            session.getTime().minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                    );
+                }
+
+                // check if amountOfAttendees < new max
+                int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
+                if (model.max_enrollees != 0 && model.max_enrollees < amountOfAttendees) {
+                    flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
+                    return badRequest(editinfosession.render(editForm, sessionId));
+                } else {
+                    session.setMaxEnrollees(model.max_enrollees);
+                }
+
+                // type
+                session.setType(InfoSessionType.valueOf(model.type));
+
+                // comments
+                session.setComments(model.comments);
+
+                dao.updateInfoSession(session);
+                flash("success", "De wijzigingen werden met succes toegepast.");
+                return redirect(routes.InfoSessions.detail(sessionId));
             }
-
-            // type
-            session.setType(InfoSessionType.valueOf(model.type));
-
-            // comments
-            session.setComments(model.comments);
-
-            dao.updateInfoSession(session);
-            flash("success", "Jouw wijzigingen werden succesvol toegepast.");
-            return redirect(routes.InfoSessions.detail(sessionId));
         }
     }
 
@@ -465,30 +462,36 @@ public class InfoSessions extends Controller {
         if (createForm.hasErrors()) {
             return badRequest(addinfosession.render(createForm));
         } else {
-            DataAccessContext context = DataAccess.getInjectedContext();
-            InfoSessionDAO dao = context.getInfoSessionDAO();
-
             InfoSessionCreationModel model = createForm.get();
-
-            InfoSessionType type = InfoSessionType.valueOf(model.type);
-
+            DataAccessContext context = DataAccess.getInjectedContext();
             UserDAO udao = context.getUserDAO();
-            UserHeader host = udao.getUserHeader(model.userId);
-            InfoSession session = dao.createInfoSession(type, host, model.address.toAddress(), model.time,
-                    model.max_enrollees == null ? 0 : model.max_enrollees,
-                    model.comments);
-
-            // Schedule the reminder
-            context.getJobDAO().createJob(
-                    JobType.IS_REMINDER,
-                    session.getId(),
-                    session.getTime().minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
-            );
+            if ("copyAddress".equals(model.submit)) {
+                User host = udao.getUser(model.userId);
+                model.address.populate(host.getAddressResidence());
+                return ok(addinfosession.render (Form.form(InfoSessionCreationModel.class).fill(model)));
+            } else {
+                InfoSessionDAO dao = context.getInfoSessionDAO();
 
 
-            return redirect(
-                    routes.InfoSessions.showUpcomingSessions() // return to infosession list
-            );
+                InfoSessionType type = InfoSessionType.valueOf(model.type);
+
+                UserHeader host = udao.getUserHeader(model.userId);
+                InfoSession session = dao.createInfoSession(type, host, model.address.toAddress(), model.time,
+                        model.max_enrollees == null ? 0 : model.max_enrollees,
+                        model.comments);
+
+                // Schedule the reminder
+                context.getJobDAO().createJob(
+                        JobType.IS_REMINDER,
+                        session.getId(),
+                        session.getTime().minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                );
+
+
+                return redirect(
+                        routes.InfoSessions.showUpcomingSessions() // return to infosession list
+                );
+            }
         }
     }
 

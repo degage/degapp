@@ -42,7 +42,7 @@
         @breadcrumb("Bewerk infosessie")
     }
 
-    @maincontent("Nieuwe infosessie"){
+    @maincontent("Bewerk infosessie"){
         @flashes()
         @helper.form(routes.InfoSessions.editSessionPost(sessionId)) {
             @formErrors(form)
@@ -57,6 +57,9 @@
             }
             @panel("Adres", "fa-home"){
                 <fieldset>
+                    <div class="form-group col-xs-12">
+                        <button class="btn btn-default" type="submit" name="submit" value="copyAddress">Copieer verblijfadres van gastvrouw / gastheer</button>
+                    </div>
                     @addressFields(form)
                 </fieldset>
             }
