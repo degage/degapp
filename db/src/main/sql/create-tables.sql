@@ -442,7 +442,7 @@ CREATE TABLE `receipts` (
 
 DELIMITER $$
 
-CREATE TRIGGER users_make BEFORE INSERT ON users FOR EACH ROW
+CREATE TRIGGER users_create BEFORE INSERT ON users FOR EACH ROW
 BEGIN
    INSERT INTO addresses VALUES ();
    SET NEW.user_address_domicile_id = last_insert_id();
@@ -454,6 +454,12 @@ CREATE TRIGGER cars_make AFTER INSERT ON cars FOR EACH ROW
 BEGIN
   INSERT INTO technicalcardetails(details_id) VALUES (new.car_id);
   INSERT INTO carinsurances(insurance_id) VALUES (new.car_id);
+END $$
+
+CREATE TRIGGER cars_create BEFORE INSERT ON cars FOR EACH ROW
+BEGIN
+  INSERT INTO addresses VALUES ();
+  SET NEW.car_location = last_insert_id();
 END $$
 
 CREATE TRIGGER reservations_ins BEFORE INSERT ON reservations FOR EACH ROW

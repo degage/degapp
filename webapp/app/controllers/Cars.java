@@ -60,9 +60,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static controllers.util.Addresses.modifyAddress;
-
-
 /**
  * Controller responsible for creating, updating and showing of cars
  */
@@ -284,8 +281,6 @@ public class Cars extends Controller {
             DataAccessContext context = DataAccess.getInjectedContext();
             CarDAO dao = context.getCarDAO();
             CarModel model = carForm.get();
-            AddressDAO adao = context.getAddressDAO();
-            Address address = modifyAddress(model.address, null, adao);
 
             UserHeader owner;
             if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
@@ -330,12 +325,19 @@ public class Cars extends Controller {
                 }
             }
 
-            TechnicalCarDetails technicalCarDetails = new TechnicalCarDetails(model.licensePlate, registrationPictureFile, model.chassisNumber);
-            CarInsurance insurance = new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
+            TechnicalCarDetails technicalCarDetails =
+                    new TechnicalCarDetails(model.licensePlate, registrationPictureFile, model.chassisNumber);
+            CarInsurance insurance =
+                    new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
 
-            Car car = dao.createCar(model.name, model.brand, model.type, address, model.seats, model.doors,
-                    model.year, model.manual, model.gps, model.hook, CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
-                    model.ownerAnnualKm, technicalCarDetails, insurance, owner, model.comments, model.active, carPictureFile);
+            Car car = dao.createCar(
+                    model.name, model.brand, model.type,
+                    model.address.toAddress(), model.seats, model.doors,
+                    model.year, model.manual, model.gps, model.hook,
+                    CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
+                    model.ownerAnnualKm, technicalCarDetails, insurance, owner,
+                    model.comments, model.active, carPictureFile
+            );
 
 
             if (car != null) {
@@ -475,10 +477,7 @@ public class Cars extends Controller {
         insurance.setBonusMalus(model.bonusMalus);
         insurance.setPolisNr(model.polisNr);
 
-        AddressDAO adao = context.getAddressDAO();
-        Address address = car.getLocation();
-        car.setLocation(modifyAddress(model.address, address, adao));
-
+        car.setLocation(model.address.toAddress());
         car.setComments(model.comments);
 
         car.setActive(model.active);

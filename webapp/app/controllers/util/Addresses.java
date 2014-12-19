@@ -60,6 +60,10 @@ public class Addresses  {
             country = address.getCountry();
         }
 
+        public Address toAddress() {
+            return new Address(country, zipCode, city, street, num);
+        }
+
         public boolean isEmpty() {
             return nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(num);
         }

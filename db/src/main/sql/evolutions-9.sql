@@ -6,7 +6,13 @@ ALTER TABLE addresses DROP COLUMN address_created_at; -- always created together
 
 DELIMITER $$
 
-CREATE TRIGGER users_make BEFORE INSERT ON users FOR EACH ROW
+CREATE TRIGGER cars_create BEFORE INSERT ON cars FOR EACH ROW
+BEGIN
+  INSERT INTO addresses VALUES ();
+  SET NEW.car_location = last_insert_id();
+END $$
+
+CREATE TRIGGER users_create BEFORE INSERT ON users FOR EACH ROW
 BEGIN
    INSERT INTO addresses VALUES ();
    SET NEW.user_address_domicile_id = last_insert_id();

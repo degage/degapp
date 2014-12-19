@@ -159,27 +159,15 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             Car car = populateCarMinimal(rs);
             car.setBrand(rs.getString("car_brand"));
             car.setType(rs.getString("car_type"));
-            Integer seats = rs.getInt("car_seats");
-            if(!rs.wasNull())
-                car.setSeats(seats);
-            Integer doors = rs.getInt("car_doors");
-            if(!rs.wasNull())
-                car.setDoors(doors);
+            car.setSeats((Integer)rs.getObject("car_seats"));
+            car.setDoors((Integer)rs.getObject("car_doors"));
             car.setManual(rs.getBoolean("car_manual"));
             car.setGps(rs.getBoolean("car_gps"));
             car.setHook(rs.getBoolean("car_hook"));
-            Integer year = rs.getInt("car_year");
-            if(!rs.wasNull())
-                car.setYear(year);
-            Integer estimatedValue = rs.getInt("car_estimated_value");
-            if(!rs.wasNull())
-                car.setEstimatedValue(estimatedValue);
-            Integer fuelEconomy = rs.getInt("car_fuel_economy");
-            if(!rs.wasNull())
-                car.setFuelEconomy(fuelEconomy);
-            Integer ownerAnnualKm = rs.getInt("car_owner_annual_km");
-            if(!rs.wasNull())
-                car.setOwnerAnnualKm(ownerAnnualKm);
+            car.setYear((Integer)rs.getObject("car_year"));
+            car.setEstimatedValue((Integer)rs.getObject("car_estimated_value"));
+            car.setFuelEconomy((Integer)rs.getObject("car_fuel_economy"));
+            car.setOwnerAnnualKm((Integer)rs.getObject("car_owner_annual_km"));
             car.setComments(rs.getString("car_comments"));
             car.setActive(rs.getBoolean("car_active"));
             File photo = null;
@@ -199,19 +187,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 }
 
                 String chassisNr = rs.getString("details_car_chassis_number");
-                if (rs.wasNull()) {
-                    chassisNr = null;
-                }
                 technicalCarDetails = new TechnicalCarDetails(rs.getString("details_car_license_plate"), registration, chassisNr);
 
-                Integer bonusMalus = rs.getInt("insurance_bonus_malus");
-                if (rs.wasNull()) {
-                    bonusMalus = null;
-                }
-                Integer contractId = rs.getInt("insurance_contract_id");
-                if (rs.wasNull()) {
-                    contractId = null;
-                }
+                Integer bonusMalus = (Integer)rs.getObject("insurance_bonus_malus");
+                Integer contractId = (Integer)rs.getObject("insurance_contract_id");
 
                 Date insuranceExpiration = rs.getDate("insurance_expiration");
                 insurance = new CarInsurance(
@@ -235,10 +214,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     }
 
     private LazyStatement createCarStatement = new LazyStatement (
-            "INSERT INTO cars(car_name, car_type, car_brand, car_location, " +
+            "INSERT INTO cars(car_name, car_type, car_brand, " +
                     "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             "car_id");
 
     @Override
@@ -250,66 +229,30 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(1, name);
             ps.setString(2, type);
             ps.setString(3, brand);
-            // TODO: make sure location is never null
 
-            // TODO: use ps.setObject
-            if(location != null) {
-                ps.setInt(4, location.getId());
-            } else {
-                ps.setNull(4, Types.INTEGER);
-            }
-            if(seats != null) {
-                ps.setInt(5, seats);
-            } else {
-                ps.setNull(5, Types.INTEGER);
-            }
-            if(doors != null) {
-                ps.setInt(6, doors);
-            } else {
-                ps.setNull(6, Types.INTEGER);
-            }
-            if(year != null) {
-                ps.setInt(7, year);
-            } else {
-                ps.setNull(7, Types.INTEGER);
-            }
-            ps.setBoolean(8, manual);
-            ps.setBoolean(9, gps);
-            ps.setBoolean(10, hook);
-            ps.setString(11, fuel.name());
-            if(fuelEconomy != null) {
-                ps.setInt(12, fuelEconomy);
-            } else {
-                ps.setNull(12, Types.INTEGER);
-            }
-            if(estimatedValue!= null) {
-                ps.setInt(13, estimatedValue);
-            } else {
-                ps.setNull(13, Types.INTEGER);
-            }
-            if(ownerAnnualKm != null) {
-                ps.setInt(14, ownerAnnualKm);
-            } else {
-                ps.setNull(14, Types.INTEGER);
-            }
+            ps.setObject(4, seats, Types.INTEGER);
+            ps.setObject(5, doors, Types.INTEGER);
+            ps.setObject(6, year, Types.INTEGER);
 
-            // Owner cannot be null according to SQL script so this will throw an Exception
-            if(owner != null) {
-                ps.setInt(15, owner.getId());
-            } else {
-                ps.setNull(15, Types.INTEGER);
-            }
-            ps.setString(16, comments);
-            ps.setBoolean(17, active);
+            ps.setBoolean(7, manual);
+            ps.setBoolean(8, gps);
+            ps.setBoolean(9, hook);
+            ps.setString(10, fuel.name());
 
-            if (photo != null) {
-                ps.setInt(18, photo.getId());
-            } else {
-                ps.setNull(18, Types.INTEGER);
-            }
+            ps.setObject(11, fuelEconomy, Types.INTEGER);
+            ps.setObject(12, estimatedValue, Types.INTEGER);
+            ps.setObject(13, ownerAnnualKm, Types.INTEGER);
+            ps.setObject(14, owner.getId(), Types.INTEGER);
+                        // Owner cannot be null according to SQL script so this will throw an Exception
+
+            ps.setString(15, comments);
+            ps.setBoolean(16, active);
+
+            ps.setObject(17, photo, Types.INTEGER);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
+
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next();
                 int id = keys.getInt(1);
@@ -317,6 +260,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 // records have been automatically created by db trigger
                 updateTechnicalCarDetails(id, technicalCarDetails);
                 updateInsurance(id, insurance);
+                updateLocation (id, location);
 
                 Car car = new Car(id, name, brand, type, location, seats, doors, year, manual, gps, hook, fuel,
                         fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
@@ -374,8 +318,33 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         }
     }
 
+    private LazyStatement updateLocationStatement = new LazyStatement(
+            "UPDATE addresses JOIN cars ON car_location=address_id " +
+                    "SET address_city = ?, address_zipcode = ?, address_street = ?, address_number = ?, address_country=? " +
+                    "WHERE car_id = ?"
+    );
+
+    private void updateLocation (int carId, Address location) {
+        try {
+            PreparedStatement ps = updateLocationStatement.value();
+            ps.setString(1, location.getCity());
+            ps.setString(2, location.getZip());
+            ps.setString(3, location.getStreet());
+            ps.setString(4, location.getNum());
+            ps.setString(5, location.getCountry());
+
+            ps.setInt(6, carId);
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Address update affected 0 rows.");
+
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to update car location.", ex);
+        }
+    }
+
     private LazyStatement updateCarStatement = new LazyStatement(
-            "UPDATE cars SET car_name=?, car_type=? , car_brand=? , car_location=? , " +
+            "UPDATE cars SET car_name=?, car_type=? , car_brand=? ,  " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
                     "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
@@ -387,69 +356,44 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(1, car.getName());
             ps.setString(2, car.getType());
             ps.setString(3, car.getBrand());
-            if(car.getLocation() != null) {
-                ps.setInt(4, car.getLocation().getId());
-            } else {
-                ps.setNull(4, Types.INTEGER);
-            }
-            if(car.getSeats() != null) {
-                ps.setInt(5, car.getSeats());
-            } else {
-                ps.setNull(5, Types.INTEGER);
-            }
-            if(car.getDoors() != null) {
-                ps.setInt(6, car.getDoors());
-            } else {
-                ps.setNull(6, Types.INTEGER);
-            }
-            if(car.getYear() != null) {
-                ps.setInt(7, car.getYear());
-            } else {
-                ps.setNull(7, Types.INTEGER);
-            }
-            ps.setBoolean(8, car.isManual());
-            ps.setBoolean(9, car.isGps());
-            ps.setBoolean(10, car.isHook());
-            ps.setString(11, car.getFuel().name());
-            if(car.getFuelEconomy() != null) {
-                ps.setInt(12, car.getFuelEconomy());
-            } else {
-                ps.setNull(12, Types.INTEGER);
-            }
-            if(car.getEstimatedValue()!= null) {
-                ps.setInt(13, car.getEstimatedValue());
-            } else {
-                ps.setNull(13, Types.INTEGER);
-            }
-            if(car.getOwnerAnnualKm() != null) {
-                ps.setInt(14, car.getOwnerAnnualKm());
+
+            ps.setObject(4, car.getSeats(), Types.INTEGER);
+            ps.setObject(5, car.getDoors(), Types.INTEGER);
+            ps.setObject(6, car.getYear(), Types.INTEGER);
+
+            ps.setBoolean(7, car.isManual());
+            ps.setBoolean(8, car.isGps());
+            ps.setBoolean(9, car.isHook());
+            ps.setString(10, car.getFuel().name());
+
+            ps.setObject(11, car.getFuelEconomy(), Types.INTEGER);
+            ps.setObject(12, car.getEstimatedValue(), Types.INTEGER);
+            ps.setObject(13, car.getOwnerAnnualKm(), Types.INTEGER);
+
+            if (car.getOwner() != null) {
+                ps.setInt(14, car.getOwner().getId());
             } else {
                 ps.setNull(14, Types.INTEGER);
             }
+            ps.setString(15, car.getComments());
+            ps.setBoolean(16, car.isActive());
 
-            updateTechnicalCarDetails(car.getId(), car.getTechnicalCarDetails());
-            updateInsurance(car.getId(), car.getInsurance());
-
-            // If Owner == null, this should throw an error on execution
-            if(car.getOwner() != null) {
-                ps.setInt(15,car.getOwner().getId());
+            if (car.getPhoto() != null && car.getPhoto().getId() != 0) {
+                ps.setInt(17, car.getPhoto().getId());
             } else {
-                ps.setNull(15, Types.INTEGER);
-            }
-            ps.setString(16, car.getComments());
-
-            ps.setBoolean(17, car.isActive());
-
-            if(car.getPhoto() != null && car.getPhoto().getId() != 0){
-                ps.setInt(18, car.getPhoto().getId());
-            }else{
-                ps.setNull(18, Types.INTEGER);
+                ps.setNull(17, Types.INTEGER);
             }
 
-            ps.setInt(19, car.getId());
+            int carId = car.getId();
+
+            ps.setInt(18, carId);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");
+
+            updateTechnicalCarDetails(carId, car.getTechnicalCarDetails());
+            updateInsurance(carId, car.getInsurance());
+            updateLocation(carId, car.getLocation());
 
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update car.", ex);
