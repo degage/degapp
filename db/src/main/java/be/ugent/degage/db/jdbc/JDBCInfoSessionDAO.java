@@ -110,37 +110,63 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
     private LazyStatement createInfoSessionStatement = new LazyStatement(
             "INSERT INTO infosessions(infosession_type, infosession_timestamp, " +
-                    "infosession_address_id, infosession_host_user_id, infosession_max_enrollees, infosession_comments) " +
-                    "VALUES (?,?,?,?,?,?)",
+                    "infosession_host_user_id, infosession_max_enrollees, infosession_comments) " +
+                    "VALUES (?,?,?,?,?)",
             "infosession_id"
     );
 
     @Override
     public InfoSession createInfoSession(InfoSessionType type, UserHeader host, Address address,
                                          Instant time, int maxEnrollees, String comments) throws DataAccessException {
-        if (host.getId() == 0 || address.getId() == 0)
-            throw new DataAccessException("Tried to create infosession without user or address");
-
         try {
             PreparedStatement ps = createInfoSessionStatement.value();
             ps.setString(1, type.name());
             ps.setTimestamp(2, Timestamp.from(time));
-            ps.setInt(3, address.getId());
-            ps.setInt(4, host.getId());
-            ps.setInt(5, maxEnrollees);
-            ps.setString(6, comments);
+            ps.setInt(3, host.getId());
+            ps.setInt(4, maxEnrollees);
+            ps.setString(5, comments);
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating infosession.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new InfoSession(keys.getInt(1), type, time, address, host, maxEnrollees, comments);
+
+                int sessionId = keys.getInt(1);
+                updateLocation(sessionId, address);
+                return new InfoSession(sessionId, type, time, address, host, maxEnrollees, comments);
+
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for new infosession.", ex);
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not create infosession.", ex);
+        }
+    }
+
+    // TODO: very similar to updateLocation* in JDBCCarDAO
+    private LazyStatement updateLocationStatement = new LazyStatement(
+            "UPDATE addresses JOIN infosessions ON infosession_address_id=address_id " +
+                    "SET address_city = ?, address_zipcode = ?, address_street = ?, address_number = ?, address_country=? " +
+                    "WHERE infosession_id = ?"
+    );
+
+    private void updateLocation (int sessionId, Address location) {
+        try {
+            PreparedStatement ps = updateLocationStatement.value();
+            ps.setString(1, location.getCity());
+            ps.setString(2, location.getZip());
+            ps.setString(3, location.getStreet());
+            ps.setString(4, location.getNum());
+            ps.setString(5, location.getCountry());
+
+            ps.setInt(6, sessionId);
+
+            if(ps.executeUpdate() == 0)
+                throw new DataAccessException("Address update affected 0 rows.");
+
+        } catch(SQLException ex) {
+            throw new DataAccessException("Failed to update location of infosession.", ex);
         }
     }
 
@@ -400,31 +426,30 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
 
     private LazyStatement updateInfoSessionStatement = new LazyStatement(
             "UPDATE infosessions SET infosession_type=?, infosession_max_enrollees=?, " +
-                    "infosession_timestamp=?, infosession_address_id=?, infosession_host_user_id=?, infosession_comments=? " +
+                    "infosession_timestamp=?, infosession_host_user_id=?, infosession_comments=? " +
                     "WHERE infosession_id=?"
     );
 
     /*
-     * Updates timestamp, type and max enrollees 
-     * for updating address see updateInfoSessionAddress(InfoSession)
+     * Update infosession
      */
     @Override
     public void updateInfoSession(InfoSession session) throws DataAccessException {
-        if (session.getId() == 0)
-            throw new DataAccessException("Failed to update session. Session doesn't exist in be.ugent.degage.database.");
         try {
             PreparedStatement ps = updateInfoSessionStatement.value();
             ps.setString(1, session.getType().name());
             ps.setInt(2, session.getMaxEnrollees());
             ps.setTimestamp(3, Timestamp.from(session.getTime()));
-            ps.setInt(4, session.getAddress().getId());
-            ps.setInt(5, session.getHost().getId());
-            ps.setString(6, session.getComments());
-            ps.setInt(7, session.getId());
+            ps.setInt(4, session.getHost().getId());
+            ps.setString(5, session.getComments());
+
+            int sessionId = session.getId();
+            ps.setInt(6, sessionId);
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("InfoSession update did not affect any row.");
+            updateLocation(sessionId, session.getAddress());
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to fetch infosession for user", ex);
+            throw new DataAccessException("Failed to update infosession", ex);
         }
     }
 

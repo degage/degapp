@@ -462,6 +462,12 @@ BEGIN
   SET NEW.car_location = last_insert_id();
 END $$
 
+CREATE TRIGGER infosession_create BEFORE INSERT ON infosessions FOR EACH ROW
+BEGIN
+  INSERT INTO addresses VALUES ();
+  SET NEW.infosession_address_id = last_insert_id();
+END $$
+
 CREATE TRIGGER reservations_ins BEFORE INSERT ON reservations FOR EACH ROW
 BEGIN
     DECLARE privileged int default 0;

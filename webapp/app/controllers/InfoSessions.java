@@ -33,7 +33,6 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
-import controllers.util.FormHelper;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -48,8 +47,6 @@ import views.html.infosession.*;
 
 import java.time.Instant;
 import java.util.*;
-
-import static controllers.util.Addresses.modifyAddress;
 
 /**
  * Created by Cedric on 2/21/14.
@@ -168,7 +165,7 @@ public class InfoSessions extends Controller {
      * Edits the session for given ID, based on submitted form data
      *
      * @param sessionId SessionID to edit
-     * @return Redirect to edited session, or the form if errors occured
+     * @return Redirect to edited session, or the form if errors occurred
      */
     @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
     @InjectContext
@@ -197,9 +194,7 @@ public class InfoSessions extends Controller {
             session.setHost(host);
 
             // update address
-            AddressDAO adao = context.getAddressDAO();
-            Address newAddress = modifyAddress(model.address, session.getAddress(), adao);
-            session.setAddress(newAddress);
+            session.setAddress(model.address.toAddress());
 
             // update time
             Instant time = model.time;
@@ -226,8 +221,7 @@ public class InfoSessions extends Controller {
             }
 
             // type
-            InfoSessionType type = InfoSessionType.valueOf(model.type);
-            session.setType(type);
+            session.setType(InfoSessionType.valueOf(model.type));
 
             // comments
             session.setComments(model.comments);
@@ -474,15 +468,15 @@ public class InfoSessions extends Controller {
             DataAccessContext context = DataAccess.getInjectedContext();
             InfoSessionDAO dao = context.getInfoSessionDAO();
 
-            AddressDAO adao = context.getAddressDAO();
             InfoSessionCreationModel model = createForm.get();
-            Address address = modifyAddress(model.address, null, adao);
 
             InfoSessionType type = InfoSessionType.valueOf(model.type);
 
             UserDAO udao = context.getUserDAO();
             UserHeader host = udao.getUserHeader(model.userId);
-            InfoSession session = dao.createInfoSession(type, host, address, model.time, FormHelper.toInt(model.max_enrollees), model.comments); //TODO: allow other hosts
+            InfoSession session = dao.createInfoSession(type, host, model.address.toAddress(), model.time,
+                    model.max_enrollees == null ? 0 : model.max_enrollees,
+                    model.comments);
 
             // Schedule the reminder
             context.getJobDAO().createJob(

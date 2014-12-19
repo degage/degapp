@@ -93,40 +93,6 @@ public class Addresses  {
     }
 
     /**
-     * Modifies, creates or deletes an address in the database based on the provided form data and current address
-     *
-     * @param model   The submitted form data
-     * @param address The already-set address for the user
-     * @param dao     The DAO to edit addresses
-     * @return The changed or null if deleted
-     */
-    public static Address modifyAddress(EditAddressModel model, Address address, AddressDAO dao) {
-        // TODO: no checks needed for null + modify address always?
-        if (address == null) {
-            // User entered new address in fields
-            address = dao.createAddress(model.country, model.zipCode, model.city, model.street, model.num);
-        } else {
-            // User changed existing address
-
-            // Only call the database when there's actually some change
-            if ((model.country != null && !model.country.equals(address.getCountry())) ||
-                    (model.zipCode != null && !model.zipCode.equals(address.getZip())) ||
-                    (model.city != null && !model.city.equals(address.getCity())) ||
-                    (model.street != null && !model.street.equals(address.getStreet())) ||
-                    (model.num != null && !model.num.equals(address.getNum()))
-                    ) {
-                address.setCountry(model.country);
-                address.setZip(model.zipCode);
-                address.setCity(model.city);
-                address.setStreet(model.street);
-                address.setNum(model.num);
-                dao.updateAddress(address);
-            }
-        }
-        return address;
-    }
-
-    /**
      * Updates an address in the database
      */
     public static void updateAddress(EditAddressModel model, int addressId, AddressDAO dao) {

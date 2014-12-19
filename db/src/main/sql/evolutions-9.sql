@@ -20,4 +20,10 @@ BEGIN
    SET NEW.user_address_residence_id = last_insert_id();
 END $$
 
+CREATE TRIGGER infosession_create BEFORE INSERT ON infosessions FOR EACH ROW
+BEGIN
+  INSERT INTO addresses VALUES ();
+  SET NEW.infosession_address_id = last_insert_id();
+END $$
+
 DELIMITER ;
