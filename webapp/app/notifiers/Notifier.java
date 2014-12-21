@@ -64,7 +64,7 @@ public class Notifier extends Mailer {
         String mail = replaceUserTags(user, template.getBody());
         mail = mail.replace(
                 "%verification_url%",
-                toFullURL(routes.Login.register_verification(user.getId(), verificationUrl))
+                toFullURL(routes.Login.registerVerification(user.getId(), verificationUrl))
         );
         send (mail);
     }

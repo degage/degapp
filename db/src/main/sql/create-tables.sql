@@ -89,6 +89,7 @@ CREATE TABLE `users` (
 	`user_address_domicile_id` INT,
 	`user_address_residence_id` INT,
 	`user_driver_license_id` VARCHAR(32),
+	`user_driver_license_date` DATE,
 	`user_identity_card_id` VARCHAR(32), -- Identiteitskaartnr
 	`user_identity_card_registration_nr` VARCHAR(32), -- Rijksregisternummer
 	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'EMAIL_VALIDATING', -- Stadia die de gebruiker moet doorlopen
@@ -96,6 +97,9 @@ CREATE TABLE `users` (
 	`user_payed_deposit` BIT(1),
 	`user_agree_terms` BIT(1),
 	`user_image_id` INT,
+	`user_degage_id` INT,
+	`user_date_joined` DATE,
+	`user_deposit` INT,
 	`user_last_notified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`user_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	`user_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

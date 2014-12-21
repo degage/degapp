@@ -351,29 +351,32 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
 
-    private LazyStatement createUserStatement = new LazyStatement(
-            "INSERT INTO users(user_email, user_password, user_firstname, user_lastname, user_status) VALUES (?,?,?,?,?)",
+    private LazyStatement registerUserStatement = new LazyStatement(
+            "INSERT INTO users(user_email, user_password, user_firstname, user_lastname) " +
+                    "VALUES (?,?,?,?)",
             "user_id"
     );
 
     @Override
-    public UserHeader createUser(String email, String password, String firstName, String lastName,
-                                 UserStatus status, String phone, String cellPhone) throws DataAccessException {
+    public UserHeader registerUser(String email, String password, String firstName, String lastName) throws DataAccessException {
         try {
-            PreparedStatement ps = createUserStatement.value();
+            PreparedStatement ps = registerUserStatement.value();
             ps.setString(1, email);
             ps.setString(2, BCrypt.hashpw(password, BCrypt.gensalt(12)));
             ps.setString(3, firstName);
             ps.setString(4, lastName);
-            ps.setString(5, status.name());
 
             ps.executeUpdate();
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new UserHeader(keys.getInt(1), email, firstName, lastName, status, phone, cellPhone);
+                return new UserHeader(keys.getInt(1), email, firstName, lastName, UserStatus.EMAIL_VALIDATING, null, null);
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to commit new user transaction.", ex);
+            if (ex.getErrorCode() == 1022) {
+                return null; // unique key violation
+            } else {
+                throw new DataAccessException("Failed to commit new user transaction.", ex);
+            }
         }
     }
 

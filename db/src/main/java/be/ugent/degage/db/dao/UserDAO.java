@@ -94,11 +94,10 @@ public interface UserDAO {
 	public void deleteUser(int userId) throws DataAccessException;
 
     /**
-     * Create a new user.
-     * @param password plain text password
+     * Register a new user. Returns null if user with the given email address already exists. The status
+     * of the newly created user is EMAIL_VALIDATING
      */
-    public UserHeader createUser(String email, String password, String firstName, String lastName,
-                                 UserStatus status, String phone, String cellPhone) throws DataAccessException;
+    public UserHeader registerUser(String email, String password, String firstName, String lastName) throws DataAccessException;
 
     // TODO: below
     public int getAmountOfUsers(Filter filter) throws DataAccessException;

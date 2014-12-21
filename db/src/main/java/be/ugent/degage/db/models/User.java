@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.models;
 
+import java.time.LocalDate;
+
 /**
  * Represents a single user
  */
@@ -44,6 +46,10 @@ public class User {
     private Address addressResidence;
     private UserGender gender;
     private String license;
+    private LocalDate licenseDate;
+    private Integer degageId;
+    private LocalDate dateJoined;
+    private Integer deposit;
     private UserStatus status;
     private IdentityCard identityCard;
     private String damageHistory;
@@ -196,6 +202,38 @@ public class User {
         this.agreeTerms = agreeTerms;
     }
 
+    public LocalDate getLicenseDate() {
+        return licenseDate;
+    }
+
+    public void setLicenseDate(LocalDate licenseDate) {
+        this.licenseDate = licenseDate;
+    }
+
+    public Integer getDegageId() {
+        return degageId;
+    }
+
+    public void setDegageId(Integer degageId) {
+        this.degageId = degageId;
+    }
+
+    public Integer getDeposit() {
+        return deposit;
+    }
+
+    public void setDeposit(Integer deposit) {
+        this.deposit = deposit;
+    }
+
+    public LocalDate getDateJoined() {
+        return dateJoined;
+    }
+
+    public void setDateJoined(LocalDate dateJoined) {
+        this.dateJoined = dateJoined;
+    }
+
     @Override
     public String toString(){
         return firstName + " " + lastName;
@@ -218,55 +256,5 @@ public class User {
      */
     public boolean canLogin() {
         return status != UserStatus.BLOCKED && status != UserStatus.DROPPED && status != UserStatus.EMAIL_VALIDATING;
-    }
-
-    @Override
-    // TODO: remove these equals and hash codes (probably used by Cache mechanism of play?)
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        User user = (User) o;
-
-        if (agreeTerms != user.agreeTerms) return false;
-        if (id != user.id) return false;
-        if (payedDeposit != user.payedDeposit) return false;
-        if (addressDomicile != null ? !addressDomicile.equals(user.addressDomicile) : user.addressDomicile != null)
-            return false;
-        if (addressResidence != null ? !addressResidence.equals(user.addressResidence) : user.addressResidence != null)
-            return false;
-        if (cellphone != null ? !cellphone.equals(user.cellphone) : user.cellphone != null) return false;
-        if (damageHistory != null ? !damageHistory.equals(user.damageHistory) : user.damageHistory != null)
-            return false;
-        if (!email.equals(user.email)) return false;
-        if (!firstName.equals(user.firstName)) return false;
-        if (gender != user.gender) return false;
-        if (identityCard != null ? !identityCard.equals(user.identityCard) : user.identityCard != null) return false;
-        if (!lastName.equals(user.lastName)) return false;
-        if (license != null ? !license.equals(user.license) : user.license != null) return false;
-        if (phone != null ? !phone.equals(user.phone) : user.phone != null) return false;
-        if (status != user.status) return false;
-
-        return true;
-    }
-
-    @Override
-    public int hashCode() {
-        int result = id;
-        result = 31 * result + email.hashCode();
-        result = 31 * result + firstName.hashCode();
-        result = 31 * result + lastName.hashCode();
-        result = 31 * result + (phone != null ? phone.hashCode() : 0);
-        result = 31 * result + (cellphone != null ? cellphone.hashCode() : 0);
-        result = 31 * result + (addressDomicile != null ? addressDomicile.hashCode() : 0);
-        result = 31 * result + (addressResidence != null ? addressResidence.hashCode() : 0);
-        result = 31 * result + (gender != null ? gender.hashCode() : 0);
-        result = 31 * result + (license != null ? license.hashCode() : 0);
-        result = 31 * result + (status != null ? status.hashCode() : 0);
-        result = 31 * result + (identityCard != null ? identityCard.hashCode() : 0);
-        result = 31 * result + (damageHistory != null ? damageHistory.hashCode() : 0);
-        result = 31 * result + (payedDeposit ? 1 : 0);
-        result = 31 * result + (agreeTerms ? 1 : 0);
-        return result;
     }
 }

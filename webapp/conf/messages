@@ -30,3 +30,4 @@
 # Constraints
 error.required=Het veld mag niet leeg zijn
 error.invalid=Ongeldige waarde
+error.email=Ongeldig e-mailadres

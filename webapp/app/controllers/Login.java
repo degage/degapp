@@ -41,14 +41,17 @@ import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
 import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.login.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 
 /**
- * Created by Cedric on 2/16/14.
  */
 public class Login extends Controller {
 
@@ -81,25 +84,6 @@ public class Login extends Controller {
 
         public String validate() {
             return new Constraints.EmailValidator().isValid(email) ? null : "Ongeldig emailadres";
-        }
-    }
-
-    public static class RegisterModel {
-        public String email;
-        public String password;
-        public String password_repeat;
-        public String firstName;
-        public String lastName;
-
-        public String validate() {
-            if (!new Constraints.EmailValidator().isValid(email))
-                return "Dit is geen geldig e-mailadres.";
-            else if (password == null || password.length() < 8)
-                return "Wachtwoord moet minstens 8 tekens bevatten.";
-            else if (!password.equals(password_repeat))
-                return "Wachtwoord komt niet overeen.";
-            else
-                return null;
         }
     }
 
@@ -295,14 +279,10 @@ public class Login extends Controller {
      */
     // needs no injected context
     public static Result register() {
-        if (DataProvider.getUserProvider().getUser() == null) {
-            return ok(
-                    register.render(Form.form(RegisterModel.class))
-            );
+        if (!CurrentUser.isValid()) {
+            return ok(register.render(Form.form(RegisterData.class)) );
         } else {
-            return redirect(
-                    routes.Login.login(null)
-            );
+            return redirect( routes.Dashboard.index() );
         }
     }
 
@@ -315,7 +295,7 @@ public class Login extends Controller {
      * @return A login page when successful, or error message when verification code is invalid
      */
     @InjectContext
-    public static Result register_verification(int userId, String uuid) {
+    public static Result registerVerification(int userId, String uuid) {
 
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
         UserHeader user = dao.getUserHeader(userId);
@@ -345,6 +325,34 @@ public class Login extends Controller {
         }
     }
 
+    public static class RegisterData {
+
+        @Constraints.Email
+        public String email;
+
+        @Constraints.Required
+        public String password;
+
+        @Constraints.Required
+        public String password_repeat;
+
+        @Constraints.Required
+        public String firstName;
+
+        @Constraints.Required
+        public String lastName;
+
+        public List<ValidationError> validate() {
+            // TODO: password strength validation
+            if (!password.equals(password_repeat))
+                return Arrays.asList(new ValidationError(
+                        "password_repeat", "Beide wachtwoorden moeten gelijk zijn"
+                ));
+            else
+                return null;
+        }
+    }
+
     /**
      * Method: POST
      * Creates a pending user registration
@@ -352,21 +360,19 @@ public class Login extends Controller {
      * @return Redirect and logged in session if success
      */
     @InjectContext
-    public static Result register_process() {
-        Form<RegisterModel> registerForm = Form.form(RegisterModel.class).bindFromRequest();
+    public static Result registerProcess() {
+        Form<RegisterData> registerForm = Form.form(RegisterData.class).bindFromRequest();
         if (registerForm.hasErrors()) {
             return badRequest(register.render(registerForm));
         } else {
-            CurrentUser.clear();
             UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-            if (dao.getUserByEmail(registerForm.get().email) != null) {
+            RegisterData data = registerForm.get();
+            UserHeader user = dao.registerUser(data.email, data.password, data.firstName, data.lastName);
+            if (user == null) {
                 registerForm.reject("Er bestaat reeds een gebruiker met dit emailadres.");
+                // TODO: send email to that user
                 return badRequest(register.render(registerForm));
             } else {
-                UserHeader user = dao.createUser(registerForm.get().email, registerForm.get().password,
-                        registerForm.get().firstName, registerForm.get().lastName, UserStatus.EMAIL_VALIDATING,
-                        null, null);
-
                 // Now we create a registration UUID
                 String verificationIdent = dao.createVerificationString(user.getId(), VerificationType.REGISTRATION);
                 Notifier.sendVerificationMail(user, verificationIdent);
