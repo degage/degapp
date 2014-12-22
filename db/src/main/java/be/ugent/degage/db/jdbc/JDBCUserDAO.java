@@ -80,64 +80,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     // TODO: move to separate verification dao?
 
-    private LazyStatement deleteVerificationStatement = new LazyStatement(
-            "DELETE FROM verifications WHERE verification_user_id = ? AND verification_type = ?"
-    );
-
-    @Override
-    public void deleteVerificationString(int userId, VerificationType type) throws DataAccessException {
-        try {
-            PreparedStatement ps = deleteVerificationStatement.value();
-            ps.setInt(1, userId);
-            ps.setString(2, type.name());
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("Verification delete operation affected 0 rows.");
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to delete verification.", ex);
-        }
-    }
-
-    private LazyStatement createVerificationStatement = new LazyStatement(
-            "INSERT INTO verifications(verification_ident, verification_user_id, verification_type) VALUES(UUID(),?, ?)"
-    );
-
-    @Override
-    public String createVerificationString(int userId, VerificationType type) throws DataAccessException {
-        try {
-            PreparedStatement ps = createVerificationStatement.value();
-            ps.setInt(1, userId);
-            ps.setString(2, type.name());
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("Verification string creation failed. Zero rows affected");
-
-            return getVerificationString(userId, type);
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to create verification string.", ex);
-        }
-    }
-
-    private LazyStatement getVerificationStatement = new LazyStatement(
-            "SELECT verification_ident FROM verifications WHERE verification_user_id = ? AND verification_type = ?"
-    );
-
-    @Override
-    public String getVerificationString(int userId, VerificationType type) throws DataAccessException {
-        try {
-            PreparedStatement ps = getVerificationStatement.value();
-            ps.setInt(1, userId);
-            ps.setString(2, type.name());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (!rs.next())
-                    return null;
-                else
-                    return rs.getString("verification_ident");
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to get verification string.", ex);
-        }
-    }
 
 
     public static User populateUser(ResultSet rs) throws SQLException {
@@ -225,7 +167,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         try {
             PreparedStatement ps = getUserByEmailStatement.value();
-            ps.setString(1, email);
+            ps.setString(1, email.trim().toLowerCase());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next())
                     return populateUserHeader(rs);
@@ -246,7 +188,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     public UserHeader getUserWithPassword(String email, String password) throws DataAccessException {
         try {
             PreparedStatement ps = getUserByPasswordStatement.value();
-            ps.setString(1, email);
+            ps.setString(1, email.trim().toLowerCase());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     UserHeader result = populateUserHeader(rs);
@@ -295,19 +237,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    @Override public void updatePassword (int userId, String newPassword) throws DataAccessException {
-        try {
-            PreparedStatement ps = updatePasswordStatement.value();
-            ps.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
-            ps.setInt (2, userId);
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("Could not update password");
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not update password", ex);
-        }
-    }
-
     private LazyStatement getUserByIdStatement = new LazyStatement(
             USER_QUERY + " WHERE users.user_id = ?"
     );
@@ -349,38 +278,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
 
     }
-
-
-    private LazyStatement registerUserStatement = new LazyStatement(
-            "INSERT INTO users(user_email, user_password, user_firstname, user_lastname) " +
-                    "VALUES (?,?,?,?)",
-            "user_id"
-    );
-
-    @Override
-    public UserHeader registerUser(String email, String password, String firstName, String lastName) throws DataAccessException {
-        try {
-            PreparedStatement ps = registerUserStatement.value();
-            ps.setString(1, email);
-            ps.setString(2, BCrypt.hashpw(password, BCrypt.gensalt(12)));
-            ps.setString(3, firstName);
-            ps.setString(4, lastName);
-
-            ps.executeUpdate();
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
-                return new UserHeader(keys.getInt(1), email, firstName, lastName, UserStatus.EMAIL_VALIDATING, null, null);
-            }
-        } catch (SQLException ex) {
-            if (ex.getErrorCode() == 1022) {
-                return null; // unique key violation
-            } else {
-                throw new DataAccessException("Failed to commit new user transaction.", ex);
-            }
-        }
-    }
-
-
 
     private LazyStatement updateUserStatusStatement = new LazyStatement(
             "UPDATE users SET user_status=? WHERE user_id = ?"

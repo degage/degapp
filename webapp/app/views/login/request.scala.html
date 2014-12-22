@@ -1,4 +1,4 @@
-/* UserStatus.java
+@* request.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,31 +24,16 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
- */
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
-package be.ugent.degage.db.models;
+@(form: Form[Login.EmailData])
 
-/**
- * The various user statuses. (Database default: REGISTERED)
- *
- * Note: by convention the value returned by {@link #toString} is used to display a description of the
- * enum value in the web interface.
- */
-public enum UserStatus {
-    REGISTERED ("Geregistreerd"),
-    FULL_VALIDATING ("Lidmaatschap aangevraagd"),
-    FULL ("Volwaardig lid"),
-    BLOCKED ("Geblokkeerd"),
-    DROPPED ("Verwijderd");
-
-    private String description;
-
-    private UserStatus(String description) {
-        this.description = description;
-    }
-
-    public String toString(){
-        return description;
+@smallPage("Aanvraag van een Dégage-account") {
+    @helper.form(routes.Login.requestRegistrationPost) {
+        <fieldset>
+            @std.textField(form("email"), "E-mailadres waarmee je wil inloggen")
+            @std.submitButton("Vraag een account aan")
+        </fieldset>
     }
 }

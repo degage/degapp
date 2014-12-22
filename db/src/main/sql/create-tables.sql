@@ -110,6 +110,14 @@ CREATE TABLE `users` (
 	UNIQUE INDEX `user_email` (`user_email`)
 );
 
+CREATE TABLE `verifications` (
+	`verification_ident` CHAR(37) NOT NULL,
+	`verification_email` VARCHAR(64) NOT NULL,
+	`verification_type` ENUM('REGISTRATION','PWRESET') NOT NULL DEFAULT 'REGISTRATION',
+	`verification_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	PRIMARY KEY (`verification_ident`)
+);
+
 CREATE TABLE idfiles (
     user_id INT NOT NULL,
     file_id INT NOT NULL,
@@ -374,16 +382,6 @@ CREATE TABLE `templatetagassociations` ( -- Welke tags horen bij welke templates
 	PRIMARY KEY (`template_tag_association_id`),
 	FOREIGN KEY (`template_id`) REFERENCES templates(`template_id`),
 	FOREIGN KEY (`template_tag_id`) REFERENCES templatetags(`template_tag_id`)
-);
-
-CREATE TABLE `verifications` (
-	`verification_ident` CHAR(37) NOT NULL,
-	`verification_user_id` INT NOT NULL,
-	`verification_type` ENUM('REGISTRATION','PWRESET') NOT NULL DEFAULT 'REGISTRATION',
-	`verification_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	`verification_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`verification_user_id`, `verification_type`),
-	CONSTRAINT `FK_VERIFICATION_USER` FOREIGN KEY (`verification_user_id`) REFERENCES `users` (`user_id`)
 );
 
 CREATE TABLE `notifications` ( -- from system to user

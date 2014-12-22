@@ -27,15 +27,15 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Login.RegisterData])
+@(form: Form[Login.RegisterData], uuid: String)
 
 @smallPage("Registreren") {
-    @helper.form(routes.Login.registerProcess) {
+    @helper.form(routes.Login.registerVerificationPost(uuid)) {
         <fieldset>
             @formErrors(form)
+            @std.textField(form("email"), "E-mailadres (zelfde als bij aanvraag)")
             @std.textField(form("firstName"), "Voornaam")
             @std.textField(form("lastName"), "Familienaam")
-            @std.textField(form("email"), "E-mailadres")
             @std.passwordField(form("password"), "Wachtwoord")
             @std.passwordField(form("password_repeat"), "(nogmaals)")
             <p>(Alle velden zijn verplicht.)</p>

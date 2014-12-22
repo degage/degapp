@@ -58,11 +58,6 @@ public interface UserDAO {
     public boolean changePassword (int userId, String oldPassword, String newPassword) throws DataAccessException;
 
     /**
-     * Give a new password to the user. (User {@link #changePassword} by preference.)
-     */
-    public void updatePassword (int userId, String newPassword) throws DataAccessException;
-
-    /**
      * Return the user with the given id
      */
     public User getUser(int userId) throws DataAccessException;
@@ -93,18 +88,8 @@ public interface UserDAO {
      */
 	public void deleteUser(int userId) throws DataAccessException;
 
-    /**
-     * Register a new user. Returns null if user with the given email address already exists. The status
-     * of the newly created user is EMAIL_VALIDATING
-     */
-    public UserHeader registerUser(String email, String password, String firstName, String lastName) throws DataAccessException;
-
     // TODO: below
     public int getAmountOfUsers(Filter filter) throws DataAccessException;
     public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
-
-    public String getVerificationString(int userId, VerificationType type) throws DataAccessException;
-    public String createVerificationString(int userId, VerificationType type) throws DataAccessException;
-    public void deleteVerificationString(int userID, VerificationType type) throws DataAccessException;
 
 }

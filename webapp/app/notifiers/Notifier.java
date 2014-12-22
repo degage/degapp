@@ -54,17 +54,16 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendVerificationMail(UserHeader user, String verificationUrl) {
+    public static void sendVerificationMail(String email, String verificationUrl) {
         // Remark: phone numbers are not filled in!
-        setSubject("Verifieer jouw Dégage-account");
-        addRecipient(user.getEmail());
+        setSubject("Accountaanvraag bij Dégage");
+        addRecipient(email);
         addFrom(NOREPLY);
         TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
         EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = mail.replace(
+        String mail = template.getBody().replace(
                 "%verification_url%",
-                toFullURL(routes.Login.registerVerification(user.getId(), verificationUrl))
+                toFullURL(routes.Login.registerVerification(verificationUrl))
         );
         send (mail);
     }
@@ -317,7 +316,7 @@ public class Notifier extends Mailer {
         String mail = replaceUserTags(user, template.getBody());
         mail = mail.replace(
                 "%password_reset_url%",
-                toFullURL(routes.Login.resetPassword(user.getId(), verificationUrl))
+                toFullURL(routes.Login.resetPassword(verificationUrl))
         );
         send(mail);
     }

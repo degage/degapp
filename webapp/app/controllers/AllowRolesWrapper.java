@@ -62,9 +62,9 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
             }
 
             UserStatus status = UserStatus.valueOf(statusString);
-            if (status == UserStatus.BLOCKED || status == UserStatus.DROPPED || status == UserStatus.EMAIL_VALIDATING) {
+            if (status == UserStatus.BLOCKED || status == UserStatus.DROPPED ) {
                 // not allowed to log in
-                ctx.flash().put("danger", "Dit account is nog niet geactiveerd of werd geblokkeerd.");
+                ctx.flash().put("danger", "Dit account is verwijderd of werd geblokkeerd.");
                 return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
             }
 

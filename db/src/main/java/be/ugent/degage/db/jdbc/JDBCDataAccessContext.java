@@ -65,6 +65,7 @@ class JDBCDataAccessContext implements DataAccessContext {
     private FileDAO fileDAO;
     private SettingDAO settingDAO;
     private JobDAO jobDAO;
+    private VerificationDAO verificationDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -290,5 +291,13 @@ class JDBCDataAccessContext implements DataAccessContext {
             receiptDAO = new JDBCReceiptDAO(this);
         }
         return receiptDAO;
+    }
+
+    @Override
+    public VerificationDAO getVerificationDAO() {
+        if(verificationDAO == null){
+            verificationDAO = new JDBCVerificationDAO(this);
+        }
+        return verificationDAO;
     }
 }

@@ -35,18 +35,14 @@
   INSERT INTO templates(template_id, template_title, template_body, template_send_mail_changeable) VALUES (
   1,
   "Verificatie",
-  "Beste %user_firstname% %user_lastname%,<br>
+  "Beste toekomstige gebruiker,<br>
   <br>
-  Om jouw e-mailadres te controleren vragen we je om op onderstaande link te klikken:<br>
+  Klik op onderstaande link om verder te gaan met de registratie:<br>
   %verification_url% <br>
   <br>
   Met vriendelijke groeten,<br>
   Dégage", 0);
 
-  INSERT INTO templatetagassociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Verificatie" AND template_tag_body = "user_firstname";
-  INSERT INTO templatetagassociations(template_id, template_tag_id)
-  SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Verificatie" AND template_tag_body = "user_lastname";
   INSERT INTO templatetagassociations(template_id, template_tag_id)
   SELECT template_id, template_tag_id FROM templates, templatetags WHERE template_title = "Verificatie" AND template_tag_body = "verification_url";
 

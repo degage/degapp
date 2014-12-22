@@ -36,6 +36,8 @@ import play.mvc.Controller;
 
 import java.util.Set;
 
+import static play.mvc.Controller.flash;
+
 /**
  * Manages information about the current user, as stored in the HTTP session
  */

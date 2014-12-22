@@ -1,4 +1,4 @@
-/* UserStatus.java
+/* VerificationDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,28 +27,29 @@
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package be.ugent.degage.db.models;
+package be.ugent.degage.db.dao;
+
+import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.models.VerificationType;
 
 /**
- * The various user statuses. (Database default: REGISTERED)
- *
- * Note: by convention the value returned by {@link #toString} is used to display a description of the
- * enum value in the web interface.
  */
-public enum UserStatus {
-    REGISTERED ("Geregistreerd"),
-    FULL_VALIDATING ("Lidmaatschap aangevraagd"),
-    FULL ("Volwaardig lid"),
-    BLOCKED ("Geblokkeerd"),
-    DROPPED ("Verwijderd");
+public interface VerificationDAO {
 
-    private String description;
+    public String createToken(String email, VerificationType type) throws DataAccessException;
 
-    private UserStatus(String description) {
-        this.description = description;
+    public static enum Result {
+        OK, INVALID_PAIR, ALREADY_EXISTS;
     }
 
-    public String toString(){
-        return description;
-    }
+    /**
+     * Register a new user for a given token. The status of the newly created user is REGISTERED
+     */
+    public Result createUserForToken (String token, String email, String password, String firstName, String lastName) throws DataAccessException;
+
+    /**
+     * Change the password for the user with the given email address.
+     */
+    public Result changePasswordForToken (String token, String email, String password) throws DataAccessException;
+
 }

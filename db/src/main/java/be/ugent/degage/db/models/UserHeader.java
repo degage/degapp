@@ -122,7 +122,7 @@ public class UserHeader {
      * Is this user allowed to login (depends on the user status)?
      */
     public boolean canLogin() {
-        return status != UserStatus.BLOCKED && status != UserStatus.DROPPED && status != UserStatus.EMAIL_VALIDATING;
+        return status != UserStatus.BLOCKED && status != UserStatus.DROPPED;
     }
 
 }
