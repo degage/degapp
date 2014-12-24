@@ -35,7 +35,6 @@
 
 @app("Dashboard", stylesheets){
     @breadcrumbs {
-        @breadcrumb("Dashboard")
     }
 
     @maincontent("Dashboard"){
@@ -97,7 +96,7 @@
                     </div>
                     <div class="panel-body">
                         @if(!approvalRequestSent) {
-                            Tenslotte kan je het volwaardig lidmaatschap <a href="@routes.InfoSessions.requestApproval">hier</a> aanvragen.
+                            Tenslotte kan je het volwaardig lidmaatschap <a href="@routes.Approvals.requestApproval">hier</a> aanvragen.
                         } else {
                             Je aanvraag is goed verzonden en wordt verwerkt. Hierna ben je een volwaardig lid.
                         }

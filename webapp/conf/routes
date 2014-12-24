@@ -133,15 +133,17 @@ GET         /infosession/edit                       controllers.InfoSessions.edi
 POST        /infosession/edit                       controllers.InfoSessions.editSessionPost(sessionId: Int)
 GET         /infosession/status                     controllers.InfoSessions.setUserSessionStatus(sessionId: Int, userId: Int, status: String)
 GET         /infosession/delete                     controllers.InfoSessions.removeSession(sessionId: Int)
-GET         /infosession/approval                   controllers.InfoSessions.requestApproval()
-POST        /infosession/approval                   controllers.InfoSessions.requestApprovalPost()
-GET         /infosession/approvals/page             controllers.InfoSessions.pendingApprovalListPaged(page: Int)
-GET         /infosession/approvals                  controllers.InfoSessions.pendingApprovalList()
-GET         /infosession/approval/details           controllers.InfoSessions.approvalDetails(id: Int)
-POST        /infosession/approval/details           controllers.InfoSessions.approvalAdminAction(id: Int)
-GET         /infosession/approval/admin             controllers.InfoSessions.approvalAdmin(id: Int)
-POST        /infosession/approval/admin             controllers.InfoSessions.approvalAdminPost(id: Int)
 POST        /infosession/adduser                    controllers.InfoSessions.addUserToSession(sessionId: Int)
+
+# Approvals for membership
+GET         /approval                               controllers.Approvals.requestApproval()
+POST        /approval                               controllers.Approvals.requestApprovalPost()
+GET         /approvals/page                         controllers.Approvals.pendingApprovalListPaged(page: Int)
+GET         /approvals                              controllers.Approvals.pendingApprovalList()
+GET         /approval/details                       controllers.Approvals.approvalDetails(id: Int)
+POST        /approval/details                       controllers.Approvals.approvalAdminAction(id: Int)
+GET         /approval/admin                         controllers.Approvals.approvalAdmin(id: Int)
+POST        /approval/admin                         controllers.Approvals.approvalAdminPost(id: Int)
 
 # Settings
 GET         /settings/sysvars/edit                  controllers.Settings.editSysvar(name: String)

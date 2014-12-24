@@ -27,18 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reasons: Iterable[String], form: Form[InfoSessions.RequestApprovalModel], terms: String, userWentToInfoSession: Boolean)
+@(reasons: Iterable[String], form: Form[Approvals.RequestApprovalData], terms: String)
 
 @app("Goedkeuringsaanvraag") {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
-            <li class="active">Goedkeuring aanvragen</li>
-        </ol>
-    </div>
-
-    <div id="page-wrapper">
+    @breadcrumbs {
+        @breadcrumb("Infosessies", routes.InfoSessions.showUpcomingSessions)
+        @breadcrumb("Lidmaatschap aanvragen")
+    }
+    @maincontent("Lidmaatschap aanvragen"){
         @flashes()
         @if(reasons.iterator.hasNext) {
             <div class="panel panel-danger">
@@ -62,7 +58,7 @@
                 <h3 class="panel-title">Aanvraag indienen</h3>
             </div>
             <div class="panel-body">
-            @helper.form(routes.InfoSessions.requestApprovalPost, 'class -> "form-horizontal") {
+            @helper.form(routes.Approvals.requestApprovalPost) {
                 @if(form.hasGlobalErrors) {
                     <div class="alert alert-danger alert-dismissable">
                         <strong>Error!</strong> @form.globalError.message
@@ -75,7 +71,7 @@
                         <div class="col-md-12 well" style="overflow: auto; max-height:400px;">
                          @Html(terms)    @*TODO: dangerous? *@
                         </div>
-                        <input type="checkbox" id='@form("acceptsTerms").id' name=''@form("acceptsTerms").name' value="true" @if("true".equals(form("acceptsTerms").value)) { checked="checked" }> Ik aanvaard de algemene voorwaarden
+                        <input type="checkbox" id='@form("acceptsTerms").id' name='@form("acceptsTerms").name' value="true" @if("true".equals(form("acceptsTerms").value)) { checked="checked" }> Ik aanvaard de algemene voorwaarden
                     </div>
                 </div>
 
@@ -96,5 +92,5 @@
             }
             </div>
         </div>
-    </div>
+    }
 }

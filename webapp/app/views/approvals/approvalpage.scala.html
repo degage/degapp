@@ -58,9 +58,9 @@
             <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
             <td>
                 <div class="btn-group btn-group-xs">
-                    <a class="btn btn-info" href="@routes.InfoSessions.approvalAdmin(approval.getId)">Admin toewijzen</a>
+                    <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
                     @if(approval.getAdmin != null) {
-                        <a class="btn btn-primary" href="@routes.InfoSessions.approvalDetails(approval.getId)">Afronden</a>
+                        <a class="btn btn-primary" href="@routes.Approvals.approvalDetails(approval.getId)">Afronden</a>
                     }
                 </div>
             </td>

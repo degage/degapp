@@ -36,7 +36,7 @@
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li><a href="@routes.InfoSessions.pendingApprovalList">Goedkeuringsaanvragen</a></li>
+            <li><a href="@routes.Approvals.pendingApprovalList">Goedkeuringsaanvragen</a></li>
             <li class="active">Contractverantwoordelijke toewijzen</li>
         </ol>
     </div>
@@ -51,7 +51,7 @@
                 <h3 class="panel-title"><i class="fa fa-pencil-square-o"></i> Aanvraag</h3>
             </div>
             <div class="panel-body">
-            @helper.form(routes.InfoSessions.approvalAdminPost(approval.getId)) {
+            @helper.form(routes.Approvals.approvalAdminPost(approval.getId)) {
                 @std.userpicker(form("userId"), form("userIdAsString"), "Contractverantwoordelijke")
                 @std.submitButton("Contractverantwoordelijke toewijzen")
             </div>

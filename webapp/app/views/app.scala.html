@@ -294,7 +294,7 @@
 
                         @if(CurrentUser.hasSomeRole(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN )){
                             <li @if(title == "Goedkeuringen gebruikers") {class="active"}>
-                                <a href="@routes.InfoSessions.pendingApprovalList"><i class="fa fa-file fa-fw"></i> Goedkeuring gebruikers</a>
+                                <a href="@routes.Approvals.pendingApprovalList"><i class="fa fa-file fa-fw"></i> Goedkeuring gebruikers</a>
                             </li>
                         }
 

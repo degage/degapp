@@ -117,7 +117,7 @@ public class Application extends Controller {
                         javascript.Drives.showDrivesPage(),
                         javascript.Drives.showDrivesAdminPage(),
                         javascript.Maps.getMap(),
-                        javascript.InfoSessions.pendingApprovalListPaged(),
+                        javascript.Approvals.pendingApprovalListPaged(),
                         javascript.Reserve.reserve()
                 )
         );
