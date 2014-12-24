@@ -30,83 +30,96 @@
 @(user: User, completeness: Int = 0, form: play.data.Form[Reserve.IndexModel])
 @import providers.DataProvider
 @import db.CurrentUser
-@* Always called with current user *@
-@defining(CurrentUser.hasRole(UserRole.CAR_OWNER)) { owner =>
-    <div class="row">
-        @if(owner) {
-            @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { requests =>
-                @dashboardTopPanel(
-                    "col-lg-3",
-                    "fa-car",
-                    requests == 0,
-                    if(requests>0) requests.toString else "",
-                    routes.Drives.indexWithStatus("REQUEST"),
-                    "Ga naar reservatie-aanvragen"
-                ){
-                    @if(requests == 0) { Geen nieuwe reservaties }
-                    @if(requests == 1) { Nieuwe reservatie }
-                    @if(requests > 1) { Nieuwe reservaties }
-                }
-            }
-        }
-        @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false)) { requests =>
-            @dashboardTopPanel(
-                if(owner) "col-lg-3" else "col-lg-4",
-                "fa-edit",
-                requests==0,
-                requests.toString,
-                if(requests > 0) routes.Drives.indexWithStatus("REQUEST_DETAILS") else routes.Drives.index(),
-                "Ga naar ritten"
-            ){
-                @if(requests == 1) { Rit vereist } else { Ritten vereisen } details
-            }
-        }
-        @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread =>
-            @dashboardTopPanel(
-                if(owner) "col-lg-3" else "col-lg-4",
-                "fa-envelope",
-                unread==0,
-                unread.toString,
-                routes.Messages.showMessages,
-                "Ga naar berichten"
-            ){
-                Ongelezen @if(unread == 1) { bericht } else { berichten }
-            }
-        }
-        @dashboardTopPanel(
-            if(owner) "col-lg-3" else "col-lg-4",
-            "fa-user",
-            completeness==100,
-            "Volledigheid profiel",
-            routes.Profile.indexWithoutId,
-            if(completeness != 100) "Vul je profiel verder aan" else "Ga naar je profiel"
-        ){
-            <div class="progress">
-                @if(completeness == 100){
-                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
-                } else {
-                    <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
-                }
-            </div>
-        }
-    </div>
+@stylesheets = {
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
 }
 
-@panel("Reserveren", "fa-pencil"){
-   <div class="form-group cl-xs-12">
-       <div class="button-group">
-           <a class="btn btn-default" href="@routes.Reserve.index">Zoek een auto die vrij is in een bepaalde periode</a>
-           <a class="btn btn-default" href="@routes.Reserve.overview(null)">Overzicht van reservaties voor een bepaalde dag</a>
-       </div>
-   </div>
-}
-<div class="row">
-    <div class="col-lg-12">
-        <div class="panel panel-default">
-            <div class="panel-body">
-                <div class="alert alert-warning text-center">Het dashboard wordt nog aangevuld
-                    met andere panelen</div>
+@app("Dashboard", stylesheets){
+    @breadcrumbs {
+        @breadcrumb("Dashboard")
+    }
+
+    @maincontent("Dashboard"){
+
+        @defining(CurrentUser.hasRole(UserRole.CAR_OWNER)) { owner =>
+            <div class="row">
+                @if(owner) {
+                    @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { requests =>
+                        @dashboardTopPanel(
+                            "col-lg-3",
+                            "fa-car",
+                            requests == 0,
+                            if(requests>0) requests.toString else "",
+                            routes.Drives.indexWithStatus("REQUEST"),
+                            "Ga naar reservatie-aanvragen"
+                        ){
+                            @if(requests == 0) { Geen nieuwe reservaties }
+                            @if(requests == 1) { Nieuwe reservatie }
+                            @if(requests > 1) { Nieuwe reservaties }
+                        }
+                    }
+                }
+                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false)) { requests =>
+                    @dashboardTopPanel(
+                        if(owner) "col-lg-3" else "col-lg-4",
+                        "fa-edit",
+                        requests==0,
+                        requests.toString,
+                        if(requests > 0) routes.Drives.indexWithStatus("REQUEST_DETAILS") else routes.Drives.index(),
+                        "Ga naar ritten"
+                    ){
+                        @if(requests == 1) { Rit vereist } else { Ritten vereisen } details
+                    }
+                }
+                @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(user.getId())) { unread =>
+                    @dashboardTopPanel(
+                        if(owner) "col-lg-3" else "col-lg-4",
+                        "fa-envelope",
+                        unread==0,
+                        unread.toString,
+                        routes.Messages.showMessages,
+                        "Ga naar berichten"
+                    ){
+                        Ongelezen @if(unread == 1) { bericht } else { berichten }
+                    }
+                }
+                @dashboardTopPanel(
+                    if(owner) "col-lg-3" else "col-lg-4",
+                    "fa-user",
+                    completeness==100,
+                    "Volledigheid profiel",
+                    routes.Profile.indexWithoutId,
+                    if(completeness != 100) "Vul je profiel verder aan" else "Ga naar je profiel"
+                ){
+                    <div class="progress">
+                        @if(completeness == 100){
+                            <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                        } else {
+                            <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
+                        }
+                    </div>
+                }
+                @flashes()
+            </div>
+        }
+
+        @panel("Reserveren", "fa-pencil"){
+           <div class="form-group cl-xs-12">
+               <div class="button-group">
+                   <a class="btn btn-default" href="@routes.Reserve.index">Zoek een auto die vrij is in een bepaalde periode</a>
+                   <a class="btn btn-default" href="@routes.Reserve.overview(null)">Overzicht van reservaties voor een bepaalde dag</a>
+               </div>
+           </div>
+        }
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <div class="alert alert-warning text-center">Het dashboard wordt nog aangevuld
+                            met andere panelen</div>
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-</div>
+    }
+}

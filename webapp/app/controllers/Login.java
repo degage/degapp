@@ -198,7 +198,7 @@ public class Login extends Controller {
                         return redirect(redirect);
                     } else {
                         return redirect(
-                                routes.Dashboard.index() // go to dashboard page, authentication success
+                                routes.Application.index() // go to dashboard page, authentication success
                         );
                     }
                 }

@@ -37,29 +37,8 @@
     <head>
         <script type='text/javascript' src='@routes.Assets.at("lib/jquery/jquery.min.js")'></script>
         <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")'></script>
-        <script type="text/javascript">
-            function forceResponsiveTables() {
-              var windowSize = $(window).width();
-              if ($('.table-responsive > .table').length > 0) {
-                $.each($('.table-responsive > .table'), function (index, value) {
-                  var thisTable = $(value);
-                  var tableSize = thisTable.width();
-                  var parent = thisTable.parent('.table-responsive');
-                  // 768px is the default for bootstrap 3's responsive-table, modify if needed
-                  if (windowSize <= 768) {
-                    parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
-                  } else {
-                    if (tableSize >= windowSize) {
-                      // Change the border color based on the bootstrap theme colors
-                      parent.css('width', '100%').css('overflow-x', 'scroll').css('overflow-y', 'hidden').css('margin-bottom', '15px').css('border', '1px solid #DDDDDD');
-                    } else {
-                      parent.css('width', '').css('overflow-x', '').css('overflow-y', '').css('margin-bottom', '').css('border', '');
-                    }
-                  }
-                });
-              }
-            }
-        </script>
+        <script type='text/javascript' src='@routes.Assets.at("javascripts/responsiveTables.js")'></script>
+
         <script>
             // Loadingimage to use in pagination.js
             var loadingImage = '@routes.Assets.at("images/car-loader.gif")'
@@ -93,7 +72,7 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="@routes.Dashboard.index">Dégage</a>
+                    <a class="navbar-brand" href="@routes.Application.index">Dégage</a>
                 </div>
                 <!-- /.navbar-header -->
                 <ul class="nav navbar-top-links navbar-right">
@@ -210,7 +189,7 @@
                     <ul class="nav" id="side-menu">
                         <li class="submenu">LENER</li>
                         <li @if(title == "Dashboard") {class="active"}>
-                            <a href="@routes.Dashboard.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
+                            <a href="@routes.Application.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
                         </li>
                         @if(!CurrentUser.hasFullStatus){
                         <li @if(title == "Infosessies") {class="active"}>

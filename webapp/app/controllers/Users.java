@@ -108,7 +108,7 @@ public class Users extends Controller {
                 return redirect(routes.Users.showUsers());
             } else {
                 CurrentUser.set(user, userRoles);
-                return redirect(routes.Dashboard.index());
+                return redirect(routes.Application.index());
             }
         } else {
             flash("danger", "Deze gebruikersID bestaat niet.");

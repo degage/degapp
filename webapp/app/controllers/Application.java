@@ -29,17 +29,56 @@
 
 package controllers;
 
+import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserRole;
 import controllers.routes.javascript;
+import db.CurrentUser;
+import db.DataAccess;
+import db.InjectContext;
 import play.Routes;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.index;
+import providers.DataProvider;
+import views.html.dashboardFullUser;
+import views.html.dashboardRegistered;
 
 public class Application extends Controller {
 
-    // does not need context
+    /**
+     * Redirects to a specific page depending on user status (logged in? full user? ...)
+     */
+    @InjectContext
     public static Result index() {
-        return ok(index.render());
+
+        if (!CurrentUser.isValid()) {
+            // login page if not logged in
+            return redirect(routes.Login.login(null));
+        } else {
+            User currentUser = DataProvider.getUserProvider().getUser();
+            int completeness = Profile.getProfileCompleteness(currentUser);
+            if (CurrentUser.hasFullStatus() || CurrentUser.hasRole(UserRole.SUPER_USER)) {
+                // normal dashboard if user has full status
+                return ok(
+                    dashboardFullUser.render(
+                        currentUser,
+                        completeness,
+                        Form.form(Reserve.IndexModel.class)
+                    )
+                );
+
+            } else {
+                // reduced dashboard
+                return ok(
+                    dashboardRegistered.render(
+                        currentUser,
+                        completeness,
+                        InfoSessions.didUserGoToInfoSession(),
+                        DataAccess.getInjectedContext().getApprovalDAO().hasApprovalPending(currentUser.getId())
+                    )
+                );
+            }
+        }
     }
 
     /**

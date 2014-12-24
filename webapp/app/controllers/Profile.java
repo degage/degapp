@@ -244,7 +244,7 @@ public class Profile extends Controller {
         // TODO: introduce userExists
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
-            return redirect(routes.Dashboard.index());
+            return redirect(routes.Application.index());
         }
 
         // Only a profile admin or user itself can edit
@@ -307,7 +307,7 @@ public class Profile extends Controller {
 
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
-            return redirect(routes.Dashboard.index());
+            return redirect(routes.Application.index());
         }
 
 
@@ -545,7 +545,7 @@ public class Profile extends Controller {
 
         if (user == null) {
             flash("danger", "GebruikersID " + userId + " bestaat niet.");
-            return redirect(routes.Dashboard.index());
+            return redirect(routes.Application.index());
         }
 
         // Only a profile admin or user itself can edit

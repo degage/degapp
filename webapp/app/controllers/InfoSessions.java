@@ -551,12 +551,12 @@ public class InfoSessions extends Controller {
     public static Result requestApproval() {
         if (CurrentUser.hasFullStatus()) {
             flash("warning", "Je bent reeds een volwaardige gebruiker.");
-            return redirect(routes.Dashboard.index());
+            return redirect(routes.Application.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())){
                 flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
-                return redirect(routes.Dashboard.index());
+                return redirect(routes.Application.index());
             } else {
                 InfoSessionDAO idao = context.getInfoSessionDAO();
                 Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(CurrentUser.getId());
@@ -577,14 +577,14 @@ public class InfoSessions extends Controller {
     public static Result requestApprovalPost() {
         if (CurrentUser.hasRole(UserRole.CAR_OWNER) && CurrentUser.hasRole(UserRole.CAR_USER)) {
             flash("warning", "Je bent reeds een volwaardige gebruiker.");
-            return redirect(routes.Dashboard.index());
+            return redirect(routes.Application.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
             if (form.hasErrors()) {
                 if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())){
                     flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
-                    return redirect(routes.Dashboard.index());
+                    return redirect(routes.Application.index());
                 } else {
                     InfoSessionDAO idao = context.getInfoSessionDAO();
                     Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(CurrentUser.getId());
@@ -609,7 +609,7 @@ public class InfoSessions extends Controller {
                     dao.createApproval(CurrentUser.getId(), lastSession.getFirst().getId(), form.get().message);
                     udao.getUserHeader(CurrentUser.getId()).setStatus(UserStatus.FULL_VALIDATING); //set to validation
                     udao.updateUser(udao.getUser(CurrentUser.getId())); //full update   // TODO: partial update?
-                    return redirect(routes.Dashboard.index());
+                    return redirect(routes.Application.index());
                 }
             }
         }
