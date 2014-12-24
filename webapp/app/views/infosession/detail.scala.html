@@ -98,6 +98,7 @@
                     <div class="panel-body">
                         @* TODO: refine logic behind buttons *@
                         @detailPartial(infoSession, map)
+                        <div class="col-xs-12">
                         @if(enrolled == null ) {
                             <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Inschrijven</a>
                         } else {
@@ -107,6 +108,7 @@
                                 <button class="btn btn-success" data-toggle="modal" data-target="#myModal">Inschrijven</button>
                             }
                         }
+                            </div>
                     </div>
                 </div>
 

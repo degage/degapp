@@ -87,7 +87,8 @@ public interface InfoSessionDAO {
 
     /**
      * Retreive the last infosession for which a user enrolled and information on whether
-     * the user was present on that session.
+     * the user was present on that session. If the user was not present and the session was
+     * in the past, then no session is returned.
      */
     public LastSessionResult getLastInfoSession(int userId) throws DataAccessException;
 

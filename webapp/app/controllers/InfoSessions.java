@@ -550,13 +550,19 @@ public class InfoSessions extends Controller {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         InfoSessionDAO.LastSessionResult lis = dao.getLastInfoSession(CurrentUser.getId());
 
-        return ok(infosessions.render(
+        if (lis.present) {
+            return ok(infosessionsDone.render(
+                lis.session,
+                null
+            ));
+        } else {
+            return ok(infosessions.render(
                 dao.getInfoSessions(true),
                 lis.session,
                 null,
                 lis.present)
-        );
-
+            );
+        }
     }
 
     /**

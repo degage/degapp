@@ -500,6 +500,9 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 if (rs.next()) {
                     iop.session = getInfoSessionFromResultSet(rs);
                     iop.present = "PRESENT".equals(rs.getString("infosession_enrollment_status"));
+                    if (!iop.present && iop.session.getTime().isBefore(Instant.now())) {
+                        iop.session = null; // a nonattended session in the past is ignored
+                    }
                 } else {
                     iop.session = null;
                     iop.present = false;

@@ -37,13 +37,12 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.approvals.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Set;
+import java.util.*;
 
 /**
  */
@@ -59,21 +58,28 @@ public class Approvals extends Controller {
         Iterable<File> licenseFiles = fdao.getLicenseFiles(userId);
 
         Collection<String> errors = new ArrayList<>();
-        if (user.getAddressDomicile() == null)
+        if (user.getAddressDomicile() == null) {
             errors.add("Domicilieadres ontbreekt.");
-        if (user.getAddressResidence() == null)
+        }
+        if (user.getAddressResidence() == null) {
             errors.add("Verblijfsadres ontbreekt.");
-        if (user.getIdentityCard() == null)
+        }
+        if (user.getIdentityCard() == null) {
             errors.add("Identiteitskaart ontbreekt.");
-        if (user.getIdentityCard() != null && (!identityFiles.iterator().hasNext()))
-            errors.add("Bewijsgegevens identiteitskaart ontbreken");
-        if (user.getLicense() == null)
+        } else if (!identityFiles.iterator().hasNext()) {
+            errors.add("Scan identiteitskaart ontbreekt");
+        }
+        if (user.getLicense() == null) {
             errors.add("Rijbewijs ontbreekt.");
-        if (!user.isPayedDeposit())
+        } else if (!licenseFiles.iterator().hasNext()) {
+            errors.add("Ingescand rijbewijs ontbreekt");
+        }
+        if (!user.isPayedDeposit()) {
             errors.add("Waarborg nog niet betaald.");
-        if (user.getLicense() != null && (!licenseFiles.iterator().hasNext()))
-            if (user.getCellphone() == null && user.getPhone() == null)
-                errors.add("Telefoon/GSM ontbreekt.");
+        }
+        if (user.getCellphone() == null && user.getPhone() == null) {
+            errors.add("Telefoon/GSM ontbreekt.");
+        }
         return errors;
     }
 
@@ -81,6 +87,20 @@ public class Approvals extends Controller {
         TemplateDAO dao = context.getTemplateDAO();
         EmailTemplate t = dao.getTemplate(MailType.TERMS);
         return t.getBody();
+    }
+
+    public static class RequestApprovalData {
+        public String message;
+        public boolean acceptsTerms;
+
+        public List<ValidationError> validate() {
+            if (!acceptsTerms)
+                return Arrays.asList(
+                        new ValidationError("acceptsTerms", "Gelieve de algemene voorwaarden te accepteren")
+                );
+            else
+                return null;
+        }
     }
 
     /**
@@ -116,42 +136,27 @@ public class Approvals extends Controller {
     @AllowRoles
     @InjectContext
     public static Result requestApprovalPost() {
-        if (CurrentUser.hasRole(UserRole.CAR_OWNER) && CurrentUser.hasRole(UserRole.CAR_USER)) {
-            flash("warning", "Je bent reeds een volwaardige gebruiker.");
-            return redirect(routes.Application.index());
-        } else {
-            DataAccessContext context = DataAccess.getInjectedContext();
             Form<RequestApprovalData> form = Form.form(RequestApprovalData.class).bindFromRequest();
+            DataAccessContext context = DataAccess.getInjectedContext();
             if (form.hasErrors()) {
-                if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())) {
-                    flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
-                    return redirect(routes.Application.index());
-                } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == null) {
-                    flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
-                    return redirect(routes.InfoSessions.showUpcomingSessions());
-                } else {
                     return badRequest(approvalrequest.render(
                                     checkApprovalConditions(CurrentUser.getId(), context),
                                     form,
                                     getTermsAndConditions(context)
                             )
                     );
-                }
             } else {
                 Integer isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
                 if (isp == null) {
-                    flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
+                    flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    // TODO: user is retrieved as header AND in full
                     context.getApprovalDAO().createApproval(CurrentUser.getId(), isp, form.get().message);
-                    UserDAO udao = context.getUserDAO();
-                    udao.getUserHeader(CurrentUser.getId()).setStatus(UserStatus.FULL_VALIDATING); //set to validation
-                    udao.updateUser(udao.getUser(CurrentUser.getId())); //full update   // TODO: partial update?
+                    context.getUserDAO().updateUserStatus(CurrentUser.getId(), UserStatus.FULL_VALIDATING);
+                    flash("success", "Bedankt voor de interesse. We nemen je aanvraag tot lidmaatschap in beraad.");
                     return redirect(routes.Application.index());
                 }
             }
-        }
     }
 
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
@@ -326,18 +331,6 @@ public class Approvals extends Controller {
         }
 
 
-    }
-
-    public static class RequestApprovalData {
-        public String message;
-        public boolean acceptsTerms;
-
-        public String validate() {
-            if (!acceptsTerms)
-                return "Gelieve de algemene voorwaarden te accepteren";
-            else
-                return null;
-        }
     }
 
     public static class ApprovalAdminData {

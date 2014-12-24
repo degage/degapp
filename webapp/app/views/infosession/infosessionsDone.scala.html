@@ -1,4 +1,4 @@
-@* detailPartial.scala.html
+@* infosessionsDone.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,28 +27,30 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(infoSession: InfoSession, mapDetails: Maps.MapDetails = null)
-<div class="col-lg-4">
-    <dl class="dl-horizontal">
-        <dt>Wanneer?</dt><dd>@Utils.toLocalizedString(infoSession.getTime)</dd>
-        <dt>Waar?</dt><dd>@infoSession.getAddress</dd>
-        <dt>Gastvrouw / -heer</dt><dd>@infoSession.getHost.getFullName</dd>
-        <dt>Type</dt><dd>@infoSession.getType</dd>
-        <dt>Aantal deeln.</dt>
-        <dd>@if(infoSession.getMaxEnrollees == 0){
-            @infoSession.getEnrolleeCount (onbeperkt)
-        } else {
-            @if(infoSession.getEnrolleeCount < infoSession.getMaxEnrollees) {
-                @infoSession.getEnrolleeCount / @infoSession.getMaxEnrollees
-            } else {
-                Volzet (Max. @infoSession.getMaxEnrollees)
-            }
-        }</dd>
-        <dt>Opmerkingen</dt><dd>@infoSession.getComments</dd>
-    </dl>
-</div>
-<div class="col-lg-8">
-    <div class="well map">
-        @map(mapDetails)
-    </div>
-</div>
+@(enrolled: InfoSession, map: Maps.MapDetails)
+@scripts = {
+    <!-- Maps: -->
+    <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
+    <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
+}
+@stylesheets = {
+    <!-- Maps: -->
+    <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.js")' />
+}
+
+@app("Infosessies", stylesheets, scripts) {
+
+    @breadcrumbs {
+      @breadcrumb("Infosessies")
+    }
+
+    @maincontent("Infosessies"){
+        @flashes()
+        @panel("Aanwezigheid bevestigd","fa-check-square-o", "panel-success"){
+            Jouw aanwezigheid op onderstaande infosessie werd bevestigd.
+        }
+        @panel("Infosessie", "fa-lighbulb-o") {
+            @detailPartial(enrolled, map)
+        }
+    }
+}

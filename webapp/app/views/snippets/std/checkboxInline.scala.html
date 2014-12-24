@@ -29,5 +29,5 @@
 
 @(f: Field, label: Any)
 <label class="checkbox-inline">
-    <input id="@f.id"  name="@f.name" type="checkbox" @if(f.value==Some("true")){checked}>@label
+    <input id="@f.id"  name="@f.name" type="checkbox" @if(f.value==Some("true")){checked}> @label
 </label>
