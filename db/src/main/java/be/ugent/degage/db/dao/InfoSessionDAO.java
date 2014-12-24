@@ -74,5 +74,21 @@ public interface InfoSessionDAO {
 
     public InfoSession getAttendingInfoSession(int userId) throws DataAccessException;
 
-    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(int userId) throws DataAccessException;
+    /**
+     * Return the id of the infosession where the given user was present, or null if
+     * none found.
+     */
+    public Integer getInfoSessionWherePresent(int userId) throws DataAccessException;
+
+    public static class LastSessionResult {
+        public InfoSession session;
+        public boolean present;
+    }
+
+    /**
+     * Retreive the last infosession for which a user enrolled and information on whether
+     * the user was present on that session.
+     */
+    public LastSessionResult getLastInfoSession(int userId) throws DataAccessException;
+
 }

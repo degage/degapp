@@ -97,7 +97,7 @@
                     <!-- /.panel-heading -->
                     <div class="panel-body">
                         @* TODO: refine logic behind buttons *@
-                        @detailPartial(infoSession, CurrentUser.hasFullStatus, map)
+                        @detailPartial(infoSession, map)
                         @if(enrolled == null ) {
                             <a class="btn btn-success" href="@routes.InfoSessions.enrollSession(infoSession.getId)">Inschrijven</a>
                         } else {

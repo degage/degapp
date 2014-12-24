@@ -27,19 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(infoSession: InfoSession, canClick: Boolean, mapDetails: Maps.MapDetails = null)
+@(infoSession: InfoSession, mapDetails: Maps.MapDetails = null)
 <div class="row">
     <div class="col-lg-4">
-        <div class="">
             <p>
-                <strong>Host:</strong>
-                @if(canClick) {
-                    <a href="@routes.Profile.index(infoSession.getHost.getId)">@infoSession.getHost.getFirstName @infoSession.getHost.getLastName</a>
-                } else {
-                    @infoSession.getHost.getFirstName @infoSession.getHost.getLastName
-                }
-                <br>
-
+                <strong>Gastheer / gastvrouw:</strong>  @infoSession.getHost.getFullName <br>
                 <strong>Type:</strong> @infoSession.getType<br>
                 <strong>Wanneer?</strong> @Utils.toLocalizedString(infoSession.getTime)<br>
                 <strong>Adres:</strong> @infoSession.getAddress<br>
@@ -55,7 +47,6 @@
                 } <br>
                 <strong>Opmerkingen:</strong> @infoSession.getComments<br>
             </p>
-        </div>
     </div>
     <div class="col-lg-8">
         <div class="well map">

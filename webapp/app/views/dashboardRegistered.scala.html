@@ -43,8 +43,8 @@
             <div class="col-lg-12">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                            Welkom op onze webapplicatie, @user.getFirstName! Om volwaardig lid te worden moeten als eerst nog
-                            enkele stappen doorlopen worden.
+                            Welkom op onze webapplicatie, @user.getFirstName! Om volwaardig lid moet je eerst nog
+                            enkele stappen doorlopen.
                     </div>
                 </div>
             </div>
@@ -54,91 +54,65 @@
             <div class="col-lg-3">
                 <div  class="panel @if(userWentToInfoSession) { panel-success } else { panel-info } ">
                     <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <strong>1.</strong> Volg een infosessie
-                            </div>
-                        </div>
+                        <strong>1.</strong> Volg een infosessie
                     </div>
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-12">
                                 @if(userWentToInfoSession) {
-                                    Je bent reeds naar een infosessie geweest, werk de volgende stappen af om volwaardig
+                                    Je bent reeds naar een infosessie geweest. Werk stappen 2. en 3. af om volwaardig
                                     lid te worden.
                                 } else {
-                                    Inschrijven voor een infosessie kan <a href="@routes.InfoSessions.showUpcomingSessions">
+                                    Inschrijven voor een infosessie doe je <a href="@routes.InfoSessions.showUpcomingSessions">
                                         hier</a>.
                                 }
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-lg-1 visible-lg">
-                <div class="triangle-right"><div></div></div>
-            </div>
-            <div class="col-xs-12 hidden-lg">
-                <div class="triangle-down"><div></div></div><br />
-            </div>
+            @triangle
             <div class="col-lg-4 col-xs-12">
                 <div class="panel @if(completeness == 100) { panel-success } else { panel-info } ">
                     <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <strong>2.</strong> Vul je profiel verder aan
-                            </div>
-                        </div>
+                        <strong>2.</strong> Vul je profiel verder aan
                     </div>
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-12 ">
-                                @if(completeness != 100) {
-                                    De volgende zaken kan je best aanvullen voordat je je volwaardig lidmaatschap aanvraagt:
-                                    <ul>
-                                        <li>Domicilieadres</li>
-                                        <li>Verblijfsadres</li>
-                                        <li>Identiteitskaart</li>
-                                        <li>Rijbewijs</li>
-                                    </ul>
-                                    Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
-                                } else {
-                                    Je profiel is volledig ingevuld, werk de volgende stappen af om volwaardig
-                                    lid te worden.
-                                }
-                            </div>
-                        </div>
+                        @if(completeness != 100) {
+                            Onderstaande zaken vul je best aan voordat je je volwaardig lidmaatschap aanvraagt:
+                            <ul>
+                                <li>Domicilieadres</li>
+                                <li>Verblijfsadres</li>
+                                <li>Identiteitskaart</li>
+                                <li>Rijbewijs</li>
+                            </ul>
+                            Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
+                        } else {
+                            Je profiel is volledig ingevuld.
+                        }
                     </div>
                 </div>
             </div>
-            <div class="col-lg-1 visible-lg">
-                <div class="triangle-right"><div></div></div>
-            </div>
-            <div class="col-xs-12 hidden-lg">
-                <div class="triangle-down"><div></div></div><br />
-            </div>
+            @triangle
             <div class="col-lg-3 col-xs-12">
                 <div class="panel @if(approvalRequestSent) { panel-success } else { panel-info } ">
                     <div class="panel-heading">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                <strong>3.</strong> Wordt volwaardig lid
-                            </div>
-                        </div>
+                        <strong>3.</strong> Wordt volwaardig lid
                     </div>
                     <div class="panel-body">
-                        <div class="row">
-                            <div class="col-xs-12">
-                                @if(!approvalRequestSent) {
-                                    Tenslotte kan je het volwaardig lidmaatschap <a href="@routes.InfoSessions.requestApproval">hier</a> aanvragen.
-                                } else {
-                                    Je aanvraag is goed verzonden en wordt verwerkt. Hierna ben je een volwaardig lid.
-                                }
-                            </div>
-                        </div>
+                        @if(!approvalRequestSent) {
+                            Tenslotte kan je het volwaardig lidmaatschap <a href="@routes.InfoSessions.requestApproval">hier</a> aanvragen.
+                        } else {
+                            Je aanvraag is goed verzonden en wordt verwerkt. Hierna ben je een volwaardig lid.
+                        }
                     </div>
                 </div>
             </div>
         </div>
     }
+}
+
+@triangle={
+    <div class="col-lg-1 visible-lg">
+        <div class="triangle-right"><div></div></div>
+    </div>
+    <div class="col-md-12 hidden-lg">
+        <div class="triangle-down"><div></div></div>
+    </div>
 }

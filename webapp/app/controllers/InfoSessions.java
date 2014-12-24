@@ -554,20 +554,19 @@ public class InfoSessions extends Controller {
             return redirect(routes.Application.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
-            if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())){
+            if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())) {
                 flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                 return redirect(routes.Application.index());
+            } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == null) {
+                flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
-                InfoSessionDAO idao = context.getInfoSessionDAO();
-                Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(CurrentUser.getId());
-
-                if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                    flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
-                    return redirect(routes.InfoSessions.showUpcomingSessions());
-                } else {
-                    Iterable<String> errors = checkApprovalConditions(CurrentUser.getId(), context);
-                    return ok(approvalrequest.render(errors, Form.form(RequestApprovalModel.class), getTermsAndConditions(context), didUserGoToInfoSession()));
-                }
+                return ok(approvalrequest.render(
+                                checkApprovalConditions(CurrentUser.getId(), context),
+                                Form.form(RequestApprovalModel.class),
+                                getTermsAndConditions(context),
+                                true)
+                );
             }
         }
     }
@@ -582,31 +581,29 @@ public class InfoSessions extends Controller {
             DataAccessContext context = DataAccess.getInjectedContext();
             Form<RequestApprovalModel> form = Form.form(RequestApprovalModel.class).bindFromRequest();
             if (form.hasErrors()) {
-                if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())){
+                if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())) {
                     flash("warning", "Er is reeds een toelatingsprocedure voor deze gebruiker in aanvraag.");
                     return redirect(routes.Application.index());
+                } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == null) {
+                    flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
-                    InfoSessionDAO idao = context.getInfoSessionDAO();
-                    Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(CurrentUser.getId());
-                    if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
-                        flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
-                        return redirect(routes.InfoSessions.showUpcomingSessions());
-                    } else {
-                        Iterable<String> errors = checkApprovalConditions(CurrentUser.getId(), context);
-                        return badRequest(approvalrequest.render(errors, form, getTermsAndConditions(context), didUserGoToInfoSession()));
-                    }
+                    return badRequest(approvalrequest.render(
+                                    checkApprovalConditions(CurrentUser.getId(), context),
+                                    form,
+                                    getTermsAndConditions(context),
+                                    true)
+                    );
                 }
             } else {
-                ApprovalDAO dao = context.getApprovalDAO();
-                InfoSessionDAO idao = context.getInfoSessionDAO();
-                UserDAO udao = context.getUserDAO();
-                Tuple<InfoSession, EnrollementStatus> lastSession = idao.getLastInfoSession(CurrentUser.getId());
-                if (lastSession == null || lastSession.getSecond() != EnrollementStatus.PRESENT) {
+                Integer isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
+                if (isp == null) {
                     flash("danger", "Je bent nog niet aanwezig geweest op een infosessie.");
                     return redirect(routes.InfoSessions.showUpcomingSessions());
                 } else {
                     // TODO: user is retrieved as header AND in full
-                    dao.createApproval(CurrentUser.getId(), lastSession.getFirst().getId(), form.get().message);
+                    context.getApprovalDAO().createApproval(CurrentUser.getId(), isp, form.get().message);
+                    UserDAO udao = context.getUserDAO();
                     udao.getUserHeader(CurrentUser.getId()).setStatus(UserStatus.FULL_VALIDATING); //set to validation
                     udao.updateUser(udao.getUser(CurrentUser.getId())); //full update   // TODO: partial update?
                     return redirect(routes.Application.index());
@@ -829,11 +826,10 @@ public class InfoSessions extends Controller {
      * @return
      */
     // used in injected context
-    // TODO: also used in dashboard
+    // TODO: only used in dashboard
     public static boolean didUserGoToInfoSession() {
-        final Tuple<InfoSession, EnrollementStatus> enrolled =
-                DataAccess.getInjectedContext().getInfoSessionDAO().getLastInfoSession(CurrentUser.getId());
-        return enrolled != null && enrolled.getSecond() == EnrollementStatus.PRESENT && !CurrentUser.hasFullStatus();
+        return DataAccess.getInjectedContext().getInfoSessionDAO().
+                getInfoSessionWherePresent(CurrentUser.getId()) != null;
     }
 
     /*
@@ -876,23 +872,14 @@ public class InfoSessions extends Controller {
     public static Result showUpcomingSessions() {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        Tuple<InfoSession, EnrollementStatus> tuple = dao.getLastInfoSession(CurrentUser.getId());
+        InfoSessionDAO.LastSessionResult lis = dao.getLastInfoSession(CurrentUser.getId());
 
-        InfoSession enrolled = dao.getAttendingInfoSession(CurrentUser.getId());
-
-        Iterable<InfoSession> sessions = dao.getInfoSessions(true);
-//        if (enrolled != null) {
-//            //TODO: what is happening here?
-//
-//            for (InfoSession s : sessions) {
-//                if (enrolled.getId() == s.getId()) {
-//                    enrolled = s;
-//                    break;
-//                }
-//            }
-//        }
-
-        return ok(infosessions.render(sessions, tuple == null ? null : tuple.getFirst(), null, didUserGoToInfoSession()));
+        return ok(infosessions.render(
+                dao.getInfoSessions(true),
+                lis.session,
+                null,
+                lis.present)
+        );
 
     }
 
@@ -904,24 +891,8 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result showSessions() {
-
-        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        InfoSession enrolled = dao.getAttendingInfoSession(CurrentUser.getId());
-
-        Iterable<InfoSession> sessions = dao.getInfoSessions(false);
-        if (enrolled != null) {
-            //TODO: What is this?
-
-            /*
-            for (InfoSession s : sessions) {
-                if (enrolled.getId() == s.getId()) {
-                    enrolled = s; //
-                    break;
-                }
-            }
-            */
-        }
-
-        return ok(infosessionsAdmin.render(sessions));
+        return ok(infosessionsAdmin.render(
+                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(false)
+        ));
     }
 }

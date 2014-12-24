@@ -259,13 +259,16 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
+    private static String INFOSESSION_EXTENDED_FIELDS =
+            "infosession_id, infosession_type, " +
+            "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
+            "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
+            USER_HEADER_FIELDS +
+            ", enrollee_count ";
+
+
     private static String GET_INFO_SESSIONS_HEAD =
-            "SELECT infosession_id, infosession_type, " +
-                    "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
-                    USER_HEADER_FIELDS +
-                    ", enrollee_count " +
-                    "FROM infosessions_extended ";
+            "SELECT " + INFOSESSION_EXTENDED_FIELDS + "FROM infosessions_extended ";
 
     private static String GET_INFO_SESSIONS_ALL =
             GET_INFO_SESSIONS_HEAD + " ORDER BY infosession_timestamp";
@@ -409,12 +412,37 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      */
     @Override
     public InfoSession getAttendingInfoSession(int userId) throws DataAccessException {
-        try (PreparedStatement ps = getAttendingInfosessionStatement.value()) {
+        try {
+            PreparedStatement ps = getAttendingInfosessionStatement.value();
             ps.setInt(1, userId);
 
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return getInfoSessionFromResultSet(rs);
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to fetch infosession for user", ex);
+        }
+    }
+
+
+    private  LazyStatement getInfosessionWherePresentStatement = new LazyStatement(
+            "SELECT infosession_id FROM infosessionenrollees " +
+                    " WHERE infosession_enrollee_id = ? AND infosession_enrollment_status = 'PRESENT' "
+    );
+
+    @Override
+    public Integer getInfoSessionWherePresent(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getInfosessionWherePresentStatement.value();
+            ps.setInt(1, userId);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("infosession_id");
                 } else {
                     return null;
                 }
@@ -454,29 +482,29 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private LazyStatement getLastInfoSessionForUserStatement = new LazyStatement(
-            "SELECT sub.total, ie.infosession_enrollment_status status, ses.infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
-                    USER_HEADER_FIELDS + " FROM infosessionenrollees ie " +
-                    "JOIN infosessions AS ses ON ie.infosession_id = ses.infosession_id " +
-                    "JOIN users ON infosession_host_user_id = user_id " +
-                    "JOIN addresses ON infosession_address_id = address_id " +
-                    "LEFT JOIN ( SELECT COUNT(*) AS total, ie2.infosession_id " +
-                    "            FROM infosessionenrollees ie2 GROUP BY ie2.infosession_id) sub ON (ie.infosession_id = sub.infosession_id) " +
-                    "WHERE infosession_enrollee_id = ? ORDER BY infosession_timestamp DESC LIMIT 1"
+            "SELECT " + INFOSESSION_EXTENDED_FIELDS + ", infosession_enrollment_status " +
+                    "FROM infosessions_extended " +
+                    "JOIN infosessionenrollees USING (infosession_id) " +
+                    "WHERE infosession_enrollee_id = ? " +
+                    "ORDER BY infosession_timestamp DESC LIMIT 1"
     );
 
     @Override
-    public Tuple<InfoSession, EnrollementStatus> getLastInfoSession(int userId) throws DataAccessException {
+    public LastSessionResult getLastInfoSession(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getLastInfoSessionForUserStatement.value();
             ps.setInt(1, userId);
 
             try (ResultSet rs = ps.executeQuery()) {
+                LastSessionResult iop = new LastSessionResult();
                 if (rs.next()) {
-                    return new Tuple<>(populateInfoSession(rs), EnrollementStatus.valueOf(EnrollementStatus.class, rs.getString("status")));
+                    iop.session = getInfoSessionFromResultSet(rs);
+                    iop.present = "PRESENT".equals(rs.getString("infosession_enrollment_status"));
                 } else {
-                    return null;
+                    iop.session = null;
+                    iop.present = false;
                 }
+                return iop;
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to fetch last for user", ex);

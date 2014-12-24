@@ -39,7 +39,7 @@ public interface VerificationDAO {
     public String createToken(String email, VerificationType type) throws DataAccessException;
 
     public static enum Result {
-        OK, INVALID_PAIR, ALREADY_EXISTS;
+        OK, INVALID_PAIR, ALREADY_EXISTS
     }
 
     /**
