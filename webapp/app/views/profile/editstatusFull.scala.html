@@ -1,4 +1,4 @@
-/* IdentityCard.java
+@* editstatusFull.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,42 +24,18 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
- */
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
-package be.ugent.degage.db.models;
+@(user: UserHeader)
 
-/**
- *
- * @author Laurent
- */
-public class IdentityCard {
-    
-    private String id; // Identiteitskaartnummer
+@* Allow the profile admin to change the status of a registered or validating user. *@
 
-    private String registrationNr; // Rijksregisternummer
-
-    public IdentityCard() {
-    }
-
-    public IdentityCard(String id, String registrationNr) {
-        this.id = id;
-        this.registrationNr = registrationNr;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getId() {
-        return id;
-    }
-    public String getRegistrationNr() {
-        return registrationNr;
-    }
-
-    public void setRegistrationNr(String registrationNr) {
-        this.registrationNr = registrationNr;
-    }
-
+@editstatus(user){
+   <div class="col-xs-4">
+       <a class="btn btn-warning btn-sm" href="@routes.Profile.blockUser(user.getId)">Blokkeer gebruiker</a>
+    </div>
+    <div class="col-xs-8">
+    Een geblokkeerde gebruiker kan niet meer inloggen.
+   </div>
 }

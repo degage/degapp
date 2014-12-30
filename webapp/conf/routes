@@ -95,12 +95,16 @@ POST        /profile/changepicture                  controllers.Profile.profileP
 GET         /profile/picture                        controllers.Profile.getProfilePicture(userId: Int)
 GET         /profile/identitycard                   controllers.Profile.editIdentityCard(userId: Int)
 POST        /profile/identitycard                   controllers.Profile.editIdentityCardPost(userId: Int)
+POST        /profile/identitycard/addfile           controllers.Profile.addIdentityCardFile(userId: Int)
 GET         /profile/identitycard/deletefile        controllers.Profile.deleteFile(userId: Int, fileId: Int, group: String)
 GET         /profile/identitycard/file              controllers.Profile.viewFile(userId: Int, fileId: Int, group: String)
 GET         /profile/driverslicense                 controllers.Profile.editDriversLicense(userId: Int)
 POST        /profile/driverslicense                 controllers.Profile.editDriversLicensePost(userId: Int)
-GET         /profile/editstatus                     controllers.Profile.editUserStatus(userId: Int)
-POST        /profile/editstatus                     controllers.Profile.editUserStatusPost(userId: Int)
+POST        /profile/driverslicense/addfile         controllers.Profile.addDriversLicenseFile(userId: Int)
+GET         /profile/status                         controllers.Profile.editUserStatus(userId: Int)
+GET         /profile/status/block                   controllers.Profile.blockUser(userId: Int)
+GET         /profile/status/unblock                 controllers.Profile.unblockUser(userId: Int)
+GET         /profile/status/full                    controllers.Profile.makeFullUser(userId: Int)
 
 # Users
 GET         /users                                  controllers.Users.showUsers()

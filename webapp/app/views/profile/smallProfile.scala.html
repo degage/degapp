@@ -27,35 +27,31 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User, userIsAdmin: Boolean, editable: Boolean)
-@import providers.DataProvider
-@import db.CurrentUser
-<img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-<h2>@user.getFullName</h2>
-<p>
-    <strong>Email:</strong> @user.getEmail
-    <br>
+@(user: User)
 
-    <strong>Telefoon (vast):</strong>
-    @if(user.getPhone != null && !user.getPhone.isEmpty) {
-        <a href="tel:@user.getPhone">@user.getPhone</a>
-    } else {
-        /
-    }
-    <br>
+@* Left column in a profile page *@
 
-    <strong>GSM:</strong>
-    @if(user.getCellphone != null && !user.getCellphone.isEmpty) {
-        <a href="tel:@user.getCellphone">@user.getCellphone</a>
-    } else {
-        /
+<div class="col-md-4">
+    @panel(){
+    <div class="col-xs-12">
+        <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
+        <h3>@user.getFullName</h3>
+        <dl>  @* not dl-horizontal because this is too wide *@
+            <dt>Email</dt>
+            <dd><a href="mailto:@user.getEmail">@user.getEmail</a></dd>
+            <dt>Telefoon (vast)</dt>
+            <dd>
+                @if(user.getPhone != null && !user.getPhone.isEmpty) {
+                    <a href="tel:@user.getPhone">@user.getPhone</a>
+                }
+            </dd>
+            <dt>GSM</dt>
+            <dd>
+                @if(user.getCellphone != null && !user.getCellphone.isEmpty) {
+                    <a href="tel:@user.getCellphone">@user.getCellphone</a>
+                }
+            </dd>
+        </dl>
+    </div>
     }
-</p>
-<p>
-    @if(CurrentUser.isAdmin) {
-        <strong>Status: </strong> <span class="label label-default">@user.getStatus</span>
-    }
-    @if(userIsAdmin){
-        <span class="label label-default"><i class="fa fa-star" style="color: yellow;"></i> Admin</span>
-    }
-</p>
+</div>

@@ -162,20 +162,12 @@
                                         <strong>Naam:</strong> <a class="" href="@routes.Profile.index(owner.getId)">@owner.getFirstName @owner.getLastName</a>
                                     </div>
                                     <div class="col-sm-4">
-                                        <strong>Adres:</strong>
-                                        @if(owner.getAddressDomicile != null){
-                                            @owner.getAddressDomicile.getStreet
-                                            @owner.getAddressDomicile.getNum
-                                            @owner.getAddressDomicile.getZip
-                                            @owner.getAddressDomicile.getCity
-                                        }else{
-                                            Niet ingegeven
-                                        }
+                                        <strong>Adres:</strong> owner.getAddressDomicile
                                     </div>
                                     <div class="col-sm-4">
                                         <strong>Telefoon:</strong>
                                         @if(owner.getCellphone == null && owner.getPhone == null){
-                                            Niet ingegeven
+                                            (onbekend)
                                         }else{
                                             @owner.getCellphone
                                             @owner.getPhone

@@ -29,6 +29,7 @@
 
 package be.ugent.degage.db.dao;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import be.ugent.degage.db.DataAccessException;
@@ -68,6 +69,26 @@ public interface UserDAO {
     public UserHeader getUserHeader(int userId) throws DataAccessException;
 
     /**
+     * Update the main profile information about a user, i.e., names and telephone numbers
+     */
+    public void updateUserMainProfile(User user) throws DataAccessException;
+
+    /**
+     * Update the user picture
+     */
+    public void updateUserPicture (int userId, int fileId);
+
+    /**
+     * Update the drivers license data for a user
+     */
+    public void updateUserLicenseData (int userId, String license, LocalDate date);
+
+    /**
+     * Update identity data for a user
+     */
+    public void updateUserIdentityData (int userId, String identityId, String nationalId);
+
+    /**
      * Update information about the given user
      */
     public void updateUser(User user) throws DataAccessException;
@@ -81,6 +102,11 @@ public interface UserDAO {
      * Update the user status
      */
     public void updateUserStatus(int userId, UserStatus status);
+
+    /**
+     * Make user a full member. Creates a new degage id if the user did not have one.
+     */
+    public void makeUserFull (int userId);
 
 
     /**

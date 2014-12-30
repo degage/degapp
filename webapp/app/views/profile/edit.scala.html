@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Profile.EditProfileModel], user: User)
+@(form: Form[Profile.MainProfileData], user: User)
 @import providers.DataProvider
 @import db.CurrentUser
 @scripts = {
@@ -41,95 +41,49 @@
         }
     </script>
 }
-    @app("Profiel bewerken", scripts) {
 
-        <div id="page-header-wrapper">
-            <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-                <li><a href="@routes.Profile.indexWithoutId">Profiel</a></li>
-                <li class="active">Bewerken</li>
-            </ol>
-        </div>
+@app("Profiel bewerken", scripts) {
 
-        <div id="page-wrapper">
-            <h1 class="page-header">Profiel bewerken</h1>
-            <div class="row">
-            @helper.form(routes.Profile.editPost(user.getId)) {
-                <div class="col-md-3">
-                    <div class="panel panel-default">
-                            <!-- /.panel-heading -->
-                        <div class="panel-body">
-                            <div class="form-group">
-                                <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-12">Voornaam</label>
-                                <div class="col-md-12">
-                                    <input name="firstName" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("firstName").value">
-                                </div>
-                                <label class="col-md-12">Familienaam</label>
-                                <div class="col-md-12">
-                                    <input name="lastName" type="text" placeholder="Verplicht" class="form-control input-md" value="@form("lastName").value">
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="col-md-12">E-mail</label>
-                                <div class="col-md-12">
-                                    <input name="email" type="text" class="form-control input-md" value="@form("email").value" disabled>
-                                </div>
-                                <label class="col-md-12">Telefoon</label>
-                                <div class="col-md-12">
-                                    <input name="phone" type="text" class="form-control input-md" value="@form("phone").value">
-                                </div>
-                                <label class="col-md-12">GSM</label>
-                                <div class="col-md-12">
-                                    <input name="mobile" type="text" class="form-control input-md" value="@form("mobile").value">
-                                </div>
-                            </div>
-                        </div>
-                            <!-- /.panel-body -->
-                    </div>
-                </div>
-                <div class="col-md-9">
-                    @formErrors(form)
-                    @panel("Domicilieadres", "fa-home") {
-                        <fieldset>
-                            @addressFields(form, "domicileAddress")
-                        </fieldset>
-                    }
-                    @panel("Verblijfsadres", "fa-home") {
-                        <fieldset>
-                            <div class="form-group col-xs-12">
-                                <button class="btn btn-default" type="button" onclick="copyAddress();">Copieer het domicilieadres naar het verblijfsadres</button>
-                            </div>
-                            @addressFields(form, "residenceAddress")
-                        </fieldset>
-                    }
-
-                    <div class="form-group">
-                        <div class="panel panel-default">
-                            <div class="panel-heading">
-                                <h3 class="panel-title">Waarborg</h3>
-                            </div>
-                            <div class="panel-body">
-                                <input type="checkbox" id='@form("paidDeposit").id'
-                                       name='@form("paidDeposit").name' value="true"
-                                       @if(form("paidDeposit").value == Some("true")) { checked="checked" }
-                                       @if(!CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {disabled}> Waarborg betaald
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="panel panel-default">
-                            <div class="panel-body">
-                                <button name="saveChanges" class="btn btn-block btn-success" onclick="onSameAddressChange()">Wijzigingen opslaan</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <!-- /col-lg-9 -->
-            }
-            </div>
-            <!-- /row -->
-        </div>
+    @breadcrumbs{
+        @breadcrumb("Profiel", routes.Profile.index(user.getId))
+        @breadcrumb("Bewerken")
     }
+
+    @maincontent("Profiel bewerken"){
+        @helper.form(routes.Profile.editPost(user.getId)) {
+            <div class="col-md-4">
+                @panel(){
+                    <div class="form-group col-xs-12">
+                        <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
+                    </div>
+                    @std.textField(form("firstName"), "Voornaam")
+                    @std.textField(form("lastName"), "Familienaam")
+                    @std.static(user.getEmail, "E-mail")
+                    @std.textField(form("phone"), "Telefoon (vast)")
+                    @std.textField(form("mobile"), "GSM")
+                }
+            </div>
+            <div class="col-md-8">
+                @formErrors(form)
+                @panel("Domicilieadres", "fa-home") {
+                        @addressFields(form, "domicileAddress")
+                }
+                @panel("Verblijfsadres", "fa-home") {
+                        <div class="form-group col-xs-12">
+                            <button class="btn btn-primary" type="button" onclick="copyAddress();">Copieer het domicilieadres naar het verblijfsadres</button>
+                        </div>
+                        @addressFields(form, "residenceAddress")
+                }
+
+                <div class="form-group">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <button name="saveChanges" class="btn btn-block btn-success" onclick="onSameAddressChange()">Wijzigingen opslaan</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+                <!-- /col-lg-9 -->
+        }
+    }
+}

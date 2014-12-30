@@ -27,111 +27,64 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User, completeness: Int = 0, editable: Boolean)
-@import db.CurrentUser
+@(user: User, completeness: Int = 0)
+
+@* Displays an editable version of the profile page for the given user. *@
+
 @app("Profiel") {
-    @defining(CurrentUser.isAdmin) { isAdmin =>
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Profiel</li>
-        </ol>
-    </div>
-    <div id="page-wrapper">
-        @flashes()
-        <h1 class="page-header">Profiel</h1>
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        @if(editable) {
-                            <div class="progress">
-                                <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
-                            </div>
-
-                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.edit(user.getId)">Profielinformatie wijzigen</a>
-                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.profilePictureUpload(user.getId)">Profielfoto wijzigen</a>
-                            <a class="smallprofile-static btn btn-default btn-sm" class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijs wijzigen</a>
-                            <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitskaart wijzigen</a>
-
-                            @if(isAdmin){
-                                <a class="smallprofile-static btn btn-default btn-sm" href="@routes.Profile.editUserStatus(user.getId)">Gebruikersstatus wijzigen</a>
-                            }
-
-                        }
-                    </div>
+    @breadcrumbs {
+        @breadcrumb("Profiel")
+    }
+    @maincontent("Profiel"){
+        @panel(){
+            <div class="col-xs-12">
+                <div class="progress">
+                    <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
                 </div>
+
+                <a class="btn btn-primary btn-sm" href="@routes.Profile.edit(user.getId)">Profielinformatie wijzigen</a>
+                <a class="btn btn-primary btn-sm" href="@routes.Profile.profilePictureUpload(user.getId)">Profielfoto wijzigen</a>
+                <a class="btn btn-primary btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijsgegevens wijzigen</a>
+                <a class="btn btn-primary btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitsgegevens wijzigen</a>
+
+                @if(db.CurrentUser.isAdmin){
+                    <a class="btn btn-warning btn-sm" href="@routes.Profile.editUserStatus(user.getId)">Gebruikersstatus wijzigen</a>
+                }
             </div>
-        </div>
+        }
         <div class="row">
-            <div class="col-lg-4">
-                <div class="panel panel-default">
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                    @smallProfile(user, isAdmin, editable)
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-            </div>
+            @smallProfile(user)
             <div class="col-md-8">
-                    <!-- /.panel -->
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        @* <form role="form">  *@
-                            <div class="form-group">
-                                <label class="h4">Domicilie-adres</label>
-                                @defining(user.getAddressDomicile) { address =>
-                                    @if(address != null) {
-                                        <p class="form-control-static">@address.getStreet @address.getNum,
-                                            <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
-                                    } else {
-                                        <p>Niet gespecifieerd.</p>
-                                    }
-                                }
-                            </div>
-                            <div class="form-group">
-                                <label class="h4">Verblijfsadres</label>
-                                @defining(user.getAddressResidence) { address =>
-                                    @if(address != null) {
-                                        <p class="form-control-static">@address.getStreet @address.getNum,
-                                            <br> @address.getZip @address.getCity,<br>@address.getCountry</p>
-                                    } else {
-                                        <p>Niet gespecifieerd.</p>
-                                    }
-                                }
-                            </div>
-                            <div class="form-group">
-                                <label class="h4">Identiteitskaart</label>
-                                <p class="form-control-static">
-                                    @if(user.getIdentityCard != null && user.getIdentityCard.getRegistrationNr != null && !user.getIdentityCard.getRegistrationNr.isEmpty) {
-                                        @user.getIdentityCard.getRegistrationNr
-                                    } else {
-                                        Niet gespecifieerd.
-                                    }
-                                    <br/>
-                                </p>
-                            </div>
-
-                            <div class="form-group">
-                                <label class="h4">Rijbewijs</label>
-                                <p class="form-control-static">
-                                    @if(user.getLicense != null) {
-                                        @user.getLicense
-                                    } else {
-                                        Niet gespecifieerd.
-                                    }
-                                    <br/>
-                                </p>
-                            </div>
-                        @* </form>  *@
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-                    <!-- /.panel -->
+                @panel("Gegevens"){
+                    <dl class="dl-horizontal">
+                        @if(user.getStatus==UserStatus.FULL){
+                            <dt>Dégage ID</dt><dd>@user.getDegageId</dd>
+                            <dt>Lid sinds</dt>
+                            <dd>@Utils.toLocalizedDateString(user.getDateJoined)</dd>
+                        }
+                        <dt>Domicilie-adres</dt>
+                        <dd>@user.getAddressDomicile</dd>
+                        <dt>Verblijfsadres</dt>
+                        <dd>@user.getAddressResidence</dd>
+                        <dt>Nr. identiteitskaart</dt>
+                        <dd>
+                            @if(user.getIdentityId != null) {
+                                @user.getIdentityId
+                            } else {
+                                (onbekend)
+                            }
+                        </dd>
+                        <dt>Rijbewijs</dt>
+                        <dd>
+                            @if(user.getLicense != null) {
+                                @user.getLicense
+                            } else {
+                                (onbekend)
+                            }
+                        </dd>
+                    </dl>
+                }
             </div>
-                <!-- /col-lg-12 -->
         </div>
-            <!-- /row -->
-    </div>
-}
+    }
 }

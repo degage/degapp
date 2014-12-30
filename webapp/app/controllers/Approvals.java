@@ -32,6 +32,7 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
+import com.google.common.base.Strings;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -58,14 +59,14 @@ public class Approvals extends Controller {
         Iterable<File> licenseFiles = fdao.getLicenseFiles(userId);
 
         Collection<String> errors = new ArrayList<>();
-        if (user.getAddressDomicile() == null) {
+        if (Strings.isNullOrEmpty(user.getAddressDomicile().getStreet())) {
             errors.add("Domicilieadres ontbreekt.");
         }
-        if (user.getAddressResidence() == null) {
+        if (Strings.isNullOrEmpty(user.getAddressResidence().getStreet())) {
             errors.add("Verblijfsadres ontbreekt.");
         }
-        if (user.getIdentityCard() == null) {
-            errors.add("Identiteitskaart ontbreekt.");
+        if (user.getIdentityId() == null) {
+            errors.add("Identiteitsgegevens ontbreken.");
         } else if (!identityFiles.iterator().hasNext()) {
             errors.add("Scan identiteitskaart ontbreekt");
         }

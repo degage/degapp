@@ -63,14 +63,6 @@ public class Addresses  {
         public Address toAddress() {
             return new Address(country, zipCode, city, street, num);
         }
-
-        public boolean isEmpty() {
-            return nullOrEmpty(zipCode) && nullOrEmpty(city) && nullOrEmpty(street) && nullOrEmpty(num);
-        }
-    }
-
-    private static boolean nullOrEmpty(String s) {
-        return s == null || s.isEmpty();
     }
 
     /**

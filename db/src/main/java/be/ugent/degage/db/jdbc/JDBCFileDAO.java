@@ -123,7 +123,7 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
             if (ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to prepare delete file query.", ex);
+            throw new DataAccessException("Failed to delete file.", ex);
         }
     }
 

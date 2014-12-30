@@ -27,28 +27,32 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Profile.UserStatusData], user: UserHeader)
-@app("Gebruikersstatus wijzigen") {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li><a href="@routes.Users.showUsers">Gebruikers</a></li>
-            <li><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></li>
-            <li class="active">Gebruikersstatus wijzigen</li>
-        </ol>
-    </div>
+@(user: UserHeader)(body: => Html)
 
-    <div id="page-wrapper">
-        <h1 class="page-header">Gebruikersstatus wijzigen</h1>
+@* Common code for the various status changing pages. *@
+@app("Gebruikersstatus wijzigen") {
+
+    @breadcrumbs{
+        @breadcrumb("Profiel", routes.Profile.index(user.getId))
+        @breadcrumb("Gebruikersstatus wijzigen")
+    }
+
+    @maincontent("Gebruikersstatus wijzigen"){
         @flashes()
-        <div class="row">
-            <div class="col-lg-12">
-                <p>Status wijzigen voor <strong>@user.getFullName</strong>.</p>
-                @helper.form(routes.Profile.editUserStatusPost(user.getId)) {
-                    @std.selectEnum(classOf[UserStatus], form("status"), "Status")
-                    @std.submitButton("Wijzigen")
-                }
+
+        @panel("Gebruiker", "fa-user") {
+            <div class="col-xs-12">
+                <dl class="dl-horizontal">
+                    <dt>Naam</dt><dd>@user.getFullName</dd>
+                    <dt>Status</dt><dd>@user.getStatus</dd>
+                    @if(user.getStatus==UserStatus.FULL){
+                       <dt>Dégage ID</dt><dd>@user.getDegageId</dd>
+                    }
+                </dl>
             </div>
-        </div>
-    </div>
+        }
+        @panel("Acties", "fa-pencil") {
+            @body
+        }
+    }
 }

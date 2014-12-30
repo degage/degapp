@@ -51,10 +51,10 @@ public class User {
     private LocalDate dateJoined;
     private Integer deposit;
     private UserStatus status;
-    private IdentityCard identityCard;
+    private String identityId;
+    private String nationalId;
     private String damageHistory;
     private int profilePictureId; //TODO, review if it's okay practice to -1 = NULL
-    private boolean payedDeposit;
     private boolean agreeTerms;
 
     public User(String email) {
@@ -170,12 +170,20 @@ public class User {
         this.status = status;
     }
 
-    public IdentityCard getIdentityCard() {
-        return identityCard;
+    public String getIdentityId() {
+        return identityId;
     }
 
-    public void setIdentityCard(IdentityCard identityCard) {
-        this.identityCard = identityCard;
+    public String getNationalId() {
+        return nationalId;
+    }
+
+    public void setIdentityId(String identityId) {
+        this.identityId = identityId;
+    }
+
+    public void setNationalId(String nationalId) {
+        this.nationalId = nationalId;
     }
 
     public String getDamageHistory() {
@@ -187,11 +195,7 @@ public class User {
     }
 
     public boolean isPayedDeposit() {
-        return payedDeposit;
-    }
-
-    public void setPayedDeposit(boolean payedDeposit) {
-        this.payedDeposit = payedDeposit;
+        return deposit != null;
     }
 
     public boolean isAgreeTerms() {

@@ -36,6 +36,7 @@ import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
+import com.google.common.base.Strings;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -95,28 +96,23 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(user.getEmail());
                 row.createCell(j++).setCellValue(user.getPhone());
                 row.createCell(j++).setCellValue(user.getCellphone());
-                if (user.getAddressDomicile() != null) {
-                    row.createCell(j++).setCellValue(user.getAddressDomicile().getStreet());
-                    row.createCell(j++).setCellValue(user.getAddressDomicile().getNum());
-                    row.createCell(j++).setCellValue(user.getAddressDomicile().getZip());
-                    row.createCell(j++).setCellValue(user.getAddressDomicile().getCity());
-                    row.createCell(j++).setCellValue(user.getAddressDomicile().getCountry());
-                } else {
-                    j += 5;
-                }
-                if (user.getAddressResidence() != null) {
-                    row.createCell(j++).setCellValue(user.getAddressResidence().getStreet());
-                    row.createCell(j++).setCellValue(user.getAddressResidence().getNum());
-                    row.createCell(j++).setCellValue(user.getAddressResidence().getZip());
-                    row.createCell(j++).setCellValue(user.getAddressResidence().getCity());
-                    row.createCell(j++).setCellValue(user.getAddressResidence().getCountry());
-                } else {
-                    j += 5;
-                }
+
+                row.createCell(j++).setCellValue(user.getAddressDomicile().getStreet());
+                row.createCell(j++).setCellValue(user.getAddressDomicile().getNum());
+                row.createCell(j++).setCellValue(user.getAddressDomicile().getZip());
+                row.createCell(j++).setCellValue(user.getAddressDomicile().getCity());
+                row.createCell(j++).setCellValue(user.getAddressDomicile().getCountry());
+
+                row.createCell(j++).setCellValue(user.getAddressResidence().getStreet());
+                row.createCell(j++).setCellValue(user.getAddressResidence().getNum());
+                row.createCell(j++).setCellValue(user.getAddressResidence().getZip());
+                row.createCell(j++).setCellValue(user.getAddressResidence().getCity());
+                row.createCell(j++).setCellValue(user.getAddressResidence().getCountry());
+
                 row.createCell(j++).setCellValue(user.getGender().name());
-                row.createCell(j++).setCellValue((user.getLicense() != null) ? user.getLicense() : "");
+                row.createCell(j++).setCellValue(Strings.nullToEmpty(user.getLicense()));
                 row.createCell(j++).setCellValue(user.getStatus().name());
-                row.createCell(j++).setCellValue((user.getIdentityCard() != null) ? user.getIdentityCard().getRegistrationNr() : "");
+                row.createCell(j++).setCellValue(Strings.nullToEmpty(user.getNationalId()));
                 row.createCell(j++).setCellValue(user.getDamageHistory());
             }
             wb.write(out);

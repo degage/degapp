@@ -37,6 +37,8 @@ import be.ugent.degage.db.models.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
+import java.time.LocalDate;
+import java.time.Year;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,17 +48,20 @@ import java.util.List;
 class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     static final String USER_HEADER_FIELDS =
-            "user_id, user_firstname, user_lastname, user_email, user_status, user_phone, user_cellphone ";
+            "user_id, user_firstname, user_lastname, user_email, user_status, user_phone, user_cellphone, user_degage_id ";
 
-    private static final String USER_FIELDS = USER_HEADER_FIELDS + ", users.user_cellphone, users.user_phone, users.user_gender, " +
-            "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
-            "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
-            "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
-            "users.user_damage_history, users.user_payed_deposit, users.user_agree_terms, users.user_image_id";
-
-    private static final String USER_QUERY = "SELECT " + USER_FIELDS + " FROM users " +
+    private static final String USER_QUERY =
+            "SELECT " + USER_HEADER_FIELDS + ", users.user_gender, " +
+                "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
+                    "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
+                "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
+                    "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
+                "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
+                "users.user_damage_history, users.user_deposit, users.user_agree_terms, users.user_image_id, " +
+                "users.user_date_joined, users.user_driver_license_date " +
+            "FROM users " +
             "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
-            "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id";
+            "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
 
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
@@ -78,39 +83,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         super(context);
     }
 
-    // TODO: move to separate verification dao?
-
-
-
     public static User populateUser(ResultSet rs) throws SQLException {
-        return populateUser(rs, "users");
-    }
-
-    public static UserHeader populateUserHeader(ResultSet rs) throws SQLException {
-        return new UserHeader(
-                rs.getInt("user_id"),
-                rs.getString("user_email"),
-                rs.getString("user_firstname"),
-                rs.getString("user_lastname"),
-                UserStatus.valueOf(rs.getString("user_status")),
-                rs.getString ("user_phone"),
-                rs.getString ( "user_cellphone")
-        );
-    }
-
-    public static UserHeader populateUserHeader(ResultSet rs, String tableName) throws SQLException {
-        return new UserHeader(
-                rs.getInt(tableName+".user_id"),
-                rs.getString(tableName + ".user_email"),
-                rs.getString(tableName+".user_firstname"),
-                rs.getString(tableName+".user_lastname"),
-                UserStatus.valueOf(rs.getString(tableName + ".user_status")),
-                rs.getString(tableName + ".user_phone"),
-                rs.getString(tableName+".user_cellphone")
-        );
-    }
-
-    public static User populateUser(ResultSet rs, String tableName) throws SQLException {
         User user = new User(
                 rs.getInt("users.user_id"),
                 rs.getString("users.user_email"),
@@ -122,37 +95,57 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
         user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
-        user.setCellphone(rs.getString(tableName + ".user_cellphone"));
-        user.setPhone(rs.getString(tableName + ".user_phone"));
-        user.setGender(UserGender.valueOf(rs.getString(tableName + ".user_gender")));
-        user.setDamageHistory(rs.getString(tableName + ".user_damage_history"));
-        user.setPayedDeposit(rs.getBoolean(tableName + ".user_payed_deposit"));
-        user.setAgreeTerms(rs.getBoolean(tableName + ".user_agree_terms"));
+        user.setCellphone(rs.getString("users.user_cellphone"));
+        user.setPhone(rs.getString("users.user_phone"));
+        user.setGender(UserGender.valueOf(rs.getString("users.user_gender")));
+        user.setDamageHistory(rs.getString("users.user_damage_history"));
+        user.setAgreeTerms(rs.getBoolean("users.user_agree_terms"));
 
-        if (rs.getObject(tableName + ".user_image_id") != null) {
-            user.setProfilePictureId(rs.getInt(tableName + ".user_image_id"));
+        if (rs.getObject("users.user_image_id") != null) {
+            user.setProfilePictureId(rs.getInt("users.user_image_id"));
         }
 
-        user.setLicense(rs.getString(tableName + ".user_driver_license_id"));
+        user.setLicense(rs.getString("users.user_driver_license_id"));
 
-        IdentityCard identityCard = new IdentityCard();
-        boolean identityCardNotNull = false;
-        String identityCardId = rs.getString(tableName + ".user_identity_card_id");
-        if (!rs.wasNull()) {
-            identityCardNotNull = true;
-            identityCard.setId(identityCardId);
-        }
-        String identityCardRegistrationNr = rs.getString(tableName + ".user_identity_card_registration_nr");
-        if (!rs.wasNull()) {
-            identityCardNotNull = true;
-            identityCard.setRegistrationNr(identityCardRegistrationNr);
-        }
-        if (identityCardNotNull)
-            user.setIdentityCard(identityCard);
-        else
-            user.setIdentityCard(null);
+        user.setIdentityId(rs.getString("users.user_identity_card_id"));
+        user.setNationalId(rs.getString("users.user_identity_card_registration_nr"));
+
+        Date dateJoined = rs.getDate("users.user_date_joined");
+        user.setDateJoined(dateJoined == null ? null : dateJoined.toLocalDate());
+
+        user.setDegageId((Integer)rs.getObject("users.user_degage_id"));
+        Date dateLicense = rs.getDate("users.user_driver_license_date");
+        user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
+
+        user.setDeposit((Integer)rs.getObject("users.user_deposit"));
 
         return user;
+    }
+
+    public static UserHeader populateUserHeader(ResultSet rs) throws SQLException {
+        return new UserHeader(
+                rs.getInt("user_id"),
+                rs.getString("user_email"),
+                rs.getString("user_firstname"),
+                rs.getString("user_lastname"),
+                UserStatus.valueOf(rs.getString("user_status")),
+                rs.getString ("user_phone"),
+                rs.getString ( "user_cellphone"),
+                (Integer)rs.getObject("user_degage_id")
+        );
+    }
+
+    public static UserHeader populateUserHeader(ResultSet rs, String tableName) throws SQLException {
+        return new UserHeader(
+                rs.getInt(tableName+".user_id"),
+                rs.getString(tableName + ".user_email"),
+                rs.getString(tableName+".user_firstname"),
+                rs.getString(tableName+".user_lastname"),
+                UserStatus.valueOf(rs.getString(tableName + ".user_status")),
+                rs.getString(tableName + ".user_phone"),
+                rs.getString(tableName+".user_cellphone"),
+                (Integer)rs.getObject(tableName+".user_degage_id")
+        );
     }
 
 
@@ -293,9 +286,126 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             throw new DataAccessException("Failed to update user status", ex);
         }
     }
+
+    //
+    private LazyStatement makeUserFullStatement = new LazyStatement(
+            "UPDATE users SET user_status='FULL', user_date_joined=NOW(), user_degage_id = " +
+                    "( SELECT id from (" + // double select required by mysql
+                        "SELECT ifnull(max(user_degage_id),?)+1 AS id FROM users WHERE user_degage_id> ?" +
+                    ") as temp ) " +
+            "WHERE user_id = ? AND user_degage_id IS NULL"
+    );
+
+    public void makeUserFull (int userId) {
+        try {
+            int yearPar = (Year.now().getValue() - 2000) * 1000;
+
+            PreparedStatement ps = makeUserFullStatement.value();
+            ps.setInt(1, yearPar);
+            ps.setInt(2, yearPar);
+            ps.setInt(3, userId);
+            if (ps.executeUpdate() == 0) {
+                // only status must be changed
+                ps = updateUserStatusStatement.value();
+                ps.setString(1, "FULL");
+                ps.setInt(2, userId);
+                ps.executeUpdate();
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user status", ex);
+        }
+    }
+
+    private LazyStatement updateUserMainProfileStatement = new LazyStatement(
+            "UPDATE users SET user_firstname=?, user_lastname=?,  user_phone=?, user_cellphone=? WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUserMainProfile(User user) throws DataAccessException {
+        try {
+            PreparedStatement ps = updateUserMainProfileStatement.value();
+            ps.setString(1, user.getFirstName());
+            ps.setString(2, user.getLastName());
+
+            ps.setString(3, user.getPhone());
+            ps.setString(4, user.getCellphone());
+
+            ps.setInt(5, user.getId());
+
+            if (ps.executeUpdate() == 0)
+                throw new DataAccessException("User update affected 0 rows.");
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user main profile", ex);
+        }
+    }
+
+    private LazyStatement updateUserPictureStatement = new LazyStatement(
+            "UPDATE users SET user_image_id = ? WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUserPicture(int userId, int fileId) {
+        try {
+            PreparedStatement ps = updateUserPictureStatement.value();
+            ps.setInt(1, fileId);
+            ps.setInt(2, userId);
+
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("User update affected 0 rows.");
+            }
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user picture", ex);
+        }
+
+    }
+
+    private LazyStatement updateUserLicenseDataStatement = new LazyStatement(
+            "UPDATE users SET user_driver_license_id = ?, user_driver_license_date = ? WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUserLicenseData (int userId, String license, LocalDate date) {
+        try {
+            PreparedStatement ps = updateUserLicenseDataStatement.value();
+            ps.setString(1, license);
+            ps.setDate (2, date == null ? null : Date.valueOf(date));
+            ps.setInt(3, userId);
+
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("User update affected 0 rows.");
+            }
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user license data", ex);
+        }
+    }
+
+    private LazyStatement updateUserIdentityDataStatement = new LazyStatement(
+            "UPDATE users SET user_identity_card_id = ?, user_identity_card_registration_nr = ? WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUserIdentityData (int userId, String identityId, String nationalId) {
+        try {
+            PreparedStatement ps = updateUserIdentityDataStatement.value();
+            ps.setString(1, identityId);
+            ps.setString (2, nationalId);
+            ps.setInt(3, userId);
+
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("User update affected 0 rows.");
+            }
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user identity data", ex);
+        }
+    }
+
     private LazyStatement updateUserStatement = new LazyStatement(
             "UPDATE users SET user_email=?, user_firstname=?, user_lastname=?, user_status=?, " +
-                    "user_gender=?, user_phone=?, user_cellphone=?, user_damage_history=?, user_payed_deposit=?, " +
+                    "user_gender=?, user_phone=?, user_cellphone=?, user_damage_history=?, user_deposit=?, " +
                     "user_agree_terms=?, user_image_id = ?, user_driver_license_id=?,  " +
                     "user_identity_card_id=?, user_identity_card_registration_nr=? " +
                     "WHERE user_id = ?"
@@ -316,7 +426,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
             ps.setString(8, user.getDamageHistory());
 
-            ps.setBoolean(9, user.isPayedDeposit());
+            ps.setObject(9, user.getDeposit(), Types.INTEGER);
             ps.setBoolean(10, user.isAgreeTerms());
 
             if (user.getProfilePictureId() != -1) { // TODO: use NULL here
@@ -328,15 +438,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
             ps.setString(12, user.getLicense());
 
-            if (user.getIdentityCard() == null) {
-                ps.setString(13, null);
-                ps.setString(14, null);
-            } else {
-                ps.setString(13, user.getIdentityCard().getId());
-                ps.setString(14, user.getIdentityCard().getRegistrationNr());
-            }
+            ps.setString(13, user.getIdentityId());
+            ps.setString(14, user.getNationalId());
 
-            ps.setInt(17, user.getId());
+            ps.setInt(15, user.getId());
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("User update affected 0 rows.");
@@ -345,28 +450,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             throw new DataAccessException("Failed to update user", ex);
         }
     }
-
-//    private LazyStatement smallUpdateUserStatement = new LazyStatement(
-//            "UPDATE users SET user_email=?, user_firstname=?, user_lastname=? WHERE user_id = ?"
-//    );
-//
-//    @Override
-//    public void updateUserPartial(User user) throws DataAccessException {
-//        try {
-//            PreparedStatement ps = smallUpdateUserStatement.value();
-//
-//            ps.setString(1, user.getEmail());
-//            ps.setString(2, user.getFirstName());
-//            ps.setString(3, user.getLastName());
-//
-//            ps.setInt(4, user.getId());
-//            if (ps.executeUpdate() == 0)
-//                throw new DataAccessException("User update affected 0 rows.");
-//
-//        } catch (SQLException ex) {
-//            throw new DataAccessException("Failed to update user", ex);
-//        }
-//    }
 
     private LazyStatement deleteUserStatement = new LazyStatement(
             "UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?"

@@ -94,12 +94,11 @@ CREATE TABLE `users` (
 	`user_identity_card_registration_nr` VARCHAR(32), -- Rijksregisternummer
 	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'EMAIL_VALIDATING', -- Stadia die de gebruiker moet doorlopen
 	`user_damage_history` TEXT,
-	`user_payed_deposit` BIT(1),
 	`user_agree_terms` BIT(1),
 	`user_image_id` INT,
 	`user_degage_id` INT,
 	`user_date_joined` DATE,
-	`user_deposit` INT,
+	`user_deposit` INT DEFAULT -1,
 	`user_last_notified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`user_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	`user_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -236,7 +235,7 @@ CREATE VIEW `infosessions_extended` AS
         infosession_id, infosession_type,
         infosession_timestamp, infosession_max_enrollees, infosession_comments,
         address_id, address_country, address_city, address_zipcode, address_street, address_number,
-        user_id, user_firstname, user_lastname, user_phone, user_email, user_status, user_cellphone,
+        user_id, user_firstname, user_lastname, user_phone, user_email, user_status, user_cellphone, user_degage_id,
         count(infosession_enrollee_id) AS enrollee_count
     FROM infosessions AS ses
         JOIN users ON infosession_host_user_id = user_id

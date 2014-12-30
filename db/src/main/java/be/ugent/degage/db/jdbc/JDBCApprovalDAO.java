@@ -44,11 +44,11 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     private static final String USERS_USER_HEADER_FIELDS =
             "users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
-            "       users.user_status, users.user_phone, users.user_cellphone ";
+            "       users.user_status, users.user_phone, users.user_cellphone, users.user_degage_id ";
 
     private static final String ADMINS_USER_HEADER_FIELDS =
             "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, " +
-            "       admins.user_status, admins.user_phone, admins.user_cellphone ";
+            "       admins.user_status, admins.user_phone, admins.user_cellphone, admins.user_degage_id ";
 
 
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +

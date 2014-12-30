@@ -42,8 +42,9 @@ public class UserHeader {
 
     private String phone;
     private String cellPhone;
+    private Integer degageId;
 
-    public UserHeader(int id, String email, String firstName, String lastName, UserStatus status, String phone, String cellPhone){
+    public UserHeader(int id, String email, String firstName, String lastName, UserStatus status, String phone, String cellPhone, Integer degageId){
         this.id = id;
         this.email = email;
         this.firstName = firstName;
@@ -51,6 +52,7 @@ public class UserHeader {
         this.status = status;
         this.phone = phone;
         this.cellPhone = cellPhone;
+        this.degageId = degageId;
     }
 
     public void setId(int id){
@@ -108,6 +110,10 @@ public class UserHeader {
 
     public String getFullName() {
         return lastName + ", " + firstName;
+    }
+
+    public Integer getDegageId() {
+        return degageId;
     }
 
     /**

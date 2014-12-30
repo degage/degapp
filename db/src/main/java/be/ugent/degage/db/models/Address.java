@@ -104,8 +104,10 @@ public class Address {
     @Override
     public String toString() {
         if ((street != null && !street.isEmpty()) || (num != null && !num.isEmpty()) || (zip != null && !zip.isEmpty()) || (city != null && !city.isEmpty())) {
-            return String.format("%s %s, %s %s", street, num, zip, city);
-        } else return "/";
+            return String.format("%s %s, %s %s (%s)", street, num, zip, city, country);
+        } else {
+            return "(onbekend)";
+        }
     }
 
 }

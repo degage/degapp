@@ -35,6 +35,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
+import com.google.common.base.Strings;
 import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
@@ -161,7 +162,7 @@ public class Cars extends Controller {
             if (userId == null || userId == 0) {
                 error += "Geef een eigenaar op. ";
             }
-            if (address.isEmpty()) {
+            if (Strings.isNullOrEmpty(address.street)) {
                 error += "Geef het adres op.";
             }
             if (name.length() <= 0) {
