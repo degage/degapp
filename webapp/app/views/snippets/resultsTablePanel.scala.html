@@ -1,4 +1,4 @@
-@* carCostsAdmin.scala.html
+@* resultsTablePanel.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,30 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@scripts = {
-    @js.usesajax()
-    @js.pagination("Cars.showCarCostsPage")
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
-}
+@(title: String = "", faClass: String = "", css: String ="panel-default")
 
-@app("Autokosten (Admin)", scripts=scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Autogebonden kosten</li>
-        </ol>
-    </div>
+@* Panel which holds the table with results for a search *@
 
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Autogebonden kosten</h1>
-                @flashes()
-                @carCostsPartial()
-            </div>
-                <!-- /col-lg-12 -->
-        </div>
-            <!-- /row -->
+@panel(title,faClass,css){
+    <div id="resultsTable" class="table-responsive col-xs-12">
+            <!-- Here comes the loaded table-->
     </div>
-    <!-- /page-wrapper -->
 }

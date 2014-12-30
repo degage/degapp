@@ -30,12 +30,9 @@
 @scripts = {
     @js.usesajax()
     @js.pagination("Refuels.showOwnerRefuelsPage")
-    <script src="@routes.Assets.at("javascripts/app/refuelInfo.js")"></script>
+    <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
 }
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-}
-@app("Tankbeurten (eigenaar)", stylesheets, scripts) {
+@app("Tankbeurten (eigenaar)", scripts=scripts) {
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
             <li><a href="@routes.Application.index">Dashboard</a></li>

@@ -41,10 +41,7 @@
 
     <script type='text/javascript' src='@routes.Assets.at("javascripts/app/reservations.js")'></script>
 }
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
-}
-@app("Reserveren", stylesheets, scripts) {
+@app("Reserveren", scripts=scripts) {
 
     <div id="page-header-wrapper">
         <ol class="breadcrumb">

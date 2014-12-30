@@ -34,17 +34,10 @@
     @js.usesajax()
     @js.pagination("Cars.showCarsPage")
 }
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
-}
-
-@app("Auto's (Admin)", stylesheets, scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Auto's</li>
-        </ol>
-    </div>
+@app("Auto's (beheer)", scripts=scripts) {
+    @breadcrumbs{
+        @breadcrumb("Auto's (beheer)")
+    }
 
     <div id="page-wrapper">
     @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN) ||
@@ -88,19 +81,8 @@
                         <!-- /.panel-body -->
                 </div>
 
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-car fa-fw"></i> Auto's
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div id="resultsTable" class="table-responsive">
-                                <!-- Here comes the loaded table-->
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-                    <!-- /.panel -->
+                @resultsTablePanel("Auto's", "fa-car")
+
             </div>
                 <!-- /col-lg-12 -->
         </div>

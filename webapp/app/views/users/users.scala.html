@@ -33,67 +33,27 @@
     @js.usesajax()
     @js.pagination("Users.showUsersPage")
 }
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-}
+@app("Gebruikers", scripts=scripts) {
+    @breadcrumbs{
+        @breadcrumb("Gebruikers")
+    }
 
-@app("Gebruikers", stylesheets, scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Gebruikers</li>
-        </ol>
-    </div>
-
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Gebruikers</h1>
-                @flashes()
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Gebruikers zoeken
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                            <!-- TODO: layout, more fields to search on -->
-                        <div class="row">
-                            <div class="col-xs-6">
-                                <input id="user_firstname" class="searchTextField form-control" name="user_firstname" type="text" placeholder="Voornaam">
-                            </div>
-                            <div class="col-xs-6">
-                                <input id="user_lastname" class="searchTextField form-control" name="user_lastname" type="text" placeholder="Achternaam">
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <div class="btn-group btn-group">
-                                    <button id="searchButton" class="btn btn-success">Zoek</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-fw"></i> Gebruikers
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                        <div id="resultsTable" class="table-responsive">
-                                <!-- Here comes the loaded table-->
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-                    <!-- /.panel -->
+    @maincontent("Gebruikers"){
+        @panel("Gebruikers zoeken", "fa-search"){
+            <div class="col-xs-6 col-md-4">
+                <input id="user_firstname" class="searchTextField form-control" name="user_firstname" type="text" placeholder="Voornaam">
             </div>
-                <!-- /col-lg-12 -->
-        </div>
-            <!-- /row -->
-    </div>
-    <!-- /page-wrapper -->
+            <div class="col-xs-6 col-md-4">
+                <input id="user_lastname" class="searchTextField form-control" name="user_lastname" type="text" placeholder="Achternaam">
+            </div>
+            <div class="col-xs-4 col-md-4">
+                <div class="btn-group btn-group">
+                    <button id="searchButton" class="btn btn-success">Zoek</button>
+                </div>
+            </div>
+        }
+
+        @resultsTablePanel("Gebruikers", "fa-users")
+
+    }
 }

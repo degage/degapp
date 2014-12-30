@@ -31,10 +31,7 @@
     @js.usesajax()
     @js.pagination("Damages.showDamagesPageOwner")
 }
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")">
-}
-@app("Schadedossiers (eigenaar)", stylesheets, scripts) {
+@app("Schadedossiers (eigenaar)", scripts=scripts) {
 
     <div id="page-header-wrapper">
         <ol class="breadcrumb">
