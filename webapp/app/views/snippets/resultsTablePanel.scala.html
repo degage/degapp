@@ -27,12 +27,24 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String = "", faClass: String = "", css: String ="panel-default")
+@(title: String = "", faClass: String = "", css: String ="panel-default", tabbed : Boolean = false)
 
 @* Panel which holds the table with results for a search *@
 
-@panel(title,faClass,css){
-    <div id="resultsTable" class="table-responsive col-xs-12">
-            <!-- Here comes the loaded table-->
+@if(tabbed){
+    <div class="tab-content">
+        <div id="resultpanel" class="tab-pane active">
+            @panel(title,faClass,css+" tabpanel"){
+                <div id="resultsTable" class="table-responsive col-xs-12">
+                        <!-- Here comes the loaded table-->
+                </div>
+            }
+        </div>
     </div>
+} else {
+    @panel(title,faClass,css){
+        <div id="resultsTable" class="table-responsive col-xs-12">
+                <!-- Here comes the loaded table-->
+        </div>
+    }
 }

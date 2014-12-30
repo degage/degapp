@@ -72,17 +72,8 @@ $(function() {
               <li class="hidden"><button id="searchButton"></button></li>
             </ul>
 
-            <div class="tab-content">
-              <div class="tab-pane active" id="resultsPanel">
-                <div class="panel panel-default tabpanel">
-                    <div class="panel-body">
-                        <div id="resultsTable">
-                            <!-- Here comes the loaded page -->
-                        </div>
-                    </div>
-                </div>
-              </div>
-            </div>
+            @resultsTablePanel(tabbed=true)
+
         </div>
         <!-- /col-lg-12 -->
     </div>
