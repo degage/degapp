@@ -15,11 +15,15 @@ function initUserPicker() {
         userpicker.find("div").html("");
     });
 
+/*  Gave rise to stack overflow in bootstrap 3.3.1, probably because class 'open' is now only set after the dropdown
+    gets focus.
+
     $(".userpicker > input[type=text]").on("focus", function() {
         if (!$(this).parent().hasClass("open")) {
             $(this).dropdown("toggle");
         }
     });
+*/
 
     $(".userpicker").on("show.bs.dropdown", function() {
         if ($(this).find(".dropdown-menu").html() == "") {
@@ -89,6 +93,10 @@ function initUserPicker() {
             e.preventDefault();
             e.stopPropagation();
             $(this).parent().find(".dropdown-menu > li:last a").trigger("focus");
+        } else if (e.which == 40) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).parent().find(".dropdown-menu > li:first a").trigger("focus");
         }
     });
 }
