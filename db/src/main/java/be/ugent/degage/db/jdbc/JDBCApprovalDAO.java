@@ -192,10 +192,14 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Timestamp approvalDate = rs.getTimestamp("approval_date");
+                    // note that admin can be null
+                    UserHeader admin = rs.getString ("admins.user_status") == null ?
+                        null :
+                        JDBCUserDAO.populateUserHeader(rs, "admins");
                     return new Approval(
                             rs.getInt("approval_id"),
                             JDBCUserDAO.populateUserHeader(rs, "users"),
-                            JDBCUserDAO.populateUserHeader(rs, "admins"),
+                            admin,
                             rs.getTimestamp("approval_submission").toInstant(),
                             approvalDate == null ? null : approvalDate.toInstant(),
                             rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs),
