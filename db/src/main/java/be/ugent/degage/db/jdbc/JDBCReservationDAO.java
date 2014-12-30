@@ -297,16 +297,18 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     // TODO: make two different methods depending on value of getAmount
     private String getReservationsPageStatement(boolean getAmount, String amount, Filter filter) {
         String id;
-        if(filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID).equals("")) {
+        String userOrOwner = filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID);
+        if(userOrOwner.equals("") || userOrOwner.startsWith("-")) {
             id = "'%%'";
         } else {
-            id = filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID);
+            id = userOrOwner;
         }
         String carId;
-        if(filter.getValue(FilterField.RESERVATION_CAR_ID).equals("")) {
+        String car = filter.getValue(FilterField.RESERVATION_CAR_ID);
+        if(car.equals("") || car.startsWith("-")) {
             carId = "'%%'";
         } else {
-            carId = filter.getValue(FilterField.RESERVATION_CAR_ID);
+            carId = car;
         }
             // TODO: replace * by actual fields
         String sql = "SELECT " + (getAmount ? " COUNT(reservation_id) AS " + amount : " * ") +
