@@ -35,12 +35,9 @@
 }
 @app("Ritten", scripts=scripts) {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Ritten</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Ritten")
+    }
 
     <div id="page-wrapper">
         <div class="row">

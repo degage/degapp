@@ -33,13 +33,10 @@
     @js.userpicker()
     <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
 }
-@app("Tankbeurten (Admin)", scripts=scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Tankbeurten (Admin)</li>
-        </ol>
-    </div>
+@app("Tankbeurten (beheer)", scripts=scripts) {
+    @breadcrumbs{
+        @breadcrumb("Tankbeurten (beheer)")
+    }
 
     <div id="page-wrapper">
         <div class="row">

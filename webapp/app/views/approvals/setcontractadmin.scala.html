@@ -33,13 +33,10 @@
     }
 
 @app("Goedkeuringsaanvraag", scripts=scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li><a href="@routes.Approvals.pendingApprovalList">Goedkeuringsaanvragen</a></li>
-            <li class="active">Contractverantwoordelijke toewijzen</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Goedkeuringsaanvragen",routes.Approvals.pendingApprovalList)
+        @breadcrumb("Contractverantwoordelijke toewijzen")
+    }
 
     <div id="page-wrapper">
         @flashes()

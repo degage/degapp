@@ -29,13 +29,9 @@
 
 @()
 @app("Instellingen") {
-
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="@routes.Application.index">Dashboard</a></li>
-        <li class="active">Instellingen</li>
-    </ol>
-</div>
+    @breadcrumbs{
+        @breadcrumb("Instellingen")
+    }
 
 <div id="page-wrapper">
     @flashes()

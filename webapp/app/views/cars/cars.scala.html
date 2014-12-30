@@ -36,12 +36,9 @@
 @import db.CurrentUser
 
 @app("Auto's", stylesheets, scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Auto's</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Auto's")
+    }
 
     <div id="page-wrapper">
         <div class="row">

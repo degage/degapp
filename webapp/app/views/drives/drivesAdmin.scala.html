@@ -33,17 +33,14 @@
     @js.userpicker()
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
 }
-@app("Ritten (admin)", scripts=scripts) {
+@app("Ritten (beheer)", scripts=scripts) {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Ritten</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Ritten (beheer)")
+    }
 
     <div id="page-wrapper">
-        <h1 class="page-header">Ritten</h1>
+        <h1 class="page-header">Ritten (beheer)</h1>
         <div class="panel panel-default">
             <div class="panel-heading">
                 <i class="fa fa-bar-chart-o fa-fw"></i> Ritten

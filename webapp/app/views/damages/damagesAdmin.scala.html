@@ -44,17 +44,14 @@
 }
 @app("Schadedossiers (Admin)", stylesheets, scripts) {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Schadedossiers (Admin)</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Schadedossiers (beheer)")
+    }
 
     <div id="page-wrapper">
         <div class="row">
             <div class="col-lg-12">
-                <h1 class="page-header">Schadedossiers (Admin)</h1>
+                <h1 class="page-header">Schadedossiers (beheer)</h1>
                 @flashes()
 
                 <div class="panel panel-default">

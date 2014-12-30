@@ -36,6 +36,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 import controllers.util.Pagination;
 import db.CurrentUser;
@@ -127,17 +128,11 @@ public class UserRoles extends Controller {
     public static Result edit(int userId) {
 
         DataAccessContext context = DataAccess.getInjectedContext();
-        UserDAO udao = context.getUserDAO();
-        User user = udao.getUser(userId);
-        if (user == null) {
-            flash("danger", "GebruikersID " + userId + " bestaat niet.");
-            return badRequest(overview.render());
-        } else {
-            UserRoleDAO dao = context.getUserRoleDAO();
-            Set<UserRole> roles = dao.getUserRoles(userId);
-
-            return ok(editroles.render(getUserRolesStatus(roles), user));
-        }
+        UserHeader user = context.getUserDAO().getUserHeader(userId);
+        return ok(editroles.render(
+                getUserRolesStatus(context.getUserRoleDAO().getUserRoles(userId)),
+                user)
+        );
     }
 
     /**
@@ -173,53 +168,48 @@ public class UserRoles extends Controller {
     public static Result editPost(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO udao = context.getUserDAO();
-        User user = udao.getUser(userId);
-        if (user == null) {
-            flash("danger", "GebruikersID " + userId + " bestaat niet.");
-            return badRequest(overview.render());
-        } else {
-            UserRoleDAO dao = context.getUserRoleDAO();
-            Set<UserRole> oldRoles = dao.getUserRoles(userId);
+        UserHeader user = udao.getUserHeader(userId);
+        UserRoleDAO dao = context.getUserRoleDAO();
+        Set<UserRole> oldRoles = dao.getUserRoles(userId);
 
-            Map<String, String[]> map = request().body().asFormUrlEncoded();
-            String[] checkedVal = map.get("role"); // get selected topics
+        Map<String, String[]> map = request().body().asFormUrlEncoded();
+        String[] checkedVal = map.get("role"); // get selected topics
 
-            // Parse the POST values whether they contain the roles (only checked get posted)
-            Set<UserRole> newRoles = EnumSet.of(UserRole.USER);
-            if (checkedVal != null) {
-                for (String strRole : checkedVal) {
-                    newRoles.add(Enum.valueOf(UserRole.class, strRole));
-                }
+        // Parse the POST values whether they contain the roles (only checked get posted)
+        Set<UserRole> newRoles = EnumSet.of(UserRole.USER);
+        if (checkedVal != null) {
+            for (String strRole : checkedVal) {
+                newRoles.add(Enum.valueOf(UserRole.class, strRole));
             }
+        }
 
-            // Get all newly assigned roles
-            Set<UserRole> addedRoles = EnumSet.copyOf(newRoles);
-            addedRoles.removeAll(oldRoles);
+        // Get all newly assigned roles
+        Set<UserRole> addedRoles = EnumSet.copyOf(newRoles);
+        addedRoles.removeAll(oldRoles);
 
-            // Get all removed roles
-            Set<UserRole> removedRoles = EnumSet.copyOf(oldRoles);
-            removedRoles.removeAll(newRoles);
+        // Get all removed roles
+        Set<UserRole> removedRoles = EnumSet.copyOf(oldRoles);
+        removedRoles.removeAll(newRoles);
 
-            // Check if a superuser did delete his role by accident (SU roles can only be removed by other SU users)
-            if (CurrentUser.is(user.getId()) && removedRoles.contains(UserRole.SUPER_USER)) {
-                flash("danger", "Als superuser kan je je eigen superuser rechten niet verwijderen.");
-                return badRequest(editroles.render(getUserRolesStatus(oldRoles), user));
-            } else {
-                try {
-                    for (UserRole removedRole : removedRoles) {
-                        dao.removeUserRole(userId, removedRole);
-                    }
-
-                    for (UserRole addedRole : addedRoles) {
-                        dao.addUserRole(userId, addedRole);
-                    }
-
-                    flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
-                    return ok(editroles.render(getUserRolesStatus(newRoles), user));
-                } catch (DataAccessException ex) {
-                    context.rollback();
-                    throw ex;
+        // Check if a superuser did delete his role by accident (SU roles can only be removed by other SU users)
+        if (CurrentUser.is(user.getId()) && removedRoles.contains(UserRole.SUPER_USER)) {
+            flash("danger", "Als superuser kan je je eigen superuser rechten niet verwijderen.");
+            return badRequest(editroles.render(getUserRolesStatus(oldRoles), user));
+        } else {
+            try {
+                for (UserRole removedRole : removedRoles) {
+                    dao.removeUserRole(userId, removedRole);
                 }
+
+                for (UserRole addedRole : addedRoles) {
+                    dao.addUserRole(userId, addedRole);
+                }
+
+                flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
+                return ok(editroles.render(getUserRolesStatus(newRoles), user));
+            } catch (DataAccessException ex) {
+                context.rollback();
+                throw ex;
             }
         }
     }

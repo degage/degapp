@@ -31,22 +31,19 @@
     @js.usesajax()
     @js.pagination("EmailTemplates.showExistingTemplatesPage")
 }
-@app("Templates", scripts=scripts) {
+@app("Sjablonen", scripts=scripts) {
 
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="@routes.Application.index">Dashboard</a></li>
-        <li class="active">Templates</li>
-    </ol>
-</div>
+    @breadcrumbs{
+        @breadcrumb("Sjablonen")
+    }
 
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header">Templates</h1>
+            <h1 class="page-header">Sjablonen</h1>
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    <i class="fa fa-bar-chart-o fa-fw"></i> Templates zoeken
+                    <i class="fa fa-bar-chart-o fa-fw"></i> Sjablonen zoeken
                 </div>
                     <!-- /.panel-heading -->
                 <div class="panel-body">

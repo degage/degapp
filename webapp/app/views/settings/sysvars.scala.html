@@ -29,12 +29,9 @@
 
 @(settings: Iterable[Setting])
 @app("Systeemvariabelen") {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Systeemvariabelen</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Systeemvariabelen")
+    }
 
     <div id="page-wrapper">
         @flashes()

@@ -53,14 +53,11 @@
 }
 
 @app("Details Infosessie", stylesheets, scripts) {
-<div id="page-header-wrapper">
-    <!-- <h1 class="page-header">Infosessies</h1> -->
-    <ol class="breadcrumb">
-        <li><a href="@routes.Application.index">Dasboard</a></li>
-        <li><a href="@routes.InfoSessions.showUpcomingSessions">Infosessies</a></li>
-        <li class="active">Details infosessie</li>
-    </ol>
-</div>
+    @breadcrumbs{
+        @breadcrumb("Infosessies", routes.InfoSessions.showUpcomingSessions)
+        @breadcrumb("Details infosessie")
+    }
+
 
 <div id="page-wrapper">
     <div class="row">

@@ -35,13 +35,10 @@
     <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
 }
 
-@app("Infosessies (Admin)", stylesheets, scripts) {
-<div id="page-header-wrapper">
-   <ol class="breadcrumb">
-        <li><a href="@routes.Application.index">Dashboard</a></li>
-        <li class="active">Infosessies</li>
-   </ol>
-</div>
+@app("Infosessies (beheer)", stylesheets, scripts) {
+    @breadcrumbs{
+        @breadcrumb("Infosessies (beheer)")
+    }
 
 <div id="page-wrapper">
     <div class="row">

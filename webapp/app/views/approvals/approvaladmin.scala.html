@@ -49,12 +49,9 @@
     }
 
 @app("Goedkeuringsaanvraag", stylesheets, scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Goedkeuringsaanvraag</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Goedkeuringsaanvraag")
+    }
 
     <div id="page-wrapper">
         <div>

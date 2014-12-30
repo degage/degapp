@@ -33,21 +33,11 @@
 }
 @app("Schadedossiers (eigenaar)", scripts=scripts) {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Schadedossiers</li>
-        </ol>
-    </div>
-
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Schadedossiers</h1>
-                @flashes()
-                @resultsTablePanel()
-            </div>
-                <!-- /col-lg-12 -->
-        </div>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Schadedossiers (eigenaar)")
+    }
+    @maincontent("Schadedossiers (eigenaar)") {
+        @flashes()
+        @resultsTablePanel()
+    }
 }

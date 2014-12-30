@@ -30,13 +30,10 @@
 @(form: Form[Settings.ChangePasswordModel])
 @app("Wachtwoord wijzigen") {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li><a href="@routes.Settings.index">Instellingen</a></li>
-            <li class="active">Wachtwoord wijzigen</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Instellingen", routes.Settings.index)
+        @breadcrumb("Wachtwoord wijzigen")
+    }
 
     <div id="page-wrapper">
         @flashes()

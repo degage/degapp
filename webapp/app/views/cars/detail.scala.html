@@ -70,15 +70,12 @@
     }
 
 @app("Details Auto", stylesheets, scripts) {
-    @defining(DataProvider.getUserProvider().getUser()) { user =>
+    @breadcrumbs{
+        @breadcrumb("Auto's", routes.Cars.showCars())
+        @breadcrumb("Autodetails")
+    }
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="disable"><a href="@routes.Cars.showCars()">Auto's</a></li>
-            <li class="active">Autodetails</li>
-        </ol>
-    </div>
+    @defining(DataProvider.getUserProvider().getUser()) { user =>
 
     <div id="page-wrapper">
         <div class="row">

@@ -34,14 +34,10 @@
 }
 
 @app("Systeemvariabele bewerken", Html(""), scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li><a href="@routes.Settings.sysvarsOverview">Systeemvariabelen</a></li>
-            <li class="active">Systeemvariabele bewerken</li>
-        </ol>
-    </div>
-
+    @breadcrumbs{
+        @breadcrumb("Systeemvariabelen",routes.Settings.sysvarsOverview)
+        @breadcrumb("Bewerken")
+    }
     <div id="page-wrapper">
         @flashes()
         <h1 class="page-header">Systeemvariabele bewerken</h1>

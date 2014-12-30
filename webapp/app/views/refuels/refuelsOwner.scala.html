@@ -33,12 +33,9 @@
     <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
 }
 @app("Tankbeurten (eigenaar)", scripts=scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Tankbeurten (eigenaar)</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Tankbeurten (eigenaar)")
+    }
 
     <div id="page-wrapper">
         <div class="row">

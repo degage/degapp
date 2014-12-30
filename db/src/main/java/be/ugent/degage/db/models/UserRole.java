@@ -42,21 +42,28 @@ public enum UserRole {
 
     // at most 36 values are allowed for toString(Set) to work properly
 
-    USER("Gebruiker"),
-    SUPER_USER("Superuser"),
-    CAR_OWNER("Auto-eigenaar"),
-    CAR_USER("Autolener"),
-    INFOSESSION_ADMIN("Infosessiebeheerder"),
-    MAIL_ADMIN("E-mailbeheerder"),
-    PROFILE_ADMIN("Profielbeheerder"),
-    RESERVATION_ADMIN("Reservatiebeheerder"),
-    CAR_ADMIN("Autobeheerder");
+    USER("Gebruiker", "Een lid van Dégage"),
+    CAR_USER("Autolener", "Kan een auto lenen"),
+    CAR_OWNER("Auto-eigenaar", "Eigenaar van een auto die kan uitgeleend worden"),
+    CAR_ADMIN("Autobeheerder", "Kan auto's beheren en autogebonden kosten goedkeuren"),
+    INFOSESSION_ADMIN("Infosessiebeheerder", "Kan infosessies beheren"),
+    MAIL_ADMIN("E-mailbeheerder", "Kan email-sjablonen aanpassen"),
+    PROFILE_ADMIN("Profielbeheerder", "Kan gebruikersgegevens wijzigen"),
+    RESERVATION_ADMIN("Reservatiebeheerder", "Kan reservaties beheren"),
+    SUPER_USER("Superuser", "Heeft ALLE rechten in de applicatie") ;
 
     // Enum implementation
     private String description;
 
-    private UserRole(String description) {
+    private String longDescription;
+
+    public String getLongDescription() {
+        return longDescription;
+    }
+
+    private UserRole(String description, String longDescription) {
         this.description = description;
+        this.longDescription = longDescription;
     }
 
     public String toString() {

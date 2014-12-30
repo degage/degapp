@@ -107,20 +107,17 @@
         } ) ;
     </script>
 }
-@app("Template bewerken",stylesheets, scripts) {
+@app("Sjabloon bewerken",stylesheets, scripts) {
 
-<div id="page-header-wrapper">
-    <ol class="breadcrumb">
-        <li><a href="@routes.Application.index">Dashboard</a></li>
-        <li><a href="@routes.EmailTemplates.showExistingTemplates">Templates</a></li>
-        <li class="active">Template bewerken</li>
-    </ol>
-</div>
+    @breadcrumbs{
+        @breadcrumb("Sjablonen", routes.EmailTemplates.showExistingTemplates)
+        @breadcrumb("Sjabloon bewerken")
+    }
 
 <div id="page-wrapper">
     <div class="row">
         <div class="col-lg-12">
-            <h1 class="page-header">Template bewerken</h1>
+            <h1 class="page-header">Sjabloon bewerken</h1>
             <div class="panel panel-default">
                 <div class="panel-heading">
                     <i class="fa fa-bar-chart-o fa-fw"></i> Bewerken

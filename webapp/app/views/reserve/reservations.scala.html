@@ -43,12 +43,9 @@
 }
 @app("Reserveren", scripts=scripts) {
 
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Reserveren</li>
-        </ol>
-    </div>
+    @breadcrumbs{
+        @breadcrumb("Reserveren")
+    }
 
     <div id="page-wrapper">
         <div class="row">
