@@ -95,12 +95,13 @@ public class Approvals extends Controller {
         public boolean acceptsTerms;
 
         public List<ValidationError> validate() {
-            if (!acceptsTerms)
+            if (!acceptsTerms) {
                 return Arrays.asList(
                         new ValidationError("acceptsTerms", "Gelieve de algemene voorwaarden te accepteren")
                 );
-            else
+            } else {
                 return null;
+            }
         }
     }
 
@@ -137,27 +138,27 @@ public class Approvals extends Controller {
     @AllowRoles
     @InjectContext
     public static Result requestApprovalPost() {
-            Form<RequestApprovalData> form = Form.form(RequestApprovalData.class).bindFromRequest();
-            DataAccessContext context = DataAccess.getInjectedContext();
-            if (form.hasErrors()) {
-                    return badRequest(approvalrequest.render(
-                                    checkApprovalConditions(CurrentUser.getId(), context),
-                                    form,
-                                    getTermsAndConditions(context)
-                            )
-                    );
+        Form<RequestApprovalData> form = Form.form(RequestApprovalData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        if (form.hasErrors()) {
+            return badRequest(approvalrequest.render(
+                            checkApprovalConditions(CurrentUser.getId(), context),
+                            form,
+                            getTermsAndConditions(context)
+                    )
+            );
+        } else {
+            Integer isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
+            if (isp == null) {
+                flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
+                return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
-                Integer isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
-                if (isp == null) {
-                    flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
-                    return redirect(routes.InfoSessions.showUpcomingSessions());
-                } else {
-                    context.getApprovalDAO().createApproval(CurrentUser.getId(), isp, form.get().message);
-                    context.getUserDAO().updateUserStatus(CurrentUser.getId(), UserStatus.FULL_VALIDATING);
-                    flash("success", "Bedankt voor de interesse. We nemen je aanvraag tot lidmaatschap in beraad.");
-                    return redirect(routes.Application.index());
-                }
+                context.getApprovalDAO().createApproval(CurrentUser.getId(), isp, form.get().message);
+                context.getUserDAO().updateUserStatus(CurrentUser.getId(), UserStatus.FULL_VALIDATING);
+                flash("success", "Bedankt voor de interesse. We nemen je aanvraag tot lidmaatschap in beraad.");
+                return redirect(routes.Application.index());
             }
+        }
     }
 
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
@@ -170,13 +171,14 @@ public class Approvals extends Controller {
     @InjectContext
     public static Result pendingApprovalListPaged(int page) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        int pageSize = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosessions_page_size")); // should be application constant?
+        int pageSize = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosessions_page_size"));
+            // TODO: standard size of a page should be in application.conf, not in database
         ApprovalDAO dao = context.getApprovalDAO();
-        Iterable<Approval> approvalsList = dao.getApprovals(page, pageSize);
         int amountOfResults = dao.getApprovalCount();
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
-
-        return ok(approvalpage.render(approvalsList, page, amountOfResults, amountOfPages));
+        return ok(approvalpage.render(dao.getApprovals(page, pageSize),
+                page,
+                amountOfResults,
+                (amountOfResults + pageSize - 1) / pageSize));
     }
 
     // used in injected context
@@ -231,7 +233,7 @@ public class Approvals extends Controller {
             status = idao.getUserEnrollmentStatus(ap.getSession().getId(), ap.getUser().getId());
         }
         InfoSessions.UserpickerData data = new InfoSessions.UserpickerData();
-        data.populate (ap.getAdmin());
+        data.populate(ap.getAdmin());
         return ok(setcontractadmin.render(ap, status, Form.form(InfoSessions.UserpickerData.class).fill(data)));
     }
 
@@ -243,7 +245,7 @@ public class Approvals extends Controller {
         Approval app = adao.getApproval(id);
         Form<InfoSessions.UserpickerData> form = Form.form(InfoSessions.UserpickerData.class).bindFromRequest();
         if (form.hasErrors()) {
-                // TODO: code in common with approvalAdmin
+            // TODO: code in common with approvalAdmin
             EnrollementStatus status = EnrollementStatus.ABSENT;
             if (app.getSession() != null) {
                 InfoSessionDAO idao = context.getInfoSessionDAO();
@@ -304,17 +306,17 @@ public class Approvals extends Controller {
             dao.updateApproval(ap);
 
             // Set contact admin
-            User user = udao.getUser(ap.getUser().getId());
-            user.setStatus(UserStatus.FULL);
-            user.setAgreeTerms(true); //TODO: check if we can accept this earlier, as it is accepted once approval is submitted
-            udao.updateUser(user); //full update
+            udao.makeUserFull(ap.getUser().getId());
 
             // Add the new user roles
             UserRoleDAO roleDao = context.getUserRoleDAO();
-            if (m.sharer)
+            // TODO: always at least sharer
+            if (m.sharer) {
                 roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
-            if (m.user)
+            }
+            if (m.user) {
                 roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
+            }
             Notifier.sendMembershipStatusChanged(ap.getUser(), true, m.message);
             flash("success", "De gebruikersrechten werden succesvol aangepast.");
 
@@ -363,7 +365,9 @@ public class Approvals extends Controller {
         public String validate() {
             if (getAction() == Action.ACCEPT && !sharer && !user) { //if the user is accepted, but no extra rules specified
                 return "Gelieve aan te geven welke rechten deze gebruiker toegewezen krijgt.";
-            } else return null;
+            } else {
+                return null;
+            }
         }
     }
 }

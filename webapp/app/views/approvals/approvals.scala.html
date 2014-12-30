@@ -31,7 +31,7 @@
 
 @scripts = {
     @js.usesajax()
-    @js.pagination("InfoSessions.pendingApprovalListPaged")
+    @js.pagination("Approvals.pendingApprovalListPaged")
 
     <script>
         $(document).ready(function () {
@@ -45,31 +45,14 @@
 }
 
 @app("Goedkeuringen gebruikers", stylesheets, scripts) {
-    <div id="page-header-wrapper">
-        <ol class="breadcrumb">
-            <li><a href="@routes.Application.index">Dashboard</a></li>
-            <li class="active">Goedkeuringen gebruikers</li>
-        </ol>
-    </div>
-
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Goedkeuringen gebruikers</h1>
-
-                <div class="panel panel-default">
-                    <div class="panel-body">
-                        <div id="resultsTable" class="table-responsive">
-                                <!-- Here comes the loaded table-->
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-                    <!-- /.panel -->
+    @breadcrumbs{
+        @breadcrumb("Goedkeuringen gebruikers")
+    }
+    @maincontent("Goedkeuringen gebruikers"){
+        @panel(){
+            <div id="resultsTable" class="table-responsive col-xs-12">
+                    <!-- Here comes the loaded table-->
             </div>
-                <!-- /col-lg-12 -->
-        </div>
-            <!-- /row -->
-    </div>
-    <!-- /page-wrapper -->
+        }
+    }
 }

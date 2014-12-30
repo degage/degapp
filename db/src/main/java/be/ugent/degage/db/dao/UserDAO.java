@@ -89,16 +89,6 @@ public interface UserDAO {
     public void updateUserIdentityData (int userId, String identityId, String nationalId);
 
     /**
-     * Update information about the given user
-     */
-    public void updateUser(User user) throws DataAccessException;
-
-    /**
-     * Update partial information about the given user
-     */
-    //public void updateUserPartial(User user) throws DataAccessException;
-
-    /**
      * Update the user status
      */
     public void updateUserStatus(int userId, UserStatus status);
