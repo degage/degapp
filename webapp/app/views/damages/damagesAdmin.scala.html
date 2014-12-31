@@ -41,48 +41,16 @@
     <!-- <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/plugins/tristate-checkbox/main.css")"> -->
     @* TODO: remove tristate button and icons? *@
 }
-@app("Schadedossiers (Admin)", stylesheets, scripts) {
-
-    @breadcrumbs{
-        @breadcrumb("Schadedossiers (beheer)")
-    }
-
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Schadedossiers (beheer)</h1>
-                @flashes()
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-search fa-fw"></i> Schadedossiers zoeken
-                    </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <p>
-                                    Bekijk hier als admin alle schadedossiers in het systeem.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            @search.carpicker("damage_car_id", "Auto")
-                            @search.userpicker("damage_owner_id", "Eigenaar")
-                            @search.userpicker("damage_user_id", "Bestuurder")
-                        </div>
-                        <div class="row">
-                            <div class="col-md-12">
-                                <span class="tristate" id="damage_finished"></span>
-                                <label for="damage_finished">Afgesloten</label>
-                            </div>
-                        @search.button("Zoek!")
-                        </div>
-                    </div>
-                    <!-- /.panel-body -->
-                </div>
-                @resultsTablePanel()
-            </div>
-                <!-- /col-lg-12 -->
+@stdlayout("Schadedossiers (beheer)", stylesheets, scripts) {
+    @panel("Schadedossiers zoeken", "fa-search") {
+        @search.carpicker("damage_car_id", "Auto")
+        @search.userpicker("damage_owner_id", "Eigenaar")
+        @search.userpicker("damage_user_id", "Bestuurder")
+        <div class="col-xs-12">
+            <span class="tristate" id="damage_finished"></span>
+            <label for="damage_finished">Afgesloten</label>
         </div>
-    </div>
+        @search.button("Zoek!")
+    }
+    @resultsTablePanel()
 }

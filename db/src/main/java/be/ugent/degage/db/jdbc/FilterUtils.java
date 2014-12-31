@@ -75,6 +75,18 @@ public final class FilterUtils {
     }
 
     /**
+     * Append to a given builder the AND-clause for an id. Negative ids are considered shorthand
+     * for null.
+     */
+    public static void appendIdFilter (StringBuilder builder, String key, String value) {
+        if(! value.isEmpty()) {
+            if (Integer.parseInt(value) >= 0) {
+                builder.append(" AND ").append(key).append(" = ").append(value);
+            }
+        }
+    }
+
+    /**
      * Append to a given builder the AND-clause for a boolean, when one
      */
     public static void appendWhenOneFilter (StringBuilder builder, String key, String value) {

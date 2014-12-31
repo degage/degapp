@@ -235,9 +235,9 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
 
     private void appendDamagesFilter(StringBuilder builder, Filter filter) {
         FilterUtils.appendTristateFilter(builder, "damage_finished", filter.getValue(FilterField.DAMAGE_FINISHED));
-        FilterUtils.appendIntFilter(builder, "reservation_car_id", filter.getValue(FilterField.DAMAGE_CAR_ID));
-        FilterUtils.appendIntFilter (builder, "reservation_user_id", filter.getValue(FilterField.DAMAGE_USER_ID));
-        FilterUtils.appendIntFilter (builder, "car_owner_user_id", filter.getValue(FilterField.DAMAGE_OWNER_ID));
+        FilterUtils.appendIdFilter(builder, "reservation_car_id", filter.getValue(FilterField.DAMAGE_CAR_ID));
+        FilterUtils.appendIdFilter (builder, "reservation_user_id", filter.getValue(FilterField.DAMAGE_USER_ID));
+        FilterUtils.appendIdFilter (builder, "car_owner_user_id", filter.getValue(FilterField.DAMAGE_OWNER_ID));
     }
 
     @Override

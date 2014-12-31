@@ -459,7 +459,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
     private static void appendCarFilter (StringBuilder builder, Filter filter) {
 
-        FilterUtils.appendIntFilter(builder, "car_id", filter.getValue(FilterField.CAR_ID));
+        FilterUtils.appendIdFilter(builder, "car_id", filter.getValue(FilterField.CAR_ID));
 
         // filter on car_seats
         String carSeats = filter.getValue(FilterField.CAR_SEATS);
