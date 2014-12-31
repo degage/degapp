@@ -28,63 +28,30 @@
  *@
 
 @(approval: Approval, enrollStatus: EnrollementStatus, reasons: Iterable[String] = null, form: Form[Approvals.ApprovalAdminData])
-    @stylesheets = {
-        <link href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")' rel="stylesheet">
 
-    }
-    @scripts = {
-        <script src='@routes.Assets.at("javascripts/jquery-ui-1.10.4.custom.min.js")'></script>
-        <script>
-            $(document ).ready(function(){
-                $('#@form("status").id').change(function(e)
-                {
-                    if( e.target.value === "ACCEPT"){
-                        $("#acceptProperties" ).show();
-                    } else {
-                        $("#acceptProperties" ).hide();
-                    }
-                });
-            });
-        </script>
-    }
-
-@app("Goedkeuringsaanvraag", stylesheets, scripts) {
-    @breadcrumbs{
-        @breadcrumb("Goedkeuringsaanvraag")
-    }
-
-    <div id="page-wrapper">
-        <div>
-            @flashes()
-            @if(reasons.iterator.hasNext) {
-                <div class="panel panel-danger">
-                    <div class="panel-heading">
-                        <h3 class="panel-title"><i class="fa fa-exclamation-triangle"></i> Opgelet!</h3>
-                    </div>
-                    <div class="panel-body">
-                        <p>Er zijn mogelijks problemen met deze aanvraag:</p>
-                        <ul>
-                        @foreach(reasons){ reason =>
-                            <li>@reason</li>
-                        }
-                        </ul>
-                    </div>
-                </div>
-            }
-        @approvaluserpartial(approval, enrollStatus)
-
-        @panel("Aanvraag", "fa-pencil-square-o"){
-            @helper.form(routes.Approvals.approvalAdminAction(approval.getId)) {
-                    @formErrors(form)
-                    @std.selectEnum(classOf[Approvals.ApprovalAdminData.Action],form("status"),"Actie")
-                    <div class="form-group col-xs-12">
-                        @std.checkboxInline(form("user"),"Autolener")
-                        @std.checkboxInline(form("sharer"),"Eigenaar")
-                    </div>
-                    @std.textArea(form("message"),"Opmerkingen", 4)
-                    @std.submitButton("Verzenden")
-            }
+@stdlayout("Goedkeuringsaanvraag") {
+    @if(reasons.iterator.hasNext) {
+        @panel("Opgelet!", "fa-exlamation-triangle", css="panel-danger"){
+            <div class="col-xs-12">
+                <p>Niet alle gegevens voor deze aanvraag zijn reeds ter beschikking:</p>
+                <ul>
+                @foreach(reasons){ reason => <li>@reason</li> }
+                </ul>
+            </div>
         }
-        </div>
-    </div>
+    }
+    @approvaluserpartial(approval, enrollStatus)
+
+    @panel("Aanvraag", "fa-pencil-square-o"){
+        @helper.form(routes.Approvals.approvalAdminAction(approval.getId)) {
+                @formErrors(form)
+                @std.selectEnum(classOf[Approvals.ApprovalAdminData.Action],form("status"),"Actie")
+                <div class="form-group col-xs-12">
+                    @std.checkboxInline(form("user"),"Autolener")
+                    @std.checkboxInline(form("sharer"),"Eigenaar")
+                </div>
+                @std.textArea(form("message"),"Opmerkingen", 4)
+                @std.submitButton("Verzenden")
+        }
+    }
 }

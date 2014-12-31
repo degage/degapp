@@ -1,4 +1,4 @@
-@* setcontractadmin.scala.html
+@* stdlayout.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,17 +27,18 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approval: Approval, enrollStatus: EnrollementStatus,form: Form[InfoSessions.UserpickerData])
+@(title: String, stylesheets: Html = Html(""), scripts: Html = Html(""), extrabc: Html = Html(""))(content: Html)
 
-@stdlayout("Contractverantwoordelijke",
-           scripts=js.userpicker(),
-           extrabc=breadcrumb("Goedkeuringsaanvragen",routes.Approvals.pendingApprovalList)) {
-    @approvaluserpartial(approval, enrollStatus)
+@* Layout used by most standard pages. *@
 
-    @panel("Aanvraag", "fa-pencil-square-o") {
-        @helper.form(routes.Approvals.approvalAdminPost(approval.getId)) {
-            @std.userpicker(form("userId"), form("userIdAsString"), "Contractverantwoordelijke")
-            @std.submitButton("Contractverantwoordelijke toewijzen")
-        }
+@app(title, stylesheets, scripts) {
+    @breadcrumbs{
+        @extrabc
+        @breadcrumb(title)
+    }
+
+    @maincontent(title){
+        @flashes()
+        @content
     }
 }

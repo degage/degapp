@@ -29,39 +29,28 @@
 
 @(reasons: Iterable[String], form: Form[Approvals.RequestApprovalData], terms: String)
 
-@app("Goedkeuringsaanvraag") {
-    @breadcrumbs {
-        @breadcrumb("Infosessies", routes.InfoSessions.showUpcomingSessions)
-        @breadcrumb("Lidmaatschap aanvragen")
-    }
-    @maincontent("Lidmaatschap aanvragen"){
-        @flashes()
-        @if(reasons.iterator.hasNext) {
-            @panel("Opgelet!", "fa-exclamation-triangle", "panel-danger"){
-            <div class="col-xs-12">
-                <p>De volgende informatie ontbreekt nog in je profiel:</p>
-                <ul>
-                @foreach(reasons){ reason =>
-                    <li>@reason</li>
-                }
-                </ul>
-                <a class="btn btn-default" href="@routes.Profile.edit(db.CurrentUser.getId)">Profiel aanvullen</a>
-            </div>
-            }
+@stdlayout("Lidmaatschap aanvragen", extrabc=breadcrumb("Infosessies", routes.InfoSessions.showUpcomingSessions)) {
+    @if(reasons.iterator.hasNext) {
+        @panel("Opgelet!", "fa-exclamation-triangle", "panel-danger"){
+        <div class="col-xs-12">
+            <p>De volgende informatie ontbreekt nog in je profiel:</p>
+            <ul>@foreach(reasons){ reason => <li>@reason</li> }</ul>
+            <a class="btn btn-primary btn-sm" href="@routes.Profile.edit(db.CurrentUser.getId)">Profiel aanvullen</a>
+        </div>
         }
+    }
 
-        @panel("Lidmaatschap aanvragen"){
-            @helper.form(routes.Approvals.requestApprovalPost) {
-                @std.checkbox(form("acceptsTerms"), "Ik aanvaard de algemene voorwaarden (zie onderaan)")
-                @std.textArea(form("message"), "Opmerkingen", 4)
-                @std.submitButton("Aanvraag indienen")
-                <div class="form-group col-xs-12" >
-                    <label>Algemene voorwaarden</label>
-                    <div class="well" style="overflow: auto; max-height:400px;">
-                    @Html(terms)    @*TODO: dangerous? *@
-                    </div>
+    @panel("Lidmaatschap aanvragen"){
+        @helper.form(routes.Approvals.requestApprovalPost) {
+            @std.checkbox(form("acceptsTerms"), "Ik aanvaard de algemene voorwaarden (zie onderaan)")
+            @std.textArea(form("message"), "Opmerkingen", 4)
+            @std.submitButton("Aanvraag indienen")
+            <div class="form-group col-xs-12" >
+                <label>Algemene voorwaarden</label>
+                <div class="well" style="overflow: auto; max-height:400px;">
+                @Html(terms)    @*TODO: dangerous? *@
                 </div>
-            }
+            </div>
         }
     }
 }

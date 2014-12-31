@@ -32,20 +32,8 @@
 @scripts = {
     @js.usesajax()
     @js.pagination("Approvals.pendingApprovalListPaged")
-
-    <script>
-        $(document).ready(function () {
-            $(window).resize(forceResponsiveTables);
-            forceResponsiveTables();
-        });
-    </script>
 }
 
-@app("Goedkeuringen gebruikers", scripts=scripts) {
-    @breadcrumbs{
-        @breadcrumb("Goedkeuringen gebruikers")
-    }
-    @maincontent("Goedkeuringen gebruikers"){
-        @resultsTablePanel()
-    }
+@stdlayout("Goedkeuringen gebruikers", scripts=scripts) {
+    @resultsTablePanel()
 }

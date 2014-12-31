@@ -31,6 +31,11 @@
 <script>
     var route = myJsRoutes.controllers.@actionName;
     @if(!initialLoad) { initialLoad = false; }
+
+    $(document).ready(function () {
+        $(window).resize(forceResponsiveTables);
+        forceResponsiveTables();
+    });
 </script>
 <script src='@routes.Assets.at("javascripts/pagination.js")'></script>
 <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>

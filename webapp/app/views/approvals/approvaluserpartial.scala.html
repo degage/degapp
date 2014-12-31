@@ -28,36 +28,36 @@
  *@
 
 @(approval: Approval, enrollStatus: EnrollementStatus)
-<div class="panel panel-default">
-    <div class="panel-heading">
-        <h3 class="panel-title"><i class="fa fa-user"></i> Gebruiker</h3>
-    </div>
-    <div class="panel-body">
-        <strong>Naam: </strong>@approval.getUser.getFirstName @approval.getUser.getLastName <br>
-        <strong>Infosessie status: </strong>
-    @if(approval.getSession == null) {
-        <span class="label label-danger">Nooit ingeschreven</span>
-    } else {
-        @enrollStatus match {
-            case EnrollementStatus.ABSENT => {
-                <span class="label label-danger">Afwezig</span>
-            }
-            case EnrollementStatus.ENROLLED => {
-                <span class="label label-warning">Ingeschreven</span>
-            }
-            case EnrollementStatus.PRESENT => {
-                <span class="label label-success">Aanwezig</span>
-            }
-        }
-        <br>
-        <strong>Infosessie type: </strong>@approval.getSession.getType <a href="@routes.InfoSessions.detail(approval.getSession.getId)">Details</a>
-    }
-
-        <br>
-        <strong>Opmerkingen:</strong><br>
-        <p>@if(approval.getUserMessage == "") { Geen opmerkingen opgegeven. } else {approval.getUserMessage}</p>
-        <br>
-
-        <a class="btn btn-default" href="@routes.Profile.index(approval.getUser.getId)">Profiel bekijken</a>
-    </div>
-</div>
+@panel("Gebruiker", "fa-user"){
+   <div class="col-xs-12">
+       <dl class="dl-horizontal">
+           <dt>Naam</dt>
+           <dd><a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser.getFullName</a></dd>
+           <dt>Infosessiestatus</dt>
+           <dd> @* TODO: refactor *@
+                @if(approval.getSession == null) {
+                    <span class="label label-danger">Nooit ingeschreven</span>
+                } else {
+                    @enrollStatus match {
+                        case EnrollementStatus.ABSENT => {
+                            <span class="label label-danger">Afwezig</span>
+                        }
+                        case EnrollementStatus.ENROLLED => {
+                            <span class="label label-warning">Ingeschreven</span>
+                        }
+                        case EnrollementStatus.PRESENT => {
+                            <span class="label label-success">Aanwezig</span>
+                        }
+                    }
+                    </dd>
+                    <dt>Infosessie</dt>
+                    <dd><a href="@routes.InfoSessions.detail(approval.getSession.getId)">Details</a>
+                }
+           </dd>
+           <dt>Opmerkingen</dt>
+           <dd>
+            <p>@if(approval.getUserMessage.isEmpty)("(geen)") else (approval.getUserMessage)</p>
+           </dd>
+       </dl>
+   </div>
+}

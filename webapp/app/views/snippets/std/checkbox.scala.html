@@ -29,7 +29,7 @@
 
 @(f: Field, label: Any, css: String="col-xs-12")
 <div class="form-group @css @if(f.hasErrors) {has-error}">
-    <label class="checkbox">
+    <label class="checkbox-inline">
         <input id="@f.id"  name="@f.name" type="checkbox" @if(f.value==Some("true")){checked}> @label
     </label>
     @f.errors.map { error =>
