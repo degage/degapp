@@ -28,7 +28,6 @@
  *@
 
 @scripts = {
-    @js.usesajax()
     @js.pagination("Messages.showReceivedMessagesPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/messages.js")'></script>
 
@@ -37,9 +36,9 @@ $(function() {
     $('li[id^="tab"]').on('click', function() {
         var id = $(this).attr("id");
         if(id == "tab_received") {
-            route = myJsRoutes.controllers.Messages.showReceivedMessagesPage;
+            route = paginationJsRoutes.controllers.Messages.showReceivedMessagesPage;
         } else { // tab_sent
-            route = myJsRoutes.controllers.Messages.showSentMessagesPage;
+            route = paginationJsRoutes.controllers.Messages.showSentMessagesPage;
         }
         $('#searchButton').click();
     });

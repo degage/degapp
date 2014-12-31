@@ -28,9 +28,10 @@
  *@
 
 @scripts = {
-    @js.usesajax()
     @js.pagination("Refuels.showAllRefuelsPage")
     @js.userpicker()
+
+    @js.usesajax()
     <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
 }
 @app("Tankbeurten (beheer)", scripts=scripts) {

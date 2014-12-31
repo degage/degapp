@@ -27,18 +27,6 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@scripts = {
-    @js.usesajax()
-    @js.pagination("Damages.showDamagesPage")
-}
-
-@app("Mijn schadedossiers", scripts=scripts) {
-    @breadcrumbs{
-        @breadcrumb("Mijn schadedossiers")
-    }
-
-    @maincontent("Mijn schadedossiers") {
-        @flashes()
-        @resultsTablePanel()
-    }
+@stdlayout("Mijn schadedossiers", scripts=js.pagination("Damages.showDamagesPage")){
+    @resultsTablePanel()
 }

@@ -22,7 +22,7 @@
  *
  * In the main file between <script> -tags:
  * ...
- * var route = myJsRoutes.controllers.Cars.showCarsPage;
+ * var route = paginationJsRoutes.controllers.Cars.showCarsPage;
  * ...
  * <input class="searchTextField" name="name" value="Naam" type="text">
  * <input class="searchTextField" name="brand" value="Merk" type="text">

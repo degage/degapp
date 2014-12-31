@@ -29,11 +29,6 @@
 
 @()
 
-@scripts = {
-    @js.usesajax()
-    @js.pagination("Approvals.pendingApprovalListPaged")
-}
-
-@stdlayout("Goedkeuringen gebruikers", scripts=scripts) {
+@stdlayout("Goedkeuringen gebruikers", scripts=js.pagination("Approvals.pendingApprovalListPaged")) {
     @resultsTablePanel()
 }

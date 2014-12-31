@@ -27,33 +27,20 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@import providers.DataProvider;
-
-@scripts = {
-    @js.usesajax()
-    @js.pagination("Users.showUsersPage")
-}
-@app("Gebruikers", scripts=scripts) {
-    @breadcrumbs{
-        @breadcrumb("Gebruikers")
+@stdlayout("Gebruikers", scripts=js.pagination("Users.showUsersPage")) {
+    @panel("Gebruikers zoeken", "fa-search"){
+        <div class="col-xs-6 col-md-4">
+            <input id="user_firstname" class="searchTextField form-control" name="user_firstname" type="text" placeholder="Voornaam">
+        </div>
+        <div class="col-xs-6 col-md-4">
+            <input id="user_lastname" class="searchTextField form-control" name="user_lastname" type="text" placeholder="Achternaam">
+        </div>
+        <div class="col-xs-4 col-md-4">
+            <div class="btn-group btn-group">
+                <button id="searchButton" class="btn btn-success">Zoek</button>
+            </div>
+        </div>
     }
 
-    @maincontent("Gebruikers"){
-        @panel("Gebruikers zoeken", "fa-search"){
-            <div class="col-xs-6 col-md-4">
-                <input id="user_firstname" class="searchTextField form-control" name="user_firstname" type="text" placeholder="Voornaam">
-            </div>
-            <div class="col-xs-6 col-md-4">
-                <input id="user_lastname" class="searchTextField form-control" name="user_lastname" type="text" placeholder="Achternaam">
-            </div>
-            <div class="col-xs-4 col-md-4">
-                <div class="btn-group btn-group">
-                    <button id="searchButton" class="btn btn-success">Zoek</button>
-                </div>
-            </div>
-        }
-
-        @resultsTablePanel("Gebruikers", "fa-users")
-
-    }
+    @resultsTablePanel("Gebruikers", "fa-users")
 }

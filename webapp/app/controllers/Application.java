@@ -90,37 +90,45 @@ public class Application extends Controller {
         return ok(
                 Routes.javascriptRouter("myJsRoutes",
                         // Routes
-                        javascript.Cars.showCarsPage(),
-                        javascript.Cars.showCarCostsPage(),
                         javascript.Cars.getCarCostModal(),
                         javascript.Cars.updatePrivileged(),
                         javascript.Refuels.provideRefuelInfo(),
-                        javascript.Refuels.showUserRefuelsPage(),
-                        javascript.Refuels.showOwnerRefuelsPage(),
-                        javascript.Refuels.showAllRefuelsPage(),
-                        javascript.Damages.showDamagesPage(),
-                        javascript.Damages.showDamagesPageOwner(),
-                        javascript.Damages.showDamagesPageAdmin(),
                         javascript.Damages.editDamage(),
                         javascript.Damages.addStatus(),
                         javascript.Damages.addProof(),
-                        javascript.Reserve.listAvailableCarsPage(),
-                        javascript.Users.showUsersPage(),
-                        javascript.UserRoles.showUsersPage(),
-                        javascript.EmailTemplates.showExistingTemplatesPage(),
                         javascript.EmailTemplates.editTemplate(),
-                        javascript.Notifications.showNotificationsPage(),
-                        javascript.Messages.showReceivedMessagesPage(),
-                        javascript.Messages.showSentMessagesPage(),
                         javascript.InfoSessions.enrollSession(),
-                        javascript.Receipts.showReceiptsPage(),
-                        javascript.Drives.showDrivesPage(),
-                        javascript.Drives.showDrivesAdminPage(),
                         javascript.Maps.getMap(),
-                        javascript.Approvals.pendingApprovalListPaged(),
                         javascript.Reserve.reserve()
                 )
         );
     }
 
+    public static Result paginationRoutes() {
+        response().setContentType("text/javascript");
+        return ok(
+                Routes.javascriptRouter("paginationJsRoutes",
+                        // Routes
+                        javascript.Approvals.pendingApprovalListPaged(),
+                        javascript.Cars.showCarCostsPage(),
+                        javascript.Cars.showCarsPage(),
+                        javascript.Damages.showDamagesPage(),
+                        javascript.Damages.showDamagesPageOwner(),
+                        javascript.Damages.showDamagesPageAdmin(),
+                        javascript.Drives.showDrivesPage(),
+                        javascript.Drives.showDrivesAdminPage(),
+                        javascript.EmailTemplates.showExistingTemplatesPage(),
+                        javascript.Messages.showReceivedMessagesPage(),
+                        javascript.Messages.showSentMessagesPage(),
+                        javascript.Notifications.showNotificationsPage(),
+                        javascript.Receipts.showReceiptsPage(),
+                        javascript.Refuels.showUserRefuelsPage(),
+                        javascript.Refuels.showOwnerRefuelsPage(),
+                        javascript.Refuels.showAllRefuelsPage(),
+                        javascript.Reserve.listAvailableCarsPage(),
+                        javascript.UserRoles.showUsersPage(),
+                        javascript.Users.showUsersPage()
+                )
+        );
+    }
 }

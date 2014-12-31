@@ -27,11 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@scripts = {
-    @js.usesajax()
-    @js.pagination("EmailTemplates.showExistingTemplatesPage")
-}
-@app("Sjablonen", scripts=scripts) {
+@app("Sjablonen", scripts=js.pagination("EmailTemplates.showExistingTemplatesPage")) {
 
     @breadcrumbs{
         @breadcrumb("Sjablonen")
