@@ -30,71 +30,57 @@
 @(car: Car, privilegedUsers: Iterable[UserHeader], mapDetails: Maps.MapDetails = null)
 @import providers.DataProvider
 @import db.CurrentUser
-    @scripts = {
-        @js.datetimepicker()
-        @js.usesajax()
-        @js.userpicker()
-        @js.pagination("Cars.showCarCostsPage")
-        <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
 
-        <!-- For maps: -->
-        @js.usesajax()
-        <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
-        <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
+@scripts = {
+    @js.datetimepicker()
+    @js.usesajax()
+    @js.userpicker()
+    @js.pagination("Cars.showCarCostsPage")
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
 
-        <script>
-        function loadModal ( carId ) {
-            $.ajax(myJsRoutes.controllers.Cars.getCarCostModal(carId))
-            .done (function (html) {
-                $ ("#resultModal").html (html) ;
-                $ ('#detailsModal').modal ('show') ;
-            })
-            .fail (function ( ) {
-                // TODO: make clearer
-                $ ( "#resultModal" ).html ("Er ging iets mis...") ;
-            });
-        }
-        </script>
+    <!-- For maps: -->
+    <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
+    <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
 
-        <script>
-            userpickerRoute = "@routes.UserPicker.getList()"
-        </script>
-        <script src='@routes.Assets.at("javascripts/updateCarPrivileges.js")'></script>
+    <script>
+    function loadModal ( carId ) {
+        $.ajax(myJsRoutes.controllers.Cars.getCarCostModal(carId))
+        .done (function (html) {
+            $ ("#resultModal").html (html) ;
+            $ ('#detailsModal').modal ('show') ;
+        })
+        .fail (function ( ) {
+            // TODO: make clearer
+            $ ( "#resultModal" ).html ("Er ging iets mis...") ;
+        });
     }
-    @stylesheets = {
-        <link rel="stylesheet" href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")'>
-        <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' >
-    }
+    </script>
 
-    @dayOptions(value: String) = {
-       @options(value, "0" -> "Zondag", "1" -> "Maandag", "2" -> "Dinsdag", "3" -> "Woensdag", "4" -> "Donderdag", "5" -> "Vrijdag", "6" -> "Zaterdag")
-    }
+    <script>
+        userpickerRoute = "@routes.UserPicker.getList()"
+    </script>
+    <script src='@routes.Assets.at("javascripts/updateCarPrivileges.js")'></script>
+}
+@stylesheets = {
+    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")'>
+    <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' >
+}
 
-@app("Details Auto", stylesheets, scripts) {
-    @breadcrumbs{
-        @breadcrumb("Auto's", routes.Cars.showCars())
-        @breadcrumb("Autodetails")
-    }
+@dayOptions(value: String) = {
+   @options(value, "0" -> "Zondag", "1" -> "Maandag", "2" -> "Dinsdag", "3" -> "Woensdag", "4" -> "Donderdag", "5" -> "Vrijdag", "6" -> "Zaterdag")
+}
+
+@stdlayout("Autodetails", stylesheets, scripts, extrabc=breadcrumb("Auto's", routes.Cars.showCars())) {
 
     @defining(DataProvider.getUserProvider().getUser()) { user =>
 
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Autodetails</h1>
-                @flashes()
-                @if(CurrentUser is car.getOwner.getId) {
-                    <div class="alert alert-info alert-dismissable">
-                        U bent eigenaar.
-                    </div>
-                }
                 @if((CurrentUser hasRole UserRole.CAR_ADMIN) || (CurrentUser is car.getOwner.getId)) {
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <a class="btn btn-default btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
-                            <a class="btn btn-default btn-sm" href="@routes.Reports.getReservationsForOwner">Exporteer ritten</a>
+                    @panel(){
+                        <div class="col-xs-12">
+                            <a class="btn btn-primary btn-sm" href="@routes.Cars.editCar(car.getId)">Auto wijzigen</a>
+                            <a class="btn btn-primary btn-sm" href="@routes.Reports.getReservationsForOwner">Exporteer ritten</a>
                         </div>
-                    </div>
+                    }
                 }
 
                 @detailPartial(car, mapDetails)
@@ -166,10 +152,6 @@
                         </div>
                     </div>
                 }
-            </div>
-        </div>
-    </div>
-    <!-- /page-wrapper -->
     <div id="resultModal"></div>
     }
 }

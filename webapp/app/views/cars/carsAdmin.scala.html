@@ -27,63 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@import providers.DataProvider
-@import db.CurrentUser
-
-@app("Auto's (beheer)", scripts=js.pagination("Cars.showCarsPage")) {
-    @breadcrumbs{
-        @breadcrumb("Auto's (beheer)")
-    }
-
-    <div id="page-wrapper">
-    @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN) ||
-            CurrentUser.hasRole(UserRole.CAR_OWNER)) { isAdmin =>
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Auto's</h1>
-                @if(isAdmin) {
-                    <div class="panel panel-default">
-                        <div class="panel-body">
-                            <a class="btn btn-default btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
-                            <a class="btn btn-default btn-sm" href="@routes.Reports.getCars">Exporteer auto's</a>
-                        </div>
-                            <!-- /.panel-body -->
-                    </div>
-                }
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-search fa-fw"></i> Auto's zoeken
-                    </div>
-                        <!-- /.panel-heading -->
-                    <div class="panel-body">
-                            <!-- TODO: layout, more fields to search on -->
-                        <div class="row">
-                            <div class="col-xs-6">
-                                <input id="name" class="searchTextField form-control" name="name" type="text" class="form-control" placeholder="Naam">
-                            </div>
-                            <div class="col-xs-6">
-                                <input id="brand" class="searchTextField form-control" name="brand" type="text"  placeholder="Merk">
-                            </div>
-                        </div>
-                        <hr />
-                        <div class="row">
-                            <div class="col-xs-4">
-                                <div class="btn-group btn-group">
-                                    <button id="searchButton" class="btn btn-success">Zoek!</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-
-                @resultsTablePanel("Auto's", "fa-car")
-
-            </div>
-                <!-- /col-lg-12 -->
+@stdlayout("Auto's (beheer)", scripts=js.pagination("Cars.showCarsPage")) {
+    @panel(){
+        <div class="col-xs-12">
+            <a class="btn btn-primary btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
+            <a class="btn btn-primary btn-sm" href="@routes.Reports.getCars">Exporteer auto's</a>
         </div>
-        <!-- /row -->
     }
-    </div>
-    <!-- /page-wrapper -->
+
+    @panel("Auto's zoeken", "fa-search"){
+        @search.textField("name", "Naam", "col-xs-6")
+        @search.textField("brand", "Merk", "col-xs-6")
+        @search.button("Zoek!")
+    }
+
+    @resultsTablePanel("Auto's", "fa-car")
 }

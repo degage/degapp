@@ -1,4 +1,4 @@
-@* datepicker.scala.html
+@* textField.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(name : String, label: String, css: String="col-xs-12")
+@(name: String, label: String, css: String = "col-xs-12")
 
-@* datetime picker input component for use in a search context *@
-
-@* TODO: make width variable, also introduce a version which takes a field as argument *@
+@*  Text field for use in a search context *@
 
 <div class="form-group @css">
-    <label class="control-label" for="@name-container">@label</label>
-    <div id="@name-container" class="input-group date datetimepicker-input"
-         data-date-format="yyyy-mm-dd"  data-min-view="2" data-max-view="3" data-start-view="3">
-        <input class="form-control searchTextField" type="text" name="@name" readonly>
-        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-                                                @* datetime picker does not work with fa icons *@
-    </div>
+    <label class="control-label" for="@name">@label</label>
+    <input id="@name" name="@name" type="text" class="searchTextField form-control" >
 </div>

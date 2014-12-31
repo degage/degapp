@@ -187,7 +187,7 @@ public class Cars extends Controller {
     }
 
     /**
-     * @return The cars index-page with all cars (only available to car_user+)
+     * @return The cars index-page with all cars (only available to car admin)
      */
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext

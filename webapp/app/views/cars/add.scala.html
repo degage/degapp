@@ -35,15 +35,11 @@
     @js.userpicker()
 }
 
-@app("Nieuwe auto", scripts=scripts) {
-    @breadcrumbs{
-        @breadcrumb("Nieuwe auto")
-    }
-    @maincontent("Nieuwe auto"){
-        @helper.form(routes.Cars.addNewCar(), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+@stdlayout("Nieuwe auto", scripts=scripts) {
+    @helper.form(routes.Cars.addNewCar(), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
         <div class="row">
             @formErrors(form)
-            <div class="col-lg-3">
+            <div class="col-md-3">
                 @panel("Algemeen", "fa-car"){
                     <div >
                         <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
@@ -72,7 +68,7 @@
                 }
             </div>
 
-            <div class="col-lg-9">
+            <div class="col-md-9">
                 @panel("Standplaats", "fa-home"){
                     <fieldset>
                         @addressFields(form)
@@ -117,6 +113,5 @@
                 @std.submitButton("Auto aanmaken")
             </div>
         </div>
-        }
     }
 }
