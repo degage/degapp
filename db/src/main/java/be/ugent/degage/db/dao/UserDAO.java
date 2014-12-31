@@ -94,6 +94,11 @@ public interface UserDAO {
     public void updateUserStatus(int userId, UserStatus status);
 
     /**
+     * Update the deposit of the user
+     */
+    public void updateUserDeposit(int userId, Integer deposit);
+
+    /**
      * Make user a full member. Creates a new degage id if the user did not have one.
      */
     public void makeUserFull (int userId);

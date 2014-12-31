@@ -49,6 +49,7 @@
 
                 @if(db.CurrentUser.isAdmin){
                     <a class="btn btn-warning btn-sm" href="@routes.Profile.editUserStatus(user.getId)">Gebruikersstatus wijzigen</a>
+                    <a class="btn btn-warning btn-sm" href="@routes.Profile.deposit(user.getId)">Waarborg</a>
                 }
             </div>
         }

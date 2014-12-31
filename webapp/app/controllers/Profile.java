@@ -590,6 +590,37 @@ public class Profile extends Controller {
         return redirect(routes.Profile.editUserStatus(userId));
     }
 
+    public static class DepositData {
+        public Integer amount;
+
+        public DepositData populate(Integer amount) {
+            this.amount = amount;
+            return this;
+        }
+    }
+
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result deposit (int userId) {
+        User user = DataAccess.getInjectedContext().getUserDAO().getUser(userId);
+        return ok(deposit.render(
+                        Form.form(DepositData.class).fill(new DepositData().populate(user.getDeposit())),
+                        user.getId())
+        );
+    }
+
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result depositPost (int userId) {
+        Form<DepositData> form = Form.form(DepositData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return ok(deposit.render(form, userId));
+        } else {
+            DataAccess.getInjectedContext().getUserDAO().updateUserDeposit(userId, form.get().amount);
+            return redirect(routes.Profile.index(userId));
+        }
+    }
+
     public static class MainProfileData {
         public String phone;
         public String mobile;

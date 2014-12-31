@@ -403,6 +403,26 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
+    private LazyStatement updateUserDepositStatement = new LazyStatement(
+            "UPDATE users SET user_deposit = ? WHERE user_id = ?"
+    );
+
+    @Override
+    public void updateUserDeposit (int userId, Integer deposit) {
+        try {
+            PreparedStatement ps = updateUserDepositStatement.value();
+            ps.setObject(1, deposit, Types.INTEGER);
+            ps.setInt(2, userId);
+
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("User update affected 0 rows.");
+            }
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user deposit", ex);
+        }
+    }
+
     private LazyStatement deleteUserStatement = new LazyStatement(
             "UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?"
     );
