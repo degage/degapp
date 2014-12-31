@@ -1,4 +1,4 @@
-@* formGroupTextField.scala.html
+@* group.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(field: play.api.data.Field, label: String, args: (Symbol, Any)*)
+@(field: play.api.data.Field, label: String, css: String="col-xs-12")(body: => Html)
 
-@* TODO: use FieldConverter? *@
-
-
-
-<div class="form-group @if(field.hasErrors) {has-error}">
-    <label class="control-label" for="@field.id">@label</label>
-
-    <input id="@field.id" name="@field.name" type="text"
-           class="form-control input-md" value="@field.value"
-           @toHtmlArgs(args.toMap)>
+<div class="form-group @css @if(field.hasErrors) {has-error}">
+    <label class="control-label">@label</label>
+    @body
     @field.errors.map { error =>
         <span class="help-block">@play.api.i18n.Messages(error.message)</span>
     }

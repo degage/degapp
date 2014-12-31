@@ -28,20 +28,20 @@
  *@
 
 @(infoForm: play.data.Form[Drives.InfoModel], reservation: Reservation, cancelButton: Boolean)
-@helper.form(routes.Drives.provideDriveInfo(reservation.getId), 'class -> "form-horizontal") {
+@helper.form(routes.Drives.provideDriveInfo(reservation.getId)) {
     <div class="well">
-        @formGroupNumberField(infoForm("startKm"), "Kilometerstand vóór de rit")
-        @formGroupNumberField(infoForm("endKm"), "Kilometerstand na de rit")
-        @formGroup(infoForm("damaged"), "Schade-opvolging") {
-              @radioItem(infoForm("damaged"), "false") {
+        @std.numberField(infoForm("startKm"), "Kilometerstand vóór de rit")
+        @std.numberField(infoForm("endKm"), "Kilometerstand na de rit")
+        @std.group(infoForm("damaged"), "Schade-opvolging") {
+              @std.radioItem(infoForm("damaged"), "false") {
                  De auto liep geen schade op
               }
-              @radioItem(infoForm("damaged"), "true") {
+              @std.radioItem(infoForm("damaged"), "true") {
                 De auto liep schade op (<i>een schadedossier zal aangemaakt worden waarbij je om bijkomende
                 informatie gevraagd wordt</i>)
               }
         }
-        @formGroupNumberField(infoForm("numberOfRefuels"), "Aantal tankbeurten")
+        @std.numberField(infoForm("numberOfRefuels"), "Aantal tankbeurten")
 
         <div id="infoButtons" class="form-group btn-group btn-group-xs">
             <button type="submit" class="btn btn-success">Verstuur details</button>
