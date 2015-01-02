@@ -87,6 +87,8 @@ public interface ReservationDAO {
 
     public Iterable<ReservationHeader> listReservationsForCar(int carID) throws DataAccessException;
 
+    public Iterable<ReservationHeader> listReservationsForCarInPeriod (int carID, LocalDateTime from, LocalDateTime to) throws DataAccessException;
+
 
     public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsLoaner);
 

@@ -32,57 +32,29 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
 @import db.CurrentUser
 
 @scripts = {
-  @js.datetimepicker()
+    @js.datetimepicker()
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/driveDetails.js")'></script>
+    <script>
+        // Determine the dates of the reservation
+        var from = new Date("@Utils.toString(reservation.getFrom)");
+        var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
+                from.getMinutes(), 0);
+        var adjustedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
+                from.getMinutes(), 0);
+        adjustedFrom.setMinutes(adjustedFrom.getMinutes() + 5);
 
-<script type="text/javascript" src='@routes.Assets.at("javascripts/app/driveDetails.js")'></script>
-<script>
-    // Determine the dates of the reservation
-    var from = new Date("@Utils.toString(reservation.getFrom)");
-    var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
-            from.getMinutes(), 0);
-    var adjustedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
-            from.getMinutes(), 0);
-    adjustedFrom.setMinutes(adjustedFrom.getMinutes() + 5);
-
-    var until = new Date("@Utils.toString(reservation.getUntil)");
-    var correctedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
-            until.getMinutes(), 0);
-    var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
-            until.getMinutes(), 0);
-    adjustedUntil.setMinutes(adjustedUntil.getMinutes() - 5);
-</script>
+        var until = new Date("@Utils.toString(reservation.getUntil)");
+        var correctedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
+                until.getMinutes(), 0);
+        var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
+                until.getMinutes(), 0);
+        adjustedUntil.setMinutes(adjustedUntil.getMinutes() - 5);
+    </script>
 }
-@app("Ritdetails", scripts=scripts) {
+@stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index)) {
+    @defining(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
 
-    @breadcrumbs{
-        @breadcrumb("Ritten",routes.Drives.index)
-        @breadcrumb("Ritdetails")
-    }
-
-@defining(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
-
-
-<!-- page wrapper -->
-<div id="page-wrapper">
-<!-- row -->
-<div class="row">
-<!-- col-lg-12 -->
-<div class="col-lg-12">
-<h1 class="page-header">Ritdetails</h1>
-<div class="panel panel-default">
-<!-- panel-heading -->
-<div class="panel-heading">
-    <i class="fa fa-bar-chart-o fa-fw"></i> Geselecteerde rit
-    <!-- /panel-heading -->
-</div>
-<!-- panel-body -->
-<div class="panel-body">
-<!-- error while providing drive information -->
-@flashes()
-<!-- well -->
-<div class="well">
-    <!-- row -->
-    <div class="row">
+    @panel("Geselecteerde rit", "fa-bar-chart-o"){
         <div class="col-sm-4">
             <strong>Autonaam:</strong> @car.getName
         </div>
@@ -92,8 +64,6 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         <div class="col-sm-4">
             <strong>Type:</strong> @car.getType
         </div>
-    </div><br />
-    <div class="row">
         <div class="col-sm-4">
             <strong>Status:</strong> @reservation.getStatus
         </div>
@@ -103,195 +73,152 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         <div class="col-sm-4">
             <strong>Reservatie tot:</strong> @Utils.toLocalizedString(reservation.getUntil)
         </div>
-    </div> <br />
-    <div class="row">
         <div class="col-sm-12">
             <strong>Commentaar:</strong> @reservation.getMessage
         </div>
-    </div><br />
-    <!-- /row -->
-    <!-- loaner specific content -->
-    @if((CurrentUser is loaner.getId) || isAdmin) {
-        @views.html.drives.driveDetailsLoaner(reservation)
-    }
-    <!-- owner specific content -->
-    @if((CurrentUser is owner.getId) || isAdmin) {
-        @views.html.drives.driveDetailsOwner(reservation, owner.getId)
-    }
-    <!-- /well -->
-</div>
-<div class="row">
-    <!-- col-lg-6 -->
-    <div class="col-lg-6">
-        <!-- well -->
-        <div class="well">
-            <strong>Eigenaar</strong><hr />
-            <p>
-                @if((CurrentUser is owner.getId) ||
-                reservation.getStatus != ReservationStatus.REFUSED &&
-                reservation.getStatus != ReservationStatus.REQUEST &&
-                reservation.getStatus != ReservationStatus.CANCELLED
-                ) {
-                <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
-                <strong>E-mail:</strong> @owner.getEmail <br />
-                <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />
-                <strong>GSM:</strong> @if(owner.getCellphone != null && !owner.getCellphone.isEmpty){ @owner.getCellphone } else { onbekend }
-                } else {
-                @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
-                <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
-                }
-                @if(reservation.getStatus != ReservationStatus.REQUEST) {
-                <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
-                }
-                }
-            </p>
-            <!-- /well -->
-        </div>
-        <!-- /col-lg-6 -->
-    </div>
-    <!-- col-lg-6 -->
-    <div class="col-lg-6">
-        <!-- well -->
-        <div class="well">
-            <strong>Ontlener</strong><hr />
-            <p>
-                <strong>Naam:</strong> <a href="@routes.Profile.index(loaner.getId)">@loaner.getLastName, @loaner.getFirstName</a><br />
-                <strong>E-mail:</strong> @loaner.getEmail <br />
-                <strong>Tel:</strong> @if(loaner.getPhone != null && !loaner.getPhone.isEmpty){ @loaner.getPhone } else { onbekend } <br />
-                <strong>GSM:</strong> @if(loaner.getCellphone != null && !loaner.getCellphone.isEmpty){ @loaner.getCellphone } else {onbekend }
-            </p>
-            <!-- /well -->
-        </div>
-        <!-- /col-lg-6 -->
-    </div>
-</div>
-
-<div class="row">
-    <!-- col-lg-6 -->
-    <div class="col-lg-6">
-        <!-- well -->
-        <div class="well">
-            <strong>Ontlener vóór u</strong><hr />
-            <p>
-                @if(((CurrentUser is owner.getId) ||
-                reservation.getStatus != ReservationStatus.REFUSED &&
-                reservation.getStatus != ReservationStatus.REQUEST &&
-                reservation.getStatus != ReservationStatus.CANCELLED) &&
-                previousLoaner != null
-                ) {
-                <strong>Naam:</strong> <a href="@routes.Profile.index(previousLoaner.getId)">@previousLoaner.getLastName, @previousLoaner.getFirstName</a><br />
-                <strong>E-mail:</strong> @previousLoaner.getEmail <br />
-                <strong>Tel:</strong> @if(previousLoaner.getPhone != null && !previousLoaner.getPhone.isEmpty){ @previousLoaner.getPhone } else { onbekend } <br />
-                <strong>GSM:</strong> @if(previousLoaner.getCellphone != null && !previousLoaner.getCellphone.isEmpty){ @previousLoaner.getCellphone } else { onbekend }
-                } else {
-                    @if(previousLoaner == null) {
-                        <i class="fa fa-info"></i>: Geen voorafgaande reservatie voor deze auto.
+        <!-- loaner specific content -->
+        @if((CurrentUser is loaner.getId) || isAdmin) {
+            @views.html.drives.driveDetailsLoaner(reservation)
+        }
+        <!-- owner specific content -->
+        @if((CurrentUser is owner.getId) || isAdmin) {
+            @views.html.drives.driveDetailsOwner(reservation, owner.getId)
+        }
+        <div class="col-lg-6">
+            <div class="well">
+                <strong>Eigenaar</strong><hr />
+                <p>
+                    @if((CurrentUser is owner.getId) ||
+                    reservation.getStatus != ReservationStatus.REFUSED &&
+                    reservation.getStatus != ReservationStatus.REQUEST &&
+                    reservation.getStatus != ReservationStatus.CANCELLED
+                    ) {
+                        <strong>Naam:</strong> <a href="@routes.Profile.index(owner.getId)">@owner.getLastName, @owner.getFirstName</a><br />
+                        <strong>E-mail:</strong> @owner.getEmail <br />
+                        <strong>Tel:</strong> @if(owner.getPhone != null && !owner.getPhone.isEmpty){ @owner.getPhone } else { onbekend } <br />
+                        <strong>GSM:</strong> @if(owner.getCellphone != null && !owner.getCellphone.isEmpty){ @owner.getCellphone } else { onbekend }
                     } else {
                         @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
                             <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
                         }
-                        @if(reservation.getStatus == ReservationStatus.REQUEST) {
-                            <i class="fa fa-info"></i>
-                            : Deze informatie is pas beschikbaar na goedkeuring.
+                        @if(reservation.getStatus != ReservationStatus.REQUEST) {
+                            <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
                         }
                     }
-                }
-            </p>
-            <!-- /well -->
+                </p>
+            </div>
         </div>
-        <!-- /col-lg-6 -->
-    </div>
-    <!-- col-lg-6 -->
-    <div class="col-lg-6">
-        <!-- well -->
-        <div class="well">
-            <strong>Ontlener na u</strong><hr />
-            <p>
-                @if(((CurrentUser is owner.getId) ||
-                reservation.getStatus != ReservationStatus.REFUSED &&
-                reservation.getStatus != ReservationStatus.REQUEST &&
-                reservation.getStatus != ReservationStatus.CANCELLED) &&
-                nextLoaner != null
-                ) {
-                <strong>Naam:</strong> <a href="@routes.Profile.index(nextLoaner.getId)">@nextLoaner.getLastName, @nextLoaner.getFirstName</a><br />
-                <strong>E-mail:</strong> @nextLoaner.getEmail <br />
-                <strong>Tel:</strong> @if(nextLoaner.getPhone != null && !nextLoaner.getPhone.isEmpty){ @nextLoaner.getPhone } else { onbekend } <br />
-                <strong>GSM:</strong> @if(nextLoaner.getCellphone != null && !nextLoaner.getCellphone.isEmpty){ @nextLoaner.getCellphone } else { onbekend }
-                } else {
-                    @if(nextLoaner == null) {
-                        <i class="fa fa-info"></i>: Geen volgende reservatie voor deze auto.
+        <div class="col-lg-6">
+            <!-- well -->
+            <div class="well">
+                <strong>Ontlener</strong><hr />
+                <p>
+                    <strong>Naam:</strong> <a href="@routes.Profile.index(loaner.getId)">@loaner.getLastName, @loaner.getFirstName</a><br />
+                    <strong>E-mail:</strong> @loaner.getEmail <br />
+                    <strong>Tel:</strong> @if(loaner.getPhone != null && !loaner.getPhone.isEmpty){ @loaner.getPhone } else { onbekend } <br />
+                    <strong>GSM:</strong> @if(loaner.getCellphone != null && !loaner.getCellphone.isEmpty){ @loaner.getCellphone } else {onbekend }
+                </p>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="well">
+                <strong>Ontlener vóór u</strong><hr />
+                <p>
+                    @if(((CurrentUser is owner.getId) ||
+                    reservation.getStatus != ReservationStatus.REFUSED &&
+                    reservation.getStatus != ReservationStatus.REQUEST &&
+                    reservation.getStatus != ReservationStatus.CANCELLED) &&
+                    previousLoaner != null
+                    ) {
+                    <strong>Naam:</strong> <a href="@routes.Profile.index(previousLoaner.getId)">@previousLoaner.getLastName, @previousLoaner.getFirstName</a><br />
+                    <strong>E-mail:</strong> @previousLoaner.getEmail <br />
+                    <strong>Tel:</strong> @if(previousLoaner.getPhone != null && !previousLoaner.getPhone.isEmpty){ @previousLoaner.getPhone } else { onbekend } <br />
+                    <strong>GSM:</strong> @if(previousLoaner.getCellphone != null && !previousLoaner.getCellphone.isEmpty){ @previousLoaner.getCellphone } else { onbekend }
                     } else {
-                        @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
-                        <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
-                        }
-                        @if(reservation.getStatus == ReservationStatus.REQUEST) {
-                        <i class="fa fa-info"></i>
-                        : Deze informatie is pas beschikbaar na goedkeuring.
+                        @if(previousLoaner == null) {
+                            <i class="fa fa-info"></i>: Geen voorafgaande reservatie voor deze auto.
+                        } else {
+                            @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
+                                <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
+                            }
+                            @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                                <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
+                            }
                         }
                     }
-                }
-            </p>
-            <!-- /well -->
+                </p>
+            </div>
         </div>
-        <!-- /col-lg-6 -->
-    </div>
-</div>
-<!-- Both loaner and owner can edit this -->
-@if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-    @views.html.drives.driveInfo(infoForm, reservation, false)
-}
-@if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
-<!-- row -->
-<div id="showEnv" @if(infoForm.hasErrors) { class="hidden" }>
-<div class="well">
-    <div class="row">
-        <div class="col-sm-4">
-            <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartKm
+        <div class="col-lg-6">
+            <div class="well">
+                <strong>Ontlener na u</strong><hr />
+                <p>
+                    @if(((CurrentUser is owner.getId) ||
+                    reservation.getStatus != ReservationStatus.REFUSED &&
+                    reservation.getStatus != ReservationStatus.REQUEST &&
+                    reservation.getStatus != ReservationStatus.CANCELLED) &&
+                    nextLoaner != null
+                    ) {
+                        <strong>Naam:</strong> <a href="@routes.Profile.index(nextLoaner.getId)">@nextLoaner.getLastName, @nextLoaner.getFirstName</a><br />
+                        <strong>E-mail:</strong> @nextLoaner.getEmail <br />
+                        <strong>Tel:</strong> @if(nextLoaner.getPhone != null && !nextLoaner.getPhone.isEmpty){ @nextLoaner.getPhone } else { onbekend } <br />
+                        <strong>GSM:</strong> @if(nextLoaner.getCellphone != null && !nextLoaner.getCellphone.isEmpty){ @nextLoaner.getCellphone } else { onbekend }
+                    } else {
+                        @if(nextLoaner == null) {
+                            <i class="fa fa-info"></i>: Geen volgende reservatie voor deze auto.
+                        } else {
+                            @if(reservation.getStatus == ReservationStatus.REFUSED || reservation.getStatus == ReservationStatus.CANCELLED) {
+                                <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
+                            }
+                            @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                                <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
+                            }
+                        }
+                    }
+                </p>
+            </div>
         </div>
-        <div class="col-sm-4">
-            <strong>Kilometerstand na rit:</strong> @driveInfo.getEndKm
-        </div>
-        <div class="col-sm-4">
-            <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
-        </div>
-    </div>
-    <div class="row">
-        @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && ((CurrentUser is owner.getId) || isAdmin)) {
-            @if(owner.getId != CurrentUser.getId) {
-                <div class="alert alert-warning alert-dismissable">
-                    Pas op! Je bent niet de eigenaar, maar ziet onderstaand formulier toch omdat je admin bent!
-                </div>
-            }
-        <div class="col-sm-4 btn-group btn-group-xs">
-            <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
-            <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
-        </div>
-        } else {
-            <!-- The admin can still change it -->
-            @if(reservation.getStatus == ReservationStatus.FINISHED && isAdmin) {
-                <div class="col-sm-4 btn-group btn-group-xs">
-                    <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
-                </div>
-            }
+        <!-- Both loaner and owner can edit this -->
+        @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
+            @views.html.drives.driveInfo(infoForm, reservation, false)
         }
-    </div>
-    <br />
-</div>
-</div>
-<div id="adjustEnv" @if(!infoForm.hasErrors) { class="hidden" }>
-@views.html.drives.driveInfo(infoForm, reservation, true)
-</div>
-</div>
-<!-- /panel-body -->
-</div>
-<!-- /panel -->
-</div>
-<!-- /col-lg-12 -->
-</div>
-<!-- /row -->
-</div>
-<!-- /page wrapper -->
-</div>
-}
-}
+        @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
+            <div id="showEnv" class="@if(infoForm.hasErrors){hidden}">
+                <div class="well">
+                    <div class="col-sm-4">
+                        <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartKm
+                    </div>
+                    <div class="col-sm-4">
+                        <strong>Kilometerstand na rit:</strong> @driveInfo.getEndKm
+                    </div>
+                    <div class="col-sm-4">
+                        <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
+                    </div>
+                    @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED && ((CurrentUser is owner.getId) || isAdmin)) {
+                        @if(owner.getId != CurrentUser.getId) {
+                            <div class="alert alert-warning alert-dismissable">
+                                Pas op! Je bent niet de eigenaar, maar ziet onderstaand formulier toch omdat je admin bent!
+                            </div>
+                        }
+                        <div class="col-sm-4 btn-group btn-group-xs">
+                            <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
+                            <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
+                        </div>
+                    } else {
+                        <!-- The admin can still change it -->
+                        @if(reservation.getStatus == ReservationStatus.FINISHED && isAdmin) {
+                            <div class="col-sm-4 btn-group btn-group-xs">
+                                <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+            <div id="adjustEnv" class="@if(!infoForm.hasErrors){hidden}">
+                @views.html.drives.driveInfo(infoForm, reservation, true)
+            </div>
+        }
+    }
+    }
 }

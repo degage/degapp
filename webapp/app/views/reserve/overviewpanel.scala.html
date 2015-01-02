@@ -1,0 +1,66 @@
+@* overviewpanel.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(title: String, faClass: String, lines: Iterable[Reserve.OverviewLine])(header: => Html)
+
+@* Overview panel for use in overview and overviewcar templates. *@
+
+@panel(title,faClass){
+    <div class="col-xs-12">
+        <table class="overview">
+            @header
+            <tr>
+                <th class="res-car">&nbsp;</th>
+                @for(i <- 7 to 21) {
+                    <th class="res-hour" colspan="@Reserve.INTERVALS_PER_HOUR"
+                        width="@(75.0/(Reserve.END_HOUR-Reserve.START_HOUR))%">@i:00</th>
+                }
+            </tr>
+            @foreach.tr(lines) { line =>
+                <th class="res-car" width="25%">@line.lineHeader</th>
+                @for(str <- line.freeTimes){
+                   <td class="@if(str==null){res-notfree}else{res-free}">
+                       @if(str!=null) {
+                            <a href='@routes.Reserve.reserveCar(line.carId,str,"")'>&nbsp;</a>
+                       }
+                   </td>
+                }
+            }
+            <tr>
+                <td colspan="@(Reserve.NUMBER_OF_INTERVALS+1)" class="text-right">
+                    <b>Legende:</b>
+                    <span class="res-label res-free">Vrij</span>
+                    <span class="res-label res-free-even">Vrij</span>
+                    <span class="res-label res-notfree">Bezet</span>
+                </td>
+            </tr>
+        </table>
+        <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
+    </div>
+}

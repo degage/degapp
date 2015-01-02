@@ -1,4 +1,4 @@
-@* userpicker.scala.html
+@* overviewcar.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(field: Field, fieldAsString: Field, label: String, css: String="col-xs-4")
+@(form: Form[Reserve.CarDateData], lines: Iterable[Reserve.OverviewLine])
 
-@* user picker input component for use in a form context *@
+@stylesheets={
+<link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
+}
+@scripts={@js.userpicker()@js.datetimepicker()}
 
-<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.UserPicker.getList()">
-
-    <label class="control-label" for="@fieldAsString.name">@label</label>
-
-    <input id="@fieldAsString.name" name="@fieldAsString.name"
-           type="text" data-toggle="dropdown" class="form-control input-md"
-           value='@fieldAsString.value' autocomplete="off"
-    />
-    <input type="hidden" name="@field.name" value='@field.value'/>
-    <div class="viewId">@field.value</div><ul class="dropdown-menu" role="menu"></ul>
-    @field.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+@stdlayout("Overzicht beschikbaarheid auto", stylesheets=stylesheets, scripts=scripts) {
+    @cardatepanel(form,routes.Reserve.overviewCarPost())
+    @overviewpanel("Beschikbare perioden", "fa-calendar", lines){
+        @* no header. *@
     }
-    @fieldAsString.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-</div>
+}

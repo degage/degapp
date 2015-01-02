@@ -1,4 +1,4 @@
-@* userpicker.scala.html
+@* reservationpanel.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(field: Field, fieldAsString: Field, label: String, css: String="col-xs-4")
+@()
 
-@* user picker input component for use in a form context *@
+@* Panel with reservation actions on the dashboard. Needs @js.carpicker snippet*@
 
-<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.UserPicker.getList()">
-
-    <label class="control-label" for="@fieldAsString.name">@label</label>
-
-    <input id="@fieldAsString.name" name="@fieldAsString.name"
-           type="text" data-toggle="dropdown" class="form-control input-md"
-           value='@fieldAsString.value' autocomplete="off"
-    />
-    <input type="hidden" name="@field.name" value='@field.value'/>
-    <div class="viewId">@field.value</div><ul class="dropdown-menu" role="menu"></ul>
-    @field.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-    @fieldAsString.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-</div>
+@panel("Reserveren", "fa-pencil"){
+    <div class="col-xs-12">
+       <div class="button-group">
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.startCar">Reserveer een specifieke auto</a>
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.index">Zoek een auto die vrij is in een bepaalde periode</a>
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.overview(null)">Overzicht van reservaties voor een bepaalde dag</a>
+       </div>
+    </div>
+}

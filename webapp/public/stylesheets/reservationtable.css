@@ -1,50 +1,42 @@
-@* userpicker.scala.html
+/* reservationtable.css
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ */
 
-@(field: Field, fieldAsString: Field, label: String, css: String="col-xs-4")
+/* CSS used to display the reservation overview tables. */
 
-@* user picker input component for use in a form context *@
-
-<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.UserPicker.getList()">
-
-    <label class="control-label" for="@fieldAsString.name">@label</label>
-
-    <input id="@fieldAsString.name" name="@fieldAsString.name"
-           type="text" data-toggle="dropdown" class="form-control input-md"
-           value='@fieldAsString.value' autocomplete="off"
-    />
-    <input type="hidden" name="@field.name" value='@field.value'/>
-    <div class="viewId">@field.value</div><ul class="dropdown-menu" role="menu"></ul>
-    @field.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-    @fieldAsString.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-</div>
+table.overview td { border: 1px solid white; }
+table.overview th.res-hour { border: 1px solid #e0e0e0; padding-left: 4px; }
+table.overview th.res-car { border: 1px solid #e0e0e0; padding-left: 4px; }
+table.overview th.res-date { text-align: center; }
+.res-free       { background-color: #eeeeee; }
+.res-free-even  { background-color: #e0e0e0; }
+.res-notfree   { background-color: #ff8888; }
+table.overview tr:nth-child(even) td.res-free   { background-color: #e0e0e0; }
+table.overview td.res-free a { display:block; width: 100%; }
+table.overview td.res-free a:hover { background-color: #d0ffd0; text-decoration: none; }
+span.res-label { display:inline; padding:.2em .6em .3em; margin:.1em; font-size: 75%;}

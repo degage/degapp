@@ -1,4 +1,4 @@
-@* userpicker.scala.html
+@* carpicker.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -31,7 +31,7 @@
 
 @* user picker input component for use in a form context *@
 
-<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.UserPicker.getList()">
+<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.CarPicker.getList()">
 
     <label class="control-label" for="@fieldAsString.name">@label</label>
 

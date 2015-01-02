@@ -46,11 +46,8 @@ import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import views.html.reserve.reservationDetailsPartial;
-import views.html.reserve.reservations;
-import views.html.reserve.start;
-import views.html.reserve.availablecarspage;
 import views.html.errortablerow;
+import views.html.reserve.*;
 
 import java.time.*;
 import java.util.ArrayList;
@@ -319,7 +316,7 @@ public class Reserve extends Controller {
         data.until = untilString.isEmpty() ? null : Utils.toLocalDateTime(untilString);
         Form<ReservationData> form = new Form<>(ReservationData.class).fill(data);
 
-        return ok (views.html.reserve.reservation.render(form,car));
+        return ok (reservation.render(form,car));
     }
 
     /**
@@ -333,7 +330,7 @@ public class Reserve extends Controller {
         Form<ReservationData> form = new Form<>(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
             Car car = DataAccess.getContext().getCarDAO().getCar(carId);
-            return ok (views.html.reserve.reservation.render(form,car));
+            return ok (reservation.render(form,car));
         }
 
 
@@ -348,7 +345,7 @@ public class Reserve extends Controller {
             String errorMessage = "De reservatie overlapt met een bestaande reservatie";
             form.reject ("from", errorMessage);
             form.reject ("until", errorMessage);
-            return ok (views.html.reserve.reservation.render(form,car));
+            return ok (reservation.render(form,car));
         }
 
         ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), data.message);
@@ -373,58 +370,71 @@ public class Reserve extends Controller {
         return redirect(routes.Drives.index());
     }
 
+    public static final int MINUTES_PER_INTERVAL = 15; // must be exactly divisible into 60
+    public static final int INTERVALS_PER_HOUR = 60/ MINUTES_PER_INTERVAL;
+    public static final int END_HOUR = 22;
+    public static final int START_HOUR = 7;
+    public static final LocalTime START_TIME = LocalTime.of(START_HOUR, 0);
+    public static final int NUMBER_OF_INTERVALS = (END_HOUR-START_HOUR)*INTERVALS_PER_HOUR;
+
+    private static void fillFreeTimes(LocalDate date, Iterable<ReservationHeader> reservations, String[] table) {
+        // by default all times are free
+        for (int i = 0; i < table.length; i++) {
+            LocalTime localTime = LocalTime.ofSecondOfDay(3600L * START_HOUR + 60L * i * MINUTES_PER_INTERVAL);
+            LocalDateTime time = date.atTime(localTime);
+            table[i] = Utils.toString(time);
+        }
+        // block all reserved times for this date
+        LocalDateTime startMoment = date.atTime(START_TIME);
+
+        for (ReservationHeader reservation : reservations) {
+            long startIndex = Duration.between(startMoment, reservation.getFrom()).toMinutes() / MINUTES_PER_INTERVAL;
+            long endIndex = (Duration.between(startMoment, reservation.getUntil()).toMinutes() + MINUTES_PER_INTERVAL-1) / MINUTES_PER_INTERVAL;
+            if (startIndex < 0) {
+                startIndex = 0;
+            }
+            if (endIndex > table.length) {
+                endIndex = table.length;
+            }
+            if (startIndex < table.length && endIndex > 0) {
+                for (int i = (int)startIndex; i < (int)endIndex; i++) {
+                    table[i] = null;
+                }
+            }
+        }
+    }
+
     /**
      * Represents a single line which can be displayed in an overview
      */
     public static class OverviewLine {
 
-        public static final int START_HOUR = 7;
-        public static final int END_HOUR = 22;
-        public static final int MINUTES_PER_INTERVAL = 15; // must be exactly divisible into 60
-        public static final int INTERVALS_PER_HOUR = 60/ MINUTES_PER_INTERVAL;
-        public static final int NUMBER_OF_INTERVALS = (END_HOUR-START_HOUR)*INTERVALS_PER_HOUR;
-
-        private static final LocalTime startTime = LocalTime.of(START_HOUR, 0);
-
 
         public int carId;
-        public String carName;
+        public String lineHeader;
 
         // times for each 15-minute period. null means: not free
         public String[] freeTimes = new String[NUMBER_OF_INTERVALS];
 
         /**
-         * Populate this OverviewLine for the given date
+         * Populate this line from a CRInfo object
          */
         public void populate (ReservationDAO.CRInfo info, LocalDate date) {
             carId = info.carId;
-            carName = info.carName;
-
-            // by default all times are free
-            for (int i = 0; i < freeTimes.length; i++) {
-                LocalTime localTime = LocalTime.ofSecondOfDay(3600L * START_HOUR + 60L * i * MINUTES_PER_INTERVAL);
-                LocalDateTime time = date.atTime(localTime);
-                freeTimes[i] = Utils.toString(time);
-            }
-            // block all reserved times for this date
-            LocalDateTime startMoment = date.atTime(startTime);
-
-            for (ReservationHeader reservation : info.reservations) {
-                long startIndex = Duration.between(startMoment, reservation.getFrom()).toMinutes() / MINUTES_PER_INTERVAL;
-                long endIndex = (Duration.between(startMoment, reservation.getUntil()).toMinutes() + MINUTES_PER_INTERVAL-1) / MINUTES_PER_INTERVAL;
-                if (startIndex < 0) {
-                    startIndex = 0;
-                }
-                if (endIndex > freeTimes.length) {
-                    endIndex = freeTimes.length;
-                }
-                if (startIndex < freeTimes.length && endIndex > 0) {
-                    for (int i = (int)startIndex; i < (int)endIndex; i++) {
-                        freeTimes[i] = null;
-                    }
-                }
-            }
+            lineHeader = info.carName;
+            fillFreeTimes(date, info.reservations, freeTimes);
         }
+
+        /**
+         * Populate this line from car reservations
+         */
+        public void populate (Iterable<ReservationHeader> reservations, int carId, LocalDate date) {
+            this.carId = carId;
+            lineHeader = Utils.toLocalizedDateString(date);
+
+            fillFreeTimes(date, reservations, freeTimes);
+        }
+
 
         /**
          * Is there still a free period on this line?
@@ -446,15 +456,15 @@ public class Reserve extends Controller {
     }
 
     /**
-     * Show an overview of reservations during a certain week. Do not show cars that are not available
+     * Show an overview of reservations during a certain day. Do not show cars that are not available
      * @return
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result overview (String dateString) {
         LocalDate date = dateString == null ? LocalDate.now() : Utils.toLocalDate(dateString);
-        LocalDateTime from = date.atTime(OverviewLine.START_HOUR, 0);
-        LocalDateTime until = date.atTime(OverviewLine.END_HOUR, 0);
+        LocalDateTime from = date.atTime(START_HOUR, 0);
+        LocalDateTime until = date.atTime(END_HOUR, 0);
 
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
         Iterable<ReservationDAO.CRInfo> list = dao.listCRInfo(from,until);
@@ -468,8 +478,8 @@ public class Reserve extends Controller {
         }
 
         DateData data = new DateData();
-        data.date = Utils.toDateString(date); // cannot use dataString!, might be empty
-        return ok(views.html.reserve.overview.render(
+        data.date = Utils.toDateString(date); // cannot use dateString!, might be empty
+        return ok(overview.render(
                 Form.form(DateData.class).fill(data),
                 lines, date,
                 date.minusDays(1L), date.plusDays(1L)
@@ -482,6 +492,55 @@ public class Reserve extends Controller {
     public static Result overviewPost () {
         DateData data = Form.form(DateData.class).bindFromRequest().get();
         return overview(data.date);
+    }
+
+    public static class CarDateData extends DateData {
+        public int carId;
+
+    @Constraints.Required
+        public String carIdAsString;
+    }
+
+    /**
+     * Use form information and dispatch to the car overview page
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result startCar () {
+        CarDateData data = new CarDateData();
+        data.date = Utils.toDateString(LocalDate.now());
+        return ok(startcar.render(Form.form(CarDateData.class).fill(data)));
+    }
+
+    private static Result overviewCar(Form<CarDateData> form) {
+        CarDateData data = form.get();
+        LocalDateTime from = Utils.toLocalDate(data.date).atStartOfDay();
+        LocalDateTime until = from.plusDays(7);
+        Iterable<ReservationHeader> reservations =
+                DataAccess.getInjectedContext().getReservationDAO().
+                        listReservationsForCarInPeriod(data.carId, from, until);
+        Collection<OverviewLine> lines = new ArrayList<>();
+        for (int i = 0; i < 7; i++) { // one week
+            OverviewLine line = new OverviewLine();
+            line.populate(reservations, data.carId, from.toLocalDate().plusDays(i));
+            lines.add(line);
+        }
+
+        return ok(overviewcar.render(form, lines));
+    }
+
+    /**
+     * Show an overview of reservations for a specific car during a certain week.
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result overviewCarPost () {
+        Form form = Form.form(CarDateData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(startcar.render(form));
+        } else {
+            return overviewCar(form);
+        }
     }
 
 }

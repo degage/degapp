@@ -421,18 +421,23 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             "SELECT  " + RESERVATION_HEADER_FIELDS + "FROM reservations WHERE reservation_car_id=?"
     );
 
+    private Iterable<ReservationHeader> listReservations(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            Collection<ReservationHeader> list = new ArrayList<>();
+            while (rs.next()) {
+                list.add(populateReservationHeader(rs));
+            }
+            return list;
+        }
+    }
+
+
     @Override
     public Iterable<ReservationHeader> listReservationsForCar (int carId) throws DataAccessException {
         try {
             PreparedStatement ps = getReservationListByCaridStatement.value();
             ps.setInt(1, carId);
-            try (ResultSet rs = ps.executeQuery()) {
-                Collection<ReservationHeader> list = new ArrayList<>();
-                while (rs.next()) {
-                    list.add(populateReservationHeader(rs));
-                }
-                return list;
-            }
+            return listReservations(ps);
         } catch (Exception e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
         }
@@ -454,9 +459,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private LazyStatement listCRInfoStatement = new LazyStatement(
         "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
-                "LEFT JOIN reservations ON reservation_car_id = car_id " +
-                    "AND reservation_to >= ? AND reservation_from <= ? " + // TODO: clause appears several times
-                    "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' " +
+                "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE +
                 "WHERE car_active "  +
                 "ORDER BY car_name, reservation_from"
     );
@@ -493,10 +496,31 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     }
 
+    public static final String OVERLAP_CLAUSE =
+        "AND reservation_to >= ? AND reservation_from <= ? " +
+        "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' ";
+
+    private LazyStatement listRCFIPStatement = new LazyStatement(
+        "SELECT " + RESERVATION_HEADER_FIELDS +
+                "FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE +
+                "ORDER BY reservation_from"
+    );
+
+    @Override
+    public Iterable<ReservationHeader> listReservationsForCarInPeriod (int carId, LocalDateTime from, LocalDateTime until) {
+        try {
+            PreparedStatement ps = listRCFIPStatement.value();
+            ps.setInt(1, carId);
+            ps.setTimestamp(2, Timestamp.valueOf(from));
+            ps.setTimestamp(3, Timestamp.valueOf(until));
+            return listReservations(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException( "Could not retreive reservation information", ex);
+        }
+    }
+
     private LazyStatement hasOverlapStatement = new LazyStatement(
-        "SELECT count(*) FROM reservations " +
-                "WHERE reservation_car_id = ? AND reservation_to >= ? AND reservation_from <= ? " +
-                "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' "
+        "SELECT count(*) FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE
     );
 
     @Override

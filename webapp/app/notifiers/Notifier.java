@@ -49,7 +49,7 @@ public class Notifier extends Mailer {
 
     public static final String NOREPLY = "Dégage <noreply@degage.be>";
 
-    public static final String toFullURL (Call call) {
+    public static String toFullURL (Call call) {
         return Play.application().configuration().getString("application.hostUrl") + call.url();
     }
 
