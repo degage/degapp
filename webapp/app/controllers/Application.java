@@ -62,8 +62,7 @@ public class Application extends Controller {
                 return ok(
                     dashboardFullUser.render(
                         currentUser,
-                        completeness,
-                        Form.form(Reserve.IndexModel.class)
+                        completeness
                     )
                 );
 
@@ -98,8 +97,7 @@ public class Application extends Controller {
                         javascript.Damages.addProof(),
                         javascript.EmailTemplates.editTemplate(),
                         javascript.InfoSessions.enrollSession(),
-                        javascript.Maps.getMap(),
-                        javascript.Reserve.reserve()
+                        javascript.Maps.getMap()
                 )
         );
     }

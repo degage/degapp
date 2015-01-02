@@ -76,19 +76,9 @@ public interface ReservationDAO {
 
     public int getAmountOfReservations(Filter filter) throws DataAccessException;
 
-    /**
-     * List of reservations (not cancelled not refused) where the given user is owner or driver
-     */
-    public Iterable<Reservation> getReservationListForUser(int userID) throws DataAccessException;
-
-
     public Iterable<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
-
-    public Iterable<ReservationHeader> listReservationsForCar(int carID) throws DataAccessException;
-
     public Iterable<ReservationHeader> listReservationsForCarInPeriod (int carID, LocalDateTime from, LocalDateTime to) throws DataAccessException;
-
 
     public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsLoaner);
 

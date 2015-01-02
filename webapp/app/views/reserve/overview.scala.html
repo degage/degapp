@@ -35,7 +35,7 @@
 }
 @datepickerWithButton(field: Field, caption: String)={
 <div class="col-md-4 @if(field.hasErrors) {has-error}">
-    <div id="@field.id-container" class="input-group datetimepicker-input"
+    <div id="@field.id-container" class="input-group date datetimepicker-input"
          data-date-format="yyyy-mm-dd" data-min-view="3" data-start-view="2">
         <span class="input-group-btn">
             <button class="btn btn-success" type="submit">@caption</button>
@@ -48,8 +48,7 @@
     }
 </div>
 }
-@stdlayout("Overzicht vrije perioden", stylesheets){
-
+@stdlayout("Overzicht vrije perioden", stylesheets, scripts=js.datetimepicker()){
 
     @panel("Toon het overzicht voor een bepaalde dag", "fa-search"){
         <div class="col-xs-12">

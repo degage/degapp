@@ -45,7 +45,6 @@ import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import views.html.errortablerow;
 import views.html.reserve.*;
 
@@ -59,13 +58,6 @@ import java.util.List;
  * Controller responsible to display and filter cars for reservation and to enable a user to reserve a car.
  */
 public class Reserve extends Controller {
-
-    public static class IndexModel {
-        // Date from
-        public String from;
-        // Date until
-        public String until;
-    }
 
     /**
      * Class implementing a model wrapped in a form.
@@ -118,113 +110,13 @@ public class Reserve extends Controller {
                     return "Ongeldig datum: tot = " + until;
                 }
             }
-            if ("".equals(dateFrom) || "".equals(dateUntil)) // TODO string compared to date
-            {
-                return "Gelieve zowel een begin als einddatum te selecteren!";
-            } else if (dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
+            if (dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
                 return "De einddatum kan niet voor de begindatum liggen!";
             }
             return null;
         }
 
     }
-
-    /**
-     * Method: GET
-     *
-     * @return the reservation index page containing one specific car
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result indexWithCar(String carName, int id) {
-        return ok(reservations.render("", carName, id, "", ""));
-    }
-
-    /**
-     * @return The html context of the reservations index page
-     */
-    private static Html showIndex() {
-        return reservations.render("", "", -1, "", "");
-    }
-
-    /**
-     * Method: GET
-     * <p>
-     * Render the details page of a future reservation for a car where the user is able to
-     * confirm the reservation and specify the start and end of the reservation
-     *
-     * @param carId the id of the car for which the reservation details ought to be rendered
-     * @param from  the string containing the date and time of the start of the reservation
-     * @param until the string containing the date and time of the end of the reservation
-     * @return the details page of a future reservation for a car
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result reserve(int carId, String from, String until) {
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        Car car = dao.getCar(carId);
-        if (car == null) {
-            flash("danger", "De reservatie van deze auto is onmogelijk: auto onbestaand!");
-            return badRequest(showIndex());
-        } else {
-            return ok(reservationDetailsPartial.render(car, from, until, Form.form(ReservationModel.class)));
-        }
-    }
-
-    /**
-     * Method: POST
-     * <p>
-     * Confirmation of a reservation. The reservation is validated.
-     * If the reservation is valid, the reservation is created and the owner is
-     * informed of the request for a reservation.
-     *
-     * @param carId The id of the car for which the reservation is being confirmed
-     * @return the user is redirected to the drives page
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result confirmReservation(int carId) {
-        // Request the form
-        Form<ReservationModel> reservationForm = Form.form(ReservationModel.class).bindFromRequest();
-        if (reservationForm.hasErrors()) {
-            return badRequest(reservations.render(reservationForm.globalError().message(), "", -1, "", ""));
-        } else {
-            DataAccessContext context = DataAccess.getInjectedContext();
-            Car car = context.getCarDAO().getCar(carId);
-            // Test whether the reservation is valid
-            ReservationModel formData = reservationForm.get();
-            LocalDateTime from = formData.getTimeFrom();
-            LocalDateTime until = formData.getTimeUntil();
-            ReservationDAO rdao = context.getReservationDAO();
-            // TODO: create 'checkOverlap'
-            for (ReservationHeader reservation : rdao.listReservationsForCar(carId)) {
-                if ((reservation.getStatus() != ReservationStatus.REFUSED && reservation.getStatus() != ReservationStatus.CANCELLED) &&
-                        (from.isBefore(reservation.getUntil()) && until.isAfter(reservation.getFrom()))) {
-                    return badRequest(reservations.render("De reservatie overlapt met een reeds bestaande reservatie!", "", -1, "", ""));
-                }
-            }
-
-            // Create the reservationCars
-            ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), formData.message);
-            if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                // Schedule the auto accept
-                context.getJobDAO().createJob(    // TODO: number of minutes after now as parameter?
-                        JobType.RESERVE_ACCEPT,
-                        reservation.getId(),
-                        Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
-                    );
-
-                // note: user contained in this record was null
-                // TODO: avoid having to retrieve the whole record
-                Reservation res = rdao.getReservation(reservation.getId());
-                Notifier.sendReservationApproveRequestMail(
-                        car.getOwner(), res
-                );
-            }
-            return redirect(routes.Drives.index());
-        }
-    }
-
 
     /**
      * Show an initial page with a reservation search form. This page uses Ajax to show all cars available for
@@ -527,6 +419,19 @@ public class Reserve extends Controller {
         }
 
         return ok(overviewcar.render(form, lines));
+    }
+
+    /**
+     * Same as overviewCarPost, but with car id and car name already filled in and day of today
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result indexWithCar(String carName, int carId) {
+        CarDateData data = new CarDateData();
+        data.carId = carId;
+        data.carIdAsString = carName;
+        data.date = Utils.toDateString(LocalDate.now());
+        return overviewCar(Form.form(CarDateData.class).fill (data));
     }
 
     /**
