@@ -38,8 +38,7 @@ GET         /userroles/edit                         controllers.UserRoles.edit(u
 POST        /userroles/edit                         controllers.UserRoles.editPost(userId: Int)
 
 # Drives
-GET         /drives                                 controllers.Drives.index()
-GET         /drives_tab                             controllers.Drives.indexWithStatus(status: String)
+GET         /drives                                 controllers.Drives.index(status: String ?= "ACCEPTED")
 GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drives/admin                           controllers.Drives.drivesAdmin()
 GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")

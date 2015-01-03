@@ -153,25 +153,13 @@ public class Drives extends Controller {
     /**
      * Method: GET
      *
-     * @return the drives index page containing all (pending) reservations of the user or for his car
-     * starting with active tab containing the approved reservations.
-     */
-    @AllowRoles
-    @InjectContext
-    public static Result index() {
-        return ok(drives.render(ReservationStatus.ACCEPTED));
-    }
-
-    /**
-     * Method: GET
-     *
-     * @param status The status identifying the tab
+     * @param status The status identifying the tab that should be shown
      * @return the drives index page containing all (pending) reservations of the user or for his car
      * starting with the tab containing the reservations with the specified status active.
      */
     @AllowRoles
     @InjectContext
-    public static Result indexWithStatus(String status) {
+    public static Result index(String status) {
         return ok(drives.render(ReservationStatus.valueOf(status)));
     }
 
@@ -349,11 +337,11 @@ public class Drives extends Controller {
         Reservation reservation = rdao.getReservation(reservationId);
         if (reservation == null) {
             flash("danger", "Er is een fout gebeurt bij het opvragen van de rit.");
-            return redirect(routes.Drives.index());
+            return redirect(routes.Drives.index("ACCEPTED"));
         }
         if (CurrentUser.isNot(reservation.getUser().getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("danger", "Je bent niet gemachtigd deze actie uit te voeren.");
-            return redirect(routes.Drives.index());
+            return redirect(routes.Drives.index("ACCEPTED"));
         }
         LocalDateTime from = adjustForm.get().getTimeFrom();
         LocalDateTime until = adjustForm.get().getTimeUntil();
@@ -363,7 +351,7 @@ public class Drives extends Controller {
         }
         if (reservation.getStatus() != ReservationStatus.ACCEPTED && reservation.getStatus() != ReservationStatus.REQUEST) {
             flash("danger", "Je kan deze reservatie niet aanpassen.");
-            return redirect(routes.Drives.index());
+            return redirect(routes.Drives.index("ACCEPTED"));
         }
         reservation.setFrom(from);
         reservation.setUntil(until);

@@ -198,7 +198,7 @@
                         }
                         @if(CurrentUser.hasRole(UserRole.CAR_USER)){
                         <li @if(title == "Ritten") {class="active"}>
-                            <a href="@routes.Drives.index"><i class="fa fa-car fa-fw"></i>
+                            <a href='@routes.Drives.index()'><i class="fa fa-car fa-fw"></i>
                                 Ritten
                                 @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false) +
                                         Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +

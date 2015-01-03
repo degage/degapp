@@ -259,7 +259,7 @@ public class Reserve extends Controller {
                     car.getOwner(), res
             );
         }
-        return redirect(routes.Drives.index());
+        return redirect(routes.Drives.index("ACCEPTED"));
     }
 
     public static final int MINUTES_PER_INTERVAL = 15; // must be exactly divisible into 60

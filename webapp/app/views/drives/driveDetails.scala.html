@@ -51,7 +51,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
         adjustedUntil.setMinutes(adjustedUntil.getMinutes() - 5);
     </script>
 }
-@stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index)) {
+@stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
     @defining(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) { isAdmin =>
 
     @panel("Geselecteerde rit", "fa-bar-chart-o"){

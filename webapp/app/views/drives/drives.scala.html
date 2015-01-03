@@ -32,17 +32,9 @@
     @js.pagination("Drives.showDrivesPage")
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
 }
-@app("Ritten", scripts=scripts) {
-
-    @breadcrumbs{
-        @breadcrumb("Ritten")
-    }
-
-    <div id="page-wrapper">
+@stdlayout("Ritten", scripts=scripts) {
         <div class="row">
             <div class="col-lg-12">
-                <h1 class="page-header">Ritten</h1>
-                <!-- Nav tabs -->
                 <ul class="nav nav-tabs">
                   <li id="tab_planned" @if(status == ReservationStatus.ACCEPTED) { class="active" } ><a href="#resultpanel" data-toggle="tab">
                       Gepland</a>
@@ -70,13 +62,9 @@
                   </li>
                   <li class="hidden"><button id="searchButton"></button></li>
                 </ul>
-
-                <!-- Tab panes -->
-                @resultsTablePanel(tabbed=true)
             </div>
-            <!-- /col-lg-12 -->
         </div>
-        <!-- /row -->
-    </div>
-    <!-- /page-wrapper -->
+
+        <!-- Tab panes -->
+        @resultsTablePanel(tabbed=true)
 }
