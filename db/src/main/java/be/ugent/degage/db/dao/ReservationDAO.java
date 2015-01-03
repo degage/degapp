@@ -49,9 +49,9 @@ public interface ReservationDAO {
 
     public Reservation getReservation (int id) throws DataAccessException;
 
-    public void updateReservation(Reservation reservation) throws DataAccessException;
-
     public void updateReservationStatus (int reservationId, ReservationStatus status);
+
+    public void updateReservationTime (int reservationId, LocalDateTime from, LocalDateTime until);
 
     /**
      * Return the first reservation that follows the given reservation, unless it is more

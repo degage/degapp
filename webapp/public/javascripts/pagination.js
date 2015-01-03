@@ -53,9 +53,6 @@ var buttonsAroundPage = 2;
 if(typeof autoLoad == 'undefined') {
     autoLoad = 0;
 }
-if (typeof initialLoad == 'undefined') {
-    initialLoad = 1;
-}
 if(typeof beginPage == 'undefined') {
     var beginPage = 1;
 }
@@ -75,11 +72,6 @@ var pageLoaded = false;
 
 var intervalLoading;
 var goingLeft = true;
-
-// Initially, we load the first page in ascending order, ordered by the default column, without filtering
-if (initialLoad) {
-    $(document).ready(loadPage(beginPage, beginPageSize, beginAsc, beginOrder, beginFilter));
-}
 
 /*
  * Filtering
@@ -287,6 +279,14 @@ function loadPage(page, pageSize, asc, orderBy, search) {
             // TODO: make clearer
             $("#resultsTable").html("Er ging iets mis...");
         });
+}
+
+/*
+ * Load the first page for the given search string.
+ */
+
+function loadFirstPage(searchString) {
+    loadPage(beginPage, beginPageSize, beginAsc, beginOrder, searchString);
 }
 
 /*

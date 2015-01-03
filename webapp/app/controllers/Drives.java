@@ -353,17 +353,16 @@ public class Drives extends Controller {
             flash("danger", "Je kan deze reservatie niet aanpassen.");
             return redirect(routes.Drives.index("ACCEPTED"));
         }
-        reservation.setFrom(from);
-        reservation.setUntil(until);
-        rdao.updateReservation(reservation);
+        rdao.updateReservationTime(reservationId, from, until);
 
         if (reservation.getStatus() == ReservationStatus.REQUEST) {
             // Remove old reservation auto accept and add new
             JobDAO jdao = context.getJobDAO();
-            jdao.deleteJob(JobType.RESERVE_ACCEPT, reservation.getId()); //remove the old job
+            // TODO: do the following in a single call
+            jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId); //remove the old job
             jdao.createJob(
                     JobType.RESERVE_ACCEPT,
-                    reservation.getId(),
+                    reservationId,
                     Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
             );
         }

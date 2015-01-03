@@ -158,27 +158,20 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    private LazyStatement getUpdateReservationStatement = new LazyStatement (
-            "UPDATE reservations SET reservation_user_id=? , reservation_car_id=? , reservation_status =? ,"
-                    + "reservation_from=? , reservation_to=?, reservation_message = ? WHERE reservation_id = ?"
+    private LazyStatement getUpdateReservationTimeStatement = new LazyStatement (
+            "UPDATE reservations SET reservation_from=? , reservation_to=? WHERE reservation_id = ?"
     );
 
     @Override
-    public void updateReservation(Reservation reservation) throws DataAccessException {
+    public void updateReservationTime(int reservationId, LocalDateTime from, LocalDateTime until) throws DataAccessException {
         try {
-            PreparedStatement ps = getUpdateReservationStatement.value();
-            ps.setInt(1, reservation.getUser().getId());
-            ps.setInt(2, reservation.getCar().getId());
-            ps.setString(3, reservation.getStatus().name());
-            ps.setTimestamp(4, Timestamp.valueOf(reservation.getFrom()));
-            ps.setTimestamp(5, Timestamp.valueOf(reservation.getUntil()));
-            ps.setString(6, reservation.getMessage());
-            ps.setInt(7, reservation.getId());
-
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("Reservation update affected 0 rows.");
+            PreparedStatement ps = getUpdateReservationTimeStatement.value();
+            ps.setTimestamp(1, Timestamp.valueOf(from));
+            ps.setTimestamp(2, Timestamp.valueOf(until));
+            ps.setInt(3, reservationId);
+            ps.executeUpdate();
         } catch (SQLException e){
-            throw new DataAccessException("Unable to update reservation", e);
+            throw new DataAccessException("Unable to update reservation time ", e);
         }
     }
 

@@ -31,11 +31,11 @@
 <script type='text/javascript' src='@routes.Application.paginationRoutes()'></script>
 <script>
     var route = paginationJsRoutes.controllers.@actionName;
-    @if(!initialLoad) { initialLoad = false; }
 
     $(document).ready(function () {
         $(window).resize(forceResponsiveTables);
         forceResponsiveTables();
+        @if(initialLoad) { loadFirstPage(beginFilter); }
     });
 </script>
 <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>

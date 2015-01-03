@@ -30,7 +30,7 @@
 @(status: ReservationStatus)
 @scripts = {
     @js.pagination("Drives.showDrivesPage")
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
+    <!-- <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script> -->
 }
 @stdlayout("Ritten", scripts=scripts) {
         <div class="row">
@@ -44,9 +44,7 @@
                       Voorbij
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
                               Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
-                          @if(amount > 0) {
-                              (@amount)
-                          }
+                          @if(amount > 0) { (@amount) }
                       }
                       </a>
                   </li>
@@ -64,7 +62,6 @@
                 </ul>
             </div>
         </div>
-
         <!-- Tab panes -->
         @resultsTablePanel(tabbed=true)
 }
