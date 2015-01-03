@@ -49,6 +49,8 @@ public interface ReservationDAO {
 
     public Reservation getReservation (int id) throws DataAccessException;
 
+    public ReservationHeader getReservationHeader (int id) throws DataAccessException;
+
     public void updateReservationStatus (int reservationId, ReservationStatus status);
 
     public void updateReservationTime (int reservationId, LocalDateTime from, LocalDateTime until);

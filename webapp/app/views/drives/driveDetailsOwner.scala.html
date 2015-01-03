@@ -27,32 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, ownerId: Int)
-@import db.CurrentUser
+@(reservationId: Int, ownerId: Int)
 
 <!-- /row -->
-@if(reservation.getStatus == ReservationStatus.REQUEST) {
-    @if(CurrentUser isNot ownerId) {
+@panel("Goed- of afkeuren (als eigenaar van de auto)", "fa-pencil"){
+    @if(db.CurrentUser isNot ownerId) {
         <div class="alert alert-warning alert-dismissable">
             Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
         </div>
     }
-    <div class="row">
-        <div class="col-xs-12">
-                @helper.form(routes.Drives.setReservationStatus(reservation.getId), 'class -> "form-horizontal") {
-                    <div class="row">
-                        <div class="col-sm-6 col-xs-6 btn-group btn-group-xs">
-                            <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-                            <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
-                        </div>
-                    </div><br />
-                    <div class="row">
-                        <div class="col-xs-12">
-                            <textarea name="remarks" class="form-control" rows="3" placeholder="Reden voor de weigering/opmerkingen bij de goedkeuring"></textarea>
-                        </div>
-                    </div>
-                }
-            </div><br />
+    @helper.form(routes.Drives.setReservationStatus(reservationId)) {
+        <div class="col-xs-12 form-group">
+            <label for="remarks">Reden voor de weigering / opmerkingen bij de goedkeuring</label>
+            <textarea id="remarks" name="remarks" class="form-control" rows="3"></textarea>
         </div>
-    </div>
+        <div class="col-sm-6 col-xs-6">
+            <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
+            <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
+        </div>
+    }
 }

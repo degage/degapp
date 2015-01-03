@@ -53,12 +53,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             "reservation_id, reservation_car_id, reservation_user_id, reservation_from, reservation_to, " +
                     "reservation_message, reservation_status, reservation_privileged ";
 
-
-            // TODO: replace * by actual fields
-    public static final String RESERVATION_QUERY = "SELECT * FROM reservations " +
-            "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
-            "INNER JOIN users ON reservations.reservation_user_id = users.user_id ";
-
     public JDBCReservationDAO(JDBCDataAccessContext context) {
         super(context);
     }
@@ -142,7 +136,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getUpdateReservationStatusStatement = new LazyStatement(
-            "UPDATE reservations SET reservation_status =?  WHERE reservation_id = ?"
+            "UPDATE reservations SET reservation_status=?  WHERE reservation_id = ?"
     );
 
     @Override
@@ -188,17 +182,37 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             PreparedStatement ps = getReservationStatement.value();
             ps.setInt(1, id);
             try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
+                if(rs.next()) {
                     return populateReservation(rs);
-                else return null;
-            }catch (SQLException e){
-                throw new DataAccessException("Error reading reservation resultset", e);
+                } else {
+                    return null;
+                }
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to get reservation", e);
         }
     }
 
+     private LazyStatement getReservationHeaderStatement = new LazyStatement (
+            "SELECT " + RESERVATION_HEADER_FIELDS + " FROM reservations WHERE reservation_id=?"
+    );
+
+    @Override
+    public ReservationHeader getReservationHeader(int id) throws DataAccessException {
+        try {
+            PreparedStatement ps = getReservationHeaderStatement.value();
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    return populateReservationHeader(rs);
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to get reservation header", e);
+        }
+    }
 
     private Reservation populateNextPrevious (ResultSet rs) throws SQLException {
         return new Reservation(

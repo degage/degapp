@@ -28,7 +28,6 @@
  *@
 
 @(reservation: Reservation)
-@import db.CurrentUser
 
 @helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
     <div class="row">
@@ -54,7 +53,7 @@
     <!-- row -->
     <!-- /row -->
     @if(reservation.getStatus == ReservationStatus.ACCEPTED || reservation.getStatus == ReservationStatus.REQUEST) {
-            @if(CurrentUser isNot reservation.getUser.getId) {
+            @if(db.CurrentUser isNot reservation.getUser.getId) {
                 <div class="alert alert-warning alert-dismissable">
                     Pas op! Je bent niet de bestuurder, maar ziet onderstaande knoppen toch omdat je admin bent!
                 </div>

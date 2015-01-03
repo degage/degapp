@@ -34,6 +34,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
+import com.google.common.base.Strings;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -55,6 +56,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -69,32 +71,6 @@ import java.util.List;
  * be associated with the reservation.
  */
 public class Drives extends Controller {
-
-    /**
-     * Class implementing a model wrapped in a form.
-     * This model is used during the form submission when an owner does not
-     * approve the reservation of his car.
-     * The owner is obligated to inform the loaner why his reservation request
-     * is denied.
-     */
-    public static class RemarksModel {
-        // String containing the reason for refusing a reservation
-        public String status;
-        public String remarks;
-
-        /**
-         * Validates the form:
-         * - the owner must explain why he does not approve a reservation
-         *
-         * @return an error string or null
-         */
-        public String validate() {
-            // Should not be possible but you never know
-            if (status == null || "".equals(status))
-                return "Een fout deed zich voor bij het verwerken van de actie. Probeer het opnieuw";
-            return null;
-        }
-    }
 
     /**
      * Class implementing a model wrapped in a form.
@@ -186,10 +162,20 @@ public class Drives extends Controller {
     @InjectContext
     public static Result details(int reservationId) {
         Html result = detailsPage(reservationId);
-        if (result != null)
+        if (result != null) {
             return ok(result);
-        else
-            return badRequest(drives.render(ReservationStatus.ACCEPTED)); // TODO redirect
+        } else {
+            return redirect(routes.Drives.index("ACCEPTED"));
+        }
+    }
+
+    private static Result detailsAux(Reservation reservation) {
+        Html result = detailsPage(reservation);
+        if (result != null) {
+            return ok(result);
+        } else {
+            return redirect(routes.Drives.index("ACCEPTED"));
+        }
     }
 
     private static Html detailsPage(int reservationId) {
@@ -248,7 +234,7 @@ public class Drives extends Controller {
         return driveDetails.render(
                 new Form<>(InfoModel.class).fill(model),
                 reservation, driveInfo, car, owner, loaner,
-                previousLoaner, nextLoaner
+                previousLoaner, nextLoaner, Form.form(RemarksData.class)
         );
     }
 
@@ -311,7 +297,7 @@ public class Drives extends Controller {
         return driveDetails.render(
                 detailsForm,
                 reservation, driveInfo, car, owner, loaner,
-                previousLoaner, nextLoaner
+                previousLoaner, nextLoaner, Form.form(RemarksData.class)
         );
     }
 
@@ -370,6 +356,20 @@ public class Drives extends Controller {
         return ok(detailsPageOld(reservationId, detailsForm));
     }
 
+    public static class RemarksData {
+        // String containing the reason for refusing a reservation
+        public String status;
+        public String remarks;
+
+        public List<ValidationError> validate() {
+            if ("REFUSED".equals(status) && Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
+                return Arrays.asList(new ValidationError("remarks", "Je moet een reden opgeven waarom je de reservatie weigert"));
+            } else {
+                return null;
+            }
+        }
+    }
+
     /**
      * Method: POST
      * <p>
@@ -378,32 +378,45 @@ public class Drives extends Controller {
      * @param reservationId the id of the reservation being refused/accepted
      * @return the drives index page
      */
-    @AllowRoles({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result setReservationStatus(int reservationId) {
-        Form<InfoModel> detailsForm = Form.form(InfoModel.class);
-        Form<RemarksModel> remarksForm = Form.form(RemarksModel.class).bindFromRequest();
-        if (remarksForm.hasErrors())
-            return badRequest(detailsPageOld(reservationId, detailsForm));
-        ReservationStatus status = ReservationStatus.valueOf(remarksForm.get().status);
-        String remarks = remarksForm.get().remarks;
-        if (status == ReservationStatus.REFUSED && (remarks == null || "".equals(remarks))) {
-            remarksForm.reject("Gelieve aan te geven waarom je de reservatie weigert.");
-            return badRequest(detailsPageOld(reservationId, detailsForm));
+        Form<RemarksData> form =  Form.form(RemarksData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(); // TODO
+        } else {
+            RemarksData data = form.get(); // the form does not contain errors
+            ReservationStatus status = ReservationStatus.valueOf(data.status);
+            String remarks = data.remarks;
+
+            if (status == ReservationStatus.REFUSED || status == ReservationStatus.ACCEPTED) {
+                DataAccessContext context = DataAccess.getInjectedContext();
+                ReservationDAO dao = context.getReservationDAO();
+                Reservation reservation = dao.getReservation(reservationId);
+                if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
+                    // extra checks when not reservation admin
+                    if (!context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
+                            || reservation.getStatus() != ReservationStatus.REQUEST) {
+                        flash("danger", "Alleen de eigenaar kan een reservatie goed- of afkeuren");
+                        return redirect(routes.Drives.details(reservationId));
+                    }
+                }
+                dao.updateReservationStatus(reservationId, status);
+
+                // Unschedule the job for auto accept
+                context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
+
+                if (status == ReservationStatus.REFUSED) {
+                    Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
+                } else {
+                    Notifier.sendReservationApprovedByOwnerMail(DataAccess.getInjectedContext(), remarks, reservation);
+                }
+                return detailsAux(reservation);
+
+            } else { // other cases only happen when somebody is hacking
+                return badRequest();
+            }
         }
-        if (status != ReservationStatus.REFUSED && status != ReservationStatus.ACCEPTED) {
-            remarksForm.reject("Het is niet toegestaan om de status van de reservatie aan te passen naar: " + status.toString());
-            return badRequest(detailsPageOld(reservationId, detailsForm));
-        }
-        Reservation reservation = adjustStatus(reservationId, status);
-        if (reservation == null) {
-            return badRequest(drives.render(ReservationStatus.ACCEPTED));
-        }
-        if (status == ReservationStatus.REFUSED)
-            Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
-        else
-            Notifier.sendReservationApprovedByOwnerMail(DataAccess.getInjectedContext(), remarks, reservation);
-        return details(reservationId);
     }
 
     /**
@@ -414,65 +427,31 @@ public class Drives extends Controller {
      * @param reservationId the id of the reservation being cancelled
      * @return the drives index page
      */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_USER,UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result cancelReservation(int reservationId) {
-        Reservation reservation = adjustStatus(reservationId, ReservationStatus.CANCELLED);
-        if (reservation == null)
-            return badRequest(drives.render(ReservationStatus.ACCEPTED));
-        return details(reservationId);
-    }
-
-    /**
-     * Adjust the status of a given reservation for a car.
-     * This method can only be called by the owner of the car and only if the reservation is not yet approved/refused.
-     *
-     * @param reservationId the id of the reservation for which the status ought the be adjusted
-     * @param status        the status to which the reservation is to be set
-     * @return the reservation if successful, null otherwise
-     */
-    // used in injected context
-    private static Reservation adjustStatus(int reservationId, ReservationStatus status) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
         Reservation reservation = dao.getReservation(reservationId);
-        if (reservation == null) {
-            flash("danger", "De actie die je wil uitvoeren is ongeldig: reservatie onbestaand");
-            return null;
-        }
-        // Both super user and reservation admin are allowed to adjust the status of a reservation
         if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
-            // TODO: refactor these additional checks
-            switch (status) {
-                // Only the loaner is allowed to cancel a reservation at any time
-                case CANCELLED:
-                    if (CurrentUser.is(reservation.getUser().getId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-                        if (reservation.getStatus() != ReservationStatus.REQUEST && reservation.getStatus() != ReservationStatus.ACCEPTED) {
-                            flash("danger", "De reservatie is niet meer in aanvraag en is niet goedgekeurd!");
-                            return null;
-                        }
-                    } else {
-                        flash("danger", "Alleen de ontlener mag een reservatie annuleren!");
-                        return null;
-                    }
-                    break;
-                // The owner is allowed to approve or refuse a reservation if that reservation
-                // has the request or request_new status
-                default:
-                    if (!context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
-                            || reservation.getStatus() != ReservationStatus.REQUEST) {
-                        flash("danger", "Alleen de eigenaar kan de status van een reservatie aanpassen");
-                        return null;
-                    }
+            // extra checks when not reservation admin
+            if (CurrentUser.is(reservation.getUser().getId())) {
+                ReservationStatus status = reservation.getStatus();
+                if (status != ReservationStatus.REQUEST && status != ReservationStatus.ACCEPTED) {
+                    flash("danger", "Deze reservatie kan niet meer geannuleerd worden.");
+                    return redirect(routes.Drives.index("ACCEPTED"));
+                }
+            } else {
+                flash("danger", "Alleen de ontlener mag een reservatie annuleren!");
+                return redirect(routes.Drives.index("ACCEPTED"));
             }
         }
-        dao.updateReservationStatus(reservationId, status);
+        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
 
         // Unschedule the job for auto accept
-        JobDAO jdao = context.getJobDAO();
-        jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId);
+        context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
 
-        return reservation;
+        return detailsAux(reservation);
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
