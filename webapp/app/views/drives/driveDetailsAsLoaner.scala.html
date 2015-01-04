@@ -69,7 +69,7 @@ car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form
         </div>
 
         <!-- loaner specific content -->
-        @driveDetailsLoaner(reservation)
+        @updateButtons(reservation.getId,reservation.getStatus)
     }
 
     @panel("Verdere informatie", "fa-bar-chart-o"){

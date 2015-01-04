@@ -1,0 +1,55 @@
+@* shorten.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(reservationId: Int, form: Form[Reserve.ReservationData], from: java.time.LocalDateTime, until: java.time.LocalDateTime)
+
+@extrabc = {
+    @breadcrumb("Ritten",routes.Drives.index())
+    @breadcrumb("Details",routes.Drives.details(reservationId)) @* TODO: differentiate between admin / not admin *@
+}
+
+@stdlayout("Reservatieperiode inkorten", extrabc=extrabc, scripts=js.datetimepicker() ) {
+
+    @panel("Aanpassen", "fa-calendar") {
+        @helper.form(routes.Drives.shortenReservationPost(reservationId)) {
+            <div class="col-xs-12">
+                <p><strong>Oorspronkelijke reservatie van:</strong> @Utils.toLocalizedString(from)
+                <strong>tot:</strong> @Utils.toLocalizedString(until).</p>
+            </div>
+            @std.datetimepicker(form("from"),"Begin ingekorte reservatie", css="col-md-6",minuteStep=15)
+            @std.datetimepicker(form("until"),"Einde ingekorte reservatie", css="col-md-6",minuteStep=15)
+            @std.submitButton("Periode inkorten")
+            <div class="col-xs-12">
+                    <p class="bg-info"><strong>Opmerking</strong> Reservaties die reeds zijn goedgekeurd kunnen enkel nog worden <b>ingekort</b>. Wens je
+                        een goedgekeurde reservatie toch te verlengen of te verplaatsen dan moet je ze annuleren en
+                een nieuwe reservatie aanvragen (die dan opnieuw moet worden goedgekeurd).</p>
+            </div>
+        }
+    }
+}

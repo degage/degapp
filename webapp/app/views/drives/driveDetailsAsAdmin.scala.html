@@ -68,7 +68,7 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User, rem
             <strong>Commentaar:</strong> @reservation.getMessage
         </div>
         <!-- loaner specific content -->
-            @driveDetailsLoaner(reservation)
+            @updateButtons(reservation.getId,reservation.getStatus)
     }
 
     <!-- owner specific content -->

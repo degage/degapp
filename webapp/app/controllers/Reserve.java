@@ -60,65 +60,6 @@ import java.util.List;
 public class Reserve extends Controller {
 
     /**
-     * Class implementing a model wrapped in a form.
-     * This model is used during the form submission when a user submits
-     * a reservation for a car.
-     * The user is obligated to provide information about the reservation:
-     * - the start date and time
-     * - the end date and time
-     */
-    public static class ReservationModel {
-        // Date and time from which the user wants to loan the car
-        public String from;
-        // Date and time the user will return the car to the owner
-        public String until;
-
-        public String message;
-
-        /**
-         * @return the start datetime of the reservation
-         */
-        public LocalDateTime getTimeFrom() {
-            return Utils.toLocalDateTime(from);
-        }
-
-        /**
-         * @return the end datetime of the reservation
-         */
-        public LocalDateTime getTimeUntil() {
-            return Utils.toLocalDateTime(until);
-        }
-
-        /**
-         * Validates the form:
-         * - the start date and time, and the end date and time are specified
-         * - the start date and time of a reservation is before the end date and time
-         * - the start date is after the date of today
-         *
-         * @return an error string or null
-         */
-        public String validate() {
-            LocalDateTime dateFrom = null;
-            LocalDateTime dateUntil;
-            try {
-                dateFrom = getTimeFrom();
-                dateUntil = getTimeUntil();
-            } catch (IllegalArgumentException ex) {
-                if (dateFrom == null) {
-                    return "Ongeldig datum: van = " + from;
-                } else {
-                    return "Ongeldig datum: tot = " + until;
-                }
-            }
-            if (dateFrom.isAfter(dateUntil) || dateFrom.isEqual(dateUntil)) {
-                return "De einddatum kan niet voor de begindatum liggen!";
-            }
-            return null;
-        }
-
-    }
-
-    /**
      * Show an initial page with a reservation search form. This page uses Ajax to show all cars available for
      * reservation in a certain period
      * @return
@@ -192,6 +133,13 @@ public class Reserve extends Controller {
                 return null;
             }
         }
+
+        public ReservationData populate(LocalDateTime from, LocalDateTime until) {
+            this.from = from;
+            this.until = until;
+            return this;
+        }
+
     }
 
     /**
@@ -200,15 +148,16 @@ public class Reserve extends Controller {
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result reserveCar(int carId, String fromString, String untilString) {
-        Car car = DataAccess.getContext().getCarDAO().getCar(carId);
-
-        // query string binders are quite complicated to write :-(
-        ReservationData data = new ReservationData();
-        data.from = Utils.toLocalDateTime(fromString);
-        data.until = untilString.isEmpty() ? null : Utils.toLocalDateTime(untilString);
-        Form<ReservationData> form = new Form<>(ReservationData.class).fill(data);
-
-        return ok (reservation.render(form,car));
+        return ok(reservation.render(
+                // query string binders are quite complicated to write :-(
+                new Form<>(ReservationData.class).fill(
+                        new ReservationData().populate(
+                                Utils.toLocalDateTime(fromString),
+                                untilString.isEmpty() ? null : Utils.toLocalDateTime(untilString)
+                        )
+                ),
+                DataAccess.getContext().getCarDAO().getCar(carId)
+        ));
     }
 
     /**

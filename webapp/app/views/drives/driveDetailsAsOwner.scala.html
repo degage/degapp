@@ -69,7 +69,7 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
         </div>
         <!-- loaner specific content -->
         @if((CurrentUser is loaner.getId)) {
-            @driveDetailsLoaner(reservation)
+            @updateButtons(reservation.getId,reservation.getStatus)
         }
     }
 

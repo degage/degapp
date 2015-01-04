@@ -35,6 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
+import controllers.Reserve.ReservationData;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -144,6 +145,7 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result drivesAdmin() {
+        // TODO: join with drives and keep history to redirect to the correct page and use the correct breadcrumbs
         return ok(drivesAdmin.render());
     }
 
@@ -237,63 +239,6 @@ public class Drives extends Controller {
                     previousLoaner, nextLoaner, Form.form(RemarksData.class)
             );
         }
-    }
-
-    /**
-     * Method: POST
-     * <p>
-     * Adjust the details of a drive. That is, adjust the date and time of the drive.
-     * It's only allowed to shorten the date and/or time.
-     *
-     * @param reservationId the id of the reservation/drive
-     * @return the detail page of specific drive/reservation after the details where adjusted
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result adjustDetails(int reservationId) {
-        // TODO: clean this up
-
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO rdao = context.getReservationDAO();
-        Reservation reservation = rdao.getReservation(reservationId);
-
-        Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
-        if (adjustForm.hasErrors())
-            return badRequest(detailsPage(reservation));
-
-        if (reservation == null) {
-            flash("danger", "Er is een fout gebeurt bij het opvragen van de rit.");
-            return redirect(routes.Drives.index("ACCEPTED"));
-        }
-        if (CurrentUser.isNot(reservation.getUser().getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            flash("danger", "Je bent niet gemachtigd deze actie uit te voeren.");
-            return redirect(routes.Drives.index("ACCEPTED"));
-        }
-        LocalDateTime from = adjustForm.get().getTimeFrom();
-        LocalDateTime until = adjustForm.get().getTimeUntil();
-        if (from.isBefore(reservation.getFrom()) || until.isAfter(reservation.getUntil())) {
-            flash("danger", "Het is niet toegestaan de reservatie te verlengen.");
-            return badRequest(detailsPage(reservation));
-        }
-        if (reservation.getStatus() != ReservationStatus.ACCEPTED && reservation.getStatus() != ReservationStatus.REQUEST) {
-            flash("danger", "Je kan deze reservatie niet aanpassen.");
-            return redirect(routes.Drives.index("ACCEPTED"));
-        }
-        rdao.updateReservationTime(reservationId, from, until);
-
-        if (reservation.getStatus() == ReservationStatus.REQUEST) {
-            // Remove old reservation auto accept and add new
-            JobDAO jdao = context.getJobDAO();
-            // TODO: do the following in a single call
-            jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId); //remove the old job
-            jdao.createJob(
-                    JobType.RESERVE_ACCEPT,
-                    reservationId,
-                    Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
-            );
-        }
-
-        return ok(detailsPage(reservation));
     }
 
     public static class RemarksData {
@@ -575,7 +520,7 @@ public class Drives extends Controller {
      * @param searchString A string witth form field1:value1,field2:value2 representing the fields to filter on
      * @return A partial page with a table of cars of the corresponding page (only available to car_user+)
      */
-    @AllowRoles({UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result showDrivesAdminPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -597,6 +542,78 @@ public class Drives extends Controller {
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
         return ok(drivespage.render(user.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+    }
+
+    /**
+     * Show the page that allows shortening of reservations
+     * @param reservationId
+     * @return
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result shortenReservation (int reservationId) {
+        ReservationHeader reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationHeader(reservationId);
+        LocalDateTime from = reservation.getFrom();
+        LocalDateTime until = reservation.getUntil();
+        return ok(shorten.render(
+                reservationId,
+                Form.form(ReservationData.class).fill(new ReservationData().populate(from, until)),
+                from,
+                until
+        ));
+    }
+
+    /**
+     * Process the page that allows shortening of reservations
+     * @param reservationId
+     * @return
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result shortenReservationPost (int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        ReservationHeader reservation = dao.getReservationHeader(reservationId);
+        LocalDateTime from = reservation.getFrom();
+        LocalDateTime until = reservation.getUntil();
+        ReservationStatus status = reservation.getStatus();
+
+        Form<ReservationData> form = Form.form(ReservationData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(shorten.render(reservationId, form, from, until));
+        }
+
+        ReservationData data = form.get();
+        if (data.from.isBefore(from)) {
+            form.reject("from", "Periode mag alleen ingekort worden");
+        }
+        if (data.until.isAfter(until)) {
+            form.reject("until", "Periode mag alleen ingekort worden");
+        }
+        if (form.hasErrors()) {
+            return badRequest(shorten.render(reservationId, form, from, until));
+        }
+
+        if ( (CurrentUser.is(reservation.getUserId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
+                        && (status ==  ReservationStatus.ACCEPTED || status == ReservationStatus.REQUEST)
+        ) {
+            dao.updateReservationTime(reservationId, data.from, data.until);
+            if (status == ReservationStatus.REQUEST) {
+                // Remove old reservation auto accept and add new
+                JobDAO jdao = context.getJobDAO();
+                // TODO: do the following in a single call
+                jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId); //remove the old job
+                jdao.createJob(
+                        JobType.RESERVE_ACCEPT,
+                        reservationId,
+                        Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
+                );
+            }
+            return redirect(routes.Drives.details(reservationId));
+        } else {
+            // this means that somebody is hacking?
+            return badRequest();
+        }
     }
 
 }
