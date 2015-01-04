@@ -1,4 +1,4 @@
-@* smallProfile.scala.html
+@* reservationAcceptPanel.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,23 +27,18 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User)
+@(reservationId: Int)
 
-@* Left column in a profile page *@
-
-<div class="col-md-4">
-    @panel(){
-    <div class="col-xs-12">
-        <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-        <h3>@user.getFullName</h3>
-        <dl>  @* not dl-horizontal because this is too wide *@
-            <dt>Email</dt>
-            <dd>@emaillink(user.getEmail)</a></dd>
-            <dt>Telefoon (vast)</dt>
-            <dd>@phonelink(user.getPhone)</dd>
-            <dt>GSM</dt>
-            <dd>@phonelink(user.getCellphone)</dd>
-        </dl>
-    </div>
+<!-- /row -->
+@panel("Goed- of afkeuren reservatie", "fa-pencil"){
+    @helper.form(routes.Drives.setReservationStatus(reservationId)) {
+        <div class="col-xs-12 form-group">
+            <label for="remarks">Reden voor de weigering / opmerkingen bij de goedkeuring</label>
+            <textarea id="remarks" name="remarks" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="col-sm-6 col-xs-6">
+            <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
+            <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
+        </div>
     }
-</div>
+}

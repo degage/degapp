@@ -1,0 +1,108 @@
+@* driveDetailsAsLoaner.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(infoForm: Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
+car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form[Drives.RemarksData])
+@import db.CurrentUser
+
+@* only called when user is not the owner of the car and also not a reservation admin *@
+
+@scripts = {
+    @js.datetimepicker()
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/driveDetails.js")'></script>
+    <script>
+        determineReservationDates(
+            "@Utils.toString(reservation.getFrom)",
+            "@Utils.toString(reservation.getUntil)"
+        );
+    </script>
+}
+@stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
+
+    @panel("Geselecteerde rit", "fa-bar-chart-o"){
+        <div class="col-sm-4">
+            <strong>Autonaam:</strong> @car.getName
+        </div>
+        <div class="col-sm-4">
+            <strong>Merk:</strong> @car.getBrand
+        </div>
+        <div class="col-sm-4">
+            <strong>Type:</strong> @car.getType
+        </div>
+        <div class="col-sm-4">
+            <strong>Status:</strong> @reservation.getStatus
+        </div>
+        <div class="col-sm-4">
+            <strong>Reservatie van:</strong> @Utils.toLocalizedString(reservation.getFrom)
+        </div>
+        <div class="col-sm-4">
+            <strong>Reservatie tot:</strong> @Utils.toLocalizedString(reservation.getUntil)
+        </div>
+        <div class="col-sm-12">
+            <strong>Commentaar:</strong> @reservation.getMessage
+        </div>
+
+        <!-- loaner specific content -->
+        @driveDetailsLoaner(reservation)
+    }
+
+    @panel("Verdere informatie", "fa-bar-chart-o"){
+        <div class="col-lg-6">
+            <div class="well">
+                <strong>Eigenaar</strong>
+                <p>@userInfo(owner,reservation.getStatus)</p>
+            </div>
+        </div>
+
+        @previousnext(previousLoaner, nextLoaner, reservation.getStatus)
+
+        <!-- Both loaner and owner can edit this -->
+        @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
+            @views.html.drives.driveInfo(infoForm, reservation, false)
+        }
+        @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
+            <div id="showEnv" class="@if(infoForm.hasErrors){hidden}">
+                <div class="well">
+                    <div class="col-sm-4">
+                        <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartKm
+                    </div>
+                    <div class="col-sm-4">
+                        <strong>Kilometerstand na rit:</strong> @driveInfo.getEndKm
+                    </div>
+                    <div class="col-sm-4">
+                        <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
+                    </div>
+                </div>
+            </div>
+            <div id="adjustEnv" class="@if(!infoForm.hasErrors){hidden}">
+                @views.html.drives.driveInfo(infoForm, reservation, true)
+            </div>
+        }
+    }
+}

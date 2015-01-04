@@ -1,4 +1,4 @@
-@* driveDetailsOwner.scala.html
+@* phonelink.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,23 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservationId: Int, ownerId: Int)
+@(phone: String)
 
-<!-- /row -->
-@panel("Goed- of afkeuren (als eigenaar van de auto)", "fa-pencil"){
-    @if(db.CurrentUser isNot ownerId) {
-        <div class="alert alert-warning alert-dismissable">
-            Pas op! Je bent niet de eigenaar, maar ziet onderstaande knoppen toch omdat je admin bent!
-        </div>
-    }
-    @helper.form(routes.Drives.setReservationStatus(reservationId)) {
-        <div class="col-xs-12 form-group">
-            <label for="remarks">Reden voor de weigering / opmerkingen bij de goedkeuring</label>
-            <textarea id="remarks" name="remarks" class="form-control" rows="3"></textarea>
-        </div>
-        <div class="col-sm-6 col-xs-6">
-            <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-            <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
-        </div>
-    }
+@if(phone == null || phone.trim.isEmpty) {
+    (onbekend)
+} else {
+    <a href="tel:@phone">@phone</a>
 }

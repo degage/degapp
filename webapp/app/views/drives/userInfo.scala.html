@@ -1,4 +1,4 @@
-@* smallProfile.scala.html
+@* userInfo.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,23 +27,24 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User)
+@(user: User, status: ReservationStatus)
 
-@* Left column in a profile page *@
+@* hint: use ReservationStatus.FINISHED to force dispay *@
 
-<div class="col-md-4">
-    @panel(){
-    <div class="col-xs-12">
-        <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-        <h3>@user.getFullName</h3>
-        <dl>  @* not dl-horizontal because this is too wide *@
-            <dt>Email</dt>
-            <dd>@emaillink(user.getEmail)</a></dd>
-            <dt>Telefoon (vast)</dt>
-            <dd>@phonelink(user.getPhone)</dd>
-            <dt>GSM</dt>
-            <dd>@phonelink(user.getCellphone)</dd>
-        </dl>
-    </div>
+@if(
+    status != ReservationStatus.REFUSED &&
+    status != ReservationStatus.REQUEST &&
+    status != ReservationStatus.CANCELLED
+) {
+    <strong>Naam:</strong> @user.getFullName<br />
+    <strong>E-mail:</strong> @emaillink(user.getEmail) <br />
+    <strong>Tel:</strong> @phonelink(user.getPhone) <br />
+    <strong>GSM:</strong> @phonelink(user.getCellphone)
+} else {
+    @if(status == ReservationStatus.REFUSED || status == ReservationStatus.CANCELLED) {
+        <i class="fa fa-info"></i>: Deze informatie is niet beschikbaar.
+    } else {
+        <i class="fa fa-info"></i>: Deze informatie is pas beschikbaar na goedkeuring.
     }
-</div>
+}
+

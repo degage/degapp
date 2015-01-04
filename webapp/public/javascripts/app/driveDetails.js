@@ -1,6 +1,9 @@
 /**
  * Created by Benjamin on 05/04/2014.
  */
+
+// only used in driveDetailsLoaner
+
 function setAdjustEnvironment() {
     $('#fromadjust').removeClass('hidden');
     $('#fromdetails').addClass('hidden');
@@ -19,6 +22,22 @@ function hideAdjustEnvironment() {
     $('#submit').addClass('hidden');
     $('#adjust').text('Reservatie inkorten');
     $('#annulateReservation').removeClass('hidden');
+}
+
+function determineReservationDates(fromString,untilString) {
+    var from = new Date(fromString);
+    var correctedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
+            from.getMinutes(), 0);
+    var adjustedFrom = new Date(from.getFullYear(), from.getMonth(), from.getDate(), from.getHours(),
+            from.getMinutes(), 0);
+    adjustedFrom.setMinutes(adjustedFrom.getMinutes() + 5);
+
+    var until = new Date(untilString);
+    var correctedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
+            until.getMinutes(), 0);
+    var adjustedUntil = new Date(until.getFullYear(), until.getMonth(), until.getDate(), until.getHours(),
+            until.getMinutes(), 0);
+    adjustedUntil.setMinutes(adjustedUntil.getMinutes() - 5);
 }
 
 $(document).ready(function() {

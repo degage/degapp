@@ -47,10 +47,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
-import views.html.drives.driveDetails;
-import views.html.drives.drives;
-import views.html.drives.drivesAdmin;
-import views.html.drives.drivespage;
+import views.html.drives.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -161,12 +158,7 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result details(int reservationId) {
-        Html result = detailsPage(reservationId);
-        if (result != null) {
-            return ok(result);
-        } else {
-            return redirect(routes.Drives.index("ACCEPTED"));
-        }
+        return detailsAux(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId));
     }
 
     private static Result detailsAux(Reservation reservation) {
@@ -176,10 +168,6 @@ public class Drives extends Controller {
         } else {
             return redirect(routes.Drives.index("ACCEPTED"));
         }
-    }
-
-    private static Html detailsPage(int reservationId) {
-        return detailsPage(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId)); // TODO: refactor
     }
 
     /**
@@ -201,11 +189,8 @@ public class Drives extends Controller {
             return null;
         }
         User owner = udao.getUser(car.getOwner().getId());
-        if (owner == null) {
-            flash("danger", "De reservatie bevat ongeldige gegevens");
-            return null;
-        }
-        if (CurrentUser.isNot(reservation.getUser().getId()) && !context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
+        if (CurrentUser.isNot(reservation.getUser().getId())
+                && CurrentUser.isNot(owner.getId())
                 && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
@@ -231,74 +216,27 @@ public class Drives extends Controller {
         if (driveInfo != null) {
             model.populate(driveInfo);
         }
-        return driveDetails.render(
-                new Form<>(InfoModel.class).fill(model),
-                reservation, driveInfo, car, owner, loaner,
-                previousLoaner, nextLoaner, Form.form(RemarksData.class)
-        );
-    }
 
-    /**
-     * Private method returning the html page with the details of a drive
-     * - an owner can approve or reject reservations of his car on this page
-     * - a loaner can adjust his reservation
-     * - details about the drive will be requested when the drive is finished
-     * - the owner has to approve the details provided by the loaner
-     *
-     * @param reservationId the id of the reservation/drive
-     * @param detailsForm   Form allowing the loaner to provided details about the drive
-     * @return the html page
-     */
-    // should be used with an injected context only
-    private static Html detailsPageOld(int reservationId, Form<InfoModel> detailsForm) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO rdao = context.getReservationDAO();
-        UserDAO udao = context.getUserDAO();
-        CarDAO cdao = context.getCarDAO();
-        CarRideDAO ddao = context.getCarRideDAO();
-        Reservation reservation = rdao.getReservation(reservationId);
-        if (reservation == null) {
-            flash("danger", "De opgegeven reservatie is onbestaand");
-            return null;
-        }
-        User loaner = udao.getUser(reservation.getUser().getId());
-        Car car = cdao.getCar(reservation.getCar().getId());
-        if (car == null || loaner == null) {
-            flash("danger", "De reservatie bevat ongeldige gegevens");
-            return null;
-        }
-        User owner = udao.getUser(car.getOwner().getId());
-        if (owner == null) {
-            flash("danger", "De reservatie bevat ongeldige gegevens");
-            return null;
-        }
-        if (CurrentUser.isNot(reservation.getUser().getId()) && !context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
-                && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
-            return null;
-        }
-        CarRide driveInfo = null;
-        if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus() == ReservationStatus.FINISHED)
-            driveInfo = ddao.getCarRide(reservationId);
 
-        User previousLoaner = null;
-        User nextLoaner = null;
-        if (reservation.getStatus() == ReservationStatus.ACCEPTED) {
-            Reservation nextReservation = rdao.getNextReservation(reservationId);
-            if (nextReservation != null) {
-                nextLoaner = udao.getUser(nextReservation.getUser().getId()); // TODO: only phones needed
-            }
-            Reservation previousReservation = rdao.getPreviousReservation(reservationId);
-            if (previousReservation != null) {
-                previousLoaner = udao.getUser(previousReservation.getUser().getId()); // TODO: only phones needed
-            }
+        if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+            return driveDetailsAsAdmin.render(
+                    new Form<>(InfoModel.class).fill(model),
+                    reservation, driveInfo, car, owner, loaner,
+                    previousLoaner, nextLoaner, Form.form(RemarksData.class)
+            );
+        } else if (CurrentUser.is(owner.getId())) {
+            return driveDetailsAsOwner.render(
+                    new Form<>(InfoModel.class).fill(model),
+                    reservation, driveInfo, car, loaner,
+                    previousLoaner, nextLoaner, Form.form(RemarksData.class)
+            );
+        } else {
+            return driveDetailsAsLoaner.render(
+                    new Form<>(InfoModel.class).fill(model),
+                    reservation, driveInfo, car, owner,
+                    previousLoaner, nextLoaner, Form.form(RemarksData.class)
+            );
         }
-
-        return driveDetails.render(
-                detailsForm,
-                reservation, driveInfo, car, owner, loaner,
-                previousLoaner, nextLoaner, Form.form(RemarksData.class)
-        );
     }
 
     /**
@@ -313,14 +251,16 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result adjustDetails(int reservationId) {
-        Form<InfoModel> detailsForm = Form.form(InfoModel.class);
-        Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
-        if (adjustForm.hasErrors())
-            return badRequest(detailsPageOld(reservationId, detailsForm));
+        // TODO: clean this up
 
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
+
+        Form<Reserve.ReservationModel> adjustForm = Form.form(Reserve.ReservationModel.class).bindFromRequest();
+        if (adjustForm.hasErrors())
+            return badRequest(detailsPage(reservation));
+
         if (reservation == null) {
             flash("danger", "Er is een fout gebeurt bij het opvragen van de rit.");
             return redirect(routes.Drives.index("ACCEPTED"));
@@ -333,7 +273,7 @@ public class Drives extends Controller {
         LocalDateTime until = adjustForm.get().getTimeUntil();
         if (from.isBefore(reservation.getFrom()) || until.isAfter(reservation.getUntil())) {
             flash("danger", "Het is niet toegestaan de reservatie te verlengen.");
-            return badRequest(detailsPageOld(reservationId, detailsForm));
+            return badRequest(detailsPage(reservation));
         }
         if (reservation.getStatus() != ReservationStatus.ACCEPTED && reservation.getStatus() != ReservationStatus.REQUEST) {
             flash("danger", "Je kan deze reservatie niet aanpassen.");
@@ -353,7 +293,7 @@ public class Drives extends Controller {
             );
         }
 
-        return ok(detailsPageOld(reservationId, detailsForm));
+        return ok(detailsPage(reservation));
     }
 
     public static class RemarksData {
@@ -457,16 +397,16 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result provideDriveInfo(int reservationId) {
-
-        Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
-        if (detailsForm.hasErrors())
-            return badRequest(detailsPageOld(reservationId, detailsForm));
-
         DataAccessContext context = DataAccess.getInjectedContext();
         CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();
-        CarDAO carDAO = context.getCarDAO();
         Reservation reservation = rdao.getReservation(reservationId);
+
+        Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
+        if (detailsForm.hasErrors())
+            return badRequest(detailsPage(reservation));
+
+        CarDAO carDAO = context.getCarDAO();
         // Test if user is authorized
         boolean isOwner = context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId());
         if (CurrentUser.isNot(reservation.getUser().getId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
@@ -516,7 +456,7 @@ public class Drives extends Controller {
         }
 
         // Commit changes
-        return ok(detailsPageOld(reservationId, detailsForm));
+        return ok(detailsPage(reservation));
     }
 
     @AllowRoles({UserRole.CAR_OWNER})
@@ -530,16 +470,16 @@ public class Drives extends Controller {
         // Test if reservation exists
         if (reservation == null) {
             detailsForm.reject("De reservatie kan niet opgevraagd worden. Gelieve de database administrator te contacteren.");
-            return badRequest(detailsPageOld(reservationId, detailsForm));
+            return badRequest(detailsPage(reservation));
         }
         if (!context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
-            return badRequest(detailsPageOld(reservationId, detailsForm));
+            return badRequest(detailsPage(reservation));
         }
         CarRide ride = dao.getCarRide(reservationId);
         if (ride == null) {
             detailsForm.reject("Er is een fout gebeurd tijdens het opslaan van de gegevens. Gelieve de database administrator te contacteren.");
-            return badRequest(detailsPageOld(reservationId, detailsForm));
+            return badRequest(detailsPage(reservation));
         }
         ride.setApprovedByOwner(true);
         Instant instant = Instant.from(reservation.getFrom());
@@ -551,7 +491,7 @@ public class Drives extends Controller {
         ride.setCost(cost);
         dao.updateCarRide(ride);
         rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
-        return ok(detailsPageOld(reservationId, detailsForm));
+        return ok(detailsPage(reservation));
     }
 
     private static BigDecimal calculateDriveCost(int distance, boolean privileged, Costs costInfo) {

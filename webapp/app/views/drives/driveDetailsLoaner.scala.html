@@ -29,7 +29,7 @@
 
 @(reservation: Reservation)
 
-@helper.form(routes.Drives.adjustDetails(reservation.getId), 'class -> "form-horizontal") {
+@helper.form(routes.Drives.adjustDetails(reservation.getId)) {
     <div class="row">
         @* TODO: use search.datetimepicker *@
         <div id="fromadjust" class="form-group hidden col-sm-10">
@@ -53,11 +53,6 @@
     <!-- row -->
     <!-- /row -->
     @if(reservation.getStatus == ReservationStatus.ACCEPTED || reservation.getStatus == ReservationStatus.REQUEST) {
-            @if(db.CurrentUser isNot reservation.getUser.getId) {
-                <div class="alert alert-warning alert-dismissable">
-                    Pas op! Je bent niet de bestuurder, maar ziet onderstaande knoppen toch omdat je admin bent!
-                </div>
-            }
         <div class="row">
             <div class="col-lg-12">
                 <button id="submit" type="submit" class="hidden btn btn-xs btn-success">Aanpassen</button>

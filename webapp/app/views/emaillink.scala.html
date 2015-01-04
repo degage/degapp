@@ -1,4 +1,4 @@
-@* smallProfile.scala.html
+@* emaillink.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,23 +27,6 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User)
+@(email: String)
 
-@* Left column in a profile page *@
-
-<div class="col-md-4">
-    @panel(){
-    <div class="col-xs-12">
-        <img src="@routes.Profile.getProfilePicture(user.getId)" alt="" class="img-responsive">
-        <h3>@user.getFullName</h3>
-        <dl>  @* not dl-horizontal because this is too wide *@
-            <dt>Email</dt>
-            <dd>@emaillink(user.getEmail)</a></dd>
-            <dt>Telefoon (vast)</dt>
-            <dd>@phonelink(user.getPhone)</dd>
-            <dt>GSM</dt>
-            <dd>@phonelink(user.getCellphone)</dd>
-        </dl>
-    </div>
-    }
-</div>
+<a href="mailto:@email">@email</a>
