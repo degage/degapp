@@ -142,6 +142,24 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
         }
     }
 
+    private LazyStatement updateCarRideKmStatement = new LazyStatement(
+            "UPDATE carrides SET car_ride_start_km = ? , car_ride_end_km = ? WHERE car_ride_car_reservation_id = ?"
+    );
+
+    @Override
+    public void updateCarRideKm(int rideId, int startKm, int endKm) throws DataAccessException {
+        try {
+            PreparedStatement ps = updateCarRideKmStatement.value();
+            ps.setInt(1, startKm);
+            ps.setInt(2, endKm);
+            ps.setInt(3,rideId);
+
+            ps.executeUpdate();
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update car ride", e);
+        }
+    }
+
     private LazyStatement getEndPeriodStatement = new LazyStatement (
             "UPDATE carrides" +
                     "  INNER JOIN reservations ON car_ride_car_reservation_id = reservation_id " +

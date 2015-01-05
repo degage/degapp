@@ -1,0 +1,23 @@
+@*
+
+*@
+
+@(reservation: Reservation, driveInfo: CarRide = null)
+
+@panel("Rit- en reservatiedetails", "fa-bar-chart-o"){
+    <div class="col-sx-12">
+        <dl class="dl-horizontal">
+            <dt>Status</dt><dd><i>@reservation.getStatus</i></dd>
+            <dt>Periode</dt>
+            <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
+            <dt>Auto</dt>
+            <dd>@reservation.getCar.getName</dd>
+        @if(driveInfo != null) {
+                <dt>Kilometerstanden</dt>
+                <dd>@driveInfo.getStartKm — @driveInfo.getEndKm</dd>
+                <dt>Schade?</dt>
+                <dd>@if(driveInfo.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
+        }
+        </dl>
+    </div>
+}

@@ -71,6 +71,50 @@ import java.util.List;
 public class Drives extends Controller {
 
     /**
+     * Method: GET
+     *
+     * @param status The status identifying the tab that should be shown
+     * @return the drives index page containing all (pending) reservations of the user or for his car
+     * starting with the tab containing the reservations with the specified status active.
+     */
+    @AllowRoles
+    @InjectContext
+    public static Result index(String status) {
+        return ok(drives.render(ReservationStatus.valueOf(status)));
+    }
+
+    /**
+     * Method: GET
+     *
+     * @return the html page of the drives page only visible for admins
+     */
+    @AllowRoles({UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result drivesAdmin() {
+        // TODO: join with drives and keep history to redirect to the correct page and use the correct breadcrumbs
+        return ok(drivesAdmin.render());
+    }
+
+    /**
+     * Method: GET
+     * <p>
+     * Render the detailpage of a drive/reservation.
+     *
+     * @param reservationId the id of the reservation of which the details are requested
+     * @return the detail page of specific drive/reservation
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
+    @InjectContext
+    public static Result details(int reservationId) {
+        Html result = detailsPage(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId));
+        if (result != null) {
+            return ok(result);
+        } else {
+            return redirect(routes.Drives.index("ACCEPTED"));
+        }
+    }
+
+        /**
      * Class implementing a model wrapped in a form.
      * This model is used during the form submission when an loaner provides information about
      * the drive.
@@ -124,49 +168,7 @@ public class Drives extends Controller {
 
     }
 
-    /**
-     * Method: GET
-     *
-     * @param status The status identifying the tab that should be shown
-     * @return the drives index page containing all (pending) reservations of the user or for his car
-     * starting with the tab containing the reservations with the specified status active.
-     */
-    @AllowRoles
-    @InjectContext
-    public static Result index(String status) {
-        return ok(drives.render(ReservationStatus.valueOf(status)));
-    }
 
-    /**
-     * Method: GET
-     *
-     * @return the html page of the drives page only visible for admins
-     */
-    @AllowRoles({UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result drivesAdmin() {
-        // TODO: join with drives and keep history to redirect to the correct page and use the correct breadcrumbs
-        return ok(drivesAdmin.render());
-    }
-
-    /**
-     * Method: GET
-     * <p>
-     * Render the detailpage of a drive/reservation.
-     *
-     * @param reservationId the id of the reservation of which the details are requested
-     * @return the detail page of specific drive/reservation
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
-    @InjectContext
-    public static Result details(int reservationId) {
-        Html result = detailsPage(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId));
-        if (result != null) {
-            return ok(result);
-        } else {
-            return redirect(routes.Drives.index("ACCEPTED"));
-        }
-    }
 
     /**
      * Create a details page for the given reservation. Form fields
@@ -613,5 +615,103 @@ public class Drives extends Controller {
             return badRequest();
         }
     }
+
+    public static class JourneyData {
+        @Constraints.Required
+        @Constraints.Min(0)
+        public int startKm;
+
+        @Constraints.Required
+        @Constraints.Min(0)
+        public int endKm;
+
+        public boolean damaged = false;
+
+        @Constraints.Required
+        @Constraints.Min(0)
+        public int numberOfRefuels;
+
+        public List<ValidationError> validate() {
+            if (startKm > endKm) {
+                String message = "De kilometerstand na de rit moet groter zijn dan vóór de rit";
+                return Arrays.asList(
+                        new ValidationError("startKm", message), new ValidationError("endKm", message)
+                );
+            } else {
+                return null;
+            }
+        }
+
+    }
+
+    private static boolean newJourneyInfoAllowed(Reservation reservation) {
+        return reservation.getStatus() == ReservationStatus.REQUEST_DETAILS &&
+                (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
+                        CurrentUser.is(reservation.getUser().getId()) ||
+                        CurrentUser.is(reservation.getCar().getOwner().getId())); // TODO: not always filled in
+    }
+
+    /**
+     * Allows first time input of journey info
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result newJourneyInfo(int reservationId) {
+        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId);
+        if (newJourneyInfoAllowed(reservation)) {
+            return ok(newjourney.render(
+                    Form.form(JourneyData.class).fill(new JourneyData()), // needs initial value damaged=false
+                    reservation
+            ));
+        } else {
+            // not allowed
+            return badRequest(); // should not happen
+        }
+    }
+
+    /**
+     * Processes result from {@Link #newJourneyInfo}
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result newJourneyInfoPost(int reservationId) {
+        Form<JourneyData> form = Form.form(JourneyData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO rdao = context.getReservationDAO();
+        Reservation reservation = rdao.getReservation(reservationId);
+        if (form.hasErrors()) {
+            return badRequest(newjourney.render(form,reservation));
+        } else if (newJourneyInfoAllowed(reservation)) {
+            // TODO: refactor this
+            JourneyData data = form.get();
+            CarRideDAO dao = context.getCarRideDAO();
+            CarRide ride = dao.getCarRide(reservationId);
+            if (ride == null) {
+                int numberOfRefuels = data.numberOfRefuels;
+                boolean damaged = data.damaged;
+                ride = context.getCarRideDAO().createCarRide(reservation, data.startKm, data.endKm, damaged, numberOfRefuels);
+                if (numberOfRefuels > 0) {
+                    RefuelDAO refuelDAO = context.getRefuelDAO();
+                    for (int i = 0; i < numberOfRefuels; i++) {
+                        refuelDAO.createRefuel(ride); // TODO: why is this? Delegate to database module?
+                    }
+                }
+                if (damaged) {
+                    context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
+                }
+                rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
+                UserHeader owner = context.getUserDAO().getUserHeader(reservation.getCar().getOwner().getId());
+                Notifier.sendReservationDetailsProvidedMail(owner, reservation);
+            } else {
+                dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
+            }
+
+            return redirect(routes.Drives.details(reservationId));
+        } else {
+            // not allowed
+            return badRequest(); // hacker?
+        }
+    }
+
 
 }

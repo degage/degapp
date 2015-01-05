@@ -43,6 +43,7 @@ public interface CarRideDAO {
     public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage, boolean damaged, int refueling) throws DataAccessException;
     public CarRide getCarRide(int id) throws DataAccessException;
     public void updateCarRide(CarRide carRide) throws DataAccessException;
+    public void updateCarRideKm(int rideId, int startKm, int endKm) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
     public List<CarRide> getBillRidesForLoaner(LocalDate date, int user) throws DataAccessException;
     public List<CarRide> getBillRidesForCar(LocalDate date, int car) throws DataAccessException;
