@@ -170,6 +170,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
+    // TODO: list actual fields
     private LazyStatement getReservationStatement = new LazyStatement (
             "SELECT * FROM reservations" +
                     " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
@@ -185,6 +186,34 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if(rs.next()) {
                     return populateReservation(rs);
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to get reservation", e);
+        }
+    }
+
+    // TODO: list actual fields
+    private LazyStatement getReservationExtendedStatement = new LazyStatement (
+            "SELECT * FROM reservations" +
+                    " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
+                    " INNER JOIN users ON reservations.reservation_user_id = users.user_id" +
+                    " JOIN addresses ON car_location = address_id" +
+                    " WHERE reservation_id=?"
+    );
+
+    @Override
+    public Reservation getReservationExtended (int id) throws DataAccessException {
+        try {
+            PreparedStatement ps = getReservationExtendedStatement.value();
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    Reservation reservation = populateReservation(rs);
+                    reservation.getCar().setLocation(JDBCAddressDAO.populateAddress(rs));
+                    return reservation;
                 } else {
                     return null;
                 }

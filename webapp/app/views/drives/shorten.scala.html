@@ -27,21 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservationId: Int, form: Form[Reserve.ReservationData], from: java.time.LocalDateTime, until: java.time.LocalDateTime)
+@(form: Form[Reserve.ReservationData], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Drives.index())
-    @breadcrumb("Details",routes.Drives.details(reservationId)) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Drives.details(reservation.getId)) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Reservatieperiode inkorten", extrabc=extrabc, scripts=js.datetimepicker() ) {
 
+    @detailsPanel(reservation.getCar(), reservation)
+
     @panel("Aanpassen", "fa-calendar") {
-        @helper.form(routes.Drives.shortenReservationPost(reservationId)) {
-            <div class="col-xs-12">
-                <p><strong>Oorspronkelijke reservatie van:</strong> @Utils.toLocalizedString(from)
-                <strong>tot:</strong> @Utils.toLocalizedString(until).</p>
-            </div>
+        @helper.form(routes.Drives.shortenReservationPost(reservation.getId)) {
             @std.datetimepicker(form("from"),"Begin ingekorte reservatie", css="col-md-6",minuteStep=15)
             @std.datetimepicker(form("until"),"Einde ingekorte reservatie", css="col-md-6",minuteStep=15)
             @std.submitButton("Periode inkorten")

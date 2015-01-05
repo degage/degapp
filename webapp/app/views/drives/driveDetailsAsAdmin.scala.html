@@ -49,11 +49,12 @@ car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User, rem
 
     <!-- owner specific content -->
     @panel("Acties", "fa-pencil") {
-        @if(reservation.getStatus == ReservationStatus.REQUEST) {
-            @reservationAcceptForm(reservation.getId) {
+        <div class="col-xs-12">
+            @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                <a class="btn btn-xs btn-primary" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
                 @updateButtons(reservation.getId,reservation.getStatus)
             }
-        }
+        </div>
     }
 
     @panel("Verdere informatie", "fa-bar-chart-o"){

@@ -77,13 +77,13 @@
                 <td>
                     <div class="btn-group btn-group-xs">
                             @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                <a class="btn btn-danger btn-small" href="@routes.Drives.details(reservation.getId)">ritdetails toevoegen</a>
+                                <a class="btn btn-danger" href="@routes.Drives.details(reservation.getId)">Ritdetails toevoegen ...</a>
                             } else {
                                 @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
                                          reservation.getUser.getId != userId) {
-                                   <a class="btn btn-warning btn-small" href="@routes.Drives.details(reservation.getId)">goed- of afkeuren</a>
+                                   <a class="btn btn-warning" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
                                 } else {
-                                   <a class="btn btn-primary btn-small" href="@routes.Drives.details(reservation.getId)">details</a>
+                                   <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">Details ...</a>
                                 }
                             }
                     </div>

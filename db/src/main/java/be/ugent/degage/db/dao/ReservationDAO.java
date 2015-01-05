@@ -49,6 +49,11 @@ public interface ReservationDAO {
 
     public Reservation getReservation (int id) throws DataAccessException;
 
+    /**
+     * Same as {@link #getReservation} but includes car location
+     */
+    public Reservation getReservationExtended (int id) throws DataAccessException;
+
     public ReservationHeader getReservationHeader (int id) throws DataAccessException;
 
     public void updateReservationStatus (int reservationId, ReservationStatus status, String message);

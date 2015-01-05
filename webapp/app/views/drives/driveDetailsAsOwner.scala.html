@@ -48,13 +48,14 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
     @detailsPanel(car, reservation, driveInfo)
 
     @panel("Acties", "fa-pencil") {
-        @if(reservation.getStatus == ReservationStatus.REQUEST) {
-            @reservationAcceptForm(reservation.getId) {
+        <div class="col-xs-12">
+            @if(reservation.getStatus == ReservationStatus.REQUEST) {
+                <a class="btn btn-xs btn-primary" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
                 @if(CurrentUser is loaner.getId) {
                     @updateButtons(reservation.getId,reservation.getStatus)
                 }
             }
-        }
+        </div>
     }
 
     <!-- owner specific content -->

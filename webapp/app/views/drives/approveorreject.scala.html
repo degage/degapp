@@ -1,4 +1,4 @@
-@* reservationAcceptPanel.scala.html
+@* approveorreject.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,17 +27,24 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservationId: Int)(extraButtons: => Html = Html(""))
+@(form: Form[Drives.RemarksData], reservation: Reservation)
 
-<!-- /row -->
-    @helper.form(routes.Drives.setReservationStatus(reservationId)) {
-        <div class="col-xs-12 form-group">
-            <label for="remarks">Reden voor de weigering / opmerkingen bij de goedkeuring</label>
-            <textarea id="remarks" name="remarks" class="form-control" rows="3"></textarea>
-        </div>
-        <div class="col-sm-6 col-xs-6">
-            <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-            <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
-            @extraButtons
-        </div>
+@extrabc = {
+    @breadcrumb("Ritten",routes.Drives.index())
+    @breadcrumb("Details",routes.Drives.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+}
+
+@stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
+
+    @detailsPanel(reservation.getCar(), reservation)
+
+    @panel("Aanpassen", "fa-pencil") {
+        @helper.form(routes.Drives.approveOrRejectPost(reservation.getId())) {
+            @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
+            <div class="col-sm-6 col-xs-6">
+                <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
+                <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
+            </div>
+        }
     }
+}

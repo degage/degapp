@@ -252,6 +252,16 @@ public class Drives extends Controller {
     }
 
     /**
+     * Show the page that allows approval or rejection of a reservation by the owner
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result approveOrReject(int reservationId) {
+        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+        return ok(approveorreject.render(Form.form(RemarksData.class), reservation));
+    }
+
+    /**
      * Method: POST
      * <p>
      * Called when a reservation of a car is refused/accepted by the owner.
@@ -261,19 +271,19 @@ public class Drives extends Controller {
      */
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
-    public static Result setReservationStatus(int reservationId) {
+    public static Result approveOrRejectPost(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        Reservation reservation = dao.getReservationExtended(reservationId);
         Form<RemarksData> form =  Form.form(RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(); // TODO
+            return badRequest(approveorreject.render(form, reservation));
         } else {
             RemarksData data = form.get(); // the form does not contain errors
             ReservationStatus status = ReservationStatus.valueOf(data.status);
             String remarks = data.remarks;
 
             if (status == ReservationStatus.REFUSED || status == ReservationStatus.ACCEPTED) {
-                DataAccessContext context = DataAccess.getInjectedContext();
-                ReservationDAO dao = context.getReservationDAO();
-                Reservation reservation = dao.getReservation(reservationId);
                 if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
                     // extra checks when not reservation admin
                     if (!context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
@@ -546,14 +556,12 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result shortenReservation (int reservationId) {
-        ReservationHeader reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationHeader(reservationId);
-        LocalDateTime from = reservation.getFrom();
-        LocalDateTime until = reservation.getUntil();
+        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
         return ok(shorten.render(
-                reservationId,
-                Form.form(ReservationData.class).fill(new ReservationData().populate(from, until)),
-                from,
-                until
+                Form.form(ReservationData.class).fill(
+                        new ReservationData().populate(reservation.getFrom(), reservation.getUntil())
+                ),
+                reservation
         ));
     }
 
@@ -565,28 +573,26 @@ public class Drives extends Controller {
     public static Result shortenReservationPost (int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
-        ReservationHeader reservation = dao.getReservationHeader(reservationId);
-        LocalDateTime from = reservation.getFrom();
-        LocalDateTime until = reservation.getUntil();
+        Reservation reservation = dao.getReservationExtended(reservationId);
         ReservationStatus status = reservation.getStatus();
 
         Form<ReservationData> form = Form.form(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(shorten.render(reservationId, form, from, until));
+            return badRequest(shorten.render(form, reservation));
         }
 
         ReservationData data = form.get();
-        if (data.from.isBefore(from)) {
+        if (data.from.isBefore(reservation.getFrom())) {
             form.reject("from", "Periode mag alleen ingekort worden");
         }
-        if (data.until.isAfter(until)) {
+        if (data.until.isAfter(reservation.getUntil())) {
             form.reject("until", "Periode mag alleen ingekort worden");
         }
         if (form.hasErrors()) {
-            return badRequest(shorten.render(reservationId, form, from, until));
+            return badRequest(shorten.render(form, reservation));
         }
 
-        if ( (CurrentUser.is(reservation.getUserId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
+        if ( (CurrentUser.is(reservation.getUser().getId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
                         && (status ==  ReservationStatus.ACCEPTED || status == ReservationStatus.REQUEST)
         ) {
             dao.updateReservationTime(reservationId, data.from, data.until);

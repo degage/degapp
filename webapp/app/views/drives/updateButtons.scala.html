@@ -30,7 +30,7 @@
 @(id: Int, status: ReservationStatus)
 
 @if(status == ReservationStatus.ACCEPTED || status == ReservationStatus.REQUEST) {
-        <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(id)">Reservatieduur inkorten ...</a>
-        <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(id)">Reservatie annuleren</a>
+    <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(id)">Reservatieduur inkorten ...</a>
+    <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(id)">Reservatie annuleren</a>
 }
 
