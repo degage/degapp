@@ -45,50 +45,26 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
 }
 @stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
 
-    @panel("Geselecteerde rit", "fa-bar-chart-o"){
-        <div class="col-sm-4">
-            <strong>Autonaam:</strong> @car.getName
-        </div>
-        <div class="col-sm-4">
-            <strong>Merk:</strong> @car.getBrand
-        </div>
-        <div class="col-sm-4">
-            <strong>Type:</strong> @car.getType
-        </div>
-        <div class="col-sm-4">
-            <strong>Status:</strong> @reservation.getStatus
-        </div>
-        <div class="col-sm-4">
-            <strong>Reservatie van:</strong> @Utils.toLocalizedString(reservation.getFrom)
-        </div>
-        <div class="col-sm-4">
-            <strong>Reservatie tot:</strong> @Utils.toLocalizedString(reservation.getUntil)
-        </div>
-        <div class="col-sm-12">
-            <strong>Commentaar:</strong> @reservation.getMessage
-        </div>
-        <!-- loaner specific content -->
-        @if((CurrentUser is loaner.getId)) {
-            @updateButtons(reservation.getId,reservation.getStatus)
+    @detailsPanel(car, reservation, driveInfo)
+
+    @panel("Acties", "fa-pencil") {
+        @if(reservation.getStatus == ReservationStatus.REQUEST) {
+            @reservationAcceptForm(reservation.getId) {
+                @if(CurrentUser is loaner.getId) {
+                    @updateButtons(reservation.getId,reservation.getStatus)
+                }
+            }
         }
     }
 
     <!-- owner specific content -->
-    @if(reservation.getStatus == ReservationStatus.REQUEST) {
-        @reservationAcceptPanel(reservation.getId)
-    }
 
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
             <!-- well -->
             <div class="well">
-                <strong>Ontlener</strong><hr />
-                <p>
-                    <strong>Naam:</strong> <a href="@routes.Profile.index(loaner.getId)">@loaner.getLastName, @loaner.getFirstName</a><br />
-                    <strong>E-mail:</strong> @loaner.getEmail <br />
-                    <strong>Tel:</strong> @if(loaner.getPhone != null && !loaner.getPhone.isEmpty){ @loaner.getPhone } else { onbekend } <br />
-                    <strong>GSM:</strong> @if(loaner.getCellphone != null && !loaner.getCellphone.isEmpty){ @loaner.getCellphone } else {onbekend }
-                </p>
+                <strong>Ontlener</strong><br>
+                @userInfo(loaner)
             </div>
         </div>
 
@@ -98,19 +74,10 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
         @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
             @views.html.drives.driveInfo(infoForm, reservation, false)
         }
-        @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
+        @if(driveInfo != null) {
             <div id="showEnv" class="@if(infoForm.hasErrors){hidden}">
                 <div class="well">
-                    <div class="col-sm-4">
-                        <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartKm
-                    </div>
-                    <div class="col-sm-4">
-                        <strong>Kilometerstand na rit:</strong> @driveInfo.getEndKm
-                    </div>
-                    <div class="col-sm-4">
-                        <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
-                    </div>
-                    @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) {
+                     @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) {
                         <div class="col-sm-4 btn-group btn-group-xs">
                             <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
                             <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>

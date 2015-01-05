@@ -160,11 +160,7 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result details(int reservationId) {
-        return detailsAux(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId));
-    }
-
-    private static Result detailsAux(Reservation reservation) {
-        Html result = detailsPage(reservation);
+        Html result = detailsPage(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId));
         if (result != null) {
             return ok(result);
         } else {
@@ -286,7 +282,7 @@ public class Drives extends Controller {
                         return redirect(routes.Drives.details(reservationId));
                     }
                 }
-                dao.updateReservationStatus(reservationId, status);
+                dao.updateReservationStatus(reservationId, status, remarks);
 
                 // Unschedule the job for auto accept
                 context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
@@ -296,7 +292,7 @@ public class Drives extends Controller {
                 } else {
                     Notifier.sendReservationApprovedByOwnerMail(DataAccess.getInjectedContext(), remarks, reservation);
                 }
-                return detailsAux(reservation);
+                return redirect(routes.Drives.details(reservationId));
 
             } else { // other cases only happen when somebody is hacking
                 return badRequest();
@@ -317,10 +313,10 @@ public class Drives extends Controller {
     public static Result cancelReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservation(reservationId);
+        ReservationHeader reservation = dao.getReservationHeader(reservationId);
         if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
             // extra checks when not reservation admin
-            if (CurrentUser.is(reservation.getUser().getId())) {
+            if (CurrentUser.is(reservation.getUserId())) {
                 ReservationStatus status = reservation.getStatus();
                 if (status != ReservationStatus.REQUEST && status != ReservationStatus.ACCEPTED) {
                     flash("danger", "Deze reservatie kan niet meer geannuleerd worden.");
@@ -331,12 +327,12 @@ public class Drives extends Controller {
                 return redirect(routes.Drives.index("ACCEPTED"));
             }
         }
-        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
+        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED, null);
 
         // Unschedule the job for auto accept
         context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
 
-        return detailsAux(reservation);
+        return redirect(routes.Drives.details(reservationId));
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
@@ -394,9 +390,9 @@ public class Drives extends Controller {
 
         // Adjust the status of the reservation
         if (isOwner) { // TODO: bug? isOwner is always true at this point
-            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
         } else {
-            rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
             Notifier.sendReservationDetailsProvidedMail(carDAO.getCar(reservation.getCar().getId()).getOwner(), reservation);
         }
 
@@ -435,7 +431,7 @@ public class Drives extends Controller {
         );
         ride.setCost(cost);
         dao.updateCarRide(ride);
-        rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
+        rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
         return ok(detailsPage(reservation));
     }
 
@@ -546,8 +542,6 @@ public class Drives extends Controller {
 
     /**
      * Show the page that allows shortening of reservations
-     * @param reservationId
-     * @return
      */
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
@@ -565,8 +559,6 @@ public class Drives extends Controller {
 
     /**
      * Process the page that allows shortening of reservations
-     * @param reservationId
-     * @return
      */
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext

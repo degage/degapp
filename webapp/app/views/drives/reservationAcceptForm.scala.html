@@ -27,10 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservationId: Int)
+@(reservationId: Int)(extraButtons: => Html = Html(""))
 
 <!-- /row -->
-@panel("Goed- of afkeuren reservatie", "fa-pencil"){
     @helper.form(routes.Drives.setReservationStatus(reservationId)) {
         <div class="col-xs-12 form-group">
             <label for="remarks">Reden voor de weigering / opmerkingen bij de goedkeuring</label>
@@ -39,6 +38,6 @@
         <div class="col-sm-6 col-xs-6">
             <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
             <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
+            @extraButtons
         </div>
     }
-}

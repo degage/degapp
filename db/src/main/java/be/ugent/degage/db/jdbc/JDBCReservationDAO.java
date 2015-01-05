@@ -136,15 +136,16 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getUpdateReservationStatusStatement = new LazyStatement(
-            "UPDATE reservations SET reservation_status=?  WHERE reservation_id = ?"
+            "UPDATE reservations SET reservation_status=?, reservation_message = ?  WHERE reservation_id = ?"
     );
 
     @Override
-    public void updateReservationStatus(int reservationId, ReservationStatus status) throws DataAccessException {
+    public void updateReservationStatus(int reservationId, ReservationStatus status, String message) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateReservationStatusStatement.value();
             ps.setString(1, status.name());
-            ps.setInt(2, reservationId);
+            ps.setString(2, message);
+            ps.setInt(3, reservationId);
 
             ps.executeUpdate();
         } catch (SQLException e) {

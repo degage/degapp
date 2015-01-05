@@ -45,37 +45,18 @@ car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form
 }
 @stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
 
-    @panel("Geselecteerde rit", "fa-bar-chart-o"){
-        <div class="col-sm-4">
-            <strong>Autonaam:</strong> @car.getName
-        </div>
-        <div class="col-sm-4">
-            <strong>Merk:</strong> @car.getBrand
-        </div>
-        <div class="col-sm-4">
-            <strong>Type:</strong> @car.getType
-        </div>
-        <div class="col-sm-4">
-            <strong>Status:</strong> @reservation.getStatus
-        </div>
-        <div class="col-sm-4">
-            <strong>Reservatie van:</strong> @Utils.toLocalizedString(reservation.getFrom)
-        </div>
-        <div class="col-sm-4">
-            <strong>Reservatie tot:</strong> @Utils.toLocalizedString(reservation.getUntil)
-        </div>
-        <div class="col-sm-12">
-            <strong>Commentaar:</strong> @reservation.getMessage
-        </div>
+    @detailsPanel(car, reservation, driveInfo)
 
-        <!-- loaner specific content -->
-        @updateButtons(reservation.getId,reservation.getStatus)
+    @panel("Acties", "fa-pencil") {
+        <div class="col-xs-12">
+            @updateButtons(reservation.getId,reservation.getStatus)
+        </div>
     }
 
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
             <div class="well">
-                <strong>Eigenaar</strong>
+                <strong>Eigenaar</strong><br>
                 <p>@userInfo(owner,reservation.getStatus)</p>
             </div>
         </div>
@@ -86,20 +67,7 @@ car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form
         @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
             @views.html.drives.driveInfo(infoForm, reservation, false)
         }
-        @if((reservation.getStatus == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus == ReservationStatus.FINISHED) && driveInfo != null) {
-            <div id="showEnv" class="@if(infoForm.hasErrors){hidden}">
-                <div class="well">
-                    <div class="col-sm-4">
-                        <strong>Kilometerstand voor rit:</strong> @driveInfo.getStartKm
-                    </div>
-                    <div class="col-sm-4">
-                        <strong>Kilometerstand na rit:</strong> @driveInfo.getEndKm
-                    </div>
-                    <div class="col-sm-4">
-                        <strong>Schade: </strong> @if(driveInfo.isDamaged){Ja}else{Nee}
-                    </div>
-                </div>
-            </div>
+        @if(driveInfo != null) {
             <div id="adjustEnv" class="@if(!infoForm.hasErrors){hidden}">
                 @views.html.drives.driveInfo(infoForm, reservation, true)
             </div>

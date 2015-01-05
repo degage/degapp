@@ -30,26 +30,16 @@
 @(previousLoaner: User, nextLoaner: User, status: ReservationStatus = ReservationStatus.FINISHED)
 
 <div class="col-lg-6">
-    <div class="well">
-        <strong>Bestuurder vorige rit</strong>
-        <p>
-            @if(previousLoaner == null) {
-                Geen voorafgaande reservatie voor deze auto.
-            } else {
-                @userInfo(previousLoaner,status)
-            }
-        </p>
-    </div>
-</div>
-<div class="col-lg-6">
-    <div class="well">
-        <strong>Bestuurder volgende rit</strong>
-        <p>
-            @if(nextLoaner == null) {
-                Geen volgende reservatie voor deze auto.
-            } else {
-                @userInfo(nextLoaner,status)
-            }
-        </p>
-    </div>
+    <h4>Bestuurder vorige rit</h4>
+    @if(previousLoaner == null) {
+        <p>Geen voorafgaande reservatie voor deze auto.</p>
+    } else {
+        @userInfo(previousLoaner,status)
+    }
+    <h4>Bestuurder volgende rit</h4>
+    @if(nextLoaner == null) {
+        <p>Geen volgende reservatie voor deze auto.</p>
+    } else {
+        @userInfo(nextLoaner,status)
+    }
 </div>
