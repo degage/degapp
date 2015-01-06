@@ -33,44 +33,37 @@ car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form
 
 @* only called when user is not the owner of the car and also not a reservation admin *@
 
-@scripts = {
-    @js.datetimepicker()
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/driveDetails.js")'></script>
-    <script>
-        determineReservationDates(
-            "@Utils.toString(reservation.getFrom)",
-            "@Utils.toString(reservation.getUntil)"
-        );
-    </script>
-}
-@stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
+@stdlayout("Reservatie- en ritdetails", extrabc=breadcrumb("Ritten",routes.Drives.index())) {
 
     @detailsPanel(car, reservation, driveInfo)
 
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
-            @updateButtons(reservation.getId,reservation.getStatus)
+            @reservation.getStatus match {
+                case ReservationStatus.REQUEST | ReservationStatus.ACCEPTED => {
+                    <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
+                    <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                }
+                case ReservationStatus.REFUSED | ReservationStatus.CANCELLED => {
+                    (Geen. De reservatie is geweigerd of geannuleerd.)
+                }
+                case ReservationStatus.REQUEST_DETAILS => {
+                    <a class="btn btn-xs btn-primary" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
+                }
+                case ReservationStatus.DETAILS_PROVIDED => {
+                    (Geen. De ritdetails moeten goedgekeurd worden door de eigenaar van de auto.)
+                }
+                case ReservationStatus.FINISHED => {(Geen. De rit is volledig afgewerkt)}
+            }
         </div>
     }
 
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
-            <div class="well">
-                <strong>Eigenaar</strong><br>
-                <p>@userInfo(owner,reservation.getStatus)</p>
-            </div>
+            <h4>Eigenaar</h4>
+            @userInfo(owner)
         </div>
 
         @previousnext(previousLoaner, nextLoaner, reservation.getStatus)
-
-        <!-- Both loaner and owner can edit this -->
-        @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-            @views.html.drives.driveInfo(infoForm, reservation, false)
-        }
-        @if(driveInfo != null) {
-            <div id="adjustEnv" class="@if(!infoForm.hasErrors){hidden}">
-                @views.html.drives.driveInfo(infoForm, reservation, true)
-            </div>
-        }
     }
 }

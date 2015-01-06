@@ -47,4 +47,9 @@ public interface CarRideDAO {
     public void endPeriod() throws DataAccessException;
     public List<CarRide> getBillRidesForLoaner(LocalDate date, int user) throws DataAccessException;
     public List<CarRide> getBillRidesForCar(LocalDate date, int car) throws DataAccessException;
+
+    /**
+     * Indicate that the car ride information stored by the loaner has been approved  by the owner.
+     */
+    public void approveInfo (int id);
 }

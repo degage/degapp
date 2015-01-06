@@ -43,17 +43,24 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
         );
     </script>
 }
-@stdlayout("Ritdetails", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
+@stdlayout("Reservatie- en ritdetails (eigenaar)", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
 
     @detailsPanel(car, reservation, driveInfo)
 
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
-            @if(reservation.getStatus == ReservationStatus.REQUEST) {
-                <a class="btn btn-xs btn-primary" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
-                @if(CurrentUser is loaner.getId) {
-                    @updateButtons(reservation.getId,reservation.getStatus)
+            @reservation.getStatus match {
+                case ReservationStatus.REQUEST => {
+                    <a class="btn btn-xs btn-primary" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
+                    @if(CurrentUser is loaner.getId) {
+                        <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
+                        <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    }
                 }
+                case ReservationStatus.DETAILS_PROVIDED => {
+                    <a type="button" class="btn btn-xs btn-danger" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren ritinformatie</a>
+                }
+                case _ => {(geen)}
             }
         </div>
     }
@@ -62,11 +69,8 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
 
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
-            <!-- well -->
-            <div class="well">
-                <strong>Ontlener</strong><br>
-                @userInfo(loaner)
-            </div>
+            <h4>Ontlener</h4>
+            @userInfo(loaner)
         </div>
 
         @previousnext(previousLoaner, nextLoaner)
@@ -80,14 +84,10 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
                 <div class="well">
                      @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) {
                         <div class="col-sm-4 btn-group btn-group-xs">
-                            <a type="button" class="btn btn-success" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren</a>
                             <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
                         </div>
                     }
                 </div>
-            </div>
-            <div id="adjustEnv" class="@if(!infoForm.hasErrors){hidden}">
-                @views.html.drives.driveInfo(infoForm, reservation, true)
             </div>
         }
     }

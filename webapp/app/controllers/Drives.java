@@ -408,39 +408,27 @@ public class Drives extends Controller {
         return ok(detailsPage(reservation));
     }
 
-    @AllowRoles({UserRole.CAR_OWNER})
+    /**
+     * Keur de kilometerstanden goed.
+     */
+
+    @AllowRoles({UserRole.CAR_OWNER,UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveDriveInfo(int reservationId) {
+
         Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         DataAccessContext context = DataAccess.getInjectedContext();
         CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
-        // Test if reservation exists
-        if (reservation == null) {
-            detailsForm.reject("De reservatie kan niet opgevraagd worden. Gelieve de database administrator te contacteren.");
-            return badRequest(detailsPage(reservation));
-        }
         if (CurrentUser.isNot(reservation.getOwnerId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
-            return badRequest(detailsPage(reservation));
+            flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
+        } else {
+            dao.approveInfo(reservationId);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+            flash("success", "De ritgegevens werden goedgekeurd.");
         }
-        CarRide ride = dao.getCarRide(reservationId);
-        if (ride == null) {
-            detailsForm.reject("Er is een fout gebeurd tijdens het opslaan van de gegevens. Gelieve de database administrator te contacteren.");
-            return badRequest(detailsPage(reservation));
-        }
-        ride.setApprovedByOwner(true);
-        Instant instant = Instant.from(reservation.getFrom());
-        // TODO: what if mileages are blank?
-        BigDecimal cost = calculateDriveCost(ride.getEndKm() - ride.getStartKm(),
-                ride.getReservation().isPrivileged(),
-                context.getSettingDAO().getCostSettings(instant)
-        );
-        ride.setCost(cost);
-        dao.updateCarRide(ride);
-        rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
-        return ok(detailsPage(reservation));
+        return redirect(routes.Drives.details(reservationId));
     }
 
     private static BigDecimal calculateDriveCost(int distance, boolean privileged, Costs costInfo) {

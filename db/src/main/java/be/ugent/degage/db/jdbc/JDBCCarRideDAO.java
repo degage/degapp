@@ -223,4 +223,19 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
         }
     }
+
+    private LazyStatement approveInfoStatement = new LazyStatement(
+            "UPDATE carrides SET car_ride_status = 1 WHERE car_ride_car_reservation_id = ?"
+    );
+
+    @Override
+    public void approveInfo(int id) {
+        try {
+            PreparedStatement ps = approveInfoStatement.value();
+            ps.setInt(1, id);
+            ps.executeUpdate();
+        }  catch (SQLException e){
+            throw new DataAccessException("Unable to update car ride record", e);
+        }
+    }
 }
