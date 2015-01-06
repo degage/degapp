@@ -1,4 +1,4 @@
-/* ReservationStatus.java
+@* buttonsLoaner.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,33 +24,20 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
- */
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
-package be.ugent.degage.db.models;
+@(reservation: Reservation)
 
-/**
- * Note: by convention the value returned by {@link #toString} is used to display a description of the
- * enum value in the web interface.
- */
-public enum ReservationStatus {
-    REQUEST("Wachten op goedkeuring"),
-    ACCEPTED("Aanvraag goedgekeurd"),
-    REFUSED("Aanvraag geweigerd"),
-    CANCELLED("Aanvraag geannuleerd"),
-    REQUEST_DETAILS("Wachten op ritdetails"),
-    DETAILS_PROVIDED("Ritdetails ingegeven"),
-    FINISHED("Rit afgewerkt");
-
-    // Enum definition
-    private String description;
-
-    private ReservationStatus(final String description) {
-        this.description = description;
+@reservation.getStatus match {
+    case ReservationStatus.REQUEST | ReservationStatus.ACCEPTED => {
+        <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Inkorten ...</a>
+        <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Annuleren</a>
     }
+    case ReservationStatus.REQUEST_DETAILS => {
+        <a class="btn btn-xs btn-primary" href="@routes.Drives.newJourneyInfo(reservation.getId)">Rit invullen ...</a>
+    }
+    case _ => {
 
-    @Override
-    public String toString() {
-        return description;
     }
 }

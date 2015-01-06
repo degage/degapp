@@ -52,14 +52,14 @@
                 }
                 <td>
                     @reservation.getStatus match {
+                        case ReservationStatus.REQUEST => {
+                            <span class="fa fa-question-circle"></span>
+                        }
                         case ReservationStatus.ACCEPTED => {
                             <span class="fa fa-check-circle"></span>
                         }
                         case ReservationStatus.REFUSED => {
                             <span class="fa fa-minus-circle"></span>
-                        }
-                        case ReservationStatus.REQUEST => {
-                            <span class="fa fa-question-circle"></span>
                         }
                         case ReservationStatus.CANCELLED => {
                             <span class="fa fa-times-circle"></span>
@@ -67,26 +67,24 @@
                         case ReservationStatus.REQUEST_DETAILS => {
                             <span class="fa fa-question-circle"></span>
                         }
-                        case ReservationStatus.FINISHED => {
-                            <span class="fa fa-check-circle"></span>
+                        case ReservationStatus.DETAILS_PROVIDED => {
+                            <span class="fa fa-square-o"></span>
                         }
-                        case _ => {}
+                        case ReservationStatus.FINISHED => {
+                            <span class="fa fa-check-square-o"></span>
+                        }
                     }
                     @reservation.getStatus
                 </td>
                 <td>
-                    <div class="btn-group btn-group-xs">
-                            @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-                                <a class="btn btn-primary" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
-                            } else {
-                                @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
-                                         reservation.getUserId != userId) {
-                                   <a class="btn btn-warning" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
-                                } else {
-                                   <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">Details ...</a>
-                                }
-                            }
-                    </div>
+                    <a class="btn btn-xs btn-primary" href="routes.Drives.details(reservation.getId)">Details ...</a>
+                    @{ if(db.CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
+                           buttonsAdmin(reservation)
+                       else if (db.CurrentUser is reservation.getOwnerId)
+                           buttonsOwner(reservation)
+                       else
+                           buttonsLoaner(reservation)
+                    }
                 </td>
         }{
         <tr>

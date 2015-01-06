@@ -194,8 +194,6 @@ public class Reserve extends Controller {
             // Reservations by the owner were accepted automatically
 
             // Schedule the auto accept
-            int minutesAfterNow = Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept"));
-
             context.getJobDAO().createJob(
                     JobType.RESERVE_ACCEPT, reservation.getId(),
                     Instant.now().plusSeconds(60*Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
@@ -389,7 +387,7 @@ public class Reserve extends Controller {
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result overviewCarPost () {
-        Form form = Form.form(CarDateData.class).bindFromRequest();
+        Form<CarDateData> form = Form.form(CarDateData.class).bindFromRequest();
         if (form.hasErrors()) {
             return badRequest(startcar.render(form));
         } else {

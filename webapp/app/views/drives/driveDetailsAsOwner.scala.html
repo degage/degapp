@@ -27,23 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(infoForm: Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
-car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form[Drives.RemarksData])
+@(reservation: Reservation, driveInfo: CarRide, car: Car, loaner: User, previousLoaner: User, nextLoaner: User)
 @import db.CurrentUser
 
 @* only called when the user owns the car but is not a reservation admin*@
 
-@scripts = {
-    @js.datetimepicker()
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/driveDetails.js")'></script>
-    <script>
-        determineReservationDates(
-            "@Utils.toString(reservation.getFrom)",
-            "@Utils.toString(reservation.getUntil)"
-        );
-    </script>
-}
-@stdlayout("Reservatie- en ritdetails (eigenaar)", scripts=scripts,extrabc=breadcrumb("Ritten",routes.Drives.index())) {
+@stdlayout("Reservatie- en ritdetails (eigenaar)", extrabc=breadcrumb("Ritten",routes.Drives.index())) {
 
     @detailsPanel(car, reservation, driveInfo)
 
@@ -52,15 +41,32 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
             @reservation.getStatus match {
                 case ReservationStatus.REQUEST => {
                     <a class="btn btn-xs btn-primary" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
-                    @if(CurrentUser is loaner.getId) {
+                    @* should not happen: such a reservation is always immediately accepted
+                    <!-- @if(CurrentUser is reservation.getUserId) {
                         <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
                         <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    } -->
+                    *@
+                }
+                case ReservationStatus.REFUSED | ReservationStatus.CANCELLED => {
+                                (Geen. De reservatie is geweigerd of geannuleerd.)
+                }
+                case ReservationStatus.ACCEPTED => {
+                    @if(CurrentUser is reservation.getUserId) {
+                        <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
+                        <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    } else {
+                            (Geen. De rit heeft nog niet plaatsgevonden.)
                     }
                 }
-                case ReservationStatus.DETAILS_PROVIDED => {
-                    <a type="button" class="btn btn-xs btn-danger" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren ritinformatie</a>
+                case ReservationStatus.REQUEST_DETAILS => {
+                    <a class="btn btn-xs btn-primary" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
                 }
-                case _ => {(geen)}
+                case ReservationStatus.DETAILS_PROVIDED => {
+                    <a class="btn btn-xs btn-primary" href="@routes.Drives.editJourneyInfo(reservation.getId)">Ritdetails aanpassen ...</a>
+                    <a class="btn btn-xs btn-danger" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren ritinformatie</a>
+                }
+                case ReservationStatus.FINISHED => {(Geen. De rit is volledig afgewerkt.)}
             }
         </div>
     }
@@ -74,21 +80,5 @@ car: Car, loaner: User, previousLoaner: User, nextLoaner: User, remarksForm: For
         </div>
 
         @previousnext(previousLoaner, nextLoaner)
-
-        <!-- Both loaner and owner can edit this -->
-        @if(reservation.getStatus == ReservationStatus.REQUEST_DETAILS) {
-            @views.html.drives.driveInfo(infoForm, reservation, false)
-        }
-        @if(driveInfo != null) {
-            <div id="showEnv" class="@if(infoForm.hasErrors){hidden}">
-                <div class="well">
-                     @if(reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) {
-                        <div class="col-sm-4 btn-group btn-group-xs">
-                            <button id="adjustInfo" type="button" class="btn btn-warning">Aanpassen</button>
-                        </div>
-                    }
-                </div>
-            </div>
-        }
     }
 }

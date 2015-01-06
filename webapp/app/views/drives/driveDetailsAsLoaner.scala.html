@@ -27,8 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(infoForm: Form[Drives.InfoModel], reservation: Reservation, driveInfo: CarRide,
-car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form[Drives.RemarksData])
+@(reservation: Reservation, driveInfo: CarRide, car: Car, owner: User, previousLoaner: User, nextLoaner: User)
 @import db.CurrentUser
 
 @* only called when user is not the owner of the car and also not a reservation admin *@
@@ -53,7 +52,7 @@ car: Car, owner: User, previousLoaner: User, nextLoaner: User, remarksForm: Form
                 case ReservationStatus.DETAILS_PROVIDED => {
                     (Geen. De ritdetails moeten goedgekeurd worden door de eigenaar van de auto.)
                 }
-                case ReservationStatus.FINISHED => {(Geen. De rit is volledig afgewerkt)}
+                case ReservationStatus.FINISHED => {(Geen. De rit is volledig afgewerkt.)}
             }
         </div>
     }

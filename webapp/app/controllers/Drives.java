@@ -52,7 +52,6 @@ import views.html.drives.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -113,62 +112,6 @@ public class Drives extends Controller {
         }
     }
 
-        /**
-     * Class implementing a model wrapped in a form.
-     * This model is used during the form submission when an loaner provides information about
-     * the drive.
-     */
-    public static class InfoModel {
-
-        @Constraints.Required
-        public int startKm;
-
-        @Constraints.Required
-        public int endKm;
-
-        public boolean damaged;
-
-        @Constraints.Required
-        public int numberOfRefuels;
-
-        /**
-         * Validates the form:
-         * - startKm must be smaller then the endKm;
-         *
-         * @return an error string or null
-         */
-        public List<ValidationError> validate() {
-            List<ValidationError> result = new ArrayList<>();
-            // TODO: use field constraints for most of these
-            if (startKm <= 0) {
-                result.add(new ValidationError("startKm", "Kilometerstand moet groter zijn dan 0"));
-            }
-            if (endKm <= 0) {
-                result.add(new ValidationError("endKm", "Kilometerstand moet groter zijn dan 0"));
-            }
-            if (result.isEmpty()) {
-                // further requirements
-                if (startKm > endKm) {
-                    result.add(new ValidationError("endKm", "De kilometerstand na de rit moet groter zijn dan vóór de rit"));
-                }
-            }
-            if (numberOfRefuels < 0) {
-                result.add(new ValidationError("numberOfRefuels", "Ongeldig aantal"));
-            }
-            return result.isEmpty() ? null : result ;
-        }
-
-        public void populate(CarRide ride) {
-            startKm = ride.getStartKm();
-            endKm = ride.getEndKm();
-            damaged = ride.isDamaged();
-            numberOfRefuels = ride.getNumberOfRefuels();
-        }
-
-    }
-
-
-
     /**
      * Create a details page for the given reservation. Form fields
      * are filled in with details from the corresponding reservation.
@@ -179,7 +122,6 @@ public class Drives extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         UserDAO udao = context.getUserDAO();
-        CarDAO cdao = context.getCarDAO();
         CarRideDAO ddao = context.getCarRideDAO();
         User loaner = udao.getUser(reservation.getUserId());
         User owner = udao.getUser(reservation.getOwnerId());
@@ -206,29 +148,21 @@ public class Drives extends Controller {
             }
         }
 
-        InfoModel model = new InfoModel();
-        if (driveInfo != null) {
-            model.populate(driveInfo);
-        }
-
         Car car = context.getCarDAO().getCar(reservation.getCar().getId()); // TOOD: check whether this is necessary
         if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             return driveDetailsAsAdmin.render(
-                    new Form<>(InfoModel.class).fill(model),
                     reservation, driveInfo, car, owner, loaner,
-                    previousLoaner, nextLoaner, Form.form(RemarksData.class)
+                    previousLoaner, nextLoaner
             );
         } else if (CurrentUser.is(owner.getId())) {
             return driveDetailsAsOwner.render(
-                    new Form<>(InfoModel.class).fill(model),
                     reservation, driveInfo, car, loaner,
-                    previousLoaner, nextLoaner, Form.form(RemarksData.class)
+                    previousLoaner, nextLoaner
             );
         } else {
             return driveDetailsAsLoaner.render(
-                    new Form<>(InfoModel.class).fill(model),
                     reservation, driveInfo, car, owner,
-                    previousLoaner, nextLoaner, Form.form(RemarksData.class)
+                    previousLoaner, nextLoaner
             );
         }
     }
@@ -341,71 +275,57 @@ public class Drives extends Controller {
         return redirect(routes.Drives.details(reservationId));
     }
 
+    private static boolean editJourneyInfoAllowed(Reservation reservation) {
+        if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
+            return CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
+                    CurrentUser.is(reservation.getOwnerId());
+        } else
+            return reservation.getStatus() == ReservationStatus.FINISHED && CurrentUser.hasRole(UserRole.RESERVATION_ADMIN);
+    }
+
+    /**
+     * Show the page that allows editing of the journey info
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result editJourneyInfo (int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Reservation reservation = context.getReservationDAO().getReservationExtended(reservationId);
+        if (editJourneyInfoAllowed(reservation)) {
+            CarRide ride = context.getCarRideDAO().getCarRide(reservationId);
+            return ok(editjourney.render(
+                    Form.form(JourneyData.class).fill(new JourneyData().populate(ride)),
+                    reservation
+            ));
+        }  else {
+            // not allowed
+            return badRequest(); // should not happen - hacker?
+        }
+    }
+
+    /**
+     * Process the results of {@link #editJourneyInfo}
+     */
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
-    public static Result provideDriveInfo(int reservationId) {
+    public static Result editJourneyInfoPost (int reservationId) {
+        Form<JourneyData> form = Form.form(JourneyData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
-        CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
-
-        Form<InfoModel> detailsForm = Form.form(InfoModel.class).bindFromRequest();
-        if (detailsForm.hasErrors())
-            return badRequest(detailsPage(reservation));
-
-        CarDAO carDAO = context.getCarDAO();
-        // Test if user is authorized
-        boolean isOwner = CurrentUser.is(reservation.getOwnerId());
-        if (CurrentUser.isNot(reservation.getUserId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            flash("danger", "Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
-            return redirect(routes.Drives.details(reservationId));
-        }
-        // Test if ride already exists
-        CarRide ride = dao.getCarRide(reservationId);
-        if (ride == null) {
-            int numberOfRefuels = detailsForm.get().numberOfRefuels;
-
-            boolean damaged = detailsForm.get().damaged;
-            ride = dao.createCarRide(reservation, detailsForm.get().startKm, detailsForm.get().endKm, damaged, numberOfRefuels);
-            if (numberOfRefuels > 0) {
-                RefuelDAO refuelDAO = context.getRefuelDAO();
-                for (int i = 0; i < numberOfRefuels; i++) {
-                    refuelDAO.createRefuel(ride); // TODO: why is this? Delegate to database module?
-                }
-            }
-            if (damaged) {
-                context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
-            }
-        } else if (isOwner || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            // Owner is allowed to adjust the information
-            ride.setStartKm(detailsForm.get().startKm);
-            ride.setEndKm(detailsForm.get().endKm);
-        }
-
-        //if (isOwner) {  // TODO: compute cost only at time of invoice
-        Instant instant = Instant.from(reservation.getFrom());
-        BigDecimal cost = calculateDriveCost(ride.getEndKm() - ride.getStartKm(),
-                ride.getReservation().isPrivileged(),
-                context.getSettingDAO().getCostSettings(instant));
-        ride.setCost(cost);
-        dao.updateCarRide(ride);
-//        } else {
-//            flash("danger", "Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
-//            return redirect(routes.Drives.details(reservationId));
-//        }
-
-        // Adjust the status of the reservation
-        if (isOwner) { // TODO: bug? isOwner is always true at this point
+        if (form.hasErrors()) {
+            return badRequest(editjourney.render(form,reservation));
+        } else if (editJourneyInfoAllowed(reservation)) {
+            JourneyData data = form.get();
+            CarRideDAO dao = context.getCarRideDAO();
+            dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
+            dao.approveInfo(reservationId);
             rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+            return redirect(routes.Drives.details(reservationId));
         } else {
-            rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
-            Notifier.sendReservationDetailsProvidedMail(
-                    context.getUserDAO().getUserHeader(reservation.getOwnerId()),
-                    reservation);
+            // not allowed
+            return badRequest(); // hacker?
         }
-
-        // Commit changes
-        return ok(detailsPage(reservation));
     }
 
     /**
@@ -416,7 +336,6 @@ public class Drives extends Controller {
     @InjectContext
     public static Result approveDriveInfo(int reservationId) {
 
-        Form<InfoModel> detailsForm = Form.form(InfoModel.class);
         DataAccessContext context = DataAccess.getInjectedContext();
         CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();
@@ -431,6 +350,7 @@ public class Drives extends Controller {
         return redirect(routes.Drives.details(reservationId));
     }
 
+    /* KEPT HERE FOR FUTURE REFERENCE
     private static BigDecimal calculateDriveCost(int distance, boolean privileged, Costs costInfo) {
         if (privileged) {
             return BigDecimal.ZERO;
@@ -456,6 +376,7 @@ public class Drives extends Controller {
             return new BigDecimal(cost);
         }
     }
+    */
 
     /**
      * Get the number of reservations having the provided status
@@ -626,6 +547,14 @@ public class Drives extends Controller {
             }
         }
 
+        public JourneyData populate(CarRide ride) {
+            this.startKm = ride.getStartKm();
+            this.endKm = ride.getEndKm();
+            this.damaged = ride.isDamaged();
+            this.numberOfRefuels = ride.getNumberOfRefuels();
+            return this;
+        }
+
     }
 
     private static boolean newJourneyInfoAllowed(Reservation reservation) {
@@ -666,7 +595,7 @@ public class Drives extends Controller {
         if (form.hasErrors()) {
             return badRequest(newjourney.render(form,reservation));
         } else if (newJourneyInfoAllowed(reservation)) {
-            // TODO: refactor this
+            // add details to database
             JourneyData data = form.get();
             CarRideDAO dao = context.getCarRideDAO();
             CarRide ride = dao.getCarRide(reservationId);
@@ -683,11 +612,20 @@ public class Drives extends Controller {
                 if (damaged) {
                     context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
                 }
+            } else {//  make changes and approve
+                dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
+            }
+
+            // change status according to whether current user is owner or not
+            int ownerId = reservation.getOwnerId();
+            if (CurrentUser.is(ownerId) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+                // approve immediately
+                rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+            } else {
+                // register and send mail to owner
                 rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
                 UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
                 Notifier.sendReservationDetailsProvidedMail(owner, reservation);
-            } else {
-                dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             }
 
             return redirect(routes.Drives.details(reservationId));

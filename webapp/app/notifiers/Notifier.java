@@ -253,7 +253,6 @@ public class Notifier extends Mailer {
         // note: needs extended reservation
         UserHeader user = carReservation.getUser();
         TemplateDAO dao = context.getTemplateDAO();
-        CarDAO cdao = context.getCarDAO();
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
         String mail = replaceUserTags(user, template.getBody());
         mail = replaceCarReservationTags(carReservation, mail);
