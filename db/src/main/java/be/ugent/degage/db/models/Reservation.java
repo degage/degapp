@@ -40,16 +40,18 @@ public class Reservation {
     private ReservationStatus status;
     private Car car;
     private UserHeader user;
+    private int ownerId;
     private LocalDateTime from;
     private LocalDateTime until;
     private String message;
     private boolean privileged;
 
-    public Reservation(int id, Car car, UserHeader user, LocalDateTime from, LocalDateTime until, String message) {
+    public Reservation(int id, Car car, UserHeader user, int ownerId, LocalDateTime from, LocalDateTime until, String message) {
         this.id = id;
         this.car = car;
         this.user = user;
         this.from = from;
+        this.ownerId = ownerId;
         this.until = until;
         this.message = message;
     }
@@ -72,6 +74,14 @@ public class Reservation {
 
     public UserHeader getUser() {
         return user;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
+
+    public int getUserId() {
+        return user.getId();
     }
 
     public void setUser(UserHeader user) {

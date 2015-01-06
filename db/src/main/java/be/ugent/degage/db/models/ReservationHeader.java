@@ -42,20 +42,21 @@ public class ReservationHeader {
     private ReservationStatus status;
     private int carId;
     private int userId;
+    private int ownerId;
     private LocalDateTime from;
     private LocalDateTime until;
     private String message;
     private boolean privileged;
 
-    public ReservationHeader(int id, int carId, int userId, LocalDateTime from, LocalDateTime until, String message) {
+    public ReservationHeader(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until, String message) {
         this.id = id;
         this.carId = carId;
         this.userId = userId;
+        this.ownerId = ownerId;
         this.from = from;
         this.until = until;
         this.message = message;
-
-    }    
+    }
     
     public int getId() {
         return id;
@@ -71,6 +72,10 @@ public class ReservationHeader {
 
     public int getUserId() {
         return userId;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
     }
 
     public LocalDateTime getFrom() {

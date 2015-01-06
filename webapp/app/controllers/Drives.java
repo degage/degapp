@@ -52,7 +52,6 @@ import views.html.drives.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -182,14 +181,9 @@ public class Drives extends Controller {
         UserDAO udao = context.getUserDAO();
         CarDAO cdao = context.getCarDAO();
         CarRideDAO ddao = context.getCarRideDAO();
-        User loaner = udao.getUser(reservation.getUser().getId());
-        Car car = cdao.getCar(reservation.getCar().getId());
-        if (car == null || loaner == null) {
-            flash("danger", "De reservatie bevat ongeldige gegevens");
-            return null;
-        }
-        User owner = udao.getUser(car.getOwner().getId());
-        if (CurrentUser.isNot(reservation.getUser().getId())
+        User loaner = udao.getUser(reservation.getUserId());
+        User owner = udao.getUser(reservation.getOwnerId());
+        if (CurrentUser.isNot(reservation.getUserId())
                 && CurrentUser.isNot(owner.getId())
                 && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
@@ -217,7 +211,7 @@ public class Drives extends Controller {
             model.populate(driveInfo);
         }
 
-
+        Car car = context.getCarDAO().getCar(reservation.getCar().getId()); // TOOD: check whether this is necessary
         if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             return driveDetailsAsAdmin.render(
                     new Form<>(InfoModel.class).fill(model),
@@ -288,7 +282,7 @@ public class Drives extends Controller {
             if (status == ReservationStatus.REFUSED || status == ReservationStatus.ACCEPTED) {
                 if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
                     // extra checks when not reservation admin
-                    if (!context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId())
+                    if (CurrentUser.isNot(reservation.getOwnerId())
                             || reservation.getStatus() != ReservationStatus.REQUEST) {
                         flash("danger", "Alleen de eigenaar kan een reservatie goed- of afkeuren");
                         return redirect(routes.Drives.details(reservationId));
@@ -361,8 +355,8 @@ public class Drives extends Controller {
 
         CarDAO carDAO = context.getCarDAO();
         // Test if user is authorized
-        boolean isOwner = context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId());
-        if (CurrentUser.isNot(reservation.getUser().getId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+        boolean isOwner = CurrentUser.is(reservation.getOwnerId());
+        if (CurrentUser.isNot(reservation.getUserId()) && !isOwner && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             flash("danger", "Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
             return redirect(routes.Drives.details(reservationId));
         }
@@ -405,7 +399,9 @@ public class Drives extends Controller {
             rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
         } else {
             rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
-            Notifier.sendReservationDetailsProvidedMail(carDAO.getCar(reservation.getCar().getId()).getOwner(), reservation);
+            Notifier.sendReservationDetailsProvidedMail(
+                    context.getUserDAO().getUserHeader(reservation.getOwnerId()),
+                    reservation);
         }
 
         // Commit changes
@@ -425,7 +421,7 @@ public class Drives extends Controller {
             detailsForm.reject("De reservatie kan niet opgevraagd worden. Gelieve de database administrator te contacteren.");
             return badRequest(detailsPage(reservation));
         }
-        if (!context.getCarDAO().isCarOfUser(reservation.getCar().getId(), CurrentUser.getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+        if (CurrentUser.isNot(reservation.getOwnerId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             detailsForm.reject("Je bent niet geauthoriseerd voor het uitvoeren van deze actie.");
             return badRequest(detailsPage(reservation));
         }
@@ -594,7 +590,7 @@ public class Drives extends Controller {
             return badRequest(shorten.render(form, reservation));
         }
 
-        if ( (CurrentUser.is(reservation.getUser().getId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
+        if ( (CurrentUser.is(reservation.getUserId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
                         && (status ==  ReservationStatus.ACCEPTED || status == ReservationStatus.REQUEST)
         ) {
             dao.updateReservationTime(reservationId, data.from, data.until);
@@ -647,8 +643,8 @@ public class Drives extends Controller {
     private static boolean newJourneyInfoAllowed(Reservation reservation) {
         return reservation.getStatus() == ReservationStatus.REQUEST_DETAILS &&
                 (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
-                        CurrentUser.is(reservation.getUser().getId()) ||
-                        CurrentUser.is(reservation.getCar().getOwner().getId())); // TODO: not always filled in
+                        CurrentUser.is(reservation.getUserId()) ||
+                        CurrentUser.is(reservation.getOwnerId()));
     }
 
     /**
@@ -700,7 +696,7 @@ public class Drives extends Controller {
                     context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
                 }
                 rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
-                UserHeader owner = context.getUserDAO().getUserHeader(reservation.getCar().getOwner().getId());
+                UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
                 Notifier.sendReservationDetailsProvidedMail(owner, reservation);
             } else {
                 dao.updateCarRideKm(reservationId, data.startKm, data.endKm);

@@ -45,10 +45,10 @@
                 <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
                 <td>@Utils.toLocalizedString(reservation.getFrom)</td>
                 <td>@Utils.toLocalizedString(reservation.getUntil)</td>
-                @if(reservation.getUser.getId == userId) {
-                    <td><a href="@routes.Profile.index(reservation.getUser.getId)">Jij</a></td>
+                @if(reservation.getUserId == userId) {
+                    <td><a href="@routes.Profile.index(reservation.getUserId)">Jij</a></td>
                 } else {
-                    <td><a href="@routes.Profile.index(reservation.getUser.getId)">@reservation.getUser</a></td>
+                    <td><a href="@routes.Profile.index(reservation.getUserId)">@reservation.getUser</a></td>
                 }
                 <td>
                     @reservation.getStatus match {
@@ -80,7 +80,7 @@
                                 <a class="btn btn-danger" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
                             } else {
                                 @if((reservation.getStatus == ReservationStatus.REQUEST || reservation.getStatus == ReservationStatus.DETAILS_PROVIDED) &&
-                                         reservation.getUser.getId != userId) {
+                                         reservation.getUserId != userId) {
                                    <a class="btn btn-warning" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
                                 } else {
                                    <a class="btn btn-primary" href="@routes.Drives.details(reservation.getId)">Details ...</a>

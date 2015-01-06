@@ -91,6 +91,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
         }
     }
 
+    // replace * by actual fields!
     private LazyStatement getCarRideStatement = new LazyStatement (
             "SELECT * FROM carrides INNER JOIN reservations ON carrides.car_ride_car_reservation_id = reservations.reservation_id " +
                     "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
@@ -107,8 +108,6 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
                 if(rs.next())
                     return populateCarRide(rs);
                 else return null;
-            }catch (SQLException e){
-                throw new DataAccessException("Error reading car ride resultset", e);
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to get car ride", e);

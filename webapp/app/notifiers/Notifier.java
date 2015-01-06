@@ -250,14 +250,14 @@ public class Notifier extends Mailer {
     }
 
     public static void sendReservationApprovedByOwnerMail(DataAccessContext context, String remarks, Reservation carReservation) {
+        // note: needs extended reservation
         UserHeader user = carReservation.getUser();
         TemplateDAO dao = context.getTemplateDAO();
         CarDAO cdao = context.getCarDAO();
-        Car car = cdao.getCar(carReservation.getCar().getId());
         EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
         String mail = replaceUserTags(user, template.getBody());
         mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_car_address%", car.getLocation().toString());
+        mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
         mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
         mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).toString());
         NotificationDAO notificationDAO = context.getNotificationDAO();

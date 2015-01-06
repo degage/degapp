@@ -195,6 +195,7 @@ CREATE TABLE `reservations` (
 	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED') NOT NULL DEFAULT 'REQUEST',
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
+	`reservation_owner_id` INT NOT NULL,
 	`reservation_privileged` BIT(1) NOT NULL DEFAULT 0,
 	`reservation_from` DATETIME NOT NULL,
 	`reservation_to` DATETIME NOT NULL,
@@ -203,7 +204,8 @@ CREATE TABLE `reservations` (
 	`reservation_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
 	FOREIGN KEY (`reservation_car_id`) REFERENCES cars(`car_id`),
-	FOREIGN KEY (`reservation_user_id`) REFERENCES users(`user_id`)
+	FOREIGN KEY (`reservation_user_id`) REFERENCES users(`user_id`),
+	FOREIGN KEY (`reservation_owner_id`) REFERENCES users(`user_id`)
 );
 
 CREATE TABLE `infosessions` (
@@ -477,6 +479,9 @@ BEGIN
        WHERE car_privilege_car_id = NEW.reservation_car_id AND  car_privilege_user_id = NEW.reservation_user_id;
     SELECT 1 INTO privileged FROM cars
        WHERE car_id = NEW.reservation_car_id AND car_owner_user_id = NEW.reservation_user_id;
+
+    SET NEW.reservation_owner_id =
+       ( SELECT car_owner_user_id FROM cars WHERE car_id = NEW.reservation_car_id );
 
     IF privileged THEN
         SET NEW.reservation_status = 'ACCEPTED';

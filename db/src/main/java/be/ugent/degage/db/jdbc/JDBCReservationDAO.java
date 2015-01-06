@@ -50,7 +50,7 @@ import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static final String RESERVATION_HEADER_FIELDS =
-            "reservation_id, reservation_car_id, reservation_user_id, reservation_from, reservation_to, " +
+            "reservation_id, reservation_car_id, reservation_user_id, reservation_owner_id, reservation_from, reservation_to, " +
                     "reservation_message, reservation_status, reservation_privileged ";
 
     public JDBCReservationDAO(JDBCDataAccessContext context) {
@@ -62,6 +62,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getInt("reservation_id"),
                 rs.getInt("reservation_car_id"),
                 rs.getInt("reservation_user_id"),
+                rs.getInt("reservation_owner_id"),
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message")
@@ -76,6 +77,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getInt("reservation_id"),
                 JDBCCarDAO.populateCar(rs, false),
                 JDBCUserDAO.populateUserHeader(rs),
+                rs.getInt ("reservation_owner_id"),
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message")
@@ -91,8 +93,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             "reservation_id"
     );
 
-    private LazyStatement retreiveStatusStatement = new LazyStatement (
-            "SELECT reservation_status, reservation_privileged FROM reservations WHERE reservation_id = ?"
+    private LazyStatement retreiveCreatedStatement = new LazyStatement (
+            "SELECT reservation_status, reservation_privileged, reservation_owner_id FROM reservations WHERE reservation_id = ?"
     );
 
     @Override
@@ -117,13 +119,13 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             }
 
             // retrieve status
-            PreparedStatement ps2 = retreiveStatusStatement.value();
+            PreparedStatement ps2 = retreiveCreatedStatement.value();
             ps2.setInt(1, id);
             try (ResultSet rs = ps2.executeQuery()) {
                 rs.next();
                 ReservationHeader reservation = new ReservationHeader (
                         id,
-                        userId, carId,
+                        userId, carId,  rs.getInt("reservation_owner_id"),
                         from, until,
                         message);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
@@ -249,6 +251,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getInt("r.reservation_id"),
                 null,
                 JDBCUserDAO.populateUserHeader(rs),
+                rs.getInt("r.reservation_owner_id"),
                 rs.getTimestamp("r.reservation_from").toLocalDateTime(),
                 rs.getTimestamp("r.reservation_to").toLocalDateTime(),
                 null
@@ -256,7 +259,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getNextReservationStatement = new LazyStatement(
-            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, " +
                     USER_HEADER_FIELDS +
             "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
@@ -286,7 +289,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getPreviousReservationStatement = new LazyStatement(
-            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, " +
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, " +
                     USER_HEADER_FIELDS +
             "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +

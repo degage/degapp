@@ -186,8 +186,6 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 if(rs.next())
                     return populateRefuel(rs);
                 else return null;
-            }catch (SQLException e){
-                throw new DataAccessException("Error reading reservation resultset", e);
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to get reservation", e);

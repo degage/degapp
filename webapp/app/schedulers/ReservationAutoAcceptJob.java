@@ -46,7 +46,7 @@ public class ReservationAutoAcceptJob implements ScheduledJob.Executor {
     public void execute(DataAccessContext context, Job job) {
         ReservationDAO dao = context.getReservationDAO();
         Integer reservationId = job.getRefId();
-        Reservation reservation = dao.getReservation(reservationId);
+        Reservation reservation = dao.getReservationExtended(reservationId);
         if (reservation != null && reservation.getStatus() == ReservationStatus.REQUEST) {
             if (reservation.getFrom().isBefore(LocalDateTime.now())) {
                 String message = "Automatisch goedgekeurd door het systeem.";
