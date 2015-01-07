@@ -50,7 +50,7 @@
                         <fieldset>
                             <div class="form-group">
                             @for((role, checked) <- roles) {
-                                <input type="checkbox" name="role" value="@role" @if(checked){checked}> @role - <i>@role.getLongDescription</i>  <br>
+                                <input type="checkbox" name="role" value="@role.name" @if(checked){checked}> @role - <i>@role.getLongDescription</i>  <br>
                             }
                             </div>
 
