@@ -67,7 +67,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         }
         ps.setString(start, filter.getValue(FilterField.CAR_COST_STATUS));
         String carId = filter.getValue(FilterField.CAR_ID);
-        if(carId.equals("")) { // Not very nice programming, but works :D
+        if(carId.equals("") || carId.startsWith("-")) { // Not very nice programming, but works :D
             carId = "%%";
         }
         ps.setString(start+1, carId);

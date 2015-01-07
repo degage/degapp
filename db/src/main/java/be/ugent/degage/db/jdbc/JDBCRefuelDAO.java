@@ -64,19 +64,19 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             filter = new JDBCFilter();
         }
         String userId = filter.getValue(FilterField.REFUEL_USER_ID);
-        if(userId.equals("")) { // Not very nice programming, but works :D
+        if(userId.equals("") || userId.startsWith("-")) { // Not very nice programming, but works :D
             userId = "%%";
         }
         ps.setString(start, userId);
 
         String ownerId = filter.getValue(FilterField.REFUEL_OWNER_ID);
-        if(ownerId.equals("")) { // Not very nice programming, but works :D
+        if(ownerId.equals("") || ownerId.startsWith("-")) { // Not very nice programming, but works :D
             ownerId = "%%";
         }
         ps.setString(start+1, ownerId);
 
         String carId = filter.getValue(FilterField.REFUEL_CAR_ID);
-        if(carId.equals("")) { // Not very nice programming, but works :D
+        if(carId.equals("") || carId.startsWith("-")) { // Not very nice programming, but works :D
             carId = "%%";
         }
         ps.setString(start+2, carId);
