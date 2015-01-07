@@ -164,12 +164,12 @@ public class Refuels extends Controller {
         if (orderBy == null) {
             orderBy = FilterField.REFUEL_NOT_STATUS; // not neccessary, but orderBy cannot be null
         }
-        List<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, pageSize, filter);
+        Iterable<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfRefuels(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return refuelspage.render(listOfResults, page, amountOfResults, amountOfPages);
+        return refuelspage.render(dao.getRefuels(orderBy, asc, page, pageSize, filter), page, amountOfResults, amountOfPages);
     }
 
     /**
@@ -316,4 +316,39 @@ public class Refuels extends Controller {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
         return dao.getAmountOfRefuelsWithStatus(status, user.getId());
     }
+
+    /**
+     * Show all refuels connected with a given ride
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result showRefuelsForRide(int reservationId) {
+        return ok();
+    }
+
+    /**
+     * Page to create a new refuel entry for a given ride
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result newRefuelForRide(int reservationId) {
+        // check correct user id
+        return ok();
+    }
+
+    /**
+     * Process {@link #newRefuelForRide}
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result newRefuelForRidePost(int reservationId) {
+        // check correct user id
+        return ok();
+    }
+
+
+
 }
+
+
+

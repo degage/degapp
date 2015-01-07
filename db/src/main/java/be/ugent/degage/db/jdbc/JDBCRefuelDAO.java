@@ -36,6 +36,7 @@ import be.ugent.degage.db.models.*;
 import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -247,7 +248,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     );
 
     @Override
-    public List<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             // TODO: more to orderBy, asc/desc
             PreparedStatement ps = getRefuelsStatement.value();
@@ -268,7 +269,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     );
 
     @Override
-    public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException {
+    public Iterable<Refuel> getRefuelsForUser(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getRefuelsForUserStatement.value();
             ps.setInt(1, userId);
@@ -278,6 +279,20 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
+    private LazyStatement getRefuelsForCarRideStatement= new LazyStatement (
+            REFUEL_QUERY + " WHERE refuel_car_ride_id = ? ORDER BY refuel_id DESC "
+    );
+
+    @Override
+    public Iterable<Refuel> getRefuelsForCarRide(int userId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getRefuelsForCarRideStatement.value();
+            ps.setInt(1, userId);
+            return getRefuelList(ps);
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
+        }
+    }
     private LazyStatement getRefuelsForOwnerStatement= new LazyStatement (
             REFUEL_QUERY + " WHERE car_owner_user_id = ? AND refuel_status <> 'CREATED' " +
                     "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 1 WHEN 'REFUSED' THEN 3 " +
@@ -285,7 +300,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     );
 
     @Override
-    public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException {
+    public Iterable<Refuel> getRefuelsForOwner(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getRefuelsForOwnerStatement.value();
             ps.setInt(1, userId);
@@ -321,8 +336,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private List<Refuel> getRefuelList(PreparedStatement ps) throws DataAccessException {
-        List<Refuel> list = new ArrayList<>();
+    private Iterable<Refuel> getRefuelList(PreparedStatement ps) throws DataAccessException {
+        Collection<Refuel> list = new ArrayList<>();
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 list.add(populateRefuel(rs));
@@ -357,7 +372,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     );
 
     @Override
-    public List<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException {
+    public Iterable<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException {
         try {
             PreparedStatement ps = getBillRefuelsForLoanerStatement.value();
             ps.setDate(1, Date.valueOf(date));

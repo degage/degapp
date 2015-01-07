@@ -204,6 +204,10 @@ GET         /refuels/owner/approved                 controllers.Refuels.approveR
 GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
 GET         /refuels/owner/request                  controllers.Refuels.makeRefuelStatusRequest(refuelId: Int)
 
+# new UI
+GET         /refuels/ride                           controllers.Refuels.showRefuelsForRide(id: Int)
+
+
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()

@@ -49,13 +49,14 @@ public interface RefuelDAO {
     public Refuel getRefuel(int refuelId) throws DataAccessException;
     public void updateRefuel(Refuel refuel) throws DataAccessException;
 
-    public List<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    public Iterable<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
     public int getAmountOfRefuels(Filter filter) throws DataAccessException;
-    public List<Refuel> getRefuelsForUser(int userId) throws DataAccessException;
-    public List<Refuel> getRefuelsForOwner(int userId) throws DataAccessException;
+    public Iterable<Refuel> getRefuelsForCarRide(int reservationId) throws DataAccessException;
+    public Iterable<Refuel> getRefuelsForUser(int userId) throws DataAccessException;
+    public Iterable<Refuel> getRefuelsForOwner(int userId) throws DataAccessException;
     public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
-    public List<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException;
+    public Iterable<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException;
 
 
     /**
