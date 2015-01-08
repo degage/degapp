@@ -65,9 +65,6 @@ if(typeof beginAsc == 'undefined') {
 if(typeof beginOrder == 'undefined') {
     var beginOrder = "";
 }
-if(typeof beginFilter == 'undefined') {
-    var beginFilter = importSearchTextFields();
-}
 var pageLoaded = false;
 
 var intervalLoading;

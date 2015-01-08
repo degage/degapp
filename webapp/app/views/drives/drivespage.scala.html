@@ -77,7 +77,7 @@
                     @reservation.getStatus
                 </td>
                 <td>
-                    <a class="btn btn-xs btn-primary" href="routes.Drives.details(reservation.getId)">Details ...</a>
+                    <a class="btn btn-xs btn-primary" href="@routes.Drives.details(reservation.getId)">Details ...</a>
                     @{ if(db.CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
                            buttonsAdmin(reservation)
                        else if (db.CurrentUser is reservation.getOwnerId)

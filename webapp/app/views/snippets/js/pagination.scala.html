@@ -35,7 +35,7 @@
     $(document).ready(function () {
         $(window).resize(forceResponsiveTables);
         forceResponsiveTables();
-        @if(initialLoad) { loadFirstPage(beginFilter); }
+        @if(initialLoad) { loadFirstPage(importSearchTextFields()); }
     });
 </script>
 <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
