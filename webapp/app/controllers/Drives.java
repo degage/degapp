@@ -125,9 +125,7 @@ public class Drives extends Controller {
         CarRideDAO ddao = context.getCarRideDAO();
         User loaner = udao.getUser(reservation.getUserId());
         User owner = udao.getUser(reservation.getOwnerId());
-        if (CurrentUser.isNot(reservation.getUserId())
-                && CurrentUser.isNot(owner.getId())
-                && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+        if ( ! isDriverOrOwnerOrAdmin(reservation)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
         }
@@ -277,8 +275,7 @@ public class Drives extends Controller {
 
     private static boolean editJourneyInfoAllowed(Reservation reservation) {
         if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
-            return CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
-                    CurrentUser.is(reservation.getOwnerId());
+            return isOwnerOrAdmin(reservation);
         } else
             return reservation.getStatus() == ReservationStatus.FINISHED && CurrentUser.hasRole(UserRole.RESERVATION_ADMIN);
     }
@@ -340,12 +337,12 @@ public class Drives extends Controller {
         CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
-        if (CurrentUser.isNot(reservation.getOwnerId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
-        } else {
+        if (isOwnerOrAdmin(reservation)) {
             dao.approveInfo(reservationId);
             rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
             flash("success", "De ritgegevens werden goedgekeurd.");
+        } else {
+            flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
         }
         return redirect(routes.Drives.details(reservationId));
     }
@@ -556,12 +553,18 @@ public class Drives extends Controller {
         }
 
     }
+    public static boolean isOwnerOrAdmin (Reservation reservation) {
+        return  CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
+                        CurrentUser.is(reservation.getOwnerId());
+    }
+
+    public static boolean isDriverOrOwnerOrAdmin (Reservation reservation) {
+        return  isOwnerOrAdmin(reservation) || CurrentUser.is(reservation.getUserId());
+    }
 
     private static boolean newJourneyInfoAllowed(Reservation reservation) {
         return reservation.getStatus() == ReservationStatus.REQUEST_DETAILS &&
-                (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
-                        CurrentUser.is(reservation.getUserId()) ||
-                        CurrentUser.is(reservation.getOwnerId()));
+                isDriverOrOwnerOrAdmin(reservation);
     }
 
     /**
@@ -617,8 +620,7 @@ public class Drives extends Controller {
             }
 
             // change status according to whether current user is owner or not
-            int ownerId = reservation.getOwnerId();
-            if (CurrentUser.is(ownerId) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+            if (isOwnerOrAdmin(reservation)) {
                 // approve immediately
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
             } else {

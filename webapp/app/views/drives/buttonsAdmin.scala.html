@@ -41,6 +41,10 @@
     }
     case ReservationStatus.REQUEST_DETAILS => {
         <a class="btn btn-xs btn-primary" href="@routes.Drives.newJourneyInfo(reservation.getId)">Rit invullen ...</a>
+        <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
+    }
+    case ReservationStatus.DETAILS_PROVIDED | ReservationStatus.FINISHED => {
+        <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
     }
     case _ => {
     }

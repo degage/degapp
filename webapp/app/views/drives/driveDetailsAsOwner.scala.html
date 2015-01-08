@@ -61,12 +61,16 @@
                 }
                 case ReservationStatus.REQUEST_DETAILS => {
                     <a class="btn btn-xs btn-primary" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
+                    <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
                 }
                 case ReservationStatus.DETAILS_PROVIDED => {
                     <a class="btn btn-xs btn-primary" href="@routes.Drives.editJourneyInfo(reservation.getId)">Ritdetails aanpassen ...</a>
                     <a class="btn btn-xs btn-danger" href="@routes.Drives.approveDriveInfo(reservation.getId)">Goedkeuren ritinformatie</a>
+                    <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
                 }
-                case ReservationStatus.FINISHED => {(Geen. De rit is volledig afgewerkt.)}
+                case ReservationStatus.FINISHED => {
+                    <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
+                }
             }
         </div>
     }

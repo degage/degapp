@@ -38,8 +38,10 @@
             <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
             <dt>Auto</dt>
             <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
-            <dt>Standplaats</dt>
-            <dd>@car.getLocation</dd>
+            @if(car.getLocation != null) {
+                <dt>Standplaats</dt>
+                <dd>@car.getLocation</dd>
+            }
             @* TODO: make when.notblank snippet *@
             @if(reservation.getMessage != null && !reservation.getMessage.trim.isEmpty) {
                 <dt>Opmerkingen</dt>

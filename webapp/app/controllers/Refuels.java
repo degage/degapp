@@ -327,8 +327,11 @@ public class Refuels extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
-        // TODO:  check correct user id
-        return ok(refuelsForRide.render(refuels, reservation));
+        if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
+            return ok(refuelsForRide.render(refuels, reservation));
+        } else {
+            return badRequest(); // hacker?
+        }
     }
 
     /**
