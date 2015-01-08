@@ -49,66 +49,7 @@
                         <td><a href="@routes.Cars.detail(refuel.getCarRide.getReservation.getCar.getId)">@refuel.getCarRide.getReservation.getCar.getName</a></td>
                         <td><a href="@routes.Drives.details(refuel.getCarRide.getReservation.getId)">@Utils.toLocalizedDateString(refuel.getCarRide.getReservation.getFrom)</a></td>
                         <td><a href="@routes.Profile.index(refuel.getCarRide.getReservation.getUserId)">@refuel.getCarRide.getReservation.getUser</a></td>
-                        @if(refuel.getStatus == RefuelStatus.CREATED) {
-                            <td colspan="4">
-                                <div class="btn-group btn-group-xs">
-                                    <button class="btn btn-primary" onclick="loadModal(@refuel.getId)">@refuel.getStatus</button>
-                                </div>
-                            </td>
-
-                        } else {
-                            <td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
-                            <td>
-                                @refuel.getStatus match {
-                                    case RefuelStatus.ACCEPTED => {
-                                        <span class="fa fa-check-circle"></span>
-                                    }
-                                    case RefuelStatus.REFUSED => {
-                                        <span class="fa fa-minus-circle"></span>
-                                    }
-                                    case RefuelStatus.REQUEST => {
-                                        <span class="fa fa-question-circle"></span>
-                                    }
-                                    case _ => {}
-                                }
-                                @refuel.getStatus
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-xs">
-                                    <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getProof.getId)" target="_blank">Link</a>
-                                </div>
-
-                            </td>
-
-                            <td>
-                            @if((CurrentUser is refuel.getCarRide.getReservation.getOwnerId) || isAdmin) {
-                                @refuel.getStatus match {
-                                    case RefuelStatus.ACCEPTED => {
-                                        <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
-                                        <a type="button" class="btn btn-xs btn-info" href="@routes.Refuels.makeRefuelStatusRequest(refuel.getId)">Onbeslist zetten</a>
-                                    }
-                                    case RefuelStatus.REFUSED => {
-                                        <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
-                                        <a type="button" class="btn btn-xs btn-info" href="@routes.Refuels.makeRefuelStatusRequest(refuel.getId)">Onbeslist zetten</a>
-                                    }
-                                    case RefuelStatus.REQUEST => {
-                                        <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
-                                        <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
-                                    }
-                                    case _ => {}
-                                }
-                            }
-                             @if((CurrentUser is refuel.getCarRide.getReservation.getUserId) || isAdmin) {
-                                @if(refuel.getStatus == RefuelStatus.REQUEST){
-                                    <div class="btn-group btn-group-xs">
-                                        <button class="btn btn-primary" onclick="loadModal(@refuel.getId)">Bewijs wijzigen</button>
-                                    </div>
-                                }
-                            }
-
-                            </td>
-                        }
-
+                        @columns(refuel,isAdmin)
                     </tr>
                 }{
                     <tr>
