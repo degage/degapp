@@ -30,9 +30,6 @@
 @scripts = {
     @js.pagination("Refuels.showAllRefuelsPage")
     @js.userpicker()
-
-    @js.usesajax()
-    <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
 }
 @app("Tankbeurten (beheer)", scripts=scripts) {
     @breadcrumbs{
@@ -73,6 +70,4 @@
         </div>
             <!-- /row -->
     </div>
-    <!-- /page-wrapper -->
-    <div id="resultModal"></div>
 }

@@ -42,7 +42,9 @@ import java.util.List;
  */
 public interface RefuelDAO {
 
-    public Refuel createRefuel(CarRide carRide) throws DataAccessException;
+    public Refuel createRefuel(CarRide carRide) throws DataAccessException; // TODO: remove this
+    public int createRefuel(int reservationId, int eurocents, File file);
+
     public void acceptRefuel(int refuelId) throws DataAccessException;
     public void rejectRefuel(int refuelId) throws DataAccessException;
     public void deleteRefuel(int refuelId) throws DataAccessException;

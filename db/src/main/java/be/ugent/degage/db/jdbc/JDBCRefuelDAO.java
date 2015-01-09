@@ -37,7 +37,6 @@ import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 26/04/14.
@@ -104,7 +103,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
 
 
-    private LazyStatement createRefuelStatement= new LazyStatement (
+    private LazyStatement oldCreateRefuelStatement = new LazyStatement (
             "INSERT INTO refuels (refuel_car_ride_id) VALUES (?)",
             "refuel_id"
     );
@@ -112,7 +111,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     @Override
     public Refuel createRefuel(CarRide carRide) throws DataAccessException {
         try{
-            PreparedStatement ps = createRefuelStatement.value();
+            PreparedStatement ps = oldCreateRefuelStatement.value();
             ps.setInt(1, carRide.getReservation().getId());
 
             if(ps.executeUpdate() == 0)
@@ -123,6 +122,32 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 return new Refuel(keys.getInt(1), carRide, RefuelStatus.CREATED);
             } catch (SQLException ex) {
                 throw new DataAccessException("Failed to get primary key for refuel.", ex);
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to create refuel", e);
+        }
+    }
+
+    private LazyStatement createRefuelStatement = new LazyStatement (
+            "INSERT INTO refuels (refuel_car_ride_id, refuel_file_id, refuel_eurocents, refuel_status) " +
+                    "VALUES (?,?,?,'REQUEST')",
+            "refuel_id"
+    );
+
+
+    @Override
+    public int createRefuel(int reservationId, int eurocents, File file) {
+        try{
+            PreparedStatement ps = createRefuelStatement.value();
+            ps.setInt(1, reservationId);
+            ps.setInt(2, file.getId());
+            ps.setInt(3, eurocents);
+
+            ps.executeUpdate();
+
+            try (ResultSet keys = ps.getGeneratedKeys()) {
+                keys.next(); //if this fails we want an exception anyway
+                return keys.getInt(1);
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to create refuel", e);

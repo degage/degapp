@@ -43,6 +43,7 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
@@ -53,6 +54,7 @@ import views.html.refuels.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -60,15 +62,18 @@ import java.util.List;
  */
 public class Refuels extends Controller {
 
-    public static class RefuelModel {
+    public static class RefuelData {
 
         public EurocentAmount amount;
 
-        public String validate() {
-            int value = amount.getValue();
-            if (value < 0 || value > 20000) {
-                return "Bedrag moet liggen tussen 0 en 200 €";
+        public RefuelData populate(EurocentAmount amount) {
+            this.amount = amount;
+            return this;
+        }
 
+        public List<ValidationError> validate () {
+            if (amount.getValue() <= 0) {
+                return Arrays.asList(new ValidationError("amount", "Bedrag moet groter zijn dan 0"));
             } else {
                 return null;
             }
@@ -175,71 +180,6 @@ public class Refuels extends Controller {
     /**
      * Method: GET
      *
-     * @return modal to provide refuel information
-     */
-    @AllowRoles
-    @InjectContext
-    public static Result provideRefuelInfo(int refuelId) {
-        return ok(editmodal.render(Form.form(RefuelModel.class), refuelId));
-    }
-
-    /**
-     * Method: POST
-     *
-     * @return redirect to the index page containing all the refuel requests
-     */
-    @AllowRoles
-    @InjectContext
-    public static Result provideRefuelInfoPost(int refuelId) {
-        Form<RefuelModel> refuelForm = Form.form(RefuelModel.class).bindFromRequest();
-        if (refuelForm.hasErrors()) {
-            flash("danger", "Info verstrekken mislukt.");
-            return redirect(routes.Refuels.showRefuels());
-
-        } else {
-            DataAccessContext context = DataAccess.getInjectedContext();
-            RefuelDAO dao = context.getRefuelDAO();
-            RefuelModel model = refuelForm.get();
-            Refuel refuel = dao.getRefuel(refuelId);
-            Http.MultipartFormData body = request().body().asMultipartFormData();
-            Http.MultipartFormData.FilePart proof = body.getFile("picture");
-            if (proof != null) {
-                String contentType = proof.getContentType();
-                if (!FileHelper.isDocumentContentType(contentType)) {
-                    flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return redirect(routes.Refuels.showRefuels());
-                } else {
-                    try {
-                        Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.refuelproofs"));
-                        FileDAO fdao = context.getFileDAO();
-                        try {
-                            File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
-                            refuel.setEurocents(model.amount.getValue());
-                            refuel.setStatus(RefuelStatus.REQUEST);
-                            refuel.setProof(file);
-                            dao.updateRefuel(refuel);
-                            context.commit();
-                            Notifier.sendRefuelRequest(refuel);
-                            flash("success", "Uw tankbeurt wordt voorgelegd aan de auto-eigenaar.");
-                            return redirect(routes.Refuels.showRefuels());
-                        } catch (DataAccessException ex) {
-                            FileHelper.deleteFile(relativePath);
-                            throw ex;
-                        }
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex); //no more checked catch -> error page!
-                    }
-                }
-            } else {
-                flash("error", "Missing file");
-                return redirect(routes.Refuels.showRefuels());
-            }
-        }
-    }
-
-    /**
-     * Method: GET
-     *
      * @return proof url
      */
     @AllowRoles
@@ -328,29 +268,65 @@ public class Refuels extends Controller {
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
         if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
-            return ok(refuelsForRide.render(refuels, reservation));
+            return ok( refuelsForRide.render(
+                            Form.form(RefuelData.class).fill(new RefuelData().populate(new EurocentAmount())),
+                            refuels,
+                            reservation) );
         } else {
             return badRequest(); // hacker?
         }
     }
 
     /**
-     * Page to create a new refuel entry for a given ride
-     */
-    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result newRefuelForRide(int reservationId) {
-        // check correct user id
-        return ok();
-    }
-
-    /**
-     * Process {@link #newRefuelForRide}
+     * Process form from {@link #showRefuelsForRide}
      */
     @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result newRefuelForRidePost(int reservationId) {
-        return ok();
+        Form<RefuelData> form = Form.form(RefuelData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
+        if (form.hasErrors()) {
+            Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
+            return ok( refuelsForRide.render(form, refuels, reservation));
+        } else if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
+
+            RefuelData data = form.get();
+            Http.MultipartFormData body = request().body().asMultipartFormData();
+            Http.MultipartFormData.FilePart proof = body.getFile("picture");
+            if (proof == null) {  // should not happen
+                flash ("danger", "Bestand met de scan of foto van het tankbonnetje ontbreekt");
+            } else if (!FileHelper.isDocumentContentType(proof.getContentType())) {
+                flash("danger", "Het bestand  is van het verkeerde type");
+            } else {
+                // TODO: make general method for file handling. There is too much cut and paste
+                try {
+                    Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.refuelproofs"));
+                    FileDAO fdao = context.getFileDAO();
+                    try {
+                        File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
+                        int eurocents = data.amount.getValue();
+                        context.getRefuelDAO().createRefuel(reservationId, eurocents, file);
+                        Notifier.sendRefuelRequest(
+                                context.getUserDAO().getUserHeader(reservation.getOwnerId()),
+                                reservation.getCar(),
+                                eurocents
+                        );
+                        flash("success", "Uw tankbeurt wordt voorgelegd aan de auto-eigenaar.");
+                    } catch (DataAccessException ex) {
+                        FileHelper.deleteFile(relativePath);
+                        throw ex;
+                    }
+                }  catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+
+            }
+            return redirect(routes.Refuels.showRefuelsForRide(reservationId));
+        } else {
+            return badRequest(); // hacker?
+        }
+
     }
 
 }

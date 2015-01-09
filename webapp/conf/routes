@@ -197,8 +197,6 @@ GET         /refuels/owner                          controllers.Refuels.showOwne
 GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/admin                          controllers.Refuels.showAllRefuels()
 GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /refuels/edit                           controllers.Refuels.provideRefuelInfo(refuelId: Int)
-POST        /refuels/edit                           controllers.Refuels.provideRefuelInfoPost(refuelId: Int)
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
 GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
 GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
@@ -206,8 +204,7 @@ GET         /refuels/owner/request                  controllers.Refuels.makeRefu
 
 # new UI
 GET         /refuels/ride                           controllers.Refuels.showRefuelsForRide(id: Int)
-
-
+POST        /refuels/new                            controllers.Refuels.newRefuelForRidePost(id: Int)
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()

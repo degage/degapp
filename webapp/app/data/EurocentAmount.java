@@ -45,6 +45,10 @@ public class EurocentAmount {
         return value;
     }
 
+    public EurocentAmount() {
+        value  = 0;
+    }
+
     public EurocentAmount (int euro, int cent) {
         if (cent >= 0 && cent < 100) {
             if (euro >= 0)

@@ -27,13 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@scripts = {
-    @js.pagination("Refuels.showOwnerRefuelsPage")
-
-    @js.usesajax()
-    <script src='@routes.Assets.at("javascripts/app/refuelInfo.js")'></script>
-}
-@app("Tankbeurten (eigenaar)", scripts=scripts) {
+@app("Tankbeurten (eigenaar)", scripts=js.pagination("Refuels.showOwnerRefuelsPage")) {
     @breadcrumbs{
         @breadcrumb("Tankbeurten (eigenaar)")
     }
@@ -49,6 +43,4 @@
         </div>
             <!-- /row -->
     </div>
-    <!-- /page-wrapper -->
-    <div id="resultModal"></div>
 }

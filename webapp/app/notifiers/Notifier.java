@@ -155,7 +155,8 @@ public class Notifier extends Mailer {
             template = dao.getTemplate(MailType.REFUEL_REFUSED);
         }
         String mail = replaceUserTags(user, template.getBody());
-        mail = replaceRefuelTags(refuel, mail);
+        mail = replaceRefuelTags(
+                refuel.getCarRide().getReservation().getCar(), refuel.getEurocents(), mail);
         NotificationDAO notificationDAO = context.getNotificationDAO();
         createNotification(notificationDAO, user, template.getSubject(), mail);
         if (template.getSendMail()) {
@@ -181,18 +182,15 @@ public class Notifier extends Mailer {
     }
 
     // to be used with injected context
-    public static void sendRefuelRequest(Refuel refuel) {
-        UserHeader user = refuel.getCarRide().getReservation().getCar().getOwner();
+    public static void sendRefuelRequest(UserHeader owner, Car car, int eurocents) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.REFUEL_REQUEST);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceRefuelTags(refuel, mail);
-        NotificationDAO notificationDAO = context.getNotificationDAO();
-        createNotification(notificationDAO, user, template.getSubject(), mail);
+        EmailTemplate template = context.getTemplateDAO().getTemplate(MailType.REFUEL_REQUEST);
+        String mail = replaceUserTags(owner, template.getBody());
+        mail = replaceRefuelTags(car, eurocents, mail);
+        createNotification(context.getNotificationDAO(), owner, template.getSubject(), mail);
         if (template.getSendMail()) {
             setSubject(template.getSubject());
-            addRecipient(user.getEmail());
+            addRecipient(owner.getEmail());
             addFrom(NOREPLY);
             send(mail);
         }
@@ -363,9 +361,9 @@ public class Notifier extends Mailer {
         return template;
     }
 
-    private static String replaceRefuelTags(Refuel refuel, String template) {
-        template = template.replace("%car_name%", refuel.getCarRide().getReservation().getCar().getName());
-        template = template.replace("%amount%", EurocentAmount.toString(refuel.getEurocents()) + " euro");
+    private static String replaceRefuelTags(Car car, int eurocents, String template) {
+        template = template.replace("%car_name%", car.getName());
+        template = template.replace("%amount%", EurocentAmount.toString(eurocents) + " euro");
         return template;
     }
 
