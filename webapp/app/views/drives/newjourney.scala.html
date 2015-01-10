@@ -51,7 +51,6 @@
                     informatie gevraagd wordt</i>)
                   }
             }
-            @std.numberField(form("numberOfRefuels"), "Aantal tankbeurten", css="col-sm-6")
             @if(db.CurrentUser isNot reservation.getOwnerId){
                 <div class="col-xs-12">
                     <p class="alert alert-danger"><strong>Opgelet!</strong> Na het doorsturen kan deze informatie

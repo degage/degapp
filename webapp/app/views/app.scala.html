@@ -212,11 +212,6 @@
                         <li @if(title == "Tankbeurten") {class="active"}>
                             <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i>
                                 Tankbeurten
-                                @defining(Refuels.refuelsWithStatus(RefuelStatus.CREATED)) { requests =>
-                                    @if(requests > 0) {
-                                        <span class="sidenumber">@requests</span>
-                                    }
-                                }
                             </a>
                         </li>
                         <li @if(title == "Afrekeningen") {class="active"}>

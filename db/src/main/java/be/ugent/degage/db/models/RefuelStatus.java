@@ -34,7 +34,6 @@ package be.ugent.degage.db.models;
  * enum value in the web interface.
  */
 public enum RefuelStatus {
-    CREATED("Info verstrekken"),
     REQUEST("Wachten op goedkeuring"),
     ACCEPTED("Aanvraag goedgekeurd"),
     REFUSED("Aanvraag geweigerd");

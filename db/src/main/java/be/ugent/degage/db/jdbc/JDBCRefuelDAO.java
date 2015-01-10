@@ -52,7 +52,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             "LEFT JOIN users AS owners ON car_owner_user_id = owners.user_id " +
             "LEFT JOIN files ON refuel_file_id = file_id ";
 
-    private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND car_id LIKE ? AND refuel_status <> ?";
+    private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND car_id LIKE ? ";
 
     public JDBCRefuelDAO(JDBCDataAccessContext context) {
         super(context);
@@ -80,18 +80,16 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             carId = "%%";
         }
         ps.setString(start+2, carId);
-
-        ps.setString(start+3, filter.getValue(FilterField.REFUEL_NOT_STATUS));
     }
 
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
-        Refuel refuel;
-        if(rs.getString("refuel_status").equals("CREATED")){
-            refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), RefuelStatus.valueOf(rs.getString("refuel_status")));
-        }else{
-            refuel = new Refuel(rs.getInt("refuel_id"), JDBCCarRideDAO.populateCarRide(rs), JDBCFileDAO.populateFile(rs),
-                    rs.getInt("refuel_eurocents"), RefuelStatus.valueOf(rs.getString("refuel_status")));
-        }
+        Refuel refuel = new Refuel(
+                rs.getInt("refuel_id"),
+                JDBCCarRideDAO.populateCarRide(rs),
+                JDBCFileDAO.populateFile(rs),
+                rs.getInt("refuel_eurocents"),
+                RefuelStatus.valueOf(rs.getString("refuel_status"))
+        );
 
         Date refuelBilled = rs.getDate("refuel_billed");
         refuel.setBilled(refuelBilled == null ? null : refuelBilled.toLocalDate());
@@ -101,42 +99,15 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         return refuel;
     }
 
-
-
-    private LazyStatement oldCreateRefuelStatement = new LazyStatement (
-            "INSERT INTO refuels (refuel_car_ride_id) VALUES (?)",
-            "refuel_id"
-    );
-
-    @Override
-    public Refuel createRefuel(CarRide carRide) throws DataAccessException {
-        try{
-            PreparedStatement ps = oldCreateRefuelStatement.value();
-            ps.setInt(1, carRide.getReservation().getId());
-
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when creating refuel.");
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
-                return new Refuel(keys.getInt(1), carRide, RefuelStatus.CREATED);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for refuel.", ex);
-            }
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to create refuel", e);
-        }
-    }
-
     private LazyStatement createRefuelStatement = new LazyStatement (
             "INSERT INTO refuels (refuel_car_ride_id, refuel_file_id, refuel_eurocents, refuel_status) " +
-                    "VALUES (?,?,?,'REQUEST')",
-            "refuel_id"
+                    "VALUES (?,?,?,'REQUEST')" //,
+            //"refuel_id"
     );
 
 
     @Override
-    public int createRefuel(int reservationId, int eurocents, File file) {
+    public void createRefuel(int reservationId, int eurocents, File file) {
         try{
             PreparedStatement ps = createRefuelStatement.value();
             ps.setInt(1, reservationId);
@@ -145,10 +116,12 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
             ps.executeUpdate();
 
+            /*
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 return keys.getInt(1);
             }
+            */
         } catch (SQLException e){
             throw new DataAccessException("Unable to create refuel", e);
         }
@@ -268,19 +241,19 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private LazyStatement getRefuelsStatement= new LazyStatement (
             REFUEL_QUERY + FILTER_FRAGMENT +
-                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
+                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
                     "WHEN 'ACCEPTED' THEN 4 END ASC LIMIT ?,?"
     );
 
     @Override
-    public Iterable<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<Refuel> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             // TODO: more to orderBy, asc/desc
             PreparedStatement ps = getRefuelsStatement.value();
             fillFragment(ps, filter, 1);
             int first = (page-1)*pageSize;
-            ps.setInt(5, first);
-            ps.setInt(6, pageSize);
+            ps.setInt(4, first);
+            ps.setInt(5, pageSize);
             return getRefuelList(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of refuels", ex);
@@ -289,7 +262,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private LazyStatement getRefuelsForUserStatement= new LazyStatement (
             REFUEL_QUERY + " WHERE reservation_user_id = ? " +
-                    "ORDER BY CASE refuel_status WHEN 'CREATED' THEN 1 WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
+                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
                     "WHEN 'ACCEPTED' THEN 4 END"
     );
 
@@ -319,7 +292,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
     private LazyStatement getRefuelsForOwnerStatement= new LazyStatement (
-            REFUEL_QUERY + " WHERE car_owner_user_id = ? AND refuel_status <> 'CREATED' " +
+            REFUEL_QUERY + " WHERE car_owner_user_id = ? " +
                     "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 1 WHEN 'REFUSED' THEN 3 " +
                     "WHEN 'ACCEPTED' THEN 2 END"
     );

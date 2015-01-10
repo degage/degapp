@@ -57,8 +57,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
                 rs.getInt("car_ride_start_km"),
                 rs.getInt("car_ride_end_km"),
                 rs.getBoolean("car_ride_status"),
-                rs.getBoolean("car_ride_damage"),
-                rs.getInt("car_ride_refueling")
+                rs.getBoolean("car_ride_damage")
         );
         carRide.setCost(rs.getBigDecimal("car_ride_cost"));
         Date carRideBilled = rs.getDate("car_ride_billed");
@@ -69,23 +68,22 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
 
     private LazyStatement createCarRideStatement = new LazyStatement(
             "INSERT INTO carrides (car_ride_car_reservation_id, car_ride_start_km, " +
-                    "car_ride_end_km, car_ride_damage, car_ride_refueling) VALUE (?, ?, ?, ?, ?)"
+                    "car_ride_end_km, car_ride_damage) VALUE (?, ?, ?, ?)"
     );
     
     @Override
-    public CarRide createCarRide(Reservation reservation, int startKm, int endKm, boolean damaged, int numberOfRefuels) throws DataAccessException {
+    public CarRide createCarRide(Reservation reservation, int startKm, int endKm, boolean damaged) throws DataAccessException {
         try{
             PreparedStatement ps = createCarRideStatement.value();
             ps.setInt(1, reservation.getId());
             ps.setInt(2, startKm);
             ps.setInt(3, endKm);
             ps.setBoolean(4, damaged);
-            ps.setInt(5, numberOfRefuels);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car ride.");
 
-            return new CarRide(reservation, startKm, endKm, false, damaged, numberOfRefuels);
+            return new CarRide(reservation, startKm, endKm, false, damaged);
         } catch (SQLException e){
             throw new DataAccessException("Unable to create car ride", e);
         }
@@ -116,7 +114,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
 
     private LazyStatement updateCarRideStatement = new LazyStatement(
             "UPDATE carrides SET car_ride_status = ? , car_ride_start_km = ? , " +
-                    "car_ride_end_km = ? , car_ride_damage = ? , car_ride_refueling = ? , car_ride_cost = ? , car_ride_billed = ? " +
+                    "car_ride_end_km = ? , car_ride_damage = ? , car_ride_cost = ? , car_ride_billed = ? " +
                     "WHERE car_ride_car_reservation_id = ?"
     );
 
@@ -128,11 +126,10 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             ps.setInt(2, carRide.getStartKm());
             ps.setInt(3, carRide.getEndKm());
             ps.setBoolean(4, carRide.isDamaged());
-            ps.setInt(5, carRide.getNumberOfRefuels());
-            ps.setBigDecimal(6, carRide.getCost());
-            ps.setDate(7, Date.valueOf(carRide.getBilled()));
+            ps.setBigDecimal(5, carRide.getCost());
+            ps.setDate(6, Date.valueOf(carRide.getBilled()));
 
-            ps.setInt(8, carRide.getReservation().getId());
+            ps.setInt(7, carRide.getReservation().getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Car Ride update affected 0 rows.");

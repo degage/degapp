@@ -529,10 +529,6 @@ public class Drives extends Controller {
 
         public boolean damaged = false;
 
-        @Constraints.Required
-        @Constraints.Min(0)
-        public int numberOfRefuels;
-
         public List<ValidationError> validate() {
             if (startKm > endKm) {
                 String message = "De kilometerstand na de rit moet groter zijn dan vóór de rit";
@@ -548,7 +544,6 @@ public class Drives extends Controller {
             this.startKm = ride.getStartKm();
             this.endKm = ride.getEndKm();
             this.damaged = ride.isDamaged();
-            this.numberOfRefuels = ride.getNumberOfRefuels();
             return this;
         }
 
@@ -603,15 +598,8 @@ public class Drives extends Controller {
             CarRideDAO dao = context.getCarRideDAO();
             CarRide ride = dao.getCarRide(reservationId);
             if (ride == null) {
-                int numberOfRefuels = data.numberOfRefuels;
                 boolean damaged = data.damaged;
-                ride = context.getCarRideDAO().createCarRide(reservation, data.startKm, data.endKm, damaged, numberOfRefuels);
-                if (numberOfRefuels > 0) {
-                    RefuelDAO refuelDAO = context.getRefuelDAO();
-                    for (int i = 0; i < numberOfRefuels; i++) {
-                        refuelDAO.createRefuel(ride); // TODO: why is this? Delegate to database module?
-                    }
-                }
+                context.getCarRideDAO().createCarRide(reservation, data.startKm, data.endKm, damaged);
                 if (damaged) {
                     context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
                 }

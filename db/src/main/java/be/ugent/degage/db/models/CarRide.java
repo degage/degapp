@@ -44,15 +44,12 @@ public class CarRide {
     private BigDecimal cost;
     private LocalDate billed;
 
-    private int numberOfRefuels;
-
-    public CarRide(Reservation reservation, int startKm, int endKm, boolean approvedByOwner, boolean damaged, int numberOfRefuels) {
+    public CarRide(Reservation reservation, int startKm, int endKm, boolean approvedByOwner, boolean damaged) {
         this.reservation = reservation;
         this.startKm = startKm;
         this.endKm = endKm;
         this.approvedByOwner = approvedByOwner;
         this.damaged = damaged;
-        this.numberOfRefuels = numberOfRefuels;
     }
 
     public Reservation getReservation() {
@@ -85,14 +82,6 @@ public class CarRide {
 
     public void setApprovedByOwner(boolean approvedByOwner) {
         this.approvedByOwner = approvedByOwner;
-    }
-
-    public int getNumberOfRefuels() {
-        return numberOfRefuels;
-    }
-
-    public void setNumberOfRefuels(int numberOfRefuels) {
-        this.numberOfRefuels = numberOfRefuels;
     }
 
     public boolean isDamaged() {

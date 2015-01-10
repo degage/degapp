@@ -29,7 +29,6 @@
 
 package be.ugent.degage.db.models;
 
-
 import java.time.LocalDate;
 
 /**

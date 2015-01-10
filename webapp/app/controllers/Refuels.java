@@ -95,9 +95,10 @@ public class Refuels extends Controller {
     @InjectContext
     public static Result showUserRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField field = FilterField.stringToField(orderBy);
 
-        boolean asc = Pagination.parseBoolean(ascInt);
+        // currently not used
+        //FilterField field = FilterField.stringToField(orderBy);
+        //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
         User user = DataProvider.getUserProvider().getUser();
@@ -105,7 +106,7 @@ public class Refuels extends Controller {
 
         // TODO: Check if admin or car owner/user
 
-        return ok(refuelList(page, pageSize, field, asc, filter));
+        return ok(refuelList(page, pageSize, filter));
 
     }
 
@@ -123,18 +124,18 @@ public class Refuels extends Controller {
     @InjectContext
     public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField field = FilterField.stringToField(orderBy);
 
-        boolean asc = Pagination.parseBoolean(ascInt);
+        // currently not used
+        //FilterField field = FilterField.stringToField(orderBy);
+        //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
         User user = DataProvider.getUserProvider().getUser();
         filter.putValue(FilterField.REFUEL_OWNER_ID, user.getId() + "");
-        filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
 
         // TODO: Check if admin or car owner/user
 
-        return ok(refuelList(page, pageSize, field, asc, filter));
+        return ok(refuelList(page, pageSize, filter));
     }
 
     /**
@@ -152,29 +153,25 @@ public class Refuels extends Controller {
     @InjectContext
     public static Result showAllRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField field = FilterField.stringToField(orderBy);
+        // Currently not used
+        //FilterField field = FilterField.stringToField(orderBy);
+        //boolean asc = Pagination.parseBoolean(ascInt);
 
-        boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
+        //filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
 
-        return ok(refuelList(page, pageSize, field, asc, filter));
+        return ok(refuelList(page, pageSize, filter));
     }
 
     // should be used with an injected context only
-    private static Html refuelList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
+    private static Html refuelList(int page, int pageSize, Filter filter) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
-
-        if (orderBy == null) {
-            orderBy = FilterField.REFUEL_NOT_STATUS; // not neccessary, but orderBy cannot be null
-        }
-        Iterable<Refuel> listOfResults = dao.getRefuels(orderBy, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfRefuels(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return refuelspage.render(dao.getRefuels(orderBy, asc, page, pageSize, filter), page, amountOfResults, amountOfPages);
+        return refuelspage.render(dao.getRefuels(page, pageSize, filter), page, amountOfResults, amountOfPages);
     }
 
     /**

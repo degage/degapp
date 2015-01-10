@@ -286,10 +286,6 @@ CREATE TABLE `carrides` (
   `car_ride_start_km` INTEGER NOT NULL DEFAULT 0,
   `car_ride_end_km` INTEGER NOT NULL DEFAULT 0,
   `car_ride_damage` BIT(1) NOT NULL DEFAULT 0,
-  `car_ride_refueling` INT NOT NULL,ALTER TABLE infosessions MODIFY COLUMN infosession_updated_at TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
-ALTER TABLE infosessions MODIFY COLUMN infosession_created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
-DROP TRIGGER infosessions_ins;
-
   `car_ride_cost` DECIMAL(19,4) DEFAULT NULL,
   `car_ride_billed` DATE DEFAULT NULL,
   `car_ride_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -303,7 +299,7 @@ CREATE TABLE `refuels` (
 	`refuel_car_ride_id` INT NOT NULL,
 	`refuel_file_id` INT,
 	`refuel_eurocents` INT,
-	`refuel_status` ENUM('CREATED', 'REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'CREATED', --approved by owner
+	`refuel_status` ENUM(REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', --approved by owner
 	`refuel_billed` DATE DEFAULT NULL,
    	`refuel_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    	`refuel_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

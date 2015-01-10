@@ -35,15 +35,13 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Created by Stefaan Vermassen on 26/04/14.
  */
 public interface RefuelDAO {
 
-    public Refuel createRefuel(CarRide carRide) throws DataAccessException; // TODO: remove this
-    public int createRefuel(int reservationId, int eurocents, File file);
+    public void createRefuel(int reservationId, int eurocents, File file) throws DataAccessException;
 
     public void acceptRefuel(int refuelId) throws DataAccessException;
     public void rejectRefuel(int refuelId) throws DataAccessException;
@@ -51,7 +49,7 @@ public interface RefuelDAO {
     public Refuel getRefuel(int refuelId) throws DataAccessException;
     public void updateRefuel(Refuel refuel) throws DataAccessException;
 
-    public Iterable<Refuel> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    public Iterable<Refuel> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
     public int getAmountOfRefuels(Filter filter) throws DataAccessException;
     public Iterable<Refuel> getRefuelsForCarRide(int reservationId) throws DataAccessException;
     public Iterable<Refuel> getRefuelsForUser(int userId) throws DataAccessException;
