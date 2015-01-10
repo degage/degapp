@@ -52,7 +52,6 @@
     <div class="btn-group btn-group-xs">
         <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getProof.getId)" target="_blank">Link</a>
     </div>
-
 </td>
 
 <td>
@@ -60,11 +59,9 @@
     @refuel.getStatus match {
         case RefuelStatus.ACCEPTED => {
             <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
-            <a type="button" class="btn btn-xs btn-info" href="@routes.Refuels.makeRefuelStatusRequest(refuel.getId)">Onbeslist zetten</a>
         }
         case RefuelStatus.REFUSED => {
             <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
-            <a type="button" class="btn btn-xs btn-info" href="@routes.Refuels.makeRefuelStatusRequest(refuel.getId)">Onbeslist zetten</a>
         }
         case RefuelStatus.REQUEST => {
             <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
@@ -73,13 +70,5 @@
         case _ => {}
     }
 }
- @if((CurrentUser is refuel.getCarRide.getReservation.getUserId) || isAdmin) {
-    @if(refuel.getStatus == RefuelStatus.REQUEST){
-        <div class="btn-group btn-group-xs">
-            <button class="btn btn-primary" onclick="loadModal(@refuel.getId)">Bewijs wijzigen</button>
-        </div>
-    }
-}
-
 </td>
 

@@ -27,20 +27,15 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@app("Tankbeurten (eigenaar)", scripts=js.pagination("Refuels.showOwnerRefuelsPage")) {
-    @breadcrumbs{
-        @breadcrumb("Tankbeurten (eigenaar)")
-    }
-
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Tankbeurten (eigenaar)</h1>
-                @flashes()
-                @resultsTablePanel()
-            </div>
-                <!-- /col-lg-12 -->
+@stdlayout("Tankbeurten (eigenaar)", scripts=js.pagination("Refuels.showOwnerRefuelsPage")) {
+    @panel("Tankbeurten", "fa-beer"){
+        <div id="resultsTable" class="table-responsive col-xs-12">
+                <!-- Here comes the loaded table-->
         </div>
-            <!-- /row -->
-    </div>
+        <div class="col-xs-12">
+            <p><i>Nieuwe</i> tankbeurtgegevens moet je registreren bij de overeenkomstige rit.
+            (<a href='@routes.Drives.index("REQUEST_DETAILS")'>Ga naar ritten.</a>)
+            </p>
+        </div>
+    }
 }

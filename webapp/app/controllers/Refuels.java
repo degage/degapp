@@ -218,26 +218,6 @@ public class Refuels extends Controller {
     }
 
     /**
-     * Method: GET
-     * <p>
-     * Called when a refuel of a car is put back to the request status by the car owner.
-     *
-     * @param refuelId The refuel being put back to the request status
-     * @return the refuel admin page
-     */
-    @AllowRoles({UserRole.CAR_OWNER})
-    @InjectContext
-    public static Result makeRefuelStatusRequest(int refuelId) {
-        RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
-        Refuel refuel = dao.getRefuel(refuelId);
-        refuel.setStatus(RefuelStatus.REQUEST);
-        dao.updateRefuel(refuel);
-        // TODO: also send notification?
-        flash("success", "Tankbeurt succesvol op status REQUEST gezet.");
-        return redirect(routes.Refuels.showOwnerRefuels());
-    }
-
-    /**
      * Get the number of refuels having the provided status
      *
      * @param status The status

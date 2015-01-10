@@ -200,7 +200,6 @@ GET         /refuels/admin/page                     controllers.Refuels.showAllR
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
 GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
 GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
-GET         /refuels/owner/request                  controllers.Refuels.makeRefuelStatusRequest(refuelId: Int)
 
 # new UI
 GET         /refuels/ride                           controllers.Refuels.showRefuelsForRide(id: Int)
