@@ -33,29 +33,14 @@
 @stylesheets={
 <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
 }
-@datepickerWithButton(field: Field, caption: String)={
-<div class="col-md-4 @if(field.hasErrors) {has-error}">
-    <div id="@field.id-container" class="input-group date datetimepicker-input"
-         data-date-format="yyyy-mm-dd" data-min-view="3" data-start-view="2">
-        <span class="input-group-btn">
-            <button class="btn btn-success" type="submit">@caption</button>
-        </span>
-        <input class="form-control" type="text" name="@field.name" value="@field.value" readonly>
-        <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
-    </div>
-    @field.errors.map { error =>
-        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
-    }
-</div>
-}
+
 @stdlayout("Overzicht vrije perioden", stylesheets, scripts=js.datetimepicker()){
 
     @panel("Toon het overzicht voor een bepaalde dag", "fa-search"){
-        <div class="col-xs-12">
-            @helper.form(routes.Reserve.overviewPost){
-                @datepickerWithButton(form("date"), "Toon!")
-            }
-        </div>
+        @helper.form(routes.Reserve.overviewPost){
+            @std.datepicker(form("date"), null, css="col-sm-4", minView=3)
+            @std.submitButton("Toon!", css="col-sm-4")
+        }
     }
 
     @overviewpanel("Beschikbare auto's", "fa-car", lines){

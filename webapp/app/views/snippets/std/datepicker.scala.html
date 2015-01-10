@@ -27,14 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(field: Field, label: String, css: String="col-xs-12", startView: Int = 2)
+@(field: Field, label: String, css: String="col-xs-12", startView: Int = 2, minView: Int = 2)
 
 @* date picker input component for use in a form context *@
 
 <div class="form-group @css @if(field.hasErrors) {has-error}">
-    <label class="control-label" for="@field.id-container">@label</label>
+    @if(label!=null){
+        <label class="control-label" for="@field.id-container">@label</label>
+    }
     <div id="@field.id-container" class="input-group date datetimepicker-input"
-         data-date-format="yyyy-mm-dd" data-min-view="2" data-max-view="@startView" data-start-view="@startView">
+         data-date-format="yyyy-mm-dd" data-min-view="@minView" data-max-view="@startView" data-start-view="@startView">
         <input class="form-control" type="text" name="@field.name" value="@field.value" readonly>
         <span class="input-group-addon"><span class="glyphicon glyphicon-th"></span></span>
                                                 @* datetime picker does not work with fa icons *@
