@@ -36,7 +36,9 @@ import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.Reserve.ReservationData;
+import controllers.util.FileHelper;
 import controllers.util.Pagination;
+import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -45,12 +47,12 @@ import play.data.Form;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
+import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.drives.*;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
@@ -520,11 +522,11 @@ public class Drives extends Controller {
 
     public static class JourneyData {
         @Constraints.Required
-        @Constraints.Min(0)
+        @Constraints.Min(value=1, message="Ongeldige kilometerstand")
         public int startKm;
 
         @Constraints.Required
-        @Constraints.Min(0)
+        @Constraints.Min(value=1, message="Ongeldige kilometerstand")
         public int endKm;
 
         public boolean damaged = false;
@@ -548,6 +550,7 @@ public class Drives extends Controller {
         }
 
     }
+
     public static boolean isOwnerOrAdmin (Reservation reservation) {
         return  CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
                         CurrentUser.is(reservation.getOwnerId());
@@ -562,6 +565,31 @@ public class Drives extends Controller {
                 isDriverOrOwnerOrAdmin(reservation);
     }
 
+    public static class JourneyDataExtended extends JourneyData {
+
+        public EurocentAmount amount;
+
+        public String picture; // only used to enable field error messages...
+
+        public List<ValidationError> validate () {
+            List<ValidationError> result = super.validate();
+            if (amount != null && amount.getValue() <= 0) {
+
+                ValidationError error = new ValidationError("amount", "Bedrag moet groter zijn dan 0");
+                if (result == null) {
+                    return Arrays.asList(error);
+                } else {
+                    result.add (error);
+                    return result;
+                }
+            } else {
+                return result;
+            }
+        }
+
+
+    }
+
     /**
      * Allows first time input of journey info
      */
@@ -571,7 +599,7 @@ public class Drives extends Controller {
         Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId);
         if (newJourneyInfoAllowed(reservation)) {
             return ok(newjourney.render(
-                    Form.form(JourneyData.class).fill(new JourneyData()), // needs initial value damaged=false
+                    Form.form(JourneyDataExtended.class).fill(new JourneyDataExtended()), // needs initial value damaged=false
                     reservation
             ));
         } else {
@@ -586,42 +614,73 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result newJourneyInfoPost(int reservationId) {
-        Form<JourneyData> form = Form.form(JourneyData.class).bindFromRequest();
+
+        // complicated because page allows both new drives and refuels
+        Form<JourneyDataExtended> form = Form.form(JourneyDataExtended.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
         if (form.hasErrors()) {
             return badRequest(newjourney.render(form,reservation));
-        } else if (newJourneyInfoAllowed(reservation)) {
-            // add details to database
-            JourneyData data = form.get();
-            CarRideDAO dao = context.getCarRideDAO();
-            CarRide ride = dao.getCarRide(reservationId);
-            if (ride == null) {
-                boolean damaged = data.damaged;
-                context.getCarRideDAO().createCarRide(reservation, data.startKm, data.endKm, damaged);
-                if (damaged) {
-                    context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
-                }
-            } else {//  make changes and approve
-                dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
-            }
-
-            // change status according to whether current user is owner or not
-            if (isOwnerOrAdmin(reservation)) {
-                // approve immediately
-                rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
-            } else {
-                // register and send mail to owner
-                rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
-                UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
-                Notifier.sendReservationDetailsProvidedMail(owner, reservation);
-            }
-
-            return redirect(routes.Drives.details(reservationId));
         } else {
-            // not allowed
-            return badRequest(); // hacker?
+            JourneyDataExtended data = form.get();
+            Http.MultipartFormData.FilePart filePart = Controller.request().body().asMultipartFormData().getFile("picture");
+            if (filePart != null && (data.amount == null || data.amount.getValue() == 0)) {
+                form.reject("amount", "Bedrag ontbreekt");
+                form.reject("picture", "Bestand opnieuw selecteren");
+                return badRequest(newjourney.render(form, reservation));
+            } else if (filePart == null && data.amount != null  && data.amount.getValue() != 0) {
+                form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
+                return badRequest(newjourney.render(form, reservation));
+            }
+
+            if (newJourneyInfoAllowed(reservation)) {
+
+                // register/change ride in database
+                CarRideDAO dao = context.getCarRideDAO();
+                CarRide ride = dao.getCarRide(reservationId);
+                if (ride == null) {
+                    boolean damaged = data.damaged;
+                    context.getCarRideDAO().createCarRide(reservation, data.startKm, data.endKm, damaged);
+                    if (damaged) {
+                        context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
+                    }
+                } else {//  make changes and approve
+                    dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
+                }
+
+                boolean isAdmin = isOwnerOrAdmin(reservation);
+
+
+                // change ride status according to whether current user is owner or not
+                UserHeader owner = null;
+                if (isAdmin) {
+                    // approve immediately
+                    rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+                } else {
+                    // register and send mail to owner
+                    rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
+                    owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
+                    Notifier.sendReservationDetailsProvidedMail(owner, reservation);
+                }
+
+                // add first refuel, if present
+
+                if (filePart != null) {
+                    File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+                    if (file.getContentType() == null) {
+                        form.reject("picture", "Het bestand  is van het verkeerde type");
+                        return badRequest(newjourney.render(form, reservation));
+                    } else {
+                        Refuels.newRefuel(reservation, owner, data.amount.getValue(), file);
+                    }
+                }
+
+                return redirect(routes.Drives.details(reservationId));
+            } else {
+                // not allowed
+                return badRequest(); // hacker?
+            }
         }
     }
 

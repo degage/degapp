@@ -41,7 +41,7 @@ import java.time.LocalDate;
  */
 public interface RefuelDAO {
 
-    public void createRefuel(int reservationId, int eurocents, File file) throws DataAccessException;
+    public void createRefuel(int reservationId, int eurocents, File file, RefuelStatus status) throws DataAccessException;
 
     public void acceptRefuel(int refuelId) throws DataAccessException;
     public void rejectRefuel(int refuelId) throws DataAccessException;

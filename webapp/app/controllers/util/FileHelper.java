@@ -30,10 +30,11 @@
 package controllers.util;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.User;
-import be.ugent.degage.db.models.UserRole;
+import be.ugent.degage.db.models.*;
+import com.google.common.collect.Sets;
 import db.DataAccess;
 import play.Logger;
 import play.api.Play;
@@ -48,14 +49,12 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.io.File;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by Cedric on 4/11/2014.
@@ -65,8 +64,14 @@ public class FileHelper {
     private static final boolean MOVE_INSTEAD_OF_COPY = true;
 
     //Source: http://www.cs.helsinki.fi/u/hahonen/uusmedia/sisalto/cgi_perl_ssi/mime.html
-    public static final List<String> IMAGE_CONTENT_TYPES = Arrays.asList("image/gif", "image/jpeg", "image/png", "image/tiff"); // array is too small to allocate a Set
-    public static final List<String> DOCUMENT_CONTENT_TYPES = Arrays.asList("text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream");
+
+    public static final Collection<String> IMAGE_CONTENT_TYPES
+            = Sets.newHashSet("image/gif", "image/jpeg", "image/png", "image/tiff");
+    public static final Collection<String> DOCUMENT_CONTENT_TYPES
+            = Sets.newHashSet("text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream");
+    static {
+        DOCUMENT_CONTENT_TYPES.addAll(IMAGE_CONTENT_TYPES);
+    }
 
     private static String uploadFolder;
     private static String generatedFolder;
@@ -156,7 +161,7 @@ public class FileHelper {
     }
 
     public static boolean isDocumentContentType(String contentType) {
-        return isImageContentType(contentType) || DOCUMENT_CONTENT_TYPES.contains(contentType);
+        return DOCUMENT_CONTENT_TYPES.contains(contentType);
     }
 
     /**
@@ -265,6 +270,41 @@ public class FileHelper {
             return action.failAction(user);
         } else {
             return action.process(file, fdao);
+        }
+    }
+
+    /**
+     * Returns a handle to the named file in the current http request. (Should only be used with an injected context.)
+     * @return null if no file was present. If the contenttype was invalid, returns a File-object
+     * with null content type and negative id.
+     */
+    public static be.ugent.degage.db.models.File getFileFromRequest (String fieldName, Collection<String> contentTypes, String fileType) {
+        return getFileFromFilePart(
+                Controller.request().body().asMultipartFormData().getFile(fieldName),
+                contentTypes, fileType);
+    }
+
+    public static be.ugent.degage.db.models.File getFileFromFilePart(Http.MultipartFormData.FilePart f, Collection<String> contentTypes, String fileType) {
+        if (f == null) {
+            return null;
+        } else if (!contentTypes.contains(f.getContentType())) {
+            return new be.ugent.degage.db.models.File (-1, null, null, null);
+        } else {
+            // TODO: make general method for file handling. There is too much cut and paste
+            try {
+                Path relativePath = saveFile(f, ConfigurationHelper.getConfigurationString(fileType));
+                DataAccessContext context = DataAccess.getInjectedContext();
+                FileDAO fdao = context.getFileDAO();
+                try {
+                    be.ugent.degage.db.models.File file = fdao.createFile(relativePath.toString(), f.getFilename(), f.getContentType());
+                    return file;
+                } catch (DataAccessException ex) {
+                    FileHelper.deleteFile(relativePath);
+                    throw ex;
+                }
+            }  catch (IOException ex) {
+                throw new DataAccessException("File system I/O error", ex);
+            }
         }
     }
 

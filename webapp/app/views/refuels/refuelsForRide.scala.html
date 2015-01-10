@@ -67,18 +67,19 @@
     @panel("Nieuwe tankbeurt") {
         @helper.form(routes.Refuels.newRefuelForRidePost(reservation.getId), 'enctype -> "multipart/form-data"){
             @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
-            <div class="form-group col-sm-6">
-                <label class="control-label" for="picture">Bonnetje als bewijsstuk</label>
-                <input id="picture" name="picture" type="file" class="form-control input-md" required>
-            </div>
-            <div class="col-xs-12">
-                <p class="alert alert-danger">
-                <strong>Opgelet!</strong> Na het doorsturen kan deze informatie
-                niet meer gemakkelijk worden gewijzigd. Controleer dus of je geen (tik)fouten gemaakt hebt en of je wel
-                    het juiste scan- of
-                    afbeeldingsbestand hebt geselecteerd.</p>
-            </div>
-            @std.submitButton("Doorsturen")
+            @std.fileField(form("picture"), "bonnetje als bewijsstuk:", required=true)
+            @if(Drives.isOwnerOrAdmin(reservation)){
+                @std.submitButton("Doorsturen (en meteen goedkeuren)")
+            } else {
+                <div class="col-xs-12">
+                    <p class="alert alert-danger">
+                    <strong>Opgelet!</strong> Na het doorsturen kan deze informatie
+                    niet meer gemakkelijk worden gewijzigd. Controleer dus of je geen (tik)fouten gemaakt hebt en of je wel
+                        het juiste scan- of
+                        afbeeldingsbestand hebt geselecteerd.</p>
+                </div>
+                @std.submitButton("Doorsturen")
+            }
         }
     }
 }

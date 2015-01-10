@@ -30,13 +30,10 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.*;
-import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import db.DataAccess;
@@ -45,15 +42,12 @@ import notifiers.Notifier;
 import play.data.Form;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
 import data.EurocentAmount;
 import views.html.refuels.*;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 
@@ -65,6 +59,8 @@ public class Refuels extends Controller {
     public static class RefuelData {
 
         public EurocentAmount amount;
+
+        public String picture; // only used to enable field error messages
 
         public RefuelData populate(EurocentAmount amount) {
             this.amount = amount;
@@ -283,47 +279,40 @@ public class Refuels extends Controller {
         Form<RefuelData> form = Form.form(RefuelData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
+        Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
         if (form.hasErrors()) {
-            Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
             return ok( refuelsForRide.render(form, refuels, reservation));
         } else if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
-
             RefuelData data = form.get();
-            Http.MultipartFormData body = request().body().asMultipartFormData();
-            Http.MultipartFormData.FilePart proof = body.getFile("picture");
-            if (proof == null) {  // should not happen
-                flash ("danger", "Bestand met de scan of foto van het tankbonnetje ontbreekt");
-            } else if (!FileHelper.isDocumentContentType(proof.getContentType())) {
-                flash("danger", "Het bestand  is van het verkeerde type");
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+            if (file.getContentType() == null) {
+                form.reject("picture", "Het bestand  is van het verkeerde type");
+                return badRequest(refuelsForRide.render(form, refuels, reservation));
             } else {
-                // TODO: make general method for file handling. There is too much cut and paste
-                try {
-                    Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.refuelproofs"));
-                    FileDAO fdao = context.getFileDAO();
-                    try {
-                        File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
-                        int eurocents = data.amount.getValue();
-                        context.getRefuelDAO().createRefuel(reservationId, eurocents, file);
-                        Notifier.sendRefuelRequest(
-                                context.getUserDAO().getUserHeader(reservation.getOwnerId()),
-                                reservation.getCar(),
-                                eurocents
-                        );
-                        flash("success", "Uw tankbeurt wordt voorgelegd aan de auto-eigenaar.");
-                    } catch (DataAccessException ex) {
-                        FileHelper.deleteFile(relativePath);
-                        throw ex;
-                    }
-                }  catch (IOException ex) {
-                    throw new RuntimeException(ex); //no more checked catch -> error page!
-                }
-
+                UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
+                newRefuel(reservation, owner, data.amount.getValue(), file);
             }
             return redirect(routes.Refuels.showRefuelsForRide(reservationId));
         } else {
             return badRequest(); // hacker?
         }
 
+    }
+
+    // use in injected context only
+    static void newRefuel(Reservation reservation, UserHeader owner, int eurocents, File file) {
+        boolean isAdmin = Drives.isOwnerOrAdmin(reservation);
+
+        DataAccess.getInjectedContext().getRefuelDAO().createRefuel(
+                reservation.getId(), eurocents, file,
+                isAdmin ? RefuelStatus.ACCEPTED : RefuelStatus.REQUEST);
+        if (!isAdmin) {
+            Notifier.sendRefuelRequest(
+                    owner,
+                    reservation.getCar(),
+                    eurocents
+            );
+        }
     }
 
 }

@@ -101,18 +101,19 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private LazyStatement createRefuelStatement = new LazyStatement (
             "INSERT INTO refuels (refuel_car_ride_id, refuel_file_id, refuel_eurocents, refuel_status) " +
-                    "VALUES (?,?,?,'REQUEST')" //,
+                    "VALUES (?,?,?,?)" //,
             //"refuel_id"
     );
 
 
     @Override
-    public void createRefuel(int reservationId, int eurocents, File file) {
+    public void createRefuel(int reservationId, int eurocents, File file, RefuelStatus status) {
         try{
             PreparedStatement ps = createRefuelStatement.value();
             ps.setInt(1, reservationId);
             ps.setInt(2, file.getId());
             ps.setInt(3, eurocents);
+            ps.setString(4, status.name());
 
             ps.executeUpdate();
 
