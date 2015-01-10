@@ -29,9 +29,13 @@
 
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.*;
+import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.Filter;
+import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.RefuelDAO;
-import be.ugent.degage.db.models.*;
+import be.ugent.degage.db.models.File;
+import be.ugent.degage.db.models.Refuel;
+import be.ugent.degage.db.models.RefuelStatus;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -52,34 +56,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             "LEFT JOIN users AS owners ON car_owner_user_id = owners.user_id " +
             "LEFT JOIN files ON refuel_file_id = file_id ";
 
-    private static final String FILTER_FRAGMENT = " WHERE reservation_user_id LIKE ? AND car_owner_user_id LIKE ? AND car_id LIKE ? ";
-
     public JDBCRefuelDAO(JDBCDataAccessContext context) {
         super(context);
-    }
-
-    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
-        if(filter == null) {
-            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = new JDBCFilter();
-        }
-        String userId = filter.getValue(FilterField.REFUEL_USER_ID);
-        if(userId.equals("") || userId.startsWith("-")) { // Not very nice programming, but works :D
-            userId = "%%";
-        }
-        ps.setString(start, userId);
-
-        String ownerId = filter.getValue(FilterField.REFUEL_OWNER_ID);
-        if(ownerId.equals("") || ownerId.startsWith("-")) { // Not very nice programming, but works :D
-            ownerId = "%%";
-        }
-        ps.setString(start+1, ownerId);
-
-        String carId = filter.getValue(FilterField.REFUEL_CAR_ID);
-        if(carId.equals("") || carId.startsWith("-")) { // Not very nice programming, but works :D
-            carId = "%%";
-        }
-        ps.setString(start+2, carId);
     }
 
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
@@ -212,69 +190,61 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     }
 
-    private LazyStatement getAmountOfRefuelsStatement= new LazyStatement (
-             "SELECT count(refuel_id) AS amount_of_refuels FROM refuels " +
-                     "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
-                     "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id " +
-                     "LEFT JOIN cars ON reservation_car_id = car_id " +
-                     "LEFT JOIN users ON reservation_user_id = user_id " +
-                     "LEFT JOIN files ON refuel_file_id = file_id " + FILTER_FRAGMENT
-     );
+    private static void appendRefuelFilter (StringBuilder builder, Filter filter) {
+        // build clause
+        StringBuilder b = new StringBuilder();
+
+        FilterUtils.appendIdFilter(b, "reservation_user_id", filter.getValue(FilterField.REFUEL_USER_ID));
+        FilterUtils.appendIdFilter(b, "reservation_car_id", filter.getValue(FilterField.REFUEL_CAR_ID));
+
+        String ownerFilter = filter.getValue(FilterField.REFUEL_OWNER_ID);
+        if (! ownerFilter.isEmpty()) {
+            if (Integer.parseInt(ownerFilter) >= 0) {
+                b.append(" AND (reservation_user_id = ").append(ownerFilter).
+                        append(" OR reservation_owner_id = ").append(ownerFilter).
+                        append(")");
+            }
+        }
+
+        if (b.length() > 0) {
+            builder.append(" WHERE ").append(b.substring(4));
+        }
+    }
+
+     private static String AMOUNT_OF_REFUELS_STATEMENT =
+             "SELECT count(*) AS amount_of_refuels FROM refuels " +
+                     "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id ";
 
     @Override
     public int getAmountOfRefuels(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfRefuelsStatement.value();
-            fillFragment(ps, filter, 1);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return rs.getInt("amount_of_refuels");
-                else return 0;
-
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of refuels", ex);
+        StringBuilder builder = new StringBuilder(AMOUNT_OF_REFUELS_STATEMENT);
+        appendRefuelFilter(builder, filter);
+        //System.err.println("SQL = " + builder.toString());
+        try (Statement stat = createStatement();
+             ResultSet rs = stat.executeQuery(builder.toString())) {
+            if (rs.next()) {
+                return rs.getInt("amount_of_refuels");
+            } else {
+                return 0;
             }
+
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of refuels", ex);
         }
     }
 
-    private LazyStatement getRefuelsStatement= new LazyStatement (
-            REFUEL_QUERY + FILTER_FRAGMENT +
-                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 4 END ASC LIMIT ?,?"
-    );
-
     @Override
     public Iterable<Refuel> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            // TODO: more to orderBy, asc/desc
-            PreparedStatement ps = getRefuelsStatement.value();
-            fillFragment(ps, filter, 1);
-            int first = (page-1)*pageSize;
-            ps.setInt(4, first);
-            ps.setInt(5, pageSize);
+        StringBuilder builder = new StringBuilder(REFUEL_QUERY);
+        appendRefuelFilter(builder, filter);
+        builder.append(" ORDER BY refuel_created_at DESC LIMIT ?,?");
+
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setInt(1, (page-1)*pageSize);
+            ps.setInt(2, pageSize);
             return getRefuelList(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of refuels", ex);
-        }
-    }
-
-    private LazyStatement getRefuelsForUserStatement= new LazyStatement (
-            REFUEL_QUERY + " WHERE reservation_user_id = ? " +
-                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 2 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 4 END"
-    );
-
-    @Override
-    public Iterable<Refuel> getRefuelsForUser(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getRefuelsForUserStatement.value();
-            ps.setInt(1, userId);
-            return getRefuelList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
         }
     }
 
@@ -286,22 +256,6 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     public Iterable<Refuel> getRefuelsForCarRide(int userId) throws DataAccessException {
         try {
             PreparedStatement ps = getRefuelsForCarRideStatement.value();
-            ps.setInt(1, userId);
-            return getRefuelList(ps);
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
-        }
-    }
-    private LazyStatement getRefuelsForOwnerStatement= new LazyStatement (
-            REFUEL_QUERY + " WHERE car_owner_user_id = ? " +
-                    "ORDER BY CASE refuel_status WHEN 'REQUEST' THEN 1 WHEN 'REFUSED' THEN 3 " +
-                    "WHEN 'ACCEPTED' THEN 2 END"
-    );
-
-    @Override
-    public Iterable<Refuel> getRefuelsForOwner(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getRefuelsForOwnerStatement.value();
             ps.setInt(1, userId);
             return getRefuelList(ps);
         } catch (SQLException e){

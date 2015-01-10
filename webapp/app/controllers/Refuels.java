@@ -163,11 +163,12 @@ public class Refuels extends Controller {
     // should be used with an injected context only
     private static Html refuelList(int page, int pageSize, Filter filter) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
-
         int amountOfResults = dao.getAmountOfRefuels(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
-
-        return refuelspage.render(dao.getRefuels(page, pageSize, filter), page, amountOfResults, amountOfPages);
+        return refuelspage.render(
+                dao.getRefuels(page, pageSize, filter),
+                page,
+                amountOfResults,
+                (amountOfResults + pageSize - 1) / pageSize);
     }
 
     /**

@@ -31,43 +31,12 @@
     @js.pagination("Refuels.showAllRefuelsPage")
     @js.userpicker()
 }
-@app("Tankbeurten (beheer)", scripts=scripts) {
-    @breadcrumbs{
-        @breadcrumb("Tankbeurten (beheer)")
+@stdlayout("Tankbeurten (beheer)", scripts=scripts) {
+
+    @panel("Zoek tankbeurten", "fa-search") {
+        @search.carpicker("refuel_car_id", "Auto")
+        @search.userpicker("refuel_owner_id", "Bestuurder / eigenaar")
+        @search.button("Zoek!")
     }
-
-    <div id="page-wrapper">
-        <div class="row">
-            <div class="col-lg-12">
-                <h1 class="page-header">Tankbeurten (Admin)</h1>
-                @flashes()
-
-                <div class="panel panel-default">
-                    <div class="panel-heading">
-                        <i class="fa fa-bar-chart-o fa-task"></i> Tankbeurten
-                    </div>
-                    <div class="panel-body">
-                        <div class="row">
-                            <div class="col-lg-12">
-                                <p>
-                                    Hier kan je als admin alle tankbeurten zien en die eventueel wijzigen.
-                                </p>
-                            </div>
-                        </div>
-                        <div class="row">
-                            @search.carpicker("refuel_car_id", "Auto")
-                            @search.userpicker("refuel_owner_id", "Eigenaar")
-                            @search.userpicker("refuel_user_id", "Bestuurder")
-                            @search.button("Zoek!")
-                        </div>
-                    </div>
-                        <!-- /.panel-body -->
-                </div>
-                @resultsTablePanel()
-
-            </div>
-                <!-- /col-lg-12 -->
-        </div>
-            <!-- /row -->
-    </div>
+    @resultsTablePanel()
 }
