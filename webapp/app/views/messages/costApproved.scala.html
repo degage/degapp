@@ -1,4 +1,4 @@
-@* passwordReset.scala.html
+@* costApproved.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, url: String)
+@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String)
 
-@* Wachtwoord opnieuw instellen*@
+@* Kost goedgekeurd *@
 <p>Beste @user.getFirstName @user.getLastName,</p>
-
-<p>U ontvangt deze e-mail omdat u aan de webapplicatie van Dégage hebt laten weten dat
-u uw wachtwoord bent vergeten. Klik op onderstaande link om een nieuw wachtwoord te kiezen:</p>
-<pre>
-    <a href="@url">@url</a>
-</pre>
-
-
+<p>Onderstaande autokost werd goedgekeurd door een beheerder:</p>
+<ul>
+    <li><b>Auto:</b> @carName</li>
+    <li><b>Beschrijving:</b> @costDescription</li>
+    <li><b>Bedrag:</b> @amount</li>
+    <li><b>Datum:</b> @date</li>
+</ul>

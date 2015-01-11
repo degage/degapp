@@ -1,4 +1,4 @@
-@* passwordReset.scala.html
+@* reservationApproved.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, url: String)
+@(user: UserHeader, from: String, until: String,carAddress: String, url: String, comment: String)
 
-@* Wachtwoord opnieuw instellen*@
+@* Reservatie goedgekeurd *@
 <p>Beste @user.getFirstName @user.getLastName,</p>
-
-<p>U ontvangt deze e-mail omdat u aan de webapplicatie van Dégage hebt laten weten dat
-u uw wachtwoord bent vergeten. Klik op onderstaande link om een nieuw wachtwoord te kiezen:</p>
+<p>Uw reservatie voor de
+volgende periode is goedgekeurd:</p>
+<ul><li>@from — @until.</li></ul>
+<p>De standplaats van de auto is:</p>
+<ul><li>@carAddress</li></ul>
+@if(comment != null && !comment.trim.isEmpty){
+<p>De eigenaar vermeldt hierbij het volgende:</p>
+<hr />
+@comment
+<hr />
+}
+<p>Gelieve de eigenaar te contacteren voor verdere afspraken.
+Klik op onderstaande link voor bijkomende informatie:
 <pre>
     <a href="@url">@url</a>
 </pre>
-
-

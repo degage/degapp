@@ -1,4 +1,4 @@
-@* passwordReset.scala.html
+@* reminder.scala.txt
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -29,13 +29,11 @@
 
 @(user: UserHeader, url: String)
 
-@* Wachtwoord opnieuw instellen*@
-<p>Beste @user.getFirstName @user.getLastName,</p>
+@* Ongelezen berichten *@
+Beste @user.getFirstName @user.getLastName,
 
-<p>U ontvangt deze e-mail omdat u aan de webapplicatie van Dégage hebt laten weten dat
-u uw wachtwoord bent vergeten. Klik op onderstaande link om een nieuw wachtwoord te kiezen:</p>
-<pre>
-    <a href="@url">@url</a>
-</pre>
+Je het nog ongelezen berichten. Gebruik onderstaande link om
+in te loggen op de webapplicatie van Dégage:
 
+    @url
 

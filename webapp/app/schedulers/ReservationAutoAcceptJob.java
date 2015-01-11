@@ -51,7 +51,7 @@ public class ReservationAutoAcceptJob implements ScheduledJob.Executor {
             if (reservation.getFrom().isBefore(LocalDateTime.now())) {
                 String message = "Automatisch goedgekeurd door het systeem.";
                 dao.updateReservationStatus(reservationId, ReservationStatus.ACCEPTED, message);
-                Notifier.sendReservationApprovedByOwnerMail(context, message, reservation);
+                Notifier.sendReservationApprovedByOwnerMail(message, reservation);
             } else {
                 dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED,
                         "Automatisch geannuleerd door het systeem");

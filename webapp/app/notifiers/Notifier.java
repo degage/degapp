@@ -38,6 +38,9 @@ import data.EurocentAmount;
 import db.DataAccess;
 import play.Play;
 import play.api.mvc.Call;
+import play.i18n.Messages;
+import play.twirl.api.Html;
+import play.twirl.api.Txt;
 import providers.DataProvider;
 
 import static notifiers.Mailer.sendMail;
@@ -46,23 +49,10 @@ import static notifiers.Mailer.sendMail;
 /**
  *
  */
-
 public class Notifier extends Mailer {
 
     public static String toFullURL (Call call) {
         return Play.application().configuration().getString("application.hostUrl") + call.url();
-    }
-
-    // to be used with injected context
-    public static void sendVerificationMail(String email, String verificationUrl) {
-        // Remark: phone numbers are not filled in!
-        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.VERIFICATION);
-        String mail = template.getBody().replace(
-                "%verification_url%",
-                toFullURL(routes.Login.registerVerification(verificationUrl))
-        );
-        sendMail(email, "Accountaanvraag bij Dégage", null, mail);
     }
 
     /**
@@ -79,212 +69,190 @@ public class Notifier extends Mailer {
         DataProvider.getCommunicationProvider().invalidateNotificationNumber(user.getId());
     }
 
-    private static void createNotificationAndSend(NotificationDAO dao, UserHeader user, EmailTemplate template, String mail) {
-        createNotification(dao, user, template.getSubject(), mail);
-        if (template.getSendMail()) {
-            sendMail(user.getEmail(), template.getSubject(), null, mail);
-        }
+
+    private static void createNotification(UserHeader user, String subjectKey, Html mail) {
+        createNotification(DataAccess.getInjectedContext().getNotificationDAO(), user, Messages.get("subject." + subjectKey), mail.body().trim());
     }
 
-    // to be used with injected context
-    public static void sendWelcomeMail(UserHeader user) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.WELCOME);
-        String mail = replaceUserTags(user, template.getBody());
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+    private static void createNotificationAndSend(UserHeader user, String subjectKey, Txt text, Html html) {
+        createNotification(user, subjectKey, html);
+        sendMail(user.getEmail(), subjectKey, text, html);
     }
 
-    // to be used with injected context
-    public static void sendMembershipStatusChanged(UserHeader user, boolean approved, String comment) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template;
-        if (approved) {
-            template = dao.getTemplate(MailType.MEMBERSHIP_APPROVED);
-        } else {
-            template = dao.getTemplate(MailType.MEMBERSHIP_REFUSED);
-        }
-        String mail = replaceUserTags(user, template.getBody());
-        mail = mail.replace("%comment%", comment);
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+    public static void sendVerificationMail(String email, String verificationUrl) {
+        String url = toFullURL(routes.Login.registerVerification(verificationUrl));
+        sendMail(email, "verification",
+                views.txt.messages.verification.render(url),
+                views.html.messages.verification.render(url)
+        );
     }
 
-    // to be used with injected context
-    public static void sendCarCostStatusChanged(UserHeader user, CarCost carCost, boolean approved) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template;
-        if (approved) {
-            template = dao.getTemplate(MailType.CARCOST_APPROVED);
-        } else {
-            template = dao.getTemplate(MailType.CARCOST_REFUSED);
-        }
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarCostTags(carCost, mail);
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+    public static void sendMembershipApproved(UserHeader user, String comment) {
+        createNotificationAndSend (user, "memberschipApproved",
+                views.txt.messages.membershipApproved.render(user, comment),
+                views.html.messages.membershipApproved.render(user, comment)
+        );
     }
 
-
-    // to be used with injected context
-    public static void sendRefuelStatusChanged(Refuel refuel, boolean approved) {
-        UserHeader user = refuel.getCarRide().getReservation().getUser();
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template;
-        if (approved) {
-            template = dao.getTemplate(MailType.REFUEL_APPROVED);
-        } else {
-            template = dao.getTemplate(MailType.REFUEL_REFUSED);
-        }
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceRefuelTags(
-                refuel.getCarRide().getReservation().getCar(), refuel.getEurocents(), mail);
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+    public static void sendMembershipRejected(UserHeader user, String comment) {
+        createNotificationAndSend (user, "memberschipApproved",
+                views.txt.messages.membershipRejected.render(user, comment),
+                views.html.messages.membershipRejected.render(user, comment)
+        );
     }
 
-    // to be used with injected context
+    public static void sendCarCostApproved(UserHeader user, CarCost carCost) {
+        String date = Utils.toLocalizedDateString(carCost.getDate());
+        String name = carCost.getCar().getName();
+        String amount = carCost.getAmount().toPlainString() + " euro";
+        String description = carCost.getDescription();
+        createNotificationAndSend(user, "costApproved",
+                views.txt.messages.costApproved.render(user, name, description, amount, date),
+                views.html.messages.costApproved.render(user, name, description, amount, date)
+        );
+    }
+
+    public static void sendCarCostRejected(UserHeader user, CarCost carCost) {
+        String date = Utils.toLocalizedDateString(carCost.getDate());
+        String name = carCost.getCar().getName();
+        String amount = carCost.getAmount().toPlainString() + " euro";
+        String description = carCost.getDescription();
+        createNotificationAndSend(user, "costRejected",
+                views.txt.messages.costRejected.render(user, name, description, amount, date),
+                views.html.messages.costRejected.render(user, name, description, amount, date)
+        );
+    }
+
+    public static void sendRefuelApproved(Refuel refuel) {
+        Reservation reservation = refuel.getCarRide().getReservation();
+        UserHeader user = reservation.getUser();
+        String name = reservation.getCar().getName();
+        String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
+        createNotificationAndSend(user, "refuelApproved",
+                views.txt.messages.refuelApproved.render(user, name, amount),
+                views.html.messages.refuelApproved.render(user, name, amount)
+        );
+    }
+
+    public static void sendRefuelRejected(Refuel refuel) {
+        Reservation reservation = refuel.getCarRide().getReservation();
+        UserHeader user = reservation.getUser();
+        String name = reservation.getCar().getName();
+        String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
+        createNotificationAndSend(user, "refuelRejected",
+                views.txt.messages.refuelRejected.render(user, name, amount),
+                views.html.messages.refuelRejected.render(user, name, amount)
+        );
+    }
+
     public static void sendCarCostRequest(CarCost carCost) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.CARCOST_REQUEST);
-        UserRoleDAO userRoleDAO = context.getUserRoleDAO();
-        NotificationDAO notificationDAO = context.getNotificationDAO();
-        String mail = replaceCarCostTags(carCost, template.getBody());
+        UserRoleDAO userRoleDAO = DataAccess.getInjectedContext().getUserRoleDAO();
+        String date = Utils.toLocalizedDateString(carCost.getDate());
+        String carName = carCost.getCar().getName();
+        String amount = carCost.getAmount().toPlainString() + " euro";
+        String costDescription = carCost.getDescription();
         for (UserHeader u : userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN)) {
-            createNotification(notificationDAO, u, template.getSubject(), replaceUserTags(u, mail));
+            createNotification(u, "costRequest",
+                    views.html.messages.costRequest.render(u, carName, costDescription, amount, date)
+            );
         }
 
     }
 
-    // to be used with injected context
-    public static void sendRefuelRequest(UserHeader owner, Car car, int eurocents) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        EmailTemplate template = context.getTemplateDAO().getTemplate(MailType.REFUEL_REQUEST);
-        String mail = replaceUserTags(owner, template.getBody());
-        mail = replaceRefuelTags(car, eurocents, mail);
-        createNotificationAndSend(context.getNotificationDAO(), owner, template, mail);
+    public static void sendRefuelRequest(UserHeader owner, int reservationId, Car car, int eurocents) {
+        String carName = car.getName();
+        String amount = EurocentAmount.toString(eurocents) + " euro";
+        String url = toFullURL(routes.Drives.approveOrReject(reservationId));
+        createNotificationAndSend(
+                owner, "refuelRequest",
+                views.txt.messages.refuelRequest.render(owner,carName,amount,url),
+                views.html.messages.refuelRequest.render(owner,carName,amount,url)
+        );
     }
 
     public static void sendInfoSessionEnrolledMail(DataAccessContext context, UserHeader user, InfoSession infoSession) {
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.INFOSESSION_ENROLLED);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceInfoSessionTags(infoSession, mail);
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+        String date = Utils.toLocalizedString(infoSession.getTime());
+        String address = infoSession.getAddress().toString();
+        createNotificationAndSend(
+                user, "infosessionEnrolled",
+                views.txt.messages.infosessionEnrolled.render(user, date, address),
+                views.html.messages.infosessionEnrolled.render(user, date, address)
+        );
+
     }
 
-    // to be used with injected context
-    public static void sendReservationApproveRequestMail(UserHeader owner, Reservation carReservation) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVE_REQUEST);
-        String mail = replaceUserTags(owner, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_url%", toFullURL(routes.Drives.details(carReservation.getId())));
-        createNotificationAndSend (context.getNotificationDAO(), owner, template, mail);
+    public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation) {
+        String url = toFullURL(routes.Drives.details(reservation.getId()));
+        UserHeader driver = reservation.getUser();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        createNotificationAndSend (
+                owner, "reservationApprove",
+                views.txt.messages.reservationApprove.render(
+                        owner, driver, from,  until, url, reservation.getMessage()),
+                views.html.messages.reservationApprove.render(
+                        owner, driver, from,  until, url, reservation.getMessage())
+        );
     }
 
-    // to be used with injected context
-    public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation carReservation) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.DETAILS_PROVIDED);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_url%", toFullURL(routes.Drives.details(carReservation.getId())));
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+    public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation reservation) {
+        UserHeader driver = reservation.getUser();
+        String url = toFullURL(routes.Drives.details(reservation.getId()));
+        String carName = reservation.getCar().getName();
+        createNotificationAndSend(user, "detailsProvided",
+                views.txt.messages.detailsProvided.render(user, driver, carName, url),
+                views.html.messages.detailsProvided.render(user, driver, carName, url)
+        );
     }
 
-    public static void sendReservationApprovedByOwnerMail(DataAccessContext context, String remarks, Reservation carReservation) {
+    public static void sendReservationApprovedByOwnerMail(String remarks, Reservation reservation) {
         // note: needs extended reservation
-        UserHeader user = carReservation.getUser();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.RESERVATION_APPROVED_BY_OWNER);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_car_address%", carReservation.getCar().getLocation().toString());
-        mail = mail.replace("%reservation_remarks%", ("".equals(remarks) ? "[Geen opmerkingen]" : remarks));
-        mail = mail.replace("%reservation_url%", routes.Drives.details(carReservation.getId()).toString());
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+        UserHeader user = reservation.getUser();
+        String carAddress = reservation.getCar().getLocation().toString();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        String url = toFullURL(routes.Drives.details(reservation.getId()));
+        createNotificationAndSend(
+                user, "reservationApproved",
+                views.txt.messages.reservationApproved.render(user, from, until, carAddress, url, remarks),
+                views.html.messages.reservationApproved.render(user, from, until, carAddress, url, remarks)
+        );
+    }
+    // to be used with injected context
+    public static void sendReservationRefusedByOwnerMail(String reason, Reservation reservation) {
+        UserHeader driver = reservation.getUser();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        createNotificationAndSend(
+                driver, "reservationRejected",
+                views.txt.messages.reservationRejected.render(driver, from, until, reason),
+                views.html.messages.reservationRejected.render(driver, from, until, reason)
+        );
     }
 
-    // to be used with injected context
-    public static void sendReservationRefusedByOwnerMail(String reason, Reservation carReservation) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.RESERVATION_REFUSED_BY_OWNER);
-        UserHeader user = carReservation.getUser();
-        String mail = replaceUserTags(user, template.getBody());
-        mail = replaceCarReservationTags(carReservation, mail);
-        mail = mail.replace("%reservation_reason%", reason);
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
-    }
-
-    // to be used with injected context
     public static void sendContractManagerAssignedMail(UserHeader user, Approval approval) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.CONTRACTMANAGER_ASSIGNED);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = mail.replace("%admin_name%", approval.getAdmin().getFullName());
-        createNotificationAndSend (context.getNotificationDAO(), user, template, mail);
+        UserHeader admin = approval.getAdmin();
+        createNotificationAndSend(user, "managerAssigned",
+                views.txt.messages.managerAssigned.render(user, admin, 75, 30), // TODO: not hardcoded
+                views.html.messages.managerAssigned.render(user, admin, 75, 30)
+        );
     }
 
-    // to be used with injected context
     public static void sendPasswordResetMail(UserHeader user, String verificationUrl) {
         String url = toFullURL(routes.Login.resetPassword(verificationUrl));
-        sendMail( user.getEmail(),
-                "Wachtwoord opnieuw instellen (Dégage)",
+        sendMail( user.getEmail(), "passwordReset",
                 views.txt.messages.passwordReset.render(user, url),
                 views.html.messages.passwordReset.render(user, url)
         );
     }
 
     public static void sendReminderMail(DataAccessContext context, UserHeader user) {
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.REMINDER_MAIL);
-        String mail = replaceUserTags(user, template.getBody());
-        sendMail(user.getEmail(), "Ongelezen berichten", null, mail);
-        SchedulerDAO sdao = context.getSchedulerDAO();
-        sdao.setReminded(user.getId());
-    }
-
-    private static String replaceUserTags(UserHeader user, String template) {
-        template = template.replace("%user_firstname%", user.getFirstName());
-        template = template.replace("%user_lastname%", user.getLastName());
-        //TODO: replace address only when provided
-        return template;
-    }
-
-    private static String replaceInfoSessionTags(InfoSession infoSession, String template) {
-        template = template.replace("%infosession_date%", Utils.toLocalizedString(infoSession.getTime()));
-        template = template.replace("%infosession_address%", infoSession.getAddress().toString());
-        return template;
-    }
-
-    private static String replaceCarReservationTags(Reservation carReservation, String template) {
-        UserHeader driver = carReservation.getUser();
-        template = template.replace("%reservation_from%", Utils.toLocalizedString(carReservation.getFrom()));
-        template = template.replace("%reservation_to%", Utils.toLocalizedString(carReservation.getUntil()));
-        template = template.replace("%comment%", carReservation.getMessage() == null ? "[Geen commentaar]" : carReservation.getMessage());
-        template = template.replace("%reservation_user_firstname%", driver.getFirstName());
-        template = template.replace("%reservation_user_lastname%", driver.getLastName());
-        return template;
-    }
-
-    private static String replaceCarCostTags(CarCost carCost, String template) {
-        template = template.replace("%car_cost_time%", Utils.toLocalizedDateString(carCost.getDate()));
-        template = template.replace("%car_name%", carCost.getCar().getName());
-        template = template.replace("%amount%", carCost.getAmount().toPlainString() + " euro");
-        template = template.replace("%car_cost_description%", carCost.getDescription());
-        return template;
-    }
-
-    private static String replaceRefuelTags(Car car, int eurocents, String template) {
-        template = template.replace("%car_name%", car.getName());
-        template = template.replace("%amount%", EurocentAmount.toString(eurocents) + " euro");
-        return template;
+        context.getSchedulerDAO().setReminded(user.getId());
+        String url = toFullURL(routes.Application.index());
+        sendMail(user.getEmail(), "reminder",
+                views.txt.messages.reminder.render(user, url),
+                views.html.messages.reminder.render(user, url)
+        );
     }
 
 }

@@ -1,4 +1,4 @@
-@* passwordReset.scala.html
+@* managerAssigned.scala.txt
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,25 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, url: String)
+@(user: UserHeader, admin: UserHeader, deposit: Int, initial: Int)
 
-@* Wachtwoord opnieuw instellen*@
-<p>Beste @user.getFirstName @user.getLastName,</p>
+@* Contract tekenen *@
+Beste @user.getFirstName @user.getLastName,
 
-<p>U ontvangt deze e-mail omdat u aan de webapplicatie van Dégage hebt laten weten dat
-u uw wachtwoord bent vergeten. Klik op onderstaande link om een nieuw wachtwoord te kiezen:</p>
-<pre>
-    <a href="@url">@url</a>
-</pre>
+@admin.getFirstName @admin.getLastName werd je toegewezen als
+contractverantwoordelijke.
 
+Ben je na de infosessie overtuigd dat autodelen via&nbsp;Dégage!
+iets voor jou is, neem dan contact op met deze persoon om
+een contract te ondertekenen.
+
+    E-mail: @admin.getEmail
+@if(admin.getPhone != null && !admin.getPhone.isEmpty){    Tel: @admin.getPhone}
+@if(admin.getCellPhone != null && !admin.getCellPhone.isEmpty){    GSM: @admin.getCellPhone}
+
+Je kan alvast de waarborg en het instapgeld betalen op rekening nr.
+
+    IBAN BE78 5230 8045 2986 - BIC Code TRIOBEBB
+
+van Dégage! VZW. De waarborg bedraagt @deposit euro, de instapsom is  @initial euro.
 

@@ -31,3 +31,30 @@
 error.required=Het veld mag niet leeg zijn
 error.invalid=Ongeldige waarde
 error.email=Ongeldig e-mailadres
+
+# Subjects
+subject.passwordReset=Wachtwoord opnieuw instellen
+subject.verification=Aanvraag gebruikersnummer voor webapplicatie
+subject.infosessionEnrolled=Bevestiging infosessie autodelen
+subject.reservationApprove=Aanvraag reservatie
+subject.reservationApproved=Reservatie goedgekeurd
+subject.reservationRejected=Reservatie geweigerd
+subject.membershipApproved=Lidmaatschap bevestigd
+subject.membershipRejected=Lidmaatschap geweigerd
+subject.costApproved=Kost goedgekeurd
+subject.costRejected=Kost niet goedgekeurd
+subject.refuelApproved=Tankbeurt goedgekeurd
+subject.refuelRejected=Tankbeurt niet goedgekeurd
+subject.reminder=U hebt ongelezen berichten
+subject.refuelRequest=Nieuwe tankbeurt
+subject.costRequest=Nieuwe autokost
+subject.managerAssigned=Contract ondertekenen
+subject.detailsProvided=Nieuwe kilometerstanden
+
+
+
+
+
+
+
+

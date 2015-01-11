@@ -195,7 +195,7 @@ public class Refuels extends Controller {
     public static Result refuseRefuel(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
         dao.rejectRefuel(refuelId);
-        Notifier.sendRefuelStatusChanged(dao.getRefuel(refuelId), false);
+        Notifier.sendRefuelRejected(dao.getRefuel(refuelId));
         flash("success", "Tankbeurt succesvol geweigerd");
         return redirect(routes.Refuels.showOwnerRefuels());
     }
@@ -213,7 +213,7 @@ public class Refuels extends Controller {
     public static Result approveRefuel(int refuelId) {
         RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
         dao.acceptRefuel(refuelId);
-        Notifier.sendRefuelStatusChanged(dao.getRefuel(refuelId), true);
+        Notifier.sendRefuelApproved(dao.getRefuel(refuelId));
         flash("success", "Tankbeurt succesvol geaccepteerd");
         return redirect(routes.Refuels.showOwnerRefuels());
     }
@@ -284,12 +284,14 @@ public class Refuels extends Controller {
     static void newRefuel(Reservation reservation, UserHeader owner, int eurocents, File file) {
         boolean isAdmin = Drives.isOwnerOrAdmin(reservation);
 
+        int reservationId = reservation.getId();
         DataAccess.getInjectedContext().getRefuelDAO().createRefuel(
-                reservation.getId(), eurocents, file,
+                reservationId, eurocents, file,
                 isAdmin ? RefuelStatus.ACCEPTED : RefuelStatus.REQUEST);
         if (!isAdmin) {
             Notifier.sendRefuelRequest(
                     owner,
+                    reservationId,
                     reservation.getCar(),
                     eurocents
             );

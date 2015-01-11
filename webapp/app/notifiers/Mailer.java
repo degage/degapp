@@ -28,6 +28,7 @@
  */
 
 package notifiers;
+import play.i18n.Messages;
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerPlugin;
 import play.Play;
@@ -48,9 +49,9 @@ public class Mailer {
      * @param subject Subject of the email
      * @param text Text-version of the email
      */
-    public static void sendMail (String to, String subject, String text, String html) {
-        if (true || ! Play.isDev() ) { // TODO: remove!!!
-        //if (! Play.isDev() ) {
+    private static void sendMail (String to, String subject, String text, String html) {
+        //if (true || ! Play.isDev() ) { // TODO: remove!!!
+        if (! Play.isDev() ) {
             Email email = new Email();
             email.setCharset("utf-8");
             email.setSubject(subject); // play plugin does not encode
@@ -73,7 +74,13 @@ public class Mailer {
 
     }
 
-    public static void sendMail (String to, String subject, Txt text, Html html) {
-        sendMail(to, subject, text.body().trim(), html.body().trim());
+    /**
+     * Sends mails with the given bodies. Adds signatures.
+     */
+    public static void sendMail (String to, String subjectKey, Txt text, Html html) {
+        sendMail(to, Messages.get("subject." + subjectKey),
+                text.body().trim() + views.txt.messages.signature.render().body().trim(),
+                html.body().trim() + views.html.messages.signature.render().body().trim()
+        );
     }
 }

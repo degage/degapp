@@ -47,8 +47,9 @@
             @std.submitButton("Aanvraag indienen")
             <div class="form-group col-xs-12" >
                 <label>Algemene voorwaarden</label>
+                @* <font color="#696969" face="Verdana, sans-serif"><span style="font-size: 12px; line-height: normal;"></span></font> *@
                 <div class="well" style="overflow: auto; max-height:400px;">
-                @Html(terms)    @*TODO: dangerous? *@
+                    @termsAndConditions()
                 </div>
             </div>
         }

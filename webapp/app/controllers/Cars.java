@@ -771,7 +771,7 @@ public class Cars extends Controller {
         CarCost carCost = dao.getCarCost(carCostId);
         carCost.setStatus(CarCostStatus.ACCEPTED);
         dao.updateCarCost(carCost);
-        Notifier.sendCarCostStatusChanged(carCost.getCar().getOwner(), carCost, true);
+        Notifier.sendCarCostApproved(carCost.getCar().getOwner(), carCost);
 
         flash("success", "Autokost succesvol geaccepteerd");
         if (returnToDetail == 0) {
@@ -798,7 +798,7 @@ public class Cars extends Controller {
         CarCost carCost = dao.getCarCost(carCostId);
         carCost.setStatus(CarCostStatus.REFUSED);
         dao.updateCarCost(carCost);
-        Notifier.sendCarCostStatusChanged(carCost.getCar().getOwner(), carCost, false);
+        Notifier.sendCarCostRejected(carCost.getCar().getOwner(), carCost);
         if (returnToDetail == 0) {
             flash("success", "Autokost succesvol geweigerd");
             return redirect(routes.Cars.showCarCosts());

@@ -1,4 +1,4 @@
-@* passwordReset.scala.html
+@* refuelRejected.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, url: String)
+@(user: UserHeader, carName: String, amount: String)
 
-@* Wachtwoord opnieuw instellen*@
+@* Tankbeurt niet goedgekeurd *@
 <p>Beste @user.getFirstName @user.getLastName,</p>
-
-<p>U ontvangt deze e-mail omdat u aan de webapplicatie van Dégage hebt laten weten dat
-u uw wachtwoord bent vergeten. Klik op onderstaande link om een nieuw wachtwoord te kiezen:</p>
-<pre>
-    <a href="@url">@url</a>
-</pre>
-
-
+<p>De tankbeurt van de auto '@carName' voor een bedrag van @amount
+werd door de eigenaar helaas <b>niet goedgekeurd</b>.
+</p>

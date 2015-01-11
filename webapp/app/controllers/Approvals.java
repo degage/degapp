@@ -317,7 +317,7 @@ public class Approvals extends Controller {
             if (m.user) {
                 roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
             }
-            Notifier.sendMembershipStatusChanged(ap.getUser(), true, m.message);
+            Notifier.sendMembershipApproved(ap.getUser(), m.message);
             flash("success", "De gebruikersrechten werden succesvol aangepast.");
 
             return redirect(routes.Approvals.pendingApprovalList());
@@ -325,8 +325,8 @@ public class Approvals extends Controller {
             //TODO Warning, if status was not pending, possibly have to remove user roles
             ap.setStatus(Approval.ApprovalStatus.DENIED);
             dao.updateApproval(ap);
-            Notifier.sendMembershipStatusChanged(ap.getUser(), false, m.message);
-            flash("success", "De aanvraag werd met succes afgekeurd.");
+            Notifier.sendMembershipRejected(ap.getUser(), m.message);
+            flash("success", "De aanvraag werd afgekeurd.");
 
             return redirect(routes.Approvals.pendingApprovalList());
         } else {
