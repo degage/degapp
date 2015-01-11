@@ -28,8 +28,8 @@
  */
 
 package notifiers;
-import com.typesafe.plugin.MailerAPI;
-import com.typesafe.plugin.MailerPlugin;
+import play.libs.mailer.Email;
+import play.libs.mailer.MailerPlugin;
 import play.Play;
 
 /**
@@ -37,49 +37,37 @@ import play.Play;
  */
 public class Mailer {
 
-    // TODO: do not use static here!
-    private static MailerAPI mail = play.Play.application()
-            .plugin(MailerPlugin.class).email();
+    private static final String NO_REPLY_ADDRESS = "Degage webapplicatie <noreply@degage.be>";
+        // international characters not admitted here ??
 
-    public static MailerAPI getMail() {
-        return mail;
-    }
+    /**
+     * Send an email
+     * @param to Email address of the intended recipient
+     * @param subject Subject of the email
+     * @param text Text-version of the email
+     */
+    public static void sendMail (String to, String subject, String text, String html) {
+//        if (true || ! Play.isDev() ) { // TODO: remove!!!
+        if (! Play.isDev() ) {
+            Email email = new Email();
+            email.setCharset("utf-8");
+            email.setSubject(subject); // play plugin does not encode
+            email.setFrom(NO_REPLY_ADDRESS);
+            email.addTo(to);
 
-    public static void setSubject(String subject) {
-        mail.setSubject(subject);
-    }
-
-    public static void setSubject(String pattern, String subjects) {
-        mail.setSubject(pattern, subjects);
-    }
-
-    // TODO: rename to setRecipient and check whether this is called only once for each mail message - same with addFrom
-    public static void addRecipient(String recipient) {
-        mail.setRecipient(recipient);
-    }
-
-    public static void addRecipient(String... recipients) {
-        mail.setRecipient(recipients);
-    }
-
-    public static void addFrom(String from) {
-        mail.setFrom(from);
-    }
-
-    public static void send(String html) {
-        if(!Play.isDev()) {
-            mail.sendHtml(html);
+            if (text != null) {
+                email.setBodyText(text);
+            }
+            if (html != null) {
+                email.setBodyHtml(html);
+            }
+            MailerPlugin.send(email);
         } else {
-            // TODO: use different mailer instead of logging
-            System.err.println("Sent mail: " + html);
+            // TODO: make mails pluggable
+            System.err.println("To: " + to);
+            System.err.println("Subject: " + subject);
+            System.err.println(html);
         }
-    }
 
-    public static void sendText(String text) {
-        mail.send(text);
-    }
-
-    public static String getEmailAndNameFormatted(String name, String email) {
-        return name + " <" + email + ">";
     }
 }

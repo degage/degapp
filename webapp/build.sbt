@@ -21,7 +21,7 @@ libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.0-SNAPSHOT",
   "com.edulify"             %% "play-hikaricp"               % "1.4.1",
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
-  "com.typesafe.play.plugins" %% "play-plugins-mailer"       % "2.3.0",
+  "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
   "com.typesafe.akka"       %% "akka-actor"                  % "2.3.0",
   "org.webjars"             %  "bootstrap"                   % "3.3.1",
   "org.webjars"             % "jquery"                       % "2.1.1",
