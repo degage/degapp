@@ -233,14 +233,12 @@ public class Notifier extends Mailer {
 
     // to be used with injected context
     public static void sendPasswordResetMail(UserHeader user, String verificationUrl) {
-        TemplateDAO dao = DataAccess.getInjectedContext().getTemplateDAO();
-        EmailTemplate template = dao.getTemplate(MailType.PASSWORD_RESET);
-        String mail = replaceUserTags(user, template.getBody());
-        mail = mail.replace(
-                "%password_reset_url%",
-                toFullURL(routes.Login.resetPassword(verificationUrl))
+        String url = toFullURL(routes.Login.resetPassword(verificationUrl));
+        sendMail( user.getEmail(),
+                "Wachtwoord opnieuw instellen (Dégage)",
+                views.txt.messages.passwordReset.render(user, url),
+                views.html.messages.passwordReset.render(user, url)
         );
-        sendMail(user.getEmail(), "Wachtwoord opnieuw instellen (Dégage)", null, mail);
     }
 
     public static void sendReminderMail(DataAccessContext context, UserHeader user) {

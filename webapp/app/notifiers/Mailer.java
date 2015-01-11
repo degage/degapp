@@ -31,6 +31,8 @@ package notifiers;
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerPlugin;
 import play.Play;
+import play.twirl.api.Html;
+import play.twirl.api.Txt;
 
 /**
  * Created by Stefaan Vermassen on 16/02/14.
@@ -47,8 +49,8 @@ public class Mailer {
      * @param text Text-version of the email
      */
     public static void sendMail (String to, String subject, String text, String html) {
-//        if (true || ! Play.isDev() ) { // TODO: remove!!!
-        if (! Play.isDev() ) {
+        if (true || ! Play.isDev() ) { // TODO: remove!!!
+        //if (! Play.isDev() ) {
             Email email = new Email();
             email.setCharset("utf-8");
             email.setSubject(subject); // play plugin does not encode
@@ -69,5 +71,9 @@ public class Mailer {
             System.err.println(html);
         }
 
+    }
+
+    public static void sendMail (String to, String subject, Txt text, Html html) {
+        sendMail(to, subject, text.body().trim(), html.body().trim());
     }
 }
