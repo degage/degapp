@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reasons: Iterable[String], form: Form[Approvals.RequestApprovalData], terms: String)
+@(reasons: Iterable[String], form: Form[Approvals.RequestApprovalData])
 
 @stdlayout("Lidmaatschap aanvragen", extrabc=breadcrumb("Infosessies", routes.InfoSessions.showUpcomingSessions)) {
     @if(reasons.iterator.hasNext) {

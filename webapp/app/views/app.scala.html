@@ -270,12 +270,6 @@
                             <li class="submenu">ADMIN</li>
 
 
-                        @if(CurrentUser.hasRole(UserRole.MAIL_ADMIN)){
-                        <li @if(title == "Templates") {class="active"}>
-                            <a href="@routes.EmailTemplates.showExistingTemplates()"><i class="fa fa-file fa-fw"></i> Templates</a>
-                        </li>
-                        }
-
                         @if(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)){
                             <li @if(title == "Ritten (Admin)") {class="active"}>
                             <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>

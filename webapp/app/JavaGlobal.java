@@ -27,10 +27,6 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  */
 
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.dao.TemplateDAO;
-import be.ugent.degage.db.models.MailType;
 import controllers.Utils;
 import db.DataAccess;
 import org.joda.time.DateTime;
@@ -54,6 +50,8 @@ public class JavaGlobal {
 
     // Tests if all templates are in the database, and if the database works
     private static void testDatabase() {
+        // TODO: fill in something useful here
+        /*
         try (DataAccessContext context = DataAccess.getContext()) {
             TemplateDAO dao = context.getTemplateDAO();
             StringBuilder sb = new StringBuilder();
@@ -67,6 +65,7 @@ public class JavaGlobal {
         } catch (DataAccessException ex) {
             throw ex;
         }
+        */
     }
 
     private static void registerFormatters() {

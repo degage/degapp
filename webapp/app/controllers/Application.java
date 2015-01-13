@@ -93,7 +93,6 @@ public class Application extends Controller {
                         javascript.Damages.editDamage(),
                         javascript.Damages.addStatus(),
                         javascript.Damages.addProof(),
-                        javascript.EmailTemplates.editTemplate(),
                         javascript.InfoSessions.enrollSession(),
                         javascript.Maps.getMap()
                 )
@@ -113,7 +112,6 @@ public class Application extends Controller {
                         javascript.Damages.showDamagesPageAdmin(),
                         javascript.Drives.showDrivesPage(),
                         javascript.Drives.showDrivesAdminPage(),
-                        javascript.EmailTemplates.showExistingTemplatesPage(),
                         javascript.Messages.showReceivedMessagesPage(),
                         javascript.Messages.showSentMessagesPage(),
                         javascript.Notifications.showNotificationsPage(),

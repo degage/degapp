@@ -6,6 +6,5 @@ load data local infile 'settings.txt'
    into table settings
    fields terminated by ':';
 
-source init-templates.sql;
 source init-users.sql;
 source init-userroles.sql;

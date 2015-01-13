@@ -47,7 +47,7 @@ public enum UserRole {
     CAR_OWNER("Auto-eigenaar", "Eigenaar van een auto die kan uitgeleend worden"),
     CAR_ADMIN("Autobeheerder", "Kan auto's beheren en autogebonden kosten goedkeuren"),
     INFOSESSION_ADMIN("Infosessiebeheerder", "Kan infosessies beheren"),
-    MAIL_ADMIN("E-mailbeheerder", "Kan email-sjablonen aanpassen"),
+    MAIL_ADMIN("E-mailbeheerder", "Kan email-sjablonen aanpassen"),   // not used, but left here so indices do not change
     PROFILE_ADMIN("Profielbeheerder", "Kan gebruikersgegevens wijzigen"),
     RESERVATION_ADMIN("Reservatiebeheerder", "Kan reservaties beheren"),
     SUPER_USER("Superuser", "Heeft ALLE rechten in de applicatie") ;

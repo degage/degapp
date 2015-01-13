@@ -84,12 +84,6 @@ public class Approvals extends Controller {
         return errors;
     }
 
-    private static String getTermsAndConditions(DataAccessContext context) {
-        TemplateDAO dao = context.getTemplateDAO();
-        EmailTemplate t = dao.getTemplate(MailType.TERMS);
-        return t.getBody();
-    }
-
     public static class RequestApprovalData {
         public String message;
         public boolean acceptsTerms;
@@ -128,8 +122,7 @@ public class Approvals extends Controller {
             } else {
                 return ok(approvalrequest.render(
                                 checkApprovalConditions(CurrentUser.getId(), context),
-                                Form.form(RequestApprovalData.class),
-                                getTermsAndConditions(context))
+                                Form.form(RequestApprovalData.class) )
                 );
             }
         }
@@ -143,8 +136,7 @@ public class Approvals extends Controller {
         if (form.hasErrors()) {
             return badRequest(approvalrequest.render(
                             checkApprovalConditions(CurrentUser.getId(), context),
-                            form,
-                            getTermsAndConditions(context)
+                            form
                     )
             );
         } else {

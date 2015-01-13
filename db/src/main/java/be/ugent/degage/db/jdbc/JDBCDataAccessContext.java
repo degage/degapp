@@ -52,7 +52,6 @@ class JDBCDataAccessContext implements DataAccessContext {
     private AvailabilityDAO availabilityDAO;
     private CarCostDAO carCostDAO;
     private UserRoleDAO userRoleDAO;
-    private TemplateDAO templateDAO;
     private CarRideDAO carRideDAO;
     private DamageDAO damageDAO;
     private DamageLogDAO damageLogDAO;
@@ -129,14 +128,6 @@ class JDBCDataAccessContext implements DataAccessContext {
             infoSessionDAO = new JDBCInfoSessionDAO(this);
         }
         return infoSessionDAO;
-    }
-
-    @Override
-    public TemplateDAO getTemplateDAO() {
-        if(templateDAO == null){
-            templateDAO = new JDBCTemplateDAO(this);
-        }
-        return templateDAO;
     }
 
     @Override

@@ -144,7 +144,7 @@ public class CurrentUser {
         return roleSet.contains (UserRole.SUPER_USER) ||
                 roleSet.contains (UserRole.CAR_ADMIN) ||
                 roleSet.contains (UserRole.INFOSESSION_ADMIN) ||
-                roleSet.contains (UserRole.MAIL_ADMIN) ||
+                // roleSet.contains (UserRole.MAIL_ADMIN) ||  // no longer used
                 roleSet.contains (UserRole.RESERVATION_ADMIN);
     }
 

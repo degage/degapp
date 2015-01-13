@@ -162,12 +162,6 @@ GET         /changepass                             controllers.Settings.changeP
 POST        /changepass                             controllers.Settings.changePasswordPost()
 
 
-# Emailtemplates
-GET         /emailtemplate                          controllers.EmailTemplates.showExistingTemplates()
-GET         /emailtemplate/page                     controllers.EmailTemplates.showExistingTemplatesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /emailtemplate/edit                     controllers.EmailTemplates.showTemplate(id: Int)
-POST        /emailtemplate/edit                     controllers.EmailTemplates.editTemplate()
-
 # Cars
 GET         /cars/admin                             controllers.Cars.showCars()
 GET         /cars                                   controllers.Cars.showUserCars()
