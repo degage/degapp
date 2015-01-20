@@ -68,6 +68,7 @@ public enum FilterField {
      * @return The corresponding FilterField (or null if there is none)
      */
     public static FilterField stringToField(String string) {
+        // TODO: put these in a map
         FilterField field = null;
         switch(string) {
             case "car_id":

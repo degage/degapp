@@ -73,14 +73,14 @@ public class Drives extends Controller {
     /**
      * Method: GET
      *
-     * @param status The status identifying the tab that should be shown
+     * @param tab The number of the tab that should be shown 0,1,2 or 3
      * @return the drives index page containing all (pending) reservations of the user or for his car
      * starting with the tab containing the reservations with the specified status active.
      */
     @AllowRoles
     @InjectContext
-    public static Result index(String status) {
-        return ok(drives.render(ReservationStatus.valueOf(status)));
+    public static Result index(int tab) {
+        return ok(drives.render(tab));
     }
 
     /**
@@ -110,7 +110,7 @@ public class Drives extends Controller {
         if (result != null) {
             return ok(result);
         } else {
-            return redirect(routes.Drives.index("ACCEPTED"));
+            return redirect(routes.Drives.index(0));
         }
     }
 
@@ -260,11 +260,11 @@ public class Drives extends Controller {
                 ReservationStatus status = reservation.getStatus();
                 if (status != ReservationStatus.REQUEST && status != ReservationStatus.ACCEPTED) {
                     flash("danger", "Deze reservatie kan niet meer geannuleerd worden.");
-                    return redirect(routes.Drives.index("ACCEPTED"));
+                    return redirect(routes.Drives.index(0));
                 }
             } else {
                 flash("danger", "Alleen de ontlener mag een reservatie annuleren!");
-                return redirect(routes.Drives.index("ACCEPTED"));
+                return redirect(routes.Drives.index(0));
             }
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED, null);

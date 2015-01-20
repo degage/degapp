@@ -63,13 +63,16 @@
                     <input name="status" value="ACCEPTED" class="searchTextField hidden">
                 </li>
                 <li id="tab_passed" ><a href="#resultpanel" data-toggle="tab">
-                    Voorbij
-                </a>
+                    Voorbij</a>
+                    <input name="status" value="REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" class="hidden">
                 </li>
                 <li id="tab_request"><a href="#resultpanel" data-toggle="tab">
-                    Aanvragen
-                </a>
+                    Aanvragen</a>
                     <input name="status" value="REQUEST" class="hidden">
+                </li>
+                <li id="tab_others" ><a href="#resultpanel" data-toggle="tab">
+                    Andere</a>
+                    <input name="status" value="REFUSED|CANCELLED" class="hidden">
                 </li>
             </ul>
 

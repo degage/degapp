@@ -27,29 +27,40 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(status: ReservationStatus)
+@(tab: Int)
 @scripts = {
     @js.pagination("Drives.showDrivesPage", initialLoad = false)
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
-    <script>$(document).ready(function(){loadFirstPage(status="@status.name");});</script>
+    @* TODO: avoid code duplication *@
+    <script>$(document).ready(function(){
+        loadFirstPage(
+          @tab match {
+             case 0 => { "status=ACCEPTED" }
+             case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }
+             case 2 => { "status=REQUEST" }
+             case _ => { "status=REFUSED|CANCELLED" }
+          }
+        );});
+    </script>
 }
 @stdlayout("Ritten", scripts=scripts) {
         <div class="row">
             <div class="col-lg-12">
                 <ul class="nav nav-tabs">
-                  <li id="tab_planned" @if(status == ReservationStatus.ACCEPTED) { class="active" } ><a href="#resultpanel" data-toggle="tab">
+                  <li id="tab_planned" @if(tab == 0) { class="active" } ><a href="#resultpanel" data-toggle="tab">
                       Gepland</a>
                       <input name="status" value="ACCEPTED" class="searchTextField hidden">
                   </li>
-                  <li id="tab_passed" @if(status != ReservationStatus.ACCEPTED && status != ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
+                  <li id="tab_passed" @if(tab == 1) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Voorbij
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
                               Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
                           @if(amount > 0) { (@amount) }
                       }
                       </a>
+                      <input name="status" value="REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" class="hidden">
                   </li>
-                  <li id="tab_request" @if(status == ReservationStatus.REQUEST) { class="active" }><a href="#resultpanel" data-toggle="tab">
+                  <li id="tab_request" @if(tab == 2) { class="active" }><a href="#resultpanel" data-toggle="tab">
                       Aanvragen
                       @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
                           @if(amount > 0) {
@@ -59,6 +70,10 @@
                       </a>
                       <input name="status" value="REQUEST" class="hidden">
                   </li>
+                    <li id="tab_others" @if(tab == 3) { class="active" }><a href="#resultpanel" data-toggle="tab">
+                        Andere</a>
+                        <input name="status" value="REFUSED|CANCELLED" class="hidden">
+                    </li>
                   <li class="hidden"><button id="searchButton"></button></li>
                 </ul>
             </div>

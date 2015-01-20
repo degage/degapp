@@ -49,7 +49,7 @@
                             "fa-car",
                             requests == 0,
                             if(requests>0) requests.toString else "",
-                            routes.Drives.index("REQUEST"),
+                            routes.Drives.index(2),
                             "Ga naar reservatie-aanvragen"
                         ){
                             @if(requests == 0) { Geen nieuwe reservaties }
@@ -64,7 +64,7 @@
                         "fa-edit",
                         requests==0,
                         requests.toString,
-                        routes.Drives.index(if (requests>0) "REQUEST_DETAILS" else "ACCEPTED"),
+                        routes.Drives.index(if (requests>0) 1 else 0),
                         "Ga naar ritten"
                     ){
                         @if(requests == 1) { Rit vereist } else { Ritten vereisen } details

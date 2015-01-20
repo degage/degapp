@@ -32,6 +32,7 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,8 +43,7 @@ public class JDBCFilter implements Filter {
 
     // TODO: this class should not be public!
 
-    // EnumMap doesn't want F.class as a constructor-argument, so we use HashMap
-    private Map<FilterField, String> content = new HashMap<>();
+    private Map<FilterField, String> content = new EnumMap<>(FilterField.class);
 
     /**
      * Associate with a given filterfield a specified value.

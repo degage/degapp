@@ -334,6 +334,19 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 		}
     }
 
+    private void appendStatusFilter(StringBuilder builder, String searchString) {
+        if (searchString != null) {
+            String[] names = searchString.split("\\|");
+            if (names.length != 0) {
+                builder.append (" AND ( reservation_status = '").append(names[0]).append("' ");
+                for  (int i=1; i < names.length; i++) {
+                    builder.append (" OR reservation_status = '").append(names[i]).append("' ");
+                }
+                builder.append (") ");
+            }
+        }
+    }
+
     // TODO: make two different methods depending on value of getAmount
     private String getReservationsPageStatement(boolean getAmount, String amount, Filter filter) {
         String id;
@@ -351,17 +364,17 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             carId = car;
         }
             // TODO: replace * by actual fields
-        String sql = "SELECT " + (getAmount ? " COUNT(reservation_id) AS " + amount : " * ") +
+        StringBuilder builder = new StringBuilder(400);
+        builder.append("SELECT ").
+                append(getAmount ? " COUNT(reservation_id) AS " + amount : " * ").
+                append(
                 " FROM reservations INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
                 " INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
-                " WHERE (car_owner_user_id LIKE " + id +
-                " OR reservation_user_id LIKE " + id + ") AND " +
-                " reservation_car_id LIKE " + carId + " AND ";
-        if("".equals(filter.getValue(FilterField.RESERVATION_STATUS)))
-            sql += " reservation_status != 'ACCEPTED'  AND reservation_status != 'REQUEST' ";
-        else
-            sql += " reservation_status = '" + filter.getValue(FilterField.RESERVATION_STATUS) + "' ";
-        return sql;
+                " WHERE (car_owner_user_id LIKE ").append(id).
+                append( " OR reservation_user_id LIKE ").append(id).
+                append(") AND reservation_car_id LIKE ").append(carId);
+        appendStatusFilter(builder, filter.getValue(FilterField.RESERVATION_STATUS));
+        return builder.toString();
     }
 
     private String getReservationsPageStatement(Filter filter) {
@@ -394,7 +407,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             switch(orderBy) {
                 // TODO: get some other things to sort on
                 default:
-                    sql += " reservation_from " + (asc ? " asc " : " dec ");
+                    sql += " reservation_from " + (asc ? " asc " : " desc ");
                     break;
             }
             sql += " LIMIT " + (page-1)*pageSize + ", " + pageSize;
