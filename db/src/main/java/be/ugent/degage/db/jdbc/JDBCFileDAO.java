@@ -112,14 +112,46 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
     }
 
     private LazyStatement deleteFileStatement = new LazyStatement(
-         "DELETE FROM files WHERE file_id = ?"
+             "DELETE FROM files WHERE file_id = ?"
+        );
+
+        @Override
+        public void deleteFile(int fileId) throws DataAccessException {
+            try {
+                PreparedStatement ps = deleteFileStatement.value();
+                ps.setInt(1, fileId);
+                if (ps.executeUpdate() != 1)
+                    throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
+            } catch (SQLException ex) {
+                throw new DataAccessException("Failed to delete file.", ex);
+            }
+        }    private LazyStatement deleteIdFileStatement = new LazyStatement(
+         "DELETE FROM idfiles WHERE user_id = ? AND file_id = ?"
     );
 
     @Override
-    public void deleteFile(int fileId) throws DataAccessException {
+    public void deleteIdFile(int userId, int fileId) throws DataAccessException {
         try {
-            PreparedStatement ps = deleteFileStatement.value();
-            ps.setInt(1, fileId);
+            PreparedStatement ps = deleteIdFileStatement.value();
+            ps.setInt(1, userId);
+            ps.setInt(2, fileId);
+            if (ps.executeUpdate() != 1)
+                throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to delete file.", ex);
+        }
+    }
+
+    private LazyStatement deleteLicenseFileStatement = new LazyStatement(
+         "DELETE FROM licensefiles WHERE user_id = ? AND  file_id = ?"
+    );
+
+    @Override
+    public void deleteLicenseFile(int userId, int fileId) throws DataAccessException {
+        try {
+            PreparedStatement ps = deleteLicenseFileStatement.value();
+            ps.setInt(1, userId);
+            ps.setInt(2, fileId);
             if (ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
         } catch (SQLException ex) {

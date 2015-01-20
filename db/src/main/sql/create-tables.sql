@@ -122,7 +122,7 @@ CREATE TABLE idfiles (
     file_id INT NOT NULL,
     PRIMARY KEY (user_id, file_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (file_id) REFERENCES files(file_id)
+    FOREIGN KEY (file_id) REFERENCES files(file_id) ON DELETE CASCADE
 );
 
 CREATE TABLE licensefiles (
@@ -130,7 +130,7 @@ CREATE TABLE licensefiles (
     file_id INT NOT NULL,
     PRIMARY KEY (user_id, file_id),
     FOREIGN KEY (user_id) REFERENCES users(user_id),
-    FOREIGN KEY (file_id) REFERENCES files(file_id)
+    FOREIGN KEY (file_id) REFERENCES files(file_id)  ON DELETE CASCADE
 );
 
 CREATE TABLE `userroles` (

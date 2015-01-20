@@ -53,6 +53,16 @@ public interface FileDAO {
     public void deleteFile(int fileId) throws DataAccessException;
 
     /**
+     * Delete an image file for an identity card
+     */
+    public void deleteIdFile(int userId, int fileId) throws DataAccessException;
+
+    /**
+     * Delete an image file for a drivers license
+     */
+    public void deleteLicenseFile(int userId, int fileId) throws DataAccessException;
+
+    /**
      * Return the image files for a damage case
      */
     public Iterable<File> getDamageFiles(int damageId) throws DataAccessException;

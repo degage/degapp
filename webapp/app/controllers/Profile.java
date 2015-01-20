@@ -315,9 +315,9 @@ public class Profile extends Controller {
                 flash("danger", "Bestand niet gevonden.");
                 return redirect(routes.Profile.editIdentityCard(userId));
             } else {
-                fdao.deleteFile(file.getId());
+                fdao.deleteIdFile(userId, file.getId());
                 FileHelper.deleteFile(Paths.get(file.getPath()));
-                flash("success", file.getFileName() + " werd met succes verwijderd.");
+                //flash("success", file.getFileName() + " werd met succes verwijderd.");
                 return redirect(routes.Profile.editIdentityCard(userId));
             }
         } else {
@@ -346,10 +346,9 @@ public class Profile extends Controller {
                 flash("danger", "Bestand niet gevonden.");
                 return redirect(routes.Profile.editIdentityCard(userId));
             } else {
-                fdao.deleteFile(file.getId());
+                fdao.deleteLicenseFile(userId, file.getId());
                 FileHelper.deleteFile(Paths.get(file.getPath()));
-
-                flash("success", file.getFileName() + " werd met succes verwijderd.");
+                // flash("success", file.getFileName() + " werd met succes verwijderd.");
                 return redirect(routes.Profile.editDriversLicense(userId));
             }
         } else {
