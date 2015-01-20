@@ -28,7 +28,6 @@
  *@
 
 @(userId: Int, form: Form[Profile.IdentityCardData], listOfFiles: Iterable[File])
-@import controllers.util.FileType;
 
     @app("Identiteitsgegevens wijzigen") {
 
@@ -62,8 +61,8 @@
             <ul>
             @foreach.orElse(listOfFiles){ file =>
                 <li>
-                    <a href="@routes.Profile.viewFile(userId, file.getId, FileType.IDENTITYCARD.name)" target="_blank">@file.getFileName</a>
-                    <a href="@routes.Profile.deleteFile(userId, file.getId, FileType.IDENTITYCARD.name)"><span class="glyphicon glyphicon-remove"></span></a>
+                    <a href="@routes.Profile.viewIdentityFile(userId, file.getId)" target="_blank">@file.getFileName</a>
+                    <a href="@routes.Profile.deleteIdentityFile(userId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
                 </li>
              }{
                Nog geen bestanden geupload.

@@ -161,7 +161,6 @@ CREATE TABLE `technicalcardetails` (
 	FOREIGN KEY (`details_car_registration`) REFERENCES files(`file_id`)
 );
 
-
 CREATE TABLE `cars` (
 	`car_id` INT NOT NULL AUTO_INCREMENT,
 	`car_name` VARCHAR(64) NOT NULL,

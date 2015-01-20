@@ -253,26 +253,6 @@ public class FileHelper {
         }
     }
 
-    // to be used inside an injected context
-    public static Result genericFileAction(int userId, int fileId, FileAction action) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        UserDAO udao = context.getUserDAO();
-        FileDAO fdao = context.getFileDAO();
-        User user = udao.getUser(userId);
-
-        if (user == null) {
-            return Controller.badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
-        }
-
-        be.ugent.degage.db.models.File file = action.getFile(fileId, user, fdao);
-        if (file == null) {
-            Controller.flash("danger", "Bestand niet gevonden.");
-            return action.failAction(user);
-        } else {
-            return action.process(file, fdao);
-        }
-    }
-
     /**
      * Returns a handle to the named file in the current http request. (Should only be used with an injected context.)
      * @return null if no file was present. If the contenttype was invalid, returns a File-object

@@ -28,13 +28,8 @@
  *@
 
 @(userId: Int, form: Form[Profile.DriversLicenseData], listOfFiles: Iterable[File])
-@import controllers.util.FileType;
 
-@scripts = {
-    @js.datetimepicker()
-}
-
-@app("Rijbewijsgegevens wijzigen", scripts=scripts) {
+@app("Rijbewijsgegevens wijzigen", scripts=js.datetimepicker()) {
 
     @breadcrumbs{
         @breadcrumb("Profiel", routes.Profile.index(userId))
@@ -65,8 +60,8 @@
             <ul>
             @foreach.orElse(listOfFiles){ file =>
                 <li>
-                    <a href="@routes.Profile.viewFile(userId, file.getId, FileType.DRIVERSLICENSE.name)" target="_blank">@file.getFileName</a>
-                    <a href="@routes.Profile.deleteFile(userId, file.getId, FileType.DRIVERSLICENSE.name)"><span class="glyphicon glyphicon-remove"></span></a>
+                    <a href="@routes.Profile.viewLicenseFile(userId, file.getId)" target="_blank">@file.getFileName</a>
+                    <a href="@routes.Profile.deleteLicenseFile(userId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
                 </li>
              }{
                Nog geen bestanden geupload.
