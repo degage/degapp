@@ -40,6 +40,7 @@ import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
+import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
@@ -103,7 +104,7 @@ public class Users extends Controller {
         UserHeader user = context.getUserDAO().getUserHeader(userId);
         if (user != null) {
             Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
-            if (userRoles.contains(UserRole.SUPER_USER)) {
+            if (Play.isProd() && userRoles.contains(UserRole.SUPER_USER)) {
                 flash("danger", "Je kan geen superuser impersoneren.");
                 return redirect(routes.Users.showUsers());
             } else {
