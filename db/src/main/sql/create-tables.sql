@@ -144,8 +144,8 @@ CREATE TABLE `carinsurances` (
 	`insurance_id` INT NOT NULL,
 	`insurance_name` VARCHAR(64),
 	`insurance_expiration` DATE,
-	`insurance_contract_id` INT, -- Polisnr
-	`insurance_bonus_malus` INT,
+	`insurance_contract_id` VARCHAR(64), -- Polisnr
+	`insurance_bonus_malus` VARCHAR(64),
 	`insurance_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`insurance_id`)
 );

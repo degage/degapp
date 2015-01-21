@@ -119,8 +119,8 @@
                     <fieldset>
                         @std.textField(form("insuranceName"), "Verzekeraar", "col-md-6")
                         @std.datepicker(form("expiration"), "Vervaldatum", "col-md-4")
-                        @std.numberField(form("bonusMalus"), "Bonus Malus", "col-md-6")
-                        @std.numberField(form("polisNr"), "Polisnummer", "col-md-6")
+                        @std.textField(form("bonusMalus"), "Bonus Malus", "col-md-6")
+                        @std.textField(form("polisNr"), "Polisnummer", "col-md-6")
                     </fieldset>
                 }
                 @std.submitButton("Wijzigingen opslaan")

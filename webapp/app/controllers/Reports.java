@@ -303,7 +303,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(checkNotNullOrZero(car.getTechnicalCarDetails().getChassisNumber()).toString());
 
                 row.createCell(j++).setCellValue(car.getInsurance().getName());
-                row.createCell(j++).setCellValue(checkNotNullOrZero(car.getInsurance().getPolisNr()).toString());
+                row.createCell(j++).setCellValue(car.getInsurance().getPolisNr());
 
                 // format as date
 

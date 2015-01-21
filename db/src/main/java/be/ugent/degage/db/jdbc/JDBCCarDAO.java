@@ -189,8 +189,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 String chassisNr = rs.getString("details_car_chassis_number");
                 technicalCarDetails = new TechnicalCarDetails(rs.getString("details_car_license_plate"), registration, chassisNr);
 
-                Integer bonusMalus = (Integer)rs.getObject("insurance_bonus_malus");
-                Integer contractId = (Integer)rs.getObject("insurance_contract_id");
+                String bonusMalus = rs.getString("insurance_bonus_malus");
+                String contractId = rs.getString("insurance_contract_id");
 
                 Date insuranceExpiration = rs.getDate("insurance_expiration");
                 insurance = new CarInsurance(
@@ -309,8 +309,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         } else {
             ps.setDate(2, Date.valueOf(insurance.getExpiration()));
         }
-        ps.setObject(3, insurance.getPolisNr(), Types.INTEGER);
-        ps.setObject(4, insurance.getBonusMalus(), Types.INTEGER);
+        ps.setString(3, insurance.getPolisNr());
+        ps.setString(4, insurance.getBonusMalus());
         ps.setInt(5, id);
 
         if (ps.executeUpdate() == 0) {
@@ -697,8 +697,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                         new CarInsurance(
                                 rs.getString("insurance_name"),
                                 insuranceExpiration == null ? null : insuranceExpiration.toLocalDate(),
-                                (Integer)rs.getObject("insurance_bonus_malus"),
-                                (Integer)rs.getObject("insurance_contract_id")
+                                rs.getString("insurance_bonus_malus"),
+                                rs.getString("insurance_contract_id")
                         ),
                         JDBCUserDAO.populateUserHeader(rs),
                         rs.getString ("car_comments")

@@ -35,10 +35,10 @@ public class CarInsurance {
 
     private String name;
 	private LocalDate expiration;
-	private Integer bonusMalus;
-	private Integer polisNr;
+	private String bonusMalus;
+	private String polisNr;
 
-	public CarInsurance(String name, LocalDate expiration, Integer bonusMalus, Integer polisNr) {
+	public CarInsurance(String name, LocalDate expiration, String bonusMalus, String polisNr) {
         this.name = name;
 		this.expiration = expiration;
 		this.bonusMalus = bonusMalus;
@@ -49,21 +49,21 @@ public class CarInsurance {
 	public LocalDate getExpiration() {
 		return expiration;
 	}
-	public Integer getPolisNr() {
+	public String getPolisNr() {
 		return polisNr;
 	}
 
-	public void setPolisNr(Integer polisNr) {
+	public void setPolisNr(String polisNr) {
 		this.polisNr = polisNr;
 	}
 
 	public void setExpiration(LocalDate expiration) {
 		this.expiration = expiration;
 	}
-	public Integer getBonusMalus() {
+	public String getBonusMalus() {
 		return bonusMalus;
 	}
-	public void setBonusMalus(Integer bonusMalus) {
+	public void setBonusMalus(String bonusMalus) {
 		this.bonusMalus = bonusMalus;
 	}
 

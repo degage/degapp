@@ -102,8 +102,8 @@ public class Cars extends Controller {
         // Insurance
         public String insuranceName;
         public LocalDate expiration;
-        public Integer bonusMalus;
-        public Integer polisNr;
+        public String bonusMalus;
+        public String polisNr;
 
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
