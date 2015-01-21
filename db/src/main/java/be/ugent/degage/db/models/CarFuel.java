@@ -38,7 +38,8 @@ public enum CarFuel {
     PETROL("Benzine"),
     DIESEL("Diesel"),
     BIODIESEL("Biodiesel"),
-    GAS("Gas"),
+    LPG("LPG"),
+    CNG("CNG"),
     HYBRID("Hybride"),
     ELECTRIC("Elektrisch");
 
