@@ -70,12 +70,17 @@ public class Notifier extends Mailer {
     }
 
 
-    private static void createNotification(UserHeader user, String subjectKey, Html mail) {
-        createNotification(DataAccess.getInjectedContext().getNotificationDAO(), user, Messages.get("subject." + subjectKey), mail.body().trim());
+    private static void createNotification(DataAccessContext context, UserHeader user, String subjectKey, Html mail) {
+        createNotification(context.getNotificationDAO(), user, Messages.get("subject." + subjectKey), mail.body().trim());
     }
 
     private static void createNotificationAndSend(UserHeader user, String subjectKey, Txt text, Html html) {
-        createNotification(user, subjectKey, html);
+        createNotification(DataAccess.getInjectedContext(), user, subjectKey, html);
+        sendMail(user.getEmail(), subjectKey, text, html);
+    }
+
+    private static void createNotificationAndSend(DataAccessContext context, UserHeader user, String subjectKey, Txt text, Html html) {
+        createNotification(context, user, subjectKey, html);
         sendMail(user.getEmail(), subjectKey, text, html);
     }
 
@@ -146,13 +151,14 @@ public class Notifier extends Mailer {
     }
 
     public static void sendCarCostRequest(CarCost carCost) {
-        UserRoleDAO userRoleDAO = DataAccess.getInjectedContext().getUserRoleDAO();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        UserRoleDAO userRoleDAO = context.getUserRoleDAO();
         String date = Utils.toLocalizedDateString(carCost.getDate());
         String carName = carCost.getCar().getName();
         String amount = carCost.getAmount().toPlainString() + " euro";
         String costDescription = carCost.getDescription();
         for (UserHeader u : userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN)) {
-            createNotification(u, "costRequest",
+            createNotification(context, u, "costRequest",
                     views.html.messages.costRequest.render(u, carName, costDescription, amount, date)
             );
         }
@@ -173,7 +179,7 @@ public class Notifier extends Mailer {
     public static void sendInfoSessionEnrolledMail(DataAccessContext context, UserHeader user, InfoSession infoSession) {
         String date = Utils.toLocalizedString(infoSession.getTime());
         String address = infoSession.getAddress().toString();
-        createNotificationAndSend(
+        createNotificationAndSend(context,
                 user, "infosessionEnrolled",
                 views.txt.messages.infosessionEnrolled.render(user, date, address),
                 views.html.messages.infosessionEnrolled.render(user, date, address)
