@@ -38,6 +38,7 @@ public class Car {
     private String name;
     private String brand;
     private String type;
+    private String email;
     private Address location;
     private Integer seats;
     private Integer doors;
@@ -61,8 +62,9 @@ public class Car {
         this.name = name;
     }
 
-    public Car(int id, String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments) {
+    public Car(int id, String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments) {
         this(id, name);
+        this.email = email;
         this.brand = brand;
         this.type = type;
         this.location = location;
@@ -81,7 +83,7 @@ public class Car {
         this.owner = owner;
         this.comments = comments;
     }
-   
+
     public int getId() {
         return id;
     }
@@ -93,6 +95,14 @@ public class Car {
     public String getName() { return name; }
 
     public void setName(String name) { this.name = name; }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
     public String getBrand() {
         return brand;

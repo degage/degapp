@@ -39,7 +39,7 @@ import be.ugent.degage.db.models.*;
  */
 public interface CarDAO {
 
-    public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
+    public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                          TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, File photo) throws DataAccessException;
     public void updateCar(Car car) throws DataAccessException;

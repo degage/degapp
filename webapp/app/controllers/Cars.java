@@ -76,6 +76,9 @@ public class Cars extends Controller {
 
         @Constraints.Required
         public String name;
+
+        // TODO: add email
+
         @Constraints.Required
         public String brand;
         @Constraints.Required
@@ -332,7 +335,7 @@ public class Cars extends Controller {
                     new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
 
             Car car = dao.createCar(
-                    model.name, model.brand, model.type,
+                    model.name, null, model.brand, model.type,
                     model.address.toAddress(), model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,

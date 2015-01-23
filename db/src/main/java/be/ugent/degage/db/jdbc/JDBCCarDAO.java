@@ -48,7 +48,7 @@ import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
     public static final String LIST_CAR_QUERY =
-            "SELECT car_id, car_name, car_brand, car_active, " +
+            "SELECT car_id, car_name, car_email, car_brand, car_active, " +
                     USER_HEADER_FIELDS +
             "FROM cars JOIN users ON car_owner_user_id = user_id " +
             "WHERE car_name LIKE ? AND car_brand LIKE ? ";
@@ -157,6 +157,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         // Extra check if car actually exists
         if(rs.getObject("car_id") != null) {
             Car car = populateCarMinimal(rs);
+            car.setEmail(rs.getString("car_email"));
             car.setBrand(rs.getString("car_brand"));
             car.setType(rs.getString("car_type"));
             car.setSeats((Integer)rs.getObject("car_seats"));
@@ -217,11 +218,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "INSERT INTO cars(car_name, car_type, car_brand, " +
                     "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
                     "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_owner_user_id, car_comments, car_active, car_images_id) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                    "car_owner_user_id, car_comments, car_active, car_images_id, car_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
             "car_id");
 
     @Override
-    public Car createCar(String name, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
+    public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                          TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, File photo) throws DataAccessException {
         try {
@@ -249,6 +250,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setBoolean(16, active);
 
             ps.setObject(17, photo, Types.INTEGER);
+            ps.setString (18, email);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car.");
@@ -262,7 +264,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 updateInsurance(id, insurance);
                 updateLocation (id, location);
 
-                Car car = new Car(id, name, brand, type, location, seats, doors, year, manual, gps, hook, fuel,
+                Car car = new Car(id, name, email, brand, type, location, seats, doors, year, manual, gps, hook, fuel,
                         fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
                 car.setActive(active);
                 car.setPhoto(photo);
@@ -347,7 +349,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "UPDATE cars SET car_name=?, car_type=? , car_brand=? ,  " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=? WHERE car_id = ?");
+                    "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=?, car_email=? WHERE car_id = ?");
 
     @Override
     public void updateCar(Car car) throws DataAccessException {
@@ -384,9 +386,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 ps.setNull(17, Types.INTEGER);
             }
 
+            ps.setString(18, car.getEmail());
+
             int carId = car.getId();
 
-            ps.setInt(18, carId);
+            ps.setInt(19, carId);
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");
@@ -484,7 +488,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     }
 
     private static final String NEW_CAR_QUERY =
-            "SELECT car_id, car_name, car_type, car_brand, car_seats, car_doors, " +
+            "SELECT car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, " +
                     "address_id, address_city, address_zipcode, address_street, " +
                     "address_number, address_country " +
@@ -542,6 +546,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                     Car result = new Car (
                             rs.getInt ("car_id"),
                             rs.getString ("car_name"),
+                            rs.getString("car_email"),
                             rs.getString ("car_brand"),
                             rs.getString ("car_type"),
                             JDBCAddressDAO.populateAddress(rs),
@@ -633,6 +638,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                     Car result = new Car (
                             rs.getInt ("car_id"),
                             rs.getString ("car_name"),
+                            rs.getString ("car_email"),
                             rs.getString ("car_brand"),
                             null, null, null, null, null, false, false, false, null, null, null, null, null, null,
                             owner,
@@ -649,7 +655,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     }
 
     public static final String LIST_ALL_CARS_QUERY =
-            "SELECT car_id, car_name, car_brand, car_type," +
+            "SELECT car_id, car_name, car_email, car_brand, car_type," +
                 "address_id, address_city, address_zipcode, address_street, " +
                 "address_number, address_country, " +
                 "car_seats, car_doors, car_year, car_manual, car_gps, car_hook," +
@@ -676,6 +682,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 Car result = new Car(
                         rs.getInt("car_id"),
                         rs.getString("car_name"),
+                        rs.getString("car_email"),
                         rs.getString("car_brand"),
                         rs.getString("car_type"),
                         JDBCAddressDAO.populateAddress(rs),
@@ -714,7 +721,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
 
     private LazyStatement listCarsOfUserStatement = new LazyStatement (
-            "SELECT car_id, car_name, car_brand, car_active " +
+            "SELECT car_id, car_name, car_email, car_brand, car_active " +
             "FROM cars WHERE car_owner_user_id = ?");
 
     @Override
@@ -728,6 +735,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                     Car result = new Car (
                             rs.getInt ("car_id"),
                             rs.getString ("car_name"),
+                            rs.getString ("car_email"),
                             rs.getString ("car_brand"),
                             null, null, null, null, null, false, false, false, null, null, null, null, null, null,
                             null, null
