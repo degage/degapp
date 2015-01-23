@@ -45,43 +45,43 @@ public final class Utils {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm").withZone(ZoneId.systemDefault());
 
     public static String toString(TemporalAccessor ta) {
-        return DATETIME_FORMATTER.format(ta);
+        return ta == null ? null : DATETIME_FORMATTER.format(ta);
     }
 
     private static DateTimeFormatter DATE_FORMATTER =
             DateTimeFormatter.ofPattern("yyyy-MM-dd").withZone(ZoneId.systemDefault());
 
     public static String toDateString(TemporalAccessor ta) {
-        return DATE_FORMATTER.format(ta);
+        return ta == null ? null : DATE_FORMATTER.format(ta);
     }
 
     private static DateTimeFormatter LOCALIZED_DATETIME_FORMATTER =
             DateTimeFormatter.ofPattern("eee dd MMM yyyy HH:mm", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedString(Instant instant) {
-        return LOCALIZED_DATETIME_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
+        return instant == null ? null : LOCALIZED_DATETIME_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
     }
 
     public static String toLocalizedString(LocalDateTime dateTime) {
-        return LOCALIZED_DATETIME_FORMATTER.format(dateTime);
+        return dateTime == null ? null : LOCALIZED_DATETIME_FORMATTER.format(dateTime);
     }
 
     private static DateTimeFormatter LOCALIZED_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("eee dd MMM yyyy", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedDateString(Instant instant) {
-        return LOCALIZED_DATE_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
+        return instant == null ? null : LOCALIZED_DATE_FORMATTER.format(instant.atZone(ZoneId.systemDefault()));
     }
 
     public static String toLocalizedDateString(LocalDateTime dateTime) {
-        return LOCALIZED_DATE_FORMATTER.format(dateTime);
+        return dateTime == null ? null : LOCALIZED_DATE_FORMATTER.format(dateTime);
     }
 
     private static DateTimeFormatter LOCALIZED_LONG_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd MMMM yyyy", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
     public static String toLocalizedDateString(LocalDate localDate) {
-        return LOCALIZED_LONG_DATE_FORMATTER.format(localDate);
+        return localDate == null ? null : LOCALIZED_LONG_DATE_FORMATTER.format(localDate);
     }
 
     public static Instant toInstant(String string) {
