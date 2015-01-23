@@ -19,7 +19,7 @@ resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/mo
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.0-SNAPSHOT",
-  "com.edulify"             %% "play-hikaricp"               % "1.4.1",
+  "com.edulify"             %% "play-hikaricp"               % "1.5.1",
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
   "com.typesafe.akka"       %% "akka-actor"                  % "2.3.0",
@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "org.webjars"             % "jquery"                       % "2.1.1",
   "org.webjars"             % "bootstrap-datetimepicker"     % "2.2.0", // Timepicker for bootstrap v3
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
-  "mysql"                   % "mysql-connector-java"         % "5.1.29",
+  "mysql"                   % "mysql-connector-java"         % "5.1.34",
   "org.apache.poi"          % "poi"                          % "3.8",
   "org.apache.poi"          % "poi-ooxml"                    % "3.9",
   "com.itextpdf"            % "itextpdf"                     % "5.1.3",
