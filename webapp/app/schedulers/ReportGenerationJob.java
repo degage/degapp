@@ -54,6 +54,8 @@ public class ReportGenerationJob implements ScheduledJob.Executor {
         context.getCarCostDAO().endPeriod();
         */
 
+        /* TODO: have this job actually do something, or else, abolish this job type
+
         UserDAO dao = context.getUserDAO();
 
         List<User> users = dao.getUserList(FilterField.USER_NAME, true, 1, dao.getAmountOfUsers(null), null);
@@ -62,5 +64,6 @@ public class ReportGenerationJob implements ScheduledJob.Executor {
         for (User user : users) {
             ReportGeneration.generateReceipt(context, user, LocalDate.now(), costInfo);
         }
+        */
     }
 }

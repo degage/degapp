@@ -41,6 +41,7 @@ import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.temporal.TemporalAdjusters;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -86,7 +87,7 @@ public final class Scheduler {
                 });
 
         // make sure that at least one report job is planned
-        checkInitialReports();
+        // TODO: checkInitialReports();
 
         // schedule 'jobs' to be run at a fixed interval (standard: every five minutes)
         int refresh = Integer.parseInt(DataAccess.getContext().getSettingDAO().getSettingForNow("scheduler_interval")); // refresh rate in seconds
@@ -108,12 +109,17 @@ public final class Scheduler {
      * Checks if there's a report already scheduled, and if not, schedule one
      */
     private static void checkInitialReports() {
+        // TODO: currently not used
         new RunnableInContext("Launch initial reports") {
             @Override
             public void runInContext(DataAccessContext context) {
                 JobDAO dao = context.getJobDAO();
                 if (!dao.existsJobOfType(JobType.REPORT)) {
-                    dao.createJob(JobType.REPORT, 0, Instant.now().with(TemporalAdjusters.firstDayOfNextMonth()));
+                    dao.createJob(JobType.REPORT, 0,
+                            // TODO: bug
+                            // Unable to obtain Instant from TemporalAccessor: 2015-02-01T00:00 of type java.time.LocalDateTime
+                            Instant.from(LocalDate.now().with(TemporalAdjusters.firstDayOfNextMonth()).atStartOfDay())
+                    );
                 }
             }
         }.run();

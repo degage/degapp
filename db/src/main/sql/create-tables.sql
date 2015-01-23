@@ -173,12 +173,12 @@ CREATE TABLE `cars` (
 	`car_manual` BIT(1) NOT NULL DEFAULT 0,
 	`car_gps` BIT(1) NOT NULL DEFAULT 0,
 	`car_hook` BIT(1) NOT NULL DEFAULT 0,
-	`car_fuel` ENUM('PETROL','DIESEL', 'BIODIESEL', 'GAS', 'HYBRID', 'ELECTRIC'),
+	`car_fuel` ENUM('PETROL','DIESEL', 'BIODIESEL', 'LPG', 'CNG', 'HYBRID', 'ELECTRIC'),
 	`car_fuel_economy` INT,
 	`car_estimated_value` INT,
 	`car_owner_annual_km` INT,
 	`car_owner_user_id` INT NOT NULL,
-	`car_comments` VARCHAR(256),
+	`car_comments` VARCHAR(4096),
 	`car_active` BIT(1) NOT NULL DEFAULT 0,
 	`car_images_id` INT,
 	`car_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -298,7 +298,7 @@ CREATE TABLE `refuels` (
 	`refuel_car_ride_id` INT NOT NULL,
 	`refuel_file_id` INT,
 	`refuel_eurocents` INT,
-	`refuel_status` ENUM(REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', --approved by owner
+	`refuel_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST',
 	`refuel_billed` DATE DEFAULT NULL,
    	`refuel_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    	`refuel_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -332,7 +332,7 @@ CREATE TABLE `damagelogs` (
 	`damage_log_damage_id` INT NOT NULL,
 	`damage_log_description` TEXT,
    	`damage_log_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-   	`damage_log_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+   	`damage_log_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`damage_log_id`),
 	FOREIGN KEY (`damage_log_damage_id`) REFERENCES damages(`damage_id`)
 );
