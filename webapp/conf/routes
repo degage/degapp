@@ -70,10 +70,6 @@ POST        /reserve/car/reserve                    controllers.Reserve.doReserv
 GET         /receipts                               controllers.Receipts.index()
 GET         /receipts/page                          controllers.Receipts.showReceiptsPage(page: Int, asc: Int ?= 1,orderBy: String ?= "", filter: String ?= "")
 
-
-# User pages
-GET         /settings                               controllers.Settings.index()
-
 # Notifiers
 GET         /messages                               controllers.Messages.showMessages()
 GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
@@ -189,9 +185,7 @@ GET         /cars/privileges/edit                   controllers.Cars.updatePrivi
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()
 GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /refuels/owner                          controllers.Refuels.showOwnerRefuels()
 GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /refuels/admin                          controllers.Refuels.showAllRefuels()
 GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
 GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)

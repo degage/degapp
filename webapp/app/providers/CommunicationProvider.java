@@ -33,6 +33,7 @@ import be.ugent.degage.db.*;
 import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.Notification;
+import db.CurrentUser;
 import play.cache.Cache;
 
 import java.util.List;
@@ -72,7 +73,8 @@ public class CommunicationProvider {
         }
     }
 
-    public int getNumberOfUnreadNotifications(int userId) {
+    public int getNumberOfUnreadNotifications() {
+        int userId = CurrentUser.getId();
         String key = String.format(NOTIFICATION_NUMBER_BY_ID, userId);
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
@@ -112,7 +114,12 @@ public class CommunicationProvider {
         Cache.remove(String.format(MESSAGES_BY_ID, userId));
     }
 
-    public int getNumberOfUnreadMessages(int userId) {
+    /**
+     * Get number of unread messages for the current user
+     * @return
+     */
+    public int getNumberOfUnreadMessages() {
+        Integer userId = CurrentUser.getId();
         String key = String.format(MESSAGE_NUMBER_BY_ID, userId);
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {

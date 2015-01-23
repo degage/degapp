@@ -36,6 +36,7 @@ import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -78,14 +79,18 @@ public class Refuels extends Controller {
 
 
     /**
-     * Method: GET
-     *
-     * @return index page containing all the refuel requests from a specific user
+     * Dispatches to the correct refuels page
      */
-    @AllowRoles
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result showRefuels() {
-        return ok(refuels.render());
+        if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+            return ok(refuelsAdmin.render());
+        } else if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
+            return ok(refuelsOwner.render());
+        } else {
+            return ok(refuels.render());
+        }
     }
 
     @InjectContext
@@ -106,17 +111,6 @@ public class Refuels extends Controller {
 
     }
 
-    /**
-     * Method: GET
-     *
-     * @return index page containing all the refuel requests to a specific owner
-     */
-    @AllowRoles({UserRole.CAR_OWNER})
-    @InjectContext
-    public static Result showOwnerRefuels() {
-        return ok(refuelsOwner.render());
-    }
-
     @InjectContext
     public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -132,17 +126,6 @@ public class Refuels extends Controller {
         // TODO: Check if admin or car owner/user
 
         return ok(refuelList(page, pageSize, filter));
-    }
-
-    /**
-     * Method: GET
-     *
-     * @return index page containing all the refuel requests to a specific owner
-     */
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result showAllRefuels() {
-        return ok(refuelsAdmin.render());
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
@@ -197,7 +180,7 @@ public class Refuels extends Controller {
         dao.rejectRefuel(refuelId);
         Notifier.sendRefuelRejected(dao.getRefuel(refuelId));
         flash("success", "Tankbeurt succesvol geweigerd");
-        return redirect(routes.Refuels.showOwnerRefuels());
+        return redirect(routes.Refuels.showRefuels());
     }
 
     /**
@@ -215,7 +198,7 @@ public class Refuels extends Controller {
         dao.acceptRefuel(refuelId);
         Notifier.sendRefuelApproved(dao.getRefuel(refuelId));
         flash("success", "Tankbeurt succesvol geaccepteerd");
-        return redirect(routes.Refuels.showOwnerRefuels());
+        return redirect(routes.Refuels.showRefuels());
     }
 
     /**

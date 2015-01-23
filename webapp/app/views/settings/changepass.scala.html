@@ -28,22 +28,16 @@
  *@
 
 @(form: Form[Settings.ChangePasswordModel])
-@app("Wachtwoord wijzigen") {
+@stdlayout("Wachtwoord wijzigen") {
 
-    @breadcrumbs{
-        @breadcrumb("Instellingen", routes.Settings.index)
-        @breadcrumb("Wachtwoord wijzigen")
-    }
-
-    <div id="page-wrapper">
-        @flashes()
+@* TODO: use @panel etc. *@
 
         <div class="panel panel-default">
             <div class="panel-heading">
-                <i class="fa fa-exchange fa-fw"></i> Wachtwoord wijzigen
+                <i class="fa fa-pencil fa-fw"></i> Wachtwoord wijzigen
             </div>
             <div class="panel-body">
-                @helper.form(routes.Settings.changePasswordPost, 'class -> "form-horizontal") {
+                @helper.form(routes.Settings.changePasswordPost) {
                     @if(form.hasGlobalErrors) {
                         <div class="alert alert-danger alert-dismissable">
                             <strong>Error!</strong> @form.globalError.message
@@ -83,6 +77,4 @@
                 }
             </div>
         </div>
-            <!-- /row -->
-    </div>
 }

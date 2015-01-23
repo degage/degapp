@@ -1,0 +1,14 @@
+@*
+*@
+
+@(title: String, itemTitle: String, faClass: String, link: Call, caption: String = null, extra: Int = 0)
+
+@* Displays one menu-item *@
+
+<li @if(title startsWith itemTitle) {class="active"}>
+    <a href="@link"><i class="fa fa-fw @faClass"></i>
+        @if(caption==null) {@itemTitle} else {@caption}
+        @if(extra>0) {<span class="sidenumber">@extra</span>}
+    </a>
+</li>
+

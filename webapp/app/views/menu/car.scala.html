@@ -1,0 +1,8 @@
+@*
+*@
+
+@(title: String)
+
+@if(db.CurrentUser.hasRole(UserRole.CAR_OWNER) || db.CurrentUser.hasRole(UserRole.CAR_ADMIN)){
+    @item(title, "Auto", "fa-car", routes.Cars.showUserCars(), "Auto's")
+}

@@ -1,0 +1,16 @@
+@*
+*@
+
+@import providers.DataProvider
+
+@(title: String)
+
+@item(title, "Berichten", "fa-envelope", routes.Messages.showMessages,
+      extra= DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()
+)
+@item(title, "Mededelingen", "fa-bell", routes.Notifications.showNotifications,
+      extra= DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications()
+)
+@item(title, "Profiel", "fa-user", routes.Profile.indexWithoutId)
+@item(title, "Wachtwoord wijzigen", "fa-exchange", routes.Settings.changePassword)
+

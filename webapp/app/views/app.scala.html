@@ -79,7 +79,7 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-envelope fa-fw"></i>
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(CurrentUser.getId)) { unread_number =>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()) { unread_number =>
                                 @if(unread_number>0){
                                     <span class="topnumber">@unread_number</span>
                                 }
@@ -121,7 +121,7 @@
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             <i class="fa fa-bell fa-fw"></i>
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(CurrentUser.getId)) { unread_number =>
+                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications()) { unread_number =>
                               @if(unread_number>0){
                                   <span class="topnumber">@unread_number</span>
                               }
@@ -156,7 +156,7 @@
                             }
                             <li>
                                 <a class="text-center" href="@routes.Notifications.showNotifications()">
-                                    <strong>Bekijk alle notificaties</strong>
+                                    <strong>Bekijk alle mededelingen</strong>
                                     <i class="fa fa-angle-right"></i>
                                 </a>
                             </li>
@@ -170,7 +170,7 @@
                         <ul class="dropdown-menu dropdown-user">
                             <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
                             </li>
-                            <li><a href="@routes.Settings.index"><i class="fa fa-gear fa-fw"></i> Instellingen</a>
+                            <li><a href="@routes.Settings.changePassword"><i class="fa fa-gear fa-fw"></i> Wachtwoord wijzigen</a>
                             </li>
                             <li class="divider"></li>
                             <li><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
@@ -187,84 +187,10 @@
             <nav class="navbar-default navbar-static-side" role="navigation">
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">
-                        <li class="submenu">LENER</li>
-                        <li @if(title == "Dashboard") {class="active"}>
-                            <a href="@routes.Application.index"><i class="fa fa-dashboard fa-fw"></i> Dashboard</a>
-                        </li>
-                        @if(!CurrentUser.hasFullStatus){
-                        <li @if(title == "Infosessies") {class="active"}>
-                            <a href="@routes.InfoSessions.showUpcomingSessions"><i class="fa fa-lightbulb-o fa-fw"></i> Infosessies</a>
-                        </li>
-                        }
-                        @if(CurrentUser.hasRole(UserRole.CAR_USER)){
-                        <li @if(title == "Ritten") {class="active"}>
-                            <a href='@routes.Drives.index()'><i class="fa fa-car fa-fw"></i>
-                                Ritten
-                                @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false) +
-                                        Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
-                                        Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { requests =>
-                                    @if(requests > 0) {
-                                        <span class="sidenumber">@requests</span>
-                                    }
-                                }
-                            </a>
-                        </li>
-                        <li @if(title == "Tankbeurten") {class="active"}>
-                            <a href="@routes.Refuels.showRefuels"><i class="fa fa-beer fa-fw"></i>
-                                Tankbeurten
-                            </a>
-                        </li>
-                        <li @if(title == "Afrekeningen") {class="active"}>
-                            <a href="@routes.Receipts.index"><i class="fa fa-money fa-fw"></i> Afrekeningen</a>
-                        </li>
-                        <li @if(title == "Schadedossiers") {class="active"}>
-                            <a href="@routes.Damages.showDamages"><i class="fa fa-tasks fa-fw"></i>
-                                Schadedossiers
-                                @defining(Damages.openDamages()) { requests =>
-                                    @if(requests > 0) {
-                                        <span class="sidenumber">@requests</span>
-                                    }
-                                }
-                            </a>
-                        </li>
-                        }
-
-                        @if(CurrentUser.hasRole(UserRole.CAR_OWNER)){
-                        <li class="submenu">EIGENAAR</li>
-                        <li @if(title == "Auto's") {class="active"}>
-                            <a href="@routes.Cars.showUserCars()"><i class="fa fa-car fa-fw"></i> Auto's</a>
-                        </li>
-                        <li @if(title == "Tankbeurten (eigenaar)") {class="active"}>
-                            <a href="@routes.Refuels.showOwnerRefuels()"><i class="fa fa-beer fa-fw"></i> Tankbeurten</a>
-                        </li>
-                        <li @if(title == "Schadedossiers (eigenaar)") {class="active"}>
-                            <a href="@routes.Damages.showDamagesOwner()"><i class="fa fa-tasks fa-fw"></i> Schadedossiers</a>
-                        </li>
-                        }
-
-                        <li class="submenu">ACCOUNT</li>
-                        <li @if(title == "Berichten") {class="active"}>
-                            <a href="@routes.Messages.showMessages()"><i class="fa fa-envelope fa-fw"></i> Berichten
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages(CurrentUser.getId)) { unread_number =>
-                                @if(unread_number>0){
-                                    <span class="sidenumber">@unread_number</span>
-                                }
-                            }</a>
-                        </li>
-                        <li @if(title == "Notificaties") {class="active"}>
-                        <a href="@routes.Notifications.showNotifications()"><i class="fa fa-bell fa-fw"></i> Notificaties
-                            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications(CurrentUser.getId)) { unread_number =>
-                              @if(unread_number>0){
-                                  <span class="sidenumber">@unread_number</span>
-                              }
-                            }</a>
-                        </li>
-                        <li @if(title == "Profiel") {class="active"}>
-                            <a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
-                        </li>
-                        <li @if(title == "Instellingen") {class="active"}>
-                            <a href="@routes.Settings.index"><i class="fa fa-gears fa-fw"></i> Instellingen</a>
-                        </li>
+                        @menu.dashboard(title)
+                        @menu.driver(title)
+                        @menu.car(title)
+                        @menu.account(title)
 
                         @if(CurrentUser.isAdmin){
                             <li class="submenu">ADMIN</li>
@@ -300,7 +226,7 @@
                                 <a href="@routes.Cars.showCarCosts()"><i class="fa fa-file fa-fw"></i> Autokosten</a>
                             </li>
                             <li @if(title == "Tankbeurten (Admin)") {class="active"}>
-                                <a href="@routes.Refuels.showAllRefuels()"><i class="fa fa-file fa-fw"></i> Tankbeurten</a>
+                                <a href="@routes.Refuels.showRefuels()"><i class="fa fa-file fa-fw"></i> Tankbeurten</a>
                             </li>
                             <li @if(title == "Schadedossiers (Admin)") {class="active"}>
                                 <a href="@routes.Damages.showAllDamages()"><i class="fa fa-file fa-fw"></i> Schadedossiers</a>

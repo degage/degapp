@@ -56,11 +56,6 @@ public class Settings extends Controller {
         return LocalDateTime.ofInstant(instant, ZoneOffset.systemDefault()).format(INSTANT_FORMATTER);
     }
 
-    private static Instant stringToInstant(String string) {
-        return LocalDateTime.parse(string, INSTANT_FORMATTER)
-                .atZone(ZoneOffset.systemDefault()).toInstant();
-    }
-
     public static class EditSettingModel {
         public String value;
         // TODO: binding for LocalDateTime
@@ -74,11 +69,6 @@ public class Settings extends Controller {
             this.value = value;
             this.after = after;
         }
-    }
-
-    @InjectContext
-    public static Result index() {
-        return ok(overview.render());
     }
 
     public static class ChangePasswordModel {
@@ -116,8 +106,8 @@ public class Settings extends Controller {
 
             if (dao.changePassword(user.getId(), model.oldpw, model.newpw)) {
                 DataProvider.getUserProvider().invalidateUser(user.getId());
-                flash("success", "Jouw wachtwoord werd succesvol gewijzigd.");
-                return redirect(routes.Settings.index());
+                flash("success", "Jouw wachtwoord werd met succes gewijzigd.");
+                return redirect(routes.Application.index());
             } else {
                 form.reject("Je oude wachtwoord is incorrect.");
                 return badRequest(changepass.render(form));
