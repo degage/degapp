@@ -40,6 +40,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.dashboardFullUser;
+import views.html.dashboardOwner;
 import views.html.dashboardRegistered;
 
 public class Application extends Controller {
@@ -58,12 +59,11 @@ public class Application extends Controller {
             int completeness = Profile.getProfileCompleteness(currentUser);
             if (CurrentUser.hasFullStatus() || CurrentUser.hasRole(UserRole.SUPER_USER)) {
                 // normal dashboard if user has full status
-                return ok(
-                    dashboardFullUser.render(
-                        currentUser,
-                        completeness
-                    )
-                );
+                if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
+                    return ok(  dashboardOwner.render(completeness) );
+                } else {
+                    return ok(  dashboardFullUser.render(completeness) );
+                }
 
             } else {
                 // reduced dashboard

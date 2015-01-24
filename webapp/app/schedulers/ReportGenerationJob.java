@@ -30,16 +30,7 @@
 package schedulers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.Costs;
 import be.ugent.degage.db.models.Job;
-import be.ugent.degage.db.models.User;
-import reports.ReportGeneration;
-
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Job that generates a report

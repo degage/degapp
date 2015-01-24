@@ -32,8 +32,6 @@ package controllers.util;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
-import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.*;
 import com.google.common.collect.Sets;
 import db.DataAccess;
 import play.Logger;

@@ -1,4 +1,4 @@
-@* dashboardFullUser.scala.html
+@* dashboardOwner.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -39,13 +39,27 @@
     }
 
     @maincontent("Welkom"){
-
         @reserve.reservationpanel()
 
+        @* TODO: code almost the same as in dashboardFullUser (except for column width and one extra column) *@
         <div class="row">
+            @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { requests =>
+                @dashboardTopPanel(
+                    "col-lg-3",
+                    "fa-car",
+                    requests == 0,
+                    if(requests>0) requests.toString else "",
+                    routes.Drives.index(2),
+                    "Ga naar reservatie-aanvragen"
+                ){
+                    @if(requests == 0) { Geen nieuwe reservaties }
+                    @if(requests == 1) { Nieuwe reservatie }
+                    @if(requests > 1) { Nieuwe reservaties }
+                }
+            }
             @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, false)) { requests =>
                 @dashboardTopPanel(
-                    "col-lg-4",
+                    "col-lg-3",
                     "fa-edit",
                     requests==0,
                     requests.toString,
@@ -57,7 +71,7 @@
             }
             @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()) { unread =>
                 @dashboardTopPanel(
-                    "col-lg-4",
+                    "col-lg-3",
                     "fa-envelope",
                     unread==0,
                     unread.toString,
@@ -68,7 +82,7 @@
                 }
             }
             @dashboardTopPanel(
-                "col-lg-4",
+                "col-lg-3",
                 "fa-user",
                 completeness==100,
                 "Volledigheid profiel",

@@ -29,14 +29,14 @@
 
 @()
 
-@* Panel with reservation actions on the dashboard. Needs @js.carpicker snippet*@
+@* Panel with reservation actions on the dashboard. *@
 
-@panel("Reserveren", "fa-pencil"){
+@panel("", "fa-pencil"){
     <div class="col-xs-12">
-       <div class="button-group">
-           <a class="btn btn-primary btn-sm" href="@routes.Reserve.startCar">Reserveer een specifieke auto</a>
-           <a class="btn btn-primary btn-sm" href="@routes.Reserve.index">Zoek een auto die vrij is in een bepaalde periode</a>
-           <a class="btn btn-primary btn-sm" href="@routes.Reserve.overview(null)">Overzicht van reservaties voor een bepaalde dag</a>
-       </div>
+           Reserveer
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.startCar">Bepaalde auto</a>
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.index">Voor bepaalde periode</a>
+           Of
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.overview(null)">Toon overzicht bepaalde dag</a>
     </div>
 }
