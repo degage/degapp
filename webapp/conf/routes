@@ -40,7 +40,6 @@ POST        /userroles/edit                         controllers.UserRoles.editPo
 # Drives
 GET         /drives                                 controllers.Drives.index(tab : Int ?= 0)
 GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /drives/admin                           controllers.Drives.drivesAdmin()
 GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drive/details                          controllers.Drives.details(reservationId: Int)
 GET         /drive/approval                         controllers.Drives.approveOrReject(reservationId: Int)

@@ -80,19 +80,11 @@ public class Drives extends Controller {
     @AllowRoles
     @InjectContext
     public static Result index(int tab) {
-        return ok(drives.render(tab));
-    }
-
-    /**
-     * Method: GET
-     *
-     * @return the html page of the drives page only visible for admins
-     */
-    @AllowRoles({UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result drivesAdmin() {
-        // TODO: join with drives and keep history to redirect to the correct page and use the correct breadcrumbs
-        return ok(drivesAdmin.render());
+        if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
+            return ok(drivesAdmin.render());
+        } else {
+            return ok(drives.render(tab));
+        }
     }
 
     /**

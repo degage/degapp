@@ -195,12 +195,6 @@
                         @if(CurrentUser.isAdmin){
                             <li class="submenu">ADMIN</li>
 
-
-                        @if(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)){
-                            <li @if(title == "Ritten (Admin)") {class="active"}>
-                            <a href="@routes.Drives.drivesAdmin()"><i class="fa fa-file fa-fw"></i> Ritten</a>
-                            </li>
-                        }
                         @if(CurrentUser.hasRole(UserRole.PROFILE_ADMIN)){
                         <li @if(title == "Gebruikers") {class="active"}>
                             <a href="@routes.Users.showUsers()"><i class="fa fa-file fa-fw"></i> Gebruikers</a>
