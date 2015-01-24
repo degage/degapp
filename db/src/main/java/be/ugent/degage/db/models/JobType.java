@@ -34,5 +34,5 @@ public enum JobType {
     RES_REMINDER,
     REPORT,
     RESERVE_ACCEPT,
-    DRIVE_FINISH
+    DRIVE_FINISH // not used?
 }

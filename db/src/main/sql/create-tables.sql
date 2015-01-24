@@ -67,7 +67,7 @@ CREATE TABLE `files` (
 
 CREATE TABLE `addresses` (
   `address_id` INT NOT NULL AUTO_INCREMENT,
-  `address_country` VARCHAR(64) NOT NULL DEFAULT 'Belgium',
+  `address_country` VARCHAR(64) NOT NULL DEFAULT 'België',
   `address_city` VARCHAR(64) NOT NULL DEFAULT '',
   `address_zipcode` VARCHAR(12) NOT NULL DEFAULT '',
   `address_street` VARCHAR(64) NOT NULL DEFAULT '',
@@ -199,7 +199,7 @@ CREATE TABLE `reservations` (
 	`reservation_privileged` BIT(1) NOT NULL DEFAULT 0,
 	`reservation_from` DATETIME NOT NULL,
 	`reservation_to` DATETIME NOT NULL,
-	`reservation_message` VARCHAR(128),
+	`reservation_message` VARCHAR(4096),
 	`reservation_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`reservation_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
@@ -215,7 +215,7 @@ CREATE TABLE `infosessions` (
 	`infosession_address_id` INT NOT NULL,
 	`infosession_host_user_id` INT,
 	`infosession_max_enrollees` INT,
-	`infosession_comments` VARCHAR(256),
+	`infosession_comments` VARCHAR(4096),
 	`infosession_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`infosession_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`infosession_id`),
@@ -350,34 +350,6 @@ CREATE TABLE `messages` ( -- from user to user != notifications
 	PRIMARY KEY (`message_id`),
 	FOREIGN KEY (`message_from_user_id`) REFERENCES users(`user_id`),
 	FOREIGN KEY (`message_to_user_id`) REFERENCES users(`user_id`)
-);
-
-CREATE TABLE `templates` (
-	`template_id` INT NOT NULL,
-	`template_title` VARCHAR(255) NOT NULL,
-	`template_subject` VARCHAR(255) NOT NULL DEFAULT 'Bericht van Dégage!',
-	`template_body` TEXT NOT NULL,
-	`template_send_mail` BIT(1) NOT NULL DEFAULT 1, -- Mail of notificatie verzenden? Instelbaar via dashboard mailtemplates
-	`template_send_mail_changeable` BIT(1) NOT NULL DEFAULT 1, -- Mag aangepast worden? Bv wachtwoord reset/verificatie niet!
-	`template_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	`template_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-	PRIMARY KEY (`template_id`),
-	UNIQUE INDEX `template_title` (`template_title`)
-);
-
-CREATE TABLE `templatetags` ( -- Welke tags kunnen we gebruiken in de templates
-	`template_tag_id` INT NOT NULL AUTO_INCREMENT,
-	`template_tag_body` VARCHAR(255) NOT NULL,
-	PRIMARY KEY (`template_tag_id`)
-);
-
-CREATE TABLE `templatetagassociations` ( -- Welke tags horen bij welke templates
-	`template_tag_association_id` INT NOT NULL AUTO_INCREMENT,
-	`template_tag_id` INT NOT NULL,
-	`template_id` INT NOT NULL,
-	PRIMARY KEY (`template_tag_association_id`),
-	FOREIGN KEY (`template_id`) REFERENCES templates(`template_id`),
-	FOREIGN KEY (`template_tag_id`) REFERENCES templatetags(`template_tag_id`)
 );
 
 CREATE TABLE `notifications` ( -- from system to user

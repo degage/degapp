@@ -28,6 +28,7 @@
  */
 
 package notifiers;
+import controllers.util.ConfigurationHelper;
 import play.i18n.Messages;
 import play.libs.mailer.Email;
 import play.libs.mailer.MailerPlugin;
@@ -50,8 +51,12 @@ public class Mailer {
      * @param text Text-version of the email
      */
     private static void sendMail (String to, String subject, String text, String html) {
-        //if (true || ! Play.isDev() ) { // TODO: remove!!!
-        if (! Play.isDev() ) {
+        if (Play.isDev() || "yes".equalsIgnoreCase(ConfigurationHelper.getConfigurationString("smtp.block"))) {
+            // TODO: make mails pluggable
+            System.err.println("To: " + to);
+            System.err.println("Subject: " + subject);
+            System.err.println(html);
+        } else {
             Email email = new Email();
             email.setCharset("utf-8");
             email.setSubject(subject); // play plugin does not encode
@@ -65,11 +70,6 @@ public class Mailer {
                 email.setBodyHtml(html);
             }
             MailerPlugin.send(email);
-        } else {
-            // TODO: make mails pluggable
-            System.err.println("To: " + to);
-            System.err.println("Subject: " + subject);
-            System.err.println(html);
         }
 
     }

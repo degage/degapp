@@ -446,7 +446,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private static final String ADJUST_STATEMENT =
             "UPDATE reservations SET reservation_status='REQUEST_DETAILS' " +
-                    " WHERE reservation_to < NOW() AND reservation_status = 'ACCEPTED' ";
+                    " WHERE reservation_from < NOW() AND reservation_status = 'ACCEPTED' ";
 
     @Override
     public void adjustReservationStatuses() {

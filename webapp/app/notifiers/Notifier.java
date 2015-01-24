@@ -93,14 +93,14 @@ public class Notifier extends Mailer {
     }
 
     public static void sendMembershipApproved(UserHeader user, String comment) {
-        createNotificationAndSend (user, "memberschipApproved",
+        createNotificationAndSend (user, "membershipApproved",
                 views.txt.messages.membershipApproved.render(user, comment),
                 views.html.messages.membershipApproved.render(user, comment)
         );
     }
 
     public static void sendMembershipRejected(UserHeader user, String comment) {
-        createNotificationAndSend (user, "memberschipApproved",
+        createNotificationAndSend (user, "membershipRejected",
                 views.txt.messages.membershipRejected.render(user, comment),
                 views.html.messages.membershipRejected.render(user, comment)
         );

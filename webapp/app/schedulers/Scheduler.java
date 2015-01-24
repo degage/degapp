@@ -78,7 +78,7 @@ public final class Scheduler {
         // change ride status to finished for every ride with an end date later than now
         // TODO: the above is not entirely correct: only accepted -> request_details
         // TODO: avoid this by looking at the date when querying the database
-        schedule(Duration.create(1, TimeUnit.MINUTES),
+        schedule(Duration.create(12, TimeUnit.MINUTES),
                 new RunnableInContext("Finish rides") {
                     @Override
                     public void runInContext(DataAccessContext context) {
