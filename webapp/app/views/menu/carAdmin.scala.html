@@ -1,4 +1,4 @@
-@* account.scala.html
+@* carAdmin.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,16 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@import providers.DataProvider
-
 @(title: String)
 
-@item(title, "Berichten", "fa-envelope", routes.Messages.showMessages,
-      extra= DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()
-)
-@item(title, "Mededelingen", "fa-bell", routes.Notifications.showNotifications,
-      extra= DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications()
-)
-@item(title, "Profiel", "fa-user", routes.Profile.indexWithoutId)
-@item(title, "Wachtwoord wijzigen", "fa-exchange", routes.Settings.changePassword)
-
+@if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)){
+@* TODO: incorporate these
+    @item(title, "Autokosten", "fa-money", routes.Cars.showCarCosts)
+*@
+}

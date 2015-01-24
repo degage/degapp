@@ -1,4 +1,4 @@
-@* account.scala.html
+@* profileInfosessionAdmin.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,16 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@import providers.DataProvider
-
 @(title: String)
 
-@item(title, "Berichten", "fa-envelope", routes.Messages.showMessages,
-      extra= DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()
-)
-@item(title, "Mededelingen", "fa-bell", routes.Notifications.showNotifications,
-      extra= DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications()
-)
-@item(title, "Profiel", "fa-user", routes.Profile.indexWithoutId)
-@item(title, "Wachtwoord wijzigen", "fa-exchange", routes.Settings.changePassword)
-
+@if(db.CurrentUser.hasRole(UserRole.PROFILE_ADMIN)){
+    @item(title, "Gebruikers", "fa-users", routes.Users.showUsers)
+}
+@if(db.CurrentUser.hasSomeRole(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN )){
+    @item(title, "Goedkeuring", "fa-plus-square-o", routes.Approvals.pendingApprovalList, "Goedkeuring gebruikers")
+}
+@if(db.CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)){
+    @item(title, "Infosessies", "fa-lightbulb-o", routes.InfoSessions.showSessions, "Infosessies (beheer)")
+}
