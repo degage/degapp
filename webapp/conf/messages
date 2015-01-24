@@ -34,12 +34,12 @@ error.email=Ongeldig e-mailadres
 
 # Subjects
 subject.passwordReset=Wachtwoord opnieuw instellen
-subject.verification=Aanvraag gebruikersnummer voor webapplicatie
+subject.verification=Aanvraag toegang webapplicatie
 subject.infosessionEnrolled=Bevestiging infosessie autodelen
 subject.reservationApprove=Aanvraag reservatie
 subject.reservationApproved=Reservatie goedgekeurd
 subject.reservationRejected=Reservatie geweigerd
-subject.membershipApproved=Lidmaatschap bevestigd
+subject.membershipApproved=Bevestiging lidmaatschap
 subject.membershipRejected=Lidmaatschap geweigerd
 subject.costApproved=Kost goedgekeurd
 subject.costRejected=Kost niet goedgekeurd
