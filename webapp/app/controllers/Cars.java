@@ -192,22 +192,14 @@ public class Cars extends Controller {
     /**
      * @return The cars index-page with all cars (only available to car admin)
      */
-    @AllowRoles({UserRole.CAR_ADMIN})
+    @AllowRoles({UserRole.CAR_ADMIN, UserRole.CAR_OWNER})
     @InjectContext
     public static Result showCars() {
-        return ok(views.html.cars.carsAdmin.render());
-    }
-
-    /**
-     * @return The cars index-page with user cars (only available to car_owners)
-     */
-    @AllowRoles({UserRole.CAR_OWNER})
-    @InjectContext
-    public static Result showUserCars() {
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        Iterable<Car> listOfCars = dao.listCarsOfUser(CurrentUser.getId());
-
-        return ok(cars.render(listOfCars));
+        if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+            return ok(views.html.cars.carsAdmin.render());
+        } else {
+            return ok(cars.render(DataAccess.getInjectedContext().getCarDAO().listCarsOfUser(CurrentUser.getId())));
+        }
     }
 
     /**
@@ -267,7 +259,7 @@ public class Cars extends Controller {
         CarModel model = new CarModel();
         model.userId = CurrentUser.getId();
         model.userIdAsString = CurrentUser.getFullName();
-        return ok(views.html.cars.add.render( Form.form(CarModel.class).fill(model) ));
+        return ok(views.html.cars.add.render(Form.form(CarModel.class).fill(model)));
     }
 
     /**
@@ -517,7 +509,7 @@ public class Cars extends Controller {
             return badRequest();
         }
 
-        if (CurrentUser.isNot(car.getOwner().getId()) && ! CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+        if (CurrentUser.isNot(car.getOwner().getId()) && !CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
             return badRequest();
         }

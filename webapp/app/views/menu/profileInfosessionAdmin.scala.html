@@ -36,5 +36,5 @@
     @item(title, "Goedkeuring", "fa-plus-square-o", routes.Approvals.pendingApprovalList, "Goedkeuring gebruikers")
 }
 @if(db.CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)){
-    @item(title, "Infosessies", "fa-lightbulb-o", routes.InfoSessions.showSessions, "Infosessies (beheer)")
+    @item(title, "Infosessies", "fa-lightbulb-o", routes.InfoSessions.showSessions)
 }

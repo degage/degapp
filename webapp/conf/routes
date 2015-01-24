@@ -160,8 +160,7 @@ POST        /changepass                             controllers.Settings.changeP
 
 
 # Cars
-GET         /cars/admin                             controllers.Cars.showCars()
-GET         /cars                                   controllers.Cars.showUserCars()
+GET         /cars                                   controllers.Cars.showCars()
 GET         /cars/page                              controllers.Cars.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/new                               controllers.Cars.newCar()
 POST        /cars/new                               controllers.Cars.addNewCar()
