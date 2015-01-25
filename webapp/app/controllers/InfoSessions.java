@@ -104,7 +104,7 @@ public class InfoSessions extends Controller {
      *
      * @return An infosession form
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result newSession() {
         User user = DataProvider.getUserProvider().getUser();
@@ -125,7 +125,7 @@ public class InfoSessions extends Controller {
      * @param sessionId SessionId to edit
      * @return An infosession form for given id
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result editSession(int sessionId) {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
@@ -148,7 +148,7 @@ public class InfoSessions extends Controller {
      * @param sessionId SessionID to remove
      * @return A result redirect whether delete was successfull or not.
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result removeSession(int sessionId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -169,7 +169,7 @@ public class InfoSessions extends Controller {
      * @param sessionId SessionID to edit
      * @return Redirect to edited session, or the form if errors occurred
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result editSessionPost(int sessionId) {
         Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
@@ -235,7 +235,7 @@ public class InfoSessions extends Controller {
      *
      * @return A redirect to the overview page with message if unenrollment was successfull.
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result unenrollSession() {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
@@ -253,7 +253,7 @@ public class InfoSessions extends Controller {
     }
 
     // TODO: reintegrate the Map (using a promise instead of a result?)
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result detail(int sessionId) {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
@@ -409,7 +409,7 @@ public class InfoSessions extends Controller {
      * @param sessionId The sessionId to enroll to
      * @return A redirect to the detail page to which the user has subscribed
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result enrollSession(int sessionId) {
         if (CurrentUser.hasFullStatus()) {
@@ -455,7 +455,7 @@ public class InfoSessions extends Controller {
      *
      * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
@@ -543,7 +543,7 @@ public class InfoSessions extends Controller {
     }
     */
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result showUpcomingSessions() {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal

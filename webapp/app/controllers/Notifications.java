@@ -56,13 +56,13 @@ public class Notifications extends Controller {
      *
      * @return index page containing all the received notifications of a specific user
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result showNotifications() {
         return ok(notifications.render());
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result showNotificationsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         User user = DataProvider.getUserProvider().getUser();
@@ -95,7 +95,7 @@ public class Notifications extends Controller {
      * @param notificationId Id of the message that has to be marked as read
      * @return message index page
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result markNotificationAsRead(int notificationId) {
         User user = DataProvider.getUserProvider().getUser();
@@ -110,7 +110,7 @@ public class Notifications extends Controller {
      *
      * @return notification index page
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result markAllNotificationsAsRead() {
         User user = DataProvider.getUserProvider().getUser();

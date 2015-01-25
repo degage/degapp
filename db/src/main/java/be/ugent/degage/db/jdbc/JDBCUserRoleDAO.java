@@ -55,7 +55,7 @@ class JDBCUserRoleDAO extends AbstractDAO implements UserRoleDAO {
             PreparedStatement ps = getUserRolesStatement.value();
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
-                EnumSet<UserRole> roleSet = EnumSet.of(UserRole.USER); // by default
+                EnumSet<UserRole> roleSet = EnumSet.noneOf(UserRole.class);
                 while (rs.next()) {
                     roleSet.add(UserRole.valueOf(rs.getString("userrole_role")));
                 }

@@ -209,6 +209,7 @@ public class Login extends Controller {
         }
     }
 
+    @AllowRoles
     @InjectContext
     public static Result setAdmin () {
         if (CurrentUser.canPromote()) {
@@ -219,6 +220,7 @@ public class Login extends Controller {
         }
     }
 
+    @AllowRoles
     @InjectContext
     public static Result clearAdmin () {
         CurrentUser.clearAdmin(DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(CurrentUser.getId()));

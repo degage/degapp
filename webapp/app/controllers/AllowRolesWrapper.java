@@ -45,14 +45,11 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
 
     /**
      * Delegates the user to the given HTTP context if the user is authorized.
-     * The authorized roles are retrieved from the RoleAuthenticated annotation.
-     *
-     * @param ctx The given HTTP context
-     * @return The result, either the requested page or an unauthorized request page
+     * The authorized roles are retrieved from the AllowRoles annotation.
      */
     public F.Promise<Result> call(Context ctx) {
         try {
-            UserRole[] securedRoles = configuration.value();
+            UserRole[] permittedRoles = configuration.value();
 
             String statusString = ctx.session().get("status");
 
@@ -68,7 +65,7 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
                 return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
             }
 
-            if (securedRoles.length == 0) {
+            if (permittedRoles.length == 0) {
                 return delegate.call(ctx);
             }
 
@@ -78,7 +75,7 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
                 if (roleSet.contains(UserRole.SUPER_USER)) {
                     return delegate.call(ctx);
                 }
-                for (UserRole role : securedRoles) {
+                for (UserRole role : permittedRoles) {
                     if (roleSet.contains(role)) {
                         return delegate.call(ctx);
                     }
@@ -86,7 +83,7 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
             }
 
             //It this point is reached, then user is not authorized
-            return F.Promise.pure((Result) unauthorized(views.html.unauthorized.render(securedRoles)));
+            return F.Promise.pure((Result) unauthorized(views.html.unauthorized.render(permittedRoles)));
 
         } catch (Throwable t) {
             throw new RuntimeException(t);

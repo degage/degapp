@@ -105,7 +105,7 @@ public class Approvals extends Controller {
      *
      * @return The page to request approval
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result requestApproval() {
         if (CurrentUser.hasFullStatus()) {
@@ -128,7 +128,7 @@ public class Approvals extends Controller {
         }
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result requestApprovalPost() {
         Form<RequestApprovalData> form = Form.form(RequestApprovalData.class).bindFromRequest();

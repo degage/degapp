@@ -51,7 +51,7 @@ public class CurrentUser {
     }
 
     public static final Set<UserRole> RESTRICTED_ROLES
-            = EnumSet.of(UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.USER);
+            = EnumSet.of(UserRole.CAR_USER, UserRole.CAR_OWNER);
 
     /**
      * Register the given user as the current user. (As part of logging in or switching to another user.)
@@ -62,9 +62,7 @@ public class CurrentUser {
         Controller.session("id", Integer.toString(user.getId()));
         Controller.session("email", user.getEmail());
         Controller.session("fullName", user.getFullName());
-        EnumSet es = EnumSet.copyOf(RESTRICTED_ROLES);
-        es.retainAll(roleSet);
-        Controller.session("roles", UserRole.toString(es));
+        clearAdmin(roleSet);
         Controller.session("status", user.getStatus().name());
         Controller.session("pa", Boolean.toString(isAdmin(roleSet))); // can this user promote to admin
     }
@@ -90,6 +88,9 @@ public class CurrentUser {
     public static void clearAdmin (Set<UserRole> roleSet) {
         EnumSet es = EnumSet.copyOf(RESTRICTED_ROLES);
         es.retainAll(roleSet);
+        if (roleSet.contains(UserRole.SUPER_USER)) {
+            es.add(UserRole.CAR_USER); // to avoid problems with super users that are not members
+        }
         Controller.session("roles", UserRole.toString(es));
     }
 

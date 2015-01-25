@@ -38,11 +38,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Indicates that the associated action can only be performed by users having a certain role,
+ * Indicates that the associated action can only be performed by users that are logged in
+ * and additionally have a certain role.
  */
 @With(AllowRolesWrapper.class)
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AllowRoles {
-    UserRole[] value() default {UserRole.USER};
+    UserRole[] value() default {UserRole.CAR_USER};
 }

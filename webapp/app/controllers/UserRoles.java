@@ -130,10 +130,15 @@ public class UserRoles extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserHeader user = context.getUserDAO().getUserHeader(userId);
         return ok(editroles.render(
-                getUserRolesStatus(context.getUserRoleDAO().getUserRoles(userId)),
+                getEditableRolesStatus(context.getUserRoleDAO().getUserRoles(userId)),
                 user)
         );
     }
+
+    // Editable roles
+    public static final Set<UserRole> EDITABLE_ROLES = EnumSet.of(
+            UserRole.CAR_OWNER, UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER
+    );
 
     /**
      * Creates a mapping between all roles and a boolean whether the rule is set in the provided role set
@@ -142,14 +147,12 @@ public class UserRoles extends Controller {
      * @return An array of all roles and their corresponding status (enabled | disabled)
      */
     @SuppressWarnings("unchecked")
-    public static Tuple2<UserRole, Boolean>[] getUserRolesStatus(Set<UserRole> assignedRoles) {
+    public static Tuple2<UserRole, Boolean>[] getEditableRolesStatus(Set<UserRole> assignedRoles) {
         UserRole[] allRoles = UserRole.values();
-        Tuple2<UserRole, Boolean>[] filtered = new Tuple2[allRoles.length - 1];
+        Tuple2<UserRole, Boolean>[] filtered = new Tuple2[EDITABLE_ROLES.size()];
         int k = 0;
-        for (UserRole allRole : allRoles) {
-            if (allRole != UserRole.USER) { //TODO: review whole USER role, this thing is a hack and can be left out
-                filtered[k++] = new Tuple2<>(allRole, assignedRoles.contains(allRole));
-            }
+        for (UserRole role : EDITABLE_ROLES) {
+            filtered[k++] = new Tuple2<>(role, assignedRoles.contains(role));
         }
         return filtered;
     }
@@ -176,7 +179,7 @@ public class UserRoles extends Controller {
         String[] checkedVal = map.get("role"); // get selected topics
 
         // Parse the POST values whether they contain the roles (only checked get posted)
-        Set<UserRole> newRoles = EnumSet.of(UserRole.USER);
+        Set<UserRole> newRoles = EnumSet.of(UserRole.CAR_USER);
         if (checkedVal != null) {
             for (String strRole : checkedVal) {
                 newRoles.add(Enum.valueOf(UserRole.class, strRole));
@@ -194,7 +197,7 @@ public class UserRoles extends Controller {
         // Check if a superuser did delete his role by accident (SU roles can only be removed by other SU users)
         if (CurrentUser.is(user.getId()) && removedRoles.contains(UserRole.SUPER_USER)) {
             flash("danger", "Als superuser kan je je eigen superuser rechten niet verwijderen.");
-            return badRequest(editroles.render(getUserRolesStatus(oldRoles), user));
+            return badRequest(editroles.render(getEditableRolesStatus(oldRoles), user));
         } else {
             try {
                 for (UserRole removedRole : removedRoles) {
@@ -206,7 +209,7 @@ public class UserRoles extends Controller {
                 }
 
                 flash("success", "Er werden " + addedRoles.size() + " recht(en) toegevoegd en " + removedRoles.size() + " recht(en) verwijderd.");
-                return ok(editroles.render(getUserRolesStatus(newRoles), user));
+                return ok(editroles.render(getEditableRolesStatus(newRoles), user));
             } catch (DataAccessException ex) {
                 context.rollback();
                 throw ex;

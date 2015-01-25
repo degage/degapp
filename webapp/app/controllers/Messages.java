@@ -83,13 +83,13 @@ public class Messages extends Controller {
      *
      * @return index page containing all the received messages of a specific user
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result showMessages() {
         return ok(messages.render());
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result showReceivedMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         int userId = CurrentUser.getId();
@@ -103,7 +103,7 @@ public class Messages extends Controller {
         );
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result showSentMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         int userId = CurrentUser.getId();
@@ -135,7 +135,7 @@ public class Messages extends Controller {
      * @return a new message form, filled in with details for replying to the given message
      */
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result reply(int messageId) {
         Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
@@ -185,7 +185,7 @@ public class Messages extends Controller {
      * @param messageId Id of the message that has to be marked as read
      * @return message index page
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result markMessageAsRead(int messageId) {
         User user = DataProvider.getUserProvider().getUser();
@@ -200,7 +200,7 @@ public class Messages extends Controller {
      *
      * @return message index page
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result markAllMessagesAsRead() {
         User user = DataProvider.getUserProvider().getUser();

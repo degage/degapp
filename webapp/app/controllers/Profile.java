@@ -69,7 +69,7 @@ public class Profile extends Controller {
      * @param userId The userId for which the picture is uploaded
      * @return The page to upload
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result profilePictureUpload(int userId) {
         return ok(uploadPicture.render(userId));
@@ -81,7 +81,7 @@ public class Profile extends Controller {
      * @param userId The user for which the image is requested
      * @return The image with correct content type
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result getProfilePicture(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -97,7 +97,7 @@ public class Profile extends Controller {
     /**
      * Processes a profile picture upload request
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result profilePictureUploadPost(int userId) {
         // We load the other user(by id)
@@ -160,7 +160,7 @@ public class Profile extends Controller {
     /**
      * @return A profile page for the currently requesting user
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result indexWithoutId() {
         return index(CurrentUser.getId());
@@ -170,7 +170,7 @@ public class Profile extends Controller {
      * @param userId The userId of the user
      * @return A profile page for the user
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result index(int userId) {
         User user = DataAccess.getInjectedContext().getUserDAO().getUser(userId);
@@ -213,7 +213,7 @@ public class Profile extends Controller {
      * @param userId The user the requester wants to edit
      * @return A page to edit the identity card information
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result editIdentityCard(int userId) {
 
@@ -238,7 +238,7 @@ public class Profile extends Controller {
      * @param fileId
      * @return
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result viewIdentityFile(int userId, int fileId) {
 
@@ -263,7 +263,7 @@ public class Profile extends Controller {
      * @param fileId
      * @return
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result viewLicenseFile(int userId, int fileId) {
         if (canEditProfile(userId)) {
@@ -304,7 +304,7 @@ public class Profile extends Controller {
      * @param fileId The file to delete
      * @return A redirect to the identity card page overview
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result deleteIdentityFile(final int userId, int fileId) {
 
@@ -334,7 +334,7 @@ public class Profile extends Controller {
      * @param fileId The file to delete
      * @return A redirect to the identity card page overview
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result deleteLicenseFile(final int userId, int fileId) {
 
@@ -363,7 +363,7 @@ public class Profile extends Controller {
      * @param userId The user to edit
      * @return The overview page or error page when something went wrong
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result editIdentityCardPost(int userId) {
         if (canEditProfile(userId)) {
@@ -384,7 +384,7 @@ public class Profile extends Controller {
         }
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result addIdentityCardFile(int userId) {
         if (canEditProfile(userId)) {
@@ -434,7 +434,7 @@ public class Profile extends Controller {
         }
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result editDriversLicense(int userId) {
         if (canEditProfile(userId)) {
@@ -453,7 +453,7 @@ public class Profile extends Controller {
     }
 
     // TODO: a LOT of code overlap with identity card!!
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result editDriversLicensePost(int userId) {
 
@@ -476,7 +476,7 @@ public class Profile extends Controller {
         }
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result addDriversLicenseFile(int userId) {
 
@@ -654,7 +654,7 @@ public class Profile extends Controller {
     /**
      * Show the main profile editing page
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result edit(int userId) {
         if (canEditProfile(userId)) {
@@ -671,7 +671,7 @@ public class Profile extends Controller {
     /**
      * Change the main profile data and the addresses of a user
      */
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result editPost(int userId) {
         Form<MainProfileData> form = Form.form(MainProfileData.class).bindFromRequest();

@@ -87,13 +87,13 @@ public class Settings extends Controller {
         }
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result changePassword() {
         return ok(changepass.render(Form.form(ChangePasswordModel.class)));
     }
 
-    @AllowRoles
+    @AllowRoles({})
     @InjectContext
     public static Result changePasswordPost() {
         Form<ChangePasswordModel> form = Form.form(ChangePasswordModel.class).bindFromRequest();

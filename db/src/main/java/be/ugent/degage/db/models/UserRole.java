@@ -42,8 +42,8 @@ public enum UserRole {
 
     // at most 36 values are allowed for toString(Set) to work properly
 
-    USER("Gebruiker", "Een lid van Dégage"),
-    CAR_USER("Autolener", "Kan een auto lenen"),
+    USER("Gebruiker", "Een lid van Dégage"), // not used, but left here so indices do not change
+    CAR_USER("Autolener", "Een lid van Dégage, kan een auto lenen"),
     CAR_OWNER("Auto-eigenaar", "Eigenaar van een auto die kan uitgeleend worden"),
     CAR_ADMIN("Autobeheerder", "Kan auto's beheren en autogebonden kosten goedkeuren"),
     INFOSESSION_ADMIN("Infosessiebeheerder", "Kan infosessies beheren"),

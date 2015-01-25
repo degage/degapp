@@ -50,8 +50,10 @@
 
     <div class="panel panel-default">
         <div class="panel-body">
-            <a class="btn btn-default btn-sm" href="@routes.Messages.newMessage()">Nieuw bericht</a>
-            <a class="btn btn-default btn-sm" href="@routes.Messages.markAllMessagesAsRead">Markeer alle berichten als gelezen</a>
+            @if(db.CurrentUser.hasRole(UserRole.CAR_USER)){
+               <a class="btn btn-primary btn-sm" href="@routes.Messages.newMessage()">Nieuw bericht</a>
+            }
+            <a class="btn btn-primary btn-sm" href="@routes.Messages.markAllMessagesAsRead">Markeer alle berichten als gelezen</a>
         </div>
     </div>
 
