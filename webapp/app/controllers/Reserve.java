@@ -384,6 +384,16 @@ public class Reserve extends Controller {
     }
 
     /**
+     * Same as indexWithCar, but with (first) car of current user filled in
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result overviewOwnerCar() {
+        Car car = DataAccess.getInjectedContext().getCarDAO().listCarsOfUser(CurrentUser.getId()).iterator().next(); // TODO: assumes owner has only one car
+        return indexWithCar(car.getName(), car.getId());
+    }
+
+    /**
      * Show an overview of reservations for a specific car during a certain week.
      */
     @AllowRoles({UserRole.CAR_USER})

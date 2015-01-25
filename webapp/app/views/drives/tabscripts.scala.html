@@ -1,0 +1,19 @@
+@*
+*@
+
+@(tab: Int)
+
+@* Scripts for tab selection in drives overview page *@
+
+<script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
+
+<script>$(document).ready(function(){
+    loadFirstPage(
+      @tab match {
+         case 0 => { "status=ACCEPTED" }
+         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }
+         case 2 => { "status=REQUEST" }
+         case _ => { "status=REFUSED|CANCELLED" }
+      }
+    );});
+</script>

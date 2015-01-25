@@ -1,4 +1,4 @@
-@* overviewcar.scala.html
+@* reservationpanelowner.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,16 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Reserve.CarDateData], lines: Iterable[Reserve.OverviewLine])
+@()
 
-@stylesheets={
-<link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
-}
-@scripts={@js.userpicker()@js.datetimepicker()}
+@* Panel with reservation actions, specific for car owner (on the dashboard). *@
 
-@stdlayout("Overzicht beschikbaarheid auto", stylesheets=stylesheets, scripts=scripts) {
-    @cardatepanel(form,routes.Reserve.overviewCarPost())
-    @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
-        @* no header. *@
-    }{  @* no footer. *@ }
+@panel("", "fa-pencil"){
+    <div class="col-xs-12">
+           Reserveer
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.overviewOwnerCar">Bepaalde auto</a>
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.index">Voor bepaalde periode</a>
+           Of
+           <a class="btn btn-primary btn-sm" href="@routes.Reserve.overview(null)">Toon overzicht bepaalde dag</a>
+    </div>
 }

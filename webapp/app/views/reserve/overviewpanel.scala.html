@@ -27,7 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String, faClass: String, lines: Iterable[Reserve.OverviewLine], percentage:Int = 25)(header: => Html)
+@(title: String, faClass: String, lines: Iterable[Reserve.OverviewLine],
+                 percentage:Int = 25)(header: => Html)(footer: => Html)
 
 @* Overview panel for use in overview and overviewcar templates. *@
 
@@ -60,5 +61,6 @@
             </tr>
         </table>
         <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
+        @footer
     </div>
 }

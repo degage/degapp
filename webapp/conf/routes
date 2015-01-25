@@ -58,6 +58,7 @@ GET         /reserve                                controllers.Reserve.index()
 GET         /reserve/overview                       controllers.Reserve.overview(date: String ?= null)
 POST        /reserve/overview                       controllers.Reserve.overviewPost()
 GET         /reserve/car/index                      controllers.Reserve.indexWithCar(carName: String, id: Int)
+GET         /reserve/car/owner                      controllers.Reserve.overviewOwnerCar()
 GET         /reserve/car/start                      controllers.Reserve.startCar()
 POST        /reserve/car/overview                   controllers.Reserve.overviewCarPost()
 

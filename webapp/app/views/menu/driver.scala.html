@@ -44,7 +44,7 @@
    }
 }
 @if(CurrentUser.hasRole(UserRole.CAR_USER)){
-    @item(title, "Ritten", "fa-car", routes.Drives.index(),
+    @item(title, "Ritten", "fa-car", routes.Drives.index(), "Ritten / reservaties",
           extra= Drives.reservationsWithStatus(ReservationStatus.REQUEST, false) +
                  Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
                  Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)
