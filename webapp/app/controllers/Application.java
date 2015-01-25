@@ -29,6 +29,7 @@
 
 package controllers;
 
+import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import controllers.routes.javascript;
@@ -36,12 +37,16 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.Routes;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.dashboardFullUser;
 import views.html.dashboardOwner;
 import views.html.dashboardRegistered;
+
+import java.time.LocalDate;
+import java.util.Iterator;
 
 public class Application extends Controller {
 
@@ -60,11 +65,24 @@ public class Application extends Controller {
             if (CurrentUser.hasFullStatus() || CurrentUser.hasRole(UserRole.SUPER_USER)) {
                 // normal dashboard if user has full status
                 if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
-                    return ok(  dashboardOwner.render(completeness) );
-                } else {
-                    return ok(  dashboardFullUser.render(completeness) );
+                    Iterable<Car> cars = DataAccess.getInjectedContext().getCarDAO().listCarsOfUser(CurrentUser.getId());
+                    Iterator<Car> iterator = cars.iterator();
+                    if (iterator.hasNext()) {
+                        Car car = iterator.next(); // TODO: assumes owner has only one car
+                        // TODO: code in common with Reserve,indexWithCar
+                        Reserve.CarDateData data = new Reserve.CarDateData();
+                        data.carId = car.getId();
+                        data.carIdAsString = car.getName();
+                        data.date = Utils.toDateString(LocalDate.now());
+                        return ok(  dashboardOwner.render(
+                                car.getName(),
+                                Reserve.getOverviewLines(data),
+                                completeness
+                        ) );
+                    }
                 }
-
+                // not an owner role or no car
+                return ok(  dashboardFullUser.render(completeness) );
             } else {
                 // reduced dashboard
                 return ok(
