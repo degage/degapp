@@ -269,7 +269,7 @@ public class Reserve extends Controller {
          */
         public void populate (Iterable<ReservationHeader> reservations, int carId, LocalDate date) {
             this.carId = carId;
-            lineHeader = Utils.toLocalizedDateString(date);
+            lineHeader = Utils.toLocalizedWeekDayString(date);
 
             fillFreeTimes(date, reservations, freeTimes);
         }
@@ -352,7 +352,10 @@ public class Reserve extends Controller {
     }
 
     private static Result overviewCar(Form<CarDateData> form) {
-        CarDateData data = form.get();
+        return ok(overviewcar.render(form, getOverviewLines(form.get())));
+    }
+
+    public static Collection<OverviewLine> getOverviewLines(CarDateData data) {
         LocalDateTime from = Utils.toLocalDate(data.date).atStartOfDay();
         LocalDateTime until = from.plusDays(7);
         Iterable<ReservationHeader> reservations =
@@ -364,8 +367,7 @@ public class Reserve extends Controller {
             line.populate(reservations, data.carId, from.toLocalDate().plusDays(i));
             lines.add(line);
         }
-
-        return ok(overviewcar.render(form, lines));
+        return lines;
     }
 
     /**

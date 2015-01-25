@@ -36,7 +36,7 @@
 
 @stdlayout("Overzicht beschikbaarheid auto", stylesheets=stylesheets, scripts=scripts) {
     @cardatepanel(form,routes.Reserve.overviewCarPost())
-    @overviewpanel("Beschikbare perioden", "fa-calendar", lines){
+    @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
         @* no header. *@
     }
 }

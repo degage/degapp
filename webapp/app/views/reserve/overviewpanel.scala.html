@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String, faClass: String, lines: Iterable[Reserve.OverviewLine])(header: => Html)
+@(title: String, faClass: String, lines: Iterable[Reserve.OverviewLine], percentage:Int = 25)(header: => Html)
 
 @* Overview panel for use in overview and overviewcar templates. *@
 
@@ -43,7 +43,7 @@
                 }
             </tr>
             @foreach.tr(lines) { line =>
-                <th class="res-car" width="25%">@line.lineHeader</th>
+                <th class="res-car" width="@percentage%">@line.lineHeader</th>
                 @for(str <- line.freeTimes){
                    <td class="@if(str==null){res-notfree}else{res-free}">
                        @if(str!=null) {
