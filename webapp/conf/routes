@@ -117,6 +117,8 @@ GET         /users/impersonate                      controllers.Users.impersonat
 GET         /login                                  controllers.Login.login(redirect ?= null)
 POST        /login                                  controllers.Login.authenticate(redirect ?= null)
 GET         /logout                                 controllers.Login.logout()
+GET         /admin/set                              controllers.Login.setAdmin()
+GET         /admin/clear                            controllers.Login.clearAdmin()
 GET         /pwreset/request                        controllers.Login.resetPasswordRequest()
 POST        /pwreset/request                        controllers.Login.resetPasswordRequestPost()
 GET         /pwreset                                controllers.Login.resetPassword(token: String)

@@ -36,6 +36,13 @@
 @if(!CurrentUser.hasFullStatus && !CurrentUser.hasRole(UserRole.SUPER_USER)){
     @item(title, "Infosessies", "fa-lightbulb-o", routes.InfoSessions.showUpcomingSessions)
 }
+@if(!CurrentUser.isAdmin && CurrentUser.canPromote){
+   @menu.item(title, "Beheersmodus", "fa-arrow-circle-up", routes.Login.setAdmin,admin=true)
+} else {
+   @if(CurrentUser.isAdmin) {
+        @menu.item(title, "Beëindig beheersmodus", "fa-arrow-circle-down", routes.Login.clearAdmin,admin=true)
+   }
+}
 @if(CurrentUser.hasRole(UserRole.CAR_USER)){
     @item(title, "Ritten", "fa-car", routes.Drives.index(),
           extra= Drives.reservationsWithStatus(ReservationStatus.REQUEST, false) +

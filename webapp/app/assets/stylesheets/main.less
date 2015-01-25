@@ -6,10 +6,13 @@
 @topnumberBGColor: red;
 @navtogColor: #ddd;
 @bg: #7dba4d;
+@bg-admin: #b22;
 
 /*computed*/
 @bgdarker: @bg - #111;
 @bglighter: @bg + #111;
+@bg-admindarker: @bg-admin - #111;
+@bg-adminlighter: @bg-admin + #111;
 
 .navbar-top-links li .dropdown-toggle {
 	color: @textColor;
@@ -33,6 +36,7 @@
 
 .navbar-static-top {
 	background-color: @bg;
+	margin-bottom: 0;
 }
 
 .navbar-top-links > li > .avatar {
@@ -66,6 +70,30 @@
 
 .navbar-default .navbar-toggle:focus {
 	background-color: @bg;
+}
+
+/* --- Admin modus --- */
+
+.navbar-static-top.admin {
+    background-color: @bg-admin;
+	margin-bottom: 0;
+}
+
+.admin .navbar-top-links li .dropdown-toggle {
+	color: @textColor;
+	background: @bg-admindarker;
+}
+
+.admin .navbar-top-links:hover li:hover .dropdown-toggle:hover {
+	background: @bg-adminlighter;
+}
+
+.admin .navbar-top-links .open>a:focus {
+	background: @bg-adminlighter;
+}
+
+.navbar-static-side ul li.admin a {
+	color: #b22;
 }
 
 

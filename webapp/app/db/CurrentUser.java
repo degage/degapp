@@ -34,6 +34,8 @@ import be.ugent.degage.db.models.UserRole;
 import be.ugent.degage.db.models.UserStatus;
 import play.mvc.Controller;
 
+import java.util.EnumSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -48,17 +50,47 @@ public class CurrentUser {
         return Controller.session().get("id") != null;
     }
 
+    public static final Set<UserRole> RESTRICTED_ROLES
+            = EnumSet.of(UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.USER);
+
     /**
      * Register the given user as the current user. (As part of logging in or switching to another user.)
+     * Admin roles are not automatically active. Use {@link #setAdmin(java.util.Set)} for that.
      * @param user partially filled in user object
      */
     public static void set (UserHeader user, Set<UserRole> roleSet) {
         Controller.session("id", Integer.toString(user.getId()));
         Controller.session("email", user.getEmail());
         Controller.session("fullName", user.getFullName());
-
-        Controller.session("roles", UserRole.toString(roleSet));
+        EnumSet es = EnumSet.copyOf(RESTRICTED_ROLES);
+        es.retainAll(roleSet);
+        Controller.session("roles", UserRole.toString(es));
         Controller.session("status", user.getStatus().name());
+        Controller.session("pa", Boolean.toString(isAdmin(roleSet))); // can this user promote to admin
+    }
+
+    /**
+     * Can this user promote to admin?
+     * @return
+     */
+    public static boolean canPromote () {
+        return "true".equals(Controller.session("pa"));
+    }
+
+    /**
+     * Increase the roles to the full set.
+     */
+    public static void setAdmin (Set<UserRole> roleSet) {
+        Controller.session("roles", UserRole.toString(roleSet));
+    }
+
+    /**
+     * Reset the roles to the restricted set.
+     */
+    public static void clearAdmin (Set<UserRole> roleSet) {
+        EnumSet es = EnumSet.copyOf(RESTRICTED_ROLES);
+        es.retainAll(roleSet);
+        Controller.session("roles", UserRole.toString(es));
     }
 
     /**
@@ -140,7 +172,10 @@ public class CurrentUser {
      * Does the current user have one of the administrative roles?
      */
     public static boolean isAdmin () {
-        Set<UserRole> roleSet = getRoles();
+        return isAdmin(getRoles());
+    }
+
+    private static boolean isAdmin(Set<UserRole> roleSet) {
         return roleSet.contains (UserRole.SUPER_USER) ||
                 roleSet.contains (UserRole.CAR_ADMIN) ||
                 roleSet.contains (UserRole.INFOSESSION_ADMIN) ||

@@ -209,6 +209,22 @@ public class Login extends Controller {
         }
     }
 
+    @InjectContext
+    public static Result setAdmin () {
+        if (CurrentUser.canPromote()) {
+            CurrentUser.setAdmin(DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(CurrentUser.getId()));
+            return redirect(routes.Application.index());
+        } else {
+            return badRequest(); // hacker? user should not have been given the opportunity.
+        }
+    }
+
+    @InjectContext
+    public static Result clearAdmin () {
+        CurrentUser.clearAdmin(DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(CurrentUser.getId()));
+        return redirect(routes.Application.index());
+    }
+
    /**
      * Shows the screen for a registration request
      */
