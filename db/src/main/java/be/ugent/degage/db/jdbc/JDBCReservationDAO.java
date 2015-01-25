@@ -266,8 +266,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
                     "AND r.reservation_status = 'ACCEPTED' " +
-                    "AND r.reservation_from > o.reservation_to  " +
-                    "AND r.reservation_from < o.reservation_to + INTERVAL 1 DAY " +
+                    "AND r.reservation_from >= o.reservation_to  " +
+                    "AND r.reservation_from <= o.reservation_to + INTERVAL 1 DAY " +
                     "ORDER BY r.reservation_from ASC LIMIT 1"
     );
 
@@ -296,8 +296,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
                     "AND r.reservation_status = 'ACCEPTED' " +
-                    "AND r.reservation_to < o.reservation_from  " +
-                    "AND r.reservation_to + INTERVAL 1 DAY > o.reservation_from " +
+                    "AND r.reservation_to <= o.reservation_from  " +
+                    "AND r.reservation_to + INTERVAL 1 DAY >= o.reservation_from " +
                     "ORDER BY r.reservation_to DESC LIMIT 1"
     );
 
@@ -460,7 +460,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private LazyStatement listCRInfoStatement = new LazyStatement(
         "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
-                "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE +
+                "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE_WIDE +
                 "WHERE car_active "  +
                 "ORDER BY car_name, reservation_from"
     );
@@ -497,13 +497,13 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     }
 
-    public static final String OVERLAP_CLAUSE =
+    public static final String OVERLAP_CLAUSE_WIDE =
         "AND reservation_to >= ? AND reservation_from <= ? " +
         "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' ";
 
     private LazyStatement listRCFIPStatement = new LazyStatement(
         "SELECT " + RESERVATION_HEADER_FIELDS +
-                "FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE +
+                "FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE_WIDE +
                 "ORDER BY reservation_from"
     );
 
@@ -526,8 +526,12 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
+    public static final String OVERLAP_CLAUSE_NARROW =
+        "AND reservation_to > ? AND reservation_from < ? " +
+        "AND reservation_status != 'CANCELED' AND reservation_status != 'REFUSED' ";
+
     private LazyStatement hasOverlapStatement = new LazyStatement(
-        "SELECT count(*) FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE
+        "SELECT count(*) FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE_NARROW
     );
 
     @Override
