@@ -43,6 +43,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
 import views.html.notifiers.addmessage;
+import views.html.notifiers.addmsgowner;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
 
@@ -51,16 +52,38 @@ import java.util.List;
 
 public class Messages extends Controller {
 
-    /**
-     * Class implementing a model wrapped in a form.
-     * This model is used during the submission of a new message.
-     */
-    public static class MessageCreationModel {
+    public static class BasicMessageData {
         @Constraints.Required
         public String subject;
 
         @Constraints.Required
         public String body;
+    }
+
+
+    public static class MessageToOwnerData extends BasicMessageData {
+
+        public Integer carId;
+
+        @Constraints.Required
+        public String carIdAsString;
+
+        // TODO: create a specific constraint
+        public List<ValidationError> validate() {
+            if (carId == null || carId == 0) {
+                // needed for those cases where a string is input which does not correspond with a real car
+                return Arrays.asList(new ValidationError ("carId", "Gelieve een auto te selecteren"));
+            } else {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Class implementing a model wrapped in a form.
+     * This model is used during the submission of a new message.
+     */
+    public static class MessageToUserData extends BasicMessageData {
 
         public Integer userId;
 
@@ -126,7 +149,13 @@ public class Messages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result newMessage() {
-        return ok(addmessage.render(Form.form(MessageCreationModel.class)));
+        return ok(addmessage.render(Form.form(MessageToUserData.class)));
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result newMessageToOwner() {
+        return ok(addmsgowner.render(Form.form(MessageToOwnerData.class)));
     }
 
     /**
@@ -140,14 +169,14 @@ public class Messages extends Controller {
     public static Result reply(int messageId) {
         Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
         UserHeader initialReceiver = message.getUser();
-        MessageCreationModel model = new MessageCreationModel();
+        MessageToUserData model = new MessageToUserData();
         model.userId = initialReceiver.getId();
         model.userIdAsString = initialReceiver.getFullName();
         model.subject = message.getSubject();
         if (!model.subject.startsWith("Re: ")) {
             model.subject = "Re: " + model.subject;
         }
-        return ok(addmessage.render(Form.form(MessageCreationModel.class).fill(model)));
+        return ok(addmessage.render(Form.form(MessageToUserData.class).fill(model)));
     }
 
 
@@ -162,21 +191,37 @@ public class Messages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result createNewMessage() {
-        Form<MessageCreationModel> createForm = Form.form(MessageCreationModel.class).bindFromRequest();
-        if (createForm.hasErrors()) {
-            return ok(addmessage.render(createForm));
+        Form<MessageToUserData> form = Form.form(MessageToUserData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return ok(addmessage.render(form));
         } else {
+            MessageToUserData data = form.get();
+            return sendMessage(data, data.userId);
+        }
+    }
 
-            MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
-
-            int receiverId = createForm.get().userId;
-            dao.createMessage(CurrentUser.getId(), receiverId, createForm.get().subject, createForm.get().body);
-            DataProvider.getCommunicationProvider().invalidateMessages(receiverId); // invalidate the message
-            DataProvider.getCommunicationProvider().invalidateMessageNumber(receiverId);
-            return redirect(
-                    routes.Messages.showMessages() // return to message list
+    @AllowRoles
+    @InjectContext
+    public static Result sendMessageToOwner() {
+        Form<MessageToOwnerData> form = Form.form(MessageToOwnerData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return ok(addmsgowner.render(form));
+        } else {
+            MessageToOwnerData data = form.get();
+            return sendMessage(
+                data,
+                DataAccess.getInjectedContext().getCarDAO().getCar(data.carId).getOwner().getId()
             );
         }
+    }
+
+    // must be used with injected context
+    private static Result sendMessage(BasicMessageData data, int receiverId) {
+        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
+        dao.createMessage(CurrentUser.getId(), receiverId, data.subject, data.body);
+        DataProvider.getCommunicationProvider().invalidateMessages(receiverId); // invalidate the message
+        DataProvider.getCommunicationProvider().invalidateMessageNumber(receiverId);
+        return redirect( routes.Messages.showMessages() );
     }
 
     /**
