@@ -50,19 +50,20 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
     public F.Promise<Result> call(Context ctx) {
         try {
             UserRole[] permittedRoles = configuration.value();
+            String requestURL = ctx.request().uri();
 
             String statusString = ctx.session().get("status");
 
             if (statusString == null) {
                 // not yet logged in
-                return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
+                return F.Promise.pure(redirect(routes.Login.login(requestURL)));
             }
 
             UserStatus status = UserStatus.valueOf(statusString);
             if (status == UserStatus.BLOCKED || status == UserStatus.DROPPED ) {
                 // not allowed to log in
                 ctx.flash().put("danger", "Dit account is verwijderd of werd geblokkeerd.");
-                return F.Promise.pure(redirect(routes.Login.login(ctx.request().path())));
+                return F.Promise.pure(redirect(routes.Login.login(null)));
             }
 
             if (permittedRoles.length == 0) {
