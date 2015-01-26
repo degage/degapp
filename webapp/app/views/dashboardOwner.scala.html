@@ -47,35 +47,6 @@
         @reserve.reservationpanelowner()
 
         <div class="row">
-            @* Removed first two panels because info is already there *@
-            @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()) { unread =>
-                @dashboardTopPanel(
-                    "col-lg-3",
-                    "fa-envelope",
-                    unread==0,
-                    unread.toString,
-                    routes.Messages.showMessages,
-                    "Ga naar berichten"
-                ){
-                    Ongelezen @if(unread == 1) { bericht } else { berichten }
-                }
-            }
-            @dashboardTopPanel(
-                "col-lg-3",
-                "fa-user",
-                completeness==100,
-                "Volledigheid profiel",
-                routes.Profile.indexWithoutId,
-                if(completeness != 100) "Vul je profiel verder aan" else "Ga naar je profiel"
-            ){
-                <div class="progress">
-                    @if(completeness == 100){
-                        <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
-                    } else {
-                        <div class="progress-bar progress-bar-info" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
-                    }
-                </div>
-            }
             @flashes()
         </div>
         @reserve.overviewpanel(carName + " (deze week)", "fa-calendar", lines, percentage=10){
