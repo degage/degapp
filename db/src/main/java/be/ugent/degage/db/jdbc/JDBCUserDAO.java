@@ -443,11 +443,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     // TODO: refactor filters
 
     private LazyStatement getUserListPageByNameAscStatement = new LazyStatement(
-            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname asc, users.user_lastname asc LIMIT ?, ?"
+            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname asc, users.user_firstname asc LIMIT ?, ?"
     );
 
     private LazyStatement getUserListPageByNameDescStatement = new LazyStatement(
-            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_firstname desc, users.user_lastname desc LIMIT ?, ?"
+            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname desc, users.user_firstname desc LIMIT ?, ?"
     );
 
     private LazyStatement getAmountOfUsersStatement = new LazyStatement(
