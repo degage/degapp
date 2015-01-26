@@ -30,6 +30,7 @@
 @()
 @scripts = {
     @js.datetimepicker()
+    <script type='text/javascript' src='@routes.Assets.at("javascripts/fromuntil.js")'></script>
     @js.pagination("Reserve.listAvailableCarsPage", false)
 }
 @app("Start reservatie", scripts=scripts) {
