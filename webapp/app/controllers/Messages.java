@@ -46,6 +46,7 @@ import views.html.notifiers.addmessage;
 import views.html.notifiers.addmsgowner;
 import views.html.notifiers.messages;
 import views.html.notifiers.messagespage;
+import views.html.notifiers.reply;
 
 import java.util.Arrays;
 import java.util.List;
@@ -167,18 +168,30 @@ public class Messages extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result reply(int messageId) {
+        // TODO: check whether message was meant for ths user (hint: add sender id paraneter to getReplyHeader
         Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
         UserHeader initialReceiver = message.getUser();
-        MessageToUserData model = new MessageToUserData();
-        model.userId = initialReceiver.getId();
-        model.userIdAsString = initialReceiver.getFullName();
-        model.subject = message.getSubject();
-        if (!model.subject.startsWith("Re: ")) {
-            model.subject = "Re: " + model.subject;
+        BasicMessageData data = new BasicMessageData();
+        data.subject = message.getSubject();
+        if (!data.subject.startsWith("Re: ")) {
+            data.subject = "Re: " + data.subject;
         }
-        return ok(addmessage.render(Form.form(MessageToUserData.class).fill(model)));
+        return ok(reply.render(Form.form(BasicMessageData.class).fill(data), messageId, initialReceiver.getFullName()));
     }
 
+    @AllowRoles({})
+    @InjectContext
+    public static Result sendReplyTo(int messageId) {
+            // TODO: check whether message was meant for this user.
+        Form<BasicMessageData> form = Form.form(BasicMessageData.class).bindFromRequest();
+        Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
+        UserHeader initialReceiver = message.getUser();
+        if (form.hasErrors()) {
+            return  ok(reply.render(form, messageId, initialReceiver.getFullName()));
+        } else {
+            return sendMessage(form.get(), initialReceiver.getId());
+        }
+    }
 
     /**
      * Method: POST

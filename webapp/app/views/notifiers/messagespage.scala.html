@@ -47,9 +47,9 @@
                 </div>
                 @if(userIsReceiver) {
                     @if(!message.isRead) {
-                        <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>
+                        <a type="button" class="pull-right btn btn-primary btn-sm" href="@routes.Messages.markMessageAsRead(message.getId)">Markeer als gelezen</a>
                     }
-                    <a type="button" class="pull-right btn btn-default btn-sm" href="@routes.Messages.reply(message.getId)">Antwoorden</a>
+                    <a type="button" class="pull-right btn btn-primary btn-sm" href="@routes.Messages.reply(message.getId)">Antwoorden</a>
                 }
             </div>
         </li>

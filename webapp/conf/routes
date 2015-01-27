@@ -81,6 +81,7 @@ POST        /messages/new                           controllers.Messages.createN
 GET         /messages/owner                         controllers.Messages.newMessageToOwner()
 POST        /messages/owner                         controllers.Messages.sendMessageToOwner()
 GET         /messages/reply                         controllers.Messages.reply(messageId: Int)
+POST        /messages/reply                         controllers.Messages.sendReplyTo(messageId: Int)
 GET         /notifications                          controllers.Notifications.showNotifications()
 GET         /notifications/markasread               controllers.Notifications.markNotificationAsRead(notificationId: Int)
 GET         /notifications/markallasread            controllers.Notifications.markAllNotificationsAsRead()

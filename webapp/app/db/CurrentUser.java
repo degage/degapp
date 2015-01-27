@@ -176,12 +176,24 @@ public class CurrentUser {
         return isAdmin(getRoles());
     }
 
+    private static final Set<UserRole> ADMIN_ROLES
+            = EnumSet.of(UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN,
+                         UserRole.PROFILE_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER);
+
     private static boolean isAdmin(Set<UserRole> roleSet) {
-        return roleSet.contains (UserRole.SUPER_USER) ||
-                roleSet.contains (UserRole.CAR_ADMIN) ||
-                roleSet.contains (UserRole.INFOSESSION_ADMIN) ||
-                // roleSet.contains (UserRole.MAIL_ADMIN) ||  // no longer used
-                roleSet.contains (UserRole.RESERVATION_ADMIN);
+        Set<UserRole> set = EnumSet.copyOf(ADMIN_ROLES);
+        set.retainAll(roleSet);
+        return ! set.isEmpty();
+    }
+
+    private static final Set<UserRole> CSME_ROLES
+            = EnumSet.of(UserRole.CAR_OWNER, UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN,
+                         UserRole.PROFILE_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER);
+
+    public static boolean canSendMessagesToEveryone() {
+        Set<UserRole> set = EnumSet.copyOf(CSME_ROLES);
+        set.retainAll(getRoles());
+        return ! set.isEmpty();
     }
 
 }

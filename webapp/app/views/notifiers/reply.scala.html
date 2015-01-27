@@ -1,4 +1,4 @@
-@* tabscripts.scala.html
+@* reply.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,19 +27,18 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(tab: Int)
+@(form: play.data.Form[controllers.Messages.BasicMessageData], messageId: Int, senderName: String)
+@stdlayout("Antwoord op bericht", extrabc=breadcrumb("Berichten",routes.Messages.showMessages())) {
 
-@* Scripts for tab selection in drives overview page *@
-
-<script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
-
-<script>$(document).ready(function(){
-    loadFirstPage(
-      @tab match {
-         case 0 => { "status=ACCEPTED" }
-         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }
-         case 2 => { "status=REQUEST" }
-         case _ => { "status=REFUSED|CANCELLED" }
-      }
-    );});
-</script>
+    @panel("Bericht", "fa-pencil") {
+        @helper.form(routes.Messages.sendReplyTo(messageId)) {
+            @formErrors(form)
+            <fieldset>
+                @std.static(senderName, "Ontvanger")
+                @std.textField(form("subject"),"Onderwerp")
+                @std.textArea(form("body"), "Bericht", 6)
+                @std.submitButton("Verzend")
+            </fieldset>
+        }
+    }
+}
