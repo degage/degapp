@@ -235,4 +235,68 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             throw new DataAccessException("Unable to update car ride record", e);
         }
     }
+
+    private LazyStatement getNextStartKmStatement = new LazyStatement(
+            "SELECT car_ride_start_km "+
+            "FROM reservations AS r " +
+            "LEFT JOIN carrides ON r.reservation_id = car_ride_car_reservation_id " +
+            "JOIN reservations AS o ON r.reservation_car_id = o.reservation_car_id " +
+                    "WHERE o.reservation_id = ? " +
+                    "AND ( r.reservation_status = 'REQUEST_DETAILS' OR " +
+                    "      r.reservation_status = 'DETAILS_PROVIDED' OR " +
+                    "      r.reservation_status = 'FINISHED') " +
+                    "AND r.reservation_from >= o.reservation_to  " +
+                    "ORDER BY r.reservation_from ASC LIMIT 1"
+    );
+
+    @Override
+    public int getNextStartKm(int reservationId) {
+        try {
+            PreparedStatement ps = getNextStartKmStatement.value();
+            ps.setInt(1, reservationId);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    return rs.getInt("car_ride_start_km");
+                } else {
+                    return 0;
+                }
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while retreiving next start km " + reservationId, ex);
+        }
+    }
+
+    private LazyStatement getPrevEndKmStatement = new LazyStatement(
+            "SELECT car_ride_end_km " +
+            "FROM reservations AS r " +
+            "LEFT JOIN carrides ON r.reservation_id = car_ride_car_reservation_id " +
+            "JOIN reservations AS o ON r.reservation_car_id = o.reservation_car_id " +
+                    "WHERE o.reservation_id = ? " +
+                    "AND ( r.reservation_status = 'REQUEST_DETAILS' OR " +
+                    "      r.reservation_status = 'DETAILS_PROVIDED' OR " +
+                    "      r.reservation_status = 'FINISHED') " +
+                    "AND r.reservation_to <= o.reservation_from  " +
+                    "ORDER BY r.reservation_from DESC LIMIT 1"
+    );
+
+    @Override
+    public int getPrevEndKm(int reservationId) {
+        try {
+            PreparedStatement ps = getPrevEndKmStatement.value();
+            ps.setInt(1, reservationId);
+
+            try(ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    return rs.getInt("car_ride_end_km");
+                } else {
+                    return 0;
+                }
+            }
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while retreiving previous start km " + reservationId, ex);
+        }
+    }
+
+
 }

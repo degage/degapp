@@ -52,4 +52,16 @@ public interface CarRideDAO {
      * Indicate that the car ride information stored by the loaner has been approved  by the owner.
      */
     public void approveInfo (int id);
+
+    /**
+     * Return the startKm field of the next reservation, or 0 if no next km is filled in
+     */
+    public int getNextStartKm (int reservationId);
+
+    /**
+     * Return the endKm field of the previous reservation, or 0 if no previous km is filled in
+     */
+    public int getPrevEndKm (int reservationId);
+
+
 }

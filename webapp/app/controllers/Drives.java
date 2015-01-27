@@ -588,10 +588,19 @@ public class Drives extends Controller {
     @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result newJourneyInfo(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         if (newJourneyInfoAllowed(reservation)) {
+            // prefill
+            CarRideDAO dao = context.getCarRideDAO();
+            int startKm = dao.getPrevEndKm(reservationId);
+            int endKm = dao.getNextStartKm(reservationId);
+            JourneyDataExtended data = new JourneyDataExtended();
+            data.startKm = startKm;
+            data.endKm = endKm;
+            data.damaged = false;
             return ok(newjourney.render(
-                    Form.form(JourneyDataExtended.class).fill(new JourneyDataExtended()), // needs initial value damaged=false
+                    Form.form(JourneyDataExtended.class).fill(data),
                     reservation
             ));
         } else {
