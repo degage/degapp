@@ -92,7 +92,7 @@ CREATE TABLE `users` (
 	`user_driver_license_date` DATE,
 	`user_identity_card_id` VARCHAR(32), -- Identiteitskaartnr
 	`user_identity_card_registration_nr` VARCHAR(32), -- Rijksregisternummer
-	`user_status` ENUM('EMAIL_VALIDATING','REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'EMAIL_VALIDATING', -- Stadia die de gebruiker moet doorlopen
+	`user_status` ENUM('REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'REGISTERED', -- Stadia die de gebruiker moet doorlopen
 	`user_damage_history` TEXT,
 	`user_agree_terms` BIT(1),
 	`user_image_id` INT,

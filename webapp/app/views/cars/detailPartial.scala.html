@@ -109,7 +109,7 @@
                             <strong>Bouwjaar: </strong> @if(car.getYear == null) { Onbekend } else { @car.getYear }<br>
                             <strong>Gemiddeld verbruik (per 100 km): </strong> @if(car.getFuelEconomy == null) { Onbekend } else { @car.getFuelEconomy }<br>
                             <strong>Geschatte huidige waarde: </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
-                            <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
+                            <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getOwnerAnnualKm == null) { Onbekend } else { @car.getOwnerAnnualKm }<br>
                             <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
                             <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistration== null) { Onbekend } else { <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)">Link</a> }<br>
                             <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
