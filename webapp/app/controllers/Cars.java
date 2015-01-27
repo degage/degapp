@@ -246,7 +246,7 @@ public class Cars extends Controller {
         if (car != null && car.getPhoto() != null && car.getPhoto().getId() > 0) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), car.getPhoto().getId());
         } else {
-            return FileHelper.getPublicFile(Paths.get("images", "no-photo-car.jpg").toString(), "image/jpeg");
+            return FileHelper.getPublicFile("images/car.png", "image/png");
         }
     }
 

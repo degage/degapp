@@ -89,8 +89,7 @@ public class Profile extends Controller {
         if (profilePictureId >= 0) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), profilePictureId);
         } else {
-            return FileHelper.getPublicFile(
-                    Paths.get("images", "no_profile.png").toString(), "image/png");
+            return FileHelper.getPublicFile("images/user.png", "image/png");
         }
     }
 

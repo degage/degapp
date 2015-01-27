@@ -47,12 +47,13 @@ import javax.imageio.stream.ImageInputStream;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
-import java.io.File;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.UUID;
 
 /**
  * Created by Cedric on 4/11/2014.
@@ -169,19 +170,7 @@ public class FileHelper {
      * @return
      */
     public static Result getPublicFile(String path, String contentType) {
-        String playPath = Play.current().path().getAbsolutePath();
-        try {
-            FileInputStream is;
-            if (Play.isProd(Play.current())) {
-                playPath = Paths.get(playPath, ConfigurationHelper.getConfigurationString("application.classpath")).toString();
-                is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
-            } else {
-                is = new FileInputStream(Paths.get(playPath, "public", path).toFile());
-            }
-            return Controller.ok(is).as(contentType);
-        } catch (FileNotFoundException e) {
-            return Controller.notFound();
-        }
+        return (Controller.ok(FileHelper.class.getResourceAsStream("/public/" + path)).as(contentType));
     }
 
     /**
