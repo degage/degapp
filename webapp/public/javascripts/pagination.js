@@ -286,6 +286,11 @@ function loadFirstPage(searchString) {
     loadPage(beginPage, beginPageSize, beginAsc, beginOrder, searchString);
 }
 
+/* same but in descending order (TODO: refactor) */
+function loadFirstPageDesc(searchString) {
+    loadPage(beginPage, beginPageSize, 0, beginOrder, searchString);
+}
+
 /*
  * Create a string "field1:value1,field2:value2" and so on
  */
