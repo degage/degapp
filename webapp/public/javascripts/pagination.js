@@ -80,7 +80,7 @@ var searchButton = document.getElementById("searchButton");
 if(searchButton != null) {
     searchButton.onclick = function () {
         var searchString = importSearchTextFields()
-        loadPage(1, beginPageSize, 1, "", searchString);
+        loadPage(beginPage, beginPageSize, beginAsc, beginOrder, searchString);
     }
 }
 
@@ -288,11 +288,6 @@ function loadPage(page, pageSize, asc, orderBy, search) {
 
 function loadFirstPage(searchString) {
     loadPage(beginPage, beginPageSize, beginAsc, beginOrder, searchString);
-}
-
-/* same but in descending order (TODO: refactor) */
-function loadFirstPageDesc(searchString) {
-    loadPage(beginPage, beginPageSize, 0, beginOrder, searchString);
 }
 
 /*

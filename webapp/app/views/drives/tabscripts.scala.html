@@ -34,7 +34,8 @@
 <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
 
 <script>$(document).ready(function(){
-    loadFirstPageDesc(
+    beginAsc = 0;
+    loadFirstPage(
       @tab match {
          case 0 => { "status=ACCEPTED" }
          case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }

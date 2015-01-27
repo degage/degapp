@@ -30,6 +30,7 @@
 @(tab: Int)
 @scripts = {
     @js.pagination("Drives.showDrivesPage", initialLoad = false)
+    <script>beginAsc = 0;</script>
     @tabscripts(tab)
 }
 @stdlayout("Ritten", scripts=scripts) {
