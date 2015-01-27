@@ -91,7 +91,11 @@ function importSearchTextFields() {
     for (var i = 0; i < searchFields.length; i++) {
         var searchField = searchFields[i];
         fields[i] = searchField.getAttribute('name');
-        values[i] = searchField.value;
+        if (searchField.type == "checkbox") {
+          values[i] = searchField.checked ? "1" : "0";
+        } else {
+          values[i] = searchField.value;
+        }
         if(fields[i].indexOf('=') != -1 || values[i].indexOf('=') != -1 ||
             fields[i].indexOf(',') != -1 || values[i].indexOf(',') != -1) {
             alert(errorMessageFilter);

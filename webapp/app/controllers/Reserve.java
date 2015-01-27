@@ -71,7 +71,7 @@ public class Reserve extends Controller {
     }
 
     /**
-     * Ajax call as a result of the 'search' button in  str=art.
+     * Ajax call as a result of the 'search' button in  start.
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext

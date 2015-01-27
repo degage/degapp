@@ -33,53 +33,39 @@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/fromuntil.js")'></script>
     @js.pagination("Reserve.listAvailableCarsPage", false)
 }
-@app("Start reservatie", scripts=scripts) {
-
-    @breadcrumbs{
-        @breadcrumb("Start reservatie")
-    }
-
-    @maincontent("Start reservatie"){
-        @panel("Zoek een auto die vrij is in tijdens de opgegeven periode", "fa-search"){
-            <fieldset>
-                @search.datetimepicker("from", "Van:", "col-lg-6", minuteStep=15)
-                @search.datetimepicker("until", "Tot:", "col-lg-6", minuteStep=15)
-                @search.numberField("seats", "Minimum aantal zitplaatsen", "col-lg-6")
-                <div class="form-group col-lg-6">
-                    <label class="control-label" for="selectFuel">Brandstof</label>
-                    <select id="selectFuel" name="fuel" class="form-control searchTextField">
-                        @* TODO: use extra option in @selectEnum *@
-                        <option value="ALL">(niet belangrijk)</option>
-                        @for(item <- CarFuel.values) {
-                            @option("",item.name){ @item }
-                        }
-                    </select>
-                </div>
-                <div class="form-group col-lg-6">
-                    <label>Enkel auto's met</label>
-                    <div>
-                        <label class="checkbox-inline">
-                            <input id="gps" class="searchTextField" name="gps" type="checkbox" value="0">GPS
-                        </label>
-                        <label class="checkbox-inline">
-                            <input id="hook" class="searchTextField" name="hook" type="checkbox" value="0">Trekhaak
-                        </label>
-                        <label class="checkbox-inline">
-                            <input id="automatic" class="searchTextField" name="automatic" type="checkbox" value="0">Automatische versnellingsbak
-                        </label>
-                    </div>
-                </div>
-                @search.button("Zoeken")
-            </fieldset>
-        }
-        @panel("Beschikbare auto's", "fa-car"){
-            <div id="resultsTable" class="table-responsive">
-                    <!-- Here comes the loaded table-->
-                <div class="text-center">
-                   (Nog) geen resultaten.
+@stdlayout("Start reservatie", scripts=scripts) {
+    @panel("Zoek een auto die vrij is in tijdens de opgegeven periode", "fa-search"){
+        <fieldset>
+            @search.datetimepicker("from", "Van:", "col-lg-6", minuteStep=15)
+            @search.datetimepicker("until", "Tot:", "col-lg-6", minuteStep=15)
+            @search.numberField("seats", "Minimum aantal zitplaatsen", "col-lg-6")
+            <div class="form-group col-lg-6">
+                <label class="control-label" for="selectFuel">Brandstof</label>
+                <select id="selectFuel" name="fuel" class="form-control searchTextField">
+                    @* TODO: use extra option in @selectEnum *@
+                    <option value="ALL">(niet belangrijk)</option>
+                    @for(item <- CarFuel.values) {
+                        @option("",item.name){ @item }
+                    }
+                </select>
+            </div>
+            <div class="form-group col-lg-6">
+                <label>Enkel auto's met</label>
+                <div>
+                    @search.checkboxInline("gps","GPS")
+                    @search.checkboxInline("hook","Trekhaak")
+                    @search.checkboxInline("automatic","Automatische versnellingsbak")
                 </div>
             </div>
-        }
+            @search.button("Zoeken")
+        </fieldset>
     }
-
+    @panel("Beschikbare auto's", "fa-car"){
+        <div id="resultsTable" class="table-responsive">
+                <!-- Here comes the loaded table-->
+            <div class="text-center">
+               (Nog) geen resultaten.
+            </div>
+        </div>
+    }
 }
