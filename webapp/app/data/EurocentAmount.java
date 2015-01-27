@@ -79,7 +79,9 @@ public class EurocentAmount {
     public static final Pattern PATTERN = Pattern.compile("-?[0-9]+[,.][0-9][0-9]");
 
     /**
-     * Parse a string into an amount of eurocents. The string *must* contain a decimal point or comma followed by exactly two digits.
+     * Parse a string into an amount of eurocents.
+     * If the string contains a decimal point or comma then it must be
+     * followed by exactly two digits.
      * @throws java.lang.NumberFormatException
      */
     public static EurocentAmount parse (String str) {
@@ -90,7 +92,9 @@ public class EurocentAmount {
                Integer.parseInt(str.substring(len-2, len))
             );
         } else {
-            throw new NumberFormatException("Incorrect format for EurocentAmount");
+            return new EurocentAmount(
+               Integer.parseInt(str), 0
+            );
         }
     }
 }
