@@ -629,13 +629,16 @@ public class Cars extends Controller {
     public static Result getCarCostModal(int id) {
         // TODO: hide from other users (badRequest)
 
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        Car car = dao.getCar(id);
-        if (car == null) {
-            return badRequest("Fail."); //TODO: error in flashes?
-        } else {
-            return ok(addcarcostmodal.render(Form.form(CarCostModel.class), car));
-        }
+        Car car = DataAccess.getInjectedContext().getCarDAO().getCar(id);
+        return ok(addcarcostmodal.render(Form.form(CarCostModel.class), car));
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result getCarInfoModal(int id) {
+        Car car = DataAccess.getInjectedContext().getCarDAO().getCar(id);
+        return ok(carinfomodal.render(car));
+
     }
 
     /**

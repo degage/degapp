@@ -43,12 +43,9 @@
         <td> <a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
         <td>@car.getSeats</td>
         <td>
-            @if(car.isGps) {
-                <span class="label label-default">gps</span>
-            }
-            @if(car.isHook) {
-                <span class="label label-default">trekhaak</span>
-            }
+            @if(car.isGps){ <span class="label label-default">gps</span> }
+            @if(car.isHook){ <span class="label label-default">trekhaak</span> }
+            @if(!car.isManual){ <span class="label label-default">automaat</span> }
         </td>
         <td>@car.getLocation</td>
         <td>

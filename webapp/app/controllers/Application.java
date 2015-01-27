@@ -108,6 +108,7 @@ public class Application extends Controller {
                         // Routes
                         javascript.Cars.getCarCostModal(),
                         javascript.Cars.updatePrivileged(),
+                        javascript.Cars.getCarInfoModal(),
                         javascript.Damages.editDamage(),
                         javascript.Damages.addStatus(),
                         javascript.Damages.addProof(),

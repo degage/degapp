@@ -45,6 +45,7 @@ import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
+import play.twirl.api.Html;
 import views.html.errortablerow;
 import views.html.reserve.*;
 
@@ -250,7 +251,7 @@ public class Reserve extends Controller {
 
 
         public int carId;
-        public String lineHeader;
+        public Html lineHeader;
 
         // times for each 15-minute period. null means: not free
         public String[] freeTimes = new String[NUMBER_OF_INTERVALS];
@@ -260,7 +261,7 @@ public class Reserve extends Controller {
          */
         public void populate (ReservationDAO.CRInfo info, LocalDate date) {
             carId = info.carId;
-            lineHeader = info.carName;
+            lineHeader = views.html.reserve.carheader.render(info.carName, info.carId);
             fillFreeTimes(date, info.reservations, freeTimes);
         }
 
@@ -269,7 +270,7 @@ public class Reserve extends Controller {
          */
         public void populate (Iterable<ReservationHeader> reservations, int carId, LocalDate date) {
             this.carId = carId;
-            lineHeader = Utils.toLocalizedWeekDayString(date);
+            lineHeader = new Html(Utils.toLocalizedWeekDayString(date));
 
             fillFreeTimes(date, reservations, freeTimes);
         }

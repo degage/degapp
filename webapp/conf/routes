@@ -175,6 +175,7 @@ GET         /cars/edit                              controllers.Cars.editCar(car
 POST        /cars/edit                              controllers.Cars.editCarPost(carId: Int)
 GET         /cars/picture                           controllers.Cars.getPicture(carId: Int)
 GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
+GET         /cars/modal/info                        controllers.Cars.getCarInfoModal(carId: Int)
 POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()
 GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")

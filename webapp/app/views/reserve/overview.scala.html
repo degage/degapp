@@ -30,11 +30,30 @@
 @import java.time.LocalDate
 @(form: Form[Reserve.DateData], lines: Iterable[Reserve.OverviewLine], date: LocalDate, prev: LocalDate, next: LocalDate)
 @* Displays an overview of available cars during subsequent days *@
+
+@scripts={
+  @js.datetimepicker()
+  @js.usesajax()
+    <script>
+     function loadModal ( carId ) {
+         $.ajax(myJsRoutes.controllers.Cars.getCarInfoModal(carId))
+         .done (function (html) {
+             $ ("#resultModal").html (html) ;
+             $ ('#detailsModal').modal ('show') ;
+         })
+         .fail (function ( ) {
+             // TODO: make clearer
+             $ ( "#resultModal" ).html ("Er ging iets mis...") ;
+         });
+     }
+    </script>
+}
+
 @stylesheets={
 <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
 }
 
-@stdlayout("Overzicht vrije perioden", stylesheets, scripts=js.datetimepicker()){
+@stdlayout("Overzicht vrije perioden", stylesheets, scripts){
 
     @panel("Toon het overzicht voor een bepaalde dag", "fa-search"){
         @helper.form(routes.Reserve.overviewPost){
@@ -54,4 +73,5 @@
         </tr>
     }{  @* no footer. *@ }
 
+    <div id="resultModal"></div>
 }
