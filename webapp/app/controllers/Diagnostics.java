@@ -28,7 +28,7 @@ public class Diagnostics  extends Controller {
     @InjectContext
     public static Result checkDatabase() {
         try {
-            DataAccess.getInjectedContext().getJobDAO().existsJobOfType(JobType.DRIVE_FINISH);
+            DataAccess.getInjectedContext().getJobDAO().ping();
             return ok();
         } catch (DataAccessException ex) {
             return internalServerError();

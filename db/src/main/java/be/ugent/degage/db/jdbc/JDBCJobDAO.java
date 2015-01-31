@@ -55,6 +55,15 @@ class JDBCJobDAO extends AbstractDAO implements JobDAO {
     );
 
     @Override
+    public void ping() throws DataAccessException {
+        try (Statement stat = createStatement()) {
+            stat.execute("DO 1");
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not ping the database", ex);
+        }
+    }
+
+    @Override
     public Iterable<Job> listScheduledForNow() throws DataAccessException {
         try {
             PreparedStatement ps = getListUnfinishedStatement.value();

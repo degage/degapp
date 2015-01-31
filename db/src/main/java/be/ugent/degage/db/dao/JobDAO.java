@@ -37,6 +37,11 @@ import java.time.Instant;
 
 public interface JobDAO {
 
+    /** Just polls the database connection. Returns an exception when there is something
+     * seriously wrong with the database.
+     */
+    public void ping () throws DataAccessException;
+
     /** List all jobs that should have been finished by now. */
     public Iterable<Job> listScheduledForNow() throws DataAccessException;
 
