@@ -19,7 +19,7 @@ resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/mo
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.0-SNAPSHOT",
-  "com.edulify"             %% "play-hikaricp"               % "1.5.1",
+  "com.edulify"             %% "play-hikaricp"               % "1.5.0-fork",    // 1.5.0 adapted to use hikari 2.3.0
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
   "com.typesafe.akka"       %% "akka-actor"                  % "2.3.0",

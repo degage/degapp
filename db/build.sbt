@@ -8,7 +8,7 @@ organization := "be.ugent.degage"
 
 crossPaths := false
 
-libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.29"
+libraryDependencies += "mysql" % "mysql-connector-java" % "5.1.34"
 
 libraryDependencies += "com.google.guava" % "guava" % "17.0"
 
