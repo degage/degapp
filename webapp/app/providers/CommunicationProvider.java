@@ -43,6 +43,8 @@ import java.util.List;
  */
 public class CommunicationProvider {
 
+    // TODO: make these obsolete and have them computed in injected context
+
     public static final int AMOUNT_OF_VISIBLE_NOTIFICATIONS = 3;
     public static final int AMOUNT_OF_VISIBLE_MESSAGES = 3;
 

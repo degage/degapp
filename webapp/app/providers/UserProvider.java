@@ -50,47 +50,30 @@ public class UserProvider {
         this.provider = provider;
     }
 
-    public User getUser() {
-        return getUser(true);
-    }
-    /**
-     * Returns the user based on session
-     * @param cached Whether to use a cached version or not
-     * @return The user for current session
-     */
-    public User getUser(boolean cached) {
-        Integer userId = CurrentUser.getId();
-        if (userId == null)
-            return null;
-        else
-            return getUser(userId, cached);
-    }
-
-
     public void invalidateUser(int userId) {
         Cache.remove(String.format(USER_BY_ID, userId));
     }
 
-    public User getUser(Integer userId) throws DataAccessException {
-        return getUser(userId, true);
-    }
-
-    public User getUser(int userId, boolean cached) throws DataAccessException {
-        // TODO: use injected context for this
-
-        String key = String.format(USER_BY_ID, userId);
-        User user = cached ? (User)Cache.get(key) : null;
-        if (user == null) {
-            try (DataAccessContext context = provider.getDataAccessContext()) {
-                UserDAO dao = context.getUserDAO();
-                user = dao.getUser(userId);
-                if (user != null) { // cache and return
-                    Cache.set(key, user);
+    public User getUser() {
+        Integer userId = CurrentUser.getId();
+        if (userId == null)
+            return null;
+        else {
+            String key = String.format(USER_BY_ID, userId);
+            User user =  (User) Cache.get(key);
+            if (user == null) {
+                // TODO: use injected context for this?
+                try (DataAccessContext context = provider.getDataAccessContext()) {
+                    UserDAO dao = context.getUserDAO();
+                    user = dao.getUser(userId);
+                    if (user != null) { // cache and return
+                        Cache.set(key, user);
+                    }
+                } catch (DataAccessException ex) {
+                    throw new RuntimeException("Could not get user", ex); //TODO: log
                 }
-            } catch (DataAccessException ex) {
-                throw new RuntimeException ("Could not get user", ex); //TODO: log
             }
+            return user;
         }
-        return user;
     }
 }

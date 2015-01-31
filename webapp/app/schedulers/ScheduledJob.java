@@ -32,6 +32,7 @@ package schedulers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
+import db.RunnableInContext;
 import play.Logger;
 
 import java.util.EnumMap;

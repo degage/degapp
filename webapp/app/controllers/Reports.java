@@ -69,7 +69,7 @@ public class Reports extends Controller {
     @InjectContext
     public static Result getUsers() {
         File file = new File("users.xlsx");
-        UserDAO userDao = DataAccess.getContext().getUserDAO();
+        UserDAO userDao = DataAccess.getInjectedContext().getUserDAO();
         List<User> userList = userDao.getUserList(FilterField.USER_NAME, true, 1, userDao.getAmountOfUsers(null), null);
         try (FileOutputStream out = new FileOutputStream(file)) {
             Workbook wb = new XSSFWorkbook();
@@ -129,7 +129,7 @@ public class Reports extends Controller {
         Filter filter = Pagination.parseFilter("");
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, Integer.toString(CurrentUser.getId()));
         File file = new File("reservations.xlsx");
-        DataAccessContext context = DataAccess.getContext();
+        DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO reservationDAO = context.getReservationDAO();
         CarRideDAO carRideDAO = context.getCarRideDAO();
         Iterable<Reservation> reservationList = reservationDAO.getReservationListPage(FilterField.FROM, true, 1, reservationDAO.getAmountOfReservations(filter), filter);
@@ -189,7 +189,7 @@ public class Reports extends Controller {
     @InjectContext
     public static Result getReservations() {
         File file = new File("reservations.xlsx");
-        DataAccessContext context = DataAccess.getContext();
+        DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO reservationDAO = context.getReservationDAO();
         CarRideDAO carRideDAO = context.getCarRideDAO();
         Filter filter = Pagination.parseFilter("");
@@ -253,7 +253,7 @@ public class Reports extends Controller {
     @InjectContext
     public static Result getCars() {
         File file = new File("cars.xlsx");
-        Iterable<Car> carList = DataAccess.getContext().getCarDAO().listAllCars();
+        Iterable<Car> carList = DataAccess.getInjectedContext().getCarDAO().listAllCars();
         try (FileOutputStream out = new FileOutputStream(file)) {
             Workbook wb = new XSSFWorkbook();
             CreationHelper createHelper = wb.getCreationHelper();

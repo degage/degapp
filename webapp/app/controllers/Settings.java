@@ -29,10 +29,12 @@
 
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.SettingDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
@@ -101,11 +103,11 @@ public class Settings extends Controller {
             return badRequest(changepass.render(form));
         } else {
             ChangePasswordModel model = form.get();
-            UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-            User user = DataProvider.getUserProvider().getUser(false);
+            DataAccessContext context = DataAccess.getInjectedContext();
+            UserDAO dao = context.getUserDAO();
 
-            if (dao.changePassword(user.getId(), model.oldpw, model.newpw)) {
-                DataProvider.getUserProvider().invalidateUser(user.getId());
+            if (dao.changePassword(CurrentUser.getId(), model.oldpw, model.newpw)) {
+                DataProvider.getUserProvider().invalidateUser(CurrentUser.getId());
                 flash("success", "Jouw wachtwoord werd met succes gewijzigd.");
                 return redirect(routes.Application.index());
             } else {

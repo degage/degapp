@@ -181,7 +181,6 @@ public class Damages extends Controller {
             flash("danger", "Schadedossier met ID=" + damageId + " bestaat niet.");
             return badRequest();
         } else {
-            //User currentUser = DataProvider.getUserProvider().getUser();
             if (CurrentUser.is(damage.getDriverId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
 
                 DamageModel model = new DamageModel();

@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  */
 
-package schedulers;
+package db;
 
 import be.ugent.degage.db.DataAccessContext;
 import db.DataAccess;

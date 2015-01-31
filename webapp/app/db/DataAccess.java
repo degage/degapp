@@ -90,7 +90,7 @@ public class DataAccess {
     /**
      * Obtain a data access context from the current data access provider.
      */
-    public static DataAccessContext getContext() {
+    static DataAccessContext getContext() {
         return provider.getDataAccessContext();
     }
 

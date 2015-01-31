@@ -35,6 +35,7 @@ import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
 import be.ugent.degage.db.models.UserHeader;
 import db.DataAccess;
+import db.RunnableInContext;
 import notifiers.Notifier;
 import play.libs.Akka;
 import scala.concurrent.duration.Duration;
@@ -90,8 +91,7 @@ public final class Scheduler {
         // TODO: checkInitialReports();
 
         // schedule 'jobs' to be run at a fixed interval (standard: every five minutes)
-        int refresh = Integer.parseInt(DataAccess.getContext().getSettingDAO().getSettingForNow("scheduler_interval")); // refresh rate in seconds
-        schedule(Duration.create(refresh, TimeUnit.SECONDS),
+        schedule(Duration.create(db.Utils.getSchedulerInterval(), TimeUnit.SECONDS),
                 new RunnableInContext("Job scheduler") {
                     @Override
                     public void runInContext(DataAccessContext context) {
@@ -101,8 +101,6 @@ public final class Scheduler {
                     }
                 }
         );
-
-
     }
 
     /**

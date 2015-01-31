@@ -29,7 +29,6 @@
 
 package providers;
 
-import be.ugent.degage.db.DataAccessProvider;
 import db.DataAccess;
 
 /**
@@ -44,20 +43,16 @@ public class DataProvider {
 
     public static UserProvider getUserProvider() {
         if (userProvider == null) {
-            userProvider = new UserProvider(getDataAccessProvider());
+            userProvider = new UserProvider(DataAccess.getProvider());
         }
         return userProvider;
     }
 
     public static CommunicationProvider getCommunicationProvider() {
         if (communicationProvider == null) {
-            communicationProvider = new CommunicationProvider(getDataAccessProvider());
+            communicationProvider = new CommunicationProvider(DataAccess.getProvider());
         }
         return communicationProvider;
     }
 
-    @Deprecated
-    public static DataAccessProvider getDataAccessProvider() {
-        return DataAccess.getProvider();
-    }
 }

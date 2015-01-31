@@ -157,7 +157,7 @@ public class Reserve extends Controller {
                                 untilString.isEmpty() ? null : Utils.toLocalDateTime(untilString)
                         )
                 ),
-                DataAccess.getContext().getCarDAO().getCar(carId)
+                DataAccess.getInjectedContext().getCarDAO().getCar(carId)
         ));
     }
 
@@ -171,7 +171,7 @@ public class Reserve extends Controller {
     public static Result doReservation(int carId) {
         Form<ReservationData> form = new Form<>(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
-            Car car = DataAccess.getContext().getCarDAO().getCar(carId);
+            Car car = DataAccess.getInjectedContext().getCarDAO().getCar(carId);
             return ok (reservation.render(form,car));
         }
 
