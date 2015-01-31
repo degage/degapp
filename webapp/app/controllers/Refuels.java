@@ -41,6 +41,7 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -59,6 +60,7 @@ public class Refuels extends Controller {
 
     public static class RefuelData {
 
+        @Constraints.Required
         public EurocentAmount amount;
 
         public String picture; // only used to enable field error messages
@@ -253,11 +255,14 @@ public class Refuels extends Controller {
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
         if (form.hasErrors()) {
-            return ok( refuelsForRide.render(form, refuels, reservation));
+            return badRequest( refuelsForRide.render(form, refuels, reservation));
         } else if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
             RefuelData data = form.get();
             File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
-            if (file.getContentType() == null) {
+            if (file == null) {
+                form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
+                return badRequest(refuelsForRide.render(form, refuels, reservation));
+            } else if (file.getContentType() == null) {
                 form.reject("picture", "Het bestand  is van het verkeerde type");
                 return badRequest(refuelsForRide.render(form, refuels, reservation));
             } else {
