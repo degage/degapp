@@ -287,8 +287,7 @@ public class Cars extends Controller {
             Http.MultipartFormData body = request().body().asMultipartFormData();
             Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
             Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
-            File registrationPictureFile = null;
-            File carPictureFile = null;
+            int registrationPictureFileId = 0;
             if (registrationFile != null) {
                 String contentType = registrationFile.getContentType();
                 if (!FileHelper.isDocumentContentType(contentType)) {
@@ -298,12 +297,17 @@ public class Cars extends Controller {
                     try {
                         Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                         FileDAO fdao = context.getFileDAO();
-                        registrationPictureFile = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                        registrationPictureFileId = fdao.createFile(
+                                relativePath.toString(),
+                                registrationFile.getFilename(),
+                                registrationFile.getContentType()
+                        ).getId();
                     } catch (IOException ex) {
                         throw new RuntimeException(ex); //no more checked catch -> error page!
                     }
                 }
             }
+            int carPictureFileId = 0;
             if (photoFilePart != null) {
                 String contentType = photoFilePart.getContentType();
                 if (!FileHelper.isImageContentType(contentType)) {
@@ -313,7 +317,11 @@ public class Cars extends Controller {
                     try {
                         Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
                         FileDAO fdao = context.getFileDAO();
-                        carPictureFile = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                        carPictureFileId = fdao.createFile(
+                                relativePath.toString(),
+                                photoFilePart.getFilename(),
+                                photoFilePart.getContentType()
+                        ).getId();
                     } catch (IOException ex) {
                         throw new RuntimeException(ex); //no more checked catch -> error page!
                     }
@@ -321,7 +329,7 @@ public class Cars extends Controller {
             }
 
             TechnicalCarDetails technicalCarDetails =
-                    new TechnicalCarDetails(model.licensePlate, registrationPictureFile, model.chassisNumber);
+                    new TechnicalCarDetails(model.licensePlate, registrationPictureFileId, model.chassisNumber);
             CarInsurance insurance =
                     new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
 
@@ -332,7 +340,7 @@ public class Cars extends Controller {
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
                     model.ownerAnnualKm, technicalCarDetails, insurance, owner,
-                    model.comments, model.active, carPictureFile.getId()
+                    model.comments, model.active, carPictureFileId
             );
 
 
@@ -425,8 +433,7 @@ public class Cars extends Controller {
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
         Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
-        File file = null;
-        File picture = null;
+        int fileId = 0;
         if (registrationFile != null) {
             String contentType = registrationFile.getContentType();
             if (!FileHelper.isDocumentContentType(contentType)) {
@@ -434,15 +441,19 @@ public class Cars extends Controller {
                 return redirect(routes.Cars.detail(car.getId()));
             } else {
                 try {
+                    // TODO: similar code occurs several times
                     Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                     FileDAO fdao = context.getFileDAO();
-                    file = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType());
+                    fileId = fdao.createFile(
+                            relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType()
+                    ).getId();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex); //no more checked catch -> error page!
                 }
             }
         }
 
+        int pictureId = 0;
         if (photoFilePart != null) {
             String contentType = photoFilePart.getContentType();
             if (!FileHelper.isImageContentType(contentType)) {
@@ -452,7 +463,11 @@ public class Cars extends Controller {
                 try {
                     Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
                     FileDAO fdao = context.getFileDAO();
-                    picture = fdao.createFile(relativePath.toString(), photoFilePart.getFilename(), photoFilePart.getContentType());
+                    pictureId = fdao.createFile(
+                            relativePath.toString(),
+                            photoFilePart.getFilename(),
+                            photoFilePart.getContentType()
+                    ).getId();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex); //no more checked catch -> error page!
                 }
@@ -463,8 +478,8 @@ public class Cars extends Controller {
         TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
         technicalCarDetails.setLicensePlate(model.licensePlate);
         technicalCarDetails.setChassisNumber(model.chassisNumber);
-        if (file != null) {
-            technicalCarDetails.setRegistration(file);
+        if (fileId != 0) {
+            technicalCarDetails.setRegistrationId(fileId);
         }
 
         CarInsurance insurance = car.getInsurance();
@@ -477,8 +492,8 @@ public class Cars extends Controller {
         car.setComments(model.comments);
 
         car.setActive(model.active);
-        if (picture != null) {
-            car.setPhotoId(picture.getId());
+        if (pictureId != 0) {
+            car.setPhotoId(pictureId);
         }
 
         if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
@@ -808,8 +823,19 @@ public class Cars extends Controller {
 
     @AllowRoles
     @InjectContext
-    public static Result getProof(int proofId) {
-        return FileHelper.getFileStreamResult(DataAccess.getInjectedContext().getFileDAO(), proofId);
+    public static Result getCarCostProof(int carCostId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCost carCost = context.getCarCostDAO().getCarCost(carCostId);
+        return FileHelper.getFileStreamResult(context.getFileDAO(), carCost.getProofId());
     }
 
+    @AllowRoles
+    @InjectContext
+    public static Result getRegistrationPicture(int carId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TechnicalCarDetails details = context.getCarDAO().getCar(carId).getTechnicalCarDetails();
+        return FileHelper.getFileStreamResult(context.getFileDAO(), details.getRegistrationId());
+    }
 }

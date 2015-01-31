@@ -105,10 +105,10 @@
                         <div class="form-group col-md-6">
                             <label class="control-label" for="file">Inschrijvingsbewijs</label>
                             <div>
-                                Huidig: @if(car.getTechnicalCarDetails.getRegistration== null) {
+                                Huidig: @if(car.getTechnicalCarDetails.getRegistrationId==0) {
                                     Onbekend
                                 } else {
-                                    <a href="@routes.Cars.getProof(car.getTechnicalCarDetails.getRegistration.getId)" target="_blank">Link</a>
+                                    <a href="@routes.Cars.getRegistrationPicture(car.getId)" target="_blank">Link</a>
                                 }
                             </div>
                             <input id="file" name="file" type="file" class="form-control input-md">

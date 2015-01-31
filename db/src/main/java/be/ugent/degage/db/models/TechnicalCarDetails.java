@@ -36,12 +36,12 @@ package be.ugent.degage.db.models;
  */
 public class TechnicalCarDetails {
     private String licensePlate;
-    private File registration;
+    private int registrationId;
     private String chassisNumber;
 
-    public TechnicalCarDetails(String licensePlate, File registration, String chassisNumber) {
+    public TechnicalCarDetails(String licensePlate, int registrationId, String chassisNumber) {
         this.licensePlate = licensePlate;
-        this.registration = registration;
+        this.registrationId = registrationId;
         this.chassisNumber = chassisNumber;
     }
 
@@ -53,12 +53,12 @@ public class TechnicalCarDetails {
         this.licensePlate = licensePlate;
     }
 
-    public File getRegistration() {
-        return registration;
+    public int getRegistrationId() {
+        return registrationId;
     }
 
-    public void setRegistration(File registration) {
-        this.registration = registration;
+    public void setRegistrationId(int registrationId) {
+        this.registrationId = registrationId;
     }
 
     public String getChassisNumber() {

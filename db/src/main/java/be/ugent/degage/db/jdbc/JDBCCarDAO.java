@@ -181,14 +181,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 location = JDBCAddressDAO.populateAddress(rs);
                 user = JDBCUserDAO.populateUserHeader(rs);
 
-                File registration = null;
-                rs.getInt("details_car_registration");
-                if (!rs.wasNull()) {
-                    registration = JDBCFileDAO.populateFile(rs, "files");
-                }
-
-                String chassisNr = rs.getString("details_car_chassis_number");
-                technicalCarDetails = new TechnicalCarDetails(rs.getString("details_car_license_plate"), registration, chassisNr);
+                technicalCarDetails = new TechnicalCarDetails(
+                        rs.getString("details_car_license_plate"),
+                        rs.getInt("details_car_registration"),
+                        rs.getString("details_car_chassis_number")
+                );
 
                 String bonusMalus = rs.getString("insurance_bonus_malus");
                 String contractId = rs.getString("insurance_contract_id");
@@ -249,7 +246,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(15, comments);
             ps.setBoolean(16, active);
 
-            ps.setInt(17, photoId);
+            if (photoId == 0) {
+                ps.setNull (17, Types.INTEGER); // 0 not allowed because of foreign key constraint
+            } else {
+                ps.setInt(17, photoId);
+            }
             ps.setString (18, email);
 
             if(ps.executeUpdate() == 0)
@@ -285,10 +286,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
         PreparedStatement ps = updateTechnicalCarDetailsStatement.value();
 
         ps.setString(1, technicalCarDetails.getLicensePlate());
-        if (technicalCarDetails.getRegistration() == null) {
-            ps.setNull(2, Types.INTEGER);
+        int registrationId = technicalCarDetails.getRegistrationId();
+        if (registrationId == 0) {
+            ps.setNull(2, Types.INTEGER); // cannot store 0 because of foreign key constraint
         } else {
-            ps.setInt(2, technicalCarDetails.getRegistration().getId());
+            ps.setInt(2, registrationId);
         }
         ps.setString(3, technicalCarDetails.getChassisNumber());
         ps.setInt(4, id);
@@ -380,7 +382,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(15, car.getComments());
             ps.setBoolean(16, car.isActive());
 
-            ps.setInt(17, car.getPhotoId());
+            int photoId = car.getPhotoId();
+            if (photoId == 0) {
+                ps.setNull (17, Types.INTEGER); // 0 not allowed because of foreign key constraint
+            } else {
+                ps.setInt(17, photoId);
+            }
 
             ps.setString(18, car.getEmail());
 
@@ -405,7 +412,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
             "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
             "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
-            "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
             "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
             "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id " +
             "WHERE car_id=?");
@@ -693,7 +699,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                         (Integer)rs.getObject("car_owner_annual_km"),
                         new TechnicalCarDetails(
                                 rs.getString("details_car_license_plate"),
-                                null,
+                                0,
                                 rs.getString("details_car_chassis_number")
                         ),
                         new CarInsurance(

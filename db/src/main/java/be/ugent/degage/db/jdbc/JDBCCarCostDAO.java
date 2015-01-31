@@ -38,10 +38,7 @@ import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.CarCostStatus;
 
 import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -106,7 +103,11 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.setString(3, description);
             ps.setDate(4, Date.valueOf(date));
             ps.setBigDecimal(5, mileage);
-            ps.setInt(6, fileId);
+            if (fileId == 0) {
+                ps.setNull(6, Types.INTEGER); // 0 not allowed because of foreign key constraint
+            } else {
+                ps.setInt(6, fileId);
+            }
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating carcost.");
 
@@ -199,7 +200,6 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             "SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
                     "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
                     "LEFT JOIN technicalcardetails ON car_id = details_id " +
-                    "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
                     "WHERE car_cost_id=?"
     );
 
