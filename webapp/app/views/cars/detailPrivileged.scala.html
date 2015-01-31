@@ -1,0 +1,78 @@
+@* detailPrivileged.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(carId: Int, privilegedUsers: Iterable[UserHeader])
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Geprivilegieerden
+    </div>
+        <!-- /.panel-heading -->
+    <div class="panel-body">
+        <p>Vul hier aan wie privileges heeft voor jouw auto. Deze betalen een lagere kost en hun reservaties worden automatisch goedgekeurd.</p>
+
+            <!-- TODO: make nicer (bootstrap)-->
+        <table class="table table-striped table-bordered table-hover no-footer" id="carPrivileges">
+            <thead>
+                <tr role="row">
+                    <th>Naam</th>
+                    <th>Opties</th>
+                </tr>
+            </thead>
+            <tbody>
+                @* TODO: a lot of the code below is repeated in javascripts/updateCarPrivileges *@
+                @foreach.trOrElse(privilegedUsers) { user =>
+                            <td>
+                                @user.getFirstName @user.getLastName
+                                <input type="hidden" class="privilege_user_id" value="@user.getId" />
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-xs">
+                                    <button type="button" class="btn btn-danger" onclick="deletePrivilege(this)">Verwijderen</button>
+                                </div>
+                            </td>
+                }{
+                    <tr>
+                        <td class="empty-row" colspan="7">
+                            Je auto heeft nog geen geprivilegieerden.
+                        </td>
+                    </tr>
+                }
+                <tr>
+                    <td colspan="5">
+                        <div class="btn-group btn-group-xs">
+                            <button type="button" class="btn btn-default" onclick="newPrivilege(this)">Nieuw</button>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button class="btn btn-success" onclick="updatePrivileged(@carId)">Wijzigingen opslaan</button>
+    </div>
+</div>

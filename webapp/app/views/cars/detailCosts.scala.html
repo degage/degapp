@@ -1,4 +1,4 @@
-/* Diagnostics.java
+@* detailCosts.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -25,40 +25,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- */
+ *@
 
-package controllers;
+@(carId: Int)
 
-import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.JobType;
-import db.DataAccess;
-import play.mvc.Controller;
-import play.mvc.Result;
-import db.InjectContext;
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Autogebonden kosten
+    </div>
+        <!-- /.panel-heading -->
+    <div class="panel-body">
+        <p>Vul hier als eigenaar jouw autogebonden kosten aan, zoals garagekosten, verzekering, keuring en carwash.</p>
+        <button class="btn btn-default" onclick="loadModal(@carId)">Nieuwe kost</button>
+        <p></p>
 
-/**
- * Created by kc on 1/29/15.
- */
-public class Diagnostics  extends Controller {
-
-    /**
-     * Just returns ok. Used to check whether the application is still alive
-     * @return
-     */
-    public static Result checkApplication() {
-        return ok();
-    }
-
-    /**
-     * Contacts the database and returns OK if there is no exception
-     */
-    @InjectContext
-    public static Result checkDatabase() {
-        try {
-            DataAccess.getInjectedContext().getJobDAO().ping();
-            return ok();
-        } catch (DataAccessException ex) {
-            return internalServerError();
-        }
-    }
-}
+        <input name="car_id" value="@carId" class="searchTextField hidden">
+        @carCostsPartial()
+    </div>
+</div>
