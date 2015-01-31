@@ -102,9 +102,9 @@
                                             <div>
                                                 <strong>@message.getSubject</strong>
                                             </div>
-                                            @defining(message.getBody.replaceAll("""\s+"""," ")) { message_body =>
-                                                <div>@message_body.substring(0,math.min(80,message_body.length))...</div>
-                                            }
+                                            <div>
+                                                <pre>@message.getBody.substring(0,math.min(80,message.getBody.length))...</pre>
+                                            </div>
                                         </a>
                                     </li>
                                     <li class="divider"></li>
@@ -146,10 +146,9 @@
                                                         <em>@Utils.toLocalizedString(notification.getTimestamp)</em>
                                                     </span>
                                                 </div>
-                                                @defining(notification.getBody.replaceAll("""\s+"""," ").replaceAll("""<br>""","")) { notification_body =>
-                                                    <div>@notification_body.substring(0,math.min(80,notification_body.length))...</div>
-                                                }
-
+                                                <div>
+                                                    @Html(notification.getBody.substring(0,math.min(80,notification.getBody.length)))...</b></i> @* hack: closes tags that were left open *@
+                                                </div>
                                             </a>
                                         </li>
                                         <li class="divider"></li>
