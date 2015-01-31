@@ -211,7 +211,7 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendReservationApprovedByOwnerMail(String remarks, Reservation reservation) {
+    public static void sendReservationApprovedByOwnerMail(DataAccessContext context, String remarks, Reservation reservation) {
         // note: needs extended reservation
         UserHeader user = reservation.getUser();
         String carAddress = reservation.getCar().getLocation().toString();
@@ -219,7 +219,7 @@ public class Notifier extends Mailer {
         String until = Utils.toLocalizedString(reservation.getUntil());
         String url = toFullURL(routes.Drives.details(reservation.getId()));
         createNotificationAndSend(
-                user, "reservationApproved",
+                context, user, "reservationApproved",
                 views.txt.messages.reservationApproved.render(user, from, until, carAddress, url, remarks),
                 views.html.messages.reservationApproved.render(user, from, until, carAddress, url, remarks)
         );

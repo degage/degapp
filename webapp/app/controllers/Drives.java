@@ -222,7 +222,7 @@ public class Drives extends Controller {
                 if (status == ReservationStatus.REFUSED) {
                     Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
                 } else {
-                    Notifier.sendReservationApprovedByOwnerMail(remarks, reservation);
+                    Notifier.sendReservationApprovedByOwnerMail(context, remarks, reservation);
                 }
                 return redirect(routes.Drives.details(reservationId));
 

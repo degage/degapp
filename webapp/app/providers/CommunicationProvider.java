@@ -61,6 +61,7 @@ public class CommunicationProvider {
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
+                // TODO: use injected context for this
                 Filter filter = new JDBCFilter();
 
                 filter.putValue(FilterField.USER_ID, userId + "");
@@ -74,6 +75,7 @@ public class CommunicationProvider {
     }
 
     public int getNumberOfUnreadNotifications() {
+        // TODO: use injected context for this
         int userId = CurrentUser.getId();
         String key = String.format(NOTIFICATION_NUMBER_BY_ID, userId);
         Object obj = Cache.get(key);
@@ -97,6 +99,7 @@ public class CommunicationProvider {
     }
 
     public Iterable<Message> getMessages(int userId) {
+        // TODO: use injected context for this
         String key = String.format(MESSAGES_BY_ID, userId);
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof Iterable)) {
@@ -119,6 +122,7 @@ public class CommunicationProvider {
      * @return
      */
     public int getNumberOfUnreadMessages() {
+        // TODO: use injected context for this
         Integer userId = CurrentUser.getId();
         String key = String.format(MESSAGE_NUMBER_BY_ID, userId);
         Object obj = Cache.get(key);

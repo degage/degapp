@@ -385,7 +385,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     public int getAmountOfReservations(Filter filter) throws DataAccessException {
         try {
             String amount = "amount";
-            Statement statement = context.getConnection().createStatement();
+            Statement statement = createStatement();
             String sql = getReservationsPageStatement(true, amount, filter);
             try (ResultSet rs = statement.executeQuery(sql)) {
                 if(rs.next())

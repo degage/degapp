@@ -76,6 +76,7 @@ public class UserProvider {
     }
 
     public User getUser(int userId, boolean cached) throws DataAccessException {
+        // TODO: use injected context for this
 
         String key = String.format(USER_BY_ID, userId);
         User user = cached ? (User)Cache.get(key) : null;
