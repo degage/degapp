@@ -163,7 +163,7 @@ public class Login extends Controller {
 
             switch (dao.changePasswordForToken(uuid, data.email, data.password)) {
                 case INVALID_PAIR:
-                    form.reject("email", "Dit moet het e-mailadres zijn waarnaar de 'wachtwoord vergetem'-e-mail is verzonden");
+                    form.reject("email", "Dit moet het e-mailadres zijn waarnaar de 'wachtwoord vergeten'-e-mail is verzonden");
                     return badRequest(pwreset.render(form, uuid));
                 default: // OK
                     flash ("success", "Je nieuwe wachtwoord is met succes aangemaakt. Log in om verder te gaan.");

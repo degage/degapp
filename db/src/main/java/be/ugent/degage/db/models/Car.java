@@ -55,7 +55,7 @@ public class Car {
     private UserHeader owner;
     private String comments;
     private boolean active;
-    private File photo;
+    private int photoId;
 
     public Car(int id, String name) {
         this.id = id;
@@ -248,12 +248,12 @@ public class Car {
         this.active = active;
     }
 
-    public File getPhoto() {
-        return photo;
+    public int getPhotoId() {
+        return photoId;
     }
 
-    public void setPhoto(File photo) {
-        this.photo = photo;
+    public void setPhotoId(int photoId) {
+        this.photoId = photoId;
     }
 
 }

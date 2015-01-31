@@ -241,10 +241,9 @@ public class Cars extends Controller {
     public static Result getPicture(int carId) {
         //TODO: checks on whether other person can see this
         DataAccessContext context = DataAccess.getInjectedContext();
-        CarDAO carDao = context.getCarDAO();
-        Car car = carDao.getCar(carId);
-        if (car != null && car.getPhoto() != null && car.getPhoto().getId() > 0) {
-            return FileHelper.getFileStreamResult(context.getFileDAO(), car.getPhoto().getId());
+        int photoId = context.getCarDAO().getCar(carId).getPhotoId();
+        if (photoId > 0) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), photoId);
         } else {
             return FileHelper.getPublicFile("images/car.png", "image/png");
         }
@@ -333,7 +332,7 @@ public class Cars extends Controller {
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
                     model.ownerAnnualKm, technicalCarDetails, insurance, owner,
-                    model.comments, model.active, carPictureFile
+                    model.comments, model.active, carPictureFile.getId()
             );
 
 
@@ -479,7 +478,7 @@ public class Cars extends Controller {
 
         car.setActive(model.active);
         if (picture != null) {
-            car.setPhoto(picture);
+            car.setPhotoId(picture.getId());
         }
 
         if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {

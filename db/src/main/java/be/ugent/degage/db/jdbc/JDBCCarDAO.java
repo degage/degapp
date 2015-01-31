@@ -160,24 +160,24 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             car.setEmail(rs.getString("car_email"));
             car.setBrand(rs.getString("car_brand"));
             car.setType(rs.getString("car_type"));
-            car.setSeats((Integer)rs.getObject("car_seats"));
-            car.setDoors((Integer)rs.getObject("car_doors"));
+            car.setSeats((Integer) rs.getObject("car_seats"));
+            car.setDoors((Integer) rs.getObject("car_doors"));
             car.setManual(rs.getBoolean("car_manual"));
             car.setGps(rs.getBoolean("car_gps"));
             car.setHook(rs.getBoolean("car_hook"));
-            car.setYear((Integer)rs.getObject("car_year"));
-            car.setEstimatedValue((Integer)rs.getObject("car_estimated_value"));
-            car.setFuelEconomy((Integer)rs.getObject("car_fuel_economy"));
-            car.setOwnerAnnualKm((Integer)rs.getObject("car_owner_annual_km"));
+            car.setYear((Integer) rs.getObject("car_year"));
+            car.setEstimatedValue((Integer) rs.getObject("car_estimated_value"));
+            car.setFuelEconomy((Integer) rs.getObject("car_fuel_economy"));
+            car.setOwnerAnnualKm((Integer) rs.getObject("car_owner_annual_km"));
             car.setComments(rs.getString("car_comments"));
             car.setActive(rs.getBoolean("car_active"));
-            File photo = null;
+            int photoId = 0;
             Address location = null;
             UserHeader user = null;
             TechnicalCarDetails technicalCarDetails = null;
             CarInsurance insurance = null;
             if(withRest) {
-                photo = JDBCFileDAO.populateFile(rs, "pictures");
+                photoId = rs.getInt("car_images_id");
                 location = JDBCAddressDAO.populateAddress(rs);
                 user = JDBCUserDAO.populateUserHeader(rs);
 
@@ -200,7 +200,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                         bonusMalus,
                         contractId);
             }
-            car.setPhoto(photo);
+            car.setPhotoId(photoId);
             car.setLocation(location);
             car.setOwner(user);
             car.setTechnicalCarDetails(technicalCarDetails);
@@ -224,7 +224,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
     @Override
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, File photo) throws DataAccessException {
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, int photoId) throws DataAccessException {
         try {
             PreparedStatement ps = createCarStatement.value();
             ps.setString(1, name);
@@ -249,7 +249,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(15, comments);
             ps.setBoolean(16, active);
 
-            ps.setObject(17, photo, Types.INTEGER);
+            ps.setInt(17, photoId);
             ps.setString (18, email);
 
             if(ps.executeUpdate() == 0)
@@ -267,7 +267,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                 Car car = new Car(id, name, email, brand, type, location, seats, doors, year, manual, gps, hook, fuel,
                         fuelEconomy, estimatedValue, ownerAnnualKm, technicalCarDetails, insurance, owner, comments);
                 car.setActive(active);
-                car.setPhoto(photo);
+                car.setPhotoId(photoId);
                 return car;
             }
         } catch (SQLException ex) {
@@ -380,11 +380,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             ps.setString(15, car.getComments());
             ps.setBoolean(16, car.isActive());
 
-            if (car.getPhoto() != null && car.getPhoto().getId() != 0) {
-                ps.setInt(17, car.getPhoto().getId());
-            } else {
-                ps.setNull(17, Types.INTEGER);
-            }
+            ps.setInt(17, car.getPhotoId());
 
             ps.setString(18, car.getEmail());
 
@@ -410,7 +406,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
             "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
             "LEFT JOIN files ON files.file_id = technicalcardetails.details_car_registration " +
-            "LEFT JOIN files AS pictures ON pictures.file_id = cars.car_images_id " +
             "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
             "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id " +
             "WHERE car_id=?");
