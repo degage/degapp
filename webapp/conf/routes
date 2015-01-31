@@ -31,6 +31,10 @@
 # Home page
 GET         /                                       controllers.Application.index()
 
+# Diagnostics
+GET         /diag/ok                                controllers.Diagnostics.checkApplication()
+GET         /diag/db                                controllers.Diagnostics.checkDatabase()
+
 # UserRoles
 GET         /userroles                              controllers.UserRoles.index()
 GET         /userroles/page                         controllers.UserRoles.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
