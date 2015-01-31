@@ -29,40 +29,28 @@
 
 @(form: play.data.Form[InfoSessions.InfoSessionCreationModel], sessionId: Int)
 @* TODO: shares lots of code with addinfosession *@
-@scripts = {
+@scripts = {@js.datetimepicker() @js.userpicker() }
 
-    @js.datetimepicker()
-    @js.userpicker()
-}
-
-@app("Bewerk infosessie", scripts=scripts) {
-    @breadcrumbs{
-        @breadcrumb("Infosessies",routes.InfoSessions.showSessions)
-        @breadcrumb("Bewerk infosessie")
-    }
-
-    @maincontent("Bewerk infosessie"){
-        @flashes()
-        @helper.form(routes.InfoSessions.editSessionPost(sessionId)) {
-            @formErrors(form)
-            @panel("Algemeen", "fa-bar-chart-o"){
-                <fieldset>
-                    @std.userpicker(form("userId"), form("userIdAsString"), "Gastvrouw / gastheer")
-                    @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
-                    @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
-                    @std.selectEnum(classOf[InfoSessionType], form("type"), "Type")
-                    @std.textArea(form("comments"), "Opmerkingen", 6, 'maxlength -> 512)
-                </fieldset>
-            }
-            @panel("Adres", "fa-home"){
-                <fieldset>
-                    <div class="form-group col-xs-12">
-                        <button class="btn btn-default" type="submit" name="submit" value="copyAddress">Copieer verblijfadres van gastvrouw / gastheer</button>
-                    </div>
-                    @addressFields(form)
-                </fieldset>
-            }
-            @std.submitButton("Wijzigingen opslaan")
+@stdlayout("Bewerk infosessie", scripts=scripts, extrabc=breadcrumb("Infosessies",routes.InfoSessions.showSessions)) {
+    @helper.form(routes.InfoSessions.editSessionPost(sessionId)) {
+        @formErrors(form)
+        @panel("Algemeen", "fa-bar-chart-o"){
+            <fieldset>
+                @std.userpicker(form("userId"), form("userIdAsString"), "Gastvrouw / gastheer")
+                @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
+                @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
+                @std.selectEnum(classOf[InfoSessionType], form("type"), "Type")
+                @std.textArea(form("comments"), "Opmerkingen", 6, 'maxlength -> 512)
+            </fieldset>
         }
+        @panel("Adres", "fa-home"){
+            <fieldset>
+                <div class="form-group col-xs-12">
+                    <button class="btn btn-primary" type="submit" name="submit" value="copyAddress">Kopieer verblijfadres van gastvrouw / gastheer</button>
+                </div>
+                @addressFields(form)
+            </fieldset>
+        }
+        @std.submitButton("Wijzigingen opslaan")
     }
 }

@@ -112,7 +112,7 @@ public class InfoSessions extends Controller {
         InfoSessionCreationModel model = new InfoSessionCreationModel();
         model.userId = user.getId();
         model.userIdAsString = user.getFullName();
-        model.address.populate(user.getAddressDomicile());
+        model.address.populate(user.getAddressResidence());
         model.type = "NORMAL";
         return ok(addinfosession.render(
                 Form.form(InfoSessionCreationModel.class).fill(model))
@@ -412,39 +412,34 @@ public class InfoSessions extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result enrollSession(int sessionId) {
-        if (CurrentUser.hasFullStatus()) {
-            flash("warning", "Je bent al goedgekeurd door onze administrator. Inschrijven is wel nog steeds mogelijk.");
-        }
         DataAccessContext context = DataAccess.getInjectedContext();
         InfoSessionDAO dao = context.getInfoSessionDAO();
 
         InfoSession alreadyAttending = dao.getAttendingInfoSession(CurrentUser.getId());
-        InfoSession session = dao.getInfoSession(sessionId); //TODO: just add going subclause (like in getAttending requirement)
+        InfoSession session = dao.getInfoSession(sessionId);
         int numberOfAttendees = dao.getAmountOfAttendees(sessionId);
-        if (session == null) {
-            flash("danger", "Sessie met ID = " + sessionId + " bestaat niet.");
+
+        if (session.getMaxEnrollees() != 0 && numberOfAttendees >= session.getMaxEnrollees()) {
+            flash("danger", "Deze infosessie zit reeds vol.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
-            if (session.getMaxEnrollees() != 0 && numberOfAttendees >= session.getMaxEnrollees()) {
-                flash("danger", "Deze infosessie zit reeds vol.");
-                return redirect(routes.InfoSessions.showUpcomingSessions());
-            } else {
-                if (alreadyAttending != null && alreadyAttending.getTime().isAfter(Instant.now())) {
-                    dao.unregisterUser(alreadyAttending.getId(), CurrentUser.getId());
-                }
-                dao.registerUser(sessionId, CurrentUser.getId()); // TODO: disallow registration when full
-
+            if (alreadyAttending != null && alreadyAttending.getTime().isAfter(Instant.now())) {
+                dao.unregisterUser(alreadyAttending.getId(), CurrentUser.getId());
+            }
+            if (dao.registerUser(sessionId, CurrentUser.getId())) {
                 flash("success",
                         (alreadyAttending == null ?
-                        "Je bent met succes ingeschreven voor de infosessie op " :
-                        "Je bent van infosessie veranderd naar ")
-                                + Utils.toLocalizedString(session.getTime())+ ".");
+                                "Je bent met succes ingeschreven voor de infosessie op " :
+                                "Je bent van infosessie veranderd naar ")
+                                + Utils.toLocalizedString(session.getTime()) + ".");
 
                 // TODO: avoid this?
                 UserHeader user = context.getUserDAO().getUserHeader(CurrentUser.getId());
                 Notifier.sendInfoSessionEnrolledMail(context, user, session);
-                return redirect(routes.InfoSessions.detail(sessionId));
+            } else {
+                flash("warning", "Je was reeds ingeschreven voor deze infosessie");
             }
+            return redirect(routes.InfoSessions.detail(sessionId));
         }
     }
 

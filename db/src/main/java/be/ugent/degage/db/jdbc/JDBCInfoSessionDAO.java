@@ -324,17 +324,19 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     );
 
     @Override
-    public void registerUser(int sessionId, int userId) throws DataAccessException {
-        // TODO: do not allow registration if already registered
+    public boolean registerUser(int sessionId, int userId) throws DataAccessException {
         try {
             PreparedStatement ps = registerUserForSessionStatement.value();
             ps.setInt(1, sessionId);
             ps.setInt(2, userId);
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("Failed to register user to infosession. 0 rows affected.");
-
+            ps.executeUpdate();
+            return true;
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to prepare statement for user registration with infosession.", ex);
+            if (ex.getErrorCode() == 1062) {
+                return false;
+            } else {
+                throw new DataAccessException("Failed to register user.", ex);
+            }
         }
     }
 
@@ -405,11 +407,6 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                     " ORDER BY infosession_timestamp"
     );
 
-    /**
-     * @param userId The user
-     * @return The infosession after this time, the user is enrolled in
-     * @throws DataAccessException
-     */
     @Override
     public InfoSession getAttendingInfoSession(int userId) throws DataAccessException {
         try {

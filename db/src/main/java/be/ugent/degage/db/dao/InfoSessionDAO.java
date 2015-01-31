@@ -66,12 +66,22 @@ public interface InfoSessionDAO {
     public int getAmountOfAttendees(int infosessionId) throws DataAccessException;
     public Iterable<Enrollee> getEnrollees (int infosessionId) throws DataAccessException;
 
-    public void registerUser(int sessionId, int userId) throws DataAccessException;
+    /**
+     * @return false if user already registered for this session
+     *
+     * @throws DataAccessException
+     */
+    public boolean registerUser(int sessionId, int userId) throws DataAccessException;
     public void unregisterUser(int sessionId, int userId) throws DataAccessException;
 
     public EnrollementStatus getUserEnrollmentStatus (int sessionId, int userId) throws DataAccessException;
     public void setUserEnrollmentStatus(int sessionId, int userId, EnrollementStatus status) throws DataAccessException;
 
+    /**
+     * @param userId The user
+     * @return The infosession the user is enrolled in or null if no such session. Only future sessions are considered
+     * @throws DataAccessException
+     */
     public InfoSession getAttendingInfoSession(int userId) throws DataAccessException;
 
     /**
