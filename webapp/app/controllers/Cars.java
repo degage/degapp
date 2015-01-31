@@ -326,8 +326,9 @@ public class Cars extends Controller {
             CarInsurance insurance =
                     new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
 
+            // TODO: fill in real email address
             Car car = dao.createCar(
-                    model.name, null, model.brand, model.type,
+                    model.name, "(onbekend)", model.brand, model.type,
                     model.address.toAddress(), model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
