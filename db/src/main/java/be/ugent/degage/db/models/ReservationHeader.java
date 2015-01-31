@@ -38,15 +38,15 @@ import java.time.LocalDateTime;
  */
 public class ReservationHeader {
 
-    private int id;
-    private ReservationStatus status;
-    private int carId;
-    private int userId;
-    private int ownerId;
-    private LocalDateTime from;
-    private LocalDateTime until;
-    private String message;
-    private boolean privileged;
+    protected int id;
+    protected ReservationStatus status;
+    protected int carId;
+    protected int userId;
+    protected int ownerId;
+    protected LocalDateTime from;
+    protected LocalDateTime until;
+    protected String message;
+    protected boolean privileged;
 
     public ReservationHeader(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until, String message) {
         this.id = id;

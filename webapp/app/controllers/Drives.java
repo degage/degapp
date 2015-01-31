@@ -543,16 +543,16 @@ public class Drives extends Controller {
 
     }
 
-    public static boolean isOwnerOrAdmin (Reservation reservation) {
+    public static boolean isOwnerOrAdmin (ReservationHeader reservation) {
         return  CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
                         CurrentUser.is(reservation.getOwnerId());
     }
 
-    public static boolean isDriverOrOwnerOrAdmin (Reservation reservation) {
+    public static boolean isDriverOrOwnerOrAdmin (ReservationHeader reservation) {
         return  isOwnerOrAdmin(reservation) || CurrentUser.is(reservation.getUserId());
     }
 
-    private static boolean newJourneyInfoAllowed(Reservation reservation) {
+    private static boolean newJourneyInfoAllowed(ReservationHeader reservation) {
         return reservation.getStatus() == ReservationStatus.REQUEST_DETAILS &&
                 isDriverOrOwnerOrAdmin(reservation);
     }

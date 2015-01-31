@@ -149,12 +149,13 @@ public class Reserve extends Controller {
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result reserveCar(int carId, String fromString, String untilString) {
+        LocalDateTime fromDateTime = Utils.toLocalDateTime(fromString);
         return ok(reservation.render(
                 // query string binders are quite complicated to write :-(
                 new Form<>(ReservationData.class).fill(
                         new ReservationData().populate(
-                                Utils.toLocalDateTime(fromString),
-                                untilString.isEmpty() ? null : Utils.toLocalDateTime(untilString)
+                                fromDateTime,
+                                untilString.isEmpty() ? fromDateTime : Utils.toLocalDateTime(untilString)
                         )
                 ),
                 DataAccess.getInjectedContext().getCarDAO().getCar(carId)

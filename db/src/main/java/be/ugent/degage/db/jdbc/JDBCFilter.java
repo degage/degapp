@@ -33,7 +33,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Map;
 
 /**

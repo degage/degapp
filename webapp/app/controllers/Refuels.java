@@ -161,8 +161,16 @@ public class Refuels extends Controller {
      */
     @AllowRoles
     @InjectContext
-    public static Result getProof(int proofId) {
-        return FileHelper.getFileStreamResult(DataAccess.getInjectedContext().getFileDAO(), proofId);
+    public static Result getProof(int refuelId) {
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
+        if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
+            Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
+            return FileHelper.getFileStreamResult(context.getFileDAO(), refuel.getProofId());
+        } else {
+            return badRequest(); // hacker
+        }
     }
 
     /**

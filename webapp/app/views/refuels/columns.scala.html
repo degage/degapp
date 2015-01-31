@@ -30,6 +30,7 @@
 @(refuel : Refuel, isAdmin: Boolean)
 
 @* Last four columns of a refuel table *@
+@* TODO: split according to driver/owner/admin *@
 
 @import db.CurrentUser
 <td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
@@ -50,7 +51,7 @@
 </td>
 <td>
     <div class="btn-group btn-group-xs">
-        <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getProof.getId)" target="_blank">Link</a>
+        <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getId)" target="_blank">Link</a>
     </div>
 </td>
 

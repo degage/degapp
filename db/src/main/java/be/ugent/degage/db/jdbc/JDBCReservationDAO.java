@@ -246,6 +246,27 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
+     private LazyStatement getReservationHeaderForRefuelStatement = new LazyStatement (
+            "SELECT " + RESERVATION_HEADER_FIELDS +
+                    " FROM refuels JOIN reservations ON refuel_car_ride_id=reservation_id WHERE refuel_id=?"
+    );
+
+    @Override
+    public ReservationHeader getReservationHeaderForRefuel(int refuelId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getReservationHeaderForRefuelStatement.value();
+            ps.setInt(1, refuelId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    return populateReservationHeader(rs);
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to get reservation header", e);
+        }
+    }
     private Reservation populateNextPrevious (ResultSet rs) throws SQLException {
         return new Reservation(
                 rs.getInt("r.reservation_id"),

@@ -37,15 +37,15 @@ import java.time.LocalDate;
 public class Refuel {
     private int id;
     private CarRide carRide;
-    private File proof;
+    private int proofId;
     private int eurocents;
     private RefuelStatus status;
     private LocalDate billed;
 
-    public Refuel(int id, CarRide carRide, File proof, int eurocents, RefuelStatus status) {
+    public Refuel(int id, CarRide carRide, int proofId, int eurocents, RefuelStatus status) {
         this.id = id;
         this.carRide = carRide;
-        this.proof = proof;
+        this.proofId = proofId;
         this.eurocents = eurocents;
         this.status = status;
     }
@@ -68,16 +68,8 @@ public class Refuel {
         return carRide;
     }
 
-    public void setCarRide(CarRide carRide) {
-        this.carRide = carRide;
-    }
-
-    public File getProof() {
-        return proof;
-    }
-
-    public void setProof(File proof) {
-        this.proof = proof;
+    public int getProofId() {
+        return proofId;
     }
 
     public int getEurocents() {

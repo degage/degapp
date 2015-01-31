@@ -53,8 +53,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id " +
             "LEFT JOIN cars ON reservation_car_id = car_id " +
             "LEFT JOIN users ON reservation_user_id = user_id " +
-            "LEFT JOIN users AS owners ON car_owner_user_id = owners.user_id " +
-            "LEFT JOIN files ON refuel_file_id = file_id ";
+            "LEFT JOIN users AS owners ON car_owner_user_id = owners.user_id ";
 
     public JDBCRefuelDAO(JDBCDataAccessContext context) {
         super(context);
@@ -64,7 +63,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         Refuel refuel = new Refuel(
                 rs.getInt("refuel_id"),
                 JDBCCarRideDAO.populateCarRide(rs),
-                JDBCFileDAO.populateFile(rs),
+                rs.getInt("refuel_file_id"),
                 rs.getInt("refuel_eurocents"),
                 RefuelStatus.valueOf(rs.getString("refuel_status"))
         );
@@ -178,7 +177,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     public void updateRefuel(Refuel refuel) throws DataAccessException {
         try {
             PreparedStatement ps = updateRefuelStatement.value();
-            ps.setInt(1, refuel.getProof().getId());
+            ps.setInt(1, refuel.getProofId());
             ps.setInt(2, refuel.getEurocents());
             ps.setString(3, refuel.getStatus().name());
             ps.setInt(4, refuel.getId());
@@ -211,7 +210,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-     private static String AMOUNT_OF_REFUELS_STATEMENT =
+    private static final String AMOUNT_OF_REFUELS_STATEMENT =
              "SELECT count(*) AS amount_of_refuels FROM refuels " +
                      "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id ";
 

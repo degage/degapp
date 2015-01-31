@@ -196,7 +196,7 @@ GET         /refuels                                controllers.Refuels.showRefu
 GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /refuels/proof                          controllers.Refuels.getProof(proofId: Int)
+GET         /refuels/proof                          controllers.Refuels.getProof(refuelId: Int)
 GET         /refuels/owner/approved                 controllers.Refuels.approveRefuel(refuelId: Int)
 GET         /refuels/owner/refused                  controllers.Refuels.refuseRefuel(refuelId: Int)
 
