@@ -54,6 +54,7 @@ import providers.DataProvider;
 import views.html.drives.*;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -160,13 +161,13 @@ public class Drives extends Controller {
     }
 
     public static class RemarksData {
-        // String containing the reason for refusing a reservation
+        // String containing the reason for refusing a reservation or refuel
         public String status;
         public String remarks;
 
         public List<ValidationError> validate() {
             if ("REFUSED".equals(status) && Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
-                return Arrays.asList(new ValidationError("remarks", "Je moet een reden opgeven waarom je de reservatie weigert"));
+                return Arrays.asList(new ValidationError("remarks", "Je moet een reden opgeven voor de weigering"));
             } else {
                 return null;
             }
@@ -563,22 +564,28 @@ public class Drives extends Controller {
 
         public String picture; // only used to enable field error messages...
 
-        public List<ValidationError> validate () {
-            List<ValidationError> result = super.validate();
-            if (amount != null && amount.getValue() <= 0) {
+        public String fuelAmount;
 
-                ValidationError error = new ValidationError("amount", "Bedrag moet groter zijn dan 0");
-                if (result == null) {
-                    return Arrays.asList(error);
-                } else {
-                    result.add (error);
-                    return result;
-                }
-            } else {
-                return result;
-            }
+        public int km;
+
+        public boolean someFilledIn() {
+            return (amount != null && amount.getValue() != 0)
+                    || !Strings.isNullOrEmpty(fuelAmount) || km != 0;
         }
 
+        public List<ValidationError> listOfErrors() {
+            List<ValidationError> result = new ArrayList<>();
+            if (amount == null || amount.getValue() <= 0) {
+                result.add(new ValidationError("amount", "Bedrag moet groter zijn dan 0 EURO")) ;
+            }
+            if (Strings.isNullOrEmpty(fuelAmount)) {
+                result.add(new ValidationError("fuelAmount", "Veld mag niet leeg zijn"));
+            }
+            if (km <= 0) {
+                result.add(new ValidationError("km", "Ongeldige kilometerstand"));
+            }
+            return result;
+        }
 
     }
 
@@ -626,13 +633,26 @@ public class Drives extends Controller {
         } else {
             JourneyDataExtended data = form.get();
             Http.MultipartFormData.FilePart filePart = Controller.request().body().asMultipartFormData().getFile("picture");
-            if (filePart != null && (data.amount == null || data.amount.getValue() == 0)) {
-                form.reject("amount", "Bedrag ontbreekt");
-                form.reject("picture", "Bestand opnieuw selecteren");
-                return badRequest(newjourney.render(form, reservation));
-            } else if (filePart == null && data.amount != null  && data.amount.getValue() != 0) {
-                form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
-                return badRequest(newjourney.render(form, reservation));
+
+            // process validation errors (delayed)
+            if (data.someFilledIn() || filePart!= null) {
+                List<ValidationError> errors = data.listOfErrors();
+                if (errors.isEmpty()) {
+                   if (filePart == null) {
+                       form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
+                       return badRequest(newjourney.render(form, reservation));
+                   }
+                } else {
+                   if (filePart == null) {
+                       form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
+                   } else {
+                       form.reject("picture", "Bestand opnieuw selecteren");
+                   }
+                   for (ValidationError error : errors) {
+                       form.reject(error);
+                   }
+                   return badRequest(newjourney.render(form, reservation));
+                }
             }
 
             if (newJourneyInfoAllowed(reservation)) {
@@ -667,13 +687,16 @@ public class Drives extends Controller {
 
                 // add first refuel, if present
 
+
                 if (filePart != null) {
                     File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
                     if (file.getContentType() == null) {
                         form.reject("picture", "Het bestand  is van het verkeerde type");
                         return badRequest(newjourney.render(form, reservation));
                     } else {
-                        Refuels.newRefuel(reservation, owner, data.amount.getValue(), file);
+                        Refuels.newRefuel(reservation, owner, data.amount.getValue(),
+                                file.getId(), data.km, data.fuelAmount
+                                );
                     }
                 }
 

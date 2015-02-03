@@ -33,7 +33,6 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.RefuelDAO;
-import be.ugent.degage.db.models.File;
 import be.ugent.degage.db.models.Refuel;
 import be.ugent.degage.db.models.RefuelStatus;
 
@@ -65,7 +64,10 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 JDBCCarRideDAO.populateCarRide(rs),
                 rs.getInt("refuel_file_id"),
                 rs.getInt("refuel_eurocents"),
-                RefuelStatus.valueOf(rs.getString("refuel_status"))
+                RefuelStatus.valueOf(rs.getString("refuel_status")),
+                rs.getInt("refuel_km"),
+                rs.getString ("refuel_amount"),
+                rs.getString ("refuel_message")
         );
 
         Date refuelBilled = rs.getDate("refuel_billed");
@@ -77,59 +79,45 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     }
 
     private LazyStatement createRefuelStatement = new LazyStatement (
-            "INSERT INTO refuels (refuel_car_ride_id, refuel_file_id, refuel_eurocents, refuel_status) " +
-                    "VALUES (?,?,?,?)" //,
-            //"refuel_id"
+            "INSERT INTO refuels (refuel_car_ride_id, refuel_file_id, refuel_eurocents, refuel_status," +
+                    "refuel_km, refuel_amount) " +
+                    "VALUES (?,?,?,?,?,?)",
+            "refuel_id"
     );
 
 
     @Override
-    public void createRefuel(int reservationId, int eurocents, File file, RefuelStatus status) {
+    public int createRefuel(int reservationId, int eurocents, int fileId, RefuelStatus status,
+                             int km, String amount) {
         try{
             PreparedStatement ps = createRefuelStatement.value();
             ps.setInt(1, reservationId);
-            ps.setInt(2, file.getId());
+            ps.setInt(2, fileId);
             ps.setInt(3, eurocents);
             ps.setString(4, status.name());
-
+            ps.setInt(5, km);
+            ps.setString(6, amount);
             ps.executeUpdate();
 
-            /*
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
                 return keys.getInt(1);
             }
-            */
         } catch (SQLException e){
             throw new DataAccessException("Unable to create refuel", e);
         }
     }
 
-    private LazyStatement getStatusRefuelStatement= new LazyStatement (
-            "UPDATE refuels SET refuel_status = ? WHERE refuel_id = ?"
-    );
+    private static final String ACCEPT_OR_REJECT_REFUEL_STATEMENT
+            = "UPDATE refuels SET refuel_status = ?, refuel_message = ? WHERE refuel_id = ? ";
 
     @Override
-    public void acceptRefuel(int refuelId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getStatusRefuelStatement.value();
-            ps.setString(1, "ACCEPTED");
-            ps.setInt(2, refuelId);
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("CarCost update affected 0 rows.");
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to update refuel", e);
-        }
-    }
-
-    @Override
-    public void rejectRefuel(int refuelId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getStatusRefuelStatement.value();
-            ps.setString(1, "REFUSED");
-            ps.setInt(2, refuelId);
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("CarCost update affected 0 rows.");
+    public void acceptOrRejectRefuel(RefuelStatus status, int refuelId, String message) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(ACCEPT_OR_REJECT_REFUEL_STATEMENT)) {
+            ps.setString(1, status.name());
+            ps.setString(2,message);
+            ps.setInt(3, refuelId);
+            ps.executeUpdate();
         } catch (SQLException e){
             throw new DataAccessException("Unable to update refuel", e);
         }
@@ -169,6 +157,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
+    /* Currently nog used. If introduced again, some field must be added
     private LazyStatement updateRefuelStatement= new LazyStatement (
             "UPDATE refuels SET refuel_file_id = ? , refuel_eurocents = ? , refuel_status = ? WHERE refuel_id = ?"
     );
@@ -188,6 +177,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
 
     }
+    */
 
     private static void appendRefuelFilter (StringBuilder builder, Filter filter) {
         // build clause

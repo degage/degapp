@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, amount: String)
+@(user: UserHeader, carName: String, amount: String, comment: String)
 
 @* Tankbeurt goedgekeurd *@
 Beste @user.getFirstName @user.getLastName,
@@ -35,4 +35,9 @@ Beste @user.getFirstName @user.getLastName,
 De gegevens die je hebt ingebracht voor je tankbeurt van
 de auto '@carName' werden goedgekeurd door de eigenaar
 van de auto. (Bedrag: @amount.)
-
+@if(comment != null && !comment.trim.isEmpty){
+De eigenaar vermeldt hierbij het volgende:
+--------------------------------------------------------------
+@comment
+--------------------------------------------------------------
+}

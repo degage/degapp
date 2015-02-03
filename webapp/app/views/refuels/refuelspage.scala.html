@@ -30,6 +30,7 @@
 @(refuelList: Iterable[Refuel], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import providers.DataProvider
 @import db.CurrentUser
+
 @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
         <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
             <thead>
@@ -38,8 +39,9 @@
                     <th>Autorit</th>
                     <th>Bestuurder</th>
                     <th>Bedrag</th>
+                    <th>Liters</th>
+                    <th>Km-stand</th>
                     <th>Status</th>
-                    <th>Bewijs</th>
                     <th>Acties</th>
                 </tr>
             </thead>

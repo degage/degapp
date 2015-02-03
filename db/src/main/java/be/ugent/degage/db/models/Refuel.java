@@ -41,19 +41,20 @@ public class Refuel {
     private int eurocents;
     private RefuelStatus status;
     private LocalDate billed;
+    private int km;
+    private String amount; // Amount of fuel (free format)
+    private String message;
 
-    public Refuel(int id, CarRide carRide, int proofId, int eurocents, RefuelStatus status) {
+    public Refuel(int id, CarRide carRide, int proofId, int eurocents, RefuelStatus status,
+                  int km, String amount, String message) {
         this.id = id;
         this.carRide = carRide;
         this.proofId = proofId;
         this.eurocents = eurocents;
         this.status = status;
-    }
-
-    public Refuel(int id, CarRide carRide, RefuelStatus status) {
-        this.id = id;
-        this.carRide = carRide;
-        this.status = status;
+        this.km = km;
+        this.amount = amount;
+        this.message = message;
     }
 
     public int getId() {
@@ -74,6 +75,22 @@ public class Refuel {
 
     public int getEurocents() {
         return eurocents;
+    }
+
+    public int getKm() {
+        return km;
+    }
+
+    /**
+     * Amount of fuel (free format)
+     * @return
+     */
+    public String getAmount() {
+        return amount;
+    }
+
+    public String getMessage() {
+        return message;
     }
 
     public void setEurocents(int eurocents) {

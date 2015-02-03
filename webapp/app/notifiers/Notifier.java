@@ -128,25 +128,25 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendRefuelApproved(Refuel refuel) {
+    public static void sendRefuelApproved(Refuel refuel, String newRemarks) {
         Reservation reservation = refuel.getCarRide().getReservation();
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
         createNotificationAndSend(user, "refuelApproved",
-                views.txt.messages.refuelApproved.render(user, name, amount),
-                views.html.messages.refuelApproved.render(user, name, amount)
+                views.txt.messages.refuelApproved.render(user, name, amount, newRemarks),
+                views.html.messages.refuelApproved.render(user, name, amount, newRemarks)
         );
     }
 
-    public static void sendRefuelRejected(Refuel refuel) {
+    public static void sendRefuelRejected(Refuel refuel, String newRemarks) {
         Reservation reservation = refuel.getCarRide().getReservation();
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
         createNotificationAndSend(user, "refuelRejected",
-                views.txt.messages.refuelRejected.render(user, name, amount),
-                views.html.messages.refuelRejected.render(user, name, amount)
+                views.txt.messages.refuelRejected.render(user, name, amount, newRemarks),
+                views.html.messages.refuelRejected.render(user, name, amount,newRemarks)
         );
     }
 
@@ -165,10 +165,10 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendRefuelRequest(UserHeader owner, int reservationId, Car car, int eurocents) {
+    public static void sendRefuelRequest(UserHeader owner, int refuelId, Car car, int eurocents) {
         String carName = car.getName();
         String amount = EurocentAmount.toString(eurocents) + " euro";
-        String url = toFullURL(routes.Drives.approveOrReject(reservationId));
+        String url = toFullURL(routes.Refuels.approveOrReject(refuelId));
         createNotificationAndSend(
                 owner, "refuelRequest",
                 views.txt.messages.refuelRequest.render(owner,carName,amount,url),

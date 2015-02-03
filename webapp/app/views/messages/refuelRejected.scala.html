@@ -27,10 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, amount: String)
+@(user: UserHeader, carName: String, amount: String, comment: String)
 
 @* Tankbeurt niet goedgekeurd *@
 <p>Beste @user.getFirstName @user.getLastName,</p>
 <p>De tankbeurt van de auto '@carName' voor een bedrag van @amount
 werd door de eigenaar helaas <b>niet goedgekeurd</b>.
+<p>De eigenaar heeft hierbij de volgende opmerkingen:</p>
+<hr />
+@comment
+<hr />
 </p>

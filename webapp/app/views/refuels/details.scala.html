@@ -1,4 +1,4 @@
-@* radioItem.scala.html
+@* details.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(field: play.api.data.Field, value: String)(body: => Html)
+@(refuel: Refuel, car: Car, reservation: ReservationHeader, driveInfo: CarRide)
 
-@currentValue=@{field.value.getOrElse("").toString}
+@stdlayout("Tankbeurt", extrabc=breadcrumb("Tankbeurten",routes.Refuels.showRefuels)) {
 
-@* Displays a single radio button group item, selected according to whether the
-   current value is equal to the tag value. *@
+    @detailsPanel(refuel, car, reservation, driveInfo)
 
-<div class="radio">
-<label>
-<input type="radio" name="@field.name" value="@value" @if(value==currentValue){checked}/>@body
-</label>
-</div>
+}

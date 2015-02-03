@@ -1,0 +1,70 @@
+@* detailsPanel.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(refuel: Refuel, car: Car, reservation: ReservationHeader, driveInfo: CarRide)
+
+@panel("Details", "fa-bar-chart-o"){
+    <div class="col-sm-6">
+        <h4>Tankbeurt</h4>
+        <dl class="dl-horizontal">
+            <dt>Status</dt>
+            <dd>@refuel.getStatus</dd>
+            <dt>Bedrag</dt>
+            <dd>@data.EurocentAmount.toString(refuel.getEurocents)</dd>
+            <dt>Hoeveelheid (liter)</dt>
+            <dd>@refuel.getAmount</dd>
+            <dt>Kilometerstand</dt>
+            <dd>@refuel.getKm</dd>
+            <dt>Bonnetje</dt>
+            <dd><a href="@routes.Refuels.getProof(refuel.getId)">Link</a></dd>
+            @* TODO: make when.notblank snippet *@
+            @if(refuel.getMessage != null && !refuel.getMessage.trim.isEmpty) {
+                <dt>Opmerkingen</dt>
+                <dd>@refuel.getMessage</dd>
+            }
+        </dl>
+    </div>
+    <div class="col-sm-6">
+        <h4>Reservatie</h4>
+        <dl class="dl-horizontal">
+            <dt>Auto</dt>
+            <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
+            <dt>Periode</dt>
+            <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
+            <dt>Kilometerstanden</dt>
+            <dd>@driveInfo.getStartKm — @driveInfo.getEndKm</dd>
+        </dl>
+    </div>
+    @if(refuel.getStatus==RefuelStatus.REFUSED){
+        <div class="col-xs-12 alert alert-warning">
+            <p>Een geweigerde tankbeurt kan niet worden gewijzigd, maar moet
+                <a href="@routes.Refuels.showRefuelsForRide(reservation.getId)">opnieuw worden aangevraagd</a>.</p>
+        </div>
+    }
+}

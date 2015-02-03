@@ -35,6 +35,12 @@
 @import db.CurrentUser
 <td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
 <td>
+    @refuel.getAmount
+</td>
+<td>
+    @refuel.getKm
+</td>
+<td>
     @refuel.getStatus match {
         case RefuelStatus.ACCEPTED => {
             <span class="fa fa-check-circle"></span>
@@ -50,25 +56,10 @@
     @refuel.getStatus
 </td>
 <td>
-    <div class="btn-group btn-group-xs">
-        <a class="btn btn-primary" href="@routes.Refuels.getProof(refuel.getId)" target="_blank">Link</a>
-    </div>
-</td>
-
-<td>
+    <a class="btn btn-primary btn-sm" href="@routes.Refuels.showDetails(refuel.getId)">Details</a>
 @if((CurrentUser is refuel.getCarRide.getReservation.getOwnerId) || isAdmin) {
-    @refuel.getStatus match {
-        case RefuelStatus.ACCEPTED => {
-            <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
-        }
-        case RefuelStatus.REFUSED => {
-            <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
-        }
-        case RefuelStatus.REQUEST => {
-            <a type="button" class="btn btn-xs btn-success" href="@routes.Refuels.approveRefuel(refuel.getId)">Goedkeuren</a>
-            <a type="button" class="btn btn-xs btn-warning" href="@routes.Refuels.refuseRefuel(refuel.getId)">Afkeuren</a>
-        }
-        case _ => {}
+    @if(refuel.getStatus == RefuelStatus.REQUEST) {
+        <a type="button" class="btn btn-xs btn-primary" href="@routes.Refuels.approveOrReject(refuel.getId)">Goed- of afkeuren ...</a>
     }
 }
 </td>

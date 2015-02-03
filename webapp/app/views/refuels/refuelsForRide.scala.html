@@ -44,8 +44,9 @@
                 <thead>
                     <tr role="row">
                         <th>Bedrag</th>
+                        <th>Liters</th>
+                        <th>Km-stand</th>
                         <th>Status</th>
-                        <th>Bonnetje</th>
                         <th>Acties</th>
                     </tr>
                 </thead>
@@ -53,7 +54,7 @@
                     <tbody>
                         @foreach.trOrElse(refuelList)( refuel => columns(refuel,isAdmin)) {
                         <tr>
-                            <td colspan="4" class="empty-row">
+                            <td colspan="5" class="empty-row">
                                 (Geen geregistreerde tankbeurten)
                             </td>
                         </tr>
@@ -67,7 +68,10 @@
     @panel("Nieuwe tankbeurt") {
         @helper.form(routes.Refuels.newRefuelForRidePost(reservation.getId), 'enctype -> "multipart/form-data"){
             @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
-            @std.fileField(form("picture"), "bonnetje als bewijsstuk:", required=true)
+            @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
+            @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")
+            @std.textField(form("fuelAmount"), "Aantal liters getankt", css="col-sm-6")
+            <div class="col-xs-12"><p>(Alle velden zijn verplicht)</p></div>
             @if(Drives.isOwnerOrAdmin(reservation)){
                 @std.submitButton("Doorsturen (en meteen goedkeuren)")
             } else {

@@ -27,11 +27,18 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, amount: String)
+@(user: UserHeader, carName: String, amount: String, comment: String)
 
 @* Tankbeurt niet goedgekeurd *@
 Beste @user.getFirstName @user.getLastName,
 
 De tankbeurt van de auto '@carName' voor een bedrag van @amount
 werd door de eigenaar helaas *niet* goedgekeurd.
+
+De eigenaar geeft hierbij de volgende opmerkingen:
+--------------------------------------------------------------
+@comment
+--------------------------------------------------------------
+
+
 

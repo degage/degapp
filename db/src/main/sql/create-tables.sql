@@ -301,10 +301,13 @@ CREATE TABLE `refuels` (
 	`refuel_eurocents` INT,
 	`refuel_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST',
 	`refuel_billed` DATE DEFAULT NULL,
+	`refuel_km` INTEGER,
+	`refuel_amount` VARCHAR(16), -- amount of fuel, free format
+	`refuel_message` VARCHAR(4096),
    	`refuel_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    	`refuel_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),
-	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES carrides(`car_ride_car_reservation_id`),
+	FOREIGN KEY (`refuel_car_ride_id`) REFERENCES reservations(`reservation_id`),
 	FOREIGN KEY (`refuel_file_id`) REFERENCES files(`file_id`)
 );
 
