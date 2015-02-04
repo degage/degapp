@@ -1,4 +1,4 @@
-@* dashboardOwner.scala.html
+@* dashboardHeader.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,34 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carName: String, lines: Iterable[Reserve.OverviewLine], completeness: Int = 0)
-@import providers.DataProvider
-@import db.CurrentUser
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
-}
-@scripts = {
-    @js.pagination("Drives.showDrivesPage", initialLoad = false)
-    @drives.tabscripts(2)
-}
+@(showNotice: Boolean = true)
 
-@app("Welkom", stylesheets, scripts){
-    @breadcrumbs {
-    }
-
-    <div id="page-wrapper">        @* Does not use maincontent because of header *@
-        @dashboardHeader()
-        @reserve.reservationpanelowner()
-
-        <div class="row">
-            @flashes()
-        </div>
-        @reserve.overviewpanel(carName + " (deze week)", "fa-calendar", lines, percentage=10){
-            @* no header. *@
-        }{ <a class="btn btn-primary btn-sm" href="@routes.Reserve.overviewOwnerCar">Andere periode</a> }
-
-        <h4>Reservaties / ritten</h4>
-        @drives.drivetabs(2)
+<div class="row">
+    <div class="col-xs-12 alert alert-info">
+        <p><b>Degapp</b> (beta) is de nieuwe plek voor het beheer van onze autodeelvloot.
+        Je kan er deelauto's mee opzoeken en reserveren. Na een rit kan de ontlener of eigenaar
+            kilometerstanden en tankbeurten ingeven.
+        Afspreken voor het afhalen van de sleutels en de auto doe je <i>buiten</i> dit systeem.</p>
+        <p>Vragen of suggesties stuur je naar <a href="mailto:degapp@@degage.be">degapp@@degage.be</a>.</p>
     </div>
-}
+</div>

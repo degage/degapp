@@ -43,8 +43,8 @@
     @breadcrumbs {
     }
 
-    @maincontent("Welkom"){
-
+    <div id="page-wrapper">        @* Does not use maincontent because of header *@
+        @dashboardHeader()
         @reserve.reservationpanel()
 
         <div class="row">
@@ -52,5 +52,5 @@
         </div>
         <h4>Reservaties / ritten</h4>
         @drives.drivetabs(1)
-    }
+    </div>
 }
