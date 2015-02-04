@@ -205,7 +205,7 @@ public class Reserve extends Controller {
             // TODO: avoid having to retrieve the whole record
             Reservation res = rdao.getReservation(reservation.getId());
             Notifier.sendReservationApproveRequestMail(
-                    car.getOwner(), res
+                    car.getOwner(), res, car.getName()
             );
         }
         return redirect(routes.Drives.index(0));

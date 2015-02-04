@@ -56,7 +56,7 @@
     @refuel.getStatus
 </td>
 <td>
-    <a class="btn btn-primary btn-sm" href="@routes.Refuels.showDetails(refuel.getId)">Details</a>
+    <a class="btn btn-primary btn-xs" href="@routes.Refuels.showDetails(refuel.getId)">Details</a>
 @if((CurrentUser is refuel.getCarRide.getReservation.getOwnerId) || isAdmin) {
     @if(refuel.getStatus == RefuelStatus.REQUEST) {
         <a type="button" class="btn btn-xs btn-primary" href="@routes.Refuels.approveOrReject(refuel.getId)">Goed- of afkeuren ...</a>

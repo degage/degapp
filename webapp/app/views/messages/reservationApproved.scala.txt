@@ -27,16 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, from: String, until: String, carAddress: String, url: String, comment: String)
+@(user: UserHeader, from: String, until: String, carName: String, carAddress: String, url: String, comment: String, contactInfo: String)
 
 @* Reservatie goedgekeurd *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Uw reservatie voor de volgende periode is goedgekeurd:
 
     @from - @until.
 
-De standplaats van de auto is:
+De standplaats van @carName is:
 
     @carAddress
 
@@ -47,7 +47,10 @@ De eigenaar vermeldt hierbij het volgende:
 --------------------------------------------------------------
 }
 Gelieve de eigenaar te contacteren voor verdere afspraken.
-Gebruik onderstaande link voor bijkomende informatie:
+
+   @contactInfo
+
+Meer informatie:
 
     @url
 

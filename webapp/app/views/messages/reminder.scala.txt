@@ -30,7 +30,7 @@
 @(user: UserHeader, url: String)
 
 @* Ongelezen berichten *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Je het nog ongelezen berichten. Gebruik onderstaande link om
 in te loggen op de webapplicatie van Dégage:

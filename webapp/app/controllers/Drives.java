@@ -662,7 +662,7 @@ public class Drives extends Controller {
                 CarRide ride = dao.getCarRide(reservationId);
                 if (ride == null) {
                     boolean damaged = data.damaged;
-                    context.getCarRideDAO().createCarRide(reservation, data.startKm, data.endKm, damaged);
+                    dao.createCarRide(reservation, data.startKm, data.endKm, damaged);
                     if (damaged) {
                         context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
                     }
@@ -682,7 +682,10 @@ public class Drives extends Controller {
                     // register and send mail to owner
                     rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
                     owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
-                    Notifier.sendReservationDetailsProvidedMail(owner, reservation);
+                    if (ride == null) {
+                        ride = dao.getCarRide(reservationId);
+                    }
+                    Notifier.sendReservationDetailsProvidedMail(owner, reservation, ride);
                 }
 
                 // add first refuel, if present

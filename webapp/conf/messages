@@ -36,20 +36,20 @@ error.email=Ongeldig e-mailadres
 subject.passwordReset=Wachtwoord opnieuw instellen
 subject.verification=Aanvraag toegang webapplicatie
 subject.infosessionEnrolled=Bevestiging infosessie autodelen
-subject.reservationApprove=Aanvraag reservatie
-subject.reservationApproved=Reservatie goedgekeurd
-subject.reservationRejected=Reservatie geweigerd
+subject.reservationRequest=Aanvraag reservatie {0} voor {1}
+subject.reservationApproved=Reservatie {0} goedgekeurd voor {1}
+subject.reservationRejected=Reservatie {0} geweigerd
 subject.membershipApproved=Bevestiging lidmaatschap
 subject.membershipRejected=Lidmaatschap geweigerd
 subject.costApproved=Kost goedgekeurd
 subject.costRejected=Kost niet goedgekeurd
-subject.refuelApproved=Tankbeurt goedgekeurd
-subject.refuelRejected=Tankbeurt niet goedgekeurd
+subject.refuelApproved=Tankbeurt {0} goedgekeurd. Rit van {1}
+subject.refuelRejected=Tankbeurt {0} niet goedgekeurd. Rit van {1}
 subject.reminder=U hebt ongelezen berichten
-subject.refuelRequest=Nieuwe tankbeurt
+subject.refuelRequest=Nieuwe tankbeurt voor {0}
 subject.costRequest=Nieuwe autokost
 subject.managerAssigned=Contract ondertekenen
-subject.detailsProvided=Nieuwe kilometerstanden
+subject.detailsProvided=Nieuwe kilometerstanden voor {0}
 
 
 

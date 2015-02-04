@@ -30,7 +30,7 @@
 @(user: UserHeader, carName: String, costDescription: String, amount: String, date: String)
 
 @* Kost goedgekeurd *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Onderstaande autokost werd goedgekeurd door een beheerder:
 

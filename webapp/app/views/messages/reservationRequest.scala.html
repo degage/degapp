@@ -27,12 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, from: String, until: String, url: String, comment: String)
+@(user: UserHeader, driver: UserHeader, carName: String, from: String, until: String, url: String, comment: String)
 
 @* Aanvraag reservatie *@
-<p>Beste @user.getFirstName @user.getLastName,</p>
-<p>Bestuurder <b>@driver.getFirstName @driver.getLastName</b>
-wenst uw auto te reserveren voor de volgende periode:</p>
+<p>Beste @user.getFirstName,</p>
+<p>Bestuurder <b>@driver</b>
+wenst @carName te reserveren voor de volgende periode:</p>
 <ul><li>@from — @until.</li></ul>
 @if(comment != null && !comment.trim.isEmpty){
 <p>De aanvrager vermeldt hierbij het volgende:</p>
@@ -40,9 +40,8 @@ wenst uw auto te reserveren voor de volgende periode:</p>
 @comment
 <hr />
 }
-<p>Gelieve de reservatie zo snel mogelijk goed te keuren. Klik op
-onderstaande link om naar de betreffende pagina te gaan
-in de webapplicatie.</p>
+<p>Gelieve de reservatie zo snel mogelijk goed te keuren. Klik hiervoor op
+onderstaande link.</p>
 <pre>
     <a href="@url">@url</a>
 </pre>

@@ -30,7 +30,7 @@
 @(user: UserHeader, date: String, address: String)
 
 @* Bevestiging infosessie autodelen *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Je hebt je ingeschreven voor een infosessie op
 @date.

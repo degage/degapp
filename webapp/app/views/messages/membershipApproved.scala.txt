@@ -30,7 +30,7 @@
 @(user: UserHeader, comment: String)
 
 @* Lidmaatschap bevestigd *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Hartelijk geluk gewenst! Je bent zojuist volwaardig lid geworden van Dégage!
 

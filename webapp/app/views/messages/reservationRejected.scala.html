@@ -27,11 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, from: String, until: String, comment: String)
+@(user: UserHeader, carName: String, from: String, until: String, comment: String)
 
 @* Reservatie geweigerd *@
-<p>Beste @user.getFirstName @user.getLastName,</p>
-<p>Uw reservatie voor de volgende periode is helaas <b>geweigerd</b>:</p>
+<p>Beste @user.getFirstName,</p>
+<p>Je reservatie voor een rit met auto @carName voor de volgende periode is helaas <b>geweigerd</b>:</p>
 <ul><li>@from — @until.</li></ul>
 <p>De eigenaar heeft hierbij de volgende opmerkingen:</p>
 <hr />

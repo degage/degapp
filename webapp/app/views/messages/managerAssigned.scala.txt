@@ -30,7 +30,7 @@
 @(user: UserHeader, admin: UserHeader, deposit: Int, initial: Int)
 
 @* Contract tekenen *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 @admin.getFirstName @admin.getLastName werd je toegewezen als
 contractverantwoordelijke.

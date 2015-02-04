@@ -27,13 +27,13 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, from: String, until: String, url: String, comment: String)
+@(user: UserHeader, driver: UserHeader, carName: String, from: String, until: String, url: String, comment: String)
 
 @* Aanvraag reservatie *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Bestuurder @driver.getFirstName @driver.getLastName
-wenst uw auto te reserveren voor de volgende periode:
+wenst @carName te reserveren voor de volgende periode:
 
     @from - @until.
 @if(comment != null && !comment.trim.isEmpty){
@@ -43,8 +43,7 @@ De aanvrager vermeldt hierbij het volgende:
 --------------------------------------------------------------
 }
 Gelieve de reservatie zo snel mogelijk goed te keuren. Gebruik
-onderstaande link om naar de betreffende pagina te gaan
-in de webapplicatie.
+hiervoor onderstaande link.
 
     @url
 

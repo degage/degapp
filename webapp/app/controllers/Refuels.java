@@ -264,6 +264,7 @@ public class Refuels extends Controller {
         if (!isAdmin) {
             Notifier.sendRefuelRequest(
                     owner,
+                    reservation,
                     refuelId,
                     reservation.getCar(),
                     eurocents

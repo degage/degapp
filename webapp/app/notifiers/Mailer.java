@@ -77,10 +77,16 @@ public class Mailer {
     /**
      * Sends mails with the given bodies. Adds signatures.
      */
-    public static void sendMail (String to, String subjectKey, Txt text, Html html) {
-        sendMail(to, Messages.get("subject." + subjectKey),
+    public static void sendMailWithSubjectKey(String to, String subjectKey, Txt text, Html html) {
+        sendMail (to, Messages.get("subject." + subjectKey), text, html);
+    }
+
+    public static void sendMail (String to, String subject, Txt text, Html html) {
+        sendMail(to, subject,
                 text.body().trim() + views.txt.messages.signature.render().body().trim(),
                 html.body().trim() + views.html.messages.signature.render().body().trim()
         );
+
     }
+
 }

@@ -32,6 +32,7 @@ package notifiers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
+import com.google.common.base.Strings;
 import controllers.Utils;
 import controllers.routes;
 import data.EurocentAmount;
@@ -43,7 +44,7 @@ import play.twirl.api.Html;
 import play.twirl.api.Txt;
 import providers.DataProvider;
 
-import static notifiers.Mailer.sendMail;
+import java.text.MessageFormat;
 
 
 /**
@@ -74,19 +75,24 @@ public class Notifier extends Mailer {
         createNotification(context.getNotificationDAO(), user, Messages.get("subject." + subjectKey), mail.body().trim());
     }
 
-    private static void createNotificationAndSend(UserHeader user, String subjectKey, Txt text, Html html) {
-        createNotification(DataAccess.getInjectedContext(), user, subjectKey, html);
-        sendMail(user.getEmail(), subjectKey, text, html);
+    private static void createNotificationAndSend(UserHeader user, String subjectKey,
+                                                  Txt text, Html html, Object... args) {
+        createNotificationAndSend(DataAccess.getInjectedContext(), user, subjectKey, text, html, args);
     }
 
-    private static void createNotificationAndSend(DataAccessContext context, UserHeader user, String subjectKey, Txt text, Html html) {
-        createNotification(context, user, subjectKey, html);
-        sendMail(user.getEmail(), subjectKey, text, html);
+    private static void createNotificationAndSend(DataAccessContext context, UserHeader user, String subjectKey,
+                                                  Txt text, Html html, Object... args) {
+        String subject = Messages.get("subject." + subjectKey);
+        if (args.length > 0) {
+            subject = MessageFormat.format(subject, args);
+        }
+        createNotification(context.getNotificationDAO(), user, subject, html.body().trim());
+        sendMail(user.getEmail(), subject, text, html);
     }
 
     public static void sendVerificationMail(String email, String verificationUrl) {
         String url = toFullURL(routes.Login.registerVerification(verificationUrl));
-        sendMail(email, "verification",
+        sendMailWithSubjectKey(email, "verification",
                 views.txt.messages.verification.render(url),
                 views.html.messages.verification.render(url)
         );
@@ -133,20 +139,28 @@ public class Notifier extends Mailer {
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+
         createNotificationAndSend(user, "refuelApproved",
-                views.txt.messages.refuelApproved.render(user, name, amount, newRemarks),
-                views.html.messages.refuelApproved.render(user, name, amount, newRemarks)
+                views.txt.messages.refuelApproved.render(user, name, amount, newRemarks, from, until),
+                views.html.messages.refuelApproved.render(user, name, amount, newRemarks, from, until),
+                name, from
         );
     }
 
     public static void sendRefuelRejected(Refuel refuel, String newRemarks) {
+        // TODO: combine with above to reduce code duplication
         Reservation reservation = refuel.getCarRide().getReservation();
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
         createNotificationAndSend(user, "refuelRejected",
-                views.txt.messages.refuelRejected.render(user, name, amount, newRemarks),
-                views.html.messages.refuelRejected.render(user, name, amount,newRemarks)
+                views.txt.messages.refuelRejected.render(user, name, amount, newRemarks, from, until),
+                views.html.messages.refuelRejected.render(user, name, amount,newRemarks, from, until),
+                name, from
         );
     }
 
@@ -165,14 +179,18 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendRefuelRequest(UserHeader owner, int refuelId, Car car, int eurocents) {
+    public static void sendRefuelRequest(UserHeader owner, Reservation reservation, int refuelId, Car car, int eurocents) {
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
         String carName = car.getName();
         String amount = EurocentAmount.toString(eurocents) + " euro";
         String url = toFullURL(routes.Refuels.approveOrReject(refuelId));
+        UserHeader driver = reservation.getUser();
         createNotificationAndSend(
                 owner, "refuelRequest",
-                views.txt.messages.refuelRequest.render(owner,carName,amount,url),
-                views.html.messages.refuelRequest.render(owner,carName,amount,url)
+                views.txt.messages.refuelRequest.render(owner,driver,carName,amount,url,from,until),
+                views.html.messages.refuelRequest.render(owner,driver,carName,amount,url,from,until),
+                carName
         );
     }
 
@@ -187,52 +205,73 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation) {
-        String url = toFullURL(routes.Drives.details(reservation.getId()));
+    public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation, String carName) {
+        String url = toFullURL(routes.Drives.approveOrReject(reservation.getId()));
         UserHeader driver = reservation.getUser();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         createNotificationAndSend (
-                owner, "reservationApprove",
-                views.txt.messages.reservationApprove.render(
-                        owner, driver, from,  until, url, reservation.getMessage()),
-                views.html.messages.reservationApprove.render(
-                        owner, driver, from,  until, url, reservation.getMessage())
+                owner, "reservationRequest",
+                views.txt.messages.reservationRequest.render(
+                        owner, driver, carName, from,  until, url, reservation.getMessage()),
+                views.html.messages.reservationRequest.render(
+                        owner, driver, carName, from,  until, url, reservation.getMessage()),
+                carName, from
         );
     }
 
-    public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation reservation) {
+    public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation reservation, CarRide ride) {
         UserHeader driver = reservation.getUser();
         String url = toFullURL(routes.Drives.details(reservation.getId()));
         String carName = reservation.getCar().getName();
+        int start = ride.getStartKm();
+        int end = ride.getEndKm();
         createNotificationAndSend(user, "detailsProvided",
-                views.txt.messages.detailsProvided.render(user, driver, carName, url),
-                views.html.messages.detailsProvided.render(user, driver, carName, url)
+                views.txt.messages.detailsProvided.render(user, driver, carName, url, start, end),
+                views.html.messages.detailsProvided.render(user, driver, carName, url, start, end),
+                carName
         );
     }
 
     public static void sendReservationApprovedByOwnerMail(DataAccessContext context, String remarks, Reservation reservation) {
         // note: needs extended reservation
         UserHeader user = reservation.getUser();
-        String carAddress = reservation.getCar().getLocation().toString();
+        Car car = reservation.getCar();
+        String carAddress = car.getLocation().toString();
+        String carName = car.getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         String url = toFullURL(routes.Drives.details(reservation.getId()));
+        UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
+
+        String contactInfo = car.getEmail();
+        if (!Strings.isNullOrEmpty(owner.getCellPhone())) {
+            contactInfo += " - ";
+            contactInfo += owner.getCellPhone();
+        }
+        if (!Strings.isNullOrEmpty(owner.getPhone())) {
+            contactInfo += " - ";
+            contactInfo += owner.getPhone();
+        }
+
         createNotificationAndSend(
                 context, user, "reservationApproved",
-                views.txt.messages.reservationApproved.render(user, from, until, carAddress, url, remarks),
-                views.html.messages.reservationApproved.render(user, from, until, carAddress, url, remarks)
+                views.txt.messages.reservationApproved.render(user, from, until, carName, carAddress, url, remarks, contactInfo),
+                views.html.messages.reservationApproved.render(user, from, until, carName, carAddress, url, remarks, contactInfo),
+                carName, from
         );
     }
     // to be used with injected context
     public static void sendReservationRefusedByOwnerMail(String reason, Reservation reservation) {
         UserHeader driver = reservation.getUser();
+        String carName = reservation.getCar().getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         createNotificationAndSend(
                 driver, "reservationRejected",
-                views.txt.messages.reservationRejected.render(driver, from, until, reason),
-                views.html.messages.reservationRejected.render(driver, from, until, reason)
+                views.txt.messages.reservationRejected.render(driver, carName, from, until, reason),
+                views.html.messages.reservationRejected.render(driver, carName, from, until, reason),
+                carName
         );
     }
 
@@ -246,7 +285,7 @@ public class Notifier extends Mailer {
 
     public static void sendPasswordResetMail(UserHeader user, String verificationUrl) {
         String url = toFullURL(routes.Login.resetPassword(verificationUrl));
-        sendMail( user.getEmail(), "passwordReset",
+        sendMailWithSubjectKey(user.getEmail(), "passwordReset",
                 views.txt.messages.passwordReset.render(user, url),
                 views.html.messages.passwordReset.render(user, url)
         );
@@ -255,7 +294,7 @@ public class Notifier extends Mailer {
     public static void sendReminderMail(DataAccessContext context, UserHeader user) {
         context.getSchedulerDAO().setReminded(user.getId());
         String url = toFullURL(routes.Application.index());
-        sendMail(user.getEmail(), "reminder",
+        sendMailWithSubjectKey(user.getEmail(), "reminder",
                 views.txt.messages.reminder.render(user, url),
                 views.html.messages.reminder.render(user, url)
         );

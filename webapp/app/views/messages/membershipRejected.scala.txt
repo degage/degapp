@@ -30,7 +30,7 @@
 @(user: UserHeader, comment: String)
 
 @* Lidmaatschap geweigerd *@
-Beste @user.getFirstName @user.getLastName,
+Beste @user.getFirstName,
 
 Je aanvraag tot lidmaatschap van Dégage! werd helaas geweigerd.
 De contractverantwoordelijke vermeldt hierbij het volgende:
