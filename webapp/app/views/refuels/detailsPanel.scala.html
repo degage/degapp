@@ -57,8 +57,10 @@
             <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
             <dt>Periode</dt>
             <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
-            <dt>Kilometerstanden</dt>
-            <dd>@driveInfo.getStartKm — @driveInfo.getEndKm</dd>
+            @if(driveInfo != null){  @* TODO: should never be null *@
+                <dt>Kilometerstanden</dt>
+                <dd>@driveInfo.getStartKm — @driveInfo.getEndKm</dd>
+            }
         </dl>
     </div>
     @if(refuel.getStatus==RefuelStatus.REFUSED){
