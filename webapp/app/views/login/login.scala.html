@@ -36,10 +36,20 @@
         @std.textField(form("email"), "E-mailadres")
         @std.passwordField(form("password"), "Wachtwoord")
         @std.submitButton("Inloggen")
-        <div class="col-xs-12 form-group">
+        <div class="col-xs-12">
             <p>
             <a href='@routes.Login.resetPasswordRequest'>Wachtwoord vergeten?</a> |
             <a href='@routes.Login.requestRegistration'>Account aanvragen</a>
+            </p>
+        </div>
+        <div class="col-xs-12 alert alert-info">
+            <p>
+                <b>Opgelet!</b> Het reservatieprogramma is volledig vernieuwd.</p>
+            <p>Wie een login had op de vorige kalender dient de eerste keer een nieuw
+                wachtwoord aan te maken via
+                '<a href='@routes.Login.resetPasswordRequest'>Wachtwoord vergeten?</a>'.
+                Kandidaatleden kunnen zich inschrijven voor een infosessie via
+            '<a href='@routes.Login.requestRegistration'>Account aanvragen</a>'.
             </p>
         </div>
     }
