@@ -53,7 +53,8 @@ public class ScheduledJob extends RunnableInContext {
         EXECUTORS = new EnumMap<>(JobType.class);
         EXECUTORS.put(JobType.IS_REMINDER, new InfoSessionReminderJob());
         EXECUTORS.put(JobType.REPORT, new ReportGenerationJob());
-        EXECUTORS.put(JobType.RESERVE_ACCEPT, new ReservationAutoAcceptJob());
+        // TODO: reintroduce statement below, or similar
+        // EXECUTORS.put(JobType.RESERVE_ACCEPT, new ReservationAutoAcceptJob());
     }
 
     private Job job;

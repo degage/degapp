@@ -500,11 +500,13 @@ public class Drives extends Controller {
                 JobDAO jdao = context.getJobDAO();
                 // TODO: do the following in a single call
                 jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId); //remove the old job
+                /* TODO: reintroduce statement below, or similar
                 jdao.createJob(
                         JobType.RESERVE_ACCEPT,
                         reservationId,
                         Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
                 );
+                */
             }
             return redirect(routes.Drives.details(reservationId));
         } else {

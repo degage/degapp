@@ -196,11 +196,12 @@ public class Reserve extends Controller {
             // Reservations by the owner were accepted automatically
 
             // Schedule the auto accept
+                /* TODO: reintroduce statement below, or similar
             context.getJobDAO().createJob(
                     JobType.RESERVE_ACCEPT, reservation.getId(),
                     Instant.now().plusSeconds(60*Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
             );
-
+                */
             // note: user contained in this record was null
             // TODO: avoid having to retrieve the whole record
             Reservation res = rdao.getReservation(reservation.getId());
