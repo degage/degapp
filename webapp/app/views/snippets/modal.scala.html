@@ -1,4 +1,4 @@
-@* carinfomodal.scala.html
+@* modal.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,25 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(car: Car)
+@(title: String, large: Boolean = true)(body: => Html)(footer: => Html)
 
-@* TODO: refactor duplicate code with modals *@
+<div id="detailsModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog @if(large){modal-lg} else {modal-sm}">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title">@title</h4>
+            </div>
+            <div id="modalBody" class="modal-body">@body</div>
+            <div class="modal-footer">@footer
+            </div>
+        </div>
+    <div>
+</div>
 
-@modal(car.getName){
-<dl class="dl-horizontal">
-    <dt>Standplaats</dt>
-    <dd>@car.getLocation</dd>
-    <dt>Merk / type</dt>
-    <dd>@car.getBrand / @car.getType
-        @if(car.isGps){ <span class="label label-default">gps</span> }
-        @if(car.isHook){ <span class="label label-default">trekhaak</span> }
-        @if(!car.isManual){ <span class="label label-default">automaat</span> }
-    </dd>
-    <dt>Brandstof</dt>
-    <dd>@car.getFuel</dd>
-    <dt>Zitplaatsen / deuren</dt>
-    <dd>@car.getSeats / @car.getDoors</dd>
-</dl>
-}{
-<button type="button" class="btn btn-default" data-dismiss="modal">Sluiten</button>
-}
