@@ -298,7 +298,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     public void makeUserFull (int userId) {
         try {
-            int yearPar = (Year.now().getValue() - 2000) * 1000;
+            int yearPar = (Year.now().getValue() - 2000) * 10000;
 
             PreparedStatement ps = makeUserFullStatement.value();
             ps.setInt(1, yearPar);
