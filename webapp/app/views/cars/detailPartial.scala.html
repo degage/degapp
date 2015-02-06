@@ -92,7 +92,7 @@
                         <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
                         <strong>Manueel: </strong> @if(car.isManual) { ja } else { nee } <br>
                         <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
-                        <strong>Trekhaak aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
+                        <strong>Trekhaak aanwezig: </strong> @if(car.isHook) { ja } else { nee } <br>
                         <strong>Brandstof: </strong>  @{car.getFuel } <br>
                         <strong>Commentaar: </strong> <br> @car.getComments
                     </div>
