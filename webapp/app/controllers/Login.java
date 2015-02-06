@@ -43,6 +43,7 @@ import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
+import providers.UserProvider;
 import views.html.login.*;
 
 import java.util.Arrays;
@@ -302,8 +303,11 @@ public class Login extends Controller {
      * @return Redirect to index page
      */
     public static Result logout() {
-        DataProvider.getUserProvider().invalidateUser(CurrentUser.getId());
-        CurrentUser.clear();
+        Integer id = CurrentUser.getId();
+        if (id != null) { // prevents error with (accidental) double logout
+            DataProvider.getUserProvider().invalidateUser(id);
+            CurrentUser.clear();
+        }
         return redirect(routes.Application.index());
     }
 
