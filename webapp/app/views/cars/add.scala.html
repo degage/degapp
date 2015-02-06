@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Cars.CarModel])
+@(form: Form[Cars.CarModelExtended])
 @* TODO: a lot of code in common with edit *@
 
 @scripts = {
@@ -48,6 +48,7 @@
                         <div class="form-group col-md-6">
                                 @helper.checkbox(form("active"), '_label -> "Actief")
                         </div>
+                        @* TODO: Use a user picker that only shows people with CAR_OWNER status *@
                         @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
                             @std.userpicker(form("userId"), form("userIdAsString"), "Eigenaar", css="col-md-12")
                         } else {

@@ -66,13 +66,7 @@ import java.util.List;
  */
 public class Cars extends Controller {
 
-    // TODO: extend form UserPickerData
     public static class CarModel {
-
-        public Integer userId;
-
-        @Constraints.Required
-        public String userIdAsString;
 
         @Constraints.Required
         public String name;
@@ -114,9 +108,6 @@ public class Cars extends Controller {
             if (car == null) {
                 return;
             }
-
-            userId = car.getOwner().getId();
-            userIdAsString = car.getOwner().getFullName();
 
             name = car.getName();
             brand = car.getBrand();
@@ -162,10 +153,7 @@ public class Cars extends Controller {
         public String validate() {
             /* TODO: dit moeten Field Errors worden, en niet één global error */
             String error = "";
-            if (userId == null || userId == 0) {
-                error += "Geef een eigenaar op. ";
-            }
-            if (Strings.isNullOrEmpty(address.street)) {
+           if (Strings.isNullOrEmpty(address.street)) {
                 error += "Geef het adres op.";
             }
             if (name.length() <= 0) {
@@ -188,6 +176,36 @@ public class Cars extends Controller {
             }
         }
     }
+
+    // TODO: extend form UserPickerData
+    public static class CarModelExtended extends CarModel {
+        public Integer userId;
+
+        @Constraints.Required
+        public String userIdAsString;
+
+        public void populate(Car car) {
+            if (car == null) {
+                return;
+            }
+            super.populate(car);
+            userId = car.getOwner().getId();
+            userIdAsString = car.getOwner().getFullName();
+        }
+
+        public String validate() {
+            String error = Strings.nullToEmpty(super.validate());
+            if (userId == null || userId == 0) {
+                error += "Geef een eigenaar op. ";
+            }
+            if ("".equals(error)) {
+                return null;
+            } else {
+                return error;
+            }
+        }
+    }
+
 
     /**
      * @return The cars index-page with all cars (only available to car admin)
@@ -255,10 +273,10 @@ public class Cars extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result newCar() {
-        CarModel model = new CarModel();
+        CarModelExtended model = new CarModelExtended();
         model.userId = CurrentUser.getId();
         model.userIdAsString = CurrentUser.getFullName();
-        return ok(views.html.cars.add.render(Form.form(CarModel.class).fill(model)));
+        return ok(views.html.cars.add.render(Form.form(CarModelExtended.class).fill(model)));
     }
 
     /**
@@ -269,13 +287,13 @@ public class Cars extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result addNewCar() {
-        Form<CarModel> carForm = Form.form(CarModel.class).bindFromRequest();
+        Form<CarModelExtended> carForm = Form.form(CarModelExtended.class).bindFromRequest();
         if (carForm.hasErrors()) {
             return badRequest(views.html.cars.add.render(carForm));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             CarDAO dao = context.getCarDAO();
-            CarModel model = carForm.get();
+            CarModelExtended model = carForm.get();
 
             UserHeader owner;
             if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
@@ -396,8 +414,6 @@ public class Cars extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         CarDAO dao = context.getCarDAO();
         Car car = dao.getCar(carId);
-        // TODO: only needed here: id, owner id and file numbers for photo's
-        // but first: remove all 'badrequests' and replace by redirects
 
         Form<CarModel> editForm = Form.form(CarModel.class).bindFromRequest();
         if (editForm.hasErrors()) {
@@ -494,11 +510,6 @@ public class Cars extends Controller {
         car.setActive(model.active);
         if (pictureId != 0) {
             car.setPhotoId(pictureId);
-        }
-
-        if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
-            // User is permitted to add cars for other users
-            car.setOwner(context.getUserDAO().getUserHeader(model.userId));
         }
 
         dao.updateCar(car);
