@@ -30,7 +30,11 @@
 import java.io.File
 
 import com.typesafe.config.ConfigFactory
+import play.api.mvc.Results.MovedPermanently
+import play.api.mvc.{RequestHeader, Result}
 import play.api.{Application, Configuration, GlobalSettings, Mode}
+
+import scala.concurrent.Future
 
 /**
  * Adapts the global settings object to our needs. Most of the functionality is
@@ -79,6 +83,18 @@ object Global extends GlobalSettings {
       case Mode.Test =>
         JavaGlobal.onStopTest()
     }
+  }
+
+  /**
+   * Remove trailing slashes in urls.
+   *
+   * Adapted from https://github.com/mariussoutier/play-trailing-slash/blob/master/app/TrailingSlash.scala
+   */
+  override def onHandlerNotFound(request: RequestHeader): Future[Result] = {
+    if (request.path.endsWith("/"))
+      Future.successful(MovedPermanently(request.path.dropRight(1)))
+    else
+      super.onHandlerNotFound(request)
   }
 
 }
