@@ -584,7 +584,9 @@ public class Profile extends Controller {
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result makeFullUser(int userId) {
-        DataAccess.getInjectedContext().getUserDAO().makeUserFull(userId);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        context.getUserDAO().makeUserFull(userId);
+        context.getUserRoleDAO().addUserRole(userId, UserRole.CAR_USER);
         return redirect(routes.Profile.editUserStatus(userId));
     }
 

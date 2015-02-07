@@ -91,7 +91,8 @@ class JDBCUserRoleDAO extends AbstractDAO implements UserRoleDAO {
     }
 
     private LazyStatement insertUserRolesStatement = new LazyStatement(
-            "INSERT IGNORE INTO userroles(userrole_userid, userrole_role) VALUES (?,?)"
+            "INSERT INTO userroles(userrole_userid, userrole_role) VALUES (?,?)" +
+                    "ON DUPLICATE KEY UPDATE userrole_role=userrole_role" // = do nothing
     );
 
     @Override

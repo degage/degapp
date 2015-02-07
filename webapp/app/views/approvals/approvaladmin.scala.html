@@ -47,8 +47,7 @@
                 @formErrors(form)
                 @std.selectEnum(classOf[Approvals.ApprovalAdminData.Action],form("status"),"Actie")
                 <div class="form-group col-xs-12">
-                    @std.checkboxInline(form("user"),"Autolener")
-                    @std.checkboxInline(form("sharer"),"Eigenaar")
+                    @std.checkboxInline(form("sharer"),"Wordt eigenaar van een deelauto")
                 </div>
                 @std.textArea(form("message"),"Opmerkingen", 4)
                 @std.submitButton("Verzenden")

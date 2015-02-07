@@ -198,16 +198,18 @@ public class Approvals extends Controller {
             flash("danger", "Gelieve eerst een contractverantwoordelijke op te geven.");
             return redirect(routes.Approvals.approvalAdmin(approvalId));
         } else {
-            ApprovalAdminData model = new ApprovalAdminData();
-            model.message = ap.getAdminMessage();
-            model.status = (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING
-                    ? ApprovalAdminData.Action.ACCEPT : ApprovalAdminData.Action.DENY).name();
+            ApprovalAdminData data = new ApprovalAdminData();
+            data.message = ap.getAdminMessage();
+            if (ap.getStatus() == Approval.ApprovalStatus.ACCEPTED || ap.getStatus() == Approval.ApprovalStatus.PENDING) {
+                data.status = ApprovalAdminData.Action.ACCEPT.name();
+            } else {
+                data.status = ApprovalAdminData.Action.DENY.name();
+            }
             Set<UserRole> userRoles = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(ap.getUser().getId());
 
-            model.sharer = userRoles.contains(UserRole.CAR_OWNER);
-            model.user = userRoles.contains(UserRole.CAR_USER);
+            data.owner = userRoles.contains(UserRole.CAR_OWNER);
 
-            return approvalForm(ap, context, Form.form(ApprovalAdminData.class).fill(model), false);
+            return approvalForm(ap, context, Form.form(ApprovalAdminData.class).fill(data), false);
         }
 
     }
@@ -284,13 +286,13 @@ public class Approvals extends Controller {
             return approvalForm(ap, context, form, true);
         }
 
-        ApprovalAdminData m = form.get();
-        ApprovalAdminData.Action action = m.getAction();
+        ApprovalAdminData data = form.get();
+        ApprovalAdminData.Action action = data.getAction();
 
 
         UserDAO udao = context.getUserDAO();
         ap.setAdmin(udao.getUserHeader(CurrentUser.getId()));
-        ap.setAdminMessage(m.message);
+        ap.setAdminMessage(data.message);
 
         if (action == ApprovalAdminData.Action.ACCEPT) {
 
@@ -302,14 +304,11 @@ public class Approvals extends Controller {
 
             // Add the new user roles
             UserRoleDAO roleDao = context.getUserRoleDAO();
-            // TODO: always at least sharer
-            if (m.sharer) {
+            if (data.owner) {
                 roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
             }
-            if (m.user) {
-                roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER);
-            }
-            Notifier.sendMembershipApproved(ap.getUser(), m.message);
+            roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER); // always
+            Notifier.sendMembershipApproved(ap.getUser(), data.message);
             flash("success", "De gebruikersrechten werden succesvol aangepast.");
 
             return redirect(routes.Approvals.pendingApprovalList());
@@ -317,7 +316,7 @@ public class Approvals extends Controller {
             //TODO Warning, if status was not pending, possibly have to remove user roles
             ap.setStatus(Approval.ApprovalStatus.DENIED);
             dao.updateApproval(ap);
-            Notifier.sendMembershipRejected(ap.getUser(), m.message);
+            Notifier.sendMembershipRejected(ap.getUser(), data.message);
             flash("success", "De aanvraag werd afgekeurd.");
 
             return redirect(routes.Approvals.pendingApprovalList());
@@ -331,8 +330,7 @@ public class Approvals extends Controller {
     public static class ApprovalAdminData {
         public String message;
         public String status;
-        public boolean sharer;
-        public boolean user;
+        public boolean owner;
 
         public enum Action {
             ACCEPT("Aanvaarden"),
@@ -352,14 +350,6 @@ public class Approvals extends Controller {
 
         public Action getAction() {
             return Enum.valueOf(Action.class, status);
-        }
-
-        public String validate() {
-            if (getAction() == Action.ACCEPT && !sharer && !user) { //if the user is accepted, but no extra rules specified
-                return "Gelieve aan te geven welke rechten deze gebruiker toegewezen krijgt.";
-            } else {
-                return null;
-            }
         }
     }
 }
