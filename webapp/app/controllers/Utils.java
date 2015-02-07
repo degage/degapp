@@ -84,6 +84,11 @@ public final class Utils {
         return localDate == null ? null : LOCALIZED_LONG_DATE_FORMATTER.format(localDate);
     }
 
+    public static String toLocalizedDateStringWithDayOfWeek(LocalDate localDate) {
+        return localDate == null ? null : LOCALIZED_DATE_FORMATTER.format(localDate);
+    }
+
+
     private static DateTimeFormatter LOCALIZED_WEEK_DAY_FORMATTER =
             DateTimeFormatter.ofPattern("EE dd/MM", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 
