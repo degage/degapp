@@ -91,7 +91,7 @@ public enum UserRole {
      */
     public static Set<UserRole> fromString(String rolesString) {
         if (rolesString == null) {
-            return null;
+            return EnumSet.noneOf(UserRole.class);
         } else {
             EnumSet<UserRole> set = EnumSet.noneOf(UserRole.class);
             for (int i = 0; i < rolesString.length(); i++) {

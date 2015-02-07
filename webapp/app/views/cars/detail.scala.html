@@ -35,7 +35,9 @@
     @js.datetimepicker()
     @js.usesajax()
     @js.userpicker()
+    @* Temporary disabled
     @js.pagination("Cars.showCarCostsPage")
+    *@
     <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
 
     <!-- For maps: -->
@@ -60,7 +62,9 @@
     <script>
         userpickerRoute = "@routes.UserPicker.getList()"
     </script>
+    @* Temporary disabled
     <script src='@routes.Assets.at("javascripts/updateCarPrivileges.js")'></script>
+    *@
 }
 @stylesheets = {
     <link rel="stylesheet" href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")'>
@@ -88,7 +92,7 @@
 
                 @if((CurrentUser is car.getOwner.getId) || (CurrentUser hasRole UserRole.CAR_ADMIN)) {
 
-                @* Temporarily disabled
+                @* Temporarily disabled. Do not forget to reenable the Java Script above
                     <!-- Geprivilegeerden -->
                     @detailPrivileged(car.getId,privilegedUsers)
                     <!-- Autogebonden kosten -->
