@@ -98,7 +98,7 @@ CREATE TABLE `users` (
 	`user_image_id` INT,
 	`user_degage_id` INT,
 	`user_date_joined` DATE,
-	`user_deposit` INT DEFAULT -1,
+	`user_deposit` INT,
 	`user_last_notified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`user_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	`user_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
