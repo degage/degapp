@@ -279,6 +279,7 @@ function loadPage(page, pageSize, asc, orderBy, search) {
         .fail( function() {
             // TODO: make clearer
             $("#resultsTable").html("Er ging iets mis...");
+            pageLoaded = true;
         });
 }
 
