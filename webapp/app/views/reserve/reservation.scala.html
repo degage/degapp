@@ -48,7 +48,7 @@
             @helper.form(routes.Reserve.doReservation(car.getId)) {
                 @std.datetimepicker(form("from"), "Van:", "col-md-6", minuteStep=15)
                 @std.datetimepicker(form("until"), "Tot:", "col-md-6", minuteStep=15)
-                @std.textArea(form("message"), "Opmerkingen",3, 'maxLength -> 128)
+                @std.textArea(form("message"), "Opmerkingen",3)
                 @std.submitButton("Vraag reservatie aan")
             }
         }

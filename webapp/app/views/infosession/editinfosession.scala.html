@@ -40,7 +40,7 @@
                 @std.datetimepicker(form("time"), "Tijdstip", "col-md-4")
                 @std.numberField(form("max_enrollees"), "Maximum aantal deelnemers (0 = onbeperkt)", "col-md-4")
                 @std.selectEnum(classOf[InfoSessionType], form("type"), "Type")
-                @std.textArea(form("comments"), "Opmerkingen", 6, 'maxlength -> 512)
+                @std.textArea(form("comments"), "Opmerkingen", 6)
             </fieldset>
         }
         @panel("Adres", "fa-home"){
