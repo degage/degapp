@@ -585,12 +585,17 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
 
         appendCarFilter(builder, filter);
 
-        try (Statement stat = createStatement();
-             ResultSet rs = stat.executeQuery(builder.toString())) {
-            if (rs.next())
-                return rs.getInt("amount_of_cars");
-            else
-                return 0;
+        builder.append (SELECT_NOT_OVERLAP);
+
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setString (1, filter.getValue(FilterField.FROM));
+            ps.setString (2, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next())
+                    return rs.getInt("amount_of_cars");
+                else
+                    return 0;
+            }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
         }
