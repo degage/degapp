@@ -32,12 +32,13 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.SettingDAO;
 import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
@@ -47,7 +48,9 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 public class Settings extends Controller {
 
@@ -73,45 +76,50 @@ public class Settings extends Controller {
         }
     }
 
-    public static class ChangePasswordModel {
+    public static class ChangePasswordData {
+        @Constraints.Required
         public String oldpw;
+
+        @Constraints.Required
         public String newpw;
+
+        @Constraints.Required
         public String repeatpw;
 
-        public String validate() {
-            if (oldpw == null || oldpw.isEmpty()) {
-                return "Gelieve je oud wachtwoord op te geven.";
-            } else if (newpw == null || newpw.length() < 6) {
-                return "Je nieuw wachtwoord moet minstens 6 tekens bevatten.";
-            } else if (!newpw.equals(repeatpw)) {
-                return "Wachtwoorden komen niet overeen";
-            } else return null;
+        public List<ValidationError> validate() {
+            // TODO: password strength validation
+            if (!newpw.equals(repeatpw))
+                return Arrays.asList(new ValidationError(
+                        "repeatpw", "Beide wachtwoorden moeten gelijk zijn"
+                ));
+            else
+                return null;
         }
     }
 
     @AllowRoles({})
     @InjectContext
     public static Result changePassword() {
-        return ok(changepass.render(Form.form(ChangePasswordModel.class)));
+        return ok(changepass.render(Form.form(ChangePasswordData.class)));
     }
 
     @AllowRoles({})
     @InjectContext
     public static Result changePasswordPost() {
-        Form<ChangePasswordModel> form = Form.form(ChangePasswordModel.class).bindFromRequest();
+        Form<ChangePasswordData> form = Form.form(ChangePasswordData.class).bindFromRequest();
         if (form.hasErrors()) {
             return badRequest(changepass.render(form));
         } else {
-            ChangePasswordModel model = form.get();
+            ChangePasswordData data = form.get();
             DataAccessContext context = DataAccess.getInjectedContext();
             UserDAO dao = context.getUserDAO();
 
-            if (dao.changePassword(CurrentUser.getId(), model.oldpw, model.newpw)) {
+            if (dao.changePassword(CurrentUser.getId(), data.oldpw, data.newpw)) {
                 DataProvider.getUserProvider().invalidateUser(CurrentUser.getId());
-                flash("success", "Jouw wachtwoord werd met succes gewijzigd.");
+                flash("success", "Het wachtwoord werd met succes aangepast.");
                 return redirect(routes.Application.index());
             } else {
-                form.reject("Je oude wachtwoord is incorrect.");
+                form.reject("Het oude wachtwoord is incorrect.");
                 return badRequest(changepass.render(form));
             }
 
