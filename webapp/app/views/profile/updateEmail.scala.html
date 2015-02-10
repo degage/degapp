@@ -1,4 +1,4 @@
-@* deposit.scala.html
+@* updateEmail.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,14 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Profile.DepositData], user: User)
+@(form: Form[Login.EmailData], user: UserHeader)
 
-@stdlayout("Waarborg",extrabc=breadcrumb("Profiel", routes.Profile.index(user.getId))){
-    @panel("Gestorte waarborg", "fa-euro"){
-        @helper.form(routes.Profile.depositPost(user.getId)){
+@stdlayout("E-mailadres",extrabc=breadcrumb("Profiel", routes.Profile.index(user.getId))){
+    @panel("Nieuw e-mailadres", "fa-envelope-o"){
+        @formErrors(form)
+        @helper.form(routes.Profile.updateEmailPost(user.getId)){
             @std.static(user.getFullName, "Gebruiker",css="col-md-6 col-lg-3")
-            @std.numberField(form("amount"), "Bedrag v/d betaalde waarborg (leeg = niet betaald)", css="col-md-6 col-lg-5")
+            @std.textField(form("email"), "Nieuw e-mailadres",css="col-md-6 col-lg-4")
             @std.submitButton("Wijzigen")
         }
+        <div class="col-xs-12 alert alert-info">
+            <p><b>Opgelet!</b> Het e-mailadres van een gebruiker is tegelijkertijd de identificatie
+                waarmee een gebruiker inlogt.</p>
+        </div>
     }
 }

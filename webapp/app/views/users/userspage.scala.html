@@ -49,9 +49,6 @@
                     <td><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></td>
                     <td>
                         <div class="btn-group btn-group-xs">
-                            @if(CurrentUser.hasRole(UserRole.PROFILE_ADMIN)) {
-                                <a class="btn btn-success" href="@routes.Profile.edit(user.getId)">Wijzig</a>
-                            }
                             @if(CurrentUser.hasRole(UserRole.SUPER_USER) && user.canLogin) {
                                 <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">Impersoneer</a>
                             }

@@ -115,6 +115,8 @@ GET         /profile/status/unblock                 controllers.Profile.unblockU
 GET         /profile/status/full                    controllers.Profile.makeFullUser(userId: Int)
 GET         /profile/deposit                        controllers.Profile.deposit(userId: Int)
 POST        /profile/deposit                        controllers.Profile.depositPost(userId: Int)
+GET         /profile/email                          controllers.Profile.updateEmail(userId: Int)
+POST        /profile/email                          controllers.Profile.updateEmailPost(userId: Int)
 
 # Users
 GET         /users                                  controllers.Users.showUsers()

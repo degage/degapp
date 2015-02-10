@@ -47,9 +47,10 @@
                 <a class="btn btn-primary btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijsgegevens wijzigen</a>
                 <a class="btn btn-primary btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitsgegevens wijzigen</a>
 
-                @if(db.CurrentUser.isAdmin){
+                @if(db.CurrentUser hasRole UserRole.PROFILE_ADMIN){
                     <a class="btn btn-warning btn-sm" href="@routes.Profile.editUserStatus(user.getId)">Gebruikersstatus wijzigen</a>
                     <a class="btn btn-warning btn-sm" href="@routes.Profile.deposit(user.getId)">Waarborg</a>
+                    <a class="btn btn-warning btn-sm" href="@routes.Profile.updateEmail(user.getId)">E-mailadres aanpassen</a>
                 }
             </div>
         }

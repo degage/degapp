@@ -99,6 +99,12 @@ public interface UserDAO {
     public void updateUserDeposit(int userId, Integer deposit);
 
     /**
+     * Update the email address of a user.
+     * @return true if succeeded, false if mail address existed already
+     */
+    public boolean updateUserEmail (int userId, String email);
+
+    /**
      * Make user a full member. Creates a new degage id if the user did not have one.
      */
     public void makeUserFull (int userId);

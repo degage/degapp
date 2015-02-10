@@ -507,4 +507,23 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
+
+    public static final String UPDATE_USER_EMAIL_STATEMENT =
+            "UPDATE users SET user_email = ? WHERE user_id = ?";
+
+    @Override
+    public boolean updateUserEmail(int userId, String email) {
+        try (PreparedStatement ps = prepareStatement(UPDATE_USER_EMAIL_STATEMENT)) {
+            ps.setString(1, email);
+            ps.setInt(2,userId);
+            ps.executeUpdate();
+            return true;
+        } catch (SQLException ex) {
+            if (ex.getErrorCode() == 1062) {
+                return false;
+            } else {
+                throw new DataAccessException("Could not update user email", ex);
+            }
+        }
+    }
 }

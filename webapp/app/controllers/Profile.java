@@ -36,7 +36,9 @@ import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
-import controllers.util.*;
+import controllers.util.Addresses;
+import controllers.util.ConfigurationHelper;
+import controllers.util.FileHelper;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -605,7 +607,7 @@ public class Profile extends Controller {
         User user = DataAccess.getInjectedContext().getUserDAO().getUser(userId);
         return ok(deposit.render(
                         Form.form(DepositData.class).fill(new DepositData().populate(user.getDeposit())),
-                        user.getId())
+                        user)
         );
     }
 
@@ -613,10 +615,11 @@ public class Profile extends Controller {
     @InjectContext
     public static Result depositPost (int userId) {
         Form<DepositData> form = Form.form(DepositData.class).bindFromRequest();
+        UserDAO userDAO = DataAccess.getInjectedContext().getUserDAO();
         if (form.hasErrors()) {
-            return ok(deposit.render(form, userId));
+            return badRequest(deposit.render(form, userDAO.getUser(userId)));
         } else {
-            DataAccess.getInjectedContext().getUserDAO().updateUserDeposit(userId, form.get().amount);
+            userDAO.updateUserDeposit(userId, form.get().amount);
             return redirect(routes.Profile.index(userId));
         }
     }
@@ -699,6 +702,36 @@ public class Profile extends Controller {
             return redirect(routes.Profile.index(userId));
         } else {
             return mustBeProfileAdmin();
+        }
+    }
+
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result updateEmail (int userId) {
+        UserHeader user = DataAccess.getInjectedContext().getUserDAO().getUserHeader(userId);
+        Login.EmailData data = new Login.EmailData();
+        data.email = user.getEmail();
+        return ok(updateEmail.render(
+                        Form.form(Login.EmailData.class).fill(data), user
+        ));
+    }
+
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result updateEmailPost (int userId) {
+
+        Form<Login.EmailData> form = Form.form(Login.EmailData.class).bindFromRequest();
+        UserDAO userDAO = DataAccess.getInjectedContext().getUserDAO();
+        UserHeader user = userDAO.getUserHeader(userId);
+        if (form.hasErrors()) {
+            return badRequest(updateEmail.render(form, user));
+        } else {
+            if (userDAO.updateUserEmail(userId, form.get().email)) {
+                return redirect(routes.Profile.index(userId));
+            } else {
+                form.reject("Dit e-mailadres is al in gebruik");
+                return badRequest(updateEmail.render(form, user));
+            }
         }
     }
 }
