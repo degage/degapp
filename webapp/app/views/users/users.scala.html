@@ -29,17 +29,9 @@
 
 @stdlayout("Gebruikers", scripts=js.pagination("Users.showUsersPage")) {
     @panel("Gebruikers zoeken", "fa-search"){
-        <div class="col-xs-6 col-md-4">
-            <input id="user_firstname" class="searchTextField form-control" name="user_firstname" type="text" placeholder="Voornaam">
-        </div>
-        <div class="col-xs-6 col-md-4">
-            <input id="user_lastname" class="searchTextField form-control" name="user_lastname" type="text" placeholder="Achternaam">
-        </div>
-        <div class="col-xs-4 col-md-4">
-            <div class="btn-group btn-group">
-                <button id="searchButton" class="btn btn-success">Zoek</button>
-            </div>
-        </div>
+        @search.textField("user_firstname", "Voornaam", "col-xs-12 col-sm-6")
+        @search.textField("user_lastname", "Familienaam", "col-xs-12 col-sm-6")
+        @search.button("Zoek")
     }
 
     @resultsTablePanel("Gebruikers", "fa-users")
