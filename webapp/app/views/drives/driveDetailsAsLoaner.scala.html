@@ -43,11 +43,12 @@
                     <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
                     <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
                 }
-                case ReservationStatus.REFUSED | ReservationStatus.CANCELLED => {
+                case ReservationStatus.REFUSED | ReservationStatus.CANCELLED | ReservationStatus.CANCELLED_LATE => {
                     (Geen. De reservatie is geweigerd of geannuleerd.)
                 }
                 case ReservationStatus.REQUEST_DETAILS => {
                     <a class="btn btn-xs btn-warning" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
+                    <a class="btn btn-xs btn-danger" href="@routes.Drives.lateCancelReservation(reservation.getId)">Schrappen</a>
                 }
                 case ReservationStatus.DETAILS_PROVIDED | ReservationStatus.FINISHED => {
                     <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>

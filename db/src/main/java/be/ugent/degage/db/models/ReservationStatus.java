@@ -40,7 +40,8 @@ public enum ReservationStatus {
     CANCELLED("Aanvraag geannuleerd"),
     REQUEST_DETAILS("Wachten op ritdetails"),
     DETAILS_PROVIDED("Ritdetails ingegeven"),
-    FINISHED("Rit afgewerkt");
+    FINISHED("Rit afgewerkt"),
+    CANCELLED_LATE("Rit ging niet door");
 
     // Enum definition
     private String description;

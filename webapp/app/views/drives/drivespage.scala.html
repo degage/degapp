@@ -64,6 +64,9 @@
                         case ReservationStatus.CANCELLED => {
                             <span class="fa fa-times-circle"></span>
                         }
+                        case ReservationStatus.CANCELLED_LATE => {
+                            <span class="fa fa-warning"></span>
+                        }
                         case ReservationStatus.REQUEST_DETAILS => {
                             <span class="fa fa-question-circle"></span>
                         }

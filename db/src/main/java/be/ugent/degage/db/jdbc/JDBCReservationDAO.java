@@ -137,17 +137,28 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    private LazyStatement getUpdateReservationStatusStatement = new LazyStatement(
-            "UPDATE reservations SET reservation_status=?, reservation_message = ?  WHERE reservation_id = ?"
-    );
-
-    @Override
+   @Override
     public void updateReservationStatus(int reservationId, ReservationStatus status, String message) throws DataAccessException {
-        try {
-            PreparedStatement ps = getUpdateReservationStatusStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE reservations SET reservation_status=?, reservation_message = ?  WHERE reservation_id = ?"
+        )) {
             ps.setString(1, status.name());
             ps.setString(2, message);
             ps.setInt(3, reservationId);
+
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to update reservation", e);
+        }
+    }
+
+    @Override
+    public void  updateReservationStatus(int reservationId, ReservationStatus status) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE reservations SET reservation_status=? WHERE reservation_id = ?"
+        )) {
+            ps.setString(1, status.name());
+            ps.setInt(2, reservationId);
 
             ps.executeUpdate();
         } catch (SQLException e) {
@@ -520,7 +531,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static final String OVERLAP_CLAUSE_WIDE =
         "AND reservation_to >= ? AND reservation_from <= ? " +
-        "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' ";
+        "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED_LATE'  ";
 
     private LazyStatement listRCFIPStatement = new LazyStatement(
         "SELECT " + RESERVATION_HEADER_FIELDS +
@@ -549,7 +560,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static final String OVERLAP_CLAUSE_NARROW =
         "AND reservation_to > ? AND reservation_from < ? " +
-        "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' ";
+        "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED_LATE' ";
 
     private LazyStatement hasOverlapStatement = new LazyStatement(
         "SELECT count(*) FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE_NARROW

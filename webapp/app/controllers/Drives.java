@@ -260,10 +260,39 @@ public class Drives extends Controller {
                 return redirect(routes.Drives.index(0));
             }
         }
-        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED, null);
+        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
 
         // Unschedule the job for auto accept
         context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
+
+        return redirect(routes.Drives.details(reservationId));
+    }
+
+    /**
+     * Cancel a reservation for a ride in the past which did not actually take place
+     */
+
+    @AllowRoles({UserRole.CAR_USER,UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result lateCancelReservation(int reservationId) {
+        // TODO: lots of code in common with cancelReservation
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        ReservationHeader reservation = dao.getReservationHeader(reservationId);
+        if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
+            // extra checks when not reservation admin
+            if (CurrentUser.is(reservation.getUserId())) {
+                ReservationStatus status = reservation.getStatus();
+                if (status != ReservationStatus.DETAILS_PROVIDED) {
+                    flash("danger", "Deze (lopende) rit kan niet worden geannuleerd.");
+                    return redirect(routes.Drives.index(0));
+                }
+            } else {
+                flash("danger", "Alleen de ontlener kan een lopende rit annuleren!");
+                return redirect(routes.Drives.index(0));
+            }
+        }
+        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE);
 
         return redirect(routes.Drives.details(reservationId));
     }
@@ -312,7 +341,7 @@ public class Drives extends Controller {
             CarRideDAO dao = context.getCarRideDAO();
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             dao.approveInfo(reservationId);
-            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
             return redirect(routes.Drives.details(reservationId));
         } else {
             // not allowed
@@ -334,7 +363,7 @@ public class Drives extends Controller {
         Reservation reservation = rdao.getReservation(reservationId);
         if (isOwnerOrAdmin(reservation)) {
             dao.approveInfo(reservationId);
-            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
             flash("success", "De ritgegevens werden goedgekeurd.");
         } else {
             flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
@@ -679,10 +708,10 @@ public class Drives extends Controller {
                 UserHeader owner = null;
                 if (isAdmin) {
                     // approve immediately
-                    rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED, null);
+                    rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
                 } else {
                     // register and send mail to owner
-                    rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED, null);
+                    rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED);
                     owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
                     if (ride == null) {
                         ride = dao.getCarRide(reservationId);

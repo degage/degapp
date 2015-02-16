@@ -54,6 +54,7 @@ GET         /drive/editinfo                         controllers.Drives.editJourn
 POST        /drive/editinfo                         controllers.Drives.editJourneyInfoPost(reservationId: Int)
 GET         /drive/approve_info                     controllers.Drives.approveDriveInfo(reservationId: Int)
 GET         /drive/cancel                           controllers.Drives.cancelReservation(reservationId: Int)
+GET         /drive/cancel_late                      controllers.Drives.lateCancelReservation(reservationId: Int)
 GET         /drive/shorten                          controllers.Drives.shortenReservation(reservationId: Int)
 POST        /drive/shorten                          controllers.Drives.shortenReservationPost(reservationId: Int)
 

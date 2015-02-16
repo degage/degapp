@@ -34,7 +34,8 @@
 @if(
     status != ReservationStatus.REFUSED &&
     status != ReservationStatus.REQUEST &&
-    status != ReservationStatus.CANCELLED
+    status != ReservationStatus.CANCELLED  &&
+    status != ReservationStatus.CANCELLED_LATE
 ) {
   <dl class="dl-horizontal">
     <dt>Naam</dt> <dd>@user.getFullName</dd>
