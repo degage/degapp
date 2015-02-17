@@ -41,7 +41,15 @@
             <div class="col-md-8">
                 @panel("Woonplaats", "fa-home") {
                     @defining(user.getAddressResidence) { address =>
-                        <p class="form-control-static">@address.getZip @address.getCity (@address.getCountry)</p>
+                        <div class="col-xs-12">
+                            <p>
+                            @if(db.CurrentUser hasRole UserRole.CAR_OWNER){
+                                @address
+                            }else{
+                                @address.getZip @address.getCity (@address.getCountry)
+                            }
+                            </p>
+                        </div>
                     }
                 }
             </div>
