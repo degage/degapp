@@ -33,6 +33,7 @@
 
 @modal(car.getName){
 <dl class="dl-horizontal">
+    <dt>Eigenaar</dt><dd>@car.getOwner.toString</dd>
     <dt>Standplaats</dt>
     <dd>@car.getLocation</dd>
     <dt>Merk / type</dt>
@@ -45,6 +46,8 @@
     <dd>@car.getFuel</dd>
     <dt>Zitplaatsen / deuren</dt>
     <dd>@car.getSeats / @car.getDoors</dd>
+    <dt>Opmerkingen</dt>
+    <dd>@car.getComments</dd>
 </dl>
 }{
 <button type="button" class="btn btn-default" data-dismiss="modal">Sluiten</button>
