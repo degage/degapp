@@ -572,4 +572,12 @@ public class InfoSessions extends Controller {
                 DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(false)
         ));
     }
+
+    @InjectContext
+    public static Result showUpcomingSessionsRaw() {
+        return ok(infosessionsraw.render(
+                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(true)
+        ));
+    }
+
 }

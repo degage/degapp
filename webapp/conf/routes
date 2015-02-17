@@ -154,6 +154,8 @@ GET         /infosession/status                     controllers.InfoSessions.set
 GET         /infosession/delete                     controllers.InfoSessions.removeSession(sessionId: Int)
 POST        /infosession/adduser                    controllers.InfoSessions.addUserToSession(sessionId: Int)
 
+GET         /infosessions                           controllers.InfoSessions.showUpcomingSessionsRaw()
+
 # Approvals for membership
 GET         /approval                               controllers.Approvals.requestApproval()
 POST        /approval                               controllers.Approvals.requestApprovalPost()

@@ -34,7 +34,7 @@
         <th>Type</th>
         <th name="date" class="sortable">Tijdstip</th>
         <th>Inschrijvingen</th>
-        <th>Host</th>
+        <th>Gastvrouw / -heer</th>
         <th>Adres</th>
         <th>Acties</th>
     </tr>
@@ -56,11 +56,11 @@
         </td>
         <td>@Utils.toLocalizedString(session.getTime)</td>
         @if(session.getMaxEnrollees != 0) {
-        @if(session.getEnrolleeCount == session.getMaxEnrollees) {
-        <td><strong>Volzet</strong></td>
-        } else {
-        <td>@session.getEnrolleeCount / @session.getMaxEnrollees</td>
-        }
+            @if(session.getEnrolleeCount == session.getMaxEnrollees) {
+            <td><strong>Volzet</strong></td>
+            } else {
+            <td>@session.getEnrolleeCount / @session.getMaxEnrollees</td>
+            }
         } else {
         <td>@session.getEnrolleeCount</td>
         }
