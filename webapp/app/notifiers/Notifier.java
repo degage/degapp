@@ -43,6 +43,7 @@ import play.i18n.Messages;
 import play.twirl.api.Html;
 import play.twirl.api.Txt;
 import providers.DataProvider;
+import views.html.users.users;
 
 import java.text.MessageFormat;
 
@@ -99,9 +100,12 @@ public class Notifier extends Mailer {
     }
 
     public static void sendMembershipApproved(UserHeader user, String comment) {
+        String url = toFullURL(routes.Application.index());
+
         createNotificationAndSend (user, "membershipApproved",
-                views.txt.messages.membershipApproved.render(user, comment),
-                views.html.messages.membershipApproved.render(user, comment)
+                views.txt.messages.membershipApproved.render(user, comment, url),
+                views.html.messages.membershipApproved.render(user, comment, url),
+                user.getFirstName(), user.getLastName()
         );
     }
 

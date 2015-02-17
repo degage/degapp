@@ -27,12 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, comment: String)
+@(user: UserHeader, comment: String, url: String)
 
 @* Lidmaatschap bevestigd *@
 Beste @user.getFirstName,
 
-Hartelijk geluk gewenst! Je bent zojuist volwaardig lid geworden van Dégage!
+Hartelijk geluk gewenst. Je lidmaatschap van onze autodeelgroep werd geactiveerd.
+Je hebt nu toegang tot heel wat deelwagens.
 
+Via de kalender (@url) kan je een deelauto opzoeken
+en reserveren. Na een rit kan je kilometerstanden en tankbeurten opgeven.
+
+Vul ontbrekende gegevens in je profiel verder aan. De informatie is van
+belang voor een goede werking van onze autodeelgroep.
+@if(comment != null && !comment.trim.isEmpty){
 @comment
+}
+
+Veel succes met je eerste reservatie !
+
 

@@ -298,18 +298,8 @@ public class Approvals extends Controller {
 
             ap.setStatus(Approval.ApprovalStatus.ACCEPTED);
             dao.updateApproval(ap);
-
-            // Set contact admin
-            udao.makeUserFull(ap.getUser().getId());
-
-            // Add the new user roles
-            UserRoleDAO roleDao = context.getUserRoleDAO();
-            if (data.owner) {
-                roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_OWNER);
-            }
-            roleDao.addUserRole(ap.getUser().getId(), UserRole.CAR_USER); // always
-            Notifier.sendMembershipApproved(ap.getUser(), data.message);
-            flash("success", "De gebruikersrechten werden succesvol aangepast.");
+            makeFullUser(ap.getUser().getId(), data.owner, data.message);
+            flash("success", "De gebruiker is volwaardig lid geworden.");
 
             return redirect(routes.Approvals.pendingApprovalList());
         } else if (action == ApprovalAdminData.Action.DENY) {
@@ -325,6 +315,21 @@ public class Approvals extends Controller {
         }
 
 
+    }
+
+    // to be used with injected context
+    public static void makeFullUser(int userId, boolean owner, String message) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        UserDAO udao = context.getUserDAO();
+        udao.makeUserFull(userId);
+
+        // Add the new user roles
+        UserRoleDAO roleDao = context.getUserRoleDAO();
+        if (owner) {
+            roleDao.addUserRole(userId, UserRole.CAR_OWNER);
+        }
+        roleDao.addUserRole(userId, UserRole.CAR_USER); // always
+        Notifier.sendMembershipApproved(udao.getUserHeader(userId), message);
     }
 
     public static class ApprovalAdminData {
