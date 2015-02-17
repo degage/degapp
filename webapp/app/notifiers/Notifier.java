@@ -228,12 +228,14 @@ public class Notifier extends Mailer {
         UserHeader driver = reservation.getUser();
         String url = toFullURL(routes.Drives.details(reservation.getId()));
         String carName = reservation.getCar().getName();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
         int start = ride.getStartKm();
         int end = ride.getEndKm();
         createNotificationAndSend(user, "detailsProvided",
-                views.txt.messages.detailsProvided.render(user, driver, carName, url, start, end),
-                views.html.messages.detailsProvided.render(user, driver, carName, url, start, end),
-                carName
+                views.txt.messages.detailsProvided.render(user, driver, carName, url, start, end, from, until),
+                views.html.messages.detailsProvided.render(user, driver, carName, url, start, end, from, until),
+                carName, from, driver.toString()
         );
     }
 

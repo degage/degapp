@@ -27,15 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, carName: String, url: String, start: Int, end: Int)
+@(user: UserHeader, driver: UserHeader, carName: String, url: String, start: Int, end: Int, from: String, until: String)
 
 @* Nieuwe kilometerstanden *@
 Beste @user.getFirstName,
 
-Bestuurder @driver heeft de volgende kilometerstanden ingegeven
-voor wagen '@carName'.
+Bestuurder @driver heeft de volgende kilometerstanden ingegeven:
 
-   @start - @end (= @(end-start) km)
+Auto:  @carName
+Km-st: @start - @end (= @(end-start) km)
+Rit:   @from - @until
 
 Gelieve die zo snel mogelijk goed- of af te keuren.
 

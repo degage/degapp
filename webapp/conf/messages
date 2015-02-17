@@ -49,7 +49,7 @@ subject.reminder=U hebt ongelezen berichten
 subject.refuelRequest=Nieuwe tankbeurt voor {0}
 subject.costRequest=Nieuwe autokost
 subject.managerAssigned=Contract ondertekenen
-subject.detailsProvided=Nieuwe kilometerstanden voor {0}
+subject.detailsProvided=Kilometerstanden {0} voor {1} ({2})
 
 
 
