@@ -465,3 +465,30 @@ body {
 		display:none;
 	}
 }
+
+/* --- Sortable tables --- cf. https://datatables.net/blog/2014-06-06 */
+
+table.table thead th {
+    position: relative;
+}
+
+table.table thead th.sortable:after {
+    position: absolute;
+    top: 12px;
+    right: 8px;
+    display: block;
+    font-family: FontAwesome;
+
+    content: "\f0dc";
+    color: #337ab7; /* = bootstrap link color, but lighter */
+}
+
+table.table thead th.sortable.asc:after {
+    content: "\f0de";
+    font-size: 1.2em;
+}
+
+table.table thead th.sortable.desc:after {
+    content: "\f0dd";
+    font-size: 1.2em;
+}
