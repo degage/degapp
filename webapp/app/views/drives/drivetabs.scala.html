@@ -32,11 +32,11 @@
 <div class="row">
     <div class="col-lg-12">
         <ul class="nav nav-tabs">
-          <li id="tab_planned" @if(tab == 0) { class="active" } ><a href="#resultpanel" data-toggle="tab">
+          <li id="tab_planned" data-asc="1" @if(tab == 0) { class="active" } ><a href="#resultpanel" data-toggle="tab">
               Gepland</a>
               <input name="status" value="ACCEPTED" class="searchTextField hidden">
           </li>
-          <li id="tab_passed" @if(tab == 1) { class="active" }><a href="#resultpanel" data-toggle="tab">
+          <li id="tab_passed" data-asc="0" @if(tab == 1) { class="active" }><a href="#resultpanel" data-toggle="tab">
               Voorbij
               @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
                       Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
@@ -45,7 +45,7 @@
               </a>
               <input name="status" value="REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" class="hidden">
           </li>
-          <li id="tab_request" @if(tab == 2) { class="active" }><a href="#resultpanel" data-toggle="tab">
+          <li id="tab_request" data-asc="1" @if(tab == 2) { class="active" }><a href="#resultpanel" data-toggle="tab">
               Aanvragen
               @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
                   @if(amount > 0) {
@@ -55,7 +55,7 @@
               </a>
               <input name="status" value="REQUEST" class="hidden">
           </li>
-            <li id="tab_others" @if(tab == 3) { class="active" }><a href="#resultpanel" data-toggle="tab">
+            <li id="tab_others" data-asc="0" @if(tab == 3) { class="active" }><a href="#resultpanel" data-toggle="tab">
                 Andere</a>
                 <input name="status" value="REFUSED|CANCELLED|CANCELLED_LATE" class="hidden">
             </li>

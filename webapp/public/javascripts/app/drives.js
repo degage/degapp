@@ -3,11 +3,11 @@
  */
 
 function clickHandler() {
-    $('li[id^="tab"]').each(function () {
-        $(this).find('input').removeClass('searchTextField');
-    });
+    $('li[id^="tab"] input').removeClass('searchTextField');
+
     if(typeof $(this).find('input') != 'undefined') {
         $(this).find('input').addClass('searchTextField');
+        beginAsc = $(this).data("asc");
     }
     $('#searchButton').click();
 }
