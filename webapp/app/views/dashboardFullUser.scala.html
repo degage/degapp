@@ -30,16 +30,13 @@
 @(completeness: Int = 0)
 @import providers.DataProvider
 @import db.CurrentUser
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/plugins/dataTables/dataTables.bootstrap.css")'>
-}
 
 @scripts = {
     @js.pagination("Drives.showDrivesPage", initialLoad = false)
     @drives.tabscripts(1)
 }
 
-@app("Welkom", stylesheets, scripts){
+@app("Welkom", scripts=scripts){
     @breadcrumbs {
     }
 
