@@ -29,11 +29,7 @@
 
 @import providers.DataProvider;
 
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/labels.css")'>
-}
-
-@app("Rollen", stylesheets, js.pagination("UserRoles.showUsersPage")) {
+@app("Rollen", sheets("labels"), js.pagination("UserRoles.showUsersPage")) {
     @breadcrumbs{
         @breadcrumb("Rollen")
     }

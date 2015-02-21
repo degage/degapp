@@ -44,11 +44,7 @@
         <link rel="shortcut icon" type="image/png" href='@routes.Assets.at("images/favicon.png")'>
 
         <!-- Core CSS - Include with every page -->
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap/css/bootstrap.min.css")'>
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/font-awesome.min.css")'>
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/sb-admin.css")'>
-
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/main.css")'>
+        @sheets("/lib/bootstrap/css/bootstrap.min", "font-awesome.min", "sb-admin", "main")
 
         <!-- Page-Level Plugin CSS - Main -->
 

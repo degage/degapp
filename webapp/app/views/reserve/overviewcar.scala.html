@@ -29,12 +29,9 @@
 
 @(form: Form[Reserve.CarDateData], lines: Iterable[Reserve.OverviewLine])
 
-@stylesheets={
-<link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
-}
 @scripts={@js.userpicker()@js.datetimepicker()}
 
-@stdlayout("Overzicht beschikbaarheid auto", stylesheets=stylesheets, scripts=scripts) {
+@stdlayout("Overzicht beschikbaarheid auto", sheets("reservationtable"), scripts) {
     @cardatepanel(form,routes.Reserve.overviewCarPost())
     @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
         @* no header. *@

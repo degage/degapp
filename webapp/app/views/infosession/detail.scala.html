@@ -48,11 +48,7 @@
     </script>
 }
 
-@stylesheets = {
-    <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' />
-}
-
-@app("Details Infosessie", stylesheets, scripts) {
+@app("Details Infosessie", sheets("/lib/leaflet/leaflet"), scripts) {
     @breadcrumbs{
         @breadcrumb("Infosessies", routes.InfoSessions.showUpcomingSessions)
         @breadcrumb("Details infosessie")

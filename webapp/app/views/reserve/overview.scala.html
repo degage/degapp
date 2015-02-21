@@ -49,12 +49,7 @@
     </script>
 }
 
-@stylesheets={
-<link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
-<link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/taglabels.css")'>
-}
-
-@stdlayout("Overzicht vrije perioden", stylesheets, scripts){
+@stdlayout("Overzicht vrije perioden", sheets("reservationtable", "taglabels"), scripts){
 
     @panel("Toon het overzicht voor een bepaalde dag", "fa-search"){
         @helper.form(routes.Reserve.overviewPost){

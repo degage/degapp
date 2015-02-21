@@ -33,10 +33,7 @@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/fromuntil.js")'></script>
     @js.pagination("Reserve.listAvailableCarsPage", false)
 }
-@stylesheets={
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/taglabels.css")'>
-}
-@stdlayout("Start reservatie", scripts=scripts, stylesheets=stylesheets) {
+@stdlayout("Start reservatie", sheets("taglabels"), scripts) {
     @panel("Zoek een auto die vrij is in tijdens de opgegeven periode", "fa-search"){
         <fieldset>
             @search.datetimepicker("from", "Van:", "col-lg-6", minuteStep=15)
@@ -64,7 +61,7 @@
         </fieldset>
     }
     @panel("Beschikbare auto's", "fa-car"){
-        <div id="resultsTable" class="table-responsive">
+        <div id="resultsTable" class="table-responsive col-xs-12">
                 <!-- Here comes the loaded table-->
             <div class="text-center">
                (Nog) geen resultaten.

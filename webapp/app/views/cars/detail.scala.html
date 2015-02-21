@@ -66,16 +66,12 @@
     <script src='@routes.Assets.at("javascripts/updateCarPrivileges.js")'></script>
     *@
 }
-@stylesheets = {
-    <link rel="stylesheet" href='@routes.Assets.at("stylesheets/jquery-ui-1.10.4.custom.min.css")'>
-    <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' >
-}
 
 @dayOptions(value: String) = {
    @options(value, "0" -> "Zondag", "1" -> "Maandag", "2" -> "Dinsdag", "3" -> "Woensdag", "4" -> "Donderdag", "5" -> "Vrijdag", "6" -> "Zaterdag")
 }
 
-@stdlayout("Autodetails", stylesheets, scripts, extrabc=breadcrumb("Auto's", routes.Cars.showCars())) {
+@stdlayout("Autodetails", sheets("jquery-ui-1.10.4.custom.min", "/lib/leaflet/leaflet"), scripts, extrabc=breadcrumb("Auto's", routes.Cars.showCars())) {
 
     @defining(DataProvider.getUserProvider().getUser()) { user =>
 

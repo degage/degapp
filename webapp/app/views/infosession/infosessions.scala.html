@@ -50,11 +50,8 @@
     <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
     <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
 }
-@stylesheets = {
-    <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' />
-}
 
-@app("Infosessies", stylesheets, scripts) {
+@app("Infosessies", sheets("/lib/leaflet/leaflet"), scripts) {
 
     @breadcrumbs {
       @breadcrumb("Infosessies")

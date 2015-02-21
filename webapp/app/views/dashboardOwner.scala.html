@@ -30,15 +30,12 @@
 @(carName: String, lines: Iterable[Reserve.OverviewLine], completeness: Int = 0)
 @import providers.DataProvider
 @import db.CurrentUser
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/reservationtable.css")'>
-}
 @scripts = {
     @js.pagination("Drives.showDrivesPage", initialLoad = false)
     @drives.tabscripts(2)
 }
 
-@app("Welkom", stylesheets, scripts){
+@app("Welkom", sheets("reservationtable"), scripts){
     @breadcrumbs {
     }
 

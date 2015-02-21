@@ -52,11 +52,9 @@
         <link rel="shortcut icon" type="image/png" href='@routes.Assets.at("images/favicon.png")'>
 
         <!-- Core CSS - Include with every page -->
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("lib/bootstrap/css/bootstrap.min.css")'>
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/font-awesome.min.css")'>
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/sb-admin.css")'>
+        @sheets("/lib/bootstrap/css/bootstrap.min", "font-awesome.min", "sb-admin")
         @stylesheets @* To include stylesheets from external templates *@
-        <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/main.css")'>
+        @sheets("main")
 
     <!--[if lt IE 9]>
         <script src='@routes.Assets.at("javascripts/compatibility/html5shiv.min.js")' type="text/javascript"></script>

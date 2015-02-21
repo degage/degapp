@@ -31,14 +31,14 @@
     @scripts = {
         @js.usesajax()
         <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
-        <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
+        <script type="text/javascript" src='@routes.Assets.at("javascripts/maps-custom.js")'></script>
     }
 
     @stylesheets = {
         <style>
             #map { height: 600px; width: 1400px; }
         </style>
-        <link rel="stylesheet" href='@routes.Assets.at("lib/leaflet/leaflet.css")' />
+        sheets("/lib/leaflet/leaflet")
     }
 
 @app("Simple map view", stylesheets, scripts){

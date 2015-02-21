@@ -30,10 +30,7 @@
 @(cars: Iterable[Car])
 
 @import db.CurrentUser
-@stylesheets = {
-    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/taglabels.css")'>
-}
-@stdlayout("Reserveer een auto",stylesheets=stylesheets) {
+@stdlayout("Reserveer een auto", sheets("taglabels")) {
 
     @panel("De autovloot", "fa-car"){
         <div id="resultsTable" class="table-responsive col-xs-12">
