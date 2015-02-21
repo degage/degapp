@@ -30,7 +30,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.JobType;
 import db.DataAccess;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -43,7 +42,6 @@ public class Diagnostics  extends Controller {
 
     /**
      * Just returns ok. Used to check whether the application is still alive
-     * @return
      */
     public static Result checkApplication() {
         return ok();
