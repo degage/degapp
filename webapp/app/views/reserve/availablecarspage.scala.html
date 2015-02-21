@@ -33,7 +33,7 @@
         <tr role="row">
             <th name="name" class="sortable">Naam</th>
             <th>Zitplaatsen</th>
-            <th>Functionaliteiten</th>
+            <th>&nbsp;</th>
             <th>Standplaats</th>
             <th>Actie</th>
         </tr>
@@ -42,14 +42,7 @@
     @foreach.trOrElse(cars){ car =>
         <td> <a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
         <td>@car.getSeats</td>
-        <td>
-            @if(car.isGps) {
-                <span class="label label-default">gps</span>
-            }
-            @if(car.isHook) {
-                <span class="label label-default">trekhaak</span>
-            }
-        </td>
+        <td>@views.html.cars.cartags(car)</td>
         <td>@car.getLocation</td>
         <td>
             <div class="btn-group">

@@ -33,7 +33,10 @@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/fromuntil.js")'></script>
     @js.pagination("Reserve.listAvailableCarsPage", false)
 }
-@stdlayout("Start reservatie", scripts=scripts) {
+@stylesheets={
+    <link rel="stylesheet" media="screen" href='@routes.Assets.at("stylesheets/taglabels.css")'>
+}
+@stdlayout("Start reservatie", scripts=scripts, stylesheets=stylesheets) {
     @panel("Zoek een auto die vrij is in tijdens de opgegeven periode", "fa-search"){
         <fieldset>
             @search.datetimepicker("from", "Van:", "col-lg-6", minuteStep=15)

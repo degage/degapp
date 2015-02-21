@@ -1,4 +1,4 @@
-@* reservationpanel.scala.html
+@* cartags.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,17 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@()
+@(car: Car)
 
-@* Panel with reservation actions on the dashboard. *@
-
-@panel("", "fa-pencil"){
-    <div class="col-xs-12">
-           Reserveer
-           <a class="btn btn-primary btn-sm" href="@routes.Reserve.startCar">Bepaalde auto</a>
-           <a class="btn btn-primary btn-sm" href="@routes.Reserve.index">Voor bepaalde periode</a>
-           Of toon overzicht
-           <a class="btn btn-primary btn-sm" href="@routes.Cars.showCarsForReservation()">Auto's</a>
-           <a class="btn btn-primary btn-sm" href="@routes.Reserve.overview(null)">Dag</a>
-    </div>
-}
+@if(car.isGps){ <span class="label label-gps">gps</span> }
+@if(car.isHook){ <span class="label label-hook">trekhaak</span> }
+@if(!car.isManual){ <span class="label label-automatic">automaat</span> }

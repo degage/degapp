@@ -33,7 +33,10 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.*;
+import be.ugent.degage.db.dao.CarCostDAO;
+import be.ugent.degage.db.dao.CarDAO;
+import be.ugent.degage.db.dao.FileDAO;
+import be.ugent.degage.db.dao.PrivilegedDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.Addresses;
@@ -55,8 +58,8 @@ import views.html.cars.*;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -218,6 +221,18 @@ public class Cars extends Controller {
         } else {
             return ok(cars.render(DataAccess.getInjectedContext().getCarDAO().listCarsOfUser(CurrentUser.getId())));
         }
+    }
+
+    /**
+     * Shows a list of cars with restricted information in order to make a reservation
+     * @return
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result showCarsForReservation() {
+        return ok(carsforreservation.render(
+                DataAccess.getInjectedContext().getCarDAO().listAllCars()
+        ));
     }
 
     /**

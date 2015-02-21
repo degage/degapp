@@ -37,11 +37,7 @@
     <dt>Standplaats</dt>
     <dd>@car.getLocation</dd>
     <dt>Merk / type</dt>
-    <dd>@car.getBrand / @car.getType
-        @if(car.isGps){ <span class="label label-default">gps</span> }
-        @if(car.isHook){ <span class="label label-default">trekhaak</span> }
-        @if(!car.isManual){ <span class="label label-default">automaat</span> }
-    </dd>
+    <dd>@car.getBrand / @car.getType @cartags(car)</dd>
     <dt>Brandstof</dt>
     <dd>@car.getFuel</dd>
     <dt>Zitplaatsen / deuren</dt>
