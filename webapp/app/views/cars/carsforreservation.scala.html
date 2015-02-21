@@ -47,7 +47,7 @@
                 </thead>
                 <tbody>
                     @foreach.tr(cars) { car =>
-                        <td><a href='@routes.Reserve.reserveCar(car.getId,"","")'>@car.getName</a></td>
+                        <td><a href='@routes.Reserve.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
                         <td>@car.getBrand @car.getType</td>
                         <td>@cartags(car)</td>
                         <td>@car.getLocation.getStreet, @car.getLocation.getCity</td>
