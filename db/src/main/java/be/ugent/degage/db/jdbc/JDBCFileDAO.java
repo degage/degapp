@@ -242,6 +242,20 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
         }
     }
 
+    @Override
+    public boolean hasLicenseFile(int userId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT 1 FROM licensefiles WHERE user_id = ? LIMIT 1"
+        )) {
+            ps.setInt(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to find license files", ex);
+        }
+    }
+
     private LazyStatement addLicenseFileStatement = new LazyStatement(
             "INSERT INTO licensefiles(user_id,file_id) VALUES (?,?)"
     );

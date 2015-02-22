@@ -113,4 +113,20 @@ public final class Utils {
                 ? null
                 : LocalDateTime.parse(string, DATETIME_FORMATTER);
     }
+
+    /**
+     * Check whether a string is null or consists entirely of whitespace
+     */
+    public static boolean isBlank(String str) {
+        if (str == null) {
+            return true;
+        } else {
+            int i = 0;
+            int length = str.length();
+            while (i < length && Character.isWhitespace(str.charAt(i)) ) {
+                i++;
+            }
+            return i == length;
+        }
+    }
 }

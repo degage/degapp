@@ -29,10 +29,12 @@
 
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import controllers.routes.javascript;
+import data.ProfileCompleteness;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -60,12 +62,11 @@ public class Application extends Controller {
             // login page if not logged in
             return redirect(routes.Login.login(null));
         } else {
-            User currentUser = DataProvider.getUserProvider().getUser();
-            int completeness = Profile.getProfileCompleteness(currentUser);
+            DataAccessContext context = DataAccess.getInjectedContext();
             if (CurrentUser.hasFullStatus() || CurrentUser.hasRole(UserRole.SUPER_USER)) {
                 // normal dashboard if user has full status
                 if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
-                    Iterable<Car> cars = DataAccess.getInjectedContext().getCarDAO().listCarsOfUser(CurrentUser.getId());
+                    Iterable<Car> cars = context.getCarDAO().listCarsOfUser(CurrentUser.getId());
                     Iterator<Car> iterator = cars.iterator();
                     if (iterator.hasNext()) {
                         Car car = iterator.next(); // TODO: assumes owner has only one car
@@ -75,24 +76,28 @@ public class Application extends Controller {
                         data.carIdAsString = car.getName();
                         data.date = Utils.toDateString(LocalDate.now());
                         data.period = "week";
-                        return ok(  dashboardOwner.render(
+                        return ok(dashboardOwner.render(
                                 car.getName(),
-                                Reserve.getOverviewLines(data),
-                                completeness
-                        ) );
+                                Reserve.getOverviewLines(data)
+                        ));
                     }
                 }
                 // not an owner role or no car
-                return ok(  dashboardFullUser.render(completeness) );
+                return ok(dashboardFullUser.render());
             } else {
                 // reduced dashboard
-                return ok(
-                    dashboardRegistered.render(
+                User currentUser = DataProvider.getUserProvider().getUser();
+                ProfileCompleteness pc = new ProfileCompleteness(
                         currentUser,
-                        completeness,
-                        InfoSessions.didUserGoToInfoSession(),
-                        DataAccess.getInjectedContext().getApprovalDAO().hasApprovalPending(currentUser.getId())
-                    )
+                        context.getFileDAO().hasLicenseFile(currentUser.getId())
+                );
+                return ok(
+                        dashboardRegistered.render(
+                                currentUser,
+                                pc.getPercentage(),
+                                InfoSessions.didUserGoToInfoSession(),
+                                context.getApprovalDAO().hasApprovalPending(currentUser.getId())
+                        )
                 );
             }
         }

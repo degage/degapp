@@ -35,10 +35,10 @@ import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
-import com.google.common.base.Strings;
 import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
+import data.ProfileCompleteness;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -174,11 +174,16 @@ public class Profile extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result index(int userId) {
-        User user = DataAccess.getInjectedContext().getUserDAO().getUser(userId);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        User user = context.getUserDAO().getUser(userId);
 
         // Only a profile admin or user itself can edit
         if (canEditProfile(userId)) {
-            return ok(index.render(user, getProfileCompleteness(user)));
+            ProfileCompleteness pc = new ProfileCompleteness(
+                    user,
+                    context.getFileDAO().hasLicenseFile(userId)
+            );
+            return ok(index.render(user, pc.getPercentage()));
         } else if (CurrentUser.hasFullStatus()) { // TODO: remove reference to currentUser
             return ok(profile.render(user)); // public profile
         } else { // if not yet full user and profile is not ones own
@@ -508,43 +513,6 @@ public class Profile extends Controller {
         }
     }
 
-
-    /**
-     * Returns a quotum on how complete the profile is.
-     *
-     * @param user The user to quote
-     * @return Completeness in percents
-     */
-    // TODO: should go into a helper class? (Also used by Dashboard)
-    public static int getProfileCompleteness(User user) {
-        int total = 0;
-
-        if (!Strings.isNullOrEmpty(user.getAddressDomicile().getStreet())) {
-            total++;
-        }
-        if (!Strings.isNullOrEmpty(user.getAddressResidence().getStreet())) {
-            total++;
-        }
-        if (!Strings.isNullOrEmpty(user.getCellphone())) {
-            total++;
-        }
-        if (!Strings.isNullOrEmpty(user.getFirstName())) {
-            total++;
-        }
-        if (!Strings.isNullOrEmpty(user.getLastName())) {
-            total++;
-        }
-        if (!Strings.isNullOrEmpty(user.getPhone())) {
-            total++;
-        }
-        if (!Strings.isNullOrEmpty(user.getEmail())) {
-            total++;
-        }
-        if (user.getIdentityId() != null) {
-            total++;
-        }
-        return (int) (((float) total / 8) * 100); //9 records
-    }
 
     public static class UserStatusData {
         public String status;

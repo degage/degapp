@@ -88,6 +88,11 @@ public interface FileDAO {
     public Iterable<File> getLicenseFiles(int userId) throws DataAccessException;
 
     /**
+     * Did the given user upload at least one license file? (Used to check completeness of profile.)
+     */
+    public boolean hasLicenseFile (int userId) throws DataAccessException;
+
+    /**
      * Add an image file for a drivers license
      */
     public void addLicenseFile(int userId, int fileId) throws DataAccessException;
