@@ -74,6 +74,7 @@ public class Application extends Controller {
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();
                         data.date = Utils.toDateString(LocalDate.now());
+                        data.period = "week";
                         return ok(  dashboardOwner.render(
                                 car.getName(),
                                 Reserve.getOverviewLines(data),

@@ -31,7 +31,7 @@
 
 @scripts={@js.userpicker()@js.datetimepicker()}
 
-@stdlayout("Overzicht beschikbaarheid auto", sheets("reservationtable"), scripts) {
+@stdlayout("Beschikbaarheid auto", sheets("reservationtable"), scripts) {
     @cardatepanel(form,routes.Reserve.overviewCarPost())
     @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
         @* no header. *@

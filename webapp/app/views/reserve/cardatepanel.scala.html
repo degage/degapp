@@ -35,7 +35,10 @@
 @panel("Wanneer is een auto beschikbaar?", "fa-search") {
     @helper.form(route) {
         @std.carpicker(form("carId"),form("carIdAsString"),"Auto",css="col-md-4")
-        @std.datepicker(form("date"), "Week van ...", css="col-md-4")
-        @std.submitButton("Toon overzicht")
+        @std.datepicker(form("date"), "Vanaf", css="col-md-4")
+        <div class="button-group col-xs-12">
+            <button type="submit" class="btn btn-success" name="period" value="week">Weekoverzicht</button>
+            <button type="submit" class="btn btn-success" name="period" value="month">Maandoverzicht</button>
+        </div>
     }
 }

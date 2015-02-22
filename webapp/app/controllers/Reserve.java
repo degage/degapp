@@ -49,10 +49,7 @@ import play.twirl.api.Html;
 import views.html.reserve.*;
 import views.html.snippets.errortablerow;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -344,6 +341,8 @@ public class Reserve extends Controller {
 
     @Constraints.Required
         public String carIdAsString;
+
+        public String period; // week or month
     }
 
     /**
@@ -363,14 +362,21 @@ public class Reserve extends Controller {
 
     public static Collection<OverviewLine> getOverviewLines(CarDateData data) {
         LocalDateTime from = Utils.toLocalDate(data.date).atStartOfDay();
-        LocalDateTime until = from.plusDays(7);
+        LocalDateTime until;
+        if ("month".equals(data.period)) {
+            until = from.plusMonths(1);
+        } else { // week
+            until = from.plusDays(7);
+        }
         Iterable<ReservationHeader> reservations =
                 DataAccess.getInjectedContext().getReservationDAO().
                         listReservationsForCarInPeriod(data.carId, from, until);
         Collection<OverviewLine> lines = new ArrayList<>();
-        for (int i = 0; i < 7; i++) { // one week
+        LocalDate fromDate = from.toLocalDate();
+        LocalDate untilDate = until.toLocalDate();
+        for (LocalDate date = fromDate; date.isBefore(untilDate); date = date.plusDays(1)) {
             OverviewLine line = new OverviewLine();
-            line.populate(reservations, data.carId, from.toLocalDate().plusDays(i));
+            line.populate(reservations, data.carId, date);
             lines.add(line);
         }
         return lines;
