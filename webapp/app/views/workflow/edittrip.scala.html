@@ -30,13 +30,13 @@
 @(form: Form[Workflow.TripData], reservation: Reservation)
 
 @extrabc = {
-    @breadcrumb("Ritten",routes.Drives.index())
-    @breadcrumb("Details",routes.Drives.details(reservation.getId))
+    @breadcrumb("Ritten",routes.Trips.index())
+    @breadcrumb("Details",routes.Trips.details(reservation.getId))
 }
 
 @stdlayout("Wijzigen ritgegevens", extrabc=extrabc) {
 
-    @drives.detailsPanelPartial(reservation)
+    @trips.detailsPanelPartial(reservation)
 
     @panel("Gegevens", "fa-pencil") {
         @helper.form(routes.Workflow.doEditTripInfo(reservation.getId)){

@@ -161,7 +161,7 @@ public class Workflow extends Controller {
                     car.getOwner(), res, car.getName()
             );
         }
-        return redirect(routes.Drives.index(0));
+        return redirect(routes.Trips.index(0));
     }
 
     /* ========================================================================
@@ -183,11 +183,11 @@ public class Workflow extends Controller {
                 ReservationStatus status = reservation.getStatus();
                 if (status != ReservationStatus.REQUEST && status != ReservationStatus.ACCEPTED) {
                     flash("danger", "Deze reservatie kan niet meer geannuleerd worden.");
-                    return redirect(routes.Drives.index(0));
+                    return redirect(routes.Trips.index(0));
                 }
             } else {
                 flash("danger", "Alleen de ontlener mag een reservatie annuleren!");
-                return redirect(routes.Drives.index(0));
+                return redirect(routes.Trips.index(0));
             }
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
@@ -195,7 +195,7 @@ public class Workflow extends Controller {
         // Unschedule the job for auto accept
         context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
 
-        return redirect(routes.Drives.details(reservationId));
+        return redirect(routes.Trips.details(reservationId));
     }
 
     /**
@@ -214,16 +214,16 @@ public class Workflow extends Controller {
                 ReservationStatus status = reservation.getStatus();
                 if (status != ReservationStatus.DETAILS_PROVIDED) {
                     flash("danger", "Deze (lopende) rit kan niet worden geannuleerd.");
-                    return redirect(routes.Drives.index(0));
+                    return redirect(routes.Trips.index(0));
                 }
             } else {
                 flash("danger", "Alleen de ontlener kan een lopende rit annuleren!");
-                return redirect(routes.Drives.index(0));
+                return redirect(routes.Trips.index(0));
             }
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE);
 
-        return redirect(routes.Drives.details(reservationId));
+        return redirect(routes.Trips.details(reservationId));
     }
 
 
@@ -265,7 +265,7 @@ public class Workflow extends Controller {
      * Called when a reservation of a car is refused/accepted by the owner.
      *
      * @param reservationId the id of the reservation being refused/accepted
-     * @return the drives index page
+     * @return the trips index page
      */
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
@@ -287,7 +287,7 @@ public class Workflow extends Controller {
                     if (CurrentUser.isNot(reservation.getOwnerId())
                             || reservation.getStatus() != ReservationStatus.REQUEST) {
                         flash("danger", "Alleen de eigenaar kan een reservatie goed- of afkeuren");
-                        return redirect(routes.Drives.details(reservationId));
+                        return redirect(routes.Trips.details(reservationId));
                     }
                 }
                 dao.updateReservationStatus(reservationId, status, remarks);
@@ -300,7 +300,7 @@ public class Workflow extends Controller {
                 } else {
                     Notifier.sendReservationApprovedByOwnerMail(context, remarks, reservation);
                 }
-                return redirect(routes.Drives.details(reservationId));
+                return redirect(routes.Trips.details(reservationId));
 
             } else { // other cases only happen when somebody is hacking
                 return badRequest();
@@ -371,7 +371,7 @@ public class Workflow extends Controller {
                 );
                 */
             }
-            return redirect(routes.Drives.details(reservationId));
+            return redirect(routes.Trips.details(reservationId));
         } else {
             // this means that somebody is hacking?
             return badRequest();
@@ -484,7 +484,7 @@ public class Workflow extends Controller {
     @InjectContext
     public static Result doNewTripInfo(int reservationId) {
 
-        // complicated because page allows both new drives and refuels
+        // complicated because page allows both new trips and refuels
         Form<TripDataExtended> form = Form.form(TripDataExtended.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
@@ -554,7 +554,7 @@ public class Workflow extends Controller {
 
                 if (filePart != null) {
                     File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
-                    if (file.getContentType() == null) {
+                    if (file == null || file.getContentType() == null) {
                         form.reject("picture", "Het bestand  is van het verkeerde type");
                         return badRequest(newtrip.render(form, reservation));
                     } else {
@@ -564,7 +564,7 @@ public class Workflow extends Controller {
                     }
                 }
 
-                return redirect(routes.Drives.details(reservationId));
+                return redirect(routes.Trips.details(reservationId));
             } else {
                 // not allowed
                 return badRequest(); // hacker?
@@ -622,7 +622,7 @@ public class Workflow extends Controller {
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             dao.approveInfo(reservationId);
             rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
-            return redirect(routes.Drives.details(reservationId));
+            return redirect(routes.Trips.details(reservationId));
         } else {
             // not allowed
             return badRequest(); // hacker?
@@ -650,7 +650,7 @@ public class Workflow extends Controller {
         } else {
             flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
         }
-        return redirect(routes.Drives.details(reservationId));
+        return redirect(routes.Trips.details(reservationId));
     }
 
 

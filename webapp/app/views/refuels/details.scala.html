@@ -27,10 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuel: Refuel, car: Car, reservation: ReservationHeader, driveInfo: CarRide)
+@(refuel: Refuel, car: Car, reservation: ReservationHeader, tripInfo: CarRide)
 
 @stdlayout("Tankbeurt", extrabc=breadcrumb("Tankbeurten",routes.Refuels.showRefuels)) {
 
-    @detailsPanel(refuel, car, reservation, driveInfo)
+    @detailsPanel(refuel, car, reservation, tripInfo)
 
 }

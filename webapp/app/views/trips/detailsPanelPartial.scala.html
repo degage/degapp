@@ -1,4 +1,4 @@
-@* tabscripts.scala.html
+@* detailsPanelPartial.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,20 +27,22 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(tab: Int)
+@(reservation: Reservation, tripInfo: CarRide = null)
 
-@* Scripts for tab selection in drives overview page *@
-
-<script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
-
-<script>$(document).ready(function(){
-    beginAsc = @(1-tab%2);
-    loadFirstPage(
-      @tab match {
-         case 0 => { "status=ACCEPTED" }
-         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }
-         case 2 => { "status=REQUEST" }
-         case _ => { "status=REFUSED|CANCELLED|CANCELLED_LATE" }
-      }
-    );});
-</script>
+@panel("Rit- en reservatiedetails", "fa-bar-chart-o"){
+    <div class="col-sx-12">
+        <dl class="dl-horizontal">
+            <dt>Status</dt><dd><i>@reservation.getStatus</i></dd>
+            <dt>Periode</dt>
+            <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
+            <dt>Auto</dt>
+            <dd>@reservation.getCar.getName</dd>
+        @if(tripInfo != null) {
+                <dt>Kilometerstanden</dt>
+                <dd>@tripInfo.getStartKm — @tripInfo.getEndKm</dd>
+                <dt>Schade?</dt>
+                <dd>@if(tripInfo.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
+        }
+        </dl>
+    </div>
+}

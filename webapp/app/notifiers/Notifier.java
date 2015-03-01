@@ -30,7 +30,8 @@
 package notifiers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.*;
+import be.ugent.degage.db.dao.NotificationDAO;
+import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.Utils;
@@ -43,7 +44,6 @@ import play.i18n.Messages;
 import play.twirl.api.Html;
 import play.twirl.api.Txt;
 import providers.DataProvider;
-import views.html.users.users;
 
 import java.text.MessageFormat;
 
@@ -226,7 +226,7 @@ public class Notifier extends Mailer {
 
     public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation reservation, CarRide ride) {
         UserHeader driver = reservation.getUser();
-        String url = toFullURL(routes.Drives.details(reservation.getId()));
+        String url = toFullURL(routes.Trips.details(reservation.getId()));
         String carName = reservation.getCar().getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
@@ -247,7 +247,7 @@ public class Notifier extends Mailer {
         String carName = car.getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
-        String url = toFullURL(routes.Drives.details(reservation.getId()));
+        String url = toFullURL(routes.Trips.details(reservation.getId()));
         UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
 
         String contactInfo = car.getEmail();

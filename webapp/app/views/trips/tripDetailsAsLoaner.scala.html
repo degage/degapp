@@ -1,4 +1,4 @@
-@* driveDetailsAsLoaner.scala.html
+@* tripDetailsAsLoaner.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,16 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, driveInfo: CarRide, car: Car, owner: User, previousLoaner: User, nextLoaner: User)
+@(reservation: Reservation, tripInfo: CarRide, car: Car, owner: User, previousLoaner: User, nextLoaner: User)
 
 @import routes.Workflow._
 @import routes.Refuels._
 
 @* only called when user is not the owner of the car and also not a reservation admin *@
 
-@stdlayout("Reservatie- en ritdetails", extrabc=breadcrumb("Ritten",routes.Drives.index())) {
+@stdlayout("Reservatie- en ritdetails", extrabc=breadcrumb("Ritten",routes.Trips.index())) {
 
-    @detailsPanel(car, reservation, driveInfo)
+    @detailsPanel(car, reservation, tripInfo)
 
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">

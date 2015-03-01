@@ -1,4 +1,4 @@
-@* drivetabs.scala.html
+@* triptabs.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -38,8 +38,8 @@
           </li>
           <li id="tab_passed" data-asc="0" @if(tab == 1) { class="active" }><a href="#resultpanel" data-toggle="tab">
               Voorbij
-              @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
-                      Drives.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
+              @defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
+                      Trips.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
                   @if(amount > 0) { (@amount) }
               }
               </a>
@@ -47,7 +47,7 @@
           </li>
           <li id="tab_request" data-asc="1" @if(tab == 2) { class="active" }><a href="#resultpanel" data-toggle="tab">
               Aanvragen
-              @defining(Drives.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
+              @defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
                   @if(amount > 0) {
                       (@amount)
                   }

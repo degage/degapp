@@ -41,7 +41,7 @@
     <tbody>
         @foreach.trOrElse(damageList){ damage =>
             <td><a href="@routes.Cars.detail(damage.getCarId)">@damage.getCarName</a></td>
-            <td><a href="@routes.Drives.details(damage.getReservationId)">@Utils.toLocalizedDateString(damage.getDate)</a></td>
+            <td><a href="@routes.Trips.details(damage.getReservationId)">@Utils.toLocalizedDateString(damage.getDate)</a></td>
             <td><a href="@routes.Profile.index(damage.getDriverId)">@damage.getDriverName</a></td>
             <td>@if(damage.getFinished){Ja}else{Nee}</td>
             <td>

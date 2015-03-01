@@ -1,4 +1,4 @@
-@* drivespage.scala.html
+@* tripspage.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -29,7 +29,7 @@
 
 @(userId: Int, reservations: Iterable[Reservation], page : Int, amountOfResults : Int, amountOfPages : Int, asc : Int, orderBy : String, filter : String)
 
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-drives">
+<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-trips">
     <thead>
         <tr role="row">
             <th>Autonaam</th>
@@ -80,7 +80,7 @@
                     @reservation.getStatus
                 </td>
                 <td>
-                    <a class="btn btn-xs btn-primary" href="@routes.Drives.details(reservation.getId)">Details ...</a>
+                    <a class="btn btn-xs btn-primary" href="@routes.Trips.details(reservation.getId)">Details ...</a>
                     @{ if(db.CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
                            buttonsAdmin(reservation)
                        else if (db.CurrentUser is reservation.getOwnerId)

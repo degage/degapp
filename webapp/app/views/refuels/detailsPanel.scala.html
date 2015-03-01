@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuel: Refuel, car: Car, reservation: ReservationHeader, driveInfo: CarRide)
+@(refuel: Refuel, car: Car, reservation: ReservationHeader, tripInfo: CarRide)
 
 @panel("Details", "fa-bar-chart-o"){
     <div class="col-sm-6">
@@ -57,9 +57,9 @@
             <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
             <dt>Periode</dt>
             <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
-            @if(driveInfo != null){  @* TODO: should never be null *@
+            @if(tripInfo != null){  @* TODO: should never be null *@
                 <dt>Kilometerstanden</dt>
-                <dd>@driveInfo.getStartKm — @driveInfo.getEndKm</dd>
+                <dd>@tripInfo.getStartKm — @tripInfo.getEndKm</dd>
             }
         </dl>
     </div>

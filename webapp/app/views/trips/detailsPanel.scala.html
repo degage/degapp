@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(car: Car, reservation: ReservationHeader, driveInfo: CarRide = null)
+@(car: Car, reservation: ReservationHeader, tripInfo: CarRide = null)
 
 @panel("Details", "fa-bar-chart-o"){
     <div class="col-sm-6">
@@ -49,14 +49,14 @@
             }
         </dl>
     </div>
-    @if(driveInfo != null) {
+    @if(tripInfo != null) {
         <div class="col-sm-6">
             <h4>Ritdetails</h4>
             <dl class="dl-horizontal">
                 <dt>Kilometerstanden</dt>
-                <dd>@driveInfo.getStartKm — @driveInfo.getEndKm</dd>
+                <dd>@tripInfo.getStartKm — @tripInfo.getEndKm</dd>
                 <dt>Schade?</dt>
-                <dd>@if(driveInfo.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
+                <dd>@if(tripInfo.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
             </dl>
         </div>
     }

@@ -70,11 +70,11 @@ GET         /trip/edit                              controllers.Workflow.editTri
 POST        /trip/edit                              controllers.Workflow.doEditTripInfo(reservationId: Int)
 GET         /trip/approval                          controllers.Workflow.approveTripInfo(reservationId: Int)
 
-# Drives
-GET         /drives                                 controllers.Drives.index(tab : Int ?= 0)
-GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /drive/details                          controllers.Drives.details(reservationId: Int)
+# Display information anout reservations / trips
+GET         /trip                                   controllers.Trips.details(reservationId: Int)
+GET         /trips                                  controllers.Trips.index(tab : Int ?= 0)
+GET         /trips/page                             controllers.Trips.showTripsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /trips/admin                            controllers.Trips.showTripsAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 
 # Receipts
 GET         /receipts                               controllers.Receipts.index()

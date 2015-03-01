@@ -1,4 +1,4 @@
-@* driveDetailsAsAdmin.scala.html
+@* tripDetailsAsOwner.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,37 +27,44 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, driveInfo: CarRide, car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
-
+@(reservation: Reservation, tripInfo: CarRide, car: Car, loaner: User, previousLoaner: User, nextLoaner: User)
 @import routes.Workflow._
 @import routes.Refuels._
 
-@* only called when user is a reservation admin *@
 
-@stdlayout("Reservatie- en ritdetails (beheer)", extrabc=breadcrumb("Ritten",routes.Drives.index())) {
+@* only called when the user owns the car but is not a reservation admin*@
 
-    @detailsPanel(car, reservation, driveInfo)
+@stdlayout("Reservatie- en ritdetails (eigenaar)", extrabc=breadcrumb("Ritten",routes.Trips.index())) {
 
-    <!-- owner specific content -->
+    @detailsPanel(car, reservation, tripInfo)
+
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
             @reservation.getStatus match {
                 case ReservationStatus.REQUEST => {
                     <a class="btn btn-xs btn-primary" href="@approveReservation(reservation.getId)">Goed- of afkeuren ...</a>
-                    <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
-                    <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Reservatie annuleren</a>
-                }
-                case ReservationStatus.ACCEPTED => {
-                    <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
-                    <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    @* should not happen: such a reservation is always immediately accepted
+                    <!-- @if(CurrentUser is reservation.getUserId) {
+                        <a class="btn btn-xs btn-primary" href="@routes.Trips.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
+                        <a class="btn btn-xs btn-danger" href="@routes.Trips.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    } -->
+                    *@
                 }
                 case ReservationStatus.REFUSED | ReservationStatus.CANCELLED | ReservationStatus.CANCELLED_LATE => {
-                    (Geen. De reservatie is geweigerd of geannuleerd.)
+                                (Geen. De reservatie is geweigerd of geannuleerd.)
+                }
+                case ReservationStatus.ACCEPTED => {
+                    @if(db.CurrentUser is reservation.getUserId) {
+                        <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
+                        <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    } else {
+                            (Geen. De rit heeft nog niet plaatsgevonden.)
+                    }
                 }
                 case ReservationStatus.REQUEST_DETAILS => {
                     <a class="btn btn-xs btn-warning" href="@newTripInfo(reservation.getId)">Ritdetails invullen ...</a>
                     <a class="btn btn-xs btn-primary" href="@showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
-                    <a class="btn btn-xs btn-danger" href="@lateCancelReservation(reservation.getId)">Schrappen</a>
+                     <a class="btn btn-xs btn-danger" href="@lateCancelReservation(reservation.getId)">Schrappen</a>
                 }
                 case ReservationStatus.DETAILS_PROVIDED => {
                     <a class="btn btn-xs btn-primary" href="@editTripInfo(reservation.getId)">Ritdetails aanpassen ...</a>
@@ -65,17 +72,16 @@
                     <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
                 }
                 case ReservationStatus.FINISHED => {
-                    <a class="btn btn-xs btn-primary" href="@editTripInfo(reservation.getId)">Ritdetails aanpassen ...</a>
-                    <a class="btn btn-xs btn-primary" href="@showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
+                    <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
                 }
             }
         </div>
     }
 
+    <!-- owner specific content -->
+
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
-            <h4>Eigenaar</h4>
-            @userInfo(owner)
             <h4>Ontlener</h4>
             @userInfo(loaner)
         </div>

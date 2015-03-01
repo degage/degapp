@@ -69,7 +69,7 @@ public class Application extends Controller {
                     Iterator<Car> iterator = cars.iterator();
                     if (iterator.hasNext()) {
                         Car car = iterator.next(); // TODO: assumes owner has only one car
-                        // TODO: code in common with Reserve,indexWithCar
+                        // TODO: code in common with Calendars.indexWithCar
                         Calendars.CarDateData data = new Calendars.CarDateData();
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();
@@ -135,8 +135,8 @@ public class Application extends Controller {
                         javascript.Damages.showDamagesPage(),
                         javascript.Damages.showDamagesPageOwner(),
                         javascript.Damages.showDamagesPageAdmin(),
-                        javascript.Drives.showDrivesPage(),
-                        javascript.Drives.showDrivesAdminPage(),
+                        javascript.Trips.showTripsPage(),
+                        javascript.Trips.showTripsAdminPage(),
                         javascript.Messages.showReceivedMessagesPage(),
                         javascript.Messages.showSentMessagesPage(),
                         javascript.Notifications.showNotificationsPage(),

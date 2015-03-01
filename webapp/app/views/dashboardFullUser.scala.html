@@ -32,8 +32,8 @@
 @import db.CurrentUser
 
 @scripts = {
-    @js.pagination("Drives.showDrivesPage", initialLoad = false)
-    @drives.tabscripts(1)
+    @js.pagination("Trips.showTripsPage", initialLoad = false)
+    @trips.tabscripts(1)
 }
 
 @app("Welkom", scripts=scripts){
@@ -48,6 +48,6 @@
             @flashes()
         </div>
         <h4>Reservaties / ritten</h4>
-        @drives.drivetabs(1)
+        @trips.triptabs(1)
     </div>
 }

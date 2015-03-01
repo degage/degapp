@@ -31,8 +31,8 @@
 @import providers.DataProvider
 @import db.CurrentUser
 @scripts = {
-    @js.pagination("Drives.showDrivesPage", initialLoad = false)
-    @drives.tabscripts(2)
+    @js.pagination("Trips.showTripsPage", initialLoad = false)
+    @trips.tabscripts(2)
 }
 
 @app("Welkom", sheets("reservationtable"), scripts){
@@ -51,6 +51,6 @@
         }{ <a class="btn btn-primary btn-sm" href="@routes.Calendars.overviewOwnerCar">Andere periode</a> }
 
         <h4>Reservaties / ritten</h4>
-        @drives.drivetabs(2)
+        @trips.triptabs(2)
     </div>
 }

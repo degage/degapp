@@ -1,4 +1,4 @@
-@* drivesAdmin.scala.html
+@* tripsAdmin.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -28,10 +28,10 @@
  *@
 
 @scripts = {
-    @js.pagination("Drives.showDrivesAdminPage")
+    @js.pagination("Trips.showTripsAdminPage")
     <script>beginAsc = 1;</script>
     @js.userpicker()
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/drives.js")'></script>
+    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/trips.js")'></script>
 }
 @stdlayout("Ritten (beheer)", scripts=scripts) {
 

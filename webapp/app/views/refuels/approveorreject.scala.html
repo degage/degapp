@@ -27,11 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Workflow.RemarksData], refuel: Refuel, car: Car, reservation: ReservationHeader, driveInfo: CarRide)
+@(form: Form[Workflow.RemarksData], refuel: Refuel, car: Car, reservation: ReservationHeader, tripInfo: CarRide)
 
 @stdlayout("Reservatie goed- of afkeuren", extrabc=breadcrumb("Tankbeurten",routes.Refuels.showRefuels)) {
 
-    @detailsPanel(refuel, car, reservation, driveInfo)
+    @detailsPanel(refuel, car, reservation, tripInfo)
     @panel("Aanpassen", "fa-pencil") {
         @helper.form(routes.Refuels.approveOrRejectPost(refuel.getId())) {
             @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)

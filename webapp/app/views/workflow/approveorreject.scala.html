@@ -30,13 +30,13 @@
 @(form: Form[Workflow.RemarksData], reservation: Reservation)
 
 @extrabc = {
-    @breadcrumb("Ritten",routes.Drives.index())
-    @breadcrumb("Details",routes.Drives.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Ritten",routes.Trips.index())
+    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
 
-    @drives.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(reservation.getCar(), reservation)
 
     @panel("Aanpassen", "fa-pencil") {
         @helper.form(routes.Workflow.doApproveReservation(reservation.getId())) {

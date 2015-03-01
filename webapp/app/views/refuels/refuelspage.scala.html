@@ -49,7 +49,7 @@
                 @foreach.orElse(refuelList) { refuel =>
                     <tr>
                         <td><a href="@routes.Cars.detail(refuel.getCarRide.getReservation.getCar.getId)">@refuel.getCarRide.getReservation.getCar.getName</a></td>
-                        <td><a href="@routes.Drives.details(refuel.getCarRide.getReservation.getId)">@Utils.toLocalizedDateString(refuel.getCarRide.getReservation.getFrom)</a></td>
+                        <td><a href="@routes.Trips.details(refuel.getCarRide.getReservation.getId)">@Utils.toLocalizedDateString(refuel.getCarRide.getReservation.getFrom)</a></td>
                         <td><a href="@routes.Profile.index(refuel.getCarRide.getReservation.getUserId)">@refuel.getCarRide.getReservation.getUser</a></td>
                         @columns(refuel,isAdmin)
                     </tr>

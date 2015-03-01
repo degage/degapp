@@ -1,4 +1,4 @@
-@* drives.scala.html
+@* tabscripts.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -28,11 +28,19 @@
  *@
 
 @(tab: Int)
-@scripts = {
-    @js.pagination("Drives.showDrivesPage", initialLoad = false)
-    <script>beginAsc = @(1-tab%2);</script>
-    @tabscripts(tab)
-}
-@stdlayout("Ritten", scripts=scripts) {
-    @drivetabs(tab)
-}
+
+@* Scripts for tab selection in trips overview page *@
+
+<script type="text/javascript" src='@routes.Assets.at("javascripts/app/trips.js")'></script>
+
+<script>$(document).ready(function(){
+    beginAsc = @(1-tab%2);
+    loadFirstPage(
+      @tab match {
+         case 0 => { "status=ACCEPTED" }
+         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }
+         case 2 => { "status=REQUEST" }
+         case _ => { "status=REFUSED|CANCELLED|CANCELLED_LATE" }
+      }
+    );});
+</script>
