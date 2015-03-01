@@ -1,4 +1,4 @@
-@* startcar.scala.html
+@* overviewcar.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,10 +27,13 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Reserve.CarDateData])
+@(form: Form[Calendars.CarDateData], lines: Iterable[util.OverviewLine])
 
 @scripts={@js.userpicker()@js.datetimepicker()}
 
-@stdlayout("Beschikbaarheid auto", scripts=scripts) {
-    @cardatepanel(form,routes.Reserve.overviewCarPost())
+@stdlayout("Beschikbaarheid auto", sheets("reservationtable"), scripts) {
+    @cardatepanel(form,routes.Calendars.overviewCarPost())
+    @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
+        @* no header. *@
+    }{  @* no footer. *@ }
 }

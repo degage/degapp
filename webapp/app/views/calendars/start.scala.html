@@ -31,7 +31,7 @@
 @scripts = {
     @js.datetimepicker()
     <script type='text/javascript' src='@routes.Assets.at("javascripts/fromuntil.js")'></script>
-    @js.pagination("Reserve.listAvailableCarsPage", false)
+    @js.pagination("Calendars.listAvailableCarsPage", false)
 }
 @stdlayout("Start reservatie", sheets("taglabels"), scripts) {
     @panel("Zoek een auto die vrij is in tijdens de opgegeven periode", "fa-search"){

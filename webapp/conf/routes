@@ -41,35 +41,40 @@ GET         /userroles/page                         controllers.UserRoles.showUs
 GET         /userroles/edit                         controllers.UserRoles.edit(userId: Int)
 POST        /userroles/edit                         controllers.UserRoles.editPost(userId: Int)
 
+# Reservation calendar
+GET         /calendar                               controllers.Calendars.index()
+GET         /calendar/list                          controllers.Calendars.listAvailableCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /calendar/cars                          controllers.Calendars.showCarsForReservation()
+GET         /calendar/car                           controllers.Calendars.startCar()
+POST        /calendar/car                           controllers.Calendars.overviewCarPost()
+GET         /calendar/car/index                     controllers.Calendars.indexWithCar(carName: String, id: Int)
+GET         /calendar/car/owner                     controllers.Calendars.overviewOwnerCar()
+GET         /calendar/date                          controllers.Calendars.overview(date: String ?= null)
+POST        /calendar/date                          controllers.Calendars.overviewPost()
+
+# Reservation workflow
+GET         /reservation/create                     controllers.Workflow.create(carId: Int, from: String, until: String)
+POST        /reservation/create                     controllers.Workflow.doCreate(carId: Int)
+GET         /reservation/approval                   controllers.Workflow.approveReservation(reservationId: Int)
+POST        /reservation/approval                   controllers.Workflow.doApproveReservation(reservationId: Int)
+GET         /reservation/cancel                     controllers.Workflow.cancelReservation(reservationId: Int)
+GET         /reservation/late                       controllers.Workflow.lateCancelReservation(reservationId: Int)
+GET         /reservation/shorten                    controllers.Workflow.shortenReservation(reservationId: Int)
+POST        /reservation/shorten                    controllers.Workflow.doShortenReservation(reservationId: Int)
+
+# Trip workflow
+
+GET         /trip/new                               controllers.Workflow.newTripInfo(reservationId: Int)
+POST        /trip/new                               controllers.Workflow.doNewTripInfo(reservationId: Int)
+GET         /trip/edit                              controllers.Workflow.editTripInfo(reservationId: Int)
+POST        /trip/edit                              controllers.Workflow.doEditTripInfo(reservationId: Int)
+GET         /trip/approval                          controllers.Workflow.approveTripInfo(reservationId: Int)
+
 # Drives
 GET         /drives                                 controllers.Drives.index(tab : Int ?= 0)
 GET         /drives/page                            controllers.Drives.showDrivesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drives/admin/page                      controllers.Drives.showDrivesAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /drive/details                          controllers.Drives.details(reservationId: Int)
-GET         /drive/approval                         controllers.Drives.approveOrReject(reservationId: Int)
-POST        /drive/approval                         controllers.Drives.approveOrRejectPost(reservationId: Int)
-GET         /drive/newinfo                          controllers.Drives.newJourneyInfo(reservationId: Int)
-POST        /drive/newinfo                          controllers.Drives.newJourneyInfoPost(reservationId: Int)
-GET         /drive/editinfo                         controllers.Drives.editJourneyInfo(reservationId: Int)
-POST        /drive/editinfo                         controllers.Drives.editJourneyInfoPost(reservationId: Int)
-GET         /drive/approve_info                     controllers.Drives.approveDriveInfo(reservationId: Int)
-GET         /drive/cancel                           controllers.Drives.cancelReservation(reservationId: Int)
-GET         /drive/cancel_late                      controllers.Drives.lateCancelReservation(reservationId: Int)
-GET         /drive/shorten                          controllers.Drives.shortenReservation(reservationId: Int)
-POST        /drive/shorten                          controllers.Drives.shortenReservationPost(reservationId: Int)
-
-# Reservations
-GET         /reserve                                controllers.Reserve.index()
-GET         /reserve/overview                       controllers.Reserve.overview(date: String ?= null)
-POST        /reserve/overview                       controllers.Reserve.overviewPost()
-GET         /reserve/car/index                      controllers.Reserve.indexWithCar(carName: String, id: Int)
-GET         /reserve/car/owner                      controllers.Reserve.overviewOwnerCar()
-GET         /reserve/car/start                      controllers.Reserve.startCar()
-POST        /reserve/car/overview                   controllers.Reserve.overviewCarPost()
-
-GET         /reserve/list                           controllers.Reserve.listAvailableCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /reserve/car/reserve                    controllers.Reserve.reserveCar(carId: Int, from: String, until: String)
-POST        /reserve/car/reserve                    controllers.Reserve.doReservation(carId: Int)
 
 # Receipts
 GET         /receipts                               controllers.Receipts.index()
@@ -176,7 +181,6 @@ POST        /changepass                             controllers.Settings.changeP
 
 # Cars
 GET         /cars                                   controllers.Cars.showCars()
-GET         /cars/reserve                           controllers.Cars.showCarsForReservation()
 GET         /cars/page                              controllers.Cars.showCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/new                               controllers.Cars.newCar()
 POST        /cars/new                               controllers.Cars.addNewCar()

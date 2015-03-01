@@ -224,18 +224,6 @@ public class Cars extends Controller {
     }
 
     /**
-     * Shows a list of cars with restricted information in order to make a reservation
-     * @return
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result showCarsForReservation() {
-        return ok(carsforreservation.render(
-                DataAccess.getInjectedContext().getCarDAO().listAllCars()
-        ));
-    }
-
-    /**
      * @param page         The page in the carlists
      * @param ascInt       An integer representing ascending (1) or descending (0)
      * @param orderBy      A field representing the field to order on

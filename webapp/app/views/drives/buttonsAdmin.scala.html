@@ -29,23 +29,26 @@
 
 @(reservation: Reservation)
 
+@import routes.Workflow._
+@import routes.Refuels._
+
 @reservation.getStatus match {
     case ReservationStatus.REQUEST => {
-        <a class="btn btn-xs btn-primary" href="@routes.Drives.approveOrReject(reservation.getId)">Goed- of afkeuren ...</a>
-        <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Inkorten ...</a>
-        <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Annuleren</a>
+        <a class="btn btn-xs btn-primary" href="@approveReservation(reservation.getId)">Goed- of afkeuren ...</a>
+        <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Inkorten ...</a>
+        <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Annuleren</a>
     }
     case ReservationStatus.ACCEPTED => {
-        <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Inkorten ...</a>
-        <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Annuleren</a>
+        <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Inkorten ...</a>
+        <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Annuleren</a>
     }
     case ReservationStatus.REQUEST_DETAILS => {
-        <a class="btn btn-xs btn-warning" href="@routes.Drives.newJourneyInfo(reservation.getId)">Rit invullen ...</a>
-        <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
-        <a class="btn btn-xs btn-danger" href="@routes.Drives.lateCancelReservation(reservation.getId)">Schrappen</a>
+        <a class="btn btn-xs btn-warning" href="@newTripInfo(reservation.getId)">Rit invullen ...</a>
+        <a class="btn btn-xs btn-primary" href="@showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
+        <a class="btn btn-xs btn-danger" href="@lateCancelReservation(reservation.getId)">Schrappen</a>
     }
     case ReservationStatus.DETAILS_PROVIDED | ReservationStatus.FINISHED => {
-        <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
+        <a class="btn btn-xs btn-primary" href="@showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
     }
     case _ => {
     }

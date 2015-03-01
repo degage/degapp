@@ -176,7 +176,7 @@ public class Refuels extends Controller {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
+        if (Workflow.isDriverOrOwnerOrAdmin(reservation)) {
             Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
             return FileHelper.getFileStreamResult(context.getFileDAO(), refuel.getProofId());
         } else {
@@ -207,7 +207,7 @@ public class Refuels extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
-        if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
+        if (Workflow.isDriverOrOwnerOrAdmin(reservation)) {
             return ok( refuelsForRide.render(
                             Form.form(RefuelData.class).fill(new RefuelData().populate( new EurocentAmount(), null, 0)),
                             refuels,
@@ -230,7 +230,7 @@ public class Refuels extends Controller {
         if (form.hasErrors()) {
             form.reject("picture", "Bestand opnieuw selecteren");
             return badRequest( refuelsForRide.render(form, refuels, reservation));
-        } else if (Drives.isDriverOrOwnerOrAdmin(reservation)) {
+        } else if (Workflow.isDriverOrOwnerOrAdmin(reservation)) {
             RefuelData data = form.get();
             File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
             if (file == null) {
@@ -254,7 +254,7 @@ public class Refuels extends Controller {
     static void newRefuel(Reservation reservation, UserHeader owner, int eurocents, int fileId,
                           int km, String amount
                           ) {
-        boolean isAdmin = Drives.isOwnerOrAdmin(reservation);
+        boolean isAdmin = Workflow.isOwnerOrAdmin(reservation);
 
         int refuelId = DataAccess.getInjectedContext().getRefuelDAO().createRefuel(
                 reservation.getId(), eurocents, fileId,
@@ -296,7 +296,7 @@ public class Refuels extends Controller {
         Car car = context.getCarDAO().getCar(reservation.getCarId());
         CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
         return ok(approveorreject.render(
-                Form.form(Drives.RemarksData.class),
+                Form.form(Workflow.RemarksData.class),
                 refuel, car, reservation,
                 ride));
     }
@@ -307,18 +307,18 @@ public class Refuels extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveOrRejectPost(int refuelId) {
-        // TODO lots of code in common with Drives.approveOrRejectPost
+        // TODO lots of code in common with Workflow.approveOrRejectPost
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
         RefuelDAO dao = context.getRefuelDAO();
         Refuel refuel = dao.getRefuel(refuelId);
-        Form<Drives.RemarksData> form =  Form.form(Drives.RemarksData.class).bindFromRequest();
+        Form<Workflow.RemarksData> form =  Form.form(Workflow.RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
             Car car = context.getCarDAO().getCar(reservation.getCarId());
             CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
             return badRequest(approveorreject.render(form, refuel, car, reservation, ride));
         } else {
-            Drives.RemarksData data = form.get(); // the form does not contain errors
+            Workflow.RemarksData data = form.get(); // the form does not contain errors
             RefuelStatus status = RefuelStatus.valueOf(data.status);
             String remarks = data.remarks;
             if (status == RefuelStatus.REFUSED || status == RefuelStatus.ACCEPTED) {

@@ -27,9 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(cars: Iterable[Car])
+@(carList: Iterable[Car])
 
-@import db.CurrentUser
 @stdlayout("Reserveer een auto", sheets("taglabels")) {
 
     @panel("De autovloot", "fa-car"){
@@ -46,10 +45,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach.tr(cars) { car =>
-                        <td><a href='@routes.Reserve.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
+                    @foreach.tr(carList) { car =>
+                        <td><a href='@routes.Calendars.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
                         <td>@car.getBrand @car.getType</td>
-                        <td>@cartags(car)</td>
+                        <td>@cars.cartags(car)</td>
                         <td>@car.getLocation.getStreet, @car.getLocation.getCity</td>
                         <td>@car.getComments </td>
                     }

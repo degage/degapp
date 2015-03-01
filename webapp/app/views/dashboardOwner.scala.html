@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carName: String, lines: Iterable[Reserve.OverviewLine])
+@(carName: String, lines: Iterable[util.OverviewLine])
 @import providers.DataProvider
 @import db.CurrentUser
 @scripts = {
@@ -41,14 +41,14 @@
 
     <div id="page-wrapper">        @* Does not use maincontent because of header *@
         @dashboardHeader()
-        @reserve.reservationpanelowner()
+        @calendars.reservationpanelowner()
 
         <div class="row">
             @flashes()
         </div>
-        @reserve.overviewpanel(carName + " (deze week)", "fa-calendar", lines, percentage=10){
+        @calendars.overviewpanel(carName + " (deze week)", "fa-calendar", lines, percentage=10){
             @* no header. *@
-        }{ <a class="btn btn-primary btn-sm" href="@routes.Reserve.overviewOwnerCar">Andere periode</a> }
+        }{ <a class="btn btn-primary btn-sm" href="@routes.Calendars.overviewOwnerCar">Andere periode</a> }
 
         <h4>Reservaties / ritten</h4>
         @drives.drivetabs(2)

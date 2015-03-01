@@ -39,7 +39,6 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.Routes;
-import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
@@ -71,14 +70,14 @@ public class Application extends Controller {
                     if (iterator.hasNext()) {
                         Car car = iterator.next(); // TODO: assumes owner has only one car
                         // TODO: code in common with Reserve,indexWithCar
-                        Reserve.CarDateData data = new Reserve.CarDateData();
+                        Calendars.CarDateData data = new Calendars.CarDateData();
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();
                         data.date = Utils.toDateString(LocalDate.now());
                         data.period = "week";
                         return ok(dashboardOwner.render(
                                 car.getName(),
-                                Reserve.getOverviewLines(data)
+                                Calendars.getOverviewLines(data)
                         ));
                     }
                 }
@@ -130,6 +129,7 @@ public class Application extends Controller {
                 Routes.javascriptRouter("paginationJsRoutes",
                         // Routes
                         javascript.Approvals.pendingApprovalListPaged(),
+                        javascript.Calendars.listAvailableCarsPage(),
                         javascript.Cars.showCarCostsPage(),
                         javascript.Cars.showCarsPage(),
                         javascript.Damages.showDamagesPage(),
@@ -144,7 +144,6 @@ public class Application extends Controller {
                         javascript.Refuels.showUserRefuelsPage(),
                         javascript.Refuels.showOwnerRefuelsPage(),
                         javascript.Refuels.showAllRefuelsPage(),
-                        javascript.Reserve.listAvailableCarsPage(),
                         javascript.UserRoles.showUsersPage(),
                         javascript.Users.showUsersPage()
                 )

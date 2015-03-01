@@ -27,20 +27,21 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String, faClass: String, lines: Iterable[Reserve.OverviewLine],
+@(title: String, faClass: String, lines: Iterable[util.OverviewLine],
                  percentage:Int = 25)(header: => Html)(footer: => Html)
 
 @* Overview panel for use in overview and overviewcar templates. *@
 
+@import util.OverviewLine._
 @panel(title,faClass){
     <div class="col-xs-12">
         <table class="overview">
             @header
             <tr>
                 <th class="res-car">&nbsp;</th>
-                @for(i <- 7 to 21) {
-                    <th class="res-hour" colspan="@Reserve.INTERVALS_PER_HOUR"
-                        width="@(75.0/(Reserve.END_HOUR-Reserve.START_HOUR))%">@i:00</th>
+                @for(i <- START_HOUR until END_HOUR) {
+                    <th class="res-hour" colspan="@INTERVALS_PER_HOUR"
+                        width="@(75.0/(END_HOUR-START_HOUR))%">@i:00</th>
                 }
             </tr>
             @foreach.tr(lines) { line =>
@@ -48,13 +49,13 @@
                 @for(str <- line.freeTimes){
                    <td class="@if(str==null){res-notfree}else{res-free}">
                        @if(str!=null) {
-                            <a href='@routes.Reserve.reserveCar(line.carId,str,"")'>&nbsp;</a>
+                            <a href='@routes.Workflow.create(line.carId,str,"")'>&nbsp;</a>
                        }
                    </td>
                 }
             }
             <tr>
-                <td colspan="@(Reserve.NUMBER_OF_INTERVALS+1)" class="text-right">
+                <td colspan="@(NUMBER_OF_INTERVALS+1)" class="text-right">
                     <b>Legende:</b>
                     <span class="res-label res-notfree">Bezet</span>
                 </td>

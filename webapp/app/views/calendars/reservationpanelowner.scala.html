@@ -1,4 +1,4 @@
-@* approveorreject.scala.html
+@* reservationpanelowner.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,17 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Drives.RemarksData], reservation: Reservation)
+@()
 
-@extrabc = {
-    @breadcrumb("Ritten",routes.Drives.index())
-    @breadcrumb("Details",routes.Drives.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
-}
+@* Panel with reservation actions, specific for car owner (on the dashboard). *@
 
-@stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
-
-    @detailsPanel(reservation.getCar(), reservation)
-
-    @panel("Aanpassen", "fa-pencil") {
-        @helper.form(routes.Drives.approveOrRejectPost(reservation.getId())) {
-            @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
-            <div class="col-sm-6 col-xs-6">
-                <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-                <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
-            </div>
-        }
-    }
+@panel("", "fa-pencil"){
+    <div class="col-xs-12">
+           Reserveer
+           <a class="btn btn-primary btn-sm" href="@routes.Calendars.overviewOwnerCar">Bepaalde auto</a>
+           <a class="btn btn-primary btn-sm" href="@routes.Calendars.index">Voor bepaalde periode</a>
+           Of toon overzicht
+           <a class="btn btn-primary btn-sm" href="@routes.Calendars.showCarsForReservation()">Auto's</a>
+           <a class="btn btn-primary btn-sm" href="@routes.Calendars.overview(null)">Dag</a>
+    </div>
 }

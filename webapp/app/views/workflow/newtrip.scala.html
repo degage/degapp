@@ -1,4 +1,4 @@
-@* newjourney.scala.html
+@* newtrip.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Drives.JourneyDataExtended], reservation: Reservation)
+@(form: Form[Workflow.TripDataExtended], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Drives.index())
@@ -36,10 +36,10 @@
 
 @stdlayout("Eerste ingave ritgegevens", extrabc=extrabc) {
 
-    @detailsPanelPartial(reservation)
+    @drives.detailsPanelPartial(reservation)
 
     @panel("Ingeven ritdetails", "fa-pencil") {
-        @helper.form(routes.Drives.newJourneyInfoPost(reservation.getId), 'enctype -> "multipart/form-data"){
+        @helper.form(routes.Workflow.doNewTripInfo(reservation.getId), 'enctype -> "multipart/form-data"){
             @std.numberField(form("startKm"), "Kilometerstand - vóór de rit:", css="col-sm-6")
             @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
             @std.group(form("damaged"), "Schade-opvolging") {
@@ -60,7 +60,7 @@
                 <p>(Tankbeurten kunnen ook later nog afzonderlijk worden ingegeven. Je hoeft dit niet meteen te doen.)</p>
             </div>
 
-            @if(Drives.isOwnerOrAdmin(reservation)){
+            @if(Workflow.isOwnerOrAdmin(reservation)){
                 @std.submitButton("Doorsturen (en meteen goedkeuren)")
             } else {
                 <div class="col-xs-12">

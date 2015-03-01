@@ -1,4 +1,4 @@
-@* overviewcar.scala.html
+@* cardatepanel.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,13 +27,17 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Reserve.CarDateData], lines: Iterable[Reserve.OverviewLine])
+@(form: Form[Calendars.CarDateData], route: play.api.mvc.Call)
 
-@scripts={@js.userpicker()@js.datetimepicker()}
+@* Panel used by startcar and overviewcar templates *@
 
-@stdlayout("Beschikbaarheid auto", sheets("reservationtable"), scripts) {
-    @cardatepanel(form,routes.Reserve.overviewCarPost())
-    @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
-        @* no header. *@
-    }{  @* no footer. *@ }
+
+@panel("Wanneer is een auto beschikbaar?", "fa-search") {
+    @helper.form(route) {
+        @std.carpicker(form("carId"),form("carIdAsString"),"Auto",css="col-md-4")
+        @std.datepicker(form("date"), "Vanaf", css="col-md-4")
+        <div class="button-group col-xs-12">
+            <button type="submit" class="btn btn-success" name="period" value="week">Weekoverzicht</button>
+        </div>
+    }
 }

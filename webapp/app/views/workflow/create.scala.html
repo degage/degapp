@@ -1,4 +1,4 @@
-@* reservation.scala.html
+@* create.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: play.data.Form[Reserve.ReservationData], car: Car)
+@(form: play.data.Form[Workflow.ReservationData], car: Car)
 
 @* Form which allows you to make an actual reservation *@
 
@@ -36,30 +36,23 @@
     <script type='text/javascript' src='@routes.Assets.at("javascripts/fromuntil.js")'></script>
 }
 
-@app("Reserveer", scripts=scripts) {
+@stdlayout("Reserveer", scripts=scripts, extrabc=breadcrumb("Start reservatie",routes.Calendars.index)) {
 
-    @breadcrumbs{
-        @breadcrumb("Start reservatie",routes.Reserve.index)
-        @breadcrumb("Reserveer")
+    @panel("Reserveer " + car.getName, "fa-pencil"){
+        @helper.form(routes.Workflow.doCreate(car.getId)) {
+            @std.datetimepicker(form("from"), "Van:", "col-md-6", minuteStep=15)
+            @std.datetimepicker(form("until"), "Tot:", "col-md-6", minuteStep=15)
+            @std.textArea(form("message"), "Opmerkingen",3)
+            @std.submitButton("Vraag reservatie aan")
+        }
     }
-
-    @maincontent("Reserveer"){
-        @panel("Reserveer " + car.getName, "fa-pencil"){
-            @helper.form(routes.Reserve.doReservation(car.getId)) {
-                @std.datetimepicker(form("from"), "Van:", "col-md-6", minuteStep=15)
-                @std.datetimepicker(form("until"), "Tot:", "col-md-6", minuteStep=15)
-                @std.textArea(form("message"), "Opmerkingen",3)
-                @std.submitButton("Vraag reservatie aan")
-            }
-        }
-        @panel("Auto ", "fa-car"){
-            <div class="col-lg-12">
-                <strong>Naam:</strong> @car.getName<br>
-                <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a><br>
-                <strong>Merk / type:</strong> @car.getBrand / @car.getType<br>
-                <strong>Standplaats:</strong> @car.getLocation
-            </div>
-        }
+    @panel("Auto ", "fa-car"){
+        <div class="col-lg-12">
+            <strong>Naam:</strong> @car.getName<br>
+            <strong>Eigenaar:</strong> <a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a><br>
+            <strong>Merk / type:</strong> @car.getBrand / @car.getType<br>
+            <strong>Standplaats:</strong> @car.getLocation
+        </div>
     }
 
 }

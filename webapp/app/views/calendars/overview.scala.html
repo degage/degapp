@@ -28,7 +28,7 @@
  *@
 
 @import java.time.LocalDate
-@(form: Form[Reserve.DateData], lines: Iterable[Reserve.OverviewLine], date: LocalDate, prev: LocalDate, next: LocalDate)
+@(form: Form[Calendars.DateData], lines: Iterable[util.OverviewLine], date: LocalDate, prev: LocalDate, next: LocalDate)
 @* Displays an overview of available cars during subsequent days *@
 
 @scripts={
@@ -52,7 +52,7 @@
 @stdlayout("Overzicht vrije perioden", sheets("reservationtable", "taglabels"), scripts){
 
     @panel("Toon het overzicht voor een bepaalde dag", "fa-search"){
-        @helper.form(routes.Reserve.overviewPost){
+        @helper.form(routes.Calendars.overviewPost){
             @std.datepicker(form("date"), null, css="col-sm-4", minView=3)
             @std.submitButton("Toon!", css="col-sm-4")
         }
@@ -62,10 +62,10 @@
         <tr>
             <td>&nbsp;</td>
             <td colspan="4"><a class="btn btn-sm"
-                    href="@routes.Reserve.overview(Utils.toDateString(prev))"><i class="fa fa-chevron-left"></i></a></td>
-            <th class="res-date" colspan="@(Reserve.NUMBER_OF_INTERVALS-8)">@Utils.toLocalizedDateStringWithDayOfWeek(date)</th>
+                    href="@routes.Calendars.overview(Utils.toDateString(prev))"><i class="fa fa-chevron-left"></i></a></td>
+            <th class="res-date" colspan="@(util.OverviewLine.NUMBER_OF_INTERVALS-8)">@Utils.toLocalizedDateStringWithDayOfWeek(date)</th>
             <td colspan="4" class="text-right"><a class="btn btn-sm"
-                    href="@routes.Reserve.overview(Utils.toDateString(next))"><i class="fa fa-chevron-right"></i></a></td>
+                    href="@routes.Calendars.overview(Utils.toDateString(next))"><i class="fa fa-chevron-right"></i></a></td>
         </tr>
     }{  @* no footer. *@ }
 

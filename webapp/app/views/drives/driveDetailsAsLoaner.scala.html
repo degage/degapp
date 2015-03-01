@@ -28,7 +28,9 @@
  *@
 
 @(reservation: Reservation, driveInfo: CarRide, car: Car, owner: User, previousLoaner: User, nextLoaner: User)
-@import db.CurrentUser
+
+@import routes.Workflow._
+@import routes.Refuels._
 
 @* only called when user is not the owner of the car and also not a reservation admin *@
 
@@ -40,18 +42,18 @@
         <div class="col-xs-12">
             @reservation.getStatus match {
                 case ReservationStatus.REQUEST | ReservationStatus.ACCEPTED => {
-                    <a class="btn btn-xs btn-primary" href="@routes.Drives.shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
-                    <a class="btn btn-xs btn-danger" href="@routes.Drives.cancelReservation(reservation.getId)">Reservatie annuleren</a>
+                    <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
+                    <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Reservatie annuleren</a>
                 }
                 case ReservationStatus.REFUSED | ReservationStatus.CANCELLED | ReservationStatus.CANCELLED_LATE => {
                     (Geen. De reservatie is geweigerd of geannuleerd.)
                 }
                 case ReservationStatus.REQUEST_DETAILS => {
-                    <a class="btn btn-xs btn-warning" href="@routes.Drives.newJourneyInfo(reservation.getId)">Ritdetails invullen ...</a>
-                    <a class="btn btn-xs btn-danger" href="@routes.Drives.lateCancelReservation(reservation.getId)">Schrappen</a>
+                    <a class="btn btn-xs btn-warning" href="@newTripInfo(reservation.getId)">Ritdetails invullen ...</a>
+                    <a class="btn btn-xs btn-danger" href="@lateCancelReservation(reservation.getId)">Schrappen</a>
                 }
                 case ReservationStatus.DETAILS_PROVIDED | ReservationStatus.FINISHED => {
-                    <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
+                    <a class="btn btn-xs btn-primary" href="@showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
                 }
             }
         </div>

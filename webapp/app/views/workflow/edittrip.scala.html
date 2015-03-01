@@ -1,4 +1,4 @@
-@* cardatepanel.scala.html
+@* edittrip.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,22 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Reserve.CarDateData], route: play.api.mvc.Call)
+@(form: Form[Workflow.TripData], reservation: Reservation)
 
-@* Panel used by startcar and overviewcar templates *@
+@extrabc = {
+    @breadcrumb("Ritten",routes.Drives.index())
+    @breadcrumb("Details",routes.Drives.details(reservation.getId))
+}
 
+@stdlayout("Wijzigen ritgegevens", extrabc=extrabc) {
 
-@panel("Wanneer is een auto beschikbaar?", "fa-search") {
-    @helper.form(route) {
-        @std.carpicker(form("carId"),form("carIdAsString"),"Auto",css="col-md-4")
-        @std.datepicker(form("date"), "Vanaf", css="col-md-4")
-        <div class="button-group col-xs-12">
-            <button type="submit" class="btn btn-success" name="period" value="week">Weekoverzicht</button>
-            <button type="submit" class="btn btn-success" name="period" value="month">Maandoverzicht</button>
-        </div>
+    @drives.detailsPanelPartial(reservation)
+
+    @panel("Gegevens", "fa-pencil") {
+        @helper.form(routes.Workflow.doEditTripInfo(reservation.getId)){
+            @std.numberField(form("startKm"), "Kilometerstand vóór de rit", css="col-sm-6")
+            @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
+            @std.submitButton("Wijzigen (en meteen goedkeuren)")
+        }
     }
 }

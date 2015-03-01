@@ -1,4 +1,4 @@
-@* shorten.scala.html
+@* approveorreject.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,26 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Reserve.ReservationData], reservation: Reservation)
+@(form: Form[Workflow.RemarksData], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Drives.index())
-    @breadcrumb("Details",routes.Drives.details(reservation.getId)) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Drives.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
-@stdlayout("Reservatieperiode inkorten", extrabc=extrabc, scripts=js.datetimepicker() ) {
+@stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
 
-    @detailsPanel(reservation.getCar(), reservation)
+    @drives.detailsPanel(reservation.getCar(), reservation)
 
-    @panel("Aanpassen", "fa-calendar") {
-        @helper.form(routes.Drives.shortenReservationPost(reservation.getId)) {
-            @std.datetimepicker(form("from"),"Begin ingekorte reservatie", css="col-md-6",minuteStep=15)
-            @std.datetimepicker(form("until"),"Einde ingekorte reservatie", css="col-md-6",minuteStep=15)
-            @std.submitButton("Periode inkorten")
-            <div class="col-xs-12">
-                    <p class="bg-info"><strong>Opmerking</strong> Reservaties die reeds zijn goedgekeurd kunnen enkel nog worden <b>ingekort</b>. Wens je
-                        een goedgekeurde reservatie toch te verlengen of te verplaatsen dan moet je ze annuleren en
-                een nieuwe reservatie aanvragen (die dan opnieuw moet worden goedgekeurd).</p>
+    @panel("Aanpassen", "fa-pencil") {
+        @helper.form(routes.Workflow.doApproveReservation(reservation.getId())) {
+            @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
+            <div class="col-sm-6 col-xs-6">
+                <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
+                <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
             </div>
         }
     }

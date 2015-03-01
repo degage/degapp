@@ -210,7 +210,7 @@ public class Notifier extends Mailer {
     }
 
     public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation, String carName) {
-        String url = toFullURL(routes.Drives.approveOrReject(reservation.getId()));
+        String url = toFullURL(routes.Workflow.approveReservation(reservation.getId()));
         UserHeader driver = reservation.getUser();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
