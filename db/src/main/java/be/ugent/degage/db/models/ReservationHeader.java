@@ -90,6 +90,10 @@ public class ReservationHeader {
         return message;
     }
 
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
     public boolean isPrivileged() {
         return privileged;
     }

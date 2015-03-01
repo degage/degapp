@@ -89,7 +89,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private LazyStatement createReservationStatement = new LazyStatement (
             "INSERT INTO reservations (reservation_user_id, reservation_car_id, "
-                    + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?)",
+                    + "reservation_from, reservation_to) VALUES (?,?,?,?)",
             "reservation_id"
     );
 
@@ -98,7 +98,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     @Override
-    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId, String message) throws DataAccessException {
+    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId) throws DataAccessException {
         try {
             // TODO: find a way to do this with a single SQL statement
             PreparedStatement ps = createReservationStatement.value();
@@ -106,7 +106,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             ps.setInt(2, carId);
             ps.setTimestamp(3, Timestamp.valueOf(from));
             ps.setTimestamp(4, Timestamp.valueOf(until));
-            ps.setString(5, message);
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating reservation.");
@@ -126,8 +125,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 ReservationHeader reservation = new ReservationHeader (
                         id,
                         userId, carId,  rs.getInt("reservation_owner_id"),
-                        from, until,
-                        message);
+                        from, until, null);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
                 reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
                 return reservation;

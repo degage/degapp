@@ -454,7 +454,11 @@ BEGIN
        ( SELECT car_owner_user_id FROM cars WHERE car_id = NEW.reservation_car_id );
 
     IF privileged THEN
-        SET NEW.reservation_status = 'ACCEPTED';
+        IF NEW.reservation_from < NOW() THEN
+            SET NEW.reservation_status = 'REQUEST_DETAILS';
+        ELSE
+            SET NEW.reservation_status = 'ACCEPTED';
+        END IF;
     ELSE
         SET NEW.reservation_status = 'REQUEST';
         -- TODO: add corresponding job

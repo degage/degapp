@@ -130,18 +130,24 @@ public class Workflow extends Controller {
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result doCreate(int carId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
         Form<ReservationData> form = new Form<>(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
-            Car car = DataAccess.getInjectedContext().getCarDAO().getCar(carId);
             return ok(create.render(form, car));
         }
 
-        DataAccessContext context = DataAccess.getInjectedContext();
-        Car car = context.getCarDAO().getCar(carId);
-        // Test whether the reservation is valid
         ReservationData data = form.get();
         LocalDateTime from = data.from;
         LocalDateTime until = data.until;
+
+        if (from.isBefore(LocalDateTime.now()) && CurrentUser.isNot(car.getOwner().getId())) {
+            form.reject("from",
+                    "Een reservatie uit het verleden kan enkel door de eigenaar worden ingebracht");
+            return ok(create.render(form, car));
+        }
+
+        // Test whether the reservation is valid
         ReservationDAO rdao = context.getReservationDAO();
         if (rdao.hasOverlap(carId, from, until)) {
             String errorMessage = "De reservatie overlapt met een bestaande reservatie";
@@ -150,13 +156,14 @@ public class Workflow extends Controller {
             return ok(create.render(form, car));
         }
 
-        ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId(), data.message);
-        if (reservation.getStatus() != ReservationStatus.ACCEPTED) {
-            // Reservations by the owner were accepted automatically
+        ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId());
+        if (reservation.getStatus() == ReservationStatus.REQUEST) {
+            // No mails need to be sent when ACCEPTED or REQUEST DETAILS
 
             // note: user contained in this record was null
             // TODO: avoid having to retrieve the whole record
             Reservation res = rdao.getReservation(reservation.getId());
+            res.setMessage(data.message);
             Notifier.sendReservationApproveRequestMail(
                     car.getOwner(), res, car.getName()
             );

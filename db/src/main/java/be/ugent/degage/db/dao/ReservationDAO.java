@@ -42,9 +42,10 @@ import java.util.Collection;
 public interface ReservationDAO {
 
     /**
-     * Add a new reservation to the database. If the user is privileged for the car then the reservation is accepted automatically.
+     * Add a new reservation to the database. If the user is privileged for the car then the reservation is accepted automatically. If the
+     * from date is in the past, the reservation is given status REQUEST_DETAILS automatically. No message is stored in the database.
      */
-    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId, String message) throws DataAccessException;
+    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId) throws DataAccessException;
 
 
     public Reservation getReservation (int id) throws DataAccessException;
