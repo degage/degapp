@@ -102,7 +102,7 @@ public class Notifier extends Mailer {
     public static void sendMembershipApproved(UserHeader user, String comment) {
         String url = toFullURL(routes.Application.index());
 
-        createNotificationAndSend (user, "membershipApproved",
+        createNotificationAndSend(user, "membershipApproved",
                 views.txt.messages.membershipApproved.render(user, comment, url),
                 views.html.messages.membershipApproved.render(user, comment, url),
                 user.getFirstName(), user.getLastName()
@@ -267,7 +267,6 @@ public class Notifier extends Mailer {
                 carName, from
         );
     }
-    // to be used with injected context
     public static void sendReservationRefusedByOwnerMail(String reason, Reservation reservation) {
         UserHeader driver = reservation.getUser();
         String carName = reservation.getCar().getName();
@@ -278,6 +277,23 @@ public class Notifier extends Mailer {
                 views.txt.messages.reservationRejected.render(driver, carName, from, until, reason),
                 views.html.messages.reservationRejected.render(driver, carName, from, until, reason),
                 carName
+        );
+    }
+
+    /**
+     * Sent when a reservation is cancelled although it was already accepted
+     */
+    public static void sendReservationCancelled(UserHeader owner, Reservation reservation, String carName) {
+        UserHeader driver = reservation.getUser();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        createNotificationAndSend (
+                owner, "reservationCancelled",
+                views.txt.messages.reservationCancelled.render(
+                        owner, driver, carName, from,  until, reservation.getMessage()),
+                views.html.messages.reservationCancelled.render(
+                        owner, driver, carName, from,  until, reservation.getMessage()),
+                carName, from
         );
     }
 

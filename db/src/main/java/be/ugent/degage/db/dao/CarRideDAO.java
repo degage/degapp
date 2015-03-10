@@ -41,7 +41,12 @@ import java.util.List;
  */
 public interface CarRideDAO {
     public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage, boolean damaged) throws DataAccessException;
+
+    /**
+     * Returns the trip details of the given ride. Returns null if no trip details are available.
+     */
     public CarRide getCarRide(int id) throws DataAccessException;
+
     public void updateCarRide(CarRide carRide) throws DataAccessException;
     public void updateCarRideKm(int rideId, int startKm, int endKm) throws DataAccessException;
     public void endPeriod() throws DataAccessException;

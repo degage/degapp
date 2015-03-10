@@ -60,13 +60,13 @@ public interface ReservationDAO {
     public ReservationHeader getReservationHeaderForRefuel (int refuelId) throws DataAccessException;
 
     /**
-     * Update reservation status including an optional message. Should only be used to
-     * refuse or accept a reservation
+     * Update reservation status including an optional message. Should only be used when
+     * refusing a reservation or cancelling a reservation that is already in the past
      */
     public void updateReservationStatus (int reservationId, ReservationStatus status, String message);
 
     /**
-     * Update reservation statusbut not the message. Do not use for refusing or accepting a reservation
+     * Update reservation status but not the message.
      */
     public void updateReservationStatus (int reservationId, ReservationStatus status);
 

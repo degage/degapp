@@ -58,6 +58,8 @@ POST        /reservation/create                     controllers.Workflow.doCreat
 GET         /reservation/approval                   controllers.Workflow.approveReservation(reservationId: Int)
 POST        /reservation/approval                   controllers.Workflow.doApproveReservation(reservationId: Int)
 GET         /reservation/cancel                     controllers.Workflow.cancelReservation(reservationId: Int)
+GET         /reservation/cancelaccepted             controllers.Workflow.cancelAccepted(reservationId: Int)
+POST        /reservation/cancelaccepted             controllers.Workflow.doCancelAccepted(reservationId: Int)
 GET         /reservation/late                       controllers.Workflow.lateCancelReservation(reservationId: Int)
 GET         /reservation/shorten                    controllers.Workflow.shortenReservation(reservationId: Int)
 POST        /reservation/shorten                    controllers.Workflow.doShortenReservation(reservationId: Int)

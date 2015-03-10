@@ -175,8 +175,26 @@ public class Workflow extends Controller {
        CANCEL
        ======================================================================== */
 
+    private static Result redirectToDetails(int reservationId) {
+        return redirect(routes.Trips.details(reservationId));
+    }
+
+    public static class CancelData {
+        public String remarks;
+
+        public List<ValidationError> validate() {
+            if (Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
+                return Collections.singletonList(
+                        new ValidationError("remarks", "Je moet een reden opgeven voor de annulatie")
+                );
+            } else {
+                return null;
+            }
+        }
+    }
+
     /**
-     * Cancel a reservation
+     * Try to cancel a reservation.
      */
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
@@ -184,25 +202,97 @@ public class Workflow extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
         ReservationHeader reservation = dao.getReservationHeader(reservationId);
-        if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
-            // extra checks when not reservation admin
-            if (CurrentUser.is(reservation.getUserId())) {
-                ReservationStatus status = reservation.getStatus();
-                if (status != ReservationStatus.REQUEST && status != ReservationStatus.ACCEPTED) {
-                    flash("danger", "Deze reservatie kan niet meer geannuleerd worden.");
-                    return redirect(routes.Trips.index(0));
-                }
-            } else {
-                flash("danger", "Alleen de ontlener mag een reservatie annuleren!");
-                return redirect(routes.Trips.index(0));
+
+        ReservationStatus status = reservation.getStatus();
+
+        if (reservation.getFrom().isBefore(LocalDateTime.now())) {
+            // verlopen reservatie
+            if (!isOwnerOrAdmin(reservation)) {
+                flash("danger", "Alleen de eigenaar kan een verlopen reservatie annuleren!");
+                return redirectToDetails(reservationId);
             }
+        } else {
+            // lopende reservatie
+            if (CurrentUser.isNot(reservation.getUserId())) {
+                flash("danger", "Alleen de bestuurder kan een lopende reservatie annuleren!");
+                return redirectToDetails(reservationId);
+            }
+        }
+        if (status == ReservationStatus.ACCEPTED && reservation.getFrom().isBefore(LocalDateTime.now())) {
+            // must be treated as REQUEST_DETAILS
+            status = ReservationStatus.REQUEST_DETAILS;
+        }
+        switch (status) {
+            case REQUEST:
+                // all checks have already been done
+                break;
+            case ACCEPTED:
+                // known to be in the future
+                if (!isOwnerOrAdmin(reservation)) {
+                    // can be cancelled by driver, but needs a comment
+                    flash("danger",
+                            "Deze reservatie was reeds goedgekeurd! " +
+                                    "Je moet daarom verplicht een reden opgeven voor de annulatie");
+                    return redirect(routes.Workflow.cancelAccepted(reservationId));
+                }
+                break;
+            case REQUEST_DETAILS:
+                // authorization checks have already been done
+                if (context.getCarRideDAO().getCarRide(reservationId) != null) {
+                    flash("danger", "Een rit met ingegeven kilometerstanden kan niet meer worden geannuleerd");
+                    return redirectToDetails(reservationId);
+                }
+                break;
+            default:
+                // in al other cases, cannot be cancelled
+                flash("danger", "Deze rit kan niet meer geannuleerd worden");
+                return redirectToDetails(reservationId);
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
 
         // Unschedule the job for auto accept
+        // TODO: remove this
         context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
 
-        return redirect(routes.Trips.details(reservationId));
+        return redirectToDetails(reservationId);
+    }
+
+    /**
+     * Show a form for cancelling a reservation which was already accepted
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result cancelAccepted(int reservationId) {
+        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+        return ok(cancelaccepted.render(Form.form(CancelData.class), reservation));
+    }
+
+    /**
+     * Process the results of {@link #cancelAccepted}
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result doCancelAccepted(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        Reservation reservation = dao.getReservation(reservationId);
+
+        if (CurrentUser.isNot(reservation.getUserId()) ||
+                reservation.getStatus() != ReservationStatus.ACCEPTED) {
+            return badRequest(); // should not happen
+        }
+
+        Form<CancelData> form = Form.form(CancelData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(cancelaccepted.render(form, reservation));
+        } else {
+            String comments = form.get().remarks;
+            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED, comments);
+            Car car = context.getCarDAO().getCar(reservation.getCarId());
+            reservation.setMessage(comments);
+            Notifier.sendReservationCancelled(car.getOwner(), reservation, car.getName());
+            return redirectToDetails(reservationId);
+        }
     }
 
     /**
@@ -230,7 +320,7 @@ public class Workflow extends Controller {
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE);
 
-        return redirect(routes.Trips.details(reservationId));
+        return redirectToDetails(reservationId);
     }
 
 
@@ -238,7 +328,6 @@ public class Workflow extends Controller {
     /* ========================================================================
        APPROVE / REJECT
        ======================================================================== */
-
 
     public static class RemarksData {
         // String containing the reason for refusing a reservation (or refuel)
@@ -294,7 +383,7 @@ public class Workflow extends Controller {
                     if (CurrentUser.isNot(reservation.getOwnerId())
                             || reservation.getStatus() != ReservationStatus.REQUEST) {
                         flash("danger", "Alleen de eigenaar kan een reservatie goed- of afkeuren");
-                        return redirect(routes.Trips.details(reservationId));
+                        return redirectToDetails(reservationId);
                     }
                 }
                 dao.updateReservationStatus(reservationId, status, remarks);
@@ -307,7 +396,7 @@ public class Workflow extends Controller {
                 } else {
                     Notifier.sendReservationApprovedByOwnerMail(context, remarks, reservation);
                 }
-                return redirect(routes.Trips.details(reservationId));
+                return redirectToDetails(reservationId);
 
             } else { // other cases only happen when somebody is hacking
                 return badRequest();
@@ -378,7 +467,7 @@ public class Workflow extends Controller {
                 );
                 */
             }
-            return redirect(routes.Trips.details(reservationId));
+            return redirectToDetails(reservationId);
         } else {
             // this means that somebody is hacking?
             return badRequest();
@@ -392,11 +481,11 @@ public class Workflow extends Controller {
 
     public static class TripData {
         @Constraints.Required
-        @Constraints.Min(value=1, message="Ongeldige kilometerstand")
+        @Constraints.Min(value = 1, message = "Ongeldige kilometerstand")
         public int startKm;
 
         @Constraints.Required
-        @Constraints.Min(value=1, message="Ongeldige kilometerstand")
+        @Constraints.Min(value = 1, message = "Ongeldige kilometerstand")
         public int endKm;
 
         public boolean damaged = false;
@@ -440,7 +529,7 @@ public class Workflow extends Controller {
         public List<ValidationError> listOfErrors() {
             List<ValidationError> result = new ArrayList<>();
             if (amount == null || amount.getValue() <= 0) {
-                result.add(new ValidationError("amount", "Bedrag moet groter zijn dan 0 EURO")) ;
+                result.add(new ValidationError("amount", "Bedrag moet groter zijn dan 0 EURO"));
             }
             if (Strings.isNullOrEmpty(fuelAmount)) {
                 result.add(new ValidationError("fuelAmount", "Veld mag niet leeg zijn"));
@@ -452,6 +541,7 @@ public class Workflow extends Controller {
         }
 
     }
+
     private static boolean newTripInfoAllowed(ReservationHeader reservation) {
         return reservation.getStatus() == ReservationStatus.REQUEST_DETAILS &&
                 isDriverOrOwnerOrAdmin(reservation);
@@ -571,7 +661,7 @@ public class Workflow extends Controller {
                     }
                 }
 
-                return redirect(routes.Trips.details(reservationId));
+                return redirectToDetails(reservationId);
             } else {
                 // not allowed
                 return badRequest(); // hacker?
@@ -629,7 +719,7 @@ public class Workflow extends Controller {
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             dao.approveInfo(reservationId);
             rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
-            return redirect(routes.Trips.details(reservationId));
+            return redirectToDetails(reservationId);
         } else {
             // not allowed
             return badRequest(); // hacker?
@@ -643,7 +733,7 @@ public class Workflow extends Controller {
     /**
      * Approve trip info
      */
-    @AllowRoles({UserRole.CAR_OWNER,UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -657,9 +747,8 @@ public class Workflow extends Controller {
         } else {
             flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
         }
-        return redirect(routes.Trips.details(reservationId));
+        return redirectToDetails(reservationId);
     }
-
 
 
 }
