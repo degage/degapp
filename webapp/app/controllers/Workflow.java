@@ -249,11 +249,6 @@ public class Workflow extends Controller {
                 return redirectToDetails(reservationId);
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
-
-        // Unschedule the job for auto accept
-        // TODO: remove this
-        context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
-
         return redirectToDetails(reservationId);
     }
 
@@ -387,10 +382,6 @@ public class Workflow extends Controller {
                     }
                 }
                 dao.updateReservationStatus(reservationId, status, remarks);
-
-                // Unschedule the job for auto accept
-                context.getJobDAO().deleteJob(JobType.RESERVE_ACCEPT, reservationId);
-
                 if (status == ReservationStatus.REFUSED) {
                     Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
                 } else {
@@ -454,19 +445,7 @@ public class Workflow extends Controller {
                 && (status == ReservationStatus.ACCEPTED || status == ReservationStatus.REQUEST)
                 ) {
             dao.updateReservationTime(reservationId, data.from, data.until);
-            if (status == ReservationStatus.REQUEST) {
-                // Remove old reservation auto accept and add new
-                JobDAO jdao = context.getJobDAO();
-                // TODO: do the following in a single call
-                jdao.deleteJob(JobType.RESERVE_ACCEPT, reservationId); //remove the old job
-                /* TODO: reintroduce statement below, or similar
-                jdao.createJob(
-                        JobType.RESERVE_ACCEPT,
-                        reservationId,
-                        Instant.now().plusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("reservation_auto_accept")))
-                );
-                */
-            }
+
             return redirectToDetails(reservationId);
         } else {
             // this means that somebody is hacking?
