@@ -50,10 +50,7 @@ import play.mvc.Result;
 import views.html.workflow.*;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Controller responsible for reservation/trip work flow
@@ -206,18 +203,19 @@ public class Workflow extends Controller {
         ReservationStatus status = reservation.getStatus();
 
         if (reservation.getFrom().isBefore(LocalDateTime.now())) {
-            // verlopen reservatie
+            // reservation in the past
             if (!isOwnerOrAdmin(reservation)) {
                 flash("danger", "Alleen de eigenaar kan een verlopen reservatie annuleren!");
                 return redirectToDetails(reservationId);
             }
         } else {
-            // lopende reservatie
+            // reservation in the future
             if (CurrentUser.isNot(reservation.getUserId())) {
                 flash("danger", "Alleen de bestuurder kan een lopende reservatie annuleren!");
                 return redirectToDetails(reservationId);
             }
         }
+
         if (status == ReservationStatus.ACCEPTED && reservation.getFrom().isBefore(LocalDateTime.now())) {
             // must be treated as REQUEST_DETAILS
             status = ReservationStatus.REQUEST_DETAILS;
@@ -406,6 +404,22 @@ public class Workflow extends Controller {
     @InjectContext
     public static Result shortenReservation(int reservationId) {
         Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+
+        // TODO: this is almost a copy from cancelReservation
+        if (reservation.getFrom().isBefore(LocalDateTime.now())) {
+            // reservation in the past
+            if (!isOwnerOrAdmin(reservation)) {
+                flash("danger", "Alleen de eigenaar kan een verlopen reservatie inkorten!");
+                return redirectToDetails(reservationId);
+            }
+        } else {
+            // reservation in the future
+            if (CurrentUser.isNot(reservation.getUserId())) {
+                flash("danger", "Alleen de bestuurder kan een lopende reservatie inkorten!");
+                return redirectToDetails(reservationId);
+            }
+        }
+
         return ok(shorten.render(
                 Form.form(ReservationData.class).fill(
                         new ReservationData().populate(reservation.getFrom(), reservation.getUntil())
@@ -413,6 +427,11 @@ public class Workflow extends Controller {
                 reservation
         ));
     }
+
+    public static final Set<ReservationStatus> STATUSES_THAT_ALLOW_SHORTENING
+            = EnumSet.of(ReservationStatus.ACCEPTED, ReservationStatus.REQUEST,
+                         ReservationStatus.REQUEST_DETAILS, ReservationStatus.DETAILS_PROVIDED,
+                         ReservationStatus.FINISHED);
 
     /**
      * Process the page that allows shortening of reservations
@@ -423,7 +442,20 @@ public class Workflow extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
         Reservation reservation = dao.getReservationExtended(reservationId);
+
+        // check authorizations
+        if (reservation.getFrom().isBefore(LocalDateTime.now())) {
+            if (!isOwnerOrAdmin(reservation)) {
+                return badRequest();
+            }
+        } else if (CurrentUser.isNot(reservation.getUserId())) {
+            return badRequest();
+        }
+
         ReservationStatus status = reservation.getStatus();
+        if (!STATUSES_THAT_ALLOW_SHORTENING.contains(status)) {
+            return badRequest();
+        }
 
         Form<ReservationData> form = Form.form(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
@@ -440,17 +472,9 @@ public class Workflow extends Controller {
         if (form.hasErrors()) {
             return badRequest(shorten.render(form, reservation));
         }
+        dao.updateReservationTime(reservationId, data.from, data.until);
 
-        if ((CurrentUser.is(reservation.getUserId()) || CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))
-                && (status == ReservationStatus.ACCEPTED || status == ReservationStatus.REQUEST)
-                ) {
-            dao.updateReservationTime(reservationId, data.from, data.until);
-
-            return redirectToDetails(reservationId);
-        } else {
-            // this means that somebody is hacking?
-            return badRequest();
-        }
+        return redirectToDetails(reservationId);
     }
     
     /* ========================================================================
