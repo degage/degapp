@@ -47,8 +47,9 @@ public class ReservationHeader {
     protected LocalDateTime until;
     protected String message;
     protected boolean privileged;
+    protected boolean old;
 
-    public ReservationHeader(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until, String message) {
+    public ReservationHeader(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until, String message, boolean old) {
         this.id = id;
         this.carId = carId;
         this.userId = userId;
@@ -56,10 +57,15 @@ public class ReservationHeader {
         this.from = from;
         this.until = until;
         this.message = message;
+        this.old = old;
     }
     
     public int getId() {
         return id;
+    }
+
+    public boolean isOld() {
+        return old;
     }
 
     public ReservationStatus getStatus() {
