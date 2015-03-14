@@ -60,7 +60,7 @@
                 <p>(Tankbeurten kunnen ook later nog afzonderlijk worden ingegeven. Je hoeft dit niet meteen te doen.)</p>
             </div>
 
-            @if(Workflow.isOwnerOrAdmin(reservation)){
+            @if(WFCommon.isOwnerOrAdmin(reservation)){
                 @std.submitButton("Doorsturen (en meteen goedkeuren)")
             } else {
                 <div class="col-xs-12">

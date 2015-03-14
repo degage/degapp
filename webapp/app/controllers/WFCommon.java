@@ -1,4 +1,4 @@
-@* actionPanel.scala.html
+/* WFCommon.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -25,14 +25,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ */
 
-@(reservation: Reservation)
+package controllers;
 
-@panel("Acties", "fa-pencil") {
-    <div class="col-xs-12">
-        @foreach.orElse(util.WorkflowAction.getCurrentActions(reservation))(_.asWideButton(reservation.getId)){
-        (Geen acties.)
-        }
-    </div>
+import be.ugent.degage.db.models.ReservationHeader;
+import be.ugent.degage.db.models.UserRole;
+import controllers.util.WorkflowRole;
+import db.CurrentUser;
+import play.mvc.Controller;
+import play.mvc.Result;
+
+/**
+ * Common code for all workflow related controllers. All these controllers extend this class.
+ */
+public class WFCommon extends Controller {
+
+    public static boolean isOwnerOrAdmin(ReservationHeader reservation) {
+        return WorkflowRole.OWNER.isCurrentRoleFor(reservation) ||
+                WorkflowRole.ADMIN.isCurrentRoleFor(reservation);
+    }
+
+    public static boolean isDriverOrOwnerOrAdmin(ReservationHeader reservation) {
+        return WorkflowRole.OWNER.isCurrentRoleFor(reservation) ||
+                WorkflowRole.ADMIN.isCurrentRoleFor(reservation) ||
+                 WorkflowRole.DRIVER.isCurrentRoleFor(reservation);
+    }
+
+    public static Result redirectToDetails(int reservationId) {
+        return redirect(routes.Trips.details(reservationId));
+    }
 }

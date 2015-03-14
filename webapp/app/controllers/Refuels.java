@@ -176,7 +176,7 @@ public class Refuels extends Controller {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (Workflow.isDriverOrOwnerOrAdmin(reservation)) {
+        if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
             Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
             return FileHelper.getFileStreamResult(context.getFileDAO(), refuel.getProofId());
         } else {
@@ -207,7 +207,7 @@ public class Refuels extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
-        if (Workflow.isDriverOrOwnerOrAdmin(reservation)) {
+        if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
             return ok( refuelsForRide.render(
                             Form.form(RefuelData.class).fill(new RefuelData().populate( new EurocentAmount(), null, 0)),
                             refuels,
@@ -230,7 +230,7 @@ public class Refuels extends Controller {
         if (form.hasErrors()) {
             form.reject("picture", "Bestand opnieuw selecteren");
             return badRequest( refuelsForRide.render(form, refuels, reservation));
-        } else if (Workflow.isDriverOrOwnerOrAdmin(reservation)) {
+        } else if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
             RefuelData data = form.get();
             File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
             if (file == null) {
@@ -254,7 +254,7 @@ public class Refuels extends Controller {
     static void newRefuel(Reservation reservation, UserHeader owner, int eurocents, int fileId,
                           int km, String amount
                           ) {
-        boolean isAdmin = Workflow.isOwnerOrAdmin(reservation);
+        boolean isAdmin = WFCommon.isOwnerOrAdmin(reservation);
 
         int refuelId = DataAccess.getInjectedContext().getRefuelDAO().createRefuel(
                 reservation.getId(), eurocents, fileId,

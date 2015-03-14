@@ -31,13 +31,11 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.CarRideDAO;
-import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.FileHelper;
 import controllers.util.WorkflowAction;
-import controllers.util.WorkflowRole;
 import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
@@ -57,21 +55,8 @@ import java.util.*;
 /**
  * Controller responsible for reservation/trip work flow
  */
-public class Workflow extends Controller {
+public class Workflow extends WFCommon {
    
-    /* ========================================================================
-       AUTHORIZATION CHECKS
-       ======================================================================== */
-
-    public static boolean isOwnerOrAdmin(ReservationHeader reservation) {
-        return CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
-                CurrentUser.is(reservation.getOwnerId());
-    }
-
-    public static boolean isDriverOrOwnerOrAdmin(ReservationHeader reservation) {
-        return isOwnerOrAdmin(reservation) || CurrentUser.is(reservation.getUserId());
-    }
-
 
     /* ========================================================================
        CREATION
@@ -173,92 +158,6 @@ public class Workflow extends Controller {
     /* ========================================================================
        CANCEL
        ======================================================================== */
-
-    private static Result redirectToDetails(int reservationId) {
-        return redirect(routes.Trips.details(reservationId));
-    }
-
-    public static class CancelData {
-        public String remarks;
-
-        public List<ValidationError> validate() {
-            if (Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
-                return Collections.singletonList(
-                        new ValidationError("remarks", "Je moet een reden opgeven voor de annulatie")
-                );
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Try to cancel a reservation.
-     */
-    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result cancelReservation(int reservationId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        ReservationHeader reservation = dao.getReservationHeader(reservationId);
-
-        if (WorkflowAction.CANCEL.isForbiddenForCurrentUser(reservation)) {
-            flash("danger", "U kan deze reservatie niet (meer) annuleren");
-            return redirectToDetails(reservationId);
-        }
-
-        ReservationStatus status = reservation.getStatus();
-        // one special case: already accepted and in the past (and not owner or admin)
-        if (status == reservation.getStatus()
-                && reservation.getFrom().isAfter(LocalDateTime.now())
-                && !isOwnerOrAdmin(reservation)) {
-            flash("danger",
-                    "Deze reservatie was reeds goedgekeurd! " +
-                            "Je moet daarom verplicht een reden opgeven voor de annulatie");
-            return redirect(routes.Workflow.cancelAccepted(reservationId));
-        } else {
-            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
-            return redirectToDetails(reservationId);
-        }
-    }
-
-    /**
-     * Show a form for cancelling a reservation which was already accepted
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result cancelAccepted(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
-        return ok(cancelaccepted.render(Form.form(CancelData.class), reservation));
-    }
-
-    /**
-     * Process the results of {@link #cancelAccepted}
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result doCancelAccepted(int reservationId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservation(reservationId);
-
-        if (CurrentUser.isNot(reservation.getUserId()) ||
-                reservation.getStatus() != ReservationStatus.ACCEPTED) {
-            return badRequest(); // should not happen
-        }
-
-        Form<CancelData> form = Form.form(CancelData.class).bindFromRequest();
-        if (form.hasErrors()) {
-            return badRequest(cancelaccepted.render(form, reservation));
-        } else {
-            String comments = form.get().remarks;
-            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED, comments);
-            Car car = context.getCarDAO().getCar(reservation.getCarId());
-            reservation.setMessage(comments);
-            Notifier.sendReservationCancelled(car.getOwner(), reservation, car.getName());
-            return redirectToDetails(reservationId);
-        }
-    }
 
     /**
      * Cancel a reservation for a trip in the past which did not actually take place

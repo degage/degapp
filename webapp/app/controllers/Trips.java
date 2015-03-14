@@ -37,8 +37,6 @@ import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
-import controllers.util.WorkflowAction;
-import controllers.util.WorkflowRole;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -47,8 +45,6 @@ import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.trips.*;
-
-import java.util.Set;
 
 /**
  * Controller responsible for displaying information about reservations and trips.
@@ -94,7 +90,7 @@ public class Trips extends Controller {
         CarRideDAO ddao = context.getCarRideDAO();
         User loaner = udao.getUser(reservation.getUserId());
         User owner = udao.getUser(reservation.getOwnerId());
-        if ( ! Workflow.isDriverOrOwnerOrAdmin(reservation)) {
+        if ( ! WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
         }

@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Workflow.CancelData], reservation: Reservation)
+@(form: Form[WFCancel.CancelData], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
@@ -39,7 +39,7 @@
     @trips.detailsPanel(reservation.getCar(), reservation)
 
     @panel("Annuleren", "fa-pencil") {
-        @helper.form(routes.Workflow.doCancelAccepted(reservation.getId())) {
+        @helper.form(routes.WFCancel.doCancelAccepted(reservation.getId())) {
             @std.textArea(form("remarks"), "Reden voor de annulatie (verplicht)", 3)
             @std.submitButton("Annuleren")
         }

@@ -45,7 +45,7 @@ import java.util.function.IntFunction;
 public enum WorkflowAction {
 
     CANCEL("Annuleren", "Reservatie annuleren",
-            routes.Workflow::cancelReservation, "danger"),
+            routes.WFCancel::cancelReservation, "danger"),
     // cancel a reservation request
 
     AOR_RESERVATION("Goed- of afkeuren", "Goed- of afkeuren ...",

@@ -72,7 +72,7 @@
             @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")
             @std.textField(form("fuelAmount"), "Aantal liters getankt", css="col-sm-6")
             <div class="col-xs-12"><p>(Alle velden zijn verplicht)</p></div>
-            @if(Workflow.isOwnerOrAdmin(reservation)){
+            @if(WFCommon.isOwnerOrAdmin(reservation)){
                 @std.submitButton("Doorsturen (en meteen goedkeuren)")
             } else {
                 <div class="col-xs-12">
