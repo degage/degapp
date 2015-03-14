@@ -31,10 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
-import be.ugent.degage.db.models.Reservation;
-import be.ugent.degage.db.models.ReservationStatus;
-import be.ugent.degage.db.models.UserHeader;
-import be.ugent.degage.db.models.UserRole;
+import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.WorkflowAction;
 import db.CurrentUser;
@@ -48,6 +45,7 @@ import play.mvc.Result;
 import play.mvc.Results;
 import views.html.workflow.approveorreject;
 import views.html.workflow.approveonly;
+import views.html.workflow.reminder;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -161,5 +159,41 @@ public class WFApprove extends WFCommon {
                 return null;
             }
         }
+    }
+
+
+    /**
+     * Show page which allows a driver to send a reminder that a reservation has
+     * not been approved
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result sendReminder(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        Reservation reservation = dao.getReservation(reservationId);
+        if (WorkflowAction.SEND_REMINDER.isForbiddenForCurrentUser(reservation)) {
+            flash ("danger", "Je kan geen herinnering sturen voor deze reservatie");
+            return redirectToDetails(reservationId);
+        }
+        return ok(reminder.render(reservation));
+    }
+
+    /**
+     * Send a mail with a reminder to approve a certain reservation.
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result doSendReminder(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        Reservation reservation = dao.getReservation(reservationId);
+        if (WorkflowAction.SEND_REMINDER.isForbiddenForCurrentUser(reservation)) {
+            return badRequest();
+        }
+        UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
+        Notifier.sendRemindOwner(owner, reservation, reservation.getCar().getName());
+        flash("warning", "De herinneringse-mail wordt zo snel mogelijk verstuurd");
+        return redirectToDetails(reservationId);
     }
 }

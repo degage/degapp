@@ -64,16 +64,17 @@ GET         /reservation/cancel                     controllers.WFCancel.cancelR
 GET         /reservation/cancelaccepted             controllers.WFCancel.cancelAccepted(id: Int)
 POST        /reservation/cancelaccepted             controllers.WFCancel.doCancelAccepted(id: Int)
 GET         /reservation/late                       controllers.Workflow.lateCancelReservation(id: Int)
-GET         /reservation/reminder                   controllers.Workflow.sendReminder(id: Int)
-# Trip workflow
+GET         /reservation/reminder                   controllers.WFApprove.sendReminder(id: Int)
+POST        /reservation/reminder                   controllers.WFApprove.doSendReminder(id: Int)
 
+# Trip workflow
 GET         /trip/new                               controllers.Workflow.newTripInfo(id: Int)
 POST        /trip/new                               controllers.Workflow.doNewTripInfo(id: Int)
 GET         /trip/edit                              controllers.Workflow.editTripInfo(id: Int)
 POST        /trip/edit                              controllers.Workflow.doEditTripInfo(id: Int)
 GET         /trip/approval                          controllers.Workflow.approveTripInfo(id: Int)
 
-# Display information anout reservations / trips
+# Display information about reservations / trips
 GET         /trip                                   controllers.Trips.details(id: Int)
 GET         /trips                                  controllers.Trips.index(tab : Int ?= 0)
 GET         /trips/page                             controllers.Trips.showTripsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")

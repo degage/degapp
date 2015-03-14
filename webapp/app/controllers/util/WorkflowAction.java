@@ -53,7 +53,7 @@ public enum WorkflowAction {
     // approve or reject a reservation
 
     SEND_REMINDER("Herinnering", "Stuur herinnering",
-            routes.Workflow::sendReminder, "warning"),
+            routes.WFApprove::sendReminder, "warning"),
     // send a reminder to the owner
 
     SHORTEN("Inkorten", "Reservatieduur inkorten ...",

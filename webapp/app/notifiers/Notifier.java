@@ -224,6 +224,19 @@ public class Notifier extends Mailer {
         );
     }
 
+    public static void sendRemindOwner(UserHeader owner, Reservation reservation, String carName) {
+        String url = toFullURL(routes.WFApprove.approveReservation(reservation.getId()));
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        createNotificationAndSend (
+                owner, "remindOwner",
+                views.txt.messages.remindOwner.render( owner, carName, from,  until, url),
+                views.html.messages.remindOwner.render( owner, carName, from,  until, url),
+                carName, from
+        );
+    }
+
+
     public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation reservation, CarRide ride) {
         UserHeader driver = reservation.getUser();
         String url = toFullURL(routes.Trips.details(reservation.getId()));

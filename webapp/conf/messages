@@ -48,6 +48,7 @@ subject.costRejected=Kost niet goedgekeurd
 subject.refuelApproved=Tankbeurt {0} goedgekeurd. Rit van {1}
 subject.refuelRejected=Tankbeurt {0} niet goedgekeurd. Rit van {1}
 subject.reminder=U hebt ongelezen berichten
+subject.remindOwner=Dringend reservatie {0} goedkeuren
 subject.refuelRequest=Nieuwe tankbeurt voor {0}
 subject.costRequest=Nieuwe autokost
 subject.managerAssigned=Contract ondertekenen

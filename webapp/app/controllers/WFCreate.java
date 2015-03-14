@@ -112,8 +112,7 @@ public class WFCreate extends WFCommon {
             // TODO: avoid having to retrieve the whole record
             Reservation res = rdao.getReservation(reservation.getId());
             res.setMessage(data.message);
-            Notifier.sendReservationApproveRequestMail(
-                    car.getOwner(), res, car.getName()
+            Notifier.sendReservationApproveRequestMail(car.getOwner(), res, car.getName()
             );
         }
         return redirect(routes.Trips.index(0));
