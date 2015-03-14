@@ -29,12 +29,24 @@
 
 package controllers;
 
-import be.ugent.degage.db.models.ReservationHeader;
-import be.ugent.degage.db.models.UserRole;
+import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.models.*;
+import controllers.util.WorkflowAction;
 import controllers.util.WorkflowRole;
 import db.CurrentUser;
+import db.DataAccess;
+import db.InjectContext;
+import notifiers.Notifier;
+import play.data.Form;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Common code for all workflow related controllers. All these controllers extend this class.
@@ -55,4 +67,5 @@ public class WFCommon extends Controller {
     public static Result redirectToDetails(int reservationId) {
         return redirect(routes.Trips.details(reservationId));
     }
+
 }

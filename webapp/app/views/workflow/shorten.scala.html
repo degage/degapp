@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Workflow.ReservationData], reservation: Reservation)
+@(form: Form[WFCreate.ReservationData], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
@@ -39,7 +39,7 @@
     @trips.detailsPanel(reservation.getCar(), reservation)
 
     @panel("Aanpassen", "fa-calendar") {
-        @helper.form(routes.Workflow.doShortenReservation(reservation.getId)) {
+        @helper.form(routes.WFCreate.doShortenReservation(reservation.getId)) {
             @std.datetimepicker(form("from"),"Begin ingekorte reservatie", css="col-md-6",minuteStep=15)
             @std.datetimepicker(form("until"),"Einde ingekorte reservatie", css="col-md-6",minuteStep=15)
             @std.submitButton("Periode inkorten")

@@ -53,16 +53,16 @@ GET         /calendar/date                          controllers.Calendars.overvi
 POST        /calendar/date                          controllers.Calendars.overviewPost()
 
 # Reservation workflow
-GET         /reservation/create                     controllers.Workflow.create(carId: Int, from: String, until: String)
-POST        /reservation/create                     controllers.Workflow.doCreate(carId: Int)
+GET         /reservation/create                     controllers.WFCreate.create(carId: Int, from: String, until: String)
+POST        /reservation/create                     controllers.WFCreate.doCreate(carId: Int)
+GET         /reservation/shorten                    controllers.WFCreate.shortenReservation(id: Int)
+POST        /reservation/shorten                    controllers.WFCreate.doShortenReservation(id: Int)
 GET         /reservation/approval                   controllers.Workflow.approveReservation(id: Int)
 POST        /reservation/approval                   controllers.Workflow.doApproveReservation(id: Int)
 GET         /reservation/cancel                     controllers.WFCancel.cancelReservation(id: Int)
 GET         /reservation/cancelaccepted             controllers.WFCancel.cancelAccepted(id: Int)
 POST        /reservation/cancelaccepted             controllers.WFCancel.doCancelAccepted(id: Int)
 GET         /reservation/late                       controllers.Workflow.lateCancelReservation(id: Int)
-GET         /reservation/shorten                    controllers.Workflow.shortenReservation(id: Int)
-POST        /reservation/shorten                    controllers.Workflow.doShortenReservation(id: Int)
 GET         /reservation/reminder                   controllers.Workflow.sendReminder(id: Int)
 # Trip workflow
 

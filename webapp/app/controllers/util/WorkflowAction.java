@@ -57,7 +57,7 @@ public enum WorkflowAction {
     // send a reminder to the owner
 
     SHORTEN("Inkorten", "Reservatieduur inkorten ...",
-            routes.Workflow::shortenReservation, "primary"),
+            routes.WFCreate::shortenReservation, "primary"),
     // shorten a reservation
 
     CANCEL_LATE("Opheffen", "Opheffen ...",

@@ -1,0 +1,174 @@
+package controllers;
+
+import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.models.*;
+import controllers.util.WorkflowAction;
+import db.CurrentUser;
+import db.DataAccess;
+import db.InjectContext;
+import notifiers.Notifier;
+import play.data.Form;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
+import play.mvc.Result;
+import views.html.workflow.create;
+import views.html.workflow.shorten;
+
+import java.time.LocalDateTime;
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Controller for creation and shortening of reservations
+ */
+public class WFCreate extends WFCommon {
+
+    /**
+     * Show the page to create a reservation
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result create(int carId, String fromString, String untilString) {
+        LocalDateTime fromDateTime = Utils.toLocalDateTime(fromString);
+        return ok(create.render(
+                // query string binders are quite complicated to write :-(
+                new Form<>(ReservationData.class).fill(
+                        new ReservationData().populate(
+                                fromDateTime,
+                                untilString.isEmpty() ? fromDateTime : Utils.toLocalDateTime(untilString)
+                        )
+                ),
+                DataAccess.getInjectedContext().getCarDAO().getCar(carId)
+        ));
+    }
+
+    /**
+     * Process the reservation made in {@link #create}
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result doCreate(int carId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        Form<ReservationData> form = new Form<>(ReservationData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return ok(create.render(form, car));
+        }
+
+        ReservationData data = form.get();
+        LocalDateTime from = data.from;
+        LocalDateTime until = data.until;
+
+        if (from.isBefore(LocalDateTime.now()) && CurrentUser.isNot(car.getOwner().getId())) {
+            form.reject("from",
+                    "Een reservatie uit het verleden kan enkel door de eigenaar worden ingebracht");
+            return ok(create.render(form, car));
+        }
+
+        // Test whether the reservation is valid
+        ReservationDAO rdao = context.getReservationDAO();
+        if (rdao.hasOverlap(carId, from, until)) {
+            String errorMessage = "De reservatie overlapt met een bestaande reservatie";
+            form.reject("from", errorMessage);
+            form.reject("until", errorMessage);
+            return ok(create.render(form, car));
+        }
+
+        ReservationHeader reservation = rdao.createReservation(from, until, carId, CurrentUser.getId());
+        if (reservation.getStatus() == ReservationStatus.REQUEST) {
+            // No mails need to be sent when ACCEPTED or REQUEST DETAILS
+
+            // note: user contained in this record was null
+            // TODO: avoid having to retrieve the whole record
+            Reservation res = rdao.getReservation(reservation.getId());
+            res.setMessage(data.message);
+            Notifier.sendReservationApproveRequestMail(
+                    car.getOwner(), res, car.getName()
+            );
+        }
+        return redirect(routes.Trips.index(0));
+    }
+
+    /**
+     * Show the page that allows shortening of reservations
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result shortenReservation(int reservationId) {
+        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+
+        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(reservation)) {
+            flash("danger", "U kan deze reservatie niet inkorten");
+            return redirectToDetails(reservationId);
+        }
+
+
+        return ok(shorten.render(
+                Form.form(ReservationData.class).fill(
+                        new ReservationData().populate(reservation.getFrom(), reservation.getUntil())
+                ),
+                reservation
+        ));
+    }
+
+    /**
+     * Process the page that allows shortening of reservations
+     */
+    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result doShortenReservation(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO dao = context.getReservationDAO();
+        Reservation reservation = dao.getReservationExtended(reservationId);
+        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(reservation)) {
+            return badRequest();
+        }
+
+        Form<ReservationData> form = Form.form(ReservationData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(shorten.render(form, reservation));
+        }
+
+        ReservationData data = form.get();
+        if (data.from.isBefore(reservation.getFrom())) {
+            form.reject("from", "Periode mag alleen ingekort worden");
+        }
+        if (data.until.isAfter(reservation.getUntil())) {
+            form.reject("until", "Periode mag alleen ingekort worden");
+        }
+        if (form.hasErrors()) {
+            return badRequest(shorten.render(form, reservation));
+        }
+        dao.updateReservationTime(reservationId, data.from, data.until);
+
+        return redirectToDetails(reservationId);
+    }
+
+    public static class ReservationData {
+        @Constraints.Required
+        public LocalDateTime from;
+
+        @Constraints.Required
+        public LocalDateTime until;
+
+        public String message;
+
+        public List<ValidationError> validate() {
+            if (from.isBefore(until)) {
+                return null;
+            } else {
+                return Collections.singletonList(
+                        new ValidationError("until", "Het einde van de periode moet na het begin van de periode liggen")
+                );
+            }
+        }
+
+        public ReservationData populate(LocalDateTime from, LocalDateTime until) {
+            this.from = from;
+            this.until = until;
+            return this;
+        }
+
+    }
+}

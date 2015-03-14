@@ -49,7 +49,7 @@
                 @for(str <- line.freeTimes){
                    <td class="@if(str==null){res-notfree}else{res-free}">
                        @if(str!=null) {
-                            <a href='@routes.Workflow.create(line.carId,str,"")'>&nbsp;</a>
+                            <a href='@routes.WFCreate.create(line.carId,str,"")'>&nbsp;</a>
                        }
                    </td>
                 }
