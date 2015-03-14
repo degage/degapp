@@ -30,6 +30,7 @@
 package controllers.util;
 
 import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 import controllers.routes;
 import play.api.mvc.Call;
 import play.twirl.api.Html;
@@ -99,6 +100,18 @@ public enum WorkflowAction {
 
     public Html asWideButton (int reservationId) {
         return views.html.workflow.button.render(longCaption, callFunction.apply(reservationId), strength);
+    }
+
+    /**
+     * Checks whether this action is forbidden for the current user
+     */
+    public boolean isForbiddenForCurrentUser(ReservationHeader reservation) {
+        for (WorkflowRole role : WorkflowRole.getCurrentRoles(reservation)) {
+            if (role.actionsAllowed(reservation).contains(this)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

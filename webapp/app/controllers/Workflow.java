@@ -36,6 +36,8 @@ import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.FileHelper;
+import controllers.util.WorkflowAction;
+import controllers.util.WorkflowRole;
 import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
@@ -200,54 +202,24 @@ public class Workflow extends Controller {
         ReservationDAO dao = context.getReservationDAO();
         ReservationHeader reservation = dao.getReservationHeader(reservationId);
 
+        if (WorkflowAction.CANCEL.isForbiddenForCurrentUser(reservation)) {
+            flash("danger", "U kan deze reservatie niet (meer) annuleren");
+            return redirectToDetails(reservationId);
+        }
+
         ReservationStatus status = reservation.getStatus();
-
-        if (reservation.getFrom().isBefore(LocalDateTime.now())) {
-            // reservation in the past
-            if (!isOwnerOrAdmin(reservation)) {
-                flash("danger", "Alleen de eigenaar kan een verlopen reservatie annuleren!");
-                return redirectToDetails(reservationId);
-            }
+        // one special case: already accepted and in the past (and not owner or admin)
+        if (status == reservation.getStatus()
+                && reservation.getFrom().isAfter(LocalDateTime.now())
+                && !isOwnerOrAdmin(reservation)) {
+            flash("danger",
+                    "Deze reservatie was reeds goedgekeurd! " +
+                            "Je moet daarom verplicht een reden opgeven voor de annulatie");
+            return redirect(routes.Workflow.cancelAccepted(reservationId));
         } else {
-            // reservation in the future
-            if (CurrentUser.isNot(reservation.getUserId())) {
-                flash("danger", "Alleen de bestuurder kan een lopende reservatie annuleren!");
-                return redirectToDetails(reservationId);
-            }
+            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
+            return redirectToDetails(reservationId);
         }
-
-        if (status == ReservationStatus.ACCEPTED && reservation.getFrom().isBefore(LocalDateTime.now())) {
-            // must be treated as REQUEST_DETAILS
-            status = ReservationStatus.REQUEST_DETAILS;
-        }
-        switch (status) {
-            case REQUEST:
-                // all checks have already been done
-                break;
-            case ACCEPTED:
-                // known to be in the future
-                if (!isOwnerOrAdmin(reservation)) {
-                    // can be cancelled by driver, but needs a comment
-                    flash("danger",
-                            "Deze reservatie was reeds goedgekeurd! " +
-                                    "Je moet daarom verplicht een reden opgeven voor de annulatie");
-                    return redirect(routes.Workflow.cancelAccepted(reservationId));
-                }
-                break;
-            case REQUEST_DETAILS:
-                // authorization checks have already been done
-                if (context.getCarRideDAO().getCarRide(reservationId) != null) {
-                    flash("danger", "Een rit met ingegeven kilometerstanden kan niet meer worden geannuleerd");
-                    return redirectToDetails(reservationId);
-                }
-                break;
-            default:
-                // in al other cases, cannot be cancelled
-                flash("danger", "Deze rit kan niet meer geannuleerd worden");
-                return redirectToDetails(reservationId);
-        }
-        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
-        return redirectToDetails(reservationId);
     }
 
     /**
@@ -294,6 +266,7 @@ public class Workflow extends Controller {
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result lateCancelReservation(int reservationId) {
+        // TODO: show a form with two choices
         // TODO: lots of code in common with cancelReservation
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
@@ -405,19 +378,9 @@ public class Workflow extends Controller {
     public static Result shortenReservation(int reservationId) {
         Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
 
-        // TODO: this is almost a copy from cancelReservation
-        if (reservation.getFrom().isBefore(LocalDateTime.now())) {
-            // reservation in the past
-            if (!isOwnerOrAdmin(reservation)) {
-                flash("danger", "Alleen de eigenaar kan een verlopen reservatie inkorten!");
-                return redirectToDetails(reservationId);
-            }
-        } else {
-            // reservation in the future
-            if (CurrentUser.isNot(reservation.getUserId())) {
-                flash("danger", "Alleen de bestuurder kan een lopende reservatie inkorten!");
-                return redirectToDetails(reservationId);
-            }
+        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(reservation)) {
+            flash("danger", "U kan deze reservatie niet inkorten");
+            return redirectToDetails(reservationId);
         }
 
         return ok(shorten.render(
@@ -428,11 +391,6 @@ public class Workflow extends Controller {
         ));
     }
 
-    public static final Set<ReservationStatus> STATUSES_THAT_ALLOW_SHORTENING
-            = EnumSet.of(ReservationStatus.ACCEPTED, ReservationStatus.REQUEST,
-                         ReservationStatus.REQUEST_DETAILS, ReservationStatus.DETAILS_PROVIDED,
-                         ReservationStatus.FINISHED);
-
     /**
      * Process the page that allows shortening of reservations
      */
@@ -442,18 +400,7 @@ public class Workflow extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO dao = context.getReservationDAO();
         Reservation reservation = dao.getReservationExtended(reservationId);
-
-        // check authorizations
-        if (reservation.getFrom().isBefore(LocalDateTime.now())) {
-            if (!isOwnerOrAdmin(reservation)) {
-                return badRequest();
-            }
-        } else if (CurrentUser.isNot(reservation.getUserId())) {
-            return badRequest();
-        }
-
-        ReservationStatus status = reservation.getStatus();
-        if (!STATUSES_THAT_ALLOW_SHORTENING.contains(status)) {
+        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(reservation)) {
             return badRequest();
         }
 
