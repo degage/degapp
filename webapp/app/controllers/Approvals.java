@@ -343,7 +343,7 @@ public class Approvals extends Controller {
 
             private String description;
 
-            private Action(String description) {
+            Action(String description) {
                 this.description = description;
             }
 

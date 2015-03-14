@@ -296,7 +296,7 @@ public class Refuels extends Controller {
         Car car = context.getCarDAO().getCar(reservation.getCarId());
         CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
         return ok(approveorreject.render(
-                Form.form(Workflow.RemarksData.class),
+                Form.form(WFApprove.RemarksData.class),
                 refuel, car, reservation,
                 ride));
     }
@@ -312,13 +312,13 @@ public class Refuels extends Controller {
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
         RefuelDAO dao = context.getRefuelDAO();
         Refuel refuel = dao.getRefuel(refuelId);
-        Form<Workflow.RemarksData> form =  Form.form(Workflow.RemarksData.class).bindFromRequest();
+        Form<WFApprove.RemarksData> form =  Form.form(WFApprove.RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
             Car car = context.getCarDAO().getCar(reservation.getCarId());
             CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
             return badRequest(approveorreject.render(form, refuel, car, reservation, ride));
         } else {
-            Workflow.RemarksData data = form.get(); // the form does not contain errors
+            WFApprove.RemarksData data = form.get(); // the form does not contain errors
             RefuelStatus status = RefuelStatus.valueOf(data.status);
             String remarks = data.remarks;
             if (status == RefuelStatus.REFUSED || status == RefuelStatus.ACCEPTED) {

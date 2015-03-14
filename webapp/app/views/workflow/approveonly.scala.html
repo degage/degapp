@@ -1,4 +1,4 @@
-@* approveorreject.scala.html
+@* approveonly.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,24 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFApprove.RemarksData], reservation: Reservation)
+@(reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
     @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
-@stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
+@stdlayout("Reservatie goedkeuren", extrabc=extrabc ) {
 
     @trips.detailsPanel(reservation.getCar(), reservation)
 
     @panel("Aanpassen", "fa-pencil") {
-        @helper.form(routes.WFApprove.doApproveReservation(reservation.getId())) {
-            @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
-            <div class="col-sm-6 col-xs-6">
-                <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-                <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
+        @helper.form(routes.WFApprove.doApproveOldReservation(reservation.getId())) {
+            <div class="col-xs-12 alert alert-danger">
+                <p>Deze reservatie is reeds verlopen. Op dit moment kunt u
+                    de reservatie daarom alleen nog goedkeuren.</p>
             </div>
+            @std.submitButton("Goedkeuren")
         }
     }
 }

@@ -263,8 +263,7 @@ public class FileHelper {
                 DataAccessContext context = DataAccess.getInjectedContext();
                 FileDAO fdao = context.getFileDAO();
                 try {
-                    be.ugent.degage.db.models.File file = fdao.createFile(relativePath.toString(), f.getFilename(), f.getContentType());
-                    return file;
+                    return fdao.createFile(relativePath.toString(), f.getFilename(), f.getContentType());
                 } catch (DataAccessException ex) {
                     FileHelper.deleteFile(relativePath);
                     throw ex;

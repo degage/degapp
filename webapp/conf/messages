@@ -38,6 +38,7 @@ subject.verification=Aanvraag toegang webapplicatie
 subject.infosessionEnrolled=Bevestiging infosessie autodelen
 subject.reservationRequest=Aanvraag reservatie {0} voor {1}
 subject.reservationApproved=Reservatie {0} goedgekeurd voor {1}
+subject.oldReservationApproved=Reservatie {0} a posteriori goedgekeurd
 subject.reservationRejected=Reservatie {0} geweigerd
 subject.reservationCancelled=Goedgekeurde reservatie {0} geannuleerd voor {1}
 subject.membershipApproved=Bevestiging lidmaatschap {0} {1}

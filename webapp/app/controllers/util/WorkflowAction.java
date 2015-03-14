@@ -48,8 +48,8 @@ public enum WorkflowAction {
             routes.WFCancel::cancelReservation, "danger"),
     // cancel a reservation request
 
-    AOR_RESERVATION("Goed- of afkeuren", "Goed- of afkeuren ...",
-            routes.Workflow::approveReservation, "primary"),
+    AOR_RESERVATION("Goed- of afkeuren", "Goed- of afkeuren reservatie ...",
+            routes.WFApprove::approveReservation, "warning"),
     // approve or reject a reservation
 
     SEND_REMINDER("Herinnering", "Stuur herinnering",

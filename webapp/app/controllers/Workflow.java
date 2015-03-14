@@ -59,10 +59,6 @@ public class Workflow extends WFCommon {
    
 
     /* ========================================================================
-       CREATION
-       ======================================================================== */
-
-    /* ========================================================================
        CANCEL
        ======================================================================== */
 
@@ -94,87 +90,6 @@ public class Workflow extends WFCommon {
 
         return redirectToDetails(reservationId);
     }
-
-
-
-    /* ========================================================================
-       APPROVE / REJECT
-       ======================================================================== */
-
-    public static class RemarksData {
-        // String containing the reason for refusing a reservation (or refuel)
-        public String status;
-        public String remarks;
-
-        public List<ValidationError> validate() {
-            if ("REFUSED".equals(status) && Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
-                return Collections.singletonList(
-                        new ValidationError("remarks", "Je moet een reden opgeven voor de weigering")
-                );
-            } else {
-                return null;
-            }
-        }
-    }
-
-    /**
-     * Show the page that allows approval or rejection of a reservation by the owner
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result approveReservation(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
-        return ok(approveorreject.render(Form.form(RemarksData.class), reservation));
-    }
-
-    /**
-     * Method: POST
-     * <p>
-     * Called when a reservation of a car is refused/accepted by the owner.
-     *
-     * @param reservationId the id of the reservation being refused/accepted
-     * @return the trips index page
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result doApproveReservation(int reservationId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservationExtended(reservationId);
-        Form<RemarksData> form = Form.form(RemarksData.class).bindFromRequest();
-        if (form.hasErrors()) {
-            return badRequest(approveorreject.render(form, reservation));
-        } else {
-            RemarksData data = form.get(); // the form does not contain errors
-            ReservationStatus status = ReservationStatus.valueOf(data.status);
-            String remarks = data.remarks;
-
-            if (status == ReservationStatus.REFUSED || status == ReservationStatus.ACCEPTED) {
-                if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
-                    // extra checks when not reservation admin
-                    if (CurrentUser.isNot(reservation.getOwnerId())
-                            || reservation.getStatus() != ReservationStatus.REQUEST) {
-                        flash("danger", "Alleen de eigenaar kan een reservatie goed- of afkeuren");
-                        return redirectToDetails(reservationId);
-                    }
-                }
-                dao.updateReservationStatus(reservationId, status, remarks);
-                if (status == ReservationStatus.REFUSED) {
-                    Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
-                } else {
-                    Notifier.sendReservationApprovedByOwnerMail(context, remarks, reservation);
-                }
-                return redirectToDetails(reservationId);
-
-            } else { // other cases only happen when somebody is hacking
-                return badRequest();
-            }
-        }
-    }
-
-    /* ========================================================================
-       SHORTEN
-       ======================================================================== */
 
     /* ========================================================================
        ENTER TRIP DATA

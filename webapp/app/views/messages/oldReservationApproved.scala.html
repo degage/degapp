@@ -1,4 +1,4 @@
-@* approveorreject.scala.html
+@* oldReservationApproved.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFApprove.RemarksData], reservation: Reservation)
+@(user: UserHeader, carName: String, from: String, until: String)
 
-@extrabc = {
-    @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
-}
-
-@stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
-
-    @trips.detailsPanel(reservation.getCar(), reservation)
-
-    @panel("Aanpassen", "fa-pencil") {
-        @helper.form(routes.WFApprove.doApproveReservation(reservation.getId())) {
-            @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
-            <div class="col-sm-6 col-xs-6">
-                <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-                <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
-            </div>
-        }
-    }
-}
+@* Reservatie a posteriori goedgekeurd *@
+<p>Beste @user.getFirstName,</p>
+<p>Je reservatie voor een rit met auto @carName voor de volgende periode is
+door de eigenaar (a posteriori) goedgekeurd:</p>
+<ul><li>@from — @until.</li></ul>
+<p>U kunt nu kilometerstanden en tankbeurten ingeven voor deze rit.</p>

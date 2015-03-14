@@ -210,7 +210,7 @@ public class Notifier extends Mailer {
     }
 
     public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation, String carName) {
-        String url = toFullURL(routes.Workflow.approveReservation(reservation.getId()));
+        String url = toFullURL(routes.WFApprove.approveReservation(reservation.getId()));
         UserHeader driver = reservation.getUser();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
@@ -239,7 +239,22 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendReservationApprovedByOwnerMail(DataAccessContext context, String remarks, Reservation reservation) {
+    public static void sendOldReservationApproved (Reservation reservation) {
+        UserHeader driver = reservation.getUser();
+        String carName = reservation.getCar().getName();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        createNotificationAndSend(
+                driver, "oldReservationApproved",
+                views.txt.messages.oldReservationApproved.render(driver, carName, from, until),
+                views.html.messages.oldReservationApproved.render(driver, carName, from, until),
+                carName
+        );
+
+
+    }
+
+    public static void sendReservationApprovedByOwnerMail(UserHeader owner, String remarks, Reservation reservation) {
         // note: needs extended reservation
         UserHeader user = reservation.getUser();
         Car car = reservation.getCar();
@@ -248,7 +263,6 @@ public class Notifier extends Mailer {
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         String url = toFullURL(routes.Trips.details(reservation.getId()));
-        UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
 
         String contactInfo = car.getEmail();
         if (!Strings.isNullOrEmpty(owner.getCellPhone())) {
@@ -261,7 +275,7 @@ public class Notifier extends Mailer {
         }
 
         createNotificationAndSend(
-                context, user, "reservationApproved",
+                user, "reservationApproved",
                 views.txt.messages.reservationApproved.render(user, from, until, carName, carAddress, url, remarks, contactInfo),
                 views.html.messages.reservationApproved.render(user, from, until, carName, carAddress, url, remarks, contactInfo),
                 carName, from

@@ -85,11 +85,7 @@ public enum WorkflowRole {
         public Set<WorkflowAction> actionsAllowed(ReservationHeader reservation) {
             switch (reservation.getStatus()) {
                 case REQUEST:
-                    Set<WorkflowAction> result =  EnumSet.of(WorkflowAction.AOR_RESERVATION);;
-                    if (reservation.getFrom().isBefore(LocalDateTime.now())) {
-                        result.add(WorkflowAction.CANCEL);
-                    }
-                    return result;
+                    return EnumSet.of(WorkflowAction.AOR_RESERVATION);
                 case REQUEST_DETAILS:
                     return EnumSet.of(WorkflowAction.NEW_TRIP, WorkflowAction.CANCEL_LATE,
                             WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
@@ -114,7 +110,16 @@ public enum WorkflowRole {
         public Set<WorkflowAction> actionsAllowed(ReservationHeader reservation) {
             switch (reservation.getStatus()) {
                 case REQUEST:
-                    return EnumSet.of(WorkflowAction.AOR_RESERVATION, WorkflowAction.CANCEL, WorkflowAction.SHORTEN);
+                    Set<WorkflowAction> result;
+                    if (reservation.getFrom().isBefore(LocalDateTime.now())) {
+                        result = EnumSet.of(WorkflowAction.AOR_RESERVATION);
+                    } else {
+                        result = EnumSet.of(WorkflowAction.AOR_RESERVATION, WorkflowAction.SHORTEN, WorkflowAction.CANCEL);
+                    }
+                    if (reservation.isOld()) {
+                        result.add(WorkflowAction.SEND_REMINDER);
+                    }
+                    return result;
                 case ACCEPTED:
                     return EnumSet.of(WorkflowAction.SHORTEN, WorkflowAction.CANCEL);
                 case REQUEST_DETAILS:

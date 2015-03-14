@@ -148,7 +148,6 @@ public class UserRoles extends Controller {
      */
     @SuppressWarnings("unchecked")
     public static Tuple2<UserRole, Boolean>[] getEditableRolesStatus(Set<UserRole> assignedRoles) {
-        UserRole[] allRoles = UserRole.values();
         Tuple2<UserRole, Boolean>[] filtered = new Tuple2[EDITABLE_ROLES.size()];
         int k = 0;
         for (UserRole role : EDITABLE_ROLES) {
