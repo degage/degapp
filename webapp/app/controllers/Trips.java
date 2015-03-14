@@ -37,6 +37,8 @@ import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
+import controllers.util.WorkflowAction;
+import controllers.util.WorkflowRole;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -45,6 +47,8 @@ import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.trips.*;
+
+import java.util.Set;
 
 /**
  * Controller responsible for displaying information about reservations and trips.

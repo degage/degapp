@@ -753,5 +753,13 @@ public class Workflow extends Controller {
         return redirectToDetails(reservationId);
     }
 
-
+    /**
+     * SEND REMINDER
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result sendReminder(int reservationId) {
+        // TODO
+        return ok();
+    }
 }

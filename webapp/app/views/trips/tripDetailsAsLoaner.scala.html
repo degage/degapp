@@ -29,35 +29,13 @@
 
 @(reservation: Reservation, tripInfo: CarRide, car: Car, owner: User, previousLoaner: User, nextLoaner: User)
 
-@import routes.Workflow._
-@import routes.Refuels._
-
 @* only called when user is not the owner of the car and also not a reservation admin *@
 
 @stdlayout("Reservatie- en ritdetails", extrabc=breadcrumb("Ritten",routes.Trips.index())) {
 
     @detailsPanel(car, reservation, tripInfo)
 
-    @panel("Acties", "fa-pencil") {
-        <div class="col-xs-12">
-            @reservation.getStatus match {
-                case ReservationStatus.REQUEST | ReservationStatus.ACCEPTED => {
-                    <a class="btn btn-xs btn-primary" href="@shortenReservation(reservation.getId)">Reservatieduur inkorten ...</a>
-                    <a class="btn btn-xs btn-danger" href="@cancelReservation(reservation.getId)">Reservatie annuleren</a>
-                }
-                case ReservationStatus.REFUSED | ReservationStatus.CANCELLED | ReservationStatus.CANCELLED_LATE => {
-                    (Geen. De reservatie is geweigerd of geannuleerd.)
-                }
-                case ReservationStatus.REQUEST_DETAILS => {
-                    <a class="btn btn-xs btn-warning" href="@newTripInfo(reservation.getId)">Ritdetails invullen ...</a>
-                    <a class="btn btn-xs btn-danger" href="@lateCancelReservation(reservation.getId)">Schrappen</a>
-                }
-                case ReservationStatus.DETAILS_PROVIDED | ReservationStatus.FINISHED => {
-                    <a class="btn btn-xs btn-primary" href="@showRefuelsForRide(reservation.getId)">Tankbeurten ...</a>
-                }
-            }
-        </div>
-    }
+    @actionPanel(reservation)
 
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
