@@ -66,7 +66,8 @@ public enum WorkflowRole {
                 case ACCEPTED:
                     return EnumSet.of(WorkflowAction.SHORTEN, WorkflowAction.CANCEL);
                 case REQUEST_DETAILS:
-                    return EnumSet.of(WorkflowAction.NEW_TRIP);
+                case DETAILS_REJECTED:
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP);
                 case DETAILS_PROVIDED:
                 case FINISHED:
                     return EnumSet.of(WorkflowAction.REFUELS);
@@ -87,14 +88,16 @@ public enum WorkflowRole {
                 case REQUEST:
                     return EnumSet.of(WorkflowAction.AOR_RESERVATION);
                 case REQUEST_DETAILS:
-                    return EnumSet.of(WorkflowAction.NEW_TRIP, WorkflowAction.CANCEL_LATE,
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.CANCEL_LATE,
+                            WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
+                case DETAILS_REJECTED:
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP,
                             WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 case DETAILS_PROVIDED:
                     return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.AOR_TRIP,
                             WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 case FINISHED:
-                    return EnumSet.of(WorkflowAction.SHORTEN,
-                            WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
+                    return EnumSet.of(WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 default:
                     return NO_ACTIONS;
             }
@@ -123,12 +126,12 @@ public enum WorkflowRole {
                 case ACCEPTED:
                     return EnumSet.of(WorkflowAction.SHORTEN, WorkflowAction.CANCEL);
                 case REQUEST_DETAILS:
-                    return EnumSet.of(WorkflowAction.NEW_TRIP, WorkflowAction.CANCEL_LATE,
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.CANCEL_LATE,
                             WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
+                case DETAILS_REJECTED:
                 case DETAILS_PROVIDED:
                 case FINISHED:
-                    return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.SHORTEN,
-                            WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 default:
                     return NO_ACTIONS;
             }

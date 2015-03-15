@@ -64,13 +64,9 @@ public enum WorkflowAction {
             routes.WFCancel::cancelLate, "danger"),
     // cancel a reservation when the trip did not take place
 
-    NEW_TRIP("Invullen", "Ritdetails invullen ...",
-            routes.WFTrip::newTripInfo, "warning"),
-    // enter trip data for the first time
-
-    EDIT_TRIP("Aanpassen", "Ritdetails aanpassen ...",
+    EDIT_TRIP("Km-standen", "Kilometerstanden invullen/aanpassen ...",
             routes.WFTrip::editTripInfo, "primary"),
-    // change trip data
+    // enter trip data
 
     AOR_TRIP("Goed- of afkeuren", "Goed- of afkeuren ritinformatie ...",
             routes.WFTrip::approveTripInfo, "warning"),
