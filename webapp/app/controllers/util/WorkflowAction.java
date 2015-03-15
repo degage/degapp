@@ -60,8 +60,8 @@ public enum WorkflowAction {
             routes.WFCreate::shortenReservation, "primary"),
     // shorten a reservation
 
-    CANCEL_LATE("Opheffen", "Opheffen ...",
-            routes.Workflow::lateCancelReservation, "danger"),
+    CANCEL_LATE("Niet doorgegaan", "Annuleren/markeren als niet doorgegaan ...",
+            routes.WFCancel::cancelLate, "danger"),
     // cancel a reservation when the trip did not take place
 
     NEW_TRIP("Invullen", "Ritdetails invullen ...",

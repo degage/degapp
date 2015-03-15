@@ -1,0 +1,68 @@
+@* latecancel.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(form: Form[WFCancel.CancelData], reservation: Reservation)
+
+@extrabc = {
+    @breadcrumb("Ritten",routes.Trips.index())
+    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+}
+
+@stdlayout("Rit is niet doorgegaan", extrabc=extrabc ) {
+
+    @trips.detailsPanel(reservation.getCar(), reservation)
+
+       <div class="col-xs-12 alert alert-info">
+        <p>Met onderstaande opties geef je aan dat een rit die je nochtans had goedkeurd, uiteindelijk niet
+                is doorgegaan. Je hebt twee mogelijkheden: een 'zachte' optie (annuleren)
+    en een 'harde' optie (markeren als niet doorgegaan)</p>
+       </div>
+
+    @panel("Annuleren", "fa-times-circle") {
+        @helper.form(routes.WFCancel.doCancelLate(reservation.getId(),true)) {
+            <div class="col-xs-12">
+                <p>Dit annuleert de reservatie alsnog. Voor het systeem is het alsof
+                            de reservatie door de bestuurder was geannuleerd vóór het begin van de rit.</p>
+            </div>
+            @std.submitButton("Annuleren")
+        }
+    }
+
+    @panel("Markeren als 'niet doorgegaan'", "fa-warning") {
+        @helper.form(routes.WFCancel.doCancelLate(reservation.getId(),false)) {
+            <div class="col-xs-12">
+                <p>Dit markeert de rit expliciet als <i>niet doorgegaan</i>. In dit geval moet je verplicht
+                    een opmerking meegeven die naar de bestuurder wordt gemaild en in het systeem wordt bewaard.</li>
+                </p>
+            </div>
+            @std.textArea(form("remarks"), "Opmerking (verplicht)", 3)
+            @std.submitButton("Markeren als niet doorgegaan")
+        }
+    }
+}

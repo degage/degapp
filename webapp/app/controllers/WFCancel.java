@@ -43,6 +43,7 @@ import play.data.Form;
 import play.data.validation.ValidationError;
 import play.mvc.Result;
 import views.html.workflow.cancelaccepted;
+import views.html.workflow.latecancel;
 
 import java.time.LocalDateTime;
 import java.util.Collections;
@@ -55,7 +56,7 @@ public class WFCancel extends WFCommon {
     /**
      * Try to cancel a reservation.
      */
-    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result cancelReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -121,13 +122,62 @@ public class WFCancel extends WFCommon {
         }
     }
 
+    /**
+     * Show a screen given the option between cancelling a reservation or marking it
+     * explicitely as not taken place
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result cancelLate(int reservationId) {
+        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+        // special case: already cancelled by user
+        if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(reservation)) {
+            flash("warning", "De rit kan niet (meer) worden geannuleerd");
+            return redirectToDetails(reservationId);
+        } else {
+            return ok(latecancel.render(Form.form(CancelData.class), reservation));
+        }
+    }
+
+
+    /**
+     * Processes the results of {@link #cancelLate(int)}
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result doCancelLate(int reservationId, boolean soft) {
+
+        final ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
+        Reservation reservation = dao.getReservationExtended(reservationId);
+        if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(reservation)) {
+            return badRequest();
+        }
+        if (soft) {
+            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
+            return redirectToDetails(reservationId);
+            // same as a normal cancel
+        } else {
+            Form<CancelData> form = Form.form(CancelData.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(latecancel.render(form, reservation));
+            } else {
+                String comments = form.get().remarks;
+                dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE, comments);
+                // TODO: send mail
+                reservation.setMessage(comments);
+                Notifier.sendLateCancel(reservation);
+                return redirectToDetails(reservationId);
+            }
+        }
+    }
+
     public static class CancelData {
         public String remarks;
 
         public List<ValidationError> validate() {
             if (Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
                 return Collections.singletonList(
-                        new ValidationError("remarks", "Je moet een reden opgeven voor de annulatie")
+                        new ValidationError("remarks", "Je moet een reden opgeven.")
                 );
             } else {
                 return null;

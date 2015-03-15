@@ -32,15 +32,11 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
-import com.google.common.base.Strings;
 import controllers.util.WorkflowAction;
-import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
-import play.data.validation.ValidationError;
-import play.mvc.Controller;
 import play.mvc.Result;
 import play.mvc.Results;
 import views.html.workflow.approveorreject;
@@ -48,8 +44,6 @@ import views.html.workflow.approveonly;
 import views.html.workflow.reminder;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Controller for approval and rejection of reservations / trip data
@@ -143,22 +137,6 @@ public class WFApprove extends WFCommon {
         dao.updateReservationStatus(reservationId, ReservationStatus.REQUEST_DETAILS);
         Notifier.sendOldReservationApproved(reservation);
         return WFCommon.redirectToDetails(reservationId);
-    }
-
-    public static class RemarksData {
-        // String containing the reason for refusing a reservation (or refuel)
-        public String status;
-        public String remarks;
-
-        public List<ValidationError> validate() {
-            if ("REFUSED".equals(status) && Strings.isNullOrEmpty(remarks)) { // TODO: isNullOrBlank
-                return Collections.singletonList(
-                        new ValidationError("remarks", "Je moet een reden opgeven voor de weigering")
-                );
-            } else {
-                return null;
-            }
-        }
     }
 
 

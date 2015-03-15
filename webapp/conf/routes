@@ -57,13 +57,16 @@ GET         /reservation/create                     controllers.WFCreate.create(
 POST        /reservation/create                     controllers.WFCreate.doCreate(carId: Int)
 GET         /reservation/shorten                    controllers.WFCreate.shortenReservation(id: Int)
 POST        /reservation/shorten                    controllers.WFCreate.doShortenReservation(id: Int)
-GET         /reservation/aor                        controllers.WFApprove.approveReservation(id: Int)
-POST        /reservation/aor                        controllers.WFApprove.doApproveReservation(id: Int)
-POST        /reservation/approve                    controllers.WFApprove.doApproveOldReservation(id: Int)
+
 GET         /reservation/cancel                     controllers.WFCancel.cancelReservation(id: Int)
 GET         /reservation/cancelaccepted             controllers.WFCancel.cancelAccepted(id: Int)
 POST        /reservation/cancelaccepted             controllers.WFCancel.doCancelAccepted(id: Int)
-GET         /reservation/late                       controllers.Workflow.lateCancelReservation(id: Int)
+GET         /reservation/late                       controllers.WFCancel.cancelLate(id: Int)
+POST        /reservation/late                       controllers.WFCancel.doCancelLate(id: Int, soft: Boolean)
+
+GET         /reservation/aor                        controllers.WFApprove.approveReservation(id: Int)
+POST        /reservation/aor                        controllers.WFApprove.doApproveReservation(id: Int)
+POST        /reservation/approve                    controllers.WFApprove.doApproveOldReservation(id: Int)
 GET         /reservation/reminder                   controllers.WFApprove.sendReminder(id: Int)
 POST        /reservation/reminder                   controllers.WFApprove.doSendReminder(id: Int)
 

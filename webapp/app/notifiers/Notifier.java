@@ -324,6 +324,24 @@ public class Notifier extends Mailer {
         );
     }
 
+    /**
+     * Sent when a trip is marked as not having taken place
+     */
+    public static void sendLateCancel(Reservation reservation) {
+        UserHeader driver = reservation.getUser();
+        String carName = reservation.getCar().getName();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        String message = reservation.getMessage();
+        createNotificationAndSend(
+                driver, "lateCancel",
+                views.txt.messages.lateCancel.render(driver, carName, from, until, message),
+                views.html.messages.lateCancel.render(driver, carName, from, until, message),
+                carName
+        );
+    }
+
+
     public static void sendContractManagerAssignedMail(UserHeader user, Approval approval) {
         UserHeader admin = approval.getAdmin();
         createNotificationAndSend(user, "managerAssigned",

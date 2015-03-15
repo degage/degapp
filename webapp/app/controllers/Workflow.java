@@ -62,35 +62,6 @@ public class Workflow extends WFCommon {
        CANCEL
        ======================================================================== */
 
-    /**
-     * Cancel a reservation for a trip in the past which did not actually take place
-     */
-    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result lateCancelReservation(int reservationId) {
-        // TODO: show a form with two choices
-        // TODO: lots of code in common with cancelReservation
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        ReservationHeader reservation = dao.getReservationHeader(reservationId);
-        if (!(CurrentUser.hasRole(UserRole.RESERVATION_ADMIN))) {
-            // extra checks when not reservation admin
-            if (CurrentUser.is(reservation.getUserId())) {
-                ReservationStatus status = reservation.getStatus();
-                if (status != ReservationStatus.DETAILS_PROVIDED) {
-                    flash("danger", "Deze (lopende) rit kan niet worden geannuleerd.");
-                    return redirect(routes.Trips.index(0));
-                }
-            } else {
-                flash("danger", "Alleen de ontlener kan een lopende rit annuleren!");
-                return redirect(routes.Trips.index(0));
-            }
-        }
-        dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE);
-
-        return redirectToDetails(reservationId);
-    }
-
     /* ========================================================================
        ENTER TRIP DATA
        ======================================================================== */

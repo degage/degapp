@@ -29,22 +29,12 @@
 
 package controllers;
 
-import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.ReservationDAO;
-import be.ugent.degage.db.models.*;
-import controllers.util.WorkflowAction;
+import be.ugent.degage.db.models.ReservationHeader;
 import controllers.util.WorkflowRole;
-import db.CurrentUser;
-import db.DataAccess;
-import db.InjectContext;
-import notifiers.Notifier;
-import play.data.Form;
-import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 
@@ -68,4 +58,33 @@ public class WFCommon extends Controller {
         return redirect(routes.Trips.details(reservationId));
     }
 
+    public static class RemarksData {
+
+        public String status;
+        public String remarks;
+
+        private String compareWith;
+
+        private String message;
+
+        public RemarksData(String compareWith, String message) {
+            this.compareWith = compareWith;
+            this.message = message;
+        }
+
+        public RemarksData() {
+            this ("REFUSED", "Je moet een reden opgeven voor de weigering");
+        }
+
+        public List<ValidationError> validate() {
+            if (compareWith.equals(status) &&
+                    (remarks == null || remarks.trim().isEmpty()) ) {
+                return Collections.singletonList(
+                        new ValidationError("remarks", message)
+                );
+            } else {
+                return null;
+            }
+        }
+    }
 }
