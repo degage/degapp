@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Workflow.TripDataExtended], reservation: Reservation)
+@(form: Form[WFTrip.TripDataExtended], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
@@ -39,7 +39,7 @@
     @trips.detailsPanelPartial(reservation)
 
     @panel("Ingeven ritdetails", "fa-pencil") {
-        @helper.form(routes.Workflow.doNewTripInfo(reservation.getId), 'enctype -> "multipart/form-data"){
+        @helper.form(routes.WFTrip.doNewTripInfo(reservation.getId), 'enctype -> "multipart/form-data"){
             @std.numberField(form("startKm"), "Kilometerstand - vóór de rit:", css="col-sm-6")
             @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
             @std.group(form("damaged"), "Schade-opvolging") {

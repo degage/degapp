@@ -51,6 +51,7 @@ import providers.DataProvider;
 import views.html.refuels.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -81,7 +82,7 @@ public class Refuels extends Controller {
 
         public List<ValidationError> validate () {
             if (amount.getValue() <= 0) {
-                return Arrays.asList(new ValidationError("amount", "Bedrag moet groter zijn dan 0"));
+                return Collections.singletonList(new ValidationError("amount", "Bedrag moet groter zijn dan 0"));
             } else {
                 return null;
             }

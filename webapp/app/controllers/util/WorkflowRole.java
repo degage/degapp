@@ -145,8 +145,6 @@ public enum WorkflowRole {
     /**
      * All actions that are allowed for this role and the given reservation. Mostly depends
      * on the status of the reservation, but may also depend on the time of the reservation
-     *
-     * @param reservation
      */
     public abstract Set<WorkflowAction> actionsAllowed(ReservationHeader reservation);
 

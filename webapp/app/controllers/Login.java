@@ -43,10 +43,10 @@ import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
 import providers.DataProvider;
-import providers.UserProvider;
 import views.html.login.*;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 
@@ -134,7 +134,7 @@ public class Login extends Controller {
         public List<ValidationError> validate() {
             // TODO: password strength validation
             if (!password.equals(password_repeat))
-                return Arrays.asList(new ValidationError(
+                return Collections.singletonList(new ValidationError(
                         "password_repeat", "Beide wachtwoorden moeten gelijk zijn"
                 ));
             else

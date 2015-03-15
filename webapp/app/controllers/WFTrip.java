@@ -35,7 +35,6 @@ import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.FileHelper;
-import controllers.util.WorkflowAction;
 import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
@@ -47,25 +46,17 @@ import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import views.html.workflow.*;
+import views.html.workflow.edittrip;
+import views.html.workflow.newtrip;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Controller responsible for reservation/trip work flow
  */
-public class Workflow extends WFCommon {
-   
-
-    /* ========================================================================
-       CANCEL
-       ======================================================================== */
-
-    /* ========================================================================
-       ENTER TRIP DATA
-       ======================================================================== */
-
+public class WFTrip extends WFCommon {
 
     public static class TripData {
         @Constraints.Required
@@ -138,7 +129,7 @@ public class Workflow extends WFCommon {
     /**
      * Allows first time input of journey info
      */
-    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result newTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -165,7 +156,7 @@ public class Workflow extends WFCommon {
     /**
      * Processes result from {@link #newTripInfo}
      */
-    @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result doNewTripInfo(int reservationId) {
 
@@ -272,7 +263,7 @@ public class Workflow extends WFCommon {
     /**
      * Show the page that allows editing of the journey info
      */
-    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result editTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -318,12 +309,22 @@ public class Workflow extends WFCommon {
        TRIP DATA APPROVAL
        ======================================================================== */
 
+
     /**
-     * Approve trip info
+     * Show form where trip info can be approved or rejected.
      */
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveTripInfo(int reservationId) {
+        return ok(); // TODO
+    }
+
+    /**
+     * Process the results of {@link #approveTripInfo(int)}
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result doApproveTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();

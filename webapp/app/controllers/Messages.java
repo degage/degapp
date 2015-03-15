@@ -49,6 +49,7 @@ import views.html.notifiers.messagespage;
 import views.html.notifiers.reply;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class Messages extends Controller {
@@ -73,7 +74,7 @@ public class Messages extends Controller {
         public List<ValidationError> validate() {
             if (carId == null || carId == 0) {
                 // needed for those cases where a string is input which does not correspond with a real car
-                return Arrays.asList(new ValidationError ("carId", "Gelieve een auto te selecteren"));
+                return Collections.singletonList(new ValidationError("carId", "Gelieve een auto te selecteren"));
             } else {
                 return null;
             }
@@ -95,7 +96,7 @@ public class Messages extends Controller {
         public List<ValidationError> validate() {
             if (userId == null || userId == 0) {
                 // needed for those cases where a string is input which does not correspond with a real person
-                return Arrays.asList(new ValidationError ("userId", "Gelieve een bestemmeling te selecteren"));
+                return Collections.singletonList(new ValidationError("userId", "Gelieve een bestemmeling te selecteren"));
             } else {
                 return null;
             }

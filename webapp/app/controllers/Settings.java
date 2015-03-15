@@ -49,6 +49,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -89,7 +90,7 @@ public class Settings extends Controller {
         public List<ValidationError> validate() {
             // TODO: password strength validation
             if (!newpw.equals(repeatpw))
-                return Arrays.asList(new ValidationError(
+                return Collections.singletonList(new ValidationError(
                         "repeatpw", "Beide wachtwoorden moeten gelijk zijn"
                 ));
             else

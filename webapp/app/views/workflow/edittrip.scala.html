@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Workflow.TripData], reservation: Reservation)
+@(form: Form[WFTrip.TripData], reservation: Reservation)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
@@ -39,7 +39,7 @@
     @trips.detailsPanelPartial(reservation)
 
     @panel("Gegevens", "fa-pencil") {
-        @helper.form(routes.Workflow.doEditTripInfo(reservation.getId)){
+        @helper.form(routes.WFTrip.doEditTripInfo(reservation.getId)){
             @std.numberField(form("startKm"), "Kilometerstand vóór de rit", css="col-sm-6")
             @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
             @std.submitButton("Wijzigen (en meteen goedkeuren)")

@@ -71,11 +71,12 @@ GET         /reservation/reminder                   controllers.WFApprove.sendRe
 POST        /reservation/reminder                   controllers.WFApprove.doSendReminder(id: Int)
 
 # Trip workflow
-GET         /trip/new                               controllers.Workflow.newTripInfo(id: Int)
-POST        /trip/new                               controllers.Workflow.doNewTripInfo(id: Int)
-GET         /trip/edit                              controllers.Workflow.editTripInfo(id: Int)
-POST        /trip/edit                              controllers.Workflow.doEditTripInfo(id: Int)
-GET         /trip/approval                          controllers.Workflow.approveTripInfo(id: Int)
+GET         /trip/new                               controllers.WFTrip.newTripInfo(id: Int)
+POST        /trip/new                               controllers.WFTrip.doNewTripInfo(id: Int)
+GET         /trip/edit                              controllers.WFTrip.editTripInfo(id: Int)
+POST        /trip/edit                              controllers.WFTrip.doEditTripInfo(id: Int)
+GET         /trip/aor                               controllers.WFTrip.approveTripInfo(id: Int)
+POST        /trip/aor                               controllers.WFTrip.doApproveTripInfo(id: Int)
 
 # Display information about reservations / trips
 GET         /trip                                   controllers.Trips.details(id: Int)

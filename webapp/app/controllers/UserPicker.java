@@ -31,15 +31,12 @@ package controllers;
 
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.User;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
-
-import java.util.List;
 
 public class UserPicker extends Controller {
 

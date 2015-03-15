@@ -90,7 +90,7 @@ public class Approvals extends Controller {
 
         public List<ValidationError> validate() {
             if (!acceptsTerms) {
-                return Arrays.asList(
+                return Collections.singletonList(
                         new ValidationError("acceptsTerms", "Gelieve de algemene voorwaarden te accepteren")
                 );
             } else {

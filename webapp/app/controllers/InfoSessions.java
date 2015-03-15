@@ -351,7 +351,7 @@ public class InfoSessions extends Controller {
         public List<ValidationError> validate() {
             if (userId == null || userId <= 0) {
                 // needed for those cases where a string is input which does not correspond with a real person
-                return Arrays.asList (new ValidationError("userId", "Gelieve een bestaande persoon te selecteren"));
+                return Collections.singletonList(new ValidationError("userId", "Gelieve een bestaande persoon te selecteren"));
             } else {
                 return null;
             }
