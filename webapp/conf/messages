@@ -54,6 +54,7 @@ subject.costRequest=Nieuwe autokost
 subject.managerAssigned=Contract ondertekenen
 subject.detailsProvided=Kilometerstanden {0} voor {1} ({2})
 subject.lateCancel=Rit {0} gemarkeerd als niet doorgegaan
+subject.detailsRejected=Kilometerstanden {0} niet goedgekeurd. Rit van {1}
 
 
 

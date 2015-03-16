@@ -168,6 +168,22 @@ public class Notifier extends Mailer {
         );
     }
 
+    public static void sendDetailsRejected(Reservation reservation, CarRide ride, String remarks) {
+        UserHeader driver = reservation.getUser();
+        String url = toFullURL(routes.WFTrip.tripInfo(reservation.getId()));
+        String carName = reservation.getCar().getName();
+        String from = Utils.toLocalizedString(reservation.getFrom());
+        String until = Utils.toLocalizedString(reservation.getUntil());
+        int start = ride.getStartKm();
+        int end = ride.getEndKm();
+        createNotificationAndSend(driver, "detailsRejected",
+                views.txt.messages.detailsRejected.render(driver, carName, url, start, end, remarks, from, until),
+                views.html.messages.detailsRejected.render(driver, carName, url, start, end, remarks, from, until),
+                carName, from
+        );
+
+    }
+
     public static void sendCarCostRequest(CarCost carCost) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserRoleDAO userRoleDAO = context.getUserRoleDAO();

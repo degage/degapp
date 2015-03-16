@@ -35,8 +35,8 @@ import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.FileHelper;
+import controllers.util.WorkflowAction;
 import data.EurocentAmount;
-import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -121,40 +121,52 @@ public class WFTrip extends WFCommon {
 
     }
 
-    private static boolean newTripInfoAllowed(ReservationHeader reservation) {
-        return reservation.getStatus() == ReservationStatus.REQUEST_DETAILS &&
-                isDriverOrOwnerOrAdmin(reservation);
-    }
-
     /**
-     * Allows first time input of journey info
+     * Dispatch to the proper page for editing trip information
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
-    public static Result newTripInfo(int reservationId) {
+    public static Result tripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
-        if (newTripInfoAllowed(reservation)) {
-            // prefill
+        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(reservation)) {
+            flash("danger", "Je kan geen ritdetails (meer) ingegeven voor deze rit.");
+            return redirectToDetails(reservationId);
+        }
+
+        ReservationStatus status = reservation.getStatus();
+        if (status == ReservationStatus.REQUEST_DETAILS) {
+            // first time information is entered
+            // mail sent to owner (if owner is not driver)
             CarRideDAO dao = context.getCarRideDAO();
-            int startKm = dao.getPrevEndKm(reservationId);
-            int endKm = dao.getNextStartKm(reservationId);
             TripDataExtended data = new TripDataExtended();
-            data.startKm = startKm;
-            data.endKm = endKm;
+            data.startKm = dao.getPrevEndKm(reservationId);
+            data.endKm = dao.getNextStartKm(reservationId);
             data.damaged = false;
             return ok(newtrip.render(
                     Form.form(TripDataExtended.class).fill(data),
                     reservation
             ));
         } else {
-            // not allowed
-            return badRequest(); // should not happen
+            // information is edited
+            CarRide ride = context.getCarRideDAO().getCarRide(reservationId);
+            return ok(edittrip.render(
+                    Form.form(TripData.class).fill(new TripData().populate(ride)),
+                    reservation
+            ));
         }
     }
 
+    // must be used with injected context
+    private static void updateToDetailsProvided(Reservation reservation, CarRide ride, UserHeader owner) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationDAO rdao = context.getReservationDAO();
+        rdao.updateReservationStatus(reservation.getId(), ReservationStatus.DETAILS_PROVIDED);
+        Notifier.sendReservationDetailsProvidedMail(owner, reservation, ride);
+    }
+
     /**
-     * Processes result from {@link #newTripInfo}
+     * Processes result from {@link #tripInfo} for a new request
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
@@ -165,6 +177,12 @@ public class WFTrip extends WFCommon {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
+
+        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(reservation)
+                || reservation.getStatus() != ReservationStatus.REQUEST_DETAILS) {
+            return badRequest(); // this should not happen
+        }
+
         if (form.hasErrors()) {
             return badRequest(newtrip.render(form, reservation));
         } else {
@@ -192,150 +210,87 @@ public class WFTrip extends WFCommon {
                 }
             }
 
-            if (newTripInfoAllowed(reservation)) {
-
-                // register/change ride in database
-                CarRideDAO dao = context.getCarRideDAO();
-                CarRide ride = dao.getCarRide(reservationId);
-                if (ride == null) {
-                    boolean damaged = data.damaged;
-                    dao.createCarRide(reservation, data.startKm, data.endKm, damaged);
-                    if (damaged) {
-                        context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
-                    }
-                } else {//  make changes and approve
-                    dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
+            // register/change ride in database
+            CarRideDAO dao = context.getCarRideDAO();
+            CarRide ride = dao.getCarRide(reservationId);
+            if (ride == null) {
+                boolean damaged = data.damaged;
+                dao.createCarRide(reservation, data.startKm, data.endKm, damaged);
+                if (damaged) {
+                    context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
                 }
-
-                boolean isAdmin = isOwnerOrAdmin(reservation);
-
-
-                // change ride status according to whether current user is owner or not
-                UserHeader owner = null;
-                if (isAdmin) {
-                    // approve immediately
-                    rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
-                } else {
-                    // register and send mail to owner
-                    rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_PROVIDED);
-                    owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
-                    if (ride == null) {
-                        ride = dao.getCarRide(reservationId);
-                    }
-                    Notifier.sendReservationDetailsProvidedMail(owner, reservation, ride);
-                }
-
-                // add first refuel, if present
-
-
-                if (filePart != null) {
-                    File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
-                    if (file == null || file.getContentType() == null) {
-                        form.reject("picture", "Het bestand  is van het verkeerde type");
-                        return badRequest(newtrip.render(form, reservation));
-                    } else {
-                        Refuels.newRefuel(reservation, owner, data.amount.getValue(),
-                                file.getId(), data.km, data.fuelAmount
-                        );
-                    }
-                }
-
-                return redirectToDetails(reservationId);
-            } else {
-                // not allowed
-                return badRequest(); // hacker?
+            } else {//  make changes and approve
+                dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             }
-        }
-    }
-     
-    /* ========================================================================
-       EDIT TRIP DATA
-       ======================================================================== */
 
-    private static boolean editTripInfoAllowed(Reservation reservation) {
-        if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED) {
-            return isOwnerOrAdmin(reservation);
-        } else {
-            return reservation.getStatus() == ReservationStatus.FINISHED && CurrentUser.hasRole(UserRole.RESERVATION_ADMIN);
+            // change ride status according to whether current user is owner or not
+            UserHeader owner = null;
+            if (isOwnerOrAdmin(reservation)) {
+                // approve immediately
+                rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
+            } else {
+                // register and send mail to owner
+                if (ride == null) {
+                    ride = dao.getCarRide(reservationId);
+                }
+                owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
+                updateToDetailsProvided(reservation, ride, owner);
+            }
+
+            // add first refuel, if present
+            if (filePart != null) {
+                File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+                if (file == null || file.getContentType() == null) {
+                    form.reject("picture", "Het bestand  is van het verkeerde type");
+                    return badRequest(newtrip.render(form, reservation));
+                } else {
+                    Refuels.newRefuel(reservation, owner, data.amount.getValue(),
+                            file.getId(), data.km, data.fuelAmount
+                    );
+                }
+            }
+
+            return redirectToDetails(reservationId);
         }
     }
 
     /**
-     * Show the page that allows editing of the journey info
+     * Process the results of {@link #tripInfo} when not the first time
      */
     @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result editTripInfo(int reservationId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        Reservation reservation = context.getReservationDAO().getReservationExtended(reservationId);
-        if (editTripInfoAllowed(reservation)) {
-            CarRide ride = context.getCarRideDAO().getCarRide(reservationId);
-            return ok(edittrip.render(
-                    Form.form(TripData.class).fill(new TripData().populate(ride)),
-                    reservation
-            ));
-        } else {
-            // not allowed
-            return badRequest(); // should not happen - hacker?
-        }
-    }
-
-    /**
-     * Process the results of {@link #editTripInfo}
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result doEditTripInfo(int reservationId) {
         Form<TripData> form = Form.form(TripData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
+
+        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(reservation) ||
+                reservation.getStatus() == ReservationStatus.REQUEST_DETAILS) {
+            return badRequest();
+        }
+
         if (form.hasErrors()) {
             return badRequest(edittrip.render(form, reservation));
-        } else if (editTripInfoAllowed(reservation)) {
+        } else {
             TripData data = form.get();
             CarRideDAO dao = context.getCarRideDAO();
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
-            dao.approveInfo(reservationId);
-            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
+            if (isOwnerOrAdmin(reservation)) {
+                // approve immediately
+                dao.approveInfo(reservationId);
+                rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
+            } else if (reservation.getStatus() == ReservationStatus.DETAILS_REJECTED) {
+                // register and send mail to owner
+                flash("success", "De bestuurder wordt via mail op de hoogte gebracht van uw correcties");
+                updateToDetailsProvided(
+                        reservation,
+                        dao.getCarRide(reservationId),
+                        context.getUserDAO().getUserHeader(reservation.getOwnerId())
+                );
+            }
             return redirectToDetails(reservationId);
-        } else {
-            // not allowed
-            return badRequest(); // hacker?
         }
     }
 
-    /* ========================================================================
-       TRIP DATA APPROVAL
-       ======================================================================== */
-
-
-    /**
-     * Show form where trip info can be approved or rejected.
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result approveTripInfo(int reservationId) {
-        return ok(); // TODO
-    }
-
-    /**
-     * Process the results of {@link #approveTripInfo(int)}
-     */
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
-    @InjectContext
-    public static Result doApproveTripInfo(int reservationId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        CarRideDAO dao = context.getCarRideDAO();
-        ReservationDAO rdao = context.getReservationDAO();
-        Reservation reservation = rdao.getReservation(reservationId);
-        if (isOwnerOrAdmin(reservation)) {
-            dao.approveInfo(reservationId);
-            rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
-            flash("success", "De ritgegevens werden goedgekeurd.");
-        } else {
-            flash("danger", "Je bent niet gemachtigd om deze actie uit te voeren.");
-        }
-        return redirectToDetails(reservationId);
-    }
 }

@@ -50,7 +50,6 @@ import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.refuels.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

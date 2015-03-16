@@ -38,7 +38,7 @@
     loadFirstPage(
       @tab match {
          case 0 => { "status=ACCEPTED" }
-         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" }
+         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" }
          case 2 => { "status=REQUEST" }
          case _ => { "status=REFUSED|CANCELLED|CANCELLED_LATE" }
       }

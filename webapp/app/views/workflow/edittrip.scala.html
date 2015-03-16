@@ -42,7 +42,11 @@
         @helper.form(routes.WFTrip.doEditTripInfo(reservation.getId)){
             @std.numberField(form("startKm"), "Kilometerstand vóór de rit", css="col-sm-6")
             @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
-            @std.submitButton("Wijzigen (en meteen goedkeuren)")
+            @if(WFCommon.isOwnerOrAdmin(reservation)){
+                @std.submitButton("Wijzigen (en meteen goedkeuren)")
+            } else {
+                @std.submitButton("Wijzigen")
+            }
         }
     }
 }

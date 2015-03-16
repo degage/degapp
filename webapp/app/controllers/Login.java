@@ -45,7 +45,6 @@ import play.mvc.Result;
 import providers.DataProvider;
 import views.html.login.*;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 

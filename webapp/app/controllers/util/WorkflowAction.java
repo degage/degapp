@@ -65,11 +65,11 @@ public enum WorkflowAction {
     // cancel a reservation when the trip did not take place
 
     EDIT_TRIP("Km-standen", "Kilometerstanden invullen/aanpassen ...",
-            routes.WFTrip::editTripInfo, "primary"),
+            routes.WFTrip::tripInfo, "primary"),
     // enter trip data
 
     AOR_TRIP("Goed- of afkeuren", "Goed- of afkeuren ritinformatie ...",
-            routes.WFTrip::approveTripInfo, "warning"),
+            routes.WFApprove::approveTripInfo, "warning"),
     // accept or reject trip data
 
     REFUELS("Tankbeurten", "Tankbeurten beheren ...",

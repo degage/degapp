@@ -1,4 +1,4 @@
-@* tripDetailsAsAdmin.scala.html
+@* refuelRejected.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,24 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, tripInfo: CarRide, car: Car, owner: User, loaner: User, previousLoaner: User, nextLoaner: User)
+@(user: UserHeader, carName: String, url: String, start: Int, end: Int, comment: String, from: String, until: String)
 
-@* only called when user is a reservation admin *@
+@* Kilometerstand niet goedgekeurd *@
+<p>Beste @user.getFirstName,</p>
+<p>De volgende kilometerstanden die je hebt ingegeven, werden niet aanvaard door
+de eigenaar van de auto</p>
+<ul>
+    <li><b>Auto:</b> @carName</li>
+    <li><b>Km-standen:</b>@start - @end (= @(end-start) km)</li>
+    <li><b>Rit:</b> @from - @until</li>
+</ul>
+<p>De eigenaar heeft hierbij de volgende opmerkingen:</p>
+<hr />
+@comment
+<hr />
+<p>Gelieve de kilometerstanden te corrigeren. Klik hiervoor op onderstaande link:</p>
+<pre>
+    <a href="@url">@url</a>
+</pre>
 
-@stdlayout("Reservatie- en ritdetails (beheer)", extrabc=breadcrumb("Ritten",routes.Trips.index())) {
 
-    @detailsPanel(car, reservation, tripInfo)
-
-    @actionPanel(reservation)
-
-    @panel("Verdere informatie", "fa-bar-chart-o"){
-        <div class="col-lg-6">
-            <h4>Eigenaar</h4>
-            @userInfo(owner)
-            <h4>Ontlener</h4>
-            @userInfo(loaner)
-        </div>
-
-        @previousnext(previousLoaner, nextLoaner)
-    }
-}

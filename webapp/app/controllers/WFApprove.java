@@ -30,6 +30,7 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.WorkflowAction;
@@ -38,9 +39,9 @@ import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
 import play.mvc.Result;
-import play.mvc.Results;
-import views.html.workflow.approveorreject;
+import views.html.workflow.aortripinfo;
 import views.html.workflow.approveonly;
+import views.html.workflow.approveorreject;
 import views.html.workflow.reminder;
 
 import java.time.LocalDateTime;
@@ -67,10 +68,10 @@ public class WFApprove extends WFCommon {
             return redirectToDetails(reservationId);
         } else if (reservation.getFrom().isBefore(LocalDateTime.now())) {
             // a reservation in the past can only be accepted
-            return Results.ok(approveonly.render(reservation));
+            return ok(approveonly.render(reservation));
         } else {
             // can be accepted or rejected
-            return Results.ok(approveorreject.render(Form.form(RemarksData.class), reservation));
+            return ok(approveorreject.render(Form.form(RemarksData.class), reservation));
         }
     }
 
@@ -98,7 +99,7 @@ public class WFApprove extends WFCommon {
 
         Form<RemarksData> form = Form.form(RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return Results.badRequest(approveorreject.render(form, reservation));
+            return badRequest(approveorreject.render(form, reservation));
         } else {
             RemarksData data = form.get(); // the form does not contain errors
             ReservationStatus status = ReservationStatus.valueOf(data.status);
@@ -116,7 +117,7 @@ public class WFApprove extends WFCommon {
                 }
                 return WFCommon.redirectToDetails(reservationId);
             } else {
-                return Results.badRequest(); // should not happen
+                return badRequest(); // should not happen
             }
         }
     }
@@ -173,5 +174,58 @@ public class WFApprove extends WFCommon {
         Notifier.sendRemindOwner(owner, reservation, reservation.getCar().getName());
         flash("warning", "De herinneringse-mail wordt zo snel mogelijk verstuurd");
         return redirectToDetails(reservationId);
+    }
+
+
+    /**
+     * Show form where trip info can be approved or rejected.
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result approveTripInfo(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
+        if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(reservation)) {
+            flash("danger", "Deze trip kan niet (meer) goed- of afgekeurd worden");
+            redirectToDetails(reservationId);
+        }
+        return ok(aortripinfo.render(
+                Form.form(RemarksData.class),
+                reservation,
+                context.getCarRideDAO().getCarRide(reservationId)
+        ));
+    }
+
+    /**
+     * Process the results of {@link #approveTripInfo(int)}
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result doApproveTripInfo(int reservationId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarRideDAO dao = context.getCarRideDAO();
+        ReservationDAO rdao = context.getReservationDAO();
+        Reservation reservation = rdao.getReservation(reservationId);
+
+        if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(reservation)) {
+            return badRequest(); // should not happen
+        }
+        CarRide ride = context.getCarRideDAO().getCarRide(reservationId);
+        Form<RemarksData> form = Form.form(RemarksData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(aortripinfo.render( form, reservation, ride ));
+        } else {
+            RemarksData data = form.get();
+            if ("REFUSED".equals(data.status)) {
+                rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_REJECTED);
+                Notifier.sendDetailsRejected(reservation, ride, data.remarks);
+                flash("success", "Uw opmerking wordt gemaild naar de bestuurder.");
+            } else {
+                dao.approveInfo(reservationId);
+                rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
+                flash("success", "De ritgegevens werden goedgekeurd.");
+            }
+            return redirectToDetails(reservationId);
+        }
     }
 }
