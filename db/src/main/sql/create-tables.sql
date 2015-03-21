@@ -192,7 +192,8 @@ CREATE TABLE `cars` (
 
 CREATE TABLE `reservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'FINISHED', 'DETAILS_REJECTED') NOT NULL DEFAULT 'REQUEST',
+	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED',
+	                          'FINISHED', 'CANCELLED_LATE', 'DETAILS_REJECTED') NOT NULL DEFAULT 'REQUEST',
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
 	`reservation_owner_id` INT NOT NULL,
