@@ -163,7 +163,6 @@ public class WFCancel extends WFCommon {
             } else {
                 String comments = form.get().remarks;
                 dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE, comments);
-                // TODO: send mail
                 reservation.setMessage(comments);
                 Notifier.sendLateCancel(reservation);
                 return redirectToDetails(reservationId);
