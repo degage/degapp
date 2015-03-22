@@ -192,8 +192,14 @@ CREATE TABLE `cars` (
 
 CREATE TABLE `reservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
-	`reservation_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'CANCELLED', 'REQUEST_DETAILS', 'DETAILS_PROVIDED',
-	                          'FINISHED', 'CANCELLED_LATE', 'DETAILS_REJECTED') NOT NULL DEFAULT 'REQUEST',
+	-- IMPORTANT: do not change the order of these statuses. Indices are used in code
+	-- marked with [ENUM INDEX]
+    `reservation_status` ENUM(
+        'REFUSED', 'CANCELLED', 'CANCELLED_LATE', -- first those that are 'deleted'
+        'ACCEPTED', -- no ride available, must be in the future
+        'REQUEST',  -- no ride available, can be in the past
+        'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'DETAILS_REJECTED', 'FINISHED'
+        ) NOT NULL DEFAULT 'REQUEST',
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,
 	`reservation_owner_id` INT NOT NULL,
@@ -294,6 +300,22 @@ CREATE TABLE `carrides` (
   PRIMARY KEY (`car_ride_car_reservation_id`),
   FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES reservations(`reservation_id`)
 );
+
+CREATE VIEW `trips` AS
+    SELECT
+       reservation_id,
+       reservation_status,
+       reservation_car_id,
+       reservation_owner_id,
+       reservation_privileged,
+       reservation_from,
+       reservation_to,
+       reservation_message,
+       car_ride_start_km,
+       car_ride_end_km,
+       car_ride_damage
+    FROM reservations
+         LEFT JOIN carrides ON reservation_id = car_ride_car_reservation_id;
 
 CREATE TABLE `refuels` (
 	`refuel_id` INT NOT NULL AUTO_INCREMENT,

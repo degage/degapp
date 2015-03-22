@@ -534,7 +534,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static final String OVERLAP_CLAUSE_WIDE =
         "AND reservation_to >= ? AND reservation_from <= ? " +
-        "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED_LATE'  ";
+        "AND reservation_status > 3 ";  // [ENUM INDEX]
 
     private LazyStatement listRCFIPStatement = new LazyStatement(
         "SELECT " + RESERVATION_HEADER_FIELDS +
@@ -563,7 +563,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static final String OVERLAP_CLAUSE_NARROW =
         "AND reservation_to > ? AND reservation_from < ? " +
-        "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED_LATE' ";
+        "AND reservation_status > 3 ";  // [ENUM INDEX]
 
     private LazyStatement hasOverlapStatement = new LazyStatement(
         "SELECT count(*) FROM reservations WHERE reservation_car_id = ? " + OVERLAP_CLAUSE_NARROW

@@ -242,9 +242,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             "LEFT JOIN carrides ON r.reservation_id = car_ride_car_reservation_id " +
             "JOIN reservations AS o ON r.reservation_car_id = o.reservation_car_id " +
                     "WHERE o.reservation_id = ? " +
-                    "AND ( r.reservation_status = 'REQUEST_DETAILS' OR " +
-                    "      r.reservation_status = 'DETAILS_PROVIDED' OR " +
-                    "      r.reservation_status = 'FINISHED') " +
+                    "AND r.reservation_status > 5  " + // [ENUM_INDEX]
                     "AND r.reservation_from >= o.reservation_to  " +
                     "ORDER BY r.reservation_from ASC LIMIT 1"
     );
@@ -273,9 +271,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             "LEFT JOIN carrides ON r.reservation_id = car_ride_car_reservation_id " +
             "JOIN reservations AS o ON r.reservation_car_id = o.reservation_car_id " +
                     "WHERE o.reservation_id = ? " +
-                    "AND ( r.reservation_status = 'REQUEST_DETAILS' OR " +
-                    "      r.reservation_status = 'DETAILS_PROVIDED' OR " +
-                    "      r.reservation_status = 'FINISHED') " +
+                    "AND r.reservation_status > 5  " + // [ENUM_INDEX]
                     "AND r.reservation_to <= o.reservation_from  " +
                     "ORDER BY r.reservation_from DESC LIMIT 1"
     );

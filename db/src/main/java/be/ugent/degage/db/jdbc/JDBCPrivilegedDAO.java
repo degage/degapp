@@ -42,7 +42,7 @@ import java.util.Collection;
 /**
  * JDBC implementation of {@link be.ugent.degage.db.dao.PrivilegedDAO}
  */
-public class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
+class JDBCPrivilegedDAO extends AbstractDAO implements PrivilegedDAO {
 
     public JDBCPrivilegedDAO(JDBCDataAccessContext context) {
         super(context);

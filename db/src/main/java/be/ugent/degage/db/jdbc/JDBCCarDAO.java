@@ -499,7 +499,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             " AND car_id NOT IN (" +
                 "SELECT reservation_car_id FROM reservations " +
                     "WHERE reservation_to >= ? AND reservation_from <= ? " +
-                    "AND reservation_status != 'CANCELLED' AND reservation_status != 'REFUSED' AND reservation_status != 'CANCELLED_LATE' " +
+                    "AND reservation_status > 3 " +  // [ENUM INDEX]
             ") ";
 
     /**
