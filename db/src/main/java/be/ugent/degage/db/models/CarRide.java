@@ -37,18 +37,16 @@ import java.time.LocalDate;
  */
 public class CarRide {
     private Reservation reservation; // reservation.getId() is CarRide-id
-    private boolean approvedByOwner;
     private int startKm;   // 0  when not filled in
     private int endKm;
     private boolean damaged;
     private BigDecimal cost;
     private LocalDate billed;
 
-    public CarRide(Reservation reservation, int startKm, int endKm, boolean approvedByOwner, boolean damaged) {
+    public CarRide(Reservation reservation, int startKm, int endKm, boolean damaged) {
         this.reservation = reservation;
         this.startKm = startKm;
         this.endKm = endKm;
-        this.approvedByOwner = approvedByOwner;
         this.damaged = damaged;
     }
 
@@ -76,14 +74,6 @@ public class CarRide {
         this.endKm = endKm;
     }
 
-    public boolean isApprovedByOwner() {
-        return approvedByOwner;
-    }
-
-    public void setApprovedByOwner(boolean approvedByOwner) {
-        this.approvedByOwner = approvedByOwner;
-    }
-
     public boolean isDamaged() {
         return damaged;
     }
@@ -92,11 +82,19 @@ public class CarRide {
         this.damaged = damaged;
     }
 
-    public BigDecimal getCost() { return cost; }
+    public BigDecimal getCost() {
+        return cost;
+    }
 
-    public void setCost(BigDecimal cost) { this.cost = cost; }
+    public void setCost(BigDecimal cost) {
+        this.cost = cost;
+    }
 
-    public LocalDate getBilled() { return billed; }
+    public LocalDate getBilled() {
+        return billed;
+    }
 
-    public void setBilled(LocalDate billed) { this.billed = billed; }
+    public void setBilled(LocalDate billed) {
+        this.billed = billed;
+    }
 }

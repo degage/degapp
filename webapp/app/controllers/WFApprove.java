@@ -30,7 +30,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.WorkflowAction;
@@ -203,7 +202,6 @@ public class WFApprove extends WFCommon {
     @InjectContext
     public static Result doApproveTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        CarRideDAO dao = context.getCarRideDAO();
         ReservationDAO rdao = context.getReservationDAO();
         Reservation reservation = rdao.getReservation(reservationId);
 
@@ -221,7 +219,6 @@ public class WFApprove extends WFCommon {
                 Notifier.sendDetailsRejected(reservation, ride, data.remarks);
                 flash("success", "Uw opmerking wordt gemaild naar de bestuurder.");
             } else {
-                dao.approveInfo(reservationId);
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
                 flash("success", "De ritgegevens werden goedgekeurd.");
             }

@@ -47,16 +47,14 @@ public interface CarRideDAO {
      */
     public CarRide getCarRide(int id) throws DataAccessException;
 
+    /* No longer used
     public void updateCarRide(CarRide carRide) throws DataAccessException;
+    */
+
     public void updateCarRideKm(int rideId, int startKm, int endKm) throws DataAccessException;
     public void endPeriod() throws DataAccessException;
     public List<CarRide> getBillRidesForLoaner(LocalDate date, int user) throws DataAccessException;
     public List<CarRide> getBillRidesForCar(LocalDate date, int car) throws DataAccessException;
-
-    /**
-     * Indicate that the car ride information stored by the loaner has been approved  by the owner.
-     */
-    public void approveInfo (int id);
 
     /**
      * Return the startKm field of the next reservation, or 0 if no next km is filled in

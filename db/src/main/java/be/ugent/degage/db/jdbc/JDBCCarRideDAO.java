@@ -56,7 +56,6 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
                 JDBCReservationDAO.populateReservation(rs),
                 rs.getInt("car_ride_start_km"),
                 rs.getInt("car_ride_end_km"),
-                rs.getBoolean("car_ride_status"),
                 rs.getBoolean("car_ride_damage")
         );
         carRide.setCost(rs.getBigDecimal("car_ride_cost"));
@@ -83,7 +82,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating car ride.");
 
-            return new CarRide(reservation, startKm, endKm, false, damaged);
+            return new CarRide(reservation, startKm, endKm, damaged);
         } catch (SQLException e){
             throw new DataAccessException("Unable to create car ride", e);
         }
@@ -112,8 +111,10 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
         }
     }
 
+    /* no longer used
+
     private LazyStatement updateCarRideStatement = new LazyStatement(
-            "UPDATE carrides SET car_ride_status = ? , car_ride_start_km = ? , " +
+            "UPDATE carrides SET car_ride_start_km = ? , " +
                     "car_ride_end_km = ? , car_ride_damage = ? , car_ride_cost = ? , car_ride_billed = ? " +
                     "WHERE car_ride_car_reservation_id = ?"
     );
@@ -122,14 +123,13 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     public void updateCarRide(CarRide carRide) throws DataAccessException {
         try {
             PreparedStatement ps = updateCarRideStatement.value();
-            ps.setBoolean(1, carRide.isApprovedByOwner());
-            ps.setInt(2, carRide.getStartKm());
-            ps.setInt(3, carRide.getEndKm());
-            ps.setBoolean(4, carRide.isDamaged());
-            ps.setBigDecimal(5, carRide.getCost());
-            ps.setDate(6, Date.valueOf(carRide.getBilled()));
+            ps.setInt(1, carRide.getStartKm());
+            ps.setInt(2, carRide.getEndKm());
+            ps.setBoolean(3, carRide.isDamaged());
+            ps.setBigDecimal(4, carRide.getCost());
+            ps.setDate(5, Date.valueOf(carRide.getBilled()));
 
-            ps.setInt(7, carRide.getReservation().getId());
+            ps.setInt(6, carRide.getReservation().getId());
 
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Car Ride update affected 0 rows.");
@@ -137,6 +137,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             throw new DataAccessException("Unable to update car ride", e);
         }
     }
+    */
 
     private LazyStatement updateCarRideKmStatement = new LazyStatement(
             "UPDATE carrides SET car_ride_start_km = ? , car_ride_end_km = ? WHERE car_ride_car_reservation_id = ?"
@@ -160,7 +161,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             "UPDATE carrides" +
                     "  INNER JOIN reservations ON car_ride_car_reservation_id = reservation_id " +
                     "  SET car_ride_billed = CURDATE() " +
-                    "  WHERE car_ride_billed IS NULL AND car_ride_status = 1 AND reservation_to < CURDATE() " 
+                    "  WHERE car_ride_billed IS NULL AND reservation_to < CURDATE() "
     );
 
     @Override
@@ -218,21 +219,6 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
             return list;
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of reservations", e);
-        }
-    }
-
-    private LazyStatement approveInfoStatement = new LazyStatement(
-            "UPDATE carrides SET car_ride_status = 1 WHERE car_ride_car_reservation_id = ?"
-    );
-
-    @Override
-    public void approveInfo(int id) {
-        try {
-            PreparedStatement ps = approveInfoStatement.value();
-            ps.setInt(1, id);
-            ps.executeUpdate();
-        }  catch (SQLException e){
-            throw new DataAccessException("Unable to update car ride record", e);
         }
     }
 

@@ -34,7 +34,6 @@ import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.models.Job;
 import be.ugent.degage.db.models.JobType;
 import be.ugent.degage.db.models.UserHeader;
-import db.DataAccess;
 import db.RunnableInContext;
 import notifiers.Notifier;
 import play.libs.Akka;

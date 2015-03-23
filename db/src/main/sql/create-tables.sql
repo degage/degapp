@@ -289,7 +289,6 @@ CREATE TABLE `carcosts` (
 
 CREATE TABLE `carrides` (
   `car_ride_car_reservation_id` INT NOT NULL, -- also primary key
-  `car_ride_status` BIT(1) NOT NULL DEFAULT 0, -- approved by owner?
   `car_ride_start_km` INTEGER NOT NULL DEFAULT 0,
   `car_ride_end_km` INTEGER NOT NULL DEFAULT 0,
   `car_ride_damage` BIT(1) NOT NULL DEFAULT 0,

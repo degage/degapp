@@ -278,7 +278,6 @@ public class WFTrip extends WFCommon {
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             if (isOwnerOrAdmin(reservation)) {
                 // approve immediately
-                dao.approveInfo(reservationId);
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
             } else if (reservation.getStatus() == ReservationStatus.DETAILS_REJECTED) {
                 // register and send mail to owner

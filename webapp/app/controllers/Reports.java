@@ -173,7 +173,7 @@ public class Reports extends Controller {
                     row.createCell(j++).setCellValue(carRide.getStartKm());
                     row.createCell(j++).setCellValue(carRide.getEndKm());
                     row.createCell(j++).setCellValue(carRide.isDamaged());
-                    row.createCell(j++).setCellValue(carRide.isApprovedByOwner());
+                    //row.createCell(j++).setCellValue(carRide.isApprovedByOwner());
                 }
             }
             wb.write(out);
@@ -238,7 +238,7 @@ public class Reports extends Controller {
                     row.createCell(j++).setCellValue(carRide.getStartKm());
                     row.createCell(j++).setCellValue(carRide.getEndKm());
                     row.createCell(j++).setCellValue(carRide.isDamaged());
-                    row.createCell(j++).setCellValue(carRide.isApprovedByOwner());
+                    //row.createCell(j++).setCellValue(carRide.isApprovedByOwner());
                 }
             }
             wb.write(out);

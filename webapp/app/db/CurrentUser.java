@@ -35,7 +35,6 @@ import be.ugent.degage.db.models.UserStatus;
 import play.mvc.Controller;
 
 import java.util.EnumSet;
-import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -86,7 +85,7 @@ public class CurrentUser {
      * Reset the roles to the restricted set.
      */
     public static void clearAdmin (Set<UserRole> roleSet) {
-        EnumSet es = EnumSet.copyOf(RESTRICTED_ROLES);
+        EnumSet<UserRole> es = EnumSet.copyOf(RESTRICTED_ROLES);
         es.retainAll(roleSet);
         if (roleSet.contains(UserRole.SUPER_USER)) {
             es.add(UserRole.CAR_USER); // to avoid problems with super users that are not members
