@@ -34,17 +34,24 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.dao.TripDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
+import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.trips.*;
+
+import java.text.MessageFormat;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Controller responsible for displaying information about reservations and trips.
@@ -224,6 +231,105 @@ public class Trips extends Controller {
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
         return ok(tripspage.render(user.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+    }
+
+    private static boolean overviewAllowed (Car car) {
+        return CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
+                CurrentUser.is(car.getOwner().getId());
+    }
+
+    /**
+     * Shows an overview of all trips for the given car which are in the past, starting at the given date.
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result overview(int carId, String dateString) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (overviewAllowed(car)) {
+
+            LocalDate now = LocalDate.now();
+            LocalDate startDate = Utils.toLocalDate(dateString);
+            if (startDate == null) {
+                startDate = now;
+            }
+            startDate = startDate.withDayOfMonth(1);
+            LocalDate endDate = startDate.plusMonths(2);
+            if (endDate.isAfter(now)) {
+                endDate = now;
+            }
+            TripDAO dao = context.getTripDAO();
+            Iterable<Trip> trips = dao.listTrips(carId, startDate.atStartOfDay(), endDate.atStartOfDay());
+
+            return ok(overview.render(
+                    car,
+                    trips,
+                    Utils.toDateString(startDate.minusMonths(1L)),
+                    dateString,
+                    Utils.toDateString(startDate.plusMonths(1L))
+            ));
+        } else {
+            return badRequest(); // hacking?
+        }
+    }
+
+    public static class KmDetail {
+        public Integer start;
+        public Integer end;
+        public boolean approve = false;
+    }
+
+    public static class KmData {
+        public Map<Integer,KmDetail> km = new HashMap<>();
+    }
+
+    private static final MessageFormat RESULT_WITH_ERRORS = new MessageFormat(
+        "Er {0,choice,1#is één rij|1<zijn {0} rijen} met fouten. De kilometerstanden zijn " +
+        " aangepast van {1,choice,0#0 ritten|1#één rit|2<{1} ritten} en daarnaast " +
+        " {2,choice,0#zijn er nog 0 ritten|1#is er nog één rit|2<zijn er nog {2} ritten} goedgekeurd."
+    );
+
+    private static final MessageFormat RESULT_WITHOUT_ERRORS = new MessageFormat(
+        "De kilometerstanden zijn " +
+        " aangepast van {0,choice,0#0 ritten|1#één rit|2<{0} ritten} en daarnaast " +
+        " {1,choice,0#zijn er nog 0 ritten|1#is er nog één rit|2<zijn er nog {1} ritten} goedgekeurd."
+    );
+
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result doOverview  (int carId, String dateString) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (overviewAllowed(car)) {
+            KmData kmData = Form.form(KmData.class).bindFromRequest().get();
+            int count = 0;
+            int errorCount = 0;
+            int approvedCount = 0;
+            for (Map.Entry<Integer, KmDetail> entry : kmData.km.entrySet()) {
+                KmDetail detail = entry.getValue();
+                if (detail.approve) {
+                    context.getTripDAO().approveTrip(entry.getKey());
+                    approvedCount ++;
+                } else if (detail.start != null && detail.end != null) {
+                    if (detail.start >  0 && detail.end > detail.start) {
+                        context.getTripDAO().updateTrip(entry.getKey(), detail.start, detail.end);
+                        count ++;
+                    } else {
+                        errorCount ++;
+                    }
+                } else if (detail.start != null || detail.end != null) {
+                    errorCount ++;
+                }
+            }
+            if (errorCount > 0) {
+                flash ("danger", RESULT_WITH_ERRORS.format(new Integer[] {errorCount, count, approvedCount}));
+            } else if (count > 0 || approvedCount > 0) {
+                flash("success", RESULT_WITHOUT_ERRORS.format(new Integer[] {count, approvedCount}));
+            }
+            return redirect(routes.Trips.overview(carId, dateString));
+        } else {
+            return badRequest(); // hacking
+        }
     }
 
 }

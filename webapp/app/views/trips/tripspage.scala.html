@@ -50,38 +50,7 @@
                 } else {
                     <td><a href="@routes.Profile.index(reservation.getUserId)">@reservation.getUser</a></td>
                 }
-                <td>
-                    @reservation.getStatus match {
-                        case ReservationStatus.REQUEST => {
-                            <span class="fa fa-question-circle"></span>
-                        }
-                        case ReservationStatus.ACCEPTED => {
-                            <span class="fa fa-check-circle"></span>
-                        }
-                        case ReservationStatus.REFUSED => {
-                            <span class="fa fa-minus-circle"></span>
-                        }
-                        case ReservationStatus.CANCELLED => {
-                            <span class="fa fa-times-circle"></span>
-                        }
-                        case ReservationStatus.CANCELLED_LATE => {
-                            <span class="fa fa-warning"></span>
-                        }
-                        case ReservationStatus.REQUEST_DETAILS => {
-                            <span class="fa fa-question-circle"></span>
-                        }
-                        case ReservationStatus.DETAILS_PROVIDED => {
-                            <span class="fa fa-square-o"></span>
-                        }
-                        case ReservationStatus.DETAILS_REJECTED => {
-                            <span class="fa fa-question"></span>
-                        }
-                        case ReservationStatus.FINISHED => {
-                            <span class="fa fa-check-square-o"></span>
-                        }
-                    }
-                    @reservation.getStatus
-                </td>
+                <td>@statusname(reservation.getStatus)</td>
                 <td>
                     <a class="btn btn-xs btn-primary" href="@routes.Trips.details(reservation.getId)">Details</a>
                     @foreach(util.WorkflowAction.getCurrentActions(reservation))(_.asNarrowButton(reservation.getId))

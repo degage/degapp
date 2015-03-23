@@ -56,10 +56,9 @@
                             }
                         </td>
                         <td>
-                            <div class="btn-group btn-group-xs">
-                                <a class="btn btn-primary" href="@routes.Cars.editCar(car.getId)">wijzig</a>
-                                <a class="btn btn-success" href="@routes.Calendars.indexWithCar(car.getName, car.getId)">reserveer</a>
-                            </div>
+                                @* <a class="btn btn-xs btn-primary" href="@routes.Cars.editCar(car.getId)">Wijzig</a> *@
+                                <a class="btn btn-xs  btn-primary" href="@routes.Trips.overview(car.getId)">Km-standen</a>
+                                <a class="btn btn-xs  btn-success" href="@routes.Calendars.indexWithCar(car.getName, car.getId)">Reserveer</a>
                         </td>
                     } {
                         <tr>

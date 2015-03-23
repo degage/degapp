@@ -29,10 +29,9 @@
 
 package be.ugent.degage.db.jdbc;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Common superclass of the data access objects in this package.
@@ -103,5 +102,37 @@ class AbstractDAO {
      */
     protected PreparedStatement prepareStatement(String sql, String... primaryKeys) throws SQLException {
         return context.getConnection().prepareStatement(sql, primaryKeys);
+    }
+
+
+    // TODO: introduce and use more of these (have a look at Apache DBUtils)
+
+    /**
+     * Converts the current result set record to an object of the given type
+     * @param <T>
+     */
+    @FunctionalInterface
+    interface ResultSetConverter<T> {
+        public T convert (ResultSet rs) throws SQLException;
+    }
+
+    /**
+     * Transforms a resultset into a list
+     */
+    protected static<T> Iterable<T> toList (ResultSet rs, ResultSetConverter<T> fn) throws SQLException {
+        Collection<T> list = new ArrayList<>();
+        while (rs.next()) {
+            list.add(fn.convert(rs));
+        }
+        return list;
+    }
+
+    /**
+     * Executes a prepared statement and converts the result into a list
+     */
+    protected static<T> Iterable<T> toList (PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            return toList (rs, fn);
+        }
     }
 }

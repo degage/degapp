@@ -306,7 +306,7 @@ CREATE VIEW `trips` AS
        reservation_id,
        reservation_status,
        reservation_car_id,
-       reservation_owner_id,
+       reservation_user_id,       reservation_owner_id,
        reservation_privileged,
        reservation_from,
        reservation_to,

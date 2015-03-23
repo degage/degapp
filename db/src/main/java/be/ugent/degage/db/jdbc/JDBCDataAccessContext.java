@@ -43,6 +43,8 @@ import java.sql.SQLException;
 class JDBCDataAccessContext implements DataAccessContext {
 
     private Connection connection;
+
+    // TODO: no need to use lazy instantiation. DAOs have almost no state.
     private UserDAO userDAO;
     private InfoSessionDAO infoSessionDAO;
     private AddressDAO addressDAO;
@@ -290,5 +292,10 @@ class JDBCDataAccessContext implements DataAccessContext {
             verificationDAO = new JDBCVerificationDAO(this);
         }
         return verificationDAO;
+    }
+
+    @Override
+    public TripDAO getTripDAO() {
+        return new JDBCTripDAO(this);
     }
 }

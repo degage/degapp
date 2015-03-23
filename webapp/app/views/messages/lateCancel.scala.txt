@@ -1,4 +1,4 @@
-@* lateCancel.scala.html
+@* lateCancel.scala.txt
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 

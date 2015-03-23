@@ -1,0 +1,109 @@
+@* overview.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(car: Car, trips: Iterable[Trip], previousMonth: String, thisMonth: String, nextMonth: String)
+@stylesheets={
+<style>
+    .table-striped tbody tr.request_details:nth-child(even) { background-color: #f0f0ff; }
+    .table-striped tbody tr.request_details:nth-child(odd) { background-color: #e8e8f7; }
+    .table-striped tbody tr.request_details:hover { background-color: #e1e1f0; }
+
+    .table-striped tbody tr.details_provided:nth-child(even) { background-color: #f0fff0; }
+    .table-striped tbody tr.details_provided:nth-child(odd) { background-color: #e8f7e8; }
+    .table-striped tbody tr.details_provided:hover { background-color: #e1f0e1; }
+</style>
+}
+
+@stdlayout("Kilometerstanden", stylesheets=stylesheets) {
+
+    @panel("Overzicht", "fa-list") {
+        <div class="col-xs-12">
+            <a class="btn btn-xs btn-info" data-toggle="modal" data-target="#resultModal"
+               href='@routes.Assets.at("modalhelp/overview.html")'><span class="fa fa-info"></span> Info</a>
+            &nbsp;&nbsp;
+            <a class="btn btn-xs btn-warning" href="@routes.Trips.overview(car.getId,previousMonth)">Maand eerder</a>
+            <a class="btn btn-xs btn-warning" href="@routes.Trips.overview(car.getId,nextMonth)">Maand later</a>
+        </div>
+        <div class="col-xs-12">
+            <h3>@car.getName</h3>
+        </div>
+        <div class="col-xs-12">
+            <p><b>Opgelet!</b> Je moet eerst de wijzigingen doorsturen die je in de tabel hieronder hebt gemaakt
+                vooraleer je naar een andere maand gaat!</p>
+        </div>
+        @helper.form(routes.Trips.doOverview(car.getId, thisMonth)){
+        <div class="table-responsive col-xs-12">
+            <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
+            <thead>
+               <tr>
+                   <th colspan="2">Periode</th>
+                   <th>Bestuurder</th>
+                   <th>Status</th>
+                   <th width="20">&nbsp;</th>
+                   <th colspan="2">Km-standen</th>
+               </tr>
+            </thead>
+            @foreach.orElse(trips){ trip =>
+                <tr class="@trip.getStatus.name.toLowerCase">
+                    <td><a href='@routes.Trips.details(trip.getId)'>@Utils.toLocalizedString(trip.getFrom)</a></td>
+                    <td>@Utils.toLocalizedString(trip.getUntil)</td>
+                    <td>@if(db.CurrentUser is trip.getUserId)("Jij")else(trip.getDriverName)</td>
+                    <td>@statusname(trip.getStatus)</td>
+                    @* The remaining columns depend on the current status *@
+                    @* DETAILS_REJECTED cannot be be handled here - would too easily
+                                               lead to accidental approval of wrong data *@
+                    @trip.getStatus match {
+                        case ReservationStatus.DETAILS_PROVIDED => {
+                            <td><input type="checkbox" name="km[@trip.getId].approve" value="true"></td>
+                            <td><input type="text" size="6" disabled value="@trip.getStartKm"> →
+                            <input type="text" size="6" disabled value="@trip.getEndKm">
+                            (@(trip.getEndKm-trip.getStartKm) km)</td>
+                        }
+                        case ReservationStatus.REQUEST_DETAILS => {
+                            <td>&nbsp;</td>
+                            <td><input type="text" name="km[@trip.getId].start" size="6"> →
+                                <input type="text" name="km[@trip.getId].end" size="6"></td>
+                        }
+                        case _ => {
+                            <td>&nbsp;</td>
+                            <td><input type="text" size="6" disabled value="@trip.getStartKm"> →
+                            <input type="text" size="6" disabled value="@trip.getEndKm">
+                            (@(trip.getEndKm-trip.getStartKm) km)</td>
+                        }
+                    }
+                </tr>
+            }{
+                <tr><td class="empty-row" colspan="7">Geen resultaten.</td></tr>
+            }
+            </table>
+        </div>
+        @std.submitButton("Doorsturen (en meteen goedkeuren)")
+        }
+    }
+}

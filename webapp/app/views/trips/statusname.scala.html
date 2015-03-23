@@ -1,4 +1,4 @@
-@* detailsRejected.scala.html
+@* statusname.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,24 +27,36 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, url: String, start: Int, end: Int, comment: String, from: String, until: String)
-
-@* Kilometerstand niet goedgekeurd *@
-<p>Beste @user.getFirstName,</p>
-<p>De volgende kilometerstanden die je hebt ingegeven, werden niet aanvaard door
-de eigenaar van de auto</p>
-<ul>
-    <li><b>Auto:</b> @carName</li>
-    <li><b>Km-standen:</b>@start - @end (= @(end-start) km)</li>
-    <li><b>Rit:</b> @from - @until</li>
-</ul>
-<p>De eigenaar heeft hierbij de volgende opmerkingen:</p>
-<hr />
-@comment
-<hr />
-<p>Gelieve de kilometerstanden te corrigeren. Klik hiervoor op onderstaande link:</p>
-<pre>
-    <a href="@url">@url</a>
-</pre>
+@(status: ReservationStatus)
+    @status match {
+        case ReservationStatus.REQUEST => {
+            <span class="fa fa-question-circle"></span>
+        }
+        case ReservationStatus.ACCEPTED => {
+            <span class="fa fa-check-circle"></span>
+        }
+        case ReservationStatus.REFUSED => {
+            <span class="fa fa-minus-circle"></span>
+        }
+        case ReservationStatus.CANCELLED => {
+            <span class="fa fa-times-circle"></span>
+        }
+        case ReservationStatus.CANCELLED_LATE => {
+            <span class="fa fa-warning"></span>
+        }
+        case ReservationStatus.REQUEST_DETAILS => {
+            <span class="fa fa-question-circle"></span>
+        }
+        case ReservationStatus.DETAILS_PROVIDED => {
+            <span class="fa fa-square-o"></span>
+        }
+        case ReservationStatus.DETAILS_REJECTED => {
+            <span class="fa fa-question"></span>
+        }
+        case ReservationStatus.FINISHED => {
+            <span class="fa fa-check-square-o"></span>
+        }
+    }
+@status
 
 

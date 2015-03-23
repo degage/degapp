@@ -82,6 +82,8 @@ GET         /trip                                   controllers.Trips.details(id
 GET         /trips                                  controllers.Trips.index(tab : Int ?= 0)
 GET         /trips/page                             controllers.Trips.showTripsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /trips/admin                            controllers.Trips.showTripsAdminPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /trips/overview                         controllers.Trips.overview(id: Int, date: String ?= null)
+POST        /trips/overview                         controllers.Trips.doOverview(id: Int, date: String)
 
 # Receipts
 GET         /receipts                               controllers.Receipts.index()
@@ -192,22 +194,22 @@ GET         /cars/page                              controllers.Cars.showCarsPag
 GET         /cars/new                               controllers.Cars.newCar()
 POST        /cars/new                               controllers.Cars.addNewCar()
 GET         /cars/view                              controllers.Cars.detail(id: Int)
-GET         /cars/edit                              controllers.Cars.editCar(carId: Int)
-POST        /cars/edit                              controllers.Cars.editCarPost(carId: Int)
-GET         /cars/picture                           controllers.Cars.getPicture(carId: Int)
-GET         /cars/registration                      controllers.Cars.getRegistrationPicture(carId: Int)
-GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(carId: Int)
-GET         /cars/modal/info                        controllers.Cars.getCarInfoModal(carId: Int)
-POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(carId: Int)
+GET         /cars/edit                              controllers.Cars.editCar(id: Int)
+POST        /cars/edit                              controllers.Cars.editCarPost(id: Int)
+GET         /cars/picture                           controllers.Cars.getPicture(id: Int)
+GET         /cars/registration                      controllers.Cars.getRegistrationPicture(id: Int)
+GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(id: Int)
+GET         /cars/modal/info                        controllers.Cars.getCarInfoModal(id: Int)
+POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(id: Int)
 GET         /cars/carcosts                          controllers.Cars.showCarCosts()
 GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
 GET         /cars/carcosts/proof                    controllers.Cars.getCarCostProof(proofId: Int)
-GET         /cars/privileges/edit                   controllers.Cars.updatePrivileged(carId : Int, values : String)
+GET         /cars/privileges/edit                   controllers.Cars.updatePrivileged(id : Int, values : String)
 
 # (Temporarily) disables
-#GET         /cars/availabilities/edit               controllers.Availabilities.updateAvailabilities(carId : Int, values : String)
+#GET         /cars/availabilities/edit               controllers.Availabilities.updateAvailabilities(id : Int, values : String)
 
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()

@@ -80,6 +80,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public VerificationDAO getVerificationDAO();
 
+    public TripDAO getTripDAO();
+
     public void begin();
 
     public void commit();
