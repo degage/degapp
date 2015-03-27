@@ -52,16 +52,16 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     private static final String USER_QUERY =
             "SELECT " + USER_HEADER_FIELDS + ", users.user_gender, " +
-                "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
+                    "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
                     "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
-                "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
+                    "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
-                "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
-                "users.user_damage_history, users.user_deposit, users.user_agree_terms, users.user_image_id, " +
-                "users.user_date_joined, users.user_driver_license_date " +
-            "FROM users " +
-            "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
-            "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
+                    "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
+                    "users.user_damage_history, users.user_deposit, users.user_agree_terms, users.user_image_id, " +
+                    "users.user_date_joined, users.user_driver_license_date " +
+                    "FROM users " +
+                    "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
+                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
 
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
@@ -113,11 +113,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         Date dateJoined = rs.getDate("users.user_date_joined");
         user.setDateJoined(dateJoined == null ? null : dateJoined.toLocalDate());
 
-        user.setDegageId((Integer)rs.getObject("users.user_degage_id"));
+        user.setDegageId((Integer) rs.getObject("users.user_degage_id"));
         Date dateLicense = rs.getDate("users.user_driver_license_date");
         user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
 
-        user.setDeposit((Integer)rs.getObject("users.user_deposit"));
+        user.setDeposit((Integer) rs.getObject("users.user_deposit"));
 
         return user;
     }
@@ -129,22 +129,22 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 rs.getString("user_firstname"),
                 rs.getString("user_lastname"),
                 UserStatus.valueOf(rs.getString("user_status")),
-                rs.getString ("user_phone"),
-                rs.getString ( "user_cellphone"),
-                (Integer)rs.getObject("user_degage_id")
+                rs.getString("user_phone"),
+                rs.getString("user_cellphone"),
+                (Integer) rs.getObject("user_degage_id")
         );
     }
 
     public static UserHeader populateUserHeader(ResultSet rs, String tableName) throws SQLException {
         return new UserHeader(
-                rs.getInt(tableName+".user_id"),
+                rs.getInt(tableName + ".user_id"),
                 rs.getString(tableName + ".user_email"),
-                rs.getString(tableName+".user_firstname"),
-                rs.getString(tableName+".user_lastname"),
+                rs.getString(tableName + ".user_firstname"),
+                rs.getString(tableName + ".user_lastname"),
                 UserStatus.valueOf(rs.getString(tableName + ".user_status")),
                 rs.getString(tableName + ".user_phone"),
-                rs.getString(tableName+".user_cellphone"),
-                (Integer)rs.getObject(tableName+".user_degage_id")
+                rs.getString(tableName + ".user_cellphone"),
+                (Integer) rs.getObject(tableName + ".user_degage_id")
         );
     }
 
@@ -220,7 +220,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
             ps = updatePasswordStatement.value();
             ps.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
-            ps.setInt (2, userId);
+            ps.setInt(2, userId);
             if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("Could not change password");
             }
@@ -272,13 +272,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     }
 
-    private LazyStatement updateUserStatusStatement = new LazyStatement(
-            "UPDATE users SET user_status=? WHERE user_id = ?"
-    );
-
     public void updateUserStatus(int userId, UserStatus status) throws DataAccessException {
-        try {
-            PreparedStatement ps = updateUserStatusStatement.value();
+        try (PreparedStatement ps = prepareStatement("UPDATE users SET user_status=? WHERE user_id = ?")) {
             ps.setString(1, status.name());
             ps.setInt(2, userId);
             ps.executeUpdate();
@@ -287,32 +282,39 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    //
-    private LazyStatement makeUserFullStatement = new LazyStatement(
-            "UPDATE users SET user_status='FULL', user_date_joined=NOW(), user_degage_id = " +
-                    "( SELECT id from (" + // double select required by mysql
-                        "SELECT ifnull(max(user_degage_id),?)+1 AS id FROM users WHERE user_degage_id> ?" +
-                    ") as temp ) " +
-            "WHERE user_id = ? AND user_degage_id IS NULL"
-    );
+    public void makeUserFull(int userId) {
+        // note: there is no easy way in MySQL (apart from using a stored procedure) to do
+        // what is done below with a single call to the database. But this not important
+        // because this procedure will not be called a lot.
 
-    public void makeUserFull (int userId) {
-        try {
-            int yearPar = (Year.now().getValue() - 2000) * 10000;
-
-            PreparedStatement ps = makeUserFullStatement.value();
-            ps.setInt(1, yearPar);
-            ps.setInt(2, yearPar);
-            ps.setInt(3, userId);
-            if (ps.executeUpdate() == 0) {
-                // only status must be changed
-                ps = updateUserStatusStatement.value();
-                ps.setString(1, "FULL");
-                ps.setInt(2, userId);
-                ps.executeUpdate();
+        // first retrieve new Degage id
+        int newDegageId;
+        try (PreparedStatement ps = prepareStatement("SELECT max(user_degage_id) AS id FROM users ");
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                newDegageId = rs.getInt("id") + 1;
+            } else {
+                newDegageId = (Year.now().getValue() - 2000) * 10000 + 1;
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to update user status", ex);
+            throw new DataAccessException("Failed to retreive degage id", ex);
+        }
+
+        // then try to register user as full (for the first time)
+        int nrOfUpdates;
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_status='FULL', user_date_joined=NOW(), user_degage_id = ? " +
+                        "WHERE user_id = ? AND user_degage_id IS NULL")) {
+            ps.setInt(1, newDegageId);
+            ps.setInt(2, userId);
+            nrOfUpdates = ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to make full user", ex);
+        }
+
+        // if the user already existed, only update the status
+        if (nrOfUpdates == 0) {
+            updateUserStatus(userId, UserStatus.FULL);
         }
     }
 
@@ -366,11 +368,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public void updateUserLicenseData (int userId, String license, LocalDate date) {
+    public void updateUserLicenseData(int userId, String license, LocalDate date) {
         try {
             PreparedStatement ps = updateUserLicenseDataStatement.value();
             ps.setString(1, license);
-            ps.setDate (2, date == null ? null : Date.valueOf(date));
+            ps.setDate(2, date == null ? null : Date.valueOf(date));
             ps.setInt(3, userId);
 
             if (ps.executeUpdate() == 0) {
@@ -387,11 +389,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public void updateUserIdentityData (int userId, String identityId, String nationalId) {
+    public void updateUserIdentityData(int userId, String identityId, String nationalId) {
         try {
             PreparedStatement ps = updateUserIdentityDataStatement.value();
             ps.setString(1, identityId);
-            ps.setString (2, nationalId);
+            ps.setString(2, nationalId);
             ps.setInt(3, userId);
 
             if (ps.executeUpdate() == 0) {
@@ -408,7 +410,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     );
 
     @Override
-    public void updateUserDeposit (int userId, Integer deposit) {
+    public void updateUserDeposit(int userId, Integer deposit) {
         try {
             PreparedStatement ps = updateUserDepositStatement.value();
             ps.setObject(1, deposit, Types.INTEGER);
@@ -515,7 +517,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     public boolean updateUserEmail(int userId, String email) {
         try (PreparedStatement ps = prepareStatement(UPDATE_USER_EMAIL_STATEMENT)) {
             ps.setString(1, email);
-            ps.setInt(2,userId);
+            ps.setInt(2, userId);
             ps.executeUpdate();
             return true;
         } catch (SQLException ex) {
