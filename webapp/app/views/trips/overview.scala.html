@@ -39,6 +39,7 @@
     .table-striped tbody tr.details_provided:hover { background-color: #e1f0e1; }
 
     input.show-error { border-color: #a94442; }
+    input.suspicious { color: #cc0000; }
 
 </style>
 }
@@ -46,13 +47,58 @@
 @scripts={
 <script type='text/javascript' src='@routes.Assets.at("lib/jquery_are-you-sure/jquery.are-you-sure.js")'></script>
 <script>
+function checkKm() { // TODO: do this server side?
+   var l = $ ("tr td:nth-child(6)" );
+   var len = l.length;
+   if (len > 0 ) {
+       var last = l.eq(0).children("input");
+       for( i = 1; i < len; i++) {
+          var current = l.eq(i).children("input");
+          var prevEnd = last.eq(1).val();
+          var nextStart = current.eq(0).val();
+          if (nextStart && prevEnd && nextStart!=prevEnd) {
+              current.eq(0).addClass("suspicious")
+              last.eq(1).addClass("suspicious")
+          }
+          last = current;
+       }
+   }
+}
+
+function autoFillKm() {
+   var l = $ ("tr td:nth-child(6)" );
+   var len = l.length;
+   if (len > 0 ) {
+       var last = l.eq(0).children("input");
+       for( i = 1; i < len; i++) {
+          var current = l.eq(i).children("input");
+          var prevEnd = last.eq(1).val();
+          var nextStart = current.eq(0).val();
+          if (nextStart) {
+              if (! prevEnd) {
+                  last.eq(1).val(nextStart);
+              }
+          } else {
+              if (prevEnd) {
+                  current.eq(0).val(prevEnd);
+              }
+          }
+          last = current;
+       }
+   }
+}
 $( function() {
      $("form").areYouSure(
         {message: "Ben je zeker dat je de pagina wil verlaten? De gegevens die je hebt ingetikt, worden dan niet doorgestuurd."}
         );
+     checkKm();
    });
+
 </script>
 }
+
+@* Fields
+   ====== *@
 
 @approve(trip: Trip, form: Form[Trips.KmData])={
     @defining(form("km["+trip.getId+"].approve")) { field =>
@@ -74,6 +120,12 @@ $( function() {
             }
         }
     }
+}
+
+@startEndDisabled(trip: Trip)={
+   <input type="text" size="6" disabled value="@trip.getStartKm"> →
+   <input type="text" size="6" disabled value="@trip.getEndKm">
+   (@(trip.getEndKm-trip.getStartKm) km)
 }
 
 @stdlayout("Kilometerstanden", stylesheets=stylesheets, scripts=scripts) {
@@ -103,38 +155,41 @@ $( function() {
                    <th>Bestuurder</th>
                    <th>Status</th>
                    <th width="20">&nbsp;</th>
-                   <th colspan="2">Km-standen</th>
+                   <th>Km-standen</th>
                </tr>
             </thead>
-            @foreach.orElse(trips){ trip =>
-                <tr class="@trip.getStatus.name.toLowerCase">
-                    <td><a href='@routes.Trips.details(trip.getId)'>@Utils.toLocalizedString(trip.getFrom)</a></td>
-                    <td>@Utils.toLocalizedString(trip.getUntil)</td>
-                    <td>@if(db.CurrentUser is trip.getUserId)("Jij")else(trip.getDriverName)</td>
-                    <td>@statusname(trip.getStatus)</td>
-                    @* The remaining columns depend on the current status *@
-                    @* DETAILS_REJECTED cannot be be handled here - would too easily
-                                               lead to accidental approval of wrong data *@
-                    @trip.getStatus match {
-                        case ReservationStatus.DETAILS_PROVIDED => {
-                            <td>@approve(trip,form)</td>
-                            <td><input type="text" size="6" disabled value="@trip.getStartKm"> →
-                            <input type="text" size="6" disabled value="@trip.getEndKm">
-                            (@(trip.getEndKm-trip.getStartKm) km)</td>
+            @if(trips.iterator.hasNext){
+                @foreach(trips){ trip =>
+                    <tr class="@trip.getStatus.name.toLowerCase">
+                        <td><a href='@routes.Trips.details(trip.getId)'>@Utils.toLocalizedString(trip.getFrom)</a></td>
+                        <td>@Utils.toLocalizedString(trip.getUntil)</td>
+                        <td>@if(db.CurrentUser is trip.getUserId)("Jij")else(trip.getDriverName)</td>
+                        <td>@statusname(trip.getStatus)</td>
+                        @* The remaining columns depend on the current status *@
+                        @* DETAILS_REJECTED cannot be be handled here - would too easily
+                                                   lead to accidental approval of wrong data *@
+                        @trip.getStatus match {
+                            case ReservationStatus.DETAILS_PROVIDED => {
+                                <td>@approve(trip,form)</td>
+                                <td>@startEndDisabled(trip)</td>
+                            }
+                            case ReservationStatus.REQUEST_DETAILS => {
+                                <td>&nbsp;</td>
+                                <td>@startend(trip,form)</td>
+                            }
+                            case _ => {
+                                <td>&nbsp;</td>
+                                <td>@startEndDisabled(trip)</td>
+                            }
                         }
-                        case ReservationStatus.REQUEST_DETAILS => {
-                            <td>&nbsp;</td>
-                            <td>@startend(trip,form)</td>
-                        }
-                        case _ => {
-                            <td>&nbsp;</td>
-                            <td><input type="text" size="6" disabled value="@trip.getStartKm"> →
-                            <input type="text" size="6" disabled value="@trip.getEndKm">
-                            (@(trip.getEndKm-trip.getStartKm) km)</td>
-                        }
-                    }
-                </tr>
-            }{
+                    </tr>
+                }
+                <tr><td colspan="4">&nbsp;</td>
+                    <td colspan="2">
+                        <button type="button" class="btn btn-xs btn-primary" onclick="$('input:checkbox').prop('checked','checked');">Alles aanvinken</button>
+                        <button type="button" class="btn btn-xs btn-primary" onclick="autoFillKm();">Automatisch aanvullen</button>
+                    </td></tr>
+            } else {
                 <tr><td class="empty-row" colspan="7">Geen resultaten.</td></tr>
             }
             </table>
