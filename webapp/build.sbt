@@ -27,6 +27,7 @@ libraryDependencies ++= Seq(
   "org.webjars"             % "jquery"                       % "2.1.1",
   "org.webjars"             % "bootstrap-datetimepicker"     % "2.2.0", // Timepicker for bootstrap v3
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
+  "org.webjars"             % "jquery_are-you-sure"          % "1.5.0", // checks user does not leave page when form data is changed
   "mysql"                   % "mysql-connector-java"         % "5.1.34",
   "org.apache.poi"          % "poi"                          % "3.8",
   "org.apache.poi"          % "poi-ooxml"                    % "3.9",

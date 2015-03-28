@@ -40,7 +40,18 @@
 </style>
 }
 
-@stdlayout("Kilometerstanden", stylesheets=stylesheets) {
+@scripts={
+<script type='text/javascript' src='@routes.Assets.at("lib/jquery_are-you-sure/jquery.are-you-sure.js")'></script>
+<script>
+$( function() {
+     $("form").areYouSure(
+        {message: "Ben je zeker dat je de pagina wil verlaten? De gegevens die je hebt ingetikt, worden dan niet doorgestuurd."}
+        );
+   });
+</script>
+}
+
+@stdlayout("Kilometerstanden", stylesheets=stylesheets, scripts=scripts) {
 
     @panel("Overzicht", "fa-list") {
         <div class="col-xs-12">
