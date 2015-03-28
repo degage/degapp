@@ -247,30 +247,36 @@ public class Trips extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         Car car = context.getCarDAO().getCar(carId);
         if (overviewAllowed(car)) {
-
-            LocalDate now = LocalDate.now();
-            LocalDate startDate = Utils.toLocalDate(dateString);
-            if (startDate == null) {
-                startDate = now;
-            }
-            startDate = startDate.withDayOfMonth(1);
-            LocalDate endDate = startDate.plusMonths(2);
-            if (endDate.isAfter(now)) {
-                endDate = now;
-            }
-            TripDAO dao = context.getTripDAO();
-            Iterable<Trip> trips = dao.listTrips(carId, startDate.atStartOfDay(), endDate.atStartOfDay());
-
-            return ok(overview.render(
-                    car,
-                    trips,
-                    Utils.toDateString(startDate.minusMonths(1L)),
-                    dateString,
-                    Utils.toDateString(startDate.plusMonths(1L))
-            ));
+            return overviewPage(Form.form(KmData.class), dateString, car);
         } else {
             return badRequest(); // hacking?
         }
+    }
+
+    // common code of overview and doOverview
+    private static Result overviewPage(Form<KmData> form, String dateString, Car car) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        LocalDate now = LocalDate.now();
+        LocalDate startDate = Utils.toLocalDate(dateString);
+        if (startDate == null) {
+            startDate = now;
+        }
+        startDate = startDate.withDayOfMonth(1);
+        LocalDate endDate = startDate.plusMonths(2);
+        if (endDate.isAfter(now)) {
+            endDate = now;
+        }
+        TripDAO dao = context.getTripDAO();
+        Iterable<Trip> trips = dao.listTrips(car.getId(), startDate.atStartOfDay(), endDate.atStartOfDay());
+
+        return ok(overview.render(
+                car,
+                trips,
+                form,
+                Utils.toDateString(startDate.minusMonths(1L)),
+                dateString,
+                Utils.toDateString(startDate.plusMonths(1L))
+        ));
     }
 
     public static class KmDetail {
@@ -301,32 +307,36 @@ public class Trips extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         Car car = context.getCarDAO().getCar(carId);
         if (overviewAllowed(car)) {
-            KmData kmData = Form.form(KmData.class).bindFromRequest().get();
-            int count = 0;
-            int errorCount = 0;
-            int approvedCount = 0;
-            for (Map.Entry<Integer, KmDetail> entry : kmData.km.entrySet()) {
-                KmDetail detail = entry.getValue();
-                if (detail.approve) {
-                    context.getTripDAO().approveTrip(entry.getKey());
-                    approvedCount ++;
-                } else if (detail.start != null && detail.end != null) {
-                    if (detail.start >  0 && detail.end >= detail.start) {
-                        context.getTripDAO().updateTrip(entry.getKey(), detail.start, detail.end);
-                        count ++;
-                    } else {
-                        errorCount ++;
+            Form<KmData> form = Form.form(KmData.class).bindFromRequest();
+            if (! form.hasErrors()) {
+                int errors = 0;
+                KmData kmData = form.get();
+                for (Map.Entry<Integer, KmDetail> entry : kmData.km.entrySet()) {
+                    KmDetail detail = entry.getValue();
+                    Integer id = entry.getKey();
+                    if (detail.approve) {
+                        context.getTripDAO().approveTrip(id);
+                    } else if (detail.start != null && detail.end != null) {
+                        if (detail.start > 0 && detail.end >= detail.start) {
+                            context.getTripDAO().updateTrip(id, detail.start, detail.end);
+                        } else {
+                            errors ++;
+                            form.reject("km[" + id +"].start","Ongeldige km-stand");
+                        }
+                    } else if (detail.start != null || detail.end != null) {
+                        errors ++;
+                        form.reject("km[" + id +"].start","Beide waarden invullen aub!");
                     }
-                } else if (detail.start != null || detail.end != null) {
-                    errorCount ++;
                 }
+                if (errors > 0) {
+                   form.reject ("Opgelet. Enkele gegevens konden niet worden doorgestuurd " +
+                           "(zie rode velden in de tabel).");
+                }
+            } else {
+                form.reject ("Er werden ongeldige waarden ingevuld (zie rode velden in de tabel). " +
+                        "Geen enkel van de ingevulde gegevens werd doorgestuurd.");
             }
-            if (errorCount > 0) {
-                flash ("danger", RESULT_WITH_ERRORS.format(new Integer[] {errorCount, count, approvedCount}));
-            } else if (count > 0 || approvedCount > 0) {
-                flash("success", RESULT_WITHOUT_ERRORS.format(new Integer[] {count, approvedCount}));
-            }
-            return redirect(routes.Trips.overview(carId, dateString));
+            return overviewPage(form, dateString, car);
         } else {
             return badRequest(); // hacking
         }
