@@ -29,6 +29,7 @@
 
 @(car: Car, trips: Iterable[Trip], form: Form[Trips.KmData], previousMonth: String, thisMonth: String, nextMonth: String)
 @stylesheets={
+@sheets("statuses")
 <style>
     .table-striped tbody tr.request_details:nth-child(even) { background-color: #f0f0ff; }
     .table-striped tbody tr.request_details:nth-child(odd) { background-color: #e8e8f7; }
@@ -159,30 +160,28 @@ $( function() {
                </tr>
             </thead>
             @if(trips.iterator.hasNext){
-                @foreach(trips){ trip =>
-                    <tr class="@trip.getStatus.name.toLowerCase">
-                        <td><a href='@routes.Trips.details(trip.getId)'>@Utils.toLocalizedString(trip.getFrom)</a></td>
-                        <td>@Utils.toLocalizedString(trip.getUntil)</td>
-                        <td>@if(db.CurrentUser is trip.getUserId)("Jij")else(trip.getDriverName)</td>
-                        <td>@statusname(trip.getStatus)</td>
-                        @* The remaining columns depend on the current status *@
-                        @* DETAILS_REJECTED cannot be be handled here - would too easily
-                                                   lead to accidental approval of wrong data *@
-                        @trip.getStatus match {
-                            case ReservationStatus.DETAILS_PROVIDED => {
-                                <td>@approve(trip,form)</td>
-                                <td>@startEndDisabled(trip)</td>
-                            }
-                            case ReservationStatus.REQUEST_DETAILS => {
-                                <td>&nbsp;</td>
-                                <td>@startend(trip,form)</td>
-                            }
-                            case _ => {
-                                <td>&nbsp;</td>
-                                <td>@startEndDisabled(trip)</td>
-                            }
+                @foreach.tr(trips){ trip =>
+                    <td><a href='@routes.Trips.details(trip.getId)'>@Utils.toLocalizedString(trip.getFrom)</a></td>
+                    <td>@Utils.toLocalizedString(trip.getUntil)</td>
+                    <td>@if(db.CurrentUser is trip.getUserId)("Jij")else(trip.getDriverName)</td>
+                    <td>@statusname(trip.getStatus)</td>
+                    @* The remaining columns depend on the current status *@
+                    @* DETAILS_REJECTED cannot be be handled here - would too easily
+                                               lead to accidental approval of wrong data *@
+                    @trip.getStatus match {
+                        case ReservationStatus.DETAILS_PROVIDED => {
+                            <td>@approve(trip,form)</td>
+                            <td>@startEndDisabled(trip)</td>
                         }
-                    </tr>
+                        case ReservationStatus.REQUEST_DETAILS => {
+                            <td>&nbsp;</td>
+                            <td>@startend(trip,form)</td>
+                        }
+                        case _ => {
+                            <td>&nbsp;</td>
+                            <td>@startEndDisabled(trip)</td>
+                        }
+                    }
                 }
                 <tr><td colspan="4">&nbsp;</td>
                     <td colspan="2">

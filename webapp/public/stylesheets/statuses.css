@@ -1,0 +1,15 @@
+/*
+ */
+
+/* Different colors used for reservation statuses */
+
+span.request { color: #cc8800; }
+span.accepted { color: black; }
+span.refused { color: #cc8888; }
+span.cancelled { color: #888888; }
+
+span.request_details { color: #00aa00; }
+span.details_rejected { color: #00aaaa; }
+span.details_provided { color: #880088; }
+span.finished { color: black; }
+span.cancelled_late { color: #cc0000; }
