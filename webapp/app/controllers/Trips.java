@@ -311,7 +311,7 @@ public class Trips extends Controller {
                     context.getTripDAO().approveTrip(entry.getKey());
                     approvedCount ++;
                 } else if (detail.start != null && detail.end != null) {
-                    if (detail.start >  0 && detail.end > detail.start) {
+                    if (detail.start >  0 && detail.end >= detail.start) {
                         context.getTripDAO().updateTrip(entry.getKey(), detail.start, detail.end);
                         count ++;
                     } else {
