@@ -53,7 +53,7 @@ public class CarPicker extends Controller {
             String cars = "";
             Filter filter = new JDBCFilter();
             filter.putValue(FilterField.CAR_NAME, search);
-            Iterable<Car> results = dao.listCars(FilterField.CAR_NAME, true, 1, MAX_VISIBLE_RESULTS, filter);
+            Iterable<Car> results = dao.listCars(FilterField.CAR_NAME, true, 1, MAX_VISIBLE_RESULTS, filter, true);
             for (Car car : results) {
                 String value = car.getName();
                 for (String part : search.split(" ")) {
