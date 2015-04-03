@@ -242,7 +242,7 @@ public class Cars extends Controller {
         if (carField == null) {
             carField = FilterField.CAR_NAME;
         }
-        Iterable<Car> listOfCars = dao.listCars(carField, asc, page, pageSize, filter);
+        Iterable<Car> listOfCars = dao.listCars(carField, asc, page, pageSize, filter, false);
 
         int numberOfResults = dao.countCars(filter);
         int numberOfPages = (int) Math.ceil(numberOfResults / (double) pageSize);

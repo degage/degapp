@@ -615,7 +615,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public Iterable<Car> listCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<Car> listCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException {
         try {
             PreparedStatement ps = null;
             switch(orderBy) {
@@ -651,7 +651,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
                             null
                     );
                     result.setActive(rs.getBoolean("car_active"));
-                    cars.add(result);
+                    if (result.isActive() || ! onlyActive) { // TODO: do this filter at car level
+                        cars.add(result);
+                    }
                 }
                 return cars;
             }
@@ -676,7 +678,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO{
             "LEFT JOIN users ON user_id=car_owner_user_id " +
             "LEFT JOIN technicalcardetails ON details_id = car_id " +
             "LEFT JOIN carinsurances ON insurance_id = car_id " +
-            "ORDER BY car_name";
+            "WHERE car_active ORDER BY car_name";
 
     @Override
     public Iterable<Car> listAllCars() throws DataAccessException {

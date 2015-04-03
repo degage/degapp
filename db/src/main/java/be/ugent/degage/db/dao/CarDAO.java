@@ -46,13 +46,13 @@ public interface CarDAO {
     public Car getCar(int id) throws DataAccessException;
 
     /**
-     * Return a list of all cars, with full information (in order to export it to a spread sheet)
+     * Return a list of (almost) all cars, with full information. Only shows cars that are active.
      */
     public Iterable<Car> listAllCars () throws DataAccessException;
 
 
     /**
-     * Returns a filtered list of cars. Only <i>active</i> cars are shown.
+     * Returns a filtered list of cars. Only active cars are shown.
      */
     public Iterable<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
@@ -62,9 +62,18 @@ public interface CarDAO {
     public int getAmountOfCars(Filter filter) throws DataAccessException;
 
     // newer version - uses shorter SQL
-    public Iterable<Car> listCars (FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+
+    /**
+     * Return a filtered list of cars.
+     * @param onlyActive If true, only active cars are shown
+     */
+
+    public Iterable<Car> listCars (FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException;
     public int countCars(Filter filter) throws DataAccessException;
 
+    /**
+     * Lists all cars of the given user, also those that are not active
+     */
     public Iterable<Car> listCarsOfUser (int userId)  throws DataAccessException;
 
     public boolean isCarOfUser (int carId, int userId) throws DataAccessException;
