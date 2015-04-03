@@ -275,7 +275,8 @@ public class Trips extends Controller {
                 form,
                 Utils.toDateString(startDate.minusMonths(1L)),
                 dateString,
-                Utils.toDateString(startDate.plusMonths(1L))
+                Utils.toDateString(startDate.plusMonths(1L)),
+                Utils.toLocalizedDateString(startDate)
         ));
     }
 
