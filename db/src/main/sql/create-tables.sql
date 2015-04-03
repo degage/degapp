@@ -198,7 +198,8 @@ CREATE TABLE `reservations` (
         'REFUSED', 'CANCELLED', 'CANCELLED_LATE', -- first those that are 'deleted'
         'ACCEPTED', -- no ride available, must be in the future
         'REQUEST',  -- no ride available, can be in the past
-        'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'DETAILS_REJECTED', 'FINISHED'
+        'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'DETAILS_REJECTED', 'FINISHED',
+        'FROZEN'
         ) NOT NULL DEFAULT 'REQUEST',
 	`reservation_car_id` INT NOT NULL,
 	`reservation_user_id` INT NOT NULL,

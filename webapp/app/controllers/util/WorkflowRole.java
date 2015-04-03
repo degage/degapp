@@ -97,7 +97,7 @@ public enum WorkflowRole {
                     return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.AOR_TRIP,
                             WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 case FINISHED:
-                    return EnumSet.of(WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 default:
                     return NO_ACTIONS;
             }
@@ -131,6 +131,7 @@ public enum WorkflowRole {
                 case DETAILS_REJECTED:
                 case DETAILS_PROVIDED:
                 case FINISHED:
+                case FROZEN:
                     return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.REFUELS, WorkflowAction.SHORTEN);
                 default:
                     return NO_ACTIONS;

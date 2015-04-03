@@ -102,12 +102,17 @@ public class Trips extends Controller {
             return null;
         }
         CarRide tripInfo = null;
-        if (reservation.getStatus() == ReservationStatus.DETAILS_PROVIDED || reservation.getStatus() == ReservationStatus.FINISHED)
+        ReservationStatus status = reservation.getStatus();
+        if (status == ReservationStatus.DETAILS_PROVIDED ||
+                status == ReservationStatus.FINISHED ||
+                status == ReservationStatus.DETAILS_REJECTED ||
+                status == ReservationStatus.FROZEN ) {
             tripInfo = ddao.getCarRide(reservationId);
+        }
 
         User previousLoaner = null;
         User nextLoaner = null;
-        if (reservation.getStatus() == ReservationStatus.ACCEPTED) {
+        if (status == ReservationStatus.ACCEPTED) {
             Reservation nextReservation = rdao.getNextReservation(reservationId);
             if (nextReservation != null) {
                 nextLoaner = udao.getUser(nextReservation.getUser().getId()); // TODO: only phones needed

@@ -13,3 +13,4 @@ span.details_rejected { color: #00aaaa; }
 span.details_provided { color: #880088; }
 span.finished { color: black; }
 span.cancelled_late { color: #cc0000; }
+span.frozen { color: #444444; }
