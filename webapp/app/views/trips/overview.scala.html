@@ -134,7 +134,7 @@ $( function() {
 
     @panel("Overzicht", "fa-list") {
         <div class="col-xs-12">
-            <a class="btn btn-xs btn-info" data-toggle="modal" data-target="#resultModal"
+            <a class="btn btn-xs btn-info" data-toggle="modal" data-target="#helpModal"
                href='@routes.Assets.at("modalhelp/overview.html")'><span class="fa fa-info"></span> Info</a>
             &nbsp;&nbsp;
             <a class="btn btn-xs btn-warning" href="@routes.Trips.overview(car.getId,previousMonth)">Maand eerder</a>
@@ -197,4 +197,10 @@ $( function() {
         @std.submitButton("Doorsturen (en meteen goedkeuren)")
         }
     }
+
+    <div class="modal fade" id="helpModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content"></div>
+        </div>
+    </div>
 }
