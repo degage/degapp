@@ -1,0 +1,86 @@
+@* refuelsForTripOwner.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(form: Form[Refuels.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation)
+
+@* Lists all refuels for a given ride in a 'large' format, suitable for owners *@
+
+@stdlayout("Tankbeurten (rit)", stylesheets=sheets("statuses"), extrabc=breadcrumb("Mijn auto's",routes.Cars.showCars())) {
+
+    @panel("Rit", "fa-car") {
+        <div class="col-xs-12">
+            <h3>@reservation.getCar.getName</h3>
+            <h4>@Utils.toLocalizedString(reservation.getFrom) - @Utils.toLocalizedString(reservation.getUntil)</h4>
+            <a class="btn btn-xs btn-default" data-toggle="collapse"
+                    href="#collapsedForm">Tankbeurt toevoegen ...</a>
+            <a class="btn btn-xs btn-primary" href="#">Vorige rit</a>
+            <a class="btn btn-xs btn-primary" href="#">Volgende rit</a>
+        </div>
+        @* Code in common with refuelsForTrip *@
+    }
+
+    <div class='collapse@if(form.hasErrors)(".in")' id="collapsedForm">
+        @panel("Nieuwe tankbeurt", "fa-pencil") {
+            @helper.form(routes.Refuels.newRefuelForTripOwnerPost(reservation.getId), 'enctype -> "multipart/form-data"){
+                @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
+                @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
+                @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")
+                @std.textField(form("fuelAmount"), "Aantal liters getankt", css="col-sm-6")
+                <div class="col-xs-12"><p>(Alle velden zijn verplicht)</p></div>
+                @std.submitButton("Doorsturen (en meteen goedkeuren)")
+            }
+        }
+    </div>
+
+    @foreach.orElse(refuelList){ refuel =>
+        @panel("Tankbeurt", "fa-beer") {
+            <div class="col-lg-4 col-xs-12">
+                <dl class="dl-horizontal">
+                    <dt>Bedrag</dt>
+                    <dd>@data.EurocentAmount.toString(refuel.getEurocents)</dd>
+                    <dt>Liters</dt>
+                    <dd>@refuel.getAmount</dd>
+                    <dt>Km-stand</dt>
+                    <dd>@refuel.getKm</dd>
+                    <dt>Status</dt>
+                    <dd>@statusname(refuel.getStatus)</dd>
+                </dl>
+                @if(refuel.getStatus == RefuelStatus.REQUEST) {
+                    <a type="button" class="btn btn-xs btn-danger" href="@routes.Refuels.approve(refuel.getId)">Goedkeuren</a>
+                    <a type="button" class="btn btn-xs btn-primary" href="@routes.Refuels.approveOrReject(refuel.getId)">Afkeuren ...</a>
+                }
+            </div>
+            <div class="col-lg-8 col-xs-12">
+                <img src="@routes.Refuels.getProof(refuel.getId)">
+            </div>
+        }
+    }{
+        <div class="col-xs-12 alert alert-warning"><p>Er werden voor deze rit (nog) geen tankbeurten ingegeven.</p></div>
+    }
+}

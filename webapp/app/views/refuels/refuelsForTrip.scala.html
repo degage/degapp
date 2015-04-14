@@ -1,4 +1,4 @@
-@* refuelsForRide.scala.html
+@* refuelsForTrip.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -34,7 +34,7 @@
     @breadcrumb("Details",routes.Trips.details(reservation.getId)) @* TODO: differentiate between admin / not admin *@
 }
 
-@stdlayout("Tankbeurten (rit)", extrabc=extrabc){
+@stdlayout("Tankbeurten (rit)", stylesheets=sheets("statuses"), extrabc=extrabc){
 
     @trips.detailsPanel(reservation.getCar, reservation)
 
@@ -65,8 +65,8 @@
         </div>
     }
 
-    @panel("Nieuwe tankbeurt") {
-        @helper.form(routes.Refuels.newRefuelForRidePost(reservation.getId), 'enctype -> "multipart/form-data"){
+    @panel("Nieuwe tankbeurt", "fa-pencil") {
+        @helper.form(routes.Refuels.newRefuelForTripPost(reservation.getId), 'enctype -> "multipart/form-data"){
             @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
             @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
             @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")

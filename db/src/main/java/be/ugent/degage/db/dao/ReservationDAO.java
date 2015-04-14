@@ -74,13 +74,13 @@ public interface ReservationDAO {
     public void updateReservationTime (int reservationId, LocalDateTime from, LocalDateTime until);
 
     /**
-     * Return the first reservation that follows the given reservation, unless it is more
+     * Return the first accepted reservation that follows the given reservation, unless it is more
      * than a day removed
      */
     public Reservation getNextReservation(int reservationId) throws DataAccessException;
 
     /**
-     * Return the last reservation that preceeds the given reservation, unless it is more
+     * Return the last accepted  reservation that preceeds the given reservation, unless it is more
      * than a day removed
      */
     public Reservation getPreviousReservation(int reservationId) throws DataAccessException;

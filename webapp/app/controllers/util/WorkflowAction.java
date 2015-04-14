@@ -73,7 +73,7 @@ public enum WorkflowAction {
     // accept or reject trip data
 
     REFUELS("Tankbeurten", "Tankbeurten beheren ...",
-            routes.Refuels::showRefuelsForRide, "primary");
+            routes.Refuels::showRefuelsForTrip, "primary");
 
     private String shortCaption;
 

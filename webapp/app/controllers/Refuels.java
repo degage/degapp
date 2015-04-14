@@ -202,13 +202,13 @@ public class Refuels extends Controller {
      */
     @AllowRoles({UserRole.CAR_USER})
     @InjectContext
-    public static Result showRefuelsForRide(int reservationId) {
+    public static Result showRefuelsForTrip(int reservationId) {
 
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
         if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
-            return ok( refuelsForRide.render(
+            return ok( refuelsForTrip.render(
                             Form.form(RefuelData.class).fill(new RefuelData().populate( new EurocentAmount(), null, 0)),
                             refuels,
                             reservation) );
@@ -218,32 +218,88 @@ public class Refuels extends Controller {
     }
 
     /**
-     * Process form from {@link #showRefuelsForRide}
+     * Show the list of all rides for a given reservation, intended for use by owners.
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result showRefuelsForTripOwner(int reservationId) {
+        // TODO factor out common code with showRefuelsForRide ?
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
+        Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
+        if (WFCommon.isOwnerOrAdmin(reservation)) { // note: differs from showRefuelsForTrip
+            return ok( refuelsForTripOwner.render(
+                            Form.form(RefuelData.class).fill(new RefuelData().populate( new EurocentAmount(), null, 0)),
+                            refuels,
+                            reservation) );
+        } else {
+            return badRequest(); // hacker?
+        }
+    }
+
+
+    /**
+     * Process form from {@link #showRefuelsForTrip}
      */
     @AllowRoles({UserRole.CAR_USER, UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
-    public static Result newRefuelForRidePost(int reservationId) {
+    public static Result newRefuelForTripPost(int reservationId) {
         Form<RefuelData> form = Form.form(RefuelData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
         Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
         if (form.hasErrors()) {
             form.reject("picture", "Bestand opnieuw selecteren");
-            return badRequest( refuelsForRide.render(form, refuels, reservation));
+            return badRequest(refuelsForTrip.render(form, refuels, reservation));
         } else if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
             RefuelData data = form.get();
             File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
             if (file == null) {
                 form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
-                return badRequest(refuelsForRide.render(form, refuels, reservation));
+                return badRequest(refuelsForTrip.render(form, refuels, reservation));
             } else if (file.getContentType() == null) {
                 form.reject("picture", "Het bestand  is van het verkeerde type");
-                return badRequest(refuelsForRide.render(form, refuels, reservation));
+                return badRequest(refuelsForTrip.render(form, refuels, reservation));
             } else {
                 UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
                 newRefuel(reservation, owner, data.amount.getValue(), file.getId(), data.km, data.fuelAmount);
             }
-            return redirect(routes.Refuels.showRefuelsForRide(reservationId));
+            return redirect(routes.Refuels.showRefuelsForTrip(reservationId));
+        } else {
+            return badRequest(); // hacker?
+        }
+
+    }
+
+    /**
+     * Process form from {@link #showRefuelsForTripOwner}
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result newRefuelForTripOwnerPost(int reservationId) {
+        // TODO: shares lots of code with newRefuelForTripPost
+        Form<RefuelData> form = Form.form(RefuelData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
+        Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
+        if (form.hasErrors()) {
+            form.reject("picture", "Bestand opnieuw selecteren");
+            return badRequest( refuelsForTripOwner.render(form, refuels, reservation));
+        } else if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
+            RefuelData data = form.get();
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+            if (file == null) {
+                form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
+                return badRequest(refuelsForTripOwner.render(form, refuels, reservation));
+            } else if (file.getContentType() == null) {
+                form.reject("picture", "Het bestand  is van het verkeerde type");
+                return badRequest(refuelsForTripOwner.render(form, refuels, reservation));
+            } else {
+                UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
+                newRefuel(reservation, owner, data.amount.getValue(), file.getId(), data.km, data.fuelAmount);
+            }
+            return redirect(routes.Refuels.showRefuelsForTripOwner(reservationId));
         } else {
             return badRequest(); // hacker?
         }
@@ -327,7 +383,7 @@ public class Refuels extends Controller {
                     if (CurrentUser.isNot(reservation.getOwnerId())
                             || refuel.getStatus() != RefuelStatus.REQUEST) {
                         flash("danger", "Alleen de eigenaar kan een tankbeurt goed- of afkeuren");
-                        return redirect(routes.Refuels.showRefuelsForRide(reservation.getId()));
+                        return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId()));
                     }
                 }
 
@@ -339,12 +395,30 @@ public class Refuels extends Controller {
                 } else {
                     Notifier.sendRefuelApproved(refuel, remarks);
                 }
-                return redirect(routes.Refuels.showRefuelsForRide(reservation.getId()));
+                return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId()));
             }  else { // other cases only happen when somebody is hacking
                 return badRequest();
             }
         }
 
+    }
+
+    /**
+     * Approve the indicated refuel directly
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result approve(int refuelId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
+        RefuelDAO dao = context.getRefuelDAO();
+        Refuel refuel = dao.getRefuel(refuelId);
+        // TODO: check authorization
+        // TODO: accept
+        dao.acceptOrRejectRefuel(RefuelStatus.ACCEPTED, refuelId, null);
+        Notifier.sendRefuelApproved(refuel, null);
+        flash("success", "De tankbeurt werd goedgekeurd");
+        return redirect(routes.Refuels.showRefuelsForTripOwner(reservation.getId()));
     }
 
 }

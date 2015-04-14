@@ -217,13 +217,16 @@ GET         /refuels/page                           controllers.Refuels.showUser
 GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/proof                          controllers.Refuels.getProof(refuelId: Int)
-GET         /refuels/approval                       controllers.Refuels.approveOrReject(refuelId: Int)
-POST        /refuels/approval                       controllers.Refuels.approveOrRejectPost(refuelId: Int)
+GET         /refuels/aor                            controllers.Refuels.approveOrReject(refuelId: Int)
+POST        /refuels/aor                            controllers.Refuels.approveOrRejectPost(refuelId: Int)
+GET         /refuels/approve                        controllers.Refuels.approve(refuelId: Int)
 GET         /refuels/details                        controllers.Refuels.showDetails(refuelId: Int)
 
 # new UI
-GET         /refuels/ride                           controllers.Refuels.showRefuelsForRide(id: Int)
-POST        /refuels/new                            controllers.Refuels.newRefuelForRidePost(id: Int)
+GET         /refuels/trip                           controllers.Refuels.showRefuelsForTrip(id: Int)
+POST        /refuels/new                            controllers.Refuels.newRefuelForTripPost(id: Int)
+GET         /refuels/owner/trip                     controllers.Refuels.showRefuelsForTripOwner(id: Int)
+POST        /refuels/owner/new                      controllers.Refuels.newRefuelForTripOwnerPost(id: Int)
 
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
