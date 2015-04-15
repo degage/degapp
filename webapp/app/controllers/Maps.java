@@ -37,12 +37,10 @@ import db.DataAccess;
 import db.InjectContext;
 import play.libs.F;
 import play.libs.ws.WS;
-import play.libs.ws.WSResponse;
 import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.maps.simplemap;
 
-import static play.libs.F.Function;
 import static play.libs.F.Promise;
 
 /**
@@ -101,11 +99,7 @@ public class Maps extends Controller {
     public static Promise<Result> getMap(int zoom, int x, int y) {
         String mapServer = DataAccess.getInjectedContext().getSettingDAO().getSettingForNow("maps_tile_server");
         return WS.url(String.format(mapServer, zoom, x, y)).get().map(
-                new Function<WSResponse, Result>() {
-                    public Result apply(WSResponse response) {
-                        return ok(response.getBodyAsStream()).as("image/jpeg");
-                    }
-                }
+                response -> ok(response.getBodyAsStream()).as("image/jpeg")
         );
     }
 
@@ -128,14 +122,12 @@ public class Maps extends Controller {
                             // TODO: uncomment postalcode line, it's only commented for test data purposes
                             // .setQueryParameter("postalcode", address.getZip())
                     .setQueryParameter("format", "json").get().map(
-                            new Function<WSResponse, F.Tuple<Double, Double>>() {
-                                public F.Tuple<Double, Double> apply(WSResponse response) {
-                                    JsonNode node = response.asJson();
-                                    if (node.size() > 0) {
-                                        JsonNode first = node.get(0);
-                                        return new F.Tuple<>(first.get("lat").asDouble(), first.get("lon").asDouble());
-                                    } else return null;
-                                }
+                            response -> {
+                                JsonNode node = response.asJson();
+                                if (node.size() > 0) {
+                                    JsonNode first = node.get(0);
+                                    return new F.Tuple<>(first.get("lat").asDouble(), first.get("lon").asDouble());
+                                } else return null;
                             }
                     );
         } else throw new DataAccessException("Could not find address by ID");

@@ -38,7 +38,6 @@ import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.UserRole;
 import controllers.util.OverviewLine;
 import controllers.util.Pagination;
-import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;

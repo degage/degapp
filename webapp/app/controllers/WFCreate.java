@@ -42,9 +42,11 @@ import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Result;
 import views.html.workflow.create;
+import views.html.workflow.createold;
 import views.html.workflow.shorten;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -206,19 +208,100 @@ public class WFCreate extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result createOld(int carId) {
-        // TODO
-        return ok();
+        // check whether allowed to do this
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
+                CurrentUser.is(car.getOwner().getId())) {
+            return ok (createold.render(
+                    Form.form(OldReservationData.class).fill(
+                            OldReservationData.forCurrentUser()
+                    ),
+                    car
+            ));
+        } else {
+            return badRequest(); // hack?
+        }
     }
 
      /**
      * Process the reservation made in {@link #createOld}
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result doCreateOld(int carId) {
-        // TODO
+        // TODO: factor out common code with #doCreate
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+
+        if (!CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) &&
+                CurrentUser.isNot(car.getOwner().getId())) {
+            // not allowed
+            return badRequest();  // hack?
+        }
+
+        Form<OldReservationData> form = Form.form(OldReservationData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return ok(createold.render(form, car));
+        }
+
+        OldReservationData data = form.get();
+        LocalDateTime from = data.from;
+        LocalDateTime until = data.until;
+
+        // Test whether the reservation is valid
+        ReservationDAO rdao = context.getReservationDAO();
+        if (rdao.hasOverlap(carId, from, until)) {
+            String errorMessage = "De reservatie overlapt met een bestaande reservatie";
+            form.reject("from", errorMessage);
+            form.reject("until", errorMessage);
+            return ok(createold.render(form, car));
+        }
+
+        rdao.createReservation(from, until, carId, data.userId);
+        // status will be set automatically to REQUEST_DETAILS - no mails will be sent
         return redirect(routes.Trips.index(0));
     }
 
+    public static class OldReservationData {
+        @Constraints.Required
+        public LocalDateTime from;
+
+        @Constraints.Required
+        public LocalDateTime until;
+
+        // TODO: reuse e.g. InfoSessions.UserPickerData
+        public Integer userId;
+
+        @Constraints.Required
+        public String userIdAsString;
+
+        public List<ValidationError> validate() {
+            List<ValidationError> errors = new ArrayList<>();
+            if (userId == null || userId <= 0) {
+                // needed for those cases where a string is input which does not correspond with a real person
+                errors.add(new ValidationError("userId", "Gelieve een bestaande persoon te selecteren"));
+            }
+            if (!from.isBefore(until)) {
+                errors.add(new ValidationError("until", "Het einde van de periode moet na het begin van de periode liggen"));
+            }
+            if (!from.isBefore(LocalDateTime.now())) {
+                errors.add(new ValidationError("from", "Reservatie moet in het verleden liggen"));
+            }
+            if (errors.isEmpty()) {
+                return null;
+            } else {
+                return errors;
+            }
+        }
+
+        public static OldReservationData forCurrentUser() {
+            OldReservationData data = new OldReservationData();
+            data.userId = CurrentUser.getId();
+            data.userIdAsString = CurrentUser.getFullName();
+            return data;
+        }
+
+    }
 
 }
