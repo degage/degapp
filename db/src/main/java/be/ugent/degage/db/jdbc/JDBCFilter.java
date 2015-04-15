@@ -54,6 +54,11 @@ public class JDBCFilter implements Filter {
         content.put(field, string);
     }
 
+    @Override
+    public void putValue(FilterField field, int number) {
+        putValue(field, Integer.toString(number));
+    }
+
     /**
      * Retrieve the value contained in the specified filterfield.
      * @param field The filterfield for which you want to retrieve the value

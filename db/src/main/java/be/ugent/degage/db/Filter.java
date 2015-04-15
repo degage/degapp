@@ -34,5 +34,6 @@ package be.ugent.degage.db;
  */
 public interface Filter {
     public void putValue(FilterField field, String string);
+    public void putValue(FilterField field, int number);
     public String getValue(FilterField field);
 }

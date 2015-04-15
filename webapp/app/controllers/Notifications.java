@@ -35,6 +35,7 @@ import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.Notification;
 import be.ugent.degage.db.models.User;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
@@ -65,16 +66,13 @@ public class Notifications extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result showNotificationsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        User user = DataProvider.getUserProvider().getUser();
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        filter.putValue(FilterField.USER_ID, user.getId() + "");
+        filter.putValue(FilterField.USER_ID, CurrentUser.getId());
         return ok(notificationList(page, pageSize, field, asc, filter));
-
-
     }
 
     // used with injected context

@@ -69,31 +69,20 @@ public class Refuels extends RefuelCommon {
     @AllowRoles
     @InjectContext
     public static Result showUserRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-
-        // currently not used
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        filter.putValue(FilterField.REFUEL_USER_ID, CurrentUser.getId() + "");
-
-        // TODO: Check if admin or car owner/user
-
+        filter.putValue(FilterField.REFUEL_USER_ID, CurrentUser.getId());
         return ok(refuelList(page, pageSize, filter));
-
     }
 
     @InjectContext
     public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-
-        // currently not used
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-
         User user = DataProvider.getUserProvider().getUser();
-        filter.putValue(FilterField.REFUEL_OWNER_ID, user.getId() + "");
+        filter.putValue(FilterField.REFUEL_OWNER_ID,CurrentUser.getId());
 
         // TODO: Check if admin or car owner/user
 

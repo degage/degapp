@@ -127,7 +127,7 @@ public class Reports extends Controller {
     public static Result getReservationsForOwner() {
         // TODO: factor out code in common with getReservations
         Filter filter = Pagination.parseFilter("");
-        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, Integer.toString(CurrentUser.getId()));
+        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, CurrentUser.getId());
         File file = new File("reservations.xlsx");
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO reservationDAO = context.getReservationDAO();

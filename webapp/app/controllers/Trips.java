@@ -193,7 +193,6 @@ public class Trips extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        User user = DataProvider.getUserProvider().getUser();
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
 
         if (field == null) {
@@ -201,14 +200,14 @@ public class Trips extends Controller {
         }
 
         // We only want reservations from the current user (or his car(s))
-        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, "" + user.getId());
+        filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, CurrentUser.getId());
 
         Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfReservations(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return ok(tripspage.render(user.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
     }
 
     /**
