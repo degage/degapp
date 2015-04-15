@@ -47,7 +47,8 @@ import views.html.dashboardOwner;
 import views.html.dashboardRegistered;
 
 import java.time.LocalDate;
-import java.util.Iterator;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Application extends Controller {
 
@@ -65,24 +66,19 @@ public class Application extends Controller {
             if (CurrentUser.hasFullStatus() || CurrentUser.hasRole(UserRole.SUPER_USER)) {
                 // normal dashboard if user has full status
                 if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
-                    Iterable<Car> cars = context.getCarDAO().listCarsOfUser(CurrentUser.getId());
-                    Iterator<Car> iterator = cars.iterator();
-                    if (iterator.hasNext()) {
-                        Car car = iterator.next(); // TODO: assumes owner has only one car
-                        // TODO: code in common with Calendars.indexWithCar
+                    List<Calendars.OverviewForCar> ofclist = new ArrayList<>();
+                    for (Car car : context.getCarDAO().listCarsOfUser(CurrentUser.getId())) {
                         Calendars.CarDateData data = new Calendars.CarDateData();
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();
                         data.date = Utils.toDateString(LocalDate.now());
                         data.period = "week";
-                        return ok(dashboardOwner.render(
-                                car.getName(),
-                                Calendars.getOverviewLines(data)
-                        ));
+                        ofclist.add(Calendars.getOverviewForCar(data));
                     }
+                    return ok(dashboardOwner.render(ofclist));
+                } else {
+                    return ok(dashboardFullUser.render());
                 }
-                // not an owner role or no car
-                return ok(dashboardFullUser.render());
             } else {
                 // reduced dashboard
                 User currentUser = DataProvider.getUserProvider().getUser();

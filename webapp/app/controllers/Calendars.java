@@ -184,17 +184,6 @@ public class Calendars extends Controller {
     }
 
     /**
-     * Same as indexWithCar, but with (first) car of current user filled in
-     */
-    @AllowRoles({UserRole.CAR_USER})
-    @InjectContext
-    public static Result overviewOwnerCar() {
-        Car car = DataAccess.getInjectedContext().getCarDAO().listCarsOfUser(CurrentUser.getId()).iterator().next(); // TODO: assumes owner has only one car
-        return indexWithCar(car.getName(), car.getId());
-    }
-
-
-    /**
      * Show a calendar overview of reservations during a certain day. Do not show cars
      * that are not available
      * @return
@@ -240,6 +229,22 @@ public class Calendars extends Controller {
 
     private static Result overviewCar(Form<CarDateData> form) {
         return ok(overviewcar.render(form, getOverviewLines(form.get())));
+    }
+
+    public static class OverviewForCar {
+        public int id;
+        public String name;
+        public Iterable<OverviewLine> lines;
+
+        public OverviewForCar(int id, String name, Iterable<OverviewLine> lines) {
+            this.id = id;
+            this.name = name;
+            this.lines = lines;
+        }
+    }
+
+    public static OverviewForCar getOverviewForCar(CarDateData data) {
+        return new OverviewForCar(data.carId, data.carIdAsString, getOverviewLines(data));
     }
 
     public static Collection<OverviewLine> getOverviewLines(CarDateData data) {

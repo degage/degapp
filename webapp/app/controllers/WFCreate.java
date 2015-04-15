@@ -199,4 +199,26 @@ public class WFCreate extends WFCommon {
         }
 
     }
+
+    /**
+     * Show the page to create a reservation in the past
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result createOld(int carId) {
+        // TODO
+        return ok();
+    }
+
+     /**
+     * Process the reservation made in {@link #createOld}
+     */
+    @AllowRoles({UserRole.CAR_USER})
+    @InjectContext
+    public static Result doCreateOld(int carId) {
+        // TODO
+        return redirect(routes.Trips.index(0));
+    }
+
+
 }
