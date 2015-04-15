@@ -54,7 +54,7 @@ public class Refuels extends RefuelCommon {
     /**
      * Dispatches to the correct refuels page
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result showRefuels() {
         if (CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
@@ -66,6 +66,7 @@ public class Refuels extends RefuelCommon {
         }
     }
 
+    @AllowRoles
     @InjectContext
     public static Result showUserRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
@@ -74,9 +75,7 @@ public class Refuels extends RefuelCommon {
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-
-        User user = DataProvider.getUserProvider().getUser();
-        filter.putValue(FilterField.REFUEL_USER_ID, user.getId() + "");
+        filter.putValue(FilterField.REFUEL_USER_ID, CurrentUser.getId() + "");
 
         // TODO: Check if admin or car owner/user
 
@@ -161,7 +160,7 @@ public class Refuels extends RefuelCommon {
     /**
      * Show all refuels connected with a given ride
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result showRefuelsForTrip(int reservationId) {
 
@@ -181,7 +180,7 @@ public class Refuels extends RefuelCommon {
     /**
      * Show the list of all rides for a given reservation, intended for use by owners.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result showRefuelsForTripOwner(int reservationId) {
         // TODO factor out common code with showRefuelsForRide ?
@@ -200,7 +199,7 @@ public class Refuels extends RefuelCommon {
     }
 
 
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result showDetails(int refuelId) {
         // TODO: code in common with approveOrReject

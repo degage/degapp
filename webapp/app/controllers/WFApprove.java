@@ -144,7 +144,7 @@ public class WFApprove extends WFCommon {
      * Show page which allows a driver to send a reminder that a reservation has
      * not been approved
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result sendReminder(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -160,7 +160,7 @@ public class WFApprove extends WFCommon {
     /**
      * Send a mail with a reminder to approve a certain reservation.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result doSendReminder(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();

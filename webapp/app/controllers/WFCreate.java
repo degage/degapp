@@ -58,7 +58,7 @@ public class WFCreate extends WFCommon {
     /**
      * Show the page to create a reservation
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result create(int carId, String fromString, String untilString) {
         LocalDateTime fromDateTime = Utils.toLocalDateTime(fromString);
@@ -77,7 +77,7 @@ public class WFCreate extends WFCommon {
     /**
      * Process the reservation made in {@link #create}
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result doCreate(int carId) {
         DataAccessContext context = DataAccess.getInjectedContext();

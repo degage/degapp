@@ -66,9 +66,10 @@ public enum WorkflowRole {
                 case ACCEPTED:
                     return EnumSet.of(WorkflowAction.SHORTEN, WorkflowAction.CANCEL);
                 case REQUEST_DETAILS:
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP);
                 case DETAILS_REJECTED:
                 case DETAILS_PROVIDED:
-                    return EnumSet.of(WorkflowAction.EDIT_TRIP);
+                    return EnumSet.of(WorkflowAction.EDIT_TRIP, WorkflowAction.REFUELS);
                 case FINISHED:
                     return EnumSet.of(WorkflowAction.REFUELS);
                 default:

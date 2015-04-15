@@ -214,7 +214,7 @@ public class Trips extends Controller {
     /**
      * Same as {@link #showTripsPage} but for an administrator.
      */
-    @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result showTripsAdminPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?

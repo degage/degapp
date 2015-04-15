@@ -56,7 +56,7 @@ public class WFCancel extends WFCommon {
     /**
      * Try to cancel a reservation.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result cancelReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -87,7 +87,7 @@ public class WFCancel extends WFCommon {
     /**
      * Show a form for cancelling a reservation which was already accepted
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result cancelAccepted(int reservationId) {
         Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
@@ -97,7 +97,7 @@ public class WFCancel extends WFCommon {
     /**
      * Process the results of {@link #cancelAccepted}
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result doCancelAccepted(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();

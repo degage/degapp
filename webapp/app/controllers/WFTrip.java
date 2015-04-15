@@ -124,7 +124,7 @@ public class WFTrip extends WFCommon {
     /**
      * Dispatch to the proper page for editing trip information
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result tripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -168,7 +168,7 @@ public class WFTrip extends WFCommon {
     /**
      * Processes result from {@link #tripInfo} for a new request
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result doNewTripInfo(int reservationId) {
 
@@ -257,7 +257,7 @@ public class WFTrip extends WFCommon {
     /**
      * Process the results of {@link #tripInfo} when not the first time
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result doEditTripInfo(int reservationId) {
         Form<TripData> form = Form.form(TripData.class).bindFromRequest();

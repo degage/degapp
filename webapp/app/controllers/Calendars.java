@@ -62,7 +62,7 @@ public class Calendars extends Controller {
      * Show an initial page with a reservation search form. This page uses Ajax to show all
      * cars available for reservation in a certain period. The view is a list, not a calendar.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result index() {
         return ok(start.render());
@@ -71,7 +71,7 @@ public class Calendars extends Controller {
     /**
      * Ajax call as a result of the 'search' button in  start.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result listAvailableCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
 
@@ -119,7 +119,7 @@ public class Calendars extends Controller {
      * Shows a list of cars with restricted information in order to make a reservation
      * @return
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result showCarsForReservation() {
         return ok(carsforreservation.render(
@@ -147,7 +147,7 @@ public class Calendars extends Controller {
      * Shows a reservation search form containing a car and a date. Results in a calendar overview
      * for the given car, starting at the given date.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result startCar () {
         CarDateData data = new CarDateData();
@@ -158,7 +158,7 @@ public class Calendars extends Controller {
     /**
      * Show an overview of reservations for a specific car during a certain week.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result overviewCarPost () {
         Form<CarDateData> form = Form.form(CarDateData.class).bindFromRequest();
@@ -172,7 +172,7 @@ public class Calendars extends Controller {
     /**
      * Same as overviewCarPost, but with car id and car name already filled in and day of today
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result indexWithCar(String carName, int carId) {
         CarDateData data = new CarDateData();
@@ -187,7 +187,7 @@ public class Calendars extends Controller {
      * that are not available
      * @return
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result overview (String dateString) {
         LocalDate date = dateString == null ? LocalDate.now() : Utils.toLocalDate(dateString);
@@ -218,7 +218,7 @@ public class Calendars extends Controller {
     /**
      * Same as {@link #overview} but gets the date from a POST instead of a GET.
      */
-    @AllowRoles({UserRole.CAR_USER})
+    @AllowRoles
     @InjectContext
     public static Result overviewPost () {
         // TODO: use method GET in the related form and remove this method
