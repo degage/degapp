@@ -33,7 +33,7 @@
 
     @detailsPanel(refuel, car, reservation, tripInfo)
     @panel("Aanpassen", "fa-pencil") {
-        @helper.form(routes.Refuels.approveOrRejectPost(refuel.getId())) {
+        @helper.form(routes.RefuelApprove.approveOrRejectPost(refuel.getId())) {
             @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
             <div class="col-sm-6 col-xs-6">
                 <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>

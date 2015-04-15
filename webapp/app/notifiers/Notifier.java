@@ -59,11 +59,6 @@ public class Notifier extends Mailer {
 
     /**
      * Creates a notification for the user and automatically invalidates the cache
-     *
-     * @param dao
-     * @param user
-     * @param subject
-     * @param mail
      */
     private static void createNotification(NotificationDAO dao, UserHeader user, String subject, String mail) {
         dao.createNotification(user, subject, mail);
@@ -204,7 +199,7 @@ public class Notifier extends Mailer {
         String until = Utils.toLocalizedString(reservation.getUntil());
         String carName = car.getName();
         String amount = EurocentAmount.toString(eurocents) + " euro";
-        String url = toFullURL(routes.Refuels.approveOrReject(refuelId));
+        String url = toFullURL(routes.RefuelApprove.approveOrReject(refuelId));
         UserHeader driver = reservation.getUser();
         createNotificationAndSend(
                 owner, "refuelRequest",

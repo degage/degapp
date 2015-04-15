@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Refuels.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation)
+@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation)
 
 @* Lists all refuels for a given ride in a 'large' format, suitable for owners *@
 
@@ -47,7 +47,7 @@
 
     <div class='collapse@if(form.hasErrors)(".in")' id="collapsedForm">
         @panel("Nieuwe tankbeurt", "fa-pencil") {
-            @helper.form(routes.Refuels.newRefuelForTripOwnerPost(reservation.getId), 'enctype -> "multipart/form-data"){
+            @helper.form(routes.RefuelCreate.newRefuelForTripOwnerPost(reservation.getId), 'enctype -> "multipart/form-data"){
                 @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
                 @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
                 @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")
@@ -72,8 +72,8 @@
                     <dd>@statusname(refuel.getStatus)</dd>
                 </dl>
                 @if(refuel.getStatus == RefuelStatus.REQUEST) {
-                    <a type="button" class="btn btn-xs btn-danger" href="@routes.Refuels.approve(refuel.getId)">Goedkeuren</a>
-                    <a type="button" class="btn btn-xs btn-primary" href="@routes.Refuels.approveOrReject(refuel.getId)">Afkeuren ...</a>
+                    <a type="button" class="btn btn-xs btn-danger" href="@routes.RefuelApprove.approve(refuel.getId)">Goedkeuren</a>
+                    <a type="button" class="btn btn-xs btn-primary" href="@routes.RefuelApprove.approveOrReject(refuel.getId)">Afkeuren ...</a>
                 }
             </div>
             <div class="col-lg-8 col-xs-12">
