@@ -322,7 +322,7 @@ CREATE TABLE `refuels` (
 	`refuel_car_ride_id` INT NOT NULL,
 	`refuel_file_id` INT,
 	`refuel_eurocents` INT,
-	`refuel_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST',
+	`refuel_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'FROZEN') NOT NULL DEFAULT 'REQUEST',
 	`refuel_billed` DATE DEFAULT NULL,
 	`refuel_km` INTEGER,
 	`refuel_amount` VARCHAR(16), -- amount of fuel, free format

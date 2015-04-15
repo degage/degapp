@@ -123,23 +123,6 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private LazyStatement deleteRefuelStatement= new LazyStatement (
-            "DELETE FROM refuels WHERE refuel_id = ?"
-    );
-
-    @Override
-    public void deleteRefuel(int refuelId) throws DataAccessException {
-        try {
-            PreparedStatement ps = deleteRefuelStatement.value();
-            ps.setInt(1, refuelId);
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when deleting refuel.");
-        } catch (SQLException e){
-            throw new DataAccessException("Could not delete refuel.", e);
-        }
-
-    }
-
     private LazyStatement getRefuelStatement= new LazyStatement (REFUEL_QUERY + " WHERE refuel_id = ? ");
 
     @Override
@@ -252,29 +235,17 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private LazyStatement getAmountOfRefuelsWithStatusStatement= new LazyStatement (
-            "SELECT COUNT(*) AS amount_of_refuels " +
-                    "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
-                    "WHERE refuel_status = ? AND reservation_user_id = ?"
-    );
-
     @Override
-    public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfRefuelsWithStatusStatement.value();
-            ps.setString(1, status.name());
-            ps.setInt(2, userId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return rs.getInt("amount_of_refuels");
-                else return 0;
-
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of refuels with status", ex);
-            }
+    public int numberOfRefuelRequests (int ownerId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+            "SELECT COUNT(*) " +
+                    "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
+                    "WHERE refuel_status = 'REQUEST' AND reservation_owner_id = ?"
+        )) {
+            ps.setInt(1,ownerId);
+            return toCount(ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of refuels with status", ex);
+            throw new DataAccessException("Could not get number of refuel requests", ex);
         }
     }
 
@@ -287,25 +258,6 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             return list;
         }catch (SQLException e){
             throw new DataAccessException("Error while reading refuel resultset", e);
-        }
-    }
-
-    private LazyStatement endPeriodStatement = new LazyStatement (
-            "UPDATE refuels SET refuel_billed = CURDATE() " +
-                    "FROM refuels INNER JOIN carrides ON refuels.refuel_car_ride_id = carrides.car_ride_car_reservation_id " +
-                    "             INNER JOIN reservations ON carrides.car_ride_car_reservation_id = reservations.reservation_id " +
-                    "WHERE refuels.refuel_billed = NULL AND refuels.refuel_status = 'ACCEPTED' AND carreservation.reservation_to < CURDATE()"
-    );
-
-    @Override
-    public void endPeriod() throws DataAccessException {
-        try {
-            PreparedStatement ps = endPeriodStatement.value();
-
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("Refuel update affected 0 rows.");
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to update car refuel", e);
         }
     }
 

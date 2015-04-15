@@ -36,7 +36,8 @@ package be.ugent.degage.db.models;
 public enum RefuelStatus {
     REQUEST("Wachten op goedkeuring"),
     ACCEPTED("Aanvraag goedgekeurd"),
-    REFUSED("Aanvraag geweigerd");
+    REFUSED("Aanvraag geweigerd"),
+    FROZEN("Volledig afgewerkt");
 
     // Enum definition
     private String description;

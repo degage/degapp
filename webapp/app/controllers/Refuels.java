@@ -41,6 +41,7 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
+import org.omg.CORBA.Current;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
@@ -56,7 +57,7 @@ import java.util.List;
 /**
  *
  */
-public class Refuels extends Controller {
+public class Refuels extends WFCommon {
 
     public static class RefuelData {
 
@@ -185,16 +186,15 @@ public class Refuels extends Controller {
     }
 
     /**
-     * Get the number of refuels having the provided status
      *
-     * @param status The status
-     * @return The number of refuels
      */
-    // should only be used with injected context
-    public static int refuelsWithStatus(RefuelStatus status) {
-        User user = DataProvider.getUserProvider().getUser();
-        RefuelDAO dao = DataAccess.getInjectedContext().getRefuelDAO();
-        return dao.getAmountOfRefuelsWithStatus(status, user.getId());
+    // should only be used with injected context - used in refuel menu
+    public static int numberOfRefuelRequests() {
+        if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
+            return DataAccess.getInjectedContext().getRefuelDAO().numberOfRefuelRequests(CurrentUser.getId());
+        } else {
+            return 0;
+        }
     }
 
     /**
@@ -328,16 +328,20 @@ public class Refuels extends Controller {
         }
     }
 
-    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @AllowRoles({UserRole.CAR_USER})
     @InjectContext
     public static Result showDetails(int refuelId) {
         // TODO: code in common with approveOrReject
         DataAccessContext context = DataAccess.getInjectedContext();
         Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        Car car = context.getCarDAO().getCar(reservation.getCarId());
-        CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
-        return ok(details.render(refuel, car, reservation, ride));
+        if (isDriverOrOwnerOrAdmin(reservation)) {
+            Car car = context.getCarDAO().getCar(reservation.getCarId());
+            CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
+            return ok(details.render(refuel, car, reservation, ride));
+        } else {
+            return badRequest(); // not authorized
+        }
     }
 
     /**
@@ -349,12 +353,16 @@ public class Refuels extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        Car car = context.getCarDAO().getCar(reservation.getCarId());
-        CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
-        return ok(approveorreject.render(
-                Form.form(WFApprove.RemarksData.class),
-                refuel, car, reservation,
-                ride));
+        if (isOwnerOrAdmin(reservation)) {
+            Car car = context.getCarDAO().getCar(reservation.getCarId());
+            CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
+            return ok(approveorreject.render(
+                    Form.form(RemarksData.class),
+                    refuel, car, reservation,
+                    ride));
+        } else {
+            return badRequest(); // not authorized
+        }
     }
 
     /**
@@ -368,13 +376,13 @@ public class Refuels extends Controller {
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
         RefuelDAO dao = context.getRefuelDAO();
         Refuel refuel = dao.getRefuel(refuelId);
-        Form<WFApprove.RemarksData> form =  Form.form(WFApprove.RemarksData.class).bindFromRequest();
+        Form<RemarksData> form =  Form.form(RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
             Car car = context.getCarDAO().getCar(reservation.getCarId());
             CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
             return badRequest(approveorreject.render(form, refuel, car, reservation, ride));
         } else {
-            WFApprove.RemarksData data = form.get(); // the form does not contain errors
+            RemarksData data = form.get(); // the form does not contain errors
             RefuelStatus status = RefuelStatus.valueOf(data.status);
             String remarks = data.remarks;
             if (status == RefuelStatus.REFUSED || status == RefuelStatus.ACCEPTED) {

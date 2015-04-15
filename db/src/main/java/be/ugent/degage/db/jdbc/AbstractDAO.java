@@ -135,4 +135,17 @@ class AbstractDAO {
             return toList (rs, fn);
         }
     }
+
+    /**
+     * Executes a prepared statement and converts the unique result into a count
+     */
+    protected static int toCount (PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getInt(1);
+            } else {
+                return -1;
+            }
+        }
+    }
 }

@@ -174,7 +174,7 @@ public class Trips extends Controller {
     /**
      * Get the number of reservations/trips having the provided status.
      */
-    // must be used with injected context
+    // must be used with injected context - used in driver menu
     public static int reservationsWithStatus(ReservationStatus status, boolean userIsLoaner) {
         return DataAccess.getInjectedContext().getReservationDAO().numberOfReservationsWithStatus(status, CurrentUser.getId(), userIsLoaner);
     }

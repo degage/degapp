@@ -37,7 +37,7 @@ import be.ugent.degage.db.models.RefuelStatus;
 import java.time.LocalDate;
 
 /**
- * Created by Stefaan Vermassen on 26/04/14.
+ * DAO for managing refuel information
  */
 public interface RefuelDAO {
 
@@ -46,15 +46,19 @@ public interface RefuelDAO {
 
     public void acceptOrRejectRefuel(RefuelStatus status, int refuelId, String message) throws DataAccessException;
 
-    public void deleteRefuel(int refuelId) throws DataAccessException;
     public Refuel getRefuel(int refuelId) throws DataAccessException;
     // currently not used: public void updateRefuel(Refuel refuel) throws DataAccessException;
 
     public Iterable<Refuel> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
     public int getAmountOfRefuels(Filter filter) throws DataAccessException;
+
     public Iterable<Refuel> getRefuelsForCarRide(int reservationId) throws DataAccessException;
-    public int getAmountOfRefuelsWithStatus(RefuelStatus status, int userId) throws DataAccessException;
-    public void endPeriod() throws DataAccessException;
+
+    /**
+     * Shows the number of outstanding refuel requests for a reservation with the given owner.
+     */
+    public int numberOfRefuelRequests(int ownerId) throws DataAccessException;
+
     public Iterable<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException;
 
 

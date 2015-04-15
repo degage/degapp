@@ -49,7 +49,7 @@
                  Trips.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
                  Trips.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)
     )
-    @item(title,  "Tankbeurten", "fa-beer", routes.Refuels.showRefuels)
+    @item(title,  "Tankbeurten", "fa-beer", routes.Refuels.showRefuels, extra=Refuels.numberOfRefuelRequests())
 @* TODO: incorporate these
     @item(title,  "Afrekeningen", "fa-money", routes.Receipts.index)
     @item(title, "Schadedossiers", "fa-tasks" , routes.Damages.showDamages,
