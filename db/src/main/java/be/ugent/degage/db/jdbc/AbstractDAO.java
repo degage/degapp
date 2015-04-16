@@ -137,14 +137,14 @@ class AbstractDAO {
     }
 
     /**
-     * Executes a prepared statement and converts the unique result into a count
+     * Executes a prepared statement and converts the first result into an integer, or 0 if no result.
      */
-    protected static int toCount (PreparedStatement ps) throws SQLException {
+    protected static int toSingleInt(PreparedStatement ps) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return rs.getInt(1);
             } else {
-                return -1;
+                return 0;
             }
         }
     }

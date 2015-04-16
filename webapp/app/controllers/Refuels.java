@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.RefuelDAO;
+import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
@@ -171,8 +172,15 @@ public class Refuels extends RefuelCommon {
      * Produces the correct html file for the given 'flow'
      */
     static Html refuelsForTrip(Reservation reservation, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
-        if (ownerFlow)
-            return refuelsForTripOwner.render(form, refuels, reservation);
+        // must be used in injected context
+        if (ownerFlow) {
+            ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
+
+            return refuelsForTripOwner.render(form, refuels, reservation,
+                          dao.getNextTripId(reservation.getId()),
+                          dao.getPreviousTripId(reservation.getId())
+                    );
+        }
         else
             return refuelsForTripDriver.render(form, refuels, reservation);
     }

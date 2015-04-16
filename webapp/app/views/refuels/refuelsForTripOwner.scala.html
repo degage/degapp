@@ -27,22 +27,26 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation)
+@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation,
+        nextId: Int, previousId: Int)
 
 @* Lists all refuels for a given ride in a 'large' format, suitable for owners *@
 
 @stdlayout("Tankbeurten (rit)", stylesheets=sheets("statuses"), extrabc=breadcrumb("Mijn auto's",routes.Cars.showCars())) {
 
-    @panel("Rit", "fa-car") {
+    @trips.detailsPanel(reservation.getCar, reservation)
+    @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
-            <h3>@reservation.getCar.getName</h3>
-            <h4>@Utils.toLocalizedString(reservation.getFrom) - @Utils.toLocalizedString(reservation.getUntil)</h4>
             <a class="btn btn-xs btn-default" data-toggle="collapse"
                     href="#collapsedForm">Tankbeurt toevoegen ...</a>
-            <a class="btn btn-xs btn-primary" href="#">Vorige rit</a>
-            <a class="btn btn-xs btn-primary" href="#">Volgende rit</a>
+            @if(previousId > 0){
+                <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForTrip(previousId,true)">Vorige rit</a>
+            }
+            @if(nextId > 0){
+                <a class="btn btn-xs btn-primary" href="@routes.Refuels.showRefuelsForTrip(nextId,true)">Volgende rit</a>
+            }
+
         </div>
-        @* Code in common with refuelsForTrip *@
     }
 
     <div class='collapse@if(form.hasErrors)(".in")' id="collapsedForm">

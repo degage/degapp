@@ -358,6 +358,40 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     );
 
     @Override
+    public int getNextTripId (int reservationId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT r.reservation_id FROM reservations AS r JOIN reservations AS o " +
+                    "ON r.reservation_car_id = o.reservation_car_id " +
+                    "WHERE o.reservation_id = ? " +
+                    "AND r.reservation_status > 5  " +       // [ENUM INDEX]
+                    "AND r.reservation_from > o.reservation_from  " +
+                "ORDER BY r.reservation_from ASC LIMIT 1"
+        )) {
+            ps.setInt(1, reservationId);
+            return toSingleInt(ps);
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while retrieving the next trip", ex);
+        }
+    }
+
+    @Override
+    public int getPreviousTripId (int reservationId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT r.reservation_id FROM reservations AS r JOIN reservations AS o " +
+                    "ON r.reservation_car_id = o.reservation_car_id " +
+                    "WHERE o.reservation_id = ? " +
+                    "AND r.reservation_status > 5  " +       // [ENUM INDEX]
+                    "AND r.reservation_from < o.reservation_from  " +
+                "ORDER BY r.reservation_from DESC LIMIT 1"
+        )) {
+            ps.setInt(1, reservationId);
+            return toSingleInt(ps);
+        } catch(SQLException ex) {
+            throw new DataAccessException("Error while retrieving the previous trip", ex);
+        }
+    }
+
+    @Override
     public void deleteReservation(Reservation reservation){
     	try {
 			PreparedStatement ps = deleteReservationStatement.value();

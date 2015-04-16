@@ -249,7 +249,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                     "WHERE refuel_status = 'REQUEST' AND reservation_owner_id = ?"
         )) {
             ps.setInt(1,ownerId);
-            return toCount(ps);
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get number of refuel requests", ex);
         }
