@@ -114,7 +114,7 @@ public class WFApprove extends WFCommon {
                     UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
                     Notifier.sendReservationApprovedByOwnerMail(owner, remarks, reservation);
                 }
-                return WFCommon.redirectToDetails(reservationId);
+                return redirectToDetails(reservationId);
             } else {
                 return badRequest(); // should not happen
             }
@@ -136,7 +136,7 @@ public class WFApprove extends WFCommon {
         }
         dao.updateReservationStatus(reservationId, ReservationStatus.REQUEST_DETAILS);
         Notifier.sendOldReservationApproved(reservation);
-        return WFCommon.redirectToDetails(reservationId);
+        return redirectToDetails(reservationId);
     }
 
 

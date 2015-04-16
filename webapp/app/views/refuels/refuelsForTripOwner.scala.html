@@ -73,7 +73,8 @@
                 </dl>
                 @if(refuel.getStatus == RefuelStatus.REQUEST) {
                     <a type="button" class="btn btn-xs btn-danger" href="@routes.RefuelApprove.approve(refuel.getId)">Goedkeuren</a>
-                    <a type="button" class="btn btn-xs btn-primary" href="@routes.RefuelApprove.approveOrReject(refuel.getId)">Afkeuren ...</a>
+                    <a type="button" class="btn btn-xs btn-primary"
+                       href="@routes.RefuelApprove.approveOrReject(refuel.getId, true)">Afkeuren ...</a>
                 }
             </div>
             <div class="col-lg-8 col-xs-12">

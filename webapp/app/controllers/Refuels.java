@@ -112,7 +112,7 @@ public class Refuels extends RefuelCommon {
     public static Result getProof(int refuelId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
+        if (isDriverOrOwnerOrAdmin(reservation)) {
             Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
             return FileHelper.getFileStreamResult(context.getFileDAO(), refuel.getProofId());
         } else {

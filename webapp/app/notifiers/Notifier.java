@@ -133,7 +133,7 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendRefuelApproved(Refuel refuel, String newRemarks) {
+    public static void sendRefuelApproved(Refuel refuel) {
         Reservation reservation = refuel.getCarRide().getReservation();
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
@@ -142,8 +142,8 @@ public class Notifier extends Mailer {
         String until = Utils.toLocalizedString(reservation.getUntil());
 
         createNotificationAndSend(user, "refuelApproved",
-                views.txt.messages.refuelApproved.render(user, name, amount, newRemarks, from, until),
-                views.html.messages.refuelApproved.render(user, name, amount, newRemarks, from, until),
+                views.txt.messages.refuelApproved.render(user, name, amount, from, until),
+                views.html.messages.refuelApproved.render(user, name, amount, from, until),
                 name, from
         );
     }
@@ -199,7 +199,7 @@ public class Notifier extends Mailer {
         String until = Utils.toLocalizedString(reservation.getUntil());
         String carName = car.getName();
         String amount = EurocentAmount.toString(eurocents) + " euro";
-        String url = toFullURL(routes.RefuelApprove.approveOrReject(refuelId));
+        String url = toFullURL(routes.RefuelApprove.approveOrReject(refuelId, false));
         UserHeader driver = reservation.getUser();
         createNotificationAndSend(
                 owner, "refuelRequest",

@@ -38,8 +38,6 @@ import be.ugent.degage.db.models.RefuelStatus;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * JDBC implementation of {@link RefuelDAO}
@@ -108,15 +106,26 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private static final String ACCEPT_OR_REJECT_REFUEL_STATEMENT
-            = "UPDATE refuels SET refuel_status = ?, refuel_message = ? WHERE refuel_id = ? ";
+    @Override
+    public void updateRefuelStatus (RefuelStatus status, int refuelId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE refuels SET refuel_status = ? WHERE refuel_id = ? ")
+        ) {
+            ps.setString(1, status.name());
+            ps.setInt(2, refuelId);
+            ps.executeUpdate();
+        } catch (SQLException e){
+            throw new DataAccessException("Unable to update refuel", e);
+        }
+    }
 
     @Override
-    public void acceptOrRejectRefuel(RefuelStatus status, int refuelId, String message) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(ACCEPT_OR_REJECT_REFUEL_STATEMENT)) {
-            ps.setString(1, status.name());
-            ps.setString(2,message);
-            ps.setInt(3, refuelId);
+    public void rejectRefuel(int refuelId, String message) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE refuels SET refuel_status = 'REFUSED', refuel_message = ? WHERE refuel_id = ? ")
+        ) {
+            ps.setString(1,message);
+            ps.setInt(2, refuelId);
             ps.executeUpdate();
         } catch (SQLException e){
             throw new DataAccessException("Unable to update refuel", e);

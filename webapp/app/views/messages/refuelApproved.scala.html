@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, amount: String, comment: String, from: String, until: String)
+@(user: UserHeader, carName: String, amount: String, from: String, until: String)
 
 @* Tankbeurt goedgekeurd *@
 <p>Beste @user.getFirstName,</p>
@@ -36,10 +36,5 @@ met auto <b>@carName</b> werd goedgekeurd door de eigenaar.</p>
 <ul>
     <li>Bedrag: <b>@amount</b>, rit: @from - @until</li>
 </ul>
-@if(comment != null && !comment.trim.isEmpty){
-<p>De eigenaar vermeldt hierbij het volgende:</p>
-<hr />
-@comment
-<hr />
-}
+
 

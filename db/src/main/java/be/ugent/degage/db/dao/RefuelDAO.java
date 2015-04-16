@@ -44,7 +44,15 @@ public interface RefuelDAO {
     public int createRefuel(int reservationId, int eurocents, int fileId, RefuelStatus status,
                              int km, String amount) throws DataAccessException;
 
-    public void acceptOrRejectRefuel(RefuelStatus status, int refuelId, String message) throws DataAccessException;
+    /**
+     * Update the status of the refuel record (but not the message)
+     */
+    public void updateRefuelStatus (RefuelStatus status, int refuelId) throws DataAccessException;
+
+    /**
+     * Set the status to refused and store the reason why
+     */
+    public void rejectRefuel(int refuelId, String message) throws DataAccessException;
 
     public Refuel getRefuel(int refuelId) throws DataAccessException;
     // currently not used: public void updateRefuel(Refuel refuel) throws DataAccessException;

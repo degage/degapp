@@ -217,14 +217,11 @@ GET         /refuels                                controllers.Refuels.showRefu
 GET         /refuels/page                           controllers.Refuels.showUserRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/owner/page                     controllers.Refuels.showOwnerRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /refuels/admin/page                     controllers.Refuels.showAllRefuelsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /refuels/proof                          controllers.Refuels.getProof(refuelId: Int)
-GET         /refuels/aor                            controllers.RefuelApprove.approveOrReject(refuelId: Int)
-POST        /refuels/aor                            controllers.RefuelApprove.approveOrRejectPost(refuelId: Int)
-GET         /refuels/approve                        controllers.RefuelApprove.approve(refuelId: Int)
-GET         /refuels/details                        controllers.Refuels.showDetails(refuelId: Int)
-
-# new UI
-# TODO: use flow paramater
+GET         /refuels/proof                          controllers.Refuels.getProof(id: Int)
+GET         /refuels/aor                            controllers.RefuelApprove.approveOrReject(id: Int, o: Boolean)
+POST        /refuels/aor                            controllers.RefuelApprove.doApproveOrReject(id: Int, o: Boolean)
+GET         /refuels/approve                        controllers.RefuelApprove.approve(id: Int)
+GET         /refuels/details                        controllers.Refuels.showDetails(id: Int)
 GET         /refuels/trip                           controllers.Refuels.showRefuelsForTrip(id: Int, o: Boolean)
 POST        /refuels/new                            controllers.RefuelCreate.doCreate(id: Int, o: Boolean)
 

@@ -82,7 +82,7 @@ public class RefuelCreate extends RefuelCommon {
     // use in injected context only
     static void newRefuel(Reservation reservation, UserHeader owner, int eurocents, int fileId,
                           int km, String amount) {
-        boolean isAdmin = WFCommon.isOwnerOrAdmin(reservation);
+        boolean isAdmin = isOwnerOrAdmin(reservation);
 
         int refuelId = DataAccess.getInjectedContext().getRefuelDAO().createRefuel(
                 reservation.getId(), eurocents, fileId,
