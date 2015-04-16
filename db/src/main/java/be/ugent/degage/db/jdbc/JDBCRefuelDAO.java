@@ -42,7 +42,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 /**
- * Created by Stefaan Vermassen on 26/04/14.
+ * JDBC implementation of {@link RefuelDAO}
  */
 class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
@@ -214,22 +214,19 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page-1)*pageSize);
             ps.setInt(2, pageSize);
-            return getRefuelList(ps);
+            return toList(ps, JDBCRefuelDAO::populateRefuel);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of refuels", ex);
         }
     }
 
-    private LazyStatement getRefuelsForCarRideStatement= new LazyStatement (
-            REFUEL_QUERY + " WHERE refuel_car_ride_id = ? ORDER BY refuel_id DESC "
-    );
-
     @Override
     public Iterable<Refuel> getRefuelsForCarRide(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getRefuelsForCarRideStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                REFUEL_QUERY + " WHERE refuel_car_ride_id = ? ORDER BY refuel_id DESC ")
+        ) {
             ps.setInt(1, userId);
-            return getRefuelList(ps);
+            return toList(ps, JDBCRefuelDAO::populateRefuel);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
         }
@@ -249,29 +246,14 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private Iterable<Refuel> getRefuelList(PreparedStatement ps) throws DataAccessException {
-        Collection<Refuel> list = new ArrayList<>();
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(populateRefuel(rs));
-            }
-            return list;
-        }catch (SQLException e){
-            throw new DataAccessException("Error while reading refuel resultset", e);
-        }
-    }
-
-    private LazyStatement getBillRefuelsForLoanerStatement= new LazyStatement (
-            REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_user_id = ?"
-    );
-
     @Override
     public Iterable<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException {
-        try {
-            PreparedStatement ps = getBillRefuelsForLoanerStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                REFUEL_QUERY + " WHERE refuel_billed = ? AND reservation_user_id = ?"
+        )) {
             ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, user);
-            return getRefuelList(ps);
+            return toList(ps, JDBCRefuelDAO::populateRefuel);
         } catch (SQLException e){
             throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
         }

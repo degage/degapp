@@ -64,7 +64,7 @@ public class WFCreate extends WFCommon {
         LocalDateTime fromDateTime = Utils.toLocalDateTime(fromString);
         return ok(create.render(
                 // query string binders are quite complicated to write :-(
-                new Form<>(ReservationData.class).fill(
+                Form.form(ReservationData.class).fill(
                         new ReservationData().populate(
                                 fromDateTime,
                                 untilString.isEmpty() ? fromDateTime : Utils.toLocalDateTime(untilString)
@@ -82,7 +82,7 @@ public class WFCreate extends WFCommon {
     public static Result doCreate(int carId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         Car car = context.getCarDAO().getCar(carId);
-        Form<ReservationData> form = new Form<>(ReservationData.class).bindFromRequest();
+        Form<ReservationData> form = Form.form(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
             return ok(create.render(form, car));
         }

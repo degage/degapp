@@ -36,18 +36,16 @@ import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
-import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import providers.DataProvider;
 import views.html.refuels.*;
 
 /**
- *  Controller that displays information about refuels
+ * Controller that displays information about refuels
  */
 public class Refuels extends RefuelCommon {
 
@@ -76,31 +74,22 @@ public class Refuels extends RefuelCommon {
         return ok(refuelList(page, pageSize, filter));
     }
 
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        User user = DataProvider.getUserProvider().getUser();
-        filter.putValue(FilterField.REFUEL_OWNER_ID,CurrentUser.getId());
-
-        // TODO: Check if admin or car owner/user
-
+        filter.putValue(FilterField.REFUEL_OWNER_ID, CurrentUser.getId());
         return ok(refuelList(page, pageSize, filter));
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showAllRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        // TODO: orderBy not as String-argument?
-        // Currently not used
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
-
         Filter filter = Pagination.parseFilter(searchString);
-
-        //filter.putValue(FilterField.REFUEL_NOT_STATUS, RefuelStatus.CREATED.toString());
-
         return ok(refuelList(page, pageSize, filter));
     }
 
@@ -116,14 +105,11 @@ public class Refuels extends RefuelCommon {
     }
 
     /**
-     * Method: GET
-     *
-     * @return proof url
+     * Displays the refueling ticket
      */
     @AllowRoles
     @InjectContext
     public static Result getProof(int refuelId) {
-
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
         if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
@@ -147,51 +133,27 @@ public class Refuels extends RefuelCommon {
     }
 
     /**
-     * Show all refuels connected with a given ride
+     * Show all refuels connected with a given trip.
      */
     @AllowRoles
     @InjectContext
-    public static Result showRefuelsForTrip(int reservationId) {
-
+    public static Result showRefuelsForTrip(int reservationId, boolean ownerFlow) {
         DataAccessContext context = DataAccess.getInjectedContext();
         Reservation reservation = context.getReservationDAO().getReservation(reservationId);
-        Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
-        if (WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
-            return ok( refuelsForTrip.render(
-                            Form.form(RefuelData.class).fill(new RefuelData().populate( new EurocentAmount(), null, 0)),
-                            refuels,
-                            reservation) );
+        if (isAuthorized(reservation, ownerFlow)) {
+            return ok(refuelsForTrip(
+                    reservation,
+                    Form.form(RefuelData.class).fill(RefuelData.EMPTY),
+                    context.getRefuelDAO().getRefuelsForCarRide(reservationId),
+                    ownerFlow));
         } else {
             return badRequest(); // hacker?
         }
     }
-
-    /**
-     * Show the list of all rides for a given reservation, intended for use by owners.
-     */
-    @AllowRoles
-    @InjectContext
-    public static Result showRefuelsForTripOwner(int reservationId) {
-        // TODO factor out common code with showRefuelsForRide ?
-
-        DataAccessContext context = DataAccess.getInjectedContext();
-        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
-        Iterable<Refuel> refuels = context.getRefuelDAO().getRefuelsForCarRide(reservationId);
-        if (WFCommon.isOwnerOrAdmin(reservation)) { // note: differs from showRefuelsForTrip
-            return ok( refuelsForTripOwner.render(
-                            Form.form(RefuelData.class).fill(new RefuelData().populate( new EurocentAmount(), null, 0)),
-                            refuels,
-                            reservation) );
-        } else {
-            return badRequest(); // hacker?
-        }
-    }
-
 
     @AllowRoles
     @InjectContext
     public static Result showDetails(int refuelId) {
-        // TODO: code in common with approveOrReject
         DataAccessContext context = DataAccess.getInjectedContext();
         Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
         ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
@@ -204,7 +166,16 @@ public class Refuels extends RefuelCommon {
         }
     }
 
+
+    /**
+     * Produces the correct html file for the given 'flow'
+     */
+    static Html refuelsForTrip(Reservation reservation, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
+        if (ownerFlow)
+            return refuelsForTripOwner.render(form, refuels, reservation);
+        else
+            return refuelsForTripDriver.render(form, refuels, reservation);
+    }
+
+
 }
-
-
-

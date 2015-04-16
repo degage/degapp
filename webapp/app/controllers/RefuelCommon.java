@@ -29,6 +29,8 @@
 
 package controllers;
 
+import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 import data.EurocentAmount;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
@@ -53,22 +55,43 @@ public class RefuelCommon extends WFCommon {
         public String fuelAmount;
 
         @Constraints.Required
-        @Constraints.Min(value=1, message="Ongeldige kilometerstand")
+        @Constraints.Min(value = 1, message = "Ongeldige kilometerstand")
         public int km;
 
-        public RefuelData populate(EurocentAmount amount, String fuelAmount, int km) {
-            this.amount = amount;
-            this.fuelAmount = fuelAmount;
-            this.km = km;
-            return this;
+        public static RefuelData with(EurocentAmount amount, String fuelAmount, int km) {
+            RefuelData data = new RefuelData();
+            data.amount = amount;
+            data.fuelAmount = fuelAmount;
+            data.km = km;
+            return data;
         }
 
-        public List<ValidationError> validate () {
+        public List<ValidationError> validate() {
             if (amount.getValue() <= 0) {
                 return Collections.singletonList(new ValidationError("amount", "Bedrag moet groter zijn dan 0"));
             } else {
                 return null;
             }
         }
+
+        public static RefuelData EMPTY;
+
+        static {
+            EMPTY = new RefuelData();
+            EMPTY.amount = new EurocentAmount();
+        }
+    }
+
+    /**
+     * Checks whether current user is authorized to manage refuels for the given reservation
+     *
+     * @param ownerFlow indicates whether this check is part of an 'owner' workflow or not
+     * @return
+     */
+    protected static boolean isAuthorized(ReservationHeader reservation, boolean ownerFlow) {
+        if (ownerFlow)
+            return isOwnerOrAdmin(reservation);
+        else
+            return isDriverOrOwnerOrAdmin(reservation);
     }
 }

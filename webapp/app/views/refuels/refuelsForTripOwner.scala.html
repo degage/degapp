@@ -47,7 +47,7 @@
 
     <div class='collapse@if(form.hasErrors)(".in")' id="collapsedForm">
         @panel("Nieuwe tankbeurt", "fa-pencil") {
-            @helper.form(routes.RefuelCreate.newRefuelForTripOwnerPost(reservation.getId), 'enctype -> "multipart/form-data"){
+            @helper.form(routes.RefuelCreate.doCreate(reservation.getId, true), 'enctype -> "multipart/form-data"){
                 @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
                 @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
                 @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")

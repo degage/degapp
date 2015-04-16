@@ -31,6 +31,7 @@ package controllers.util;
 
 import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationHeader;
+import controllers.Refuels;
 import controllers.routes;
 import play.api.mvc.Call;
 import play.twirl.api.Html;
@@ -73,7 +74,7 @@ public enum WorkflowAction {
     // accept or reject trip data
 
     REFUELS("Tankbeurten", "Tankbeurten beheren ...",
-            routes.Refuels::showRefuelsForTrip, "primary");
+            id -> routes.Refuels.showRefuelsForTrip(id, false), "primary"); // TODO: also owner flow?
 
     private String shortCaption;
 

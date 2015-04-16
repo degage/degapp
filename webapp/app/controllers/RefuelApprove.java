@@ -93,7 +93,7 @@ public class RefuelApprove extends RefuelCommon {
                     if (CurrentUser.isNot(reservation.getOwnerId())
                             || refuel.getStatus() != RefuelStatus.REQUEST) {
                         flash("danger", "Alleen de eigenaar kan een tankbeurt goed- of afkeuren");
-                        return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId()));
+                        return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), false));
                     }
                 }
 
@@ -105,7 +105,7 @@ public class RefuelApprove extends RefuelCommon {
                 } else {
                     Notifier.sendRefuelApproved(refuel, remarks);
                 }
-                return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId()));
+                return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), false));
             }  else { // other cases only happen when somebody is hacking
                 return badRequest();
             }
@@ -128,6 +128,6 @@ public class RefuelApprove extends RefuelCommon {
         dao.acceptOrRejectRefuel(RefuelStatus.ACCEPTED, refuelId, null);
         Notifier.sendRefuelApproved(refuel, null);
         flash("success", "De tankbeurt werd goedgekeurd");
-        return redirect(routes.Refuels.showRefuelsForTripOwner(reservation.getId()));
+        return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), true));
     }
 }
