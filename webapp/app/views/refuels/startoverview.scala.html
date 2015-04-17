@@ -1,0 +1,19 @@
+@*
+*@
+
+@(form: Form[Calendars.DateData], carId: Int)
+
+@stdlayout("Tankbeurten",scripts=js.datetimepicker()) {
+
+   @panel("Doorloop tankbeurten") {
+        @helper.form(routes.Refuels.doStartOverviewForCar(carId)){
+            @std.datepicker(form("date"), "Startdatum", css="col-sm-6", minView=3)
+            @std.submitButton("Tankbeurten...")
+        }
+        <div class="alert alert-info col-xs-12">
+              <p>Je kan de ritten voor je wagen één voor één doorlopen vanaf de opgegeven datum. Per rit zie je de
+              tankbeurtinformatie die je dan telkens kan goed- of afkeuren. Je kan ook een nieuwe tankbeurt ingeven voor een rit.</p>
+        </div>
+   }
+
+}

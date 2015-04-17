@@ -58,6 +58,7 @@
                         <td>
                                 @* <a class="btn btn-xs btn-primary" href="@routes.Cars.editCar(car.getId)">Wijzig</a> *@
                                 <a class="btn btn-xs  btn-primary" href="@routes.Trips.overview(car.getId)">Km-standen</a>
+                                <a class="btn btn-xs  btn-primary" href="@routes.Refuels.startOverviewForCar(car.getId)">Tankbeurten</a>
                                 <a class="btn btn-xs  btn-success" href="@routes.Calendars.indexWithCar(car.getName, car.getId)">Reserveer</a>
                         </td>
                     } {

@@ -225,6 +225,9 @@ GET         /refuels/details                        controllers.Refuels.showDeta
 GET         /refuels/trip                           controllers.Refuels.showRefuelsForTrip(id: Int, o: Boolean)
 POST        /refuels/new                            controllers.RefuelCreate.doCreate(id: Int, o: Boolean)
 
+GET         /refuels/overview                       controllers.Refuels.startOverviewForCar(id: Int)
+POST        /refuels/overview                       controllers.Refuels.doStartOverviewForCar(id: Int)
+
 #Damages
 GET         /damages                                controllers.Damages.showDamages()
 GET         /damages/page                           controllers.Damages.showDamagesPage(page: Int, pageSize:Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")

@@ -177,12 +177,54 @@ public class Refuels extends RefuelCommon {
             ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
 
             return refuelsForTripOwner.render(form, refuels, reservation,
-                          dao.getNextTripId(reservation.getId()),
-                          dao.getPreviousTripId(reservation.getId())
-                    );
-        }
-        else
+                    dao.getNextTripId(reservation.getId()),
+                    dao.getPreviousTripId(reservation.getId())
+            );
+        } else
             return refuelsForTripDriver.render(form, refuels, reservation);
+    }
+
+    /**
+     * Shows the start page where a date can be chosen to start listing
+     * the refuel information
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result startOverviewForCar(int carId) {
+        Car car = DataAccess.getInjectedContext().getCarDAO().getCar(carId);
+        if (CurrentUser.is(car.getOwner().getId())) {
+            return ok(startoverview.render(
+                    Form.form(Calendars.DateData.class), carId
+            ));
+        } else {
+            return badRequest(); // hacker?
+        }
+    }
+
+    /**
+     * Process the information from {@link #startOverviewForCar} and dispatch to the correct trip page
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
+    @InjectContext
+    public static Result doStartOverviewForCar(int carId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (!CurrentUser.is(car.getOwner().getId())) {
+            return badRequest();
+        }
+
+        Form<Calendars.DateData> form = Form.form(Calendars.DateData.class).bindFromRequest();
+
+        if (!form.hasErrors()) {
+            int reservationId = context.getReservationDAO().getFirstTripAfterDate(carId, Utils.toLocalDate(form.get().date));
+            if (reservationId > 0) {
+                return redirect(routes.Refuels.showRefuelsForTrip(reservationId, true));
+            } else {
+                form.reject("date", "Geen ritten gevonden vanaf deze datum");
+            }
+        }
+        return badRequest(startoverview.render(form,carId));
+
     }
 
 

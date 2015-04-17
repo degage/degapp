@@ -34,6 +34,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Collection;
 
@@ -97,6 +98,11 @@ public interface ReservationDAO {
      * @return 0 if no such trip
      */
     public int getPreviousTripId (int reservationId) throws DataAccessException;
+
+    /**
+     * Return the first trip (that has actually taken place) for a certain car after or at a certain date.
+     */
+    public int getFirstTripAfterDate (int carId, LocalDate date) throws DataAccessException;
 
     /**
      * Is there any reservation that overlaps the given period?
