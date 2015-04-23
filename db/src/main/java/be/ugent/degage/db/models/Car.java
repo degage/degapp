@@ -32,14 +32,8 @@ package be.ugent.degage.db.models;
 /**
  * Represents information about a certain car.
  */
-public class Car {
+public class Car extends CarHeader {
     
-    private int id;
-    private String name;
-    private String brand;
-    private String type;
-    private String email;
-    private Address location;
     private Integer seats;
     private Integer doors;
     private Integer year;
@@ -57,17 +51,12 @@ public class Car {
     private boolean active;
     private int photoId;
 
-    public Car(int id, String name) {
-        this.id = id;
-        this.name = name;
-    }
 
-    public Car(int id, String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm, TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments) {
-        this(id, name);
-        this.email = email;
-        this.brand = brand;
-        this.type = type;
-        this.location = location;
+    public Car(int id, String name, String email, String brand, String type,
+               Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
+               CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
+               String comments, boolean active) {
+        super(id, name, brand, type, email);
         this.seats = seats;
         this.doors = doors;
         this.year = year;
@@ -78,54 +67,8 @@ public class Car {
         this.fuelEconomy = fuelEconomy;
         this.estimatedValue = estimatedValue;
         this.ownerAnnualKm = ownerAnnualKm;
-        this.technicalCarDetails = technicalCarDetails;
-        this.insurance = insurance;
-        this.owner = owner;
         this.comments = comments;
-    }
-
-    public int getId() {
-        return id;
-    }
-    
-    public void setId(int id){
-        this.id=id;
-    }
-
-    public String getName() { return name; }
-
-    public void setName(String name) { this.name = name; }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getBrand() {
-        return brand;
-    }
-
-    public void setBrand(String brand) {
-        this.brand = brand;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Address getLocation() {
-        return location;
-    }
-
-    public void setLocation(Address location) {
-        this.location = location;
+        this.active = active;
     }
 
     public Integer getSeats() {
