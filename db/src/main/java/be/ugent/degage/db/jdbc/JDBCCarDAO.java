@@ -200,6 +200,19 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
+    // note: does note include an actual owner...
+    public static CarHeaderWithOwner populateCarHeaderWithOwner(ResultSet rs) throws SQLException {
+        CarHeaderWithOwner result = new CarHeaderWithOwner(
+                rs.getInt("car_id"),
+                rs.getString("car_name"),
+                rs.getString("car_brand"),
+                rs.getString("car_type"),
+                rs.getString("car_email"),
+                rs.getBoolean("car_active")
+        );
+        return result;
+    }
+
     private static CarHeaderLong populateCarHeaderLong(ResultSet rs) throws SQLException {
         CarHeaderLong result = new CarHeaderLong(
                 rs.getInt("car_id"),

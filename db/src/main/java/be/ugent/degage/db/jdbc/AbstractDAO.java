@@ -148,4 +148,18 @@ class AbstractDAO {
             }
         }
     }
+
+     /**
+     * Executes a prepared statement and converts the first result into an object, or null if no result.
+     */
+    protected static<T> T toSingleObject(PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return fn.convert(rs);
+            } else {
+                return null;
+            }
+        }
+    }
+
 }

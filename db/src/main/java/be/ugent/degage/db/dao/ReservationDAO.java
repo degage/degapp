@@ -49,6 +49,9 @@ public interface ReservationDAO {
     public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId) throws DataAccessException;
 
 
+    /**
+     * Returns the reservation with the given id.
+     */
     public Reservation getReservation (int id) throws DataAccessException;
 
     /**

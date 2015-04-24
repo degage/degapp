@@ -194,7 +194,7 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendRefuelRequest(UserHeader owner, Reservation reservation, int refuelId, Car car, int eurocents) {
+    public static void sendRefuelRequest(UserHeader owner, Reservation reservation, int refuelId, CarHeader car, int eurocents) {
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         String carName = car.getName();
@@ -281,7 +281,7 @@ public class Notifier extends Mailer {
     public static void sendReservationApprovedByOwnerMail(UserHeader owner, String remarks, Reservation reservation) {
         // note: needs extended reservation
         UserHeader user = reservation.getUser();
-        Car car = reservation.getCar();
+        CarHeader car = reservation.getCar();
         String carAddress = car.getLocation().toString();
         String carName = car.getName();
         String from = Utils.toLocalizedString(reservation.getFrom());

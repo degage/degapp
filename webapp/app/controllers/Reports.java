@@ -212,7 +212,7 @@ public class Reports extends Controller {
                 row = s.createRow(i);
                 int j = 0;
                 row.createCell(j++).setCellValue(reservation.getId());
-                Car car = reservation.getCar();
+                CarHeader car = reservation.getCar();
                 UserHeader user = reservation.getUser();
                 row.createCell(j++).setCellValue(car.getId());
                 row.createCell(j++).setCellValue(car.getName());

@@ -79,7 +79,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
         Reservation reservation = new Reservation(
                 rs.getInt("reservation_id"),
-                JDBCCarDAO.populateCar(rs, false),
+                JDBCCarDAO.populateCarHeaderWithOwner (rs),
                 JDBCUserDAO.populateUserHeader(rs),
                 rs.getInt("reservation_owner_id"),
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
@@ -186,54 +186,38 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    // TODO: list actual fields
-    private LazyStatement getReservationStatement = new LazyStatement(
-            "SELECT * FROM reservations" +
+    @Override
+    public Reservation getReservation(int id) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+        // TODO: list actual fields
+                "SELECT * FROM reservations" +
                     " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
                     " INNER JOIN users ON reservations.reservation_user_id = users.user_id" +
                     " WHERE reservation_id=?"
-    );
-
-    @Override
-    public Reservation getReservation(int id) throws DataAccessException {
-        try {
-            PreparedStatement ps = getReservationStatement.value();
+        )) {
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateReservation(rs);
-                } else {
-                    return null;
-                }
-            }
+            return toSingleObject(ps, JDBCReservationDAO::populateReservation);
         } catch (SQLException e) {
             throw new DataAccessException("Unable to get reservation", e);
         }
     }
 
-    // TODO: list actual fields
-    private LazyStatement getReservationExtendedStatement = new LazyStatement(
-            "SELECT * FROM reservations" +
-                    " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
-                    " INNER JOIN users ON reservations.reservation_user_id = users.user_id" +
-                    " JOIN addresses ON car_location = address_id" +
-                    " WHERE reservation_id=?"
-    );
-
     @Override
     public Reservation getReservationExtended(int id) throws DataAccessException {
-        try {
-            PreparedStatement ps = getReservationExtendedStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+        // TODO: replace * with actual parameters
+           "SELECT * FROM reservations" +
+                " INNER JOIN cars ON reservations.reservation_car_id = cars.car_id" +
+                " INNER JOIN users ON reservations.reservation_user_id = users.user_id" +
+                " JOIN addresses ON car_location = address_id" +
+                " WHERE reservation_id=?"
+        )) {
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
+            return toSingleObject(ps, rs -> {
                     Reservation reservation = populateReservation(rs);
                     reservation.getCar().setLocation(JDBCAddressDAO.populateAddress(rs));
                     return reservation;
-                } else {
-                    return null;
-                }
-            }
+                });
         } catch (SQLException e) {
             throw new DataAccessException("Unable to get reservation", e);
         }
@@ -490,7 +474,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     @Override
     public Iterable<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
-            Statement statement = createStatement();
             String sql = getReservationsPageStatement(filter);
             sql += " ORDER BY ";
             switch (orderBy) {
@@ -500,12 +483,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     break;
             }
             sql += " LIMIT " + (page - 1) * pageSize + ", " + pageSize;
-            try (ResultSet rs = statement.executeQuery(sql)) {
-                Collection<Reservation> list = new ArrayList<>();
-                while (rs.next()) {
-                    list.add(populateReservation(rs));
-                }
-                return list;
+            try (PreparedStatement ps = prepareStatement(sql)) {
+                return toList(ps, JDBCReservationDAO::populateReservation);
             }
         } catch (Exception ex) {
             throw new DataAccessException("Could not retrieve a list of reservations", ex);
