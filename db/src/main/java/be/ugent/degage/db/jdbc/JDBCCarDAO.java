@@ -47,7 +47,7 @@ import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     public static final String LIST_CAR_QUERY =
-            "SELECT car_id, car_name, car_email, car_brand, car_active, " +
+            "SELECT car_id, car_name, car_brand, car_type, car_email, car_active, " +
                     USER_HEADER_FIELDS +
                     "FROM cars JOIN users ON car_owner_user_id = user_id " +
                     "WHERE car_name LIKE ? AND car_brand LIKE ? ";
@@ -198,6 +198,26 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         } else {
             return null;
         }
+    }
+
+    private static CarHeaderLong populateCarHeaderLong(ResultSet rs) throws SQLException {
+        CarHeaderLong result = new CarHeaderLong(
+                rs.getInt("car_id"),
+                rs.getString("car_name"),
+                rs.getString("car_brand"),
+                rs.getString("car_type"),
+                rs.getString("car_email"),
+                true,
+                (Integer) rs.getObject("car_seats"),
+                (Integer) rs.getObject("car_doors"),
+                rs.getBoolean("car_manual"),
+                rs.getBoolean("car_gps"),
+                rs.getBoolean("car_hook"),
+                CarFuel.valueOf(rs.getString("car_fuel")),
+                rs.getString("car_comments")
+        );
+        result.setLocation(JDBCAddressDAO.populateAddress(rs));
+        return result;
     }
 
     private LazyStatement createCarStatement = new LazyStatement(
@@ -427,11 +447,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-
-    private LazyStatement countCarsStatement = new LazyStatement(
-            "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
-    );
-
     /**
      * @param filter The filter to apply to
      * @return The amount of filtered cars
@@ -439,18 +454,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      */
     @Override
     public int countCars(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = countCarsStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
+        )) {
             ps.setString(1, filter.getValue(FilterField.CAR_NAME));
             ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                } else {
-                    return 0;
-                }
-            }
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
         }
@@ -483,7 +492,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     private static final String NEW_CAR_QUERY =
             "SELECT car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
-                    "car_manual, car_gps, car_hook, car_active, " +
+                    "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, " +
                     "address_id, address_city, address_zipcode, address_street, " +
                     "address_number, address_country " +
                     "FROM cars JOIN addresses ON address_id=car_location ";
@@ -504,7 +513,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public Iterable<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         // build query
         StringBuilder builder = new StringBuilder(NEW_CAR_QUERY);
         builder.append(" WHERE car_active ");
@@ -529,34 +538,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
             ps.setString(1, filter.getValue(FilterField.FROM));
             ps.setString(2, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
-            int first = (page - 1) * pageSize;
-            ps.setInt(3, first);
+            ps.setInt(3, (page - 1) * pageSize);
             ps.setInt(4, pageSize);
 
-            try (ResultSet rs = ps.executeQuery()) {
-                Collection<Car> cars = new ArrayList<>();
-                while (rs.next()) {
-
-                    Car result = new Car(
-                            rs.getInt("car_id"),
-                            rs.getString("car_name"),
-                            rs.getString("car_email"),
-                            rs.getString("car_brand"),
-                            rs.getString("car_type"),
-                            (Integer) rs.getObject("car_seats"),
-                            (Integer) rs.getObject("car_doors"),
-                            null,
-                            rs.getBoolean("car_manual"),
-                            rs.getBoolean("car_gps"),
-                            rs.getBoolean("car_hook"),
-                            null, null, null, null, null,
-                            rs.getBoolean("car_active")
-                    );
-                    result.setLocation(JDBCAddressDAO.populateAddress(rs));
-                    cars.add(result);
-                }
-                return cars;
-            }
+            return toList(ps, JDBCCarDAO::populateCarHeaderLong);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
         }
@@ -568,7 +553,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      * @throws DataAccessException
      */
     @Override
-    public int getAmountOfCars(Filter filter) throws DataAccessException {
+    public int countActiveCars(Filter filter) throws DataAccessException {
         // build query
         StringBuilder builder = new StringBuilder(
                 "SELECT count(*) AS amount_of_cars FROM cars "
@@ -582,14 +567,20 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setString(1, filter.getValue(FilterField.FROM));
             ps.setString(2, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
-                    return rs.getInt("amount_of_cars");
-                else
-                    return 0;
-            }
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
+        }
+    }
+
+    @Override
+    public Iterable<CarHeaderLong> listAllActiveCars() {
+        try (PreparedStatement ps = prepareStatement(
+                NEW_CAR_QUERY + "WHERE car_active ORDER BY car_name"
+        )) {
+            return toList(ps, JDBCCarDAO::populateCarHeaderLong);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get list of cars", ex);
         }
     }
 
@@ -607,7 +598,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public Iterable<Car> listCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException {
+    public Iterable<CarHeaderWithOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException {
         // TODO: return a list of car headers
         try {
             PreparedStatement ps = null;
@@ -619,9 +610,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     ps = asc ? listCarsPageByBrandAscStatement.value() : listCarsPageByBrandDescStatement.value();
                     break;
             }
-            if (ps == null) {
-                throw new DataAccessException("Could not create listCars statement");
-            }
 
             ps.setString(1, filter.getValue(FilterField.CAR_NAME));
             ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
@@ -630,17 +618,16 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             ps.setInt(4, pageSize);
 
             try (ResultSet rs = ps.executeQuery()) {
-                Collection<Car> cars = new ArrayList<>();
+                Collection<CarHeaderWithOwner> cars = new ArrayList<>();
                 while (rs.next()) {
                     UserHeader owner = JDBCUserDAO.populateUserHeader(rs);
                     // only header is really needed
-                    Car result = new Car(
+                    CarHeaderWithOwner result = new CarHeaderWithOwner(
                             rs.getInt("car_id"),
                             rs.getString("car_name"),
-                            rs.getString("car_email"),
                             rs.getString("car_brand"),
-                            null, null, null, null,
-                            false, false, false, null, null, null, null, null,
+                            rs.getString("car_type"),
+                            rs.getString("car_email"),
                             rs.getBoolean("car_active")
                     );
                     result.setOwner(owner);
@@ -728,32 +715,20 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     }
 
 
-    private LazyStatement listCarsOfUserStatement = new LazyStatement(
-            "SELECT car_id, car_name, car_email, car_brand, car_active " +
-                    "FROM cars WHERE car_owner_user_id = ?");
-
     @Override
-    public Iterable<Car> listCarsOfUser(int userId) throws DataAccessException {
-        // TODO: use only car headers
-        try {
-            PreparedStatement ps = listCarsOfUserStatement.value();
+    public Iterable<CarHeader> listCarsOfUser(int userId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_id, car_name, car_brand, car_type, car_email, car_active " +
+                        "FROM cars WHERE car_owner_user_id = ?")) {
             ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                Collection<Car> cars = new ArrayList<>();
-                while (rs.next()) {
-                    Car result = new Car(
-                            rs.getInt("car_id"),
-                            rs.getString("car_name"),
-                            rs.getString("car_email"),
-                            rs.getString("car_brand"),
-                            null, null, null, null,
-                            false, false, false, null, null, null, null,
-                            null, rs.getBoolean("car_active")
-                    );
-                    cars.add(result);
-                }
-                return cars;
-            }
+            return toList(ps, rs -> new CarHeader(
+                    rs.getInt("car_id"),
+                    rs.getString("car_name"),
+                    rs.getString("car_brand"),
+                    rs.getString("car_type"),
+                    rs.getString("car_email"),
+                    rs.getBoolean("car_active")
+            ));
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars for user with id " + userId, ex);
         }

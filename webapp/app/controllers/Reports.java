@@ -249,6 +249,7 @@ public class Reports extends Controller {
         }
     }
 
+
     @AllowRoles({UserRole.SUPER_USER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result getCars() {

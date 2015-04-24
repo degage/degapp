@@ -31,6 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.models.Car;
+import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
 import controllers.routes.javascript;
@@ -67,7 +68,7 @@ public class Application extends Controller {
                 // normal dashboard if user has full status
                 if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
                     List<Calendars.OverviewForCar> ofclist = new ArrayList<>();
-                    for (Car car : context.getCarDAO().listCarsOfUser(CurrentUser.getId())) {
+                    for (CarHeader car : context.getCarDAO().listCarsOfUser(CurrentUser.getId())) {
                         Calendars.CarDateData data = new Calendars.CarDateData();
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();

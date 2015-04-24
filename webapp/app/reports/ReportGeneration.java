@@ -110,7 +110,7 @@ public class ReportGeneration {
                     document,
                     costInfo);
 
-            for (Car car : context.getCarDAO().listCarsOfUser(userId)) {
+            for (CarHeader car : context.getCarDAO().listCarsOfUser(userId)) {
                 int carId = car.getId();
 
                 // TODO: use localDate everywhere

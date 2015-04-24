@@ -34,6 +34,8 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.Car;
+import be.ugent.degage.db.models.CarHeader;
+import be.ugent.degage.db.models.CarHeaderWithOwner;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
@@ -53,8 +55,10 @@ public class CarPicker extends Controller {
             String cars = "";
             Filter filter = new JDBCFilter();
             filter.putValue(FilterField.CAR_NAME, search);
-            Iterable<Car> results = dao.listCars(FilterField.CAR_NAME, true, 1, MAX_VISIBLE_RESULTS, filter, true);
-            for (Car car : results) {
+            // TODO: add a method to the dao that corresponds directly to what we want here (CarHeader is already sufficient, id + name would even be better
+            // TODO: if we can combine this with a similar change in the user picker...)
+            Iterable<CarHeaderWithOwner> results = dao.listCarsAndOwners(FilterField.CAR_NAME, true, 1, MAX_VISIBLE_RESULTS, filter, true);
+            for (CarHeader car : results) {
                 String value = car.getName();
                 for (String part : search.split(" ")) {
                     value = value.replaceAll("(?i)\\b(" + part + ")", "<#>$1</#>");

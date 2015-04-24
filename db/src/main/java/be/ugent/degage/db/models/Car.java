@@ -32,23 +32,16 @@ package be.ugent.degage.db.models;
 /**
  * Represents information about a certain car.
  */
-public class Car extends CarHeader {
-    
-    private Integer seats;
-    private Integer doors;
+public class Car extends CarHeaderLong {
+
     private Integer year;
-    private boolean manual;
-    private boolean gps;
-    private boolean hook;
-    private CarFuel fuel;
     private Integer fuelEconomy;
     private Integer estimatedValue;
     private Integer ownerAnnualKm;
     private TechnicalCarDetails technicalCarDetails;
     private CarInsurance insurance;
-    private UserHeader owner;
-    private String comments;
-    private boolean active;
+
+    // TODO: move to CarHeaderLong?
     private int photoId;
 
 
@@ -56,36 +49,13 @@ public class Car extends CarHeader {
                Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
                CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                String comments, boolean active) {
-        super(id, name, brand, type, email);
-        this.seats = seats;
-        this.doors = doors;
+        super(id, name, brand, type, email, active, seats, doors, manual, gps, hook, fuel, comments);
         this.year = year;
-        this.manual = manual;
-        this.gps = gps;
-        this.hook = hook;
-        this.fuel = fuel;
         this.fuelEconomy = fuelEconomy;
         this.estimatedValue = estimatedValue;
         this.ownerAnnualKm = ownerAnnualKm;
-        this.comments = comments;
-        this.active = active;
     }
 
-    public Integer getSeats() {
-        return seats;
-    }
-
-    public void setSeats(Integer seats) {
-        this.seats = seats;
-    }
-
-    public Integer getDoors() {
-        return doors;
-    }
-
-    public void setDoors(Integer doors) {
-        this.doors = doors;
-    }
 
     public Integer getYear() {
         return year;
@@ -93,38 +63,6 @@ public class Car extends CarHeader {
 
     public void setYear(Integer year) {
         this.year = year;
-    }
-
-    public boolean isManual() {
-        return manual;
-    }
-
-    public void setManual(boolean manual) {
-        this.manual = manual;
-    }
-
-    public boolean isGps() {
-        return gps;
-    }
-
-    public void setGps(boolean gps) {
-        this.gps = gps;
-    }
-
-    public boolean isHook() {
-        return hook;
-    }
-
-    public void setHook(boolean hook) {
-        this.hook = hook;
-    }
-
-    public CarFuel getFuel() {
-        return fuel;
-    }
-
-    public void setFuel(CarFuel fuel) {
-        this.fuel = fuel;
     }
 
     public Integer getFuelEconomy() {
@@ -167,29 +105,6 @@ public class Car extends CarHeader {
         this.insurance = insurance;
     }
 
-    public UserHeader getOwner() {
-        return owner;
-    }
-
-    public void setOwner(UserHeader owner) {
-        this.owner = owner;
-    }
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public boolean isActive() {
-        return active;
-    }
-
-    public void setActive(boolean active) {
-        this.active = active;
-    }
 
     public int getPhotoId() {
         return photoId;

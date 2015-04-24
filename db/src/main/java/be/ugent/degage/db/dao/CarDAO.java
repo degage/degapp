@@ -50,31 +50,39 @@ public interface CarDAO {
      */
     public Iterable<Car> listAllCars () throws DataAccessException;
 
+    /**
+     * Returns a filtered list of cars. Only active cars are shown. Always contains a location. Owner is
+     * left null.
+     */
+    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     /**
-     * Returns a filtered list of cars. Only active cars are shown.
+     * Number of cars that can be returned by equivalent call to {@link #listActiveCars}
      */
-    public Iterable<Car> getCarList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    public int countActiveCars(Filter filter) throws DataAccessException;
 
     /**
-     * Number of cars that can be returned by equivalent call to {@link #getCarList}
+     * Returns a list of all active cars. Similar to {@link #listActiveCars} but
+     * unfiltered and withou pagination
      */
-    public int getAmountOfCars(Filter filter) throws DataAccessException;
-
-    // newer version - uses shorter SQL
+    public Iterable<CarHeaderLong> listAllActiveCars();
 
     /**
-     * Return a filtered list of cars.
-     * @param onlyActive If true, only active cars are shown
+     * Return a filtered list of cars. Does not contain location information.
+     * @param onlyActive Only include cars that are active
      */
+    public Iterable<CarHeaderWithOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException;
 
-    public Iterable<Car> listCars (FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException;
+    /**
+     * Number of cars that can be returned by an equivalent call to {@link #listCarsAndOwners}
+     */
     public int countCars(Filter filter) throws DataAccessException;
 
     /**
-     * Lists all cars of the given user, also those that are not active
+     * Lists all cars of the given user, also those that are not active.
+     * Does not contain location information
      */
-    public Iterable<Car> listCarsOfUser (int userId)  throws DataAccessException;
+    public Iterable<CarHeader> listCarsOfUser (int userId)  throws DataAccessException;
 
     public boolean isCarOfUser (int carId, int userId) throws DataAccessException;
 

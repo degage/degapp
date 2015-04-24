@@ -40,29 +40,36 @@ public class CarHeader {
     private String type;
     private String email;
     private Address location;
+    private boolean active;
 
     /**
      * Create an object containing the given information.
      */
-    public CarHeader(int id, String name, String brand, String type, String email) {
+    public CarHeader(int id, String name, String brand, String type, String email,
+                     boolean active) {
         this.id = id;
         this.name = name;
         this.brand = brand;
         this.type = type;
         this.email = email;
+        this.active = active;
     }
 
     public int getId() {
         return id;
     }
 
-    public void setId(int id){
-        this.id=id;
+    public void setId(int id) {
+        this.id = id;
     }
 
-    public String getName() { return name; }
+    public String getName() {
+        return name;
+    }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
     public String getEmail() {
         return email;
@@ -94,6 +101,14 @@ public class CarHeader {
 
     public void setLocation(Address location) {
         this.location = location;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
 
