@@ -134,7 +134,7 @@ public class Notifier extends Mailer {
     }
 
     public static void sendRefuelApproved(Refuel refuel) {
-        Reservation reservation = refuel.getCarRide().getReservation();
+        Reservation reservation = refuel.getReservation();
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
@@ -150,7 +150,7 @@ public class Notifier extends Mailer {
 
     public static void sendRefuelRejected(Refuel refuel, String newRemarks) {
         // TODO: combine with above to reduce code duplication
-        Reservation reservation = refuel.getCarRide().getReservation();
+        Reservation reservation = refuel.getReservation();
         UserHeader user = reservation.getUser();
         String name = reservation.getCar().getName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";

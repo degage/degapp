@@ -49,8 +49,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
             "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id " +
             "LEFT JOIN cars ON reservation_car_id = car_id " +
-            "LEFT JOIN users ON reservation_user_id = user_id " +
-            "LEFT JOIN users AS owners ON car_owner_user_id = owners.user_id ";
+            "LEFT JOIN users ON reservation_user_id = user_id ";
 
     public JDBCRefuelDAO(JDBCDataAccessContext context) {
         super(context);
@@ -64,19 +63,17 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getInt("refuel_eurocents"),
                 RefuelStatus.valueOf(rs.getString("refuel_status")),
                 rs.getInt("refuel_km"),
-                rs.getString ("refuel_amount"),
-                rs.getString ("refuel_message")
+                rs.getString("refuel_amount"),
+                rs.getString("refuel_message")
         );
 
         Date refuelBilled = rs.getDate("refuel_billed");
         refuel.setBilled(refuelBilled == null ? null : refuelBilled.toLocalDate());
 
-        refuel.getCarRide().getReservation().getCar().setOwner(JDBCUserDAO.populateUserHeader(rs, "owners"));
-
         return refuel;
     }
 
-    private LazyStatement createRefuelStatement = new LazyStatement (
+    private LazyStatement createRefuelStatement = new LazyStatement(
             "INSERT INTO refuels (refuel_car_ride_id, refuel_file_id, refuel_eurocents, refuel_status," +
                     "refuel_km, refuel_amount) " +
                     "VALUES (?,?,?,?,?,?)",
@@ -86,8 +83,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     @Override
     public int createRefuel(int reservationId, int eurocents, int fileId, RefuelStatus status,
-                             int km, String amount) {
-        try{
+                            int km, String amount) {
+        try {
             PreparedStatement ps = createRefuelStatement.value();
             ps.setInt(1, reservationId);
             ps.setInt(2, fileId);
@@ -101,20 +98,20 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 keys.next(); //if this fails we want an exception anyway
                 return keys.getInt(1);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to create refuel", e);
         }
     }
 
     @Override
-    public void updateRefuelStatus (RefuelStatus status, int refuelId) throws DataAccessException {
+    public void updateRefuelStatus(RefuelStatus status, int refuelId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE refuels SET refuel_status = ? WHERE refuel_id = ? ")
         ) {
             ps.setString(1, status.name());
             ps.setInt(2, refuelId);
             ps.executeUpdate();
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to update refuel", e);
         }
     }
@@ -124,27 +121,22 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE refuels SET refuel_status = 'REFUSED', refuel_message = ? WHERE refuel_id = ? ")
         ) {
-            ps.setString(1,message);
+            ps.setString(1, message);
             ps.setInt(2, refuelId);
             ps.executeUpdate();
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to update refuel", e);
         }
     }
 
-    private LazyStatement getRefuelStatement= new LazyStatement (REFUEL_QUERY + " WHERE refuel_id = ? ");
-
     @Override
     public Refuel getRefuel(int refuelId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getRefuelStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                REFUEL_QUERY + " WHERE refuel_id = ? "
+        )) {
             ps.setInt(1, refuelId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return populateRefuel(rs);
-                else return null;
-            }
-        } catch (SQLException e){
+            return toSingleObject(ps, JDBCRefuelDAO::populateRefuel);
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to get reservation", e);
         }
     }
@@ -171,7 +163,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     }
     */
 
-    private static void appendRefuelFilter (StringBuilder builder, Filter filter) {
+    private static void appendRefuelFilter(StringBuilder builder, Filter filter) {
         // build clause
         StringBuilder b = new StringBuilder();
 
@@ -179,7 +171,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         FilterUtils.appendIdFilter(b, "reservation_car_id", filter.getValue(FilterField.REFUEL_CAR_ID));
 
         String ownerFilter = filter.getValue(FilterField.REFUEL_OWNER_ID);
-        if (! ownerFilter.isEmpty()) {
+        if (!ownerFilter.isEmpty()) {
             if (Integer.parseInt(ownerFilter) >= 0) {
                 b.append(" AND (reservation_user_id = ").append(ownerFilter).
                         append(" OR reservation_owner_id = ").append(ownerFilter).
@@ -193,8 +185,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     }
 
     private static final String AMOUNT_OF_REFUELS_STATEMENT =
-             "SELECT count(*) AS amount_of_refuels FROM refuels " +
-                     "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id ";
+            "SELECT count(*) AS amount_of_refuels FROM refuels " +
+                    "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id ";
 
     @Override
     public int getAmountOfRefuels(Filter filter) throws DataAccessException {
@@ -221,7 +213,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         builder.append(" ORDER BY refuel_created_at DESC LIMIT ?,?");
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
-            ps.setInt(1, (page-1)*pageSize);
+            ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
             return toList(ps, JDBCRefuelDAO::populateRefuel);
         } catch (SQLException ex) {
@@ -236,19 +228,19 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         ) {
             ps.setInt(1, userId);
             return toList(ps, JDBCRefuelDAO::populateRefuel);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
         }
     }
 
     @Override
-    public int numberOfRefuelRequests (int ownerId) throws DataAccessException {
+    public int numberOfRefuelRequests(int ownerId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-            "SELECT COUNT(*) " +
-                    "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
-                    "WHERE refuel_status = 'REQUEST' AND reservation_owner_id = ?"
+                "SELECT COUNT(*) " +
+                        "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
+                        "WHERE refuel_status = 'REQUEST' AND reservation_owner_id = ?"
         )) {
-            ps.setInt(1,ownerId);
+            ps.setInt(1, ownerId);
             return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get number of refuel requests", ex);
@@ -263,19 +255,19 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             ps.setDate(1, Date.valueOf(date));
             ps.setInt(2, user);
             return toList(ps, JDBCRefuelDAO::populateRefuel);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
         }
     }
 
     private LazyStatement eurocentsSpentOnFuelStatement = new LazyStatement(
             "SELECT SUM(refuel_eurocents) AS s, reservation_privileged " +
-            "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
-                "WHERE refuel_billed = ? AND reservation_car_id = ? " +
-            "GROUP BY refuel_eurocents, reservation_privileged "
+                    "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
+                    "WHERE refuel_billed = ? AND reservation_car_id = ? " +
+                    "GROUP BY refuel_eurocents, reservation_privileged "
     );
 
-    public int[] eurocentsSpentOnFuel (LocalDate date, int carId) throws DataAccessException {
+    public int[] eurocentsSpentOnFuel(LocalDate date, int carId) throws DataAccessException {
         try {
             PreparedStatement ps = eurocentsSpentOnFuelStatement.value();
             ps.setDate(1, Date.valueOf(date));
@@ -284,12 +276,12 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 int[] result = new int[2];
                 while (rs.next()) {
-                    int index = rs.getBoolean ("reservation_privileged") ? 0 : 1;
+                    int index = rs.getBoolean("reservation_privileged") ? 0 : 1;
                     result[index] = rs.getInt("s");
                 }
                 return result;
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to retrieve the list of refuels for car.", e);
         }
     }

@@ -79,7 +79,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
         Reservation reservation = new Reservation(
                 rs.getInt("reservation_id"),
-                JDBCCarDAO.populateCarHeaderWithOwner (rs),
+                JDBCCarDAO.populateCarHeader (rs),
                 JDBCUserDAO.populateUserHeader(rs),
                 rs.getInt("reservation_owner_id"),
                 rs.getTimestamp("reservation_from").toLocalDateTime(),

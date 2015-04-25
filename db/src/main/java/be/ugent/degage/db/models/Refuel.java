@@ -69,6 +69,8 @@ public class Refuel {
         return carRide;
     }
 
+    public Reservation getReservation() { return carRide.getReservation(); } // TODO: header?
+
     public int getProofId() {
         return proofId;
     }

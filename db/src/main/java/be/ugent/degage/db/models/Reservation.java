@@ -36,10 +36,10 @@ import java.time.LocalDateTime;
  */
 public class Reservation extends ReservationHeader {
     
-    private CarHeaderWithOwner car;
+    private CarHeader car;
     private UserHeader user;
 
-    public Reservation(int id, CarHeaderWithOwner car, UserHeader user, int ownerId,
+    public Reservation(int id, CarHeader car, UserHeader user, int ownerId,
                        LocalDateTime from, LocalDateTime until, String message, boolean old) {
         super (id, car == null ? 0 : car.getId(), user == null ? 0 : user.getId(), ownerId, from, until, message, old);
         this.car = car;
@@ -47,7 +47,7 @@ public class Reservation extends ReservationHeader {
     }
 
     // TODO: is 'with owner' really necessary? Currently only used with refuels
-    public CarHeaderWithOwner getCar() {
+    public CarHeader getCar() {
         return car;
     }
 

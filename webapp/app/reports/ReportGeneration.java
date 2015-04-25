@@ -355,8 +355,8 @@ public class ReportGeneration {
         int refuelTotal = 0; // in euro cent
 
         for (Refuel refuel : refuels) {
-            add(refuelsTable, refuel.getCarRide().getReservation().getCar().getName());
-            add(refuelsTable, Utils.toLocalizedDateString(refuel.getCarRide().getReservation().getFrom()));
+            add(refuelsTable, refuel.getReservation().getCar().getName());
+            add(refuelsTable, Utils.toLocalizedDateString(refuel.getReservation().getFrom()));
             if (refuel.getCarRide().getCost().compareTo(BigDecimal.ZERO) != 0) {
                 add(refuelsTable, "€ " + EurocentAmount.toString(refuel.getEurocents()), true);
                 refuelTotal += refuel.getEurocents();
