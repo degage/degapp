@@ -93,38 +93,38 @@ public class Trips extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         UserDAO udao = context.getUserDAO();
-        User driver = udao.getUser(trip.getDriverId());
-        User owner = udao.getUser(trip.getOwnerId());
+        UserHeader driver = udao.getUserHeader(trip.getDriverId());
+        UserHeader owner = udao.getUserHeader(trip.getOwnerId());
         if ( ! WFCommon.isDriverOrOwnerOrAdmin(trip)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
         }
         ReservationStatus status = trip.getStatus();
 
-        User previousLoaner = null;
-        User nextLoaner = null;
+        UserHeader previousDriver = null;
+        UserHeader nextDriver = null;
         if (status == ReservationStatus.ACCEPTED) {
             Reservation nextReservation = rdao.getNextReservation(reservationId);
             if (nextReservation != null) {
-                nextLoaner = udao.getUser(nextReservation.getDriverId()); // TODO: only phones needed
+                nextDriver = udao.getUserHeader(nextReservation.getDriverId());
             }
             Reservation previousReservation = rdao.getPreviousReservation(reservationId);
             if (previousReservation != null) {
-                previousLoaner = udao.getUser(previousReservation.getDriverId()); // TODO: only phones needed
+                previousDriver = udao.getUserHeader(previousReservation.getDriverId());
             }
         }
 
         if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             return tripDetailsAsAdmin.render(
-                    trip, owner, driver, previousLoaner, nextLoaner
+                    trip, owner, driver, previousDriver, nextDriver
             );
         } else if (CurrentUser.is(owner.getId())) {
             return tripDetailsAsOwner.render(
-                    trip, driver, previousLoaner, nextLoaner
+                    trip, driver, previousDriver, nextDriver
             );
         } else {
-            return tripDetailsAsLoaner.render(
-                    trip, owner, previousLoaner, nextLoaner
+            return tripDetailsAsDriver.render(
+                    trip, owner, previousDriver, nextDriver
             );
         }
     }
@@ -162,8 +162,8 @@ public class Trips extends Controller {
      * Get the number of reservations/trips having the provided status.
      */
     // must be used with injected context - used in driver menu
-    public static int reservationsWithStatus(ReservationStatus status, boolean userIsLoaner) {
-        return DataAccess.getInjectedContext().getReservationDAO().numberOfReservationsWithStatus(status, CurrentUser.getId(), userIsLoaner);
+    public static int reservationsWithStatus(ReservationStatus status, boolean userIsDriver) {
+        return DataAccess.getInjectedContext().getReservationDAO().numberOfReservationsWithStatus(status, CurrentUser.getId(), userIsDriver);
     }
 
     // RENDERING THE PARTIAL

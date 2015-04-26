@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(trip: TripAndCar, loaner: User, previousLoaner: User, nextLoaner: User)
+@(trip: TripAndCar, driver: UserHeader, previousDriver: UserHeader, nextDriver: UserHeader)
 
 
 @* only called when the user owns the car but is not a reservation admin*@
@@ -43,9 +43,9 @@
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
             <h4>Ontlener</h4>
-            @userInfo(loaner)
+            @userInfo(driver)
         </div>
 
-        @previousnext(previousLoaner, nextLoaner)
+        @previousnext(previousDriver, nextDriver)
     }
 }

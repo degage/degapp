@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User, status: ReservationStatus = ReservationStatus.FINISHED)
+@(user: UserHeader, status: ReservationStatus = ReservationStatus.FINISHED)
 
 @* hint: use ReservationStatus.FINISHED to force dispay *@
 
@@ -41,7 +41,7 @@
     <dt>Naam</dt> <dd>@user.getFullName</dd>
     <dt>E-mail</dt> <dd>@emaillink(user.getEmail)</dd>
     <dt>Tel</dt> <dd>@phonelink(user.getPhone) </dd>
-    <dt>GSM</dt> <dd>@phonelink(user.getCellphone)</dd>
+    <dt>GSM</dt> <dd>@phonelink(user.getCellPhone)</dd>
   </dl>
 } else {
   (Deze informatie is pas beschikbaar na goedkeuring)
