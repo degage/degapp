@@ -35,7 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarCost;
-import be.ugent.degage.db.models.CarCostStatus;
+import be.ugent.degage.db.models.ApprovalStatus;
 
 import java.math.BigDecimal;
 import java.sql.*;
@@ -81,7 +81,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getString("car_cost_description"),
                 carCostTime == null ? null : carCostTime.toLocalDate(),
                 rs.getInt("car_cost_proof"));
-        carCost.setStatus(CarCostStatus.valueOf(rs.getString("car_cost_status")));
+        carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
         Date carCostBilled = rs.getDate("car_cost_billed");
         carCost.setBilled(carCostBilled == null ? null : carCostBilled.toLocalDate());

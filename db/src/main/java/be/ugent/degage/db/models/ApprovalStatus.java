@@ -1,4 +1,4 @@
-/* RefuelStatus.java
+/* ApprovalStatus.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -32,8 +32,11 @@ package be.ugent.degage.db.models;
 /**
  * Note: by convention the value returned by {@link #toString} is used to display a description of the
  * enum value in the web interface.
+ * <p>
+ * Used for {@link CarCost} and {@link Refuel}
+ * </p>
  */
-public enum RefuelStatus {
+public enum ApprovalStatus {
     REQUEST("Wachten op goedkeuring"),
     ACCEPTED("Aanvraag goedgekeurd"),
     REFUSED("Aanvraag geweigerd"),
@@ -42,7 +45,7 @@ public enum RefuelStatus {
     // Enum definition
     private String description;
 
-    private RefuelStatus(final String description) {
+    private ApprovalStatus(final String description) {
         this.description = description;
     }
 

@@ -58,13 +58,13 @@
         <td>@carCost.getAmount</td>
         <td>
             @carCost.getStatus match {
-            case CarCostStatus.ACCEPTED => {
+            case ApprovalStatus.ACCEPTED => {
             <span class="fa fa-check-circle"></span>
             }
-            case CarCostStatus.REFUSED => {
+            case ApprovalStatus.REFUSED => {
             <span class="fa fa-minus-circle"></span>
             }
-            case CarCostStatus.REQUEST => {
+            case ApprovalStatus.REQUEST => {
             <span class="fa fa-question-circle"></span>
             }
             case _ => {}
@@ -79,13 +79,13 @@
         @if(CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             <td>
             @carCost.getStatus match {
-                case CarCostStatus.ACCEPTED => {
+                case ApprovalStatus.ACCEPTED => {
                     <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
                 }
-                case CarCostStatus.REFUSED => {
+                case ApprovalStatus.REFUSED => {
                     <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
                 }
-                case CarCostStatus.REQUEST => {
+                case ApprovalStatus.REQUEST => {
                     <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
                     <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
                 }

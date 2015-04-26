@@ -33,7 +33,7 @@
 
     @detailsPanel(refuel)
 
-    @if(isAdmin && refuel.getStatus == RefuelStatus.REQUEST) {
+    @if(isAdmin && refuel.getStatus == ApprovalStatus.REQUEST) {
         @panel("Acties", "fa-pencil") {
            <div class="col-xs-12">
            <a type="button" class="btn btn-xs btn-danger" href="@routes.RefuelApprove.approve(refuel.getId)">Goedkeuren</a>

@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(status: RefuelStatus)
+@(status: ApprovalStatus)
 <span class="@status.name.toLowerCase">
     @status match {
-        case RefuelStatus.REQUEST => {
+        case ApprovalStatus.REQUEST => {
             <span class="fa fa-question-circle"></span>
         }
-        case RefuelStatus.ACCEPTED => {
+        case ApprovalStatus.ACCEPTED => {
             <span class="fa fa-check-circle"></span>
         }
-        case RefuelStatus.REFUSED => {
+        case ApprovalStatus.REFUSED => {
             <span class="fa fa-minus-circle"></span>
         }
-        case RefuelStatus.FROZEN => {
+        case ApprovalStatus.FROZEN => {
             <span class="fa fa-check-square"></span>
         }
     }

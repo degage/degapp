@@ -33,7 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.models.Refuel;
 import be.ugent.degage.db.models.RefuelExtended;
-import be.ugent.degage.db.models.RefuelStatus;
+import be.ugent.degage.db.models.ApprovalStatus;
 
 import java.time.LocalDate;
 
@@ -42,13 +42,13 @@ import java.time.LocalDate;
  */
 public interface RefuelDAO {
 
-    public int createRefuel(int reservationId, int eurocents, int fileId, RefuelStatus status,
+    public int createRefuel(int reservationId, int eurocents, int fileId, ApprovalStatus status,
                              int km, String amount) throws DataAccessException;
 
     /**
      * Update the status of the refuel record (but not the message)
      */
-    public void updateRefuelStatus (RefuelStatus status, int refuelId) throws DataAccessException;
+    public void updateRefuelStatus (ApprovalStatus status, int refuelId) throws DataAccessException;
 
     /**
      * Set the status to refused and store the reason why

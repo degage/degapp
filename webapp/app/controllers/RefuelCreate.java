@@ -86,7 +86,7 @@ public class RefuelCreate extends RefuelCommon {
 
         int refuelId = DataAccess.getInjectedContext().getRefuelDAO().createRefuel(
                 trip.getId(), eurocents, fileId,
-                isAdmin ? RefuelStatus.ACCEPTED : RefuelStatus.REQUEST,
+                isAdmin ? ApprovalStatus.ACCEPTED : ApprovalStatus.REQUEST,
                 km, amount
         );
         if (!isAdmin) {

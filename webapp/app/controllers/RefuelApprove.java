@@ -70,7 +70,7 @@ public class RefuelApprove extends RefuelCommon {
         RefuelDAO dao = context.getRefuelDAO();
         RefuelExtended refuel = dao.getRefuelExtended(refuelId);
 
-        if (!isOwnerOrAdmin(refuel) || refuel.getStatus() != RefuelStatus.REQUEST) {
+        if (!isOwnerOrAdmin(refuel) || refuel.getStatus() != ApprovalStatus.REQUEST) {
             return badRequest(); // should not happen
         }
 
@@ -86,7 +86,7 @@ public class RefuelApprove extends RefuelCommon {
                 Notifier.sendRefuelRejected(driver, refuel, data.remarks);
                 flash("success", "Uw opmerking wordt gemaild naar de bestuurder.");
             } else {
-                dao.updateRefuelStatus(RefuelStatus.ACCEPTED, refuelId);
+                dao.updateRefuelStatus(ApprovalStatus.ACCEPTED, refuelId);
                 Notifier.sendRefuelApproved(driver, refuel);
             }
             return redirect(routes.Refuels.showRefuelsForTrip(refuel.getReservationId(), ownerFlow));
@@ -103,11 +103,11 @@ public class RefuelApprove extends RefuelCommon {
         DataAccessContext context = DataAccess.getInjectedContext();
         RefuelDAO dao = context.getRefuelDAO();
         RefuelExtended refuel = dao.getRefuelExtended(refuelId);
-        if (!isOwnerOrAdmin(refuel) || refuel.getStatus() != RefuelStatus.REQUEST) {
+        if (!isOwnerOrAdmin(refuel) || refuel.getStatus() != ApprovalStatus.REQUEST) {
             return badRequest(); // should not happen
         }
 
-        dao.updateRefuelStatus(RefuelStatus.ACCEPTED, refuelId);
+        dao.updateRefuelStatus(ApprovalStatus.ACCEPTED, refuelId);
         Notifier.sendRefuelApproved(
                 context.getUserDAO().getUserHeader(refuel.getDriverId()),
                 refuel);

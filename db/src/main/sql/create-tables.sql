@@ -276,7 +276,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_proof` INT,
 	`car_cost_amount` DECIMAL(19,4) NOT NULL,
 	`car_cost_description` TEXT,
-	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
+	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'FROZEN') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
 	`car_cost_time` DATE,
 	`car_cost_mileage` DECIMAL(10,1),
 	`car_cost_billed` DATE DEFAULT NULL,

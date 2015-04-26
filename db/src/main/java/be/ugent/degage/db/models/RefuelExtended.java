@@ -51,7 +51,7 @@ public class RefuelExtended extends Refuel {
     private int startKm;   // 0  when not filled in
     private int endKm;
 
-    public RefuelExtended(int id, int proofId, int eurocents, RefuelStatus status, int km, String amount, String message,
+    public RefuelExtended(int id, int proofId, int eurocents, ApprovalStatus status, int km, String amount, String message,
                           int carId, String carName,
                           int reservationId, LocalDateTime reservationFrom, LocalDateTime reservationUntil,
                           int driverId, String driverName, int ownerId, int startKm, int endKm ) {

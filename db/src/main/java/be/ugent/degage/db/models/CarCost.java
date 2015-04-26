@@ -43,7 +43,7 @@ public class CarCost {
     private LocalDate date;
     private BigDecimal mileage;
     private String description;
-    private CarCostStatus status;
+    private ApprovalStatus status;
     private int proofId;
     private LocalDate billed;
 
@@ -95,11 +95,11 @@ public class CarCost {
         this.date = date;
     }
 
-    public CarCostStatus getStatus() {
+    public ApprovalStatus getStatus() {
         return status;
     }
 
-    public void setStatus(CarCostStatus status) {
+    public void setStatus(ApprovalStatus status) {
         this.status = status;
     }
 
@@ -122,7 +122,7 @@ public class CarCost {
         this.mileage = mileage;
         this.description = description;
         this.date = date;
-        this.status = CarCostStatus.REQUEST;
+        this.status = ApprovalStatus.REQUEST;
         this.proofId = proofId;
     }
 }

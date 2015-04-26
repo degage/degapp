@@ -35,7 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.Refuel;
 import be.ugent.degage.db.models.RefuelExtended;
-import be.ugent.degage.db.models.RefuelStatus;
+import be.ugent.degage.db.models.ApprovalStatus;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -69,7 +69,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getInt("refuel_id"),
                 rs.getInt("refuel_file_id"),
                 rs.getInt("refuel_eurocents"),
-                RefuelStatus.valueOf(rs.getString("refuel_status")),
+                ApprovalStatus.valueOf(rs.getString("refuel_status")),
                 rs.getInt("refuel_km"),
                 rs.getString("refuel_amount"),
                 rs.getString("refuel_message")
@@ -86,7 +86,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getInt("refuel_id"),
                 rs.getInt("refuel_file_id"),
                 rs.getInt("refuel_eurocents"),
-                RefuelStatus.valueOf(rs.getString("refuel_status")),
+                ApprovalStatus.valueOf(rs.getString("refuel_status")),
                 rs.getInt("refuel_km"),
                 rs.getString("refuel_amount"),
                 rs.getString("refuel_message"),
@@ -118,7 +118,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
 
     @Override
-    public int createRefuel(int reservationId, int eurocents, int fileId, RefuelStatus status,
+    public int createRefuel(int reservationId, int eurocents, int fileId, ApprovalStatus status,
                             int km, String amount) {
         try {
             PreparedStatement ps = createRefuelStatement.value();
@@ -140,7 +140,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     }
 
     @Override
-    public void updateRefuelStatus(RefuelStatus status, int refuelId) throws DataAccessException {
+    public void updateRefuelStatus(ApprovalStatus status, int refuelId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE refuels SET refuel_status = ? WHERE refuel_id = ? ")
         ) {

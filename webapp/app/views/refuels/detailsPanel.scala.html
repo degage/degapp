@@ -70,7 +70,7 @@
             }
         </dl>
     </div>
-    @if(refuel.getStatus==RefuelStatus.REFUSED){
+    @if(refuel.getStatus==ApprovalStatus.REFUSED){
         <div class="col-xs-12 alert alert-warning">
             <p>Een geweigerde tankbeurt kan niet worden gewijzigd, maar moet
                 <a href="@routes.Refuels.showRefuelsForTrip(refuel.getReservationId,false)">opnieuw worden aangevraagd</a>.</p>

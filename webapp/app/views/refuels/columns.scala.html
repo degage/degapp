@@ -39,7 +39,7 @@
 <td>
     <a class="btn btn-primary btn-xs" href="@routes.Refuels.showDetails(refuel.getId)">Details</a>
     @if(isAdmin) {
-        @if(refuel.getStatus == RefuelStatus.REQUEST) {
+        @if(refuel.getStatus == ApprovalStatus.REQUEST) {
             <a type="button" class="btn btn-xs btn-primary"
                href="@routes.RefuelApprove.approveOrReject(refuel.getId, false)">Goed- of afkeuren ...</a>
         }

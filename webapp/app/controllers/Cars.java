@@ -795,7 +795,7 @@ public class Cars extends Controller {
     public static Result approveCarCost(int carCostId, int returnToDetail) {
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
         CarCost carCost = dao.getCarCost(carCostId);
-        carCost.setStatus(CarCostStatus.ACCEPTED);
+        carCost.setStatus(ApprovalStatus.ACCEPTED);
         dao.updateCarCost(carCost);
         Notifier.sendCarCostApproved(carCost.getCar().getOwner(), carCost);
 
@@ -822,7 +822,7 @@ public class Cars extends Controller {
     public static Result refuseCarCost(int carCostId, int returnToDetail) {
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
         CarCost carCost = dao.getCarCost(carCostId);
-        carCost.setStatus(CarCostStatus.REFUSED);
+        carCost.setStatus(ApprovalStatus.REFUSED);
         dao.updateCarCost(carCost);
         Notifier.sendCarCostRejected(carCost.getCar().getOwner(), carCost);
         if (returnToDetail == 0) {

@@ -38,13 +38,13 @@ public class Refuel {
     private int id;
     private int proofId;
     private int eurocents;
-    private RefuelStatus status;
+    private ApprovalStatus status;
     private LocalDate billed;
     private int km;
     private String amount; // Amount of fuel (free format)
     private String message;
 
-    public Refuel(int id, int proofId, int eurocents, RefuelStatus status,
+    public Refuel(int id, int proofId, int eurocents, ApprovalStatus status,
                   int km, String amount, String message) {
         this.id = id;
         this.proofId = proofId;
@@ -91,11 +91,11 @@ public class Refuel {
         this.eurocents = eurocents;
     }
 
-    public RefuelStatus getStatus() {
+    public ApprovalStatus getStatus() {
         return status;
     }
 
-    public void setStatus(RefuelStatus status) {
+    public void setStatus(ApprovalStatus status) {
         this.status = status;
     }
 
