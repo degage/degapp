@@ -27,13 +27,13 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(trip: TripWithCar)
+@(trip: TripAndCar)
 
 @panel("Details", "fa-bar-chart-o"){
     <div class="col-sm-6">
         <h4>Reservatie</h4>
         <dl class="dl-horizontal">
-            @if(db.CurrentUser is trip.getUserId) {
+            @if(db.CurrentUser is trip.getDriverId) {
                 @if(db.CurrentUser is trip.getOwnerId) {
                     <dt>Bestuurder</dt><dd>Jij</dd>
                 }

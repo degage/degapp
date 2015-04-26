@@ -164,7 +164,7 @@ $( function() {
                 @foreach.tr(trips){ trip =>
                     <td><a href='@routes.Trips.details(trip.getId)'>@Utils.toLocalizedString(trip.getFrom)</a></td>
                     <td>@Utils.toLocalizedString(trip.getUntil)</td>
-                    <td>@if(db.CurrentUser is trip.getUserId)("Jij")else(trip.getDriverName)</td>
+                    <td>@if(db.CurrentUser is trip.getDriverId)("Jij")else(trip.getDriverName)</td>
                     <td>@statusname(trip.getStatus)</td>
                     @* The remaining columns depend on the current status *@
                     @* DETAILS_REJECTED cannot be be handled here - would too easily

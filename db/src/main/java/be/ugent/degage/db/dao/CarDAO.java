@@ -71,7 +71,7 @@ public interface CarDAO {
      * Return a filtered list of cars. Does not contain location information.
      * @param onlyActive Only include cars that are active
      */
-    public Iterable<CarHeaderWithOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException;
+    public Iterable<CarHeaderAndOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException;
 
     /**
      * Number of cars that can be returned by an equivalent call to {@link #listCarsAndOwners}

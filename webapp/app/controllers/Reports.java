@@ -148,7 +148,7 @@ public class Reports extends Controller {
                 i ++;
                 row = s.createRow(i);
                 int j = 0;
-                UserHeader user = reservation.getUser();
+                UserHeader user = reservation.getDriver();
                 row.createCell(j++).setCellValue(reservation.getId());
                 row.createCell(j++).setCellValue(reservation.getCar().getName());
                 row.createCell(j++).setCellValue(user.getId());
@@ -213,7 +213,7 @@ public class Reports extends Controller {
                 int j = 0;
                 row.createCell(j++).setCellValue(reservation.getId());
                 CarHeader car = reservation.getCar();
-                UserHeader user = reservation.getUser();
+                UserHeader user = reservation.getDriver();
                 row.createCell(j++).setCellValue(car.getId());
                 row.createCell(j++).setCellValue(car.getName());
                 row.createCell(j++).setCellValue(user.getId());

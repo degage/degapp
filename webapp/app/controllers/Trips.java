@@ -87,13 +87,13 @@ public class Trips extends Controller {
     /**
      * Create a details page for the given reservation or trip.
      */
-    private static Html detailsPage(TripWithCar trip) {
+    private static Html detailsPage(TripAndCar trip) {
         int reservationId = trip.getId();
 
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         UserDAO udao = context.getUserDAO();
-        User driver = udao.getUser(trip.getUserId());
+        User driver = udao.getUser(trip.getDriverId());
         User owner = udao.getUser(trip.getOwnerId());
         if ( ! WFCommon.isDriverOrOwnerOrAdmin(trip)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
@@ -106,11 +106,11 @@ public class Trips extends Controller {
         if (status == ReservationStatus.ACCEPTED) {
             Reservation nextReservation = rdao.getNextReservation(reservationId);
             if (nextReservation != null) {
-                nextLoaner = udao.getUser(nextReservation.getUser().getId()); // TODO: only phones needed
+                nextLoaner = udao.getUser(nextReservation.getDriverId()); // TODO: only phones needed
             }
             Reservation previousReservation = rdao.getPreviousReservation(reservationId);
             if (previousReservation != null) {
-                previousLoaner = udao.getUser(previousReservation.getUser().getId()); // TODO: only phones needed
+                previousLoaner = udao.getUser(previousReservation.getDriverId()); // TODO: only phones needed
             }
         }
 

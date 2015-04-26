@@ -159,7 +159,7 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendDetailsRejected(UserHeader driver, TripWithCar trip, String remarks) {
+    public static void sendDetailsRejected(UserHeader driver, TripAndCar trip, String remarks) {
         String url = toFullURL(routes.WFTrip.tripInfo(trip.getId()));
         String carName = trip.getCar().getName();
         String from = Utils.toLocalizedString(trip.getFrom());
@@ -189,7 +189,7 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendRefuelRequest(UserHeader owner, TripWithCar reservation, int refuelId, int eurocents) {
+    public static void sendRefuelRequest(UserHeader owner, TripAndCar reservation, int refuelId, int eurocents) {
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         String carName = reservation.getCar().getName();
@@ -217,7 +217,7 @@ public class Notifier extends Mailer {
 
     public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation, String carName) {
         String url = toFullURL(routes.WFApprove.approveReservation(reservation.getId()));
-        UserHeader driver = reservation.getUser();
+        UserHeader driver = reservation.getDriver();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
         createNotificationAndSend (
@@ -243,7 +243,7 @@ public class Notifier extends Mailer {
     }
 
 
-    public static void sendReservationDetailsProvidedMail(UserHeader owner, TripWithCar reservation) {
+    public static void sendReservationDetailsProvidedMail(UserHeader owner, TripAndCar reservation) {
         String driverName = reservation.getDriverName();
         String url = toFullURL(routes.Trips.details(reservation.getId()));
         String carName = reservation.getCar().getName();
@@ -259,7 +259,7 @@ public class Notifier extends Mailer {
     }
 
     public static void sendOldReservationApproved (Reservation reservation) {
-        UserHeader driver = reservation.getUser();
+        UserHeader driver = reservation.getDriver();
         String carName = reservation.getCar().getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
@@ -273,7 +273,7 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendReservationApprovedByOwnerMail(UserHeader driver, UserHeader owner, String remarks, TripWithCar reservation) {
+    public static void sendReservationApprovedByOwnerMail(UserHeader driver, UserHeader owner, String remarks, TripAndCar reservation) {
         // note: needs location of car in header
         CarHeader car = reservation.getCar();
         String carAddress = car.getLocation().toString();
@@ -299,7 +299,7 @@ public class Notifier extends Mailer {
                 carName, from
         );
     }
-    public static void sendReservationRefusedByOwnerMail(UserHeader driver, String reason, TripWithCar reservation) {
+    public static void sendReservationRefusedByOwnerMail(UserHeader driver, String reason, TripAndCar reservation) {
         String carName = reservation.getCar().getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
@@ -314,7 +314,7 @@ public class Notifier extends Mailer {
     /**
      * Sent when a reservation is cancelled although it was already accepted
      */
-    public static void sendReservationCancelled(UserHeader owner, TripWithCar trip) {
+    public static void sendReservationCancelled(UserHeader owner, TripAndCar trip) {
         String from = Utils.toLocalizedString(trip.getFrom());
         String until = Utils.toLocalizedString(trip.getUntil());
         String carName = trip.getCar().getName();
@@ -332,7 +332,7 @@ public class Notifier extends Mailer {
     /**
      * Sent when a trip is marked as not having taken place
      */
-    public static void sendLateCancel(UserHeader driver, TripWithCar trip) {
+    public static void sendLateCancel(UserHeader driver, TripAndCar trip) {
         String carName = trip.getCar().getName();
         String from = Utils.toLocalizedString(trip.getFrom());
         String until = Utils.toLocalizedString(trip.getUntil());

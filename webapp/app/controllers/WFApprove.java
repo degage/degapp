@@ -56,7 +56,7 @@ public class WFApprove extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveReservation(int reservationId) {
-        TripWithCar reservation = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar reservation = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
         // special case: already cancelled by user
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             flash("warning", "De reservatie is reeds geannulleerd");
@@ -87,7 +87,7 @@ public class WFApprove extends WFCommon {
     @InjectContext
     public static Result doApproveReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, true);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, true);
         if (trip.getStatus() == ReservationStatus.CANCELLED) {
             flash("warning", "De reservatie is (ondertussen) reeds geannuleerd");
             return redirectToDetails(reservationId);
@@ -108,7 +108,7 @@ public class WFApprove extends WFCommon {
                 // authorization already checked
                 ReservationDAO rdao = context.getReservationDAO();
                 UserDAO userDAO = context.getUserDAO();
-                UserHeader driver = userDAO.getUserHeader(trip.getUserId());
+                UserHeader driver = userDAO.getUserHeader(trip.getDriverId());
                 if (status == ReservationStatus.REFUSED) {
                     rdao.updateReservationStatus(reservationId, status, remarks);
                     Notifier.sendReservationRefusedByOwnerMail(driver, remarks,  trip);
@@ -154,7 +154,7 @@ public class WFApprove extends WFCommon {
     @InjectContext
     public static Result sendReminder(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
         if (WorkflowAction.SEND_REMINDER.isForbiddenForCurrentUser(trip)) {
             flash ("danger", "Je kan geen herinnering sturen voor deze reservatie");
             return redirectToDetails(reservationId);
@@ -187,7 +187,7 @@ public class WFApprove extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveTripInfo(int reservationId) {
-        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
         if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(trip)) {
             flash("danger", "Deze trip kan niet (meer) goed- of afgekeurd worden");
             redirectToDetails(reservationId);
@@ -205,7 +205,7 @@ public class WFApprove extends WFCommon {
     public static Result doApproveTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        TripWithCar reservation = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar reservation = context.getTripDAO().getTripAndCar(reservationId, false);
 
         if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(reservation)) {
             return badRequest(); // should not happen
@@ -218,7 +218,7 @@ public class WFApprove extends WFCommon {
             if ("REFUSED".equals(data.status)) {
                 rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_REJECTED);
                 Notifier.sendDetailsRejected(
-                        context.getUserDAO().getUserHeader(reservation.getUserId()),
+                        context.getUserDAO().getUserHeader(reservation.getDriverId()),
                         reservation,
                         data.remarks
                 );

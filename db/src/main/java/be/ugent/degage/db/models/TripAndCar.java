@@ -34,7 +34,7 @@ import java.time.LocalDateTime;
 /**
  * Contains standard trip information extended with information about the corresponding car.
  */
-public class TripWithCar extends Trip {
+public class TripAndCar extends Trip {
 
     private CarHeader car;
 
@@ -42,8 +42,8 @@ public class TripWithCar extends Trip {
         return car;
     }
 
-    public TripWithCar(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until,
-                String message, boolean old, CarHeader car) {
+    public TripAndCar(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until,
+                      String message, boolean old, CarHeader car) {
         super(id, carId, userId, ownerId, from, until, message, old);
         this.car = car;
     }

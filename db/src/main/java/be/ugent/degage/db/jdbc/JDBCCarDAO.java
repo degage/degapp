@@ -608,7 +608,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public Iterable<CarHeaderWithOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException {
+    public Iterable<CarHeaderAndOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, boolean onlyActive) throws DataAccessException {
         // TODO: return a list of car headers
         try {
             PreparedStatement ps = null;
@@ -628,11 +628,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             ps.setInt(4, pageSize);
 
             try (ResultSet rs = ps.executeQuery()) {
-                Collection<CarHeaderWithOwner> cars = new ArrayList<>();
+                Collection<CarHeaderAndOwner> cars = new ArrayList<>();
                 while (rs.next()) {
                     UserHeader owner = JDBCUserDAO.populateUserHeader(rs);
                     // only header is really needed
-                    CarHeaderWithOwner result = new CarHeaderWithOwner(
+                    CarHeaderAndOwner result = new CarHeaderAndOwner(
                             rs.getInt("car_id"),
                             rs.getString("car_name"),
                             rs.getString("car_brand"),

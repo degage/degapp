@@ -34,7 +34,7 @@ import be.ugent.degage.db.dao.TripDAO;
 import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.ReservationStatus;
 import be.ugent.degage.db.models.Trip;
-import be.ugent.degage.db.models.TripWithCar;
+import be.ugent.degage.db.models.TripAndCar;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -75,13 +75,13 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
         return trip;
     }
 
-    public static TripWithCar populateTripWithCar (ResultSet rs, boolean withLocation) throws SQLException {
+    public static TripAndCar populateTripWithCar (ResultSet rs, boolean withLocation) throws SQLException {
         // TODO: a lot of code in common with populateTrip
         CarHeader car = JDBCCarDAO.populateCarHeader(rs);
         if (withLocation) {
             car.setLocation(JDBCAddressDAO.populateAddress(rs));
         }
-        TripWithCar trip = new TripWithCar(
+        TripAndCar trip = new TripAndCar(
                 rs.getInt("reservation_id"),
                 rs.getInt("reservation_car_id"),
                 rs.getInt("reservation_user_id"),
@@ -173,7 +173,7 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
     }
 
     @Override
-    public TripWithCar getTripAndCar(int id, boolean withLocation) {
+    public TripAndCar getTripAndCar(int id, boolean withLocation) {
         StringBuilder builder = new StringBuilder(
            "SELECT " + TRIP_FIELDS + ", " + JDBCCarDAO.CAR_HEADER_FIELDS
         );

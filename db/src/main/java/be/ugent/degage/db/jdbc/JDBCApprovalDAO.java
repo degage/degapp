@@ -221,7 +221,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
      */
     @Override
     public void createApproval(int userId, int sessionId, String userMessage) {
-        // TODO: change user into userId, session into sessionId
+        // TODO: change user into driverId, session into sessionId
         try {
             PreparedStatement ps = getCreateApprovalStatement.value();
 

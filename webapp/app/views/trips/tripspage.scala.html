@@ -45,10 +45,10 @@
                 <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
                 <td>@Utils.toLocalizedString(reservation.getFrom)</td>
                 <td>@Utils.toLocalizedString(reservation.getUntil)</td>
-                @if(reservation.getUserId == userId) {
-                    <td><a href="@routes.Profile.index(reservation.getUserId)">Jij</a></td>
+                @if(reservation.getDriverId == userId) {
+                    <td><a href="@routes.Profile.index(reservation.getDriverId)">Jij</a></td>
                 } else {
-                    <td><a href="@routes.Profile.index(reservation.getUserId)">@reservation.getUser</a></td>
+                    <td><a href="@routes.Profile.index(reservation.getDriverId)">@reservation.getDriver</a></td>
                 }
                 <td>@statusname(reservation.getStatus)</td>
                 <td>

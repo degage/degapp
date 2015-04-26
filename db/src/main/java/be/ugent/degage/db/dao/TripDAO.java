@@ -30,7 +30,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.models.Trip;
-import be.ugent.degage.db.models.TripWithCar;
+import be.ugent.degage.db.models.TripAndCar;
 
 import java.time.LocalDateTime;
 
@@ -68,7 +68,7 @@ public interface TripDAO {
      * Return the details for the given trip, including a car header
      * @param withLocation also fill in the location of the car
      */
-    public TripWithCar getTripAndCar (int id, boolean withLocation);
+    public TripAndCar getTripAndCar (int id, boolean withLocation);
 
 
 

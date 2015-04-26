@@ -37,26 +37,26 @@ import java.time.LocalDateTime;
 public class Reservation extends ReservationHeader {
     
     private CarHeader car;
-    private UserHeader user;
+    private UserHeader driver;
 
-    public Reservation(int id, CarHeader car, UserHeader user, int ownerId,
+    public Reservation(int id, CarHeader car, UserHeader driver, int ownerId,
                        LocalDateTime from, LocalDateTime until, String message, boolean old) {
-        super (id, car == null ? 0 : car.getId(), user == null ? 0 : user.getId(), ownerId, from, until, message, old);
+        super (id, car == null ? 0 : car.getId(), driver == null ? 0 : driver.getId(), ownerId, from, until, message, old);
         this.car = car;
-        this.user = user;
+        this.driver = driver;
     }
 
     public CarHeader getCar() {
         return car;
     }
 
-    public UserHeader getUser() {
-        return user;
+    public UserHeader getDriver() {
+        return driver;
     }
 
-    public void setUser(UserHeader user) {
-        this.user = user;
-        this.userId = user.getId();
+    public void setDriver(UserHeader driver) {
+        this.driver = driver;
+        this.driverId = driver.getId();
     }
 
     public void setFrom(LocalDateTime from) {

@@ -141,7 +141,7 @@ class JDBCReceiptDAO extends AbstractDAO implements ReceiptDAO {
 		rs.getString(tableName + ".receipt_name"),
 		rs.getBigDecimal(tableName + ".receipt_price"));
 
-	//receipt.setUser(JDBCUserDAO.populateUser(rs, false, false));
+	//receipt.setDriver(JDBCUserDAO.populateUser(rs, false, false));
         if(withFiles) {
 	    receipt.setFiles(JDBCFileDAO.populateFile(rs, "files"));
 	}

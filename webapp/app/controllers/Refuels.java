@@ -139,7 +139,7 @@ public class Refuels extends RefuelCommon {
     @InjectContext
     public static Result showRefuelsForTrip(int reservationId, boolean ownerFlow) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
         if (isAuthorized(trip, ownerFlow)) {
             return ok(refuelsForTrip(
                     trip,
@@ -165,7 +165,7 @@ public class Refuels extends RefuelCommon {
     /**
      * Produces the correct html file for the given 'flow'
      */
-    static Html refuelsForTrip(TripWithCar trip, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
+    static Html refuelsForTrip(TripAndCar trip, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
         // must be used in injected context
         if (ownerFlow) {
             ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();

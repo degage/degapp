@@ -90,7 +90,7 @@ public class WFCancel extends WFCommon {
     @AllowRoles
     @InjectContext
     public static Result cancelAccepted(int reservationId) {
-        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
         return ok(cancelaccepted.render(Form.form(CancelData.class), trip));
     }
 
@@ -101,9 +101,9 @@ public class WFCancel extends WFCommon {
     @InjectContext
     public static Result doCancelAccepted(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
 
-        if (CurrentUser.isNot(trip.getUserId()) || trip.getStatus() != ReservationStatus.ACCEPTED) {
+        if (CurrentUser.isNot(trip.getDriverId()) || trip.getStatus() != ReservationStatus.ACCEPTED) {
             return badRequest(); // should not happen
         }
 
@@ -129,7 +129,7 @@ public class WFCancel extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result cancelLate(int reservationId) {
-        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
         if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(trip)) {
             flash("warning", "De rit kan niet (meer) worden geannuleerd");
             return redirectToDetails(reservationId);
@@ -147,7 +147,7 @@ public class WFCancel extends WFCommon {
     public static Result doCancelLate(int reservationId, boolean soft) {
 
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
         if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(trip)) {
             return badRequest();
         }
@@ -164,7 +164,7 @@ public class WFCancel extends WFCommon {
                 String comments = form.get().remarks;
                 rdao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE, comments);
                 trip.setMessage(comments);
-                Notifier.sendLateCancel(context.getUserDAO().getUserHeader(trip.getUserId()), trip);
+                Notifier.sendLateCancel(context.getUserDAO().getUserHeader(trip.getDriverId()), trip);
                 return redirectToDetails(reservationId);
             }
         }

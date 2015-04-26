@@ -33,7 +33,7 @@ package be.ugent.degage.db.models;
  * Extends {@link CarHeader} with further information. Location and owner
  * can be left null.
  */
-public class CarHeaderLong extends CarHeaderWithOwner {
+public class CarHeaderLong extends CarHeaderAndOwner {
 
 
     private Integer seats;

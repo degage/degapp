@@ -126,7 +126,7 @@ public class WFCreate extends WFCommon {
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result shortenReservation(int reservationId) {
-        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, true);
+        TripAndCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, true);
 
         if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(trip)) {
             flash("danger", "U kan deze reservatie niet inkorten");
@@ -149,7 +149,7 @@ public class WFCreate extends WFCommon {
     @InjectContext
     public static Result doShortenReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, true);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, true);
         if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(trip)) {
             return badRequest();
         }

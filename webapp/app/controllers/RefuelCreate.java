@@ -51,7 +51,7 @@ public class RefuelCreate extends RefuelCommon {
     @InjectContext
     public static Result doCreate(int reservationId, boolean ownerFlow) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
 
         if (!isAuthorized(trip, ownerFlow)) {
             return badRequest(); // hacker?
@@ -80,7 +80,7 @@ public class RefuelCreate extends RefuelCommon {
     }
 
     // use in injected context only (owner null when isAdmin)
-    static void newRefuel(TripWithCar trip, UserHeader owner, int eurocents, int fileId,
+    static void newRefuel(TripAndCar trip, UserHeader owner, int eurocents, int fileId,
                           int km, String amount) {
         boolean isAdmin = isOwnerOrAdmin(trip);
 

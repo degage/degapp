@@ -128,7 +128,7 @@ public class WFTrip extends WFCommon {
     @InjectContext
     public static Result tripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
         if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(trip)) {
             flash("danger", "Je kan geen ritdetails (meer) ingegeven voor deze rit.");
             return redirectToDetails(reservationId);
@@ -158,7 +158,7 @@ public class WFTrip extends WFCommon {
     }
 
     // must be used with injected context
-    private static void updateToDetailsProvided(TripWithCar trip, UserHeader owner) {
+    private static void updateToDetailsProvided(TripAndCar trip, UserHeader owner) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         rdao.updateReservationStatus(trip.getId(), ReservationStatus.DETAILS_PROVIDED);
@@ -176,7 +176,7 @@ public class WFTrip extends WFCommon {
         Form<TripDataExtended> form = Form.form(TripDataExtended.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
 
         if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(trip)
                 || trip.getStatus() != ReservationStatus.REQUEST_DETAILS) {
@@ -262,7 +262,7 @@ public class WFTrip extends WFCommon {
         Form<TripData> form = Form.form(TripData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        TripAndCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
         if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(trip) ||
                 trip.getStatus() == ReservationStatus.REQUEST_DETAILS) {
             return badRequest();

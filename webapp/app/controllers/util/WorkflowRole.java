@@ -46,7 +46,7 @@ public enum WorkflowRole {
     DRIVER {
         @Override
         public boolean isCurrentRoleFor(ReservationHeader reservation) {
-            return CurrentUser.is(reservation.getUserId());
+            return CurrentUser.is(reservation.getDriverId());
         }
 
         @Override
