@@ -112,9 +112,8 @@ public class Refuels extends RefuelCommon {
     @InjectContext
     public static Result getProof(int refuelId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (isDriverOrOwnerOrAdmin(reservation)) {
-            Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
+        RefuelExtended refuel = context.getRefuelDAO().getRefuelExtended(refuelId);
+        if (isDriverOrOwnerOrAdmin(refuel)) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), refuel.getProofId());
         } else {
             return badRequest(); // hacker
@@ -155,18 +154,13 @@ public class Refuels extends RefuelCommon {
     @AllowRoles
     @InjectContext
     public static Result showDetails(int refuelId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
-        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (isDriverOrOwnerOrAdmin(reservation)) {
-            Car car = context.getCarDAO().getCar(reservation.getCarId());
-            CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
-            return ok(details.render(refuel, car, reservation, ride));
+        RefuelExtended refuel = DataAccess.getInjectedContext().getRefuelDAO().getRefuelExtended(refuelId);
+        if (isDriverOrOwnerOrAdmin(refuel)) {
+            return ok(details.render(refuel, isOwnerOrAdmin(refuel)));
         } else {
             return badRequest(); // not authorized
         }
     }
-
 
     /**
      * Produces the correct html file for the given 'flow'
@@ -180,8 +174,9 @@ public class Refuels extends RefuelCommon {
                     dao.getNextTripId(trip.getId()),
                     dao.getPreviousTripId(trip.getId())
             );
-        } else
+        } else {
             return refuelsForTripDriver.render(form, refuels, trip);
+        }
     }
 
     /**
@@ -223,7 +218,7 @@ public class Refuels extends RefuelCommon {
                 form.reject("date", "Geen ritten gevonden vanaf deze datum");
             }
         }
-        return badRequest(startoverview.render(form,carId));
+        return badRequest(startoverview.render(form, carId));
 
     }
 

@@ -244,6 +244,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
+    /* no longer used
     private LazyStatement getReservationHeaderForRefuelStatement = new LazyStatement(
             "SELECT " + RESERVATION_HEADER_FIELDS +
                     " FROM refuels JOIN reservations ON refuel_car_ride_id=reservation_id WHERE refuel_id=?"
@@ -265,6 +266,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             throw new DataAccessException("Unable to get reservation header", e);
         }
     }
+    */
 
     private Reservation populateNextPrevious(ResultSet rs) throws SQLException {
         return new Reservation(

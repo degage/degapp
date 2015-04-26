@@ -52,9 +52,10 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     private static final String REFUEL_EXTENDED_QUERY =
             "SELECT " + REFUEL_FIELDS +
                     ", reservation_id, reservation_from, reservation_to, reservation_user_id, reservation_owner_id," +
-                    "car_id, car_name, user_firstname, user_lastname " +
+                    "car_id, car_name, user_firstname, user_lastname, car_ride_start_km, car_ride_end_km " +
             "FROM refuels " +
             "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id " +
+            "LEFT JOIN carrides ON refuel_car_ride_id = car_ride_car_reservation_id " +
             "LEFT JOIN cars ON reservation_car_id = car_id " +
             "LEFT JOIN users ON reservation_user_id = user_id ";
 
@@ -96,7 +97,9 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getInt("reservation_user_id"),
                 rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
-                rs.getInt("reservation_owner_id")
+                rs.getInt("reservation_owner_id"),
+                rs.getInt("car_ride_start_km"),
+                rs.getInt("car_ride_end_km")
         );
 
         Date refuelBilled = rs.getDate("refuel_billed");

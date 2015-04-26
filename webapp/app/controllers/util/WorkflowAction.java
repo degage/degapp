@@ -29,9 +29,7 @@
 
 package controllers.util;
 
-import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationHeader;
-import controllers.Refuels;
 import controllers.routes;
 import play.api.mvc.Call;
 import play.twirl.api.Html;

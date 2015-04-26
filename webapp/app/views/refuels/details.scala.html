@@ -27,10 +27,20 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuel: Refuel, car: Car, reservation: ReservationHeader, tripInfo: CarRide)
+@(refuel: RefuelExtended, isAdmin: Boolean)
 
 @stdlayout("Tankbeurt", extrabc=breadcrumb("Tankbeurten",routes.Refuels.showRefuels)) {
 
-    @detailsPanel(refuel, car, reservation, tripInfo)
+    @detailsPanel(refuel)
+
+    @if(isAdmin && refuel.getStatus == RefuelStatus.REQUEST) {
+        @panel("Acties", "fa-pencil") {
+           <div class="col-xs-12">
+           <a type="button" class="btn btn-xs btn-danger" href="@routes.RefuelApprove.approve(refuel.getId)">Goedkeuren</a>
+           <a type="button" class="btn btn-xs btn-primary"
+                       href="@routes.RefuelApprove.approveOrReject(refuel.getId, true)">Afkeuren ...</a>
+           </div>
+        }
+    }
 
 }

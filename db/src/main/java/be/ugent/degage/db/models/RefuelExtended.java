@@ -48,11 +48,13 @@ public class RefuelExtended extends Refuel {
 
     private int ownerId; // TODO: not used?
 
+    private int startKm;   // 0  when not filled in
+    private int endKm;
 
     public RefuelExtended(int id, int proofId, int eurocents, RefuelStatus status, int km, String amount, String message,
                           int carId, String carName,
                           int reservationId, LocalDateTime reservationFrom, LocalDateTime reservationUntil,
-                          int driverId, String driverName, int ownerId ) {
+                          int driverId, String driverName, int ownerId, int startKm, int endKm ) {
         super(id, proofId, eurocents, status, km, amount, message);
         this.carId = carId;
         this.carName = carName;
@@ -62,6 +64,8 @@ public class RefuelExtended extends Refuel {
         this.driverId = driverId;
         this.driverName = driverName;
         this.ownerId = ownerId;
+        this.startKm = startKm;
+        this.endKm = endKm;
     }
 
     public int getCarId() {
@@ -80,6 +84,10 @@ public class RefuelExtended extends Refuel {
         return reservationFrom;
     }
 
+    public LocalDateTime getReservationUntil() {
+        return reservationUntil;
+    }
+
     public int getDriverId() {
         return driverId;
     }
@@ -92,7 +100,11 @@ public class RefuelExtended extends Refuel {
         return ownerId;
     }
 
-    public LocalDateTime getReservationUntil() {
-        return reservationUntil;
+    public int getStartKm() {
+        return startKm;
+    }
+
+    public int getEndKm() {
+        return endKm;
     }
 }

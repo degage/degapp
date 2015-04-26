@@ -33,7 +33,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.jdbc.JDBCFilter;
-import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.CarHeaderWithOwner;
 import db.DataAccess;

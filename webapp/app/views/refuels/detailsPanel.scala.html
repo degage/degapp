@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuel: Refuel, car: CarHeader, reservation: ReservationHeader, tripInfo: CarRide)
+@(refuel: RefuelExtended)
 
 @panel("Details", "fa-bar-chart-o"){
     <div class="col-sm-6">
@@ -53,20 +53,27 @@
     <div class="col-sm-6">
         <h4>Reservatie</h4>
         <dl class="dl-horizontal">
+            @if(db.CurrentUser is refuel.getDriverId) {
+                @if(db.CurrentUser is refuel.getOwnerId) {
+                    <dt>Bestuurder</dt><dd>Jij</dd>
+                }
+            } else {
+                <dt>Bestuurder</dt><dd>@refuel.getDriverName</dd>
+            }
             <dt>Auto</dt>
-            <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
+            <dd><a href="@routes.Cars.detail(refuel.getCarId)">@refuel.getCarName</a></dd>
             <dt>Periode</dt>
-            <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
-            @if(tripInfo != null){  @* TODO: should never be null *@
+            <dd>@Utils.toLocalizedString(refuel.getReservationFrom) — @Utils.toLocalizedString(refuel.getReservationUntil)</dd>
+            @if(refuel.getStartKm > 0){  @* TODO: should never be null *@
                 <dt>Kilometerstanden</dt>
-                <dd>@tripInfo.getStartKm — @tripInfo.getEndKm</dd>
+                <dd>@refuel.getStartKm — @refuel.getEndKm</dd>
             }
         </dl>
     </div>
     @if(refuel.getStatus==RefuelStatus.REFUSED){
         <div class="col-xs-12 alert alert-warning">
             <p>Een geweigerde tankbeurt kan niet worden gewijzigd, maar moet
-                <a href="@routes.Refuels.showRefuelsForTrip(reservation.getId,false)">opnieuw worden aangevraagd</a>.</p>
+                <a href="@routes.Refuels.showRefuelsForTrip(refuel.getReservationId,false)">opnieuw worden aangevraagd</a>.</p>
         </div>
     }
 }

@@ -212,8 +212,7 @@ public class WFTrip extends WFCommon {
 
             // register/change ride in database
             CarRideDAO dao = context.getCarRideDAO();
-            CarRide ride = dao.getCarRide(reservationId);
-            if (ride == null) {
+            if (dao.getCarRide(reservationId) == null) {
                 boolean damaged = data.damaged;
                 dao.createCarRide(trip, data.startKm, data.endKm, damaged);
                 if (damaged) {
@@ -226,7 +225,6 @@ public class WFTrip extends WFCommon {
             trip.setStartKm(data.startKm);
             trip.setStartKm(data.endKm); // for use in message sent later
 
-
             // change ride status according to whether current user is owner or not
             UserHeader owner = null;
             if (isOwnerOrAdmin(trip)) {
@@ -234,9 +232,6 @@ public class WFTrip extends WFCommon {
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
             } else {
                 // register and send mail to owner
-                if (ride == null) {
-                    ride = dao.getCarRide(reservationId);
-                }
                 owner = context.getUserDAO().getUserHeader(trip.getOwnerId());
                 updateToDetailsProvided(trip, owner);
             }

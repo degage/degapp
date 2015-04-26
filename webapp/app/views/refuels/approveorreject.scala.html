@@ -27,12 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFCommon.RemarksData], refuel: Refuel, car: Car,
-                  reservation: ReservationHeader, tripInfo: CarRide, ownerFlow: Boolean)
+@(form: Form[WFCommon.RemarksData], refuel: RefuelExtended, ownerFlow: Boolean)
 
 @stdlayout("Tankbeurt goed- of afkeuren", extrabc=breadcrumb("Tankbeurten",routes.Refuels.showRefuels)) {
 
-    @detailsPanel(refuel, car, reservation, tripInfo)
+    @detailsPanel(refuel)
     @panel("Tankbeurt goed- of afkeuren", "fa-pencil") {
         @helper.form(routes.RefuelApprove.doApproveOrReject(refuel.getId(), ownerFlow)) {
             @std.textArea(form("remarks"), "Reden (enkel bij afkeuren)", 3)

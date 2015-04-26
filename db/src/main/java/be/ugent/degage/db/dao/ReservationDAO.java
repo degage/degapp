@@ -61,7 +61,7 @@ public interface ReservationDAO {
 
     public ReservationHeader getReservationHeader (int id) throws DataAccessException;
 
-    public ReservationHeader getReservationHeaderForRefuel (int refuelId) throws DataAccessException;
+    //public ReservationHeader getReservationHeaderForRefuel (int refuelId) throws DataAccessException;
 
     /**
      * Update reservation status including an optional message. Should only be used when

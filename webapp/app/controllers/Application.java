@@ -30,7 +30,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;

@@ -31,7 +31,6 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
-import be.ugent.degage.db.dao.TripDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.WorkflowAction;

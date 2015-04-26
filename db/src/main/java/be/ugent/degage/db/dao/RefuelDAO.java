@@ -55,9 +55,9 @@ public interface RefuelDAO {
      */
     public void rejectRefuel(int refuelId, String message) throws DataAccessException;
 
-    public Refuel getRefuel(int refuelId) throws DataAccessException;
+    public Refuel getRefuel(int refuelId) throws DataAccessException; // TODO: not used?
+
     public RefuelExtended getRefuelExtended(int refuelId) throws DataAccessException;
-    // TODO: may be superfluous
 
     public Iterable<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
 

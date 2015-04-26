@@ -29,9 +29,11 @@
 
 package controllers;
 
-import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.ReservationHeader;
+import be.ugent.degage.db.models.UserRole;
 import data.EurocentAmount;
+import db.CurrentUser;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 
@@ -93,5 +95,22 @@ public class RefuelCommon extends WFCommon {
             return isOwnerOrAdmin(reservation);
         else
             return isDriverOrOwnerOrAdmin(reservation);
+    }
+
+    /**
+     * Checks whether the current uses is owner or administrator for the reservation related to
+     * the given refuel
+     */
+    protected static boolean isOwnerOrAdmin(RefuelExtended refuel) {
+        return CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) || CurrentUser.is(refuel.getOwnerId());
+    }
+
+    /**
+     * Checks whether the current uses is driver, owner or administrator for the reservation related to
+     * the given refuel
+     */
+    protected static boolean isDriverOrOwnerOrAdmin(RefuelExtended refuel) {
+        return CurrentUser.hasRole(UserRole.RESERVATION_ADMIN) ||
+                CurrentUser.is(refuel.getOwnerId()) || CurrentUser.is(refuel.getDriverId());
     }
 }

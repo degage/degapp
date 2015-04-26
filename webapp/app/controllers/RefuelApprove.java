@@ -32,7 +32,6 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.models.*;
-import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -52,17 +51,10 @@ public class RefuelApprove extends RefuelCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveOrReject(int refuelId, boolean ownerFlow) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        Refuel refuel = context.getRefuelDAO().getRefuel(refuelId);
-        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (isOwnerOrAdmin(reservation)) {
+        RefuelExtended refuel = DataAccess.getInjectedContext().getRefuelDAO().getRefuelExtended(refuelId);
+        if (isOwnerOrAdmin(refuel)) {
             return ok(approveorreject.render(
-                    Form.form(RemarksData.class),
-                    refuel,
-                    context.getCarDAO().getCar(reservation.getCarId()),
-                    reservation,
-                    context.getCarRideDAO().getCarRide(reservation.getId()),
-                    ownerFlow));
+                    Form.form(RemarksData.class), refuel, ownerFlow));
         } else {
             return badRequest(); // not authorized
         }
@@ -75,27 +67,20 @@ public class RefuelApprove extends RefuelCommon {
     @InjectContext
     public static Result doApproveOrReject(int refuelId, boolean ownerFlow) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-
-        if (!isOwnerOrAdmin(reservation)) {
-            return badRequest(); // should not happen
-        }
-
         RefuelDAO dao = context.getRefuelDAO();
-        RefuelExtended refuel = dao.getRefuelExtended(refuelId); // TODO: not necessary?
-        if (refuel.getStatus() != RefuelStatus.REQUEST) {
+        RefuelExtended refuel = dao.getRefuelExtended(refuelId);
+
+        if (!isOwnerOrAdmin(refuel) || refuel.getStatus() != RefuelStatus.REQUEST) {
             return badRequest(); // should not happen
         }
 
         Form<RemarksData> form =  Form.form(RemarksData.class).bindFromRequest();
 
         if (form.hasErrors()) {
-            Car car = context.getCarDAO().getCar(reservation.getCarId());
-            CarRide ride = context.getCarRideDAO().getCarRide(reservation.getId());
-            return badRequest(approveorreject.render(form, refuel, car, reservation, ride, ownerFlow));
+            return badRequest(approveorreject.render(form, refuel, ownerFlow));
         } else {
             RemarksData data = form.get();
-            UserHeader driver = context.getUserDAO().getUserHeader(reservation.getUserId());
+            UserHeader driver = context.getUserDAO().getUserHeader(refuel.getDriverId());
             if ("REFUSED".equals(data.status)) {
                 dao.rejectRefuel(refuelId, data.remarks);
                 Notifier.sendRefuelRejected(driver, refuel, data.remarks);
@@ -104,7 +89,7 @@ public class RefuelApprove extends RefuelCommon {
                 dao.updateRefuelStatus(RefuelStatus.ACCEPTED, refuelId);
                 Notifier.sendRefuelApproved(driver, refuel);
             }
-            return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), ownerFlow));
+            return redirect(routes.Refuels.showRefuelsForTrip(refuel.getReservationId(), ownerFlow));
         }
 
     }
@@ -116,22 +101,17 @@ public class RefuelApprove extends RefuelCommon {
     @InjectContext
     public static Result approve(int refuelId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationHeader reservation = context.getReservationDAO().getReservationHeaderForRefuel(refuelId);
-        if (!isOwnerOrAdmin(reservation)) {
-            return badRequest(); // should not happen
-        }
-
         RefuelDAO dao = context.getRefuelDAO();
         RefuelExtended refuel = dao.getRefuelExtended(refuelId);
-        if (refuel.getStatus() != RefuelStatus.REQUEST) {
+        if (!isOwnerOrAdmin(refuel) || refuel.getStatus() != RefuelStatus.REQUEST) {
             return badRequest(); // should not happen
         }
 
         dao.updateRefuelStatus(RefuelStatus.ACCEPTED, refuelId);
         Notifier.sendRefuelApproved(
-                context.getUserDAO().getUserHeader(reservation.getUserId()),
+                context.getUserDAO().getUserHeader(refuel.getDriverId()),
                 refuel);
         flash("success", "De tankbeurt werd goedgekeurd");
-        return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), true));
+        return redirect(routes.Refuels.showRefuelsForTrip(refuel.getReservationId(), true));
     }
 }
