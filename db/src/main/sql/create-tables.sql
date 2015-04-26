@@ -83,7 +83,6 @@ CREATE TABLE `users` (
 	`user_password` CHAR(64) NOT NULL,
 	`user_firstname` VARCHAR(64) NOT NULL,
 	`user_lastname` VARCHAR(64) NOT NULL,
-	`user_gender` ENUM('MALE', 'FEMALE', 'UNKNOWN') NOT NULL DEFAULT 'UNKNOWN',
 	`user_cellphone` VARCHAR(24),
 	`user_phone` VARCHAR(24),
 	`user_address_domicile_id` INT,

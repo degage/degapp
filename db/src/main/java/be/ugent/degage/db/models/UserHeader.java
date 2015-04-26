@@ -103,6 +103,14 @@ public class UserHeader {
         return cellPhone;
     }
 
+    public void setCellPhone(String cellPhone) {
+        this.cellPhone = cellPhone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
     @Override
     public String toString(){
         return firstName + " " + lastName;

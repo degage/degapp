@@ -108,7 +108,7 @@ public class ProfileCompleteness {
         if (isValidEmail(user.getEmail())) {
             set.add(Item.EMAIL_ADDRESS);
         }
-        if (!isBlank(user.getCellphone()) || !isBlank (user.getPhone())) {
+        if (!isBlank(user.getCellPhone()) || !isBlank (user.getPhone())) {
             set.add(Item.PHONE);
         }
 

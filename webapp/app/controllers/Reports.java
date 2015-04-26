@@ -95,7 +95,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(user.getLastName());
                 row.createCell(j++).setCellValue(user.getEmail());
                 row.createCell(j++).setCellValue(user.getPhone());
-                row.createCell(j++).setCellValue(user.getCellphone());
+                row.createCell(j++).setCellValue(user.getCellPhone());
 
                 row.createCell(j++).setCellValue(user.getAddressDomicile().getStreet());
                 row.createCell(j++).setCellValue(user.getAddressDomicile().getNum());
@@ -109,7 +109,7 @@ public class Reports extends Controller {
                 row.createCell(j++).setCellValue(user.getAddressResidence().getCity());
                 row.createCell(j++).setCellValue(user.getAddressResidence().getCountry());
 
-                row.createCell(j++).setCellValue(user.getGender().name());
+                row.createCell(j++).setCellValue("Onbekend");
                 row.createCell(j++).setCellValue(Strings.nullToEmpty(user.getLicense()));
                 row.createCell(j++).setCellValue(user.getStatus().name());
                 row.createCell(j++).setCellValue(Strings.nullToEmpty(user.getNationalId()));

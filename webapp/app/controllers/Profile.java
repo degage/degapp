@@ -614,7 +614,7 @@ public class Profile extends Controller {
             this.firstName = user.getFirstName();
             this.lastName = user.getLastName();
             this.phone = user.getPhone();
-            this.mobile = user.getCellphone();
+            this.mobile = user.getCellPhone();
 
             this.domicileAddress.populate(user.getAddressDomicile());
             this.residenceAddress.populate(user.getAddressResidence());
@@ -654,7 +654,7 @@ public class Profile extends Controller {
         } else if (canEditProfile(userId)) {
             MainProfileData data = form.get();
             user.setPhone(data.phone);
-            user.setCellphone(data.mobile);
+            user.setCellPhone(data.mobile);
             user.setFirstName(data.firstName);
             user.setLastName(data.lastName);
             dao.updateUserMainProfile(user);

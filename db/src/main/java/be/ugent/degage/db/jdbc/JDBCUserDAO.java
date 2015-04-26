@@ -51,7 +51,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             "user_id, user_firstname, user_lastname, user_email, user_status, user_phone, user_cellphone, user_degage_id ";
 
     private static final String USER_QUERY =
-            "SELECT " + USER_HEADER_FIELDS + ", users.user_gender, " +
+            "SELECT " + USER_HEADER_FIELDS + ",  " +
                     "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
                     "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
                     "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
@@ -89,15 +89,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 rs.getString("users.user_email"),
                 rs.getString("users.user_firstname"),
                 rs.getString("users.user_lastname"),
-                UserStatus.valueOf(rs.getString("users.user_status")
-                )
+                UserStatus.valueOf(rs.getString("users.user_status")),
+                rs.getString("users.user_phone"),
+                rs.getString("users.user_cellphone"),
+                (Integer) rs.getObject("users.user_degage_id")
         );
 
         user.setAddressDomicile(JDBCAddressDAO.populateAddress(rs, "domicileAddresses"));
         user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
-        user.setCellphone(rs.getString("users.user_cellphone"));
-        user.setPhone(rs.getString("users.user_phone"));
-        user.setGender(UserGender.valueOf(rs.getString("users.user_gender")));
         user.setDamageHistory(rs.getString("users.user_damage_history"));
         user.setAgreeTerms(rs.getBoolean("users.user_agree_terms"));
 
@@ -113,7 +112,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         Date dateJoined = rs.getDate("users.user_date_joined");
         user.setDateJoined(dateJoined == null ? null : dateJoined.toLocalDate());
 
-        user.setDegageId((Integer) rs.getObject("users.user_degage_id"));
         Date dateLicense = rs.getDate("users.user_driver_license_date");
         user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
 
@@ -330,7 +328,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.setString(2, user.getLastName());
 
             ps.setString(3, user.getPhone());
-            ps.setString(4, user.getCellphone());
+            ps.setString(4, user.getCellPhone());
 
             ps.setInt(5, user.getId());
 

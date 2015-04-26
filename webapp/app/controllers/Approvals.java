@@ -78,7 +78,7 @@ public class Approvals extends Controller {
         if (!user.isPayedDeposit()) {
             errors.add("Waarborg nog niet betaald.");
         }
-        if (user.getCellphone() == null && user.getPhone() == null) {
+        if (user.getCellPhone() == null && user.getPhone() == null) {
             errors.add("Telefoon/GSM ontbreekt.");
         }
         return errors;

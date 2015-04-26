@@ -31,7 +31,6 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.CarRide;
-import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationHeader;
 
 import java.time.LocalDate;
