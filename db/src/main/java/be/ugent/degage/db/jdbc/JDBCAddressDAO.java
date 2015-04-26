@@ -66,10 +66,11 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
             );
     }
 
+    public static final String ADDRESS_FIELDS =
+            "address_id, address_city, address_zipcode, address_street, address_number, address_country ";
 
     private LazyStatement getAddressStatement = new LazyStatement(
-            "SELECT address_id, address_city, address_zipcode, address_street, address_number, address_country " +
-                    "FROM addresses WHERE address_id = ?");
+            "SELECT " + ADDRESS_FIELDS + "FROM addresses WHERE address_id = ?");
 
     @Override
     public Address getAddress(int id) throws DataAccessException {

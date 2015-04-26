@@ -504,8 +504,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     private static final String NEW_CAR_QUERY =
             "SELECT car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, " +
-                    "address_id, address_city, address_zipcode, address_street, " +
-                    "address_number, address_country " +
+                    JDBCAddressDAO.ADDRESS_FIELDS +
                     "FROM cars JOIN addresses ON address_id=car_location ";
 
     private static final String SELECT_NOT_OVERLAP =
@@ -655,8 +654,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     public static final String LIST_ALL_CARS_QUERY =
             "SELECT car_id, car_name, car_email, car_brand, car_type," +
-                    "address_id, address_city, address_zipcode, address_street, " +
-                    "address_number, address_country, " +
+                    JDBCAddressDAO.ADDRESS_FIELDS + ", " +
                     "car_seats, car_doors, car_year, car_manual, car_gps, car_hook," +
                     "car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km," +
                     "car_comments, car_active, " +
@@ -725,21 +723,17 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
+    public static final String CAR_HEADER_FIELDS =
+            "car_id, car_name, car_brand, car_type, car_email, car_active ";
+
 
     @Override
     public Iterable<CarHeader> listCarsOfUser(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT car_id, car_name, car_brand, car_type, car_email, car_active " +
+                "SELECT " + CAR_HEADER_FIELDS +
                         "FROM cars WHERE car_owner_user_id = ?")) {
             ps.setInt(1, userId);
-            return toList(ps, rs -> new CarHeader(
-                    rs.getInt("car_id"),
-                    rs.getString("car_name"),
-                    rs.getString("car_brand"),
-                    rs.getString("car_type"),
-                    rs.getString("car_email"),
-                    rs.getBoolean("car_active")
-            ));
+            return toList(ps, JDBCCarDAO::populateCarHeader);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars for user with id " + userId, ex);
         }

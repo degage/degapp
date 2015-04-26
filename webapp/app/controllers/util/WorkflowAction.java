@@ -114,7 +114,7 @@ public enum WorkflowAction {
     /**
      * Return all actions on the given reservation, allowed by the current user.
      */
-    public static Set<WorkflowAction> getCurrentActions (Reservation reservation) {
+    public static Set<WorkflowAction> getCurrentActions (ReservationHeader reservation) {
         Set<WorkflowAction> result = EnumSet.noneOf(WorkflowAction.class);
         for (WorkflowRole workflowRole : WorkflowRole.getCurrentRoles(reservation)) {
             result.addAll(workflowRole.actionsAllowed(reservation));

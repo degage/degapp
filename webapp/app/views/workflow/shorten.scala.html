@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFCreate.ReservationData], reservation: Reservation)
+@(form: Form[WFCreate.ReservationData], trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId)) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId)) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Reservatieperiode inkorten", extrabc=extrabc, scripts=js.datetimepicker() ) {
 
-    @trips.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(trip)
 
     @panel("Aanpassen", "fa-calendar") {
-        @helper.form(routes.WFCreate.doShortenReservation(reservation.getId)) {
+        @helper.form(routes.WFCreate.doShortenReservation(trip.getId)) {
             @std.datetimepicker(form("from"),"Begin ingekorte reservatie", css="col-md-6",minuteStep=15)
             @std.datetimepicker(form("until"),"Einde ingekorte reservatie", css="col-md-6",minuteStep=15)
             @std.submitButton("Periode inkorten")

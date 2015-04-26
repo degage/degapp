@@ -244,7 +244,9 @@ public class WFTrip extends WFCommon {
                     form.reject("picture", "Het bestand  is van het verkeerde type");
                     return badRequest(newtrip.render(form, reservation));
                 } else {
-                    RefuelCreate.newRefuel(reservation, owner, data.amount.getValue(),
+                    // TODO: can this be avoided?
+                    TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+                    RefuelCreate.newRefuel(trip, owner, data.amount.getValue(),
                             file.getId(), data.km, data.fuelAmount
                     );
                 }

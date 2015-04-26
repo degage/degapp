@@ -31,6 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.dao.TripDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.WorkflowAction;
 import db.CurrentUser;
@@ -126,9 +127,9 @@ public class WFCreate extends WFCommon {
     @AllowRoles({UserRole.CAR_USER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result shortenReservation(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, true);
 
-        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(reservation)) {
+        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(trip)) {
             flash("danger", "U kan deze reservatie niet inkorten");
             return redirectToDetails(reservationId);
         }
@@ -136,9 +137,9 @@ public class WFCreate extends WFCommon {
 
         return ok(shorten.render(
                 Form.form(ReservationData.class).fill(
-                        new ReservationData().populate(reservation.getFrom(), reservation.getUntil())
+                        new ReservationData().populate(trip.getFrom(), trip.getUntil())
                 ),
-                reservation
+                trip
         ));
     }
 
@@ -149,28 +150,27 @@ public class WFCreate extends WFCommon {
     @InjectContext
     public static Result doShortenReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservationExtended(reservationId);
-        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(reservation)) {
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, true);
+        if (WorkflowAction.SHORTEN.isForbiddenForCurrentUser(trip)) {
             return badRequest();
         }
 
         Form<ReservationData> form = Form.form(ReservationData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(shorten.render(form, reservation));
+            return badRequest(shorten.render(form, trip));
         }
 
         ReservationData data = form.get();
-        if (data.from.isBefore(reservation.getFrom())) {
+        if (data.from.isBefore(trip.getFrom())) {
             form.reject("from", "Periode mag alleen ingekort worden");
         }
-        if (data.until.isAfter(reservation.getUntil())) {
+        if (data.until.isAfter(trip.getUntil())) {
             form.reject("until", "Periode mag alleen ingekort worden");
         }
         if (form.hasErrors()) {
-            return badRequest(shorten.render(form, reservation));
+            return badRequest(shorten.render(form, trip));
         }
-        dao.updateReservationTime(reservationId, data.from, data.until);
+        context.getReservationDAO().updateReservationTime(reservationId, data.from, data.until);
 
         return redirectToDetails(reservationId);
     }

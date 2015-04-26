@@ -31,6 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.WorkflowAction;
 import db.DataAccess;
@@ -55,7 +56,7 @@ public class WFApprove extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveReservation(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
+        TripWithCar reservation = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
         // special case: already cancelled by user
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
             flash("warning", "De reservatie is reeds geannulleerd");
@@ -86,19 +87,18 @@ public class WFApprove extends WFCommon {
     @InjectContext
     public static Result doApproveReservation(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservationExtended(reservationId);
-        if (reservation.getStatus() == ReservationStatus.CANCELLED) {
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, true);
+        if (trip.getStatus() == ReservationStatus.CANCELLED) {
             flash("warning", "De reservatie is (ondertussen) reeds geannuleerd");
             return redirectToDetails(reservationId);
         }
-        if (WorkflowAction.AOR_RESERVATION.isForbiddenForCurrentUser(reservation)) {
+        if (WorkflowAction.AOR_RESERVATION.isForbiddenForCurrentUser(trip)) {
             return badRequest(); // should not happen
         }
 
         Form<RemarksData> form = Form.form(RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(approveorreject.render(form, reservation));
+            return badRequest(approveorreject.render(form, trip));
         } else {
             RemarksData data = form.get(); // the form does not contain errors
             ReservationStatus status = ReservationStatus.valueOf(data.status);
@@ -106,13 +106,19 @@ public class WFApprove extends WFCommon {
 
             if (status == ReservationStatus.REFUSED || status == ReservationStatus.ACCEPTED) {
                 // authorization already checked
+                ReservationDAO rdao = context.getReservationDAO();
+                UserDAO userDAO = context.getUserDAO();
+                UserHeader driver = userDAO.getUserHeader(trip.getUserId());
                 if (status == ReservationStatus.REFUSED) {
-                    dao.updateReservationStatus(reservationId, status, remarks);
-                    Notifier.sendReservationRefusedByOwnerMail(remarks, reservation);
+                    rdao.updateReservationStatus(reservationId, status, remarks);
+                    Notifier.sendReservationRefusedByOwnerMail(driver, remarks,  trip);
                 } else {
-                    dao.updateReservationStatus(reservationId, status);
-                    UserHeader owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
-                    Notifier.sendReservationApprovedByOwnerMail(owner, remarks, reservation);
+                    rdao.updateReservationStatus(reservationId, status);
+                        Notifier.sendReservationApprovedByOwnerMail(
+                                driver,
+                                userDAO.getUserHeader(trip.getOwnerId()),
+                                remarks,
+                                trip);
                 }
                 return redirectToDetails(reservationId);
             } else {
@@ -148,13 +154,12 @@ public class WFApprove extends WFCommon {
     @InjectContext
     public static Result sendReminder(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservation(reservationId);
-        if (WorkflowAction.SEND_REMINDER.isForbiddenForCurrentUser(reservation)) {
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        if (WorkflowAction.SEND_REMINDER.isForbiddenForCurrentUser(trip)) {
             flash ("danger", "Je kan geen herinnering sturen voor deze reservatie");
             return redirectToDetails(reservationId);
         }
-        return ok(reminder.render(reservation));
+        return ok(reminder.render(trip));
     }
 
     /**

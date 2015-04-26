@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFCancel.CancelData], reservation: Reservation)
+@(form: Form[WFCancel.CancelData], trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Reservatie annuleren", extrabc=extrabc ) {
 
-    @trips.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(trip)
 
     @panel("Annuleren", "fa-pencil") {
-        @helper.form(routes.WFCancel.doCancelAccepted(reservation.getId())) {
+        @helper.form(routes.WFCancel.doCancelAccepted(trip.getId())) {
             @std.textArea(form("remarks"), "Reden voor de annulatie (verplicht)", 3)
             @std.submitButton("Annuleren")
         }

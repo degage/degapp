@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFCommon.RemarksData], reservation: Reservation)
+@(form: Form[WFCommon.RemarksData], trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Reservatie goed- of afkeuren", extrabc=extrabc ) {
 
-    @trips.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(trip)
 
     @panel("Aanpassen", "fa-pencil") {
-        @helper.form(routes.WFApprove.doApproveReservation(reservation.getId())) {
+        @helper.form(routes.WFApprove.doApproveReservation(trip.getId())) {
             @std.textArea(form("remarks"), "Reden voor de weigering (verplicht) / opmerkingen bij de goedkeuring (optioneel)", 3)
             <div class="col-sm-6 col-xs-6">
                 <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>

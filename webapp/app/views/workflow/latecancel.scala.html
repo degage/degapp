@@ -27,16 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFCancel.CancelData], reservation: Reservation)
+@(form: Form[WFCancel.CancelData], trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Rit is niet doorgegaan", extrabc=extrabc ) {
 
-    @trips.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(trip)
 
        <div class="col-xs-12 alert alert-info">
         <p>Met onderstaande opties geef je aan dat een rit die je had goedkeurd, uiteindelijk niet
@@ -44,7 +44,7 @@
        </div>
 
     @panel("Gewone annulatie", "fa-times-circle") {
-        @helper.form(routes.WFCancel.doCancelLate(reservation.getId(),true)) {
+        @helper.form(routes.WFCancel.doCancelLate(trip.getId(),true)) {
             <div class="col-xs-12">
                 <p>De reservatie is door de ontlener correct geannuleerd vóór het begin van de rit.</p>
             </div>
@@ -53,7 +53,7 @@
     }
 
     @panel("Laattijdige annulatie of niet opgedaagd", "fa-warning") {
-        @helper.form(routes.WFCancel.doCancelLate(reservation.getId(),false)) {
+        @helper.form(routes.WFCancel.doCancelLate(trip.getId(),false)) {
             <div class="col-xs-12">
                 <p>De ontlener annuleerde niet correct, te laat of kwam niet opdagen. De auto was hierdoor niet
                     beschikbaar voor anderen.  Geef hieronder aan wat fout liep. Je opmerking wordt zowel naar de

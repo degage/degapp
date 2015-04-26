@@ -27,36 +27,42 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(car: CarHeader, reservation: ReservationHeader, tripInfo: CarRide = null)
+@(trip: TripWithCar)
 
 @panel("Details", "fa-bar-chart-o"){
     <div class="col-sm-6">
         <h4>Reservatie</h4>
         <dl class="dl-horizontal">
-            <dt>Status</dt><dd><i>@reservation.getStatus</i></dd>
+            @if(db.CurrentUser isNot trip.getUserId) {
+                <dt>Bestuurder</dt>
+                <dd>@trip.getDriverName</dd>
+            }
+            <dt>Status</dt><dd><i>@trip.getStatus</i></dd>
             <dt>Periode</dt>
-            <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
-            <dt>Auto</dt>
-            <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
-            @if(car.getLocation != null) {
-                <dt>Standplaats</dt>
-                <dd>@car.getLocation</dd>
+            <dd>@Utils.toLocalizedString(trip.getFrom) — @Utils.toLocalizedString(trip.getUntil)</dd>
+            @defining(trip.getCar) { car =>
+                <dt>Auto</dt>
+                <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
+                @if(car.getLocation != null) {
+                    <dt>Standplaats</dt>
+                    <dd>@car.getLocation</dd>
+                }
             }
             @* TODO: make when.notblank snippet *@
-            @if(reservation.getMessage != null && !reservation.getMessage.trim.isEmpty) {
+            @if(trip.getMessage != null && !trip.getMessage.trim.isEmpty) {
                 <dt>Opmerkingen</dt>
-                <dd>@reservation.getMessage</dd>
+                <dd>@trip.getMessage</dd>
             }
         </dl>
     </div>
-    @if(tripInfo != null) {
+    @if(trip.getStartKm > 0) {
         <div class="col-sm-6">
             <h4>Ritdetails</h4>
             <dl class="dl-horizontal">
                 <dt>Kilometerstanden</dt>
-                <dd>@tripInfo.getStartKm — @tripInfo.getEndKm</dd>
+                <dd>@trip.getStartKm — @trip.getEndKm</dd>
                 <dt>Schade?</dt>
-                <dd>@if(tripInfo.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
+                <dd>@if(trip.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
             </dl>
         </div>
     }

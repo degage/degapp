@@ -27,12 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, carName: String, from: String, until: String, comment: String)
+@(user: UserHeader, driverName: String, carName: String, from: String, until: String, comment: String)
 
 @* Annulatie reservatie *@
 Beste @user.getFirstName,
 
-Bestuurder @driver heeft de volgende reservatie geannuleerd,
+Bestuurder @driverName heeft de volgende reservatie geannuleerd,
 ook al had je die reeds goedgekeurd:
 
    Auto: @carName

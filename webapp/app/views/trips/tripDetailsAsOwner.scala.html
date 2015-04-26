@@ -27,16 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, tripInfo: CarRide, car: Car, loaner: User, previousLoaner: User, nextLoaner: User)
+@(trip: TripWithCar, loaner: User, previousLoaner: User, nextLoaner: User)
 
 
 @* only called when the user owns the car but is not a reservation admin*@
 
 @stdlayout("Reservatie- en ritdetails (eigenaar)", extrabc=breadcrumb("Ritten",routes.Trips.index())) {
 
-    @detailsPanel(car, reservation, tripInfo)
+    @detailsPanel(trip)
 
-    @actionPanel(reservation)
+    @actionPanel(trip)
 
     <!-- owner specific content -->
 

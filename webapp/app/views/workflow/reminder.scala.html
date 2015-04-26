@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation)
+@(trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Stuur herinnering", extrabc=extrabc ) {
 
-    @trips.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(trip)
 
     @panel("Stuur herinnering", "fa-envelope-o") {
-        @helper.form(routes.WFApprove.doSendReminder(reservation.getId())) {
+        @helper.form(routes.WFApprove.doSendReminder(trip.getId())) {
             <div class="col-xs-12 alert alert-info">
                 <p>Door op de knop hieronder te drukken, geef je te kennen aan de eigenaar dat
                 je <i>dringend</i> zit te wachten op een goed- of afkeuring van deze reservatie.</p>

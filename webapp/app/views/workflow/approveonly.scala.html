@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation)
+@(trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Reservatie goedkeuren", extrabc=extrabc ) {
 
-    @trips.detailsPanel(reservation.getCar(), reservation)
+    @trips.detailsPanel(trip)
 
     @panel("Aanpassen", "fa-pencil") {
-        @helper.form(routes.WFApprove.doApproveOldReservation(reservation.getId())) {
+        @helper.form(routes.WFApprove.doApproveOldReservation(trip.getId())) {
             <div class="col-xs-12 alert alert-danger">
                 <p>Deze reservatie is reeds verlopen. Op dit moment kunt u
                     de reservatie daarom alleen nog goedkeuren.</p>

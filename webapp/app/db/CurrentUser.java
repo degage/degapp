@@ -127,10 +127,23 @@ public class CurrentUser {
     }
 
     /**
-     * Retrieve the full name of the current user
+     * Retrieve the full name of the current user. Format: Name, FirstName
      */
     public static String getFullName () {
         return Controller.session("fullName");
+    }
+
+    /**
+     * Retrieve the display name of the current user. Format: FirstName Name
+     */
+    public static String getDisplayName() {
+        String fullName = Controller.session("fullName");
+        if (fullName == null) {
+            return null;
+        } else {
+            int pos = fullName.indexOf(',');
+            return fullName.substring(pos + 2) + fullName.substring (0, pos);
+        }
     }
 
     /**

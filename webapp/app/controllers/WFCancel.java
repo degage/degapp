@@ -31,6 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.dao.TripDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.WorkflowAction;
@@ -90,8 +91,8 @@ public class WFCancel extends WFCommon {
     @AllowRoles
     @InjectContext
     public static Result cancelAccepted(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
-        return ok(cancelaccepted.render(Form.form(CancelData.class), reservation));
+        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        return ok(cancelaccepted.render(Form.form(CancelData.class), trip));
     }
 
     /**
@@ -101,23 +102,23 @@ public class WFCancel extends WFCommon {
     @InjectContext
     public static Result doCancelAccepted(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        ReservationDAO dao = context.getReservationDAO();
-        Reservation reservation = dao.getReservation(reservationId);
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
 
-        if (CurrentUser.isNot(reservation.getUserId()) ||
-                reservation.getStatus() != ReservationStatus.ACCEPTED) {
+        if (CurrentUser.isNot(trip.getUserId()) || trip.getStatus() != ReservationStatus.ACCEPTED) {
             return badRequest(); // should not happen
         }
 
         Form<CancelData> form = Form.form(CancelData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(cancelaccepted.render(form, reservation));
+            return badRequest(cancelaccepted.render(form, trip));
         } else {
             String comments = form.get().remarks;
-            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED, comments);
-            Car car = context.getCarDAO().getCar(reservation.getCarId());
-            reservation.setMessage(comments);
-            Notifier.sendReservationCancelled(car.getOwner(), reservation, car.getName());
+            context.getReservationDAO().updateReservationStatus(reservationId, ReservationStatus.CANCELLED, comments);
+            trip.setMessage(comments);
+            Notifier.sendReservationCancelled(
+                    context.getUserDAO().getUserHeader(trip.getOwnerId()),
+                    trip
+            );
             return redirectToDetails(reservationId);
         }
     }
@@ -129,13 +130,12 @@ public class WFCancel extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result cancelLate(int reservationId) {
-        Reservation reservation = DataAccess.getInjectedContext().getReservationDAO().getReservationExtended(reservationId);
-        // special case: already cancelled by user
-        if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(reservation)) {
+        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(trip)) {
             flash("warning", "De rit kan niet (meer) worden geannuleerd");
             return redirectToDetails(reservationId);
         } else {
-            return ok(latecancel.render(Form.form(CancelData.class), reservation));
+            return ok(latecancel.render(Form.form(CancelData.class), trip));
         }
     }
 
@@ -147,24 +147,25 @@ public class WFCancel extends WFCommon {
     @InjectContext
     public static Result doCancelLate(int reservationId, boolean soft) {
 
-        final ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-        Reservation reservation = dao.getReservationExtended(reservationId);
-        if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(reservation)) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        if (WorkflowAction.CANCEL_LATE.isForbiddenForCurrentUser(trip)) {
             return badRequest();
         }
+        ReservationDAO rdao = context.getReservationDAO();
         if (soft) {
-            dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
+            rdao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED);
             return redirectToDetails(reservationId);
             // same as a normal cancel
         } else {
             Form<CancelData> form = Form.form(CancelData.class).bindFromRequest();
             if (form.hasErrors()) {
-                return badRequest(latecancel.render(form, reservation));
+                return badRequest(latecancel.render(form, trip));
             } else {
                 String comments = form.get().remarks;
-                dao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE, comments);
-                reservation.setMessage(comments);
-                Notifier.sendLateCancel(reservation);
+                rdao.updateReservationStatus(reservationId, ReservationStatus.CANCELLED_LATE, comments);
+                trip.setMessage(comments);
+                Notifier.sendLateCancel(context.getUserDAO().getUserHeader(trip.getUserId()), trip);
                 return redirectToDetails(reservationId);
             }
         }

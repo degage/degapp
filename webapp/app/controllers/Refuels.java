@@ -140,10 +140,10 @@ public class Refuels extends RefuelCommon {
     @InjectContext
     public static Result showRefuelsForTrip(int reservationId, boolean ownerFlow) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
-        if (isAuthorized(reservation, ownerFlow)) {
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        if (isAuthorized(trip, ownerFlow)) {
             return ok(refuelsForTrip(
-                    reservation,
+                    trip,
                     Form.form(RefuelData.class).fill(RefuelData.EMPTY),
                     context.getRefuelDAO().getRefuelsForCarRide(reservationId),
                     ownerFlow));
@@ -171,17 +171,17 @@ public class Refuels extends RefuelCommon {
     /**
      * Produces the correct html file for the given 'flow'
      */
-    static Html refuelsForTrip(Reservation reservation, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
+    static Html refuelsForTrip(TripWithCar trip, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
         // must be used in injected context
         if (ownerFlow) {
             ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
 
-            return refuelsForTripOwner.render(form, refuels, reservation,
-                    dao.getNextTripId(reservation.getId()),
-                    dao.getPreviousTripId(reservation.getId())
+            return refuelsForTripOwner.render(form, refuels, trip,
+                    dao.getNextTripId(trip.getId()),
+                    dao.getPreviousTripId(trip.getId())
             );
         } else
-            return refuelsForTripDriver.render(form, refuels, reservation);
+            return refuelsForTripDriver.render(form, refuels, trip);
     }
 
     /**

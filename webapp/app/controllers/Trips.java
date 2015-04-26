@@ -77,7 +77,7 @@ public class Trips extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_USER})
     @InjectContext
     public static Result details(int reservationId) {
-        Html result = detailsPage(DataAccess.getInjectedContext().getReservationDAO().getReservation(reservationId));
+        Html result = detailsPage(DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId,true));
         if (result != null) {
             return ok(result);
         } else {
@@ -88,27 +88,19 @@ public class Trips extends Controller {
     /**
      * Create a details page for the given reservation or trip.
      */
-    private static Html detailsPage(Reservation reservation) {
-        int reservationId = reservation.getId();
+    private static Html detailsPage(TripWithCar trip) {
+        int reservationId = trip.getId();
 
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
         UserDAO udao = context.getUserDAO();
-        CarRideDAO ddao = context.getCarRideDAO();
-        User loaner = udao.getUser(reservation.getUserId());
-        User owner = udao.getUser(reservation.getOwnerId());
-        if ( ! WFCommon.isDriverOrOwnerOrAdmin(reservation)) {
+        User driver = udao.getUser(trip.getUserId());
+        User owner = udao.getUser(trip.getOwnerId());
+        if ( ! WFCommon.isDriverOrOwnerOrAdmin(trip)) {
             flash("danger", "Je bent niet gemachtigd om deze informatie op te vragen");
             return null;
         }
-        CarRide tripInfo = null;
-        ReservationStatus status = reservation.getStatus();
-        if (status == ReservationStatus.DETAILS_PROVIDED ||
-                status == ReservationStatus.FINISHED ||
-                status == ReservationStatus.DETAILS_REJECTED ||
-                status == ReservationStatus.FROZEN ) {
-            tripInfo = ddao.getCarRide(reservationId);
-        }
+        ReservationStatus status = trip.getStatus();
 
         User previousLoaner = null;
         User nextLoaner = null;
@@ -123,21 +115,17 @@ public class Trips extends Controller {
             }
         }
 
-        Car car = context.getCarDAO().getCar(reservation.getCar().getId()); // TOOD: check whether this is necessary
         if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             return tripDetailsAsAdmin.render(
-                    reservation, tripInfo, car, owner, loaner,
-                    previousLoaner, nextLoaner
+                    trip, owner, driver, previousLoaner, nextLoaner
             );
         } else if (CurrentUser.is(owner.getId())) {
             return tripDetailsAsOwner.render(
-                    reservation, tripInfo, car, loaner,
-                    previousLoaner, nextLoaner
+                    trip, driver, previousLoaner, nextLoaner
             );
         } else {
             return tripDetailsAsLoaner.render(
-                    reservation, tripInfo, car, owner,
-                    previousLoaner, nextLoaner
+                    trip, owner, previousLoaner, nextLoaner
             );
         }
     }

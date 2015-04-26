@@ -31,19 +31,33 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.TripDAO;
+import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.ReservationStatus;
 import be.ugent.degage.db.models.Trip;
+import be.ugent.degage.db.models.TripWithCar;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Implementation of {@link TripDAO} for JDBC
  */
 class JDBCTripDAO extends AbstractDAO implements TripDAO {
+
+    private static void populateExtras(ResultSet rs, Trip trip) throws SQLException {
+        trip.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
+        trip.setPrivileged(rs.getBoolean("reservation_privileged"));
+        trip.setStartKm(rs.getInt("car_ride_start_km"));   // 0 if null
+        trip.setEndKm(rs.getInt("car_ride_end_km"));       // 0 if null
+        trip.setDamaged(rs.getBoolean("car_ride_damage")); // 0 if null
+
+        trip.setDriverName(rs.getString("user_firstname") + " " + rs.getString("user_lastname"));
+    }
 
     public static Trip populateTrip (ResultSet rs) throws SQLException {
         // TODO: has a lot of code in common populateReservationHeader and populateReservation
@@ -55,15 +69,30 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
-                false // not used
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now())
         );
-        trip.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
-        trip.setPrivileged(rs.getBoolean("reservation_privileged"));
-        trip.setStartKm(rs.getInt("car_ride_start_km"));   // 0 if null
-        trip.setEndKm(rs.getInt("car_ride_end_km"));       // 0 if null
-        trip.setDamaged(rs.getBoolean("car_ride_damage")); // 0 if null
+        populateExtras(rs, trip);
+        return trip;
+    }
 
-        trip.setDriverName(rs.getString("user_firstname") + " " + rs.getString("user_lastname"));
+    public static TripWithCar populateTripWithCar (ResultSet rs, boolean withLocation) throws SQLException {
+        // TODO: a lot of code in common with populateTrip
+        CarHeader car = JDBCCarDAO.populateCarHeader(rs);
+        if (withLocation) {
+            car.setLocation(JDBCAddressDAO.populateAddress(rs));
+        }
+        TripWithCar trip = new TripWithCar(
+                rs.getInt("reservation_id"),
+                rs.getInt("reservation_car_id"),
+                rs.getInt("reservation_user_id"),
+                rs.getInt("reservation_owner_id"),
+                rs.getTimestamp("reservation_from").toLocalDateTime(),
+                rs.getTimestamp("reservation_to").toLocalDateTime(),
+                rs.getString("reservation_message"),
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                car
+        );
+        populateExtras(rs, trip);
         return trip;
     }
 
@@ -71,17 +100,18 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
         super(context);
     }
 
+    public static final String TRIP_FIELDS =
+            JDBCReservationDAO.RESERVATION_HEADER_FIELDS +
+            ", car_ride_start_km, car_ride_end_km, car_ride_damage, " +
+            "user_firstname, user_lastname ";
+
     @Override
     public Iterable<Trip> listTrips(int carId, LocalDateTime from, LocalDateTime until) {
         if (until.isAfter(LocalDateTime.now())) {
             until = LocalDateTime.now();
         }
         try (PreparedStatement ps = prepareStatement(
-                "SELECT reservation_id, reservation_car_id, reservation_user_id, reservation_owner_id, " +
-                    "reservation_from, reservation_to, " +
-                    "reservation_message, reservation_status, reservation_privileged, " +
-                    "car_ride_start_km, car_ride_end_km, car_ride_damage, " +
-                    "user_firstname, user_lastname " +
+                "SELECT " + TRIP_FIELDS +
                 "FROM trips JOIN users ON user_id = reservation_user_id " +
                 "WHERE reservation_status > 4 " +
                 "    AND reservation_from >= ? AND reservation_from <= ?" +
@@ -139,6 +169,30 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Could not update trip", ex);
+        }
+    }
+
+    @Override
+    public TripWithCar getTripAndCar(int id, boolean withLocation) {
+        StringBuilder builder = new StringBuilder(
+           "SELECT " + TRIP_FIELDS + ", " + JDBCCarDAO.CAR_HEADER_FIELDS
+        );
+        if (withLocation) {
+            builder.append(",").append(JDBCAddressDAO.ADDRESS_FIELDS);
+        }
+        builder.append("FROM trips ")
+                .append("JOIN users ON user_id = reservation_user_id ")
+                .append("JOIN cars ON car_id = reservation_car_id ");
+        if (withLocation) {
+            builder.append("JOIN addresses ON address_id=car_location ");
+        }
+        builder.append("WHERE reservation_id = ? ");
+        //System.err.println("SQL = " + builder.toString());
+        try (PreparedStatement ps = prepareStatement( builder.toString() )) {
+            ps.setInt(1,id);
+            return toSingleObject(ps, rs -> populateTripWithCar(rs,withLocation));
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get trip and car", ex);
         }
     }
 }

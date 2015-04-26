@@ -27,15 +27,15 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, tripInfo: CarRide, car: Car, owner: User, previousLoaner: User, nextLoaner: User)
+@(trip: TripWithCar, owner: User, previousLoaner: User, nextLoaner: User)
 
 @* only called when user is not the owner of the car and also not a reservation admin *@
 
 @stdlayout("Reservatie- en ritdetails", extrabc=breadcrumb("Ritten",routes.Trips.index())) {
 
-    @detailsPanel(car, reservation, tripInfo)
+    @detailsPanel(trip)
 
-    @actionPanel(reservation)
+    @actionPanel(trip)
 
     @panel("Verdere informatie", "fa-bar-chart-o"){
         <div class="col-lg-6">
@@ -43,6 +43,6 @@
             @userInfo(owner)
         </div>
 
-        @previousnext(previousLoaner, nextLoaner, reservation.getStatus)
+        @previousnext(previousLoaner, nextLoaner, trip.getStatus)
     }
 }

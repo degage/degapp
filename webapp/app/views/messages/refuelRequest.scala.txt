@@ -27,12 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, carName: String, amount: String, url: String, from: String, to: String)
+@(user: UserHeader, driverName: String, carName: String, amount: String, url: String, from: String, to: String)
 
 @* Nieuwe tankbeurt *@
 Beste @user.getFirstName,
 
-@driver heeft een nieuwe tankbeurt ingevoerd voor wagen '@carName'
+Autolener @driverName heeft een nieuwe tankbeurt ingevoerd voor wagen '@carName'
 voor een bedrag van @amount. De tankbeurt is gelinkt aan de periode
     @from - @to
 Gelieve die zo snel mogelijk goed- of af te keuren.

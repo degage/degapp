@@ -27,14 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation,
+@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], trip: TripWithCar,
         nextId: Int, previousId: Int)
 
 @* Lists all refuels for a given ride in a 'large' format, suitable for owners *@
 
 @stdlayout("Tankbeurten (rit)", stylesheets=sheets("statuses"), extrabc=breadcrumb("Mijn auto's",routes.Cars.showCars())) {
 
-    @trips.detailsPanel(reservation.getCar, reservation)
+    @trips.detailsPanel(trip)
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
             <a class="btn btn-xs btn-default" data-toggle="collapse"
@@ -51,7 +51,7 @@
 
     <div class='collapse@if(form.hasErrors)(".in")' id="collapsedForm">
         @panel("Nieuwe tankbeurt", "fa-pencil") {
-            @helper.form(routes.RefuelCreate.doCreate(reservation.getId, true), 'enctype -> "multipart/form-data"){
+            @helper.form(routes.RefuelCreate.doCreate(trip.getId, true), 'enctype -> "multipart/form-data"){
                 @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
                 @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
                 @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")

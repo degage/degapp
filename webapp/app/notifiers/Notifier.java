@@ -194,17 +194,17 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendRefuelRequest(UserHeader owner, Reservation reservation, int refuelId, CarHeader car, int eurocents) {
+    public static void sendRefuelRequest(UserHeader owner, TripWithCar reservation, int refuelId, int eurocents) {
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
-        String carName = car.getName();
+        String carName = reservation.getCar().getName();
         String amount = EurocentAmount.toString(eurocents) + " euro";
         String url = toFullURL(routes.RefuelApprove.approveOrReject(refuelId, false));
-        UserHeader driver = reservation.getUser();
+        String driverName = reservation.getDriverName();
         createNotificationAndSend(
                 owner, "refuelRequest",
-                views.txt.messages.refuelRequest.render(owner,driver,carName,amount,url,from,until),
-                views.html.messages.refuelRequest.render(owner,driver,carName,amount,url,from,until),
+                views.txt.messages.refuelRequest.render(owner,driverName,carName,amount,url,from,until),
+                views.html.messages.refuelRequest.render(owner,driverName,carName,amount,url,from,until),
                 carName
         );
     }
@@ -278,9 +278,8 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendReservationApprovedByOwnerMail(UserHeader owner, String remarks, Reservation reservation) {
-        // note: needs extended reservation
-        UserHeader user = reservation.getUser();
+    public static void sendReservationApprovedByOwnerMail(UserHeader driver, UserHeader owner, String remarks, TripWithCar reservation) {
+        // note: needs location of car in header
         CarHeader car = reservation.getCar();
         String carAddress = car.getLocation().toString();
         String carName = car.getName();
@@ -299,14 +298,13 @@ public class Notifier extends Mailer {
         }
 
         createNotificationAndSend(
-                user, "reservationApproved",
-                views.txt.messages.reservationApproved.render(user, from, until, carName, carAddress, url, remarks, contactInfo),
-                views.html.messages.reservationApproved.render(user, from, until, carName, carAddress, url, remarks, contactInfo),
+                driver, "reservationApproved",
+                views.txt.messages.reservationApproved.render(driver, from, until, carName, carAddress, url, remarks, contactInfo),
+                views.html.messages.reservationApproved.render(driver, from, until, carName, carAddress, url, remarks, contactInfo),
                 carName, from
         );
     }
-    public static void sendReservationRefusedByOwnerMail(String reason, Reservation reservation) {
-        UserHeader driver = reservation.getUser();
+    public static void sendReservationRefusedByOwnerMail(UserHeader driver, String reason, TripWithCar reservation) {
         String carName = reservation.getCar().getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
@@ -321,16 +319,17 @@ public class Notifier extends Mailer {
     /**
      * Sent when a reservation is cancelled although it was already accepted
      */
-    public static void sendReservationCancelled(UserHeader owner, Reservation reservation, String carName) {
-        UserHeader driver = reservation.getUser();
-        String from = Utils.toLocalizedString(reservation.getFrom());
-        String until = Utils.toLocalizedString(reservation.getUntil());
+    public static void sendReservationCancelled(UserHeader owner, TripWithCar trip) {
+        String from = Utils.toLocalizedString(trip.getFrom());
+        String until = Utils.toLocalizedString(trip.getUntil());
+        String carName = trip.getCar().getName();
+        String driverName = trip.getDriverName();
         createNotificationAndSend (
                 owner, "reservationCancelled",
                 views.txt.messages.reservationCancelled.render(
-                        owner, driver, carName, from,  until, reservation.getMessage()),
+                        owner, driverName, carName, from,  until, trip.getMessage()),
                 views.html.messages.reservationCancelled.render(
-                        owner, driver, carName, from,  until, reservation.getMessage()),
+                        owner, driverName, carName, from,  until, trip.getMessage()),
                 carName, from
         );
     }
@@ -338,12 +337,11 @@ public class Notifier extends Mailer {
     /**
      * Sent when a trip is marked as not having taken place
      */
-    public static void sendLateCancel(Reservation reservation) {
-        UserHeader driver = reservation.getUser();
-        String carName = reservation.getCar().getName();
-        String from = Utils.toLocalizedString(reservation.getFrom());
-        String until = Utils.toLocalizedString(reservation.getUntil());
-        String message = reservation.getMessage();
+    public static void sendLateCancel(UserHeader driver, TripWithCar trip) {
+        String carName = trip.getCar().getName();
+        String from = Utils.toLocalizedString(trip.getFrom());
+        String until = Utils.toLocalizedString(trip.getUntil());
+        String message = trip.getMessage();
         createNotificationAndSend(
                 driver, "lateCancel",
                 views.txt.messages.lateCancel.render(driver, carName, from, until, message),

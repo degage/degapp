@@ -27,16 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], reservation: Reservation)
+@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId)) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId)) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Tankbeurten (rit)", stylesheets=sheets("statuses"), extrabc=extrabc){
 
-    @trips.detailsPanel(reservation.getCar, reservation)
+    @trips.detailsPanel(trip)
 
     @panel("Tankbeurten"){
         <div class="table-responsive col-xs-12">
@@ -66,13 +66,13 @@
     }
 
     @panel("Nieuwe tankbeurt", "fa-pencil") {
-        @helper.form(routes.RefuelCreate.doCreate(reservation.getId, false), 'enctype -> "multipart/form-data"){
+        @helper.form(routes.RefuelCreate.doCreate(trip.getId, false), 'enctype -> "multipart/form-data"){
             @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
             @std.fileField(form("picture"), "bonnetje als bewijsstuk:")
             @std.textField(form("km"), "Kilometerstand bij tanken", css="col-sm-6")
             @std.textField(form("fuelAmount"), "Aantal liters getankt", css="col-sm-6")
             <div class="col-xs-12"><p>(Alle velden zijn verplicht)</p></div>
-            @if(WFCommon.isOwnerOrAdmin(reservation)){
+            @if(WFCommon.isOwnerOrAdmin(trip)){
                 @std.submitButton("Doorsturen (en meteen goedkeuren)")
             } else {
                 <div class="col-xs-12">
