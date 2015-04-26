@@ -46,7 +46,6 @@ public class Reservation extends ReservationHeader {
         this.user = user;
     }
 
-    // TODO: is 'with owner' really necessary? Currently only used with refuels
     public CarHeader getCar() {
         return car;
     }

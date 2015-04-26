@@ -187,16 +187,13 @@ public class WFApprove extends WFCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result approveTripInfo(int reservationId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
-        if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(reservation)) {
+        TripWithCar trip = DataAccess.getInjectedContext().getTripDAO().getTripAndCar(reservationId, false);
+        if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(trip)) {
             flash("danger", "Deze trip kan niet (meer) goed- of afgekeurd worden");
             redirectToDetails(reservationId);
         }
         return ok(aortripinfo.render(
-                Form.form(RemarksData.class),
-                reservation,
-                context.getCarRideDAO().getCarRide(reservationId)
+                Form.form(RemarksData.class), trip
         ));
     }
 
@@ -208,20 +205,23 @@ public class WFApprove extends WFCommon {
     public static Result doApproveTripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        Reservation reservation = rdao.getReservation(reservationId);
+        TripWithCar reservation = context.getTripDAO().getTripAndCar(reservationId, false);
 
         if (WorkflowAction.AOR_TRIP.isForbiddenForCurrentUser(reservation)) {
             return badRequest(); // should not happen
         }
-        CarRide ride = context.getCarRideDAO().getCarRide(reservationId);
         Form<RemarksData> form = Form.form(RemarksData.class).bindFromRequest();
         if (form.hasErrors()) {
-            return badRequest(aortripinfo.render( form, reservation, ride ));
+            return badRequest(aortripinfo.render( form, reservation ));
         } else {
             RemarksData data = form.get();
             if ("REFUSED".equals(data.status)) {
                 rdao.updateReservationStatus(reservationId, ReservationStatus.DETAILS_REJECTED);
-                Notifier.sendDetailsRejected(reservation, ride, data.remarks);
+                Notifier.sendDetailsRejected(
+                        context.getUserDAO().getUserHeader(reservation.getUserId()),
+                        reservation,
+                        data.remarks
+                );
                 flash("success", "Uw opmerking wordt gemaild naar de bestuurder.");
             } else {
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);

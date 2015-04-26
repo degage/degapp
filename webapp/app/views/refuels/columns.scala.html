@@ -32,18 +32,17 @@
 @* Last four columns of a refuel table *@
 @* TODO: split according to driver/owner/admin *@
 
-@import db.CurrentUser
 <td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
 <td>@refuel.getAmount</td>
 <td>@refuel.getKm</td>
 <td>@statusname(refuel.getStatus)</td>
 <td>
     <a class="btn btn-primary btn-xs" href="@routes.Refuels.showDetails(refuel.getId)">Details</a>
-@if((CurrentUser is refuel.getCarRide.getReservation.getOwnerId) || isAdmin) {
-    @if(refuel.getStatus == RefuelStatus.REQUEST) {
-        <a type="button" class="btn btn-xs btn-primary"
-           href="@routes.RefuelApprove.approveOrReject(refuel.getId, false)">Goed- of afkeuren ...</a>
+    @if(isAdmin) {
+        @if(refuel.getStatus == RefuelStatus.REQUEST) {
+            <a type="button" class="btn btn-xs btn-primary"
+               href="@routes.RefuelApprove.approveOrReject(refuel.getId, false)">Goed- of afkeuren ...</a>
+        }
     }
-}
 </td>
 

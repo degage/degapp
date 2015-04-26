@@ -35,6 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.DamageDAO;
 import be.ugent.degage.db.models.Damage;
 import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.ReservationStatus;
 
 import java.sql.*;
@@ -90,7 +91,7 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
     );
 
     @Override
-    public Damage createDamage(Reservation reservation) throws DataAccessException {
+    public void createDamage(ReservationHeader reservation) throws DataAccessException {
         try {
             PreparedStatement ps = createDamageStatement.value();
             ps.setInt(1, reservation.getId());
@@ -99,18 +100,6 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating damage.");
 
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
-                return new Damage(
-                        keys.getInt(1),
-                        reservation.getCar().getId(),
-                        reservation.getUser().getId(),
-                        reservation,
-                        null,
-                        damageDate,
-                        false
-                );
-            }
         } catch (SQLException e) {
             throw new DataAccessException("Unable to create damage", e);
         }

@@ -32,6 +32,7 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.models.Refuel;
+import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.RefuelStatus;
 
 import java.time.LocalDate;
@@ -55,9 +56,11 @@ public interface RefuelDAO {
     public void rejectRefuel(int refuelId, String message) throws DataAccessException;
 
     public Refuel getRefuel(int refuelId) throws DataAccessException;
-    // currently not used: public void updateRefuel(Refuel refuel) throws DataAccessException;
+    public RefuelExtended getRefuelExtended(int refuelId) throws DataAccessException;
+    // TODO: may be superfluous
 
-    public Iterable<Refuel> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
+    public Iterable<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
+
     public int getAmountOfRefuels(Filter filter) throws DataAccessException;
 
     public Iterable<Refuel> getRefuelsForCarRide(int reservationId) throws DataAccessException;

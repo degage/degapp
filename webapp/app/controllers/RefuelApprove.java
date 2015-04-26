@@ -82,7 +82,7 @@ public class RefuelApprove extends RefuelCommon {
         }
 
         RefuelDAO dao = context.getRefuelDAO();
-        Refuel refuel = dao.getRefuel(refuelId);
+        RefuelExtended refuel = dao.getRefuelExtended(refuelId); // TODO: not necessary?
         if (refuel.getStatus() != RefuelStatus.REQUEST) {
             return badRequest(); // should not happen
         }
@@ -95,14 +95,14 @@ public class RefuelApprove extends RefuelCommon {
             return badRequest(approveorreject.render(form, refuel, car, reservation, ride, ownerFlow));
         } else {
             RemarksData data = form.get();
-
+            UserHeader driver = context.getUserDAO().getUserHeader(reservation.getUserId());
             if ("REFUSED".equals(data.status)) {
                 dao.rejectRefuel(refuelId, data.remarks);
-                Notifier.sendRefuelRejected(refuel, data.remarks);
+                Notifier.sendRefuelRejected(driver, refuel, data.remarks);
                 flash("success", "Uw opmerking wordt gemaild naar de bestuurder.");
             } else {
                 dao.updateRefuelStatus(RefuelStatus.ACCEPTED, refuelId);
-                Notifier.sendRefuelApproved(refuel);
+                Notifier.sendRefuelApproved(driver, refuel);
             }
             return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), ownerFlow));
         }
@@ -122,13 +122,15 @@ public class RefuelApprove extends RefuelCommon {
         }
 
         RefuelDAO dao = context.getRefuelDAO();
-        Refuel refuel = dao.getRefuel(refuelId);
+        RefuelExtended refuel = dao.getRefuelExtended(refuelId);
         if (refuel.getStatus() != RefuelStatus.REQUEST) {
             return badRequest(); // should not happen
         }
 
         dao.updateRefuelStatus(RefuelStatus.ACCEPTED, refuelId);
-        Notifier.sendRefuelApproved(refuel);
+        Notifier.sendRefuelApproved(
+                context.getUserDAO().getUserHeader(reservation.getUserId()),
+                refuel);
         flash("success", "De tankbeurt werd goedgekeurd");
         return redirect(routes.Refuels.showRefuelsForTrip(reservation.getId(), true));
     }

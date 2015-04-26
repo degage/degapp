@@ -27,23 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFTrip.TripDataExtended], reservation: Reservation)
+@(form: Form[WFTrip.TripDataExtended], trip: TripWithCar)
 
 @scripts={<script type="text/javascript" src='@routes.Assets.at("javascripts/app/checkkm.js")'></script>}
 
 @extrabc={
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId))
+    @breadcrumb("Details",routes.Trips.details(trip.getId))
 }
 
-@caption=@{if(WFCommon.isOwnerOrAdmin(reservation))("Doorsturen (en meteen goedkeuren)")else("Doorsturen")}
+@caption=@{if(WFCommon.isOwnerOrAdmin(trip))("Doorsturen (en meteen goedkeuren)")else("Doorsturen")}
 
 @stdlayout("Eerste ingave ritgegevens", extrabc=extrabc, scripts=scripts) {
 
-    @trips.detailsPanelPartial(reservation)
+    @trips.detailsPanelPartial(trip)
 
     @panel("Ingeven ritdetails", "fa-pencil") {
-        @helper.form(routes.WFTrip.doNewTripInfo(reservation.getId), 'enctype -> "multipart/form-data"){
+        @helper.form(routes.WFTrip.doNewTripInfo(trip.getId), 'enctype -> "multipart/form-data"){
             @std.numberField(form("startKm"), "Kilometerstand - vóór de rit:", css="col-sm-6")
             @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
             @std.group(form("damaged"), "Schade-opvolging") {

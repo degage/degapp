@@ -27,19 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFCommon.RemarksData], reservation: Reservation, tripInfo: CarRide)
+@(form: Form[WFCommon.RemarksData], trip: TripWithCar)
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId())) @* TODO: differentiate between admin / not admin *@
+    @breadcrumb("Details",routes.Trips.details(trip.getId())) @* TODO: differentiate between admin / not admin *@
 }
 
 @stdlayout("Kilometerstanden goed- of afkeuren", extrabc=extrabc ) {
 
-    @trips.detailsPanelPartial(reservation, tripInfo)
+    @trips.detailsPanelPartial(trip)
 
     @panel("Kilometerstanden goed- of afkeuren", "fa-pencil") {
-        @helper.form(routes.WFApprove.doApproveTripInfo(reservation.getId())) {
+        @helper.form(routes.WFApprove.doApproveTripInfo(trip.getId())) {
             @std.textArea(form("remarks"), "Reden (enkel bij afkeuren)", 3)
             <div class="col-sm-6 col-xs-6">
                 Kilometerstanden

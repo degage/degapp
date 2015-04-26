@@ -32,7 +32,7 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.models.Damage;
-import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 
 import java.time.LocalDate;
 
@@ -41,7 +41,8 @@ import java.time.LocalDate;
  */
 public interface DamageDAO {
 
-    public Damage createDamage(Reservation reservation) throws DataAccessException;
+    public void createDamage(ReservationHeader reservation) throws DataAccessException;
+
     public Damage getDamage(int damageId) throws DataAccessException;
 
     public void updateDamageFinished(int damageId, boolean finished) throws DataAccessException;

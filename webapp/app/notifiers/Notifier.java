@@ -133,13 +133,11 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendRefuelApproved(Refuel refuel) {
-        Reservation reservation = refuel.getReservation();
-        UserHeader user = reservation.getUser();
-        String name = reservation.getCar().getName();
+    public static void sendRefuelApproved(UserHeader user, RefuelExtended refuel) {
+        String name = refuel.getCarName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
-        String from = Utils.toLocalizedString(reservation.getFrom());
-        String until = Utils.toLocalizedString(reservation.getUntil());
+        String from = Utils.toLocalizedString(refuel.getReservationFrom());
+        String until = Utils.toLocalizedString(refuel.getReservationUntil());
 
         createNotificationAndSend(user, "refuelApproved",
                 views.txt.messages.refuelApproved.render(user, name, amount, from, until),
@@ -148,14 +146,12 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendRefuelRejected(Refuel refuel, String newRemarks) {
+    public static void sendRefuelRejected(UserHeader user, RefuelExtended refuel, String newRemarks) {
         // TODO: combine with above to reduce code duplication
-        Reservation reservation = refuel.getReservation();
-        UserHeader user = reservation.getUser();
-        String name = reservation.getCar().getName();
+        String name = refuel.getCarName();
         String amount = EurocentAmount.toString(refuel.getEurocents()) + " euro";
-        String from = Utils.toLocalizedString(reservation.getFrom());
-        String until = Utils.toLocalizedString(reservation.getUntil());
+        String from = Utils.toLocalizedString(refuel.getReservationFrom());
+        String until = Utils.toLocalizedString(refuel.getReservationUntil());
         createNotificationAndSend(user, "refuelRejected",
                 views.txt.messages.refuelRejected.render(user, name, amount, newRemarks, from, until),
                 views.html.messages.refuelRejected.render(user, name, amount,newRemarks, from, until),
@@ -163,14 +159,13 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendDetailsRejected(Reservation reservation, CarRide ride, String remarks) {
-        UserHeader driver = reservation.getUser();
-        String url = toFullURL(routes.WFTrip.tripInfo(reservation.getId()));
-        String carName = reservation.getCar().getName();
-        String from = Utils.toLocalizedString(reservation.getFrom());
-        String until = Utils.toLocalizedString(reservation.getUntil());
-        int start = ride.getStartKm();
-        int end = ride.getEndKm();
+    public static void sendDetailsRejected(UserHeader driver, TripWithCar trip, String remarks) {
+        String url = toFullURL(routes.WFTrip.tripInfo(trip.getId()));
+        String carName = trip.getCar().getName();
+        String from = Utils.toLocalizedString(trip.getFrom());
+        String until = Utils.toLocalizedString(trip.getUntil());
+        int start = trip.getStartKm();
+        int end = trip.getEndKm();
         createNotificationAndSend(driver, "detailsRejected",
                 views.txt.messages.detailsRejected.render(driver, carName, url, start, end, remarks, from, until),
                 views.html.messages.detailsRejected.render(driver, carName, url, start, end, remarks, from, until),
@@ -248,18 +243,18 @@ public class Notifier extends Mailer {
     }
 
 
-    public static void sendReservationDetailsProvidedMail(UserHeader user, Reservation reservation, CarRide ride) {
-        UserHeader driver = reservation.getUser();
+    public static void sendReservationDetailsProvidedMail(UserHeader owner, TripWithCar reservation) {
+        String driverName = reservation.getDriverName();
         String url = toFullURL(routes.Trips.details(reservation.getId()));
         String carName = reservation.getCar().getName();
         String from = Utils.toLocalizedString(reservation.getFrom());
         String until = Utils.toLocalizedString(reservation.getUntil());
-        int start = ride.getStartKm();
-        int end = ride.getEndKm();
-        createNotificationAndSend(user, "detailsProvided",
-                views.txt.messages.detailsProvided.render(user, driver, carName, url, start, end, from, until),
-                views.html.messages.detailsProvided.render(user, driver, carName, url, start, end, from, until),
-                carName, from, driver.toString()
+        int start = reservation.getStartKm();
+        int end = reservation.getEndKm();
+        createNotificationAndSend(owner, "detailsProvided",
+                views.txt.messages.detailsProvided.render(owner, driverName, carName, url, start, end, from, until),
+                views.html.messages.detailsProvided.render(owner, driverName, carName, url, start, end, from, until),
+                carName, from, driverName
         );
     }
 

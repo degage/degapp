@@ -32,6 +32,7 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.CarRide;
 import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -40,7 +41,7 @@ import java.util.List;
  * Created by HannesM on 10/03/14.
  */
 public interface CarRideDAO {
-    public CarRide createCarRide(Reservation reservation, int startMileage, int endMileage, boolean damaged) throws DataAccessException;
+    public CarRide createCarRide(ReservationHeader reservation, int startMileage, int endMileage, boolean damaged) throws DataAccessException;
 
     /**
      * Returns the trip details of the given ride. Returns null if no trip details are available.

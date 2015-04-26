@@ -79,7 +79,7 @@ public class RefuelCreate extends RefuelCommon {
         return redirect(routes.Refuels.showRefuelsForTrip(reservationId, ownerFlow));
     }
 
-    // use in injected context only
+    // use in injected context only (owner null when isAdmin)
     static void newRefuel(TripWithCar trip, UserHeader owner, int eurocents, int fileId,
                           int km, String amount) {
         boolean isAdmin = isOwnerOrAdmin(trip);

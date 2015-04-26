@@ -128,13 +128,13 @@ public class WFTrip extends WFCommon {
     @InjectContext
     public static Result tripInfo(int reservationId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        Reservation reservation = context.getReservationDAO().getReservation(reservationId);
-        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(reservation)) {
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(trip)) {
             flash("danger", "Je kan geen ritdetails (meer) ingegeven voor deze rit.");
             return redirectToDetails(reservationId);
         }
 
-        ReservationStatus status = reservation.getStatus();
+        ReservationStatus status = trip.getStatus();
         if (status == ReservationStatus.REQUEST_DETAILS) {
             // first time information is entered
             // mail sent to owner (if owner is not driver)
@@ -145,24 +145,24 @@ public class WFTrip extends WFCommon {
             data.damaged = false;
             return ok(newtrip.render(
                     Form.form(TripDataExtended.class).fill(data),
-                    reservation
+                    trip
             ));
         } else {
             // information is edited
             CarRide ride = context.getCarRideDAO().getCarRide(reservationId);
             return ok(edittrip.render(
                     Form.form(TripData.class).fill(new TripData().populate(ride)),
-                    reservation
+                    trip
             ));
         }
     }
 
     // must be used with injected context
-    private static void updateToDetailsProvided(Reservation reservation, CarRide ride, UserHeader owner) {
+    private static void updateToDetailsProvided(TripWithCar trip, UserHeader owner) {
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        rdao.updateReservationStatus(reservation.getId(), ReservationStatus.DETAILS_PROVIDED);
-        Notifier.sendReservationDetailsProvidedMail(owner, reservation, ride);
+        rdao.updateReservationStatus(trip.getId(), ReservationStatus.DETAILS_PROVIDED);
+        Notifier.sendReservationDetailsProvidedMail(owner, trip);
     }
 
     /**
@@ -176,15 +176,15 @@ public class WFTrip extends WFCommon {
         Form<TripDataExtended> form = Form.form(TripDataExtended.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        Reservation reservation = rdao.getReservation(reservationId);
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
 
-        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(reservation)
-                || reservation.getStatus() != ReservationStatus.REQUEST_DETAILS) {
+        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(trip)
+                || trip.getStatus() != ReservationStatus.REQUEST_DETAILS) {
             return badRequest(); // this should not happen
         }
 
         if (form.hasErrors()) {
-            return badRequest(newtrip.render(form, reservation));
+            return badRequest(newtrip.render(form, trip));
         } else {
             TripDataExtended data = form.get();
             Http.MultipartFormData.FilePart filePart = Controller.request().body().asMultipartFormData().getFile("picture");
@@ -195,7 +195,7 @@ public class WFTrip extends WFCommon {
                 if (errors.isEmpty()) {
                     if (filePart == null) {
                         form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
-                        return badRequest(newtrip.render(form, reservation));
+                        return badRequest(newtrip.render(form, trip));
                     }
                 } else {
                     if (filePart == null) {
@@ -206,7 +206,7 @@ public class WFTrip extends WFCommon {
                     for (ValidationError error : errors) {
                         form.reject(error);
                     }
-                    return badRequest(newtrip.render(form, reservation));
+                    return badRequest(newtrip.render(form, trip));
                 }
             }
 
@@ -215,17 +215,21 @@ public class WFTrip extends WFCommon {
             CarRide ride = dao.getCarRide(reservationId);
             if (ride == null) {
                 boolean damaged = data.damaged;
-                dao.createCarRide(reservation, data.startKm, data.endKm, damaged);
+                dao.createCarRide(trip, data.startKm, data.endKm, damaged);
                 if (damaged) {
-                    context.getDamageDAO().createDamage(reservation); // TODO: why is this? Delegate to database module?
+                    context.getDamageDAO().createDamage(trip); // TODO: why is this? Delegate to database module?
                 }
             } else {//  make changes and approve
                 dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             }
 
+            trip.setStartKm(data.startKm);
+            trip.setStartKm(data.endKm); // for use in message sent later
+
+
             // change ride status according to whether current user is owner or not
             UserHeader owner = null;
-            if (isOwnerOrAdmin(reservation)) {
+            if (isOwnerOrAdmin(trip)) {
                 // approve immediately
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
             } else {
@@ -233,8 +237,8 @@ public class WFTrip extends WFCommon {
                 if (ride == null) {
                     ride = dao.getCarRide(reservationId);
                 }
-                owner = context.getUserDAO().getUserHeader(reservation.getOwnerId());
-                updateToDetailsProvided(reservation, ride, owner);
+                owner = context.getUserDAO().getUserHeader(trip.getOwnerId());
+                updateToDetailsProvided(trip, owner);
             }
 
             // add first refuel, if present
@@ -242,10 +246,8 @@ public class WFTrip extends WFCommon {
                 File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
                 if (file == null || file.getContentType() == null) {
                     form.reject("picture", "Het bestand  is van het verkeerde type");
-                    return badRequest(newtrip.render(form, reservation));
+                    return badRequest(newtrip.render(form, trip));
                 } else {
-                    // TODO: can this be avoided?
-                    TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
                     RefuelCreate.newRefuel(trip, owner, data.amount.getValue(),
                             file.getId(), data.km, data.fuelAmount
                     );
@@ -265,29 +267,29 @@ public class WFTrip extends WFCommon {
         Form<TripData> form = Form.form(TripData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ReservationDAO rdao = context.getReservationDAO();
-        Reservation reservation = rdao.getReservation(reservationId);
-
-        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(reservation) ||
-                reservation.getStatus() == ReservationStatus.REQUEST_DETAILS) {
+        TripWithCar trip = context.getTripDAO().getTripAndCar(reservationId, false);
+        if (WorkflowAction.EDIT_TRIP.isForbiddenForCurrentUser(trip) ||
+                trip.getStatus() == ReservationStatus.REQUEST_DETAILS) {
             return badRequest();
         }
 
         if (form.hasErrors()) {
-            return badRequest(edittrip.render(form, reservation));
+            return badRequest(edittrip.render(form, trip));
         } else {
             TripData data = form.get();
             CarRideDAO dao = context.getCarRideDAO();
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
-            if (isOwnerOrAdmin(reservation)) {
+            trip.setStartKm(data.startKm);
+            trip.setStartKm(data.endKm); // for use in message sent later
+            if (isOwnerOrAdmin(trip)) {
                 // approve immediately
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
-            } else if (reservation.getStatus() == ReservationStatus.DETAILS_REJECTED) {
+            } else if (trip.getStatus() == ReservationStatus.DETAILS_REJECTED) {
                 // register and send mail to owner
                 flash("success", "De bestuurder wordt via mail op de hoogte gebracht van uw correcties");
                 updateToDetailsProvided(
-                        reservation,
-                        dao.getCarRide(reservationId),
-                        context.getUserDAO().getUserHeader(reservation.getOwnerId())
+                        trip,
+                        context.getUserDAO().getUserHeader(trip.getOwnerId())
                 );
             }
             return redirectToDetails(reservationId);

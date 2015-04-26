@@ -33,9 +33,12 @@
     <div class="col-sm-6">
         <h4>Reservatie</h4>
         <dl class="dl-horizontal">
-            @if(db.CurrentUser isNot trip.getUserId) {
-                <dt>Bestuurder</dt>
-                <dd>@trip.getDriverName</dd>
+            @if(db.CurrentUser is trip.getUserId) {
+                @if(db.CurrentUser is trip.getOwnerId) {
+                    <dt>Bestuurder</dt><dd>Jij</dd>
+                }
+            } else {
+                <dt>Bestuurder</dt><dd>@trip.getDriverName</dd>
             }
             <dt>Status</dt><dd><i>@trip.getStatus</i></dd>
             <dt>Periode</dt>
@@ -43,7 +46,7 @@
             @defining(trip.getCar) { car =>
                 <dt>Auto</dt>
                 <dd><a href="@routes.Cars.detail(car.getId)">@car.getName (@car.getBrand @car.getType)</a></dd>
-                @if(car.getLocation != null) {
+                @if((db.CurrentUser isNot trip.getOwnerId) && car.getLocation != null) {
                     <dt>Standplaats</dt>
                     <dd>@car.getLocation</dd>
                 }

@@ -27,11 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, carName: String, url: String, start: Int, end: Int, from: String, until: String)
+@(user: UserHeader, driverName: String, carName: String, url: String, start: Int, end: Int, from: String, until: String)
 
 @* Nieuwe kilometerstanden *@
 <p>Beste @user.getFirstName,</p>
-<p>Bestuurder @driver heeft de volgende
+<p>Bestuurder <i>@driverName</i> heeft de volgende
 kilometerstanden ingegeven:</p>
 <ul>
     <li><b>Auto:</b> @carName</li>

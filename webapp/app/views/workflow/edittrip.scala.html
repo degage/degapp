@@ -27,23 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[WFTrip.TripData], reservation: Reservation)
+@(form: Form[WFTrip.TripData], trip: TripWithCar)
 
 @scripts={<script type="text/javascript" src='@routes.Assets.at("javascripts/app/checkkm.js")'></script>}
 
-@caption=@{if(WFCommon.isOwnerOrAdmin(reservation))("Wijzigen (en meteen goedkeuren)")else("Wijzigen")}
+@caption=@{if(WFCommon.isOwnerOrAdmin(trip))("Wijzigen (en meteen goedkeuren)")else("Wijzigen")}
 
 @extrabc = {
     @breadcrumb("Ritten",routes.Trips.index())
-    @breadcrumb("Details",routes.Trips.details(reservation.getId))
+    @breadcrumb("Details",routes.Trips.details(trip.getId))
 }
 
 @stdlayout("Wijzigen kilometerstanden", extrabc=extrabc, scripts=scripts) {
 
-    @trips.detailsPanelPartial(reservation)
+    @trips.detailsPanelPartial(trip)
 
     @panel("Gegevens", "fa-pencil") {
-        @helper.form(routes.WFTrip.doEditTripInfo(reservation.getId)){
+        @helper.form(routes.WFTrip.doEditTripInfo(trip.getId)){
             @std.numberField(form("startKm"), "Kilometerstand vóór de rit", css="col-sm-6")
             @std.numberField(form("endKm"), "na de rit:", css="col-sm-6")
 

@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuelList: Iterable[Refuel], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(refuelList: Iterable[RefuelExtended], page : Int, amountOfResults : Int, amountOfPages : Int)
 @import providers.DataProvider
 @import db.CurrentUser
 
@@ -47,14 +47,12 @@
             </thead>
             <tbody>
                 @foreach.orElse(refuelList) { refuel =>
-                    @defining( refuel.getCarRide.getReservation ) { reservation =>
-                        <tr>
-                            <td><a href="@routes.Cars.detail(reservation.getCar.getId)">@reservation.getCar.getName</a></td>
-                            <td><a href="@routes.Trips.details(reservation.getId)">@Utils.toLocalizedDateString(reservation.getFrom)</a></td>
-                            <td><a href="@routes.Profile.index(reservation.getUserId)">@reservation.getUser</a></td>
-                            @columns(refuel,isAdmin)
-                        </tr>
-                    }
+                    <tr>
+                        <td><a href="@routes.Cars.detail(refuel.getCarId)">@refuel.getCarName</a></td>
+                        <td><a href="@routes.Trips.details(refuel.getReservationId)">@Utils.toLocalizedDateString(refuel.getReservationFrom)</a></td>
+                        <td><a href="@routes.Profile.index(refuel.getDriverId)">@refuel.getDriverName</a></td>
+                        @columns(refuel,isAdmin)
+                    </tr>
                 }{
                     <tr>
                         <td class="empty-row" colspan="7">

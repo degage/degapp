@@ -36,26 +36,22 @@ import java.time.LocalDate;
  * Created by HannesM on 10/03/14.
  */
 public class CarRide {
-    private Reservation reservation; // reservation.getId() is CarRide-id
+    private ReservationHeader reservation; // reservation.getId() is CarRide-id
     private int startKm;   // 0  when not filled in
     private int endKm;
     private boolean damaged;
     private BigDecimal cost;
     private LocalDate billed;
 
-    public CarRide(Reservation reservation, int startKm, int endKm, boolean damaged) {
+    public CarRide(ReservationHeader reservation, int startKm, int endKm, boolean damaged) {
         this.reservation = reservation;
         this.startKm = startKm;
         this.endKm = endKm;
         this.damaged = damaged;
     }
 
-    public Reservation getReservation() {
+    public ReservationHeader getReservation() {
         return reservation;
-    }
-
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
     }
 
     public int getStartKm() {

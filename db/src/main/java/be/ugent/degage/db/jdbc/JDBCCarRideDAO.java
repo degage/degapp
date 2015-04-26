@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.CarRideDAO;
 import be.ugent.degage.db.models.CarRide;
 import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -53,7 +54,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
 
     public static CarRide populateCarRide(ResultSet rs) throws SQLException {
         CarRide carRide = new CarRide(
-                JDBCReservationDAO.populateReservation(rs),
+                JDBCReservationDAO.populateReservationHeader(rs),
                 rs.getInt("car_ride_start_km"),
                 rs.getInt("car_ride_end_km"),
                 rs.getBoolean("car_ride_damage")
@@ -71,7 +72,7 @@ class JDBCCarRideDAO extends AbstractDAO implements CarRideDAO {
     );
     
     @Override
-    public CarRide createCarRide(Reservation reservation, int startKm, int endKm, boolean damaged) throws DataAccessException {
+    public CarRide createCarRide(ReservationHeader reservation, int startKm, int endKm, boolean damaged) throws DataAccessException {
         try{
             PreparedStatement ps = createCarRideStatement.value();
             ps.setInt(1, reservation.getId());

@@ -32,11 +32,10 @@ package be.ugent.degage.db.models;
 import java.time.LocalDate;
 
 /**
- * Created by Stefaan Vermassen on 26/04/14.
+ * Contains information about a single refuel.
  */
 public class Refuel {
     private int id;
-    private CarRide carRide;
     private int proofId;
     private int eurocents;
     private RefuelStatus status;
@@ -45,10 +44,9 @@ public class Refuel {
     private String amount; // Amount of fuel (free format)
     private String message;
 
-    public Refuel(int id, CarRide carRide, int proofId, int eurocents, RefuelStatus status,
+    public Refuel(int id, int proofId, int eurocents, RefuelStatus status,
                   int km, String amount, String message) {
         this.id = id;
-        this.carRide = carRide;
         this.proofId = proofId;
         this.eurocents = eurocents;
         this.status = status;
@@ -64,12 +62,6 @@ public class Refuel {
     public void setId(int id) {
         this.id = id;
     }
-
-    public CarRide getCarRide() {
-        return carRide;
-    }
-
-    public Reservation getReservation() { return carRide.getReservation(); } // TODO: header?
 
     public int getProofId() {
         return proofId;

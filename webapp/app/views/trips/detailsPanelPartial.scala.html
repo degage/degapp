@@ -27,21 +27,21 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(reservation: Reservation, tripInfo: CarRide = null)
+@(trip: TripWithCar)
 
 @panel("Rit- en reservatiedetails", "fa-bar-chart-o"){
     <div class="col-sx-12">
         <dl class="dl-horizontal">
-            <dt>Status</dt><dd><i>@reservation.getStatus</i></dd>
+            <dt>Status</dt><dd><i>@trip.getStatus</i></dd>
             <dt>Periode</dt>
-            <dd>@Utils.toLocalizedString(reservation.getFrom) — @Utils.toLocalizedString(reservation.getUntil)</dd>
+            <dd>@Utils.toLocalizedString(trip.getFrom) — @Utils.toLocalizedString(trip.getUntil)</dd>
             <dt>Auto</dt>
-            <dd>@reservation.getCar.getName</dd>
-        @if(tripInfo != null) {
+            <dd>@trip.getCar.getName</dd>
+        @if(trip.getStartKm > 0) {
                 <dt>Kilometerstanden</dt>
-                <dd>@tripInfo.getStartKm — @tripInfo.getEndKm</dd>
+                <dd>@trip.getStartKm — @trip.getEndKm</dd>
                 <dt>Schade?</dt>
-                <dd>@if(tripInfo.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
+                <dd>@if(trip.isDamaged){<span class="text-danger">Ja</span>}else{Nee}</dd>
         }
         </dl>
     </div>
