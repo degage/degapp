@@ -43,6 +43,8 @@ public interface CarDAO {
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                          TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, int photoId) throws DataAccessException;
     public void updateCar(Car car) throws DataAccessException;
+
+
     public Car getCar(int id) throws DataAccessException;
 
     /**
@@ -85,5 +87,7 @@ public interface CarDAO {
     public Iterable<CarHeader> listCarsOfUser (int userId)  throws DataAccessException;
 
     public boolean isCarOfUser (int carId, int userId) throws DataAccessException;
+
+    public UserHeader getOwnerOfCar(int carId)  throws DataAccessException;
 
 }

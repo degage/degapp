@@ -43,6 +43,7 @@ import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
+import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -56,12 +57,10 @@ import play.twirl.api.Html;
 import views.html.cars.*;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * Controller responsible for creating, updating and showing of cars
@@ -638,8 +637,8 @@ public class Cars extends Controller {
     public static class CarCostModel {
 
         public String description;
-        public BigDecimal amount;
-        public BigDecimal mileage;
+        public EurocentAmount amount;
+        public int mileage;
         public LocalDate time;
 
         public String validate() {
@@ -700,7 +699,7 @@ public class Cars extends Controller {
                         FileDAO fdao = context.getFileDAO();
                         try {
                             File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
-                            CarCost carCost = dao.createCarCost(car, model.amount, model.mileage, model.description, model.time, file.getId());
+                            CarCost carCost = dao.createCarCost(carId, car.getName(), model.amount.getValue(), model.mileage, model.description, model.time, file.getId());
                             if (carCost == null) {
                                 flash("danger", "Failed to add the carcost to the database. Contact administrator.");
                                 return redirect(routes.Cars.detail(carId));
@@ -774,10 +773,10 @@ public class Cars extends Controller {
             orderBy = FilterField.CAR_COST_DATE;
         }
 
-        List<CarCost> listOfResults = dao.getCarCostList(orderBy, asc, page, pageSize, filter);
+        Iterable<CarCost> listOfResults = dao.getCarCostList(orderBy, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfCarCosts(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+        int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
         return carCostspage.render(listOfResults, page, amountOfResults, amountOfPages);
     }
@@ -797,16 +796,15 @@ public class Cars extends Controller {
         CarCost carCost = dao.getCarCost(carCostId);
         carCost.setStatus(ApprovalStatus.ACCEPTED);
         dao.updateCarCost(carCost);
-        Notifier.sendCarCostApproved(carCost.getCar().getOwner(), carCost);
+        int carId = carCost.getCarId();
+        Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
 
-        flash("success", "Autokost succesvol geaccepteerd");
+        flash("success", "Autokost met succes geaccepteerd");
         if (returnToDetail == 0) {
             return redirect(routes.Cars.showCarCosts());
         } else {
-            return redirect(routes.Cars.detail(carCost.getCar().getId()));
+            return redirect(routes.Cars.detail(carId));
         }
-
-
     }
 
     /**
@@ -820,17 +818,18 @@ public class Cars extends Controller {
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result refuseCarCost(int carCostId, int returnToDetail) {
+        // TODO: very similar to approve
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
         CarCost carCost = dao.getCarCost(carCostId);
         carCost.setStatus(ApprovalStatus.REFUSED);
         dao.updateCarCost(carCost);
-        Notifier.sendCarCostRejected(carCost.getCar().getOwner(), carCost);
+        int carId = carCost.getCarId();
+        Notifier.sendCarCostRejected(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+        flash("success", "Autokost met succes geweigerd");
         if (returnToDetail == 0) {
-            flash("success", "Autokost succesvol geweigerd");
             return redirect(routes.Cars.showCarCosts());
         } else {
-            flash("success", "Autokost succesvol geweigerd");
-            return redirect(routes.Cars.detail(carCost.getCar().getId()));
+            return redirect(routes.Cars.detail(carId));
         }
     }
 

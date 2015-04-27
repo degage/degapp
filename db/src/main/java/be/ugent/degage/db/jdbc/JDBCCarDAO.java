@@ -753,8 +753,21 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 return rs.next();
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not determine car onwerschip");
+            throw new DataAccessException("Could not determine car ownership");
         }
     }
 
+    @Override
+    public UserHeader getOwnerOfCar(int carId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+           "SELECT " + JDBCUserDAO.USER_HEADER_FIELDS +
+               "FROM cars JOIN users ON user_id=car_owner_user_id " +
+               "WHERE car_id = ?"
+        )) {
+            ps.setInt(1, carId);
+            return toSingleObject(ps, JDBCUserDAO::populateUserHeader);
+        }  catch (SQLException ex) {
+            throw new DataAccessException("Could not determine car ownwer");
+        }
+    }
 }

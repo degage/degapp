@@ -111,25 +111,25 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendCarCostApproved(UserHeader user, CarCost carCost) {
+    public static void sendCarCostApproved(UserHeader owner, CarCost carCost) {
         String date = Utils.toLocalizedDateString(carCost.getDate());
-        String name = carCost.getCar().getName();
-        String amount = carCost.getAmount().toPlainString() + " euro";
+        String name = carCost.getCarName();
+        String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String description = carCost.getDescription();
-        createNotificationAndSend(user, "costApproved",
-                views.txt.messages.costApproved.render(user, name, description, amount, date),
-                views.html.messages.costApproved.render(user, name, description, amount, date)
+        createNotificationAndSend(owner, "costApproved",
+                views.txt.messages.costApproved.render(owner, name, description, amount, date),
+                views.html.messages.costApproved.render(owner, name, description, amount, date)
         );
     }
 
-    public static void sendCarCostRejected(UserHeader user, CarCost carCost) {
+    public static void sendCarCostRejected(UserHeader owner, CarCost carCost) {
         String date = Utils.toLocalizedDateString(carCost.getDate());
-        String name = carCost.getCar().getName();
-        String amount = carCost.getAmount().toPlainString() + " euro";
+        String name = carCost.getCarName();
+        String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String description = carCost.getDescription();
-        createNotificationAndSend(user, "costRejected",
-                views.txt.messages.costRejected.render(user, name, description, amount, date),
-                views.html.messages.costRejected.render(user, name, description, amount, date)
+        createNotificationAndSend(owner, "costRejected",
+                views.txt.messages.costRejected.render(owner, name, description, amount, date),
+                views.html.messages.costRejected.render(owner, name, description, amount, date)
         );
     }
 
@@ -178,8 +178,8 @@ public class Notifier extends Mailer {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserRoleDAO userRoleDAO = context.getUserRoleDAO();
         String date = Utils.toLocalizedDateString(carCost.getDate());
-        String carName = carCost.getCar().getName();
-        String amount = carCost.getAmount().toPlainString() + " euro";
+        String carName = carCost.getCarName();
+        String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String costDescription = carCost.getDescription();
         for (UserHeader u : userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN)) {
             createNotification(context, u, "costRequest",

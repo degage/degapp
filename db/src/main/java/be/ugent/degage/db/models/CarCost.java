@@ -29,19 +29,19 @@
 
 package be.ugent.degage.db.models;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 /**
- * Created by Stefaan Vermassen on 15/04/14.
+ * Information on costs made for a certain car
  */
 public class CarCost {
 
     private int id;
-    private Car car;
-    private BigDecimal amount;
+    private int carId;
+    private String carName;
+    private int amount; // in eurocent
     private LocalDate date;
-    private BigDecimal mileage;
+    private int km;
     private String description;
     private ApprovalStatus status;
     private int proofId;
@@ -55,28 +55,20 @@ public class CarCost {
         this.id = id;
     }
 
-    public Car getCar() {
-        return car;
-    }
-
-    public void setCar(Car car) {
-        this.car = car;
-    }
-
-    public BigDecimal getAmount() {
+    public int getAmount() {
         return amount;
     }
 
-    public void setAmount(BigDecimal amount) {
+    public void setAmount(int amount) {
         this.amount = amount;
     }
 
-    public BigDecimal getMileage() {
-        return mileage;
+    public int getKm() {
+        return km;
     }
 
-    public void setMileage(BigDecimal mileage) {
-        this.mileage = mileage;
+    public void setKm(int km) {
+        this.km = km;
     }
 
     public String getDescription() {
@@ -115,14 +107,23 @@ public class CarCost {
 
     public void setBilled(LocalDate billed) { this.billed = billed; }
 
-    public CarCost(int id, Car car, BigDecimal amount, BigDecimal mileage, String description, LocalDate date, int proofId){
+    public int getCarId() {
+        return carId;
+    }
+
+    public String getCarName() {
+        return carName;
+    }
+
+    public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId, int carId, String carName){
         this.id = id;
-        this.car = car;
         this.amount = amount;
-        this.mileage = mileage;
+        this.km = km;
         this.description = description;
         this.date = date;
         this.status = ApprovalStatus.REQUEST;
         this.proofId = proofId;
+        this.carId = carId;
+        this.carName = carName;
     }
 }

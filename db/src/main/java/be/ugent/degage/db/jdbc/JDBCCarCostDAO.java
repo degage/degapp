@@ -33,23 +33,22 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarCostDAO;
-import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.ApprovalStatus;
 
-import java.math.BigDecimal;
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  */
 class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
-            // TODO: replace * by actual fields
-    public static final String CAR_COST_QUERY = "SELECT * FROM carcosts " +
-            "JOIN cars ON car_cost_car_id = car_id ";
+    private static final String CAR_COST_FIELDS =
+	    "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
+        "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name";
+
+    public static final String CAR_COST_QUERY =
+        "SELECT " + CAR_COST_FIELDS + " FROM carcosts JOIN cars ON car_cost_car_id = car_id ";
 
     public static final String FILTER_FRAGMENT = " WHERE car_cost_status LIKE ? AND car_cost_car_id LIKE ?";
 
@@ -67,20 +66,22 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         if(carId.equals("") || carId.startsWith("-")) { // Not very nice programming, but works :D
             carId = "%%";
         }
-        ps.setString(start+1, carId);
+        ps.setString(start + 1, carId);
     }
 
 
-    public static CarCost populateCarCost(ResultSet rs, Car car) throws SQLException {
+    public static CarCost populateCarCost(ResultSet rs) throws SQLException {
         Date carCostTime = rs.getDate("car_cost_time");
         CarCost carCost = new CarCost(
                 rs.getInt("car_cost_id"),
-                car,
-                rs.getBigDecimal("car_cost_amount"),
-                rs.getBigDecimal("car_cost_mileage"),
+                rs.getInt("car_cost_amount"),
+                rs.getInt("car_cost_mileage"),
                 rs.getString("car_cost_description"),
                 carCostTime == null ? null : carCostTime.toLocalDate(),
-                rs.getInt("car_cost_proof"));
+                rs.getInt("car_cost_proof"),
+                rs.getInt("car_cost_car_id"),
+                rs.getString("car_name")
+                );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
         Date carCostBilled = rs.getDate("car_cost_billed");
@@ -88,86 +89,64 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         return carCost;
     }
 
-    private LazyStatement createCarCostStatement = new LazyStatement (
-            "INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
-                    "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof) VALUES (?,?,?,?,?,?)",
-            "car_cost_id"
-    );
-
     @Override
-    public CarCost createCarCost(Car car, BigDecimal amount, BigDecimal mileage, String description, LocalDate date, int fileId) throws DataAccessException {
-        try{
-            PreparedStatement ps = createCarCostStatement.value();
-            ps.setInt(1, car.getId());
-            ps.setBigDecimal(2, amount);
+    public CarCost createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date, int fileId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
+                    "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof) VALUES (?,?,?,?,?,?)",
+                "car_cost_id"
+        )) {
+            ps.setInt(1, carId);
+            ps.setInt(2, amount);
             ps.setString(3, description);
             ps.setDate(4, Date.valueOf(date));
-            ps.setBigDecimal(5, mileage);
+            ps.setInt(5, km);
             if (fileId == 0) {
                 ps.setNull(6, Types.INTEGER); // 0 not allowed because of foreign key constraint
             } else {
                 ps.setInt(6, fileId);
             }
-            if(ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when creating carcost.");
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new CarCost(keys.getInt(1), car, amount, mileage, description, date, fileId);
-            } catch (SQLException ex) {
-                throw new DataAccessException("Failed to get primary key for carcost.", ex);
+                return new CarCost(keys.getInt(1), amount, km, description, date, fileId, carId, carName);
             }
         } catch (SQLException e){
             throw new DataAccessException("Unable to create carcost", e);
         }
     }
 
-    private LazyStatement getAmountOfCarCostsStatement = new LazyStatement (
-            "SELECT count(car_cost_id) AS amount_of_carcosts FROM carcosts " +
-                    "JOIN cars ON car_cost_car_id = car_id " + FILTER_FRAGMENT
-    );
+    private static void appendCostFilter(StringBuilder builder, Filter filter) {
+        StringBuilder b = new StringBuilder();
+        FilterUtils.appendIdFilter(b, "car_cost_car_id", filter.getValue(FilterField.CAR_ID));
+        FilterUtils.appendStringFilter(b, "car_cost_status", filter.getValue(FilterField.CAR_COST_STATUS));
+        if (b.length() > 0) {
+            builder.append(" WHERE ").append(b.substring(4));
+        }
+    }
 
     @Override
     public int getAmountOfCarCosts(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfCarCostsStatement.value();
-            fillFragment(ps, filter, 1);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return rs.getInt("amount_of_carcosts");
-                else return 0;
-
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of carcosts", ex);
-            }
+        StringBuilder builder = new StringBuilder("SELECT count(*) AS amount_of_carcosts FROM carcosts ");
+        appendCostFilter(builder, filter);
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of carcosts", ex);
         }
     }
 
-    private LazyStatement getCarCostListPageByDateDescStatement = new LazyStatement (
-            CAR_COST_QUERY + FILTER_FRAGMENT + " ORDER BY car_cost_created_at DESC LIMIT ?, ?"
-    );
-
     @Override
-    public List<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = null;
-            switch(orderBy) { // TODO: more to orderBy, asc/desc
-                case CAR_COST_DATE:
-                    ps = getCarCostListPageByDateDescStatement.value();
-                    break;
-            }
-            if(ps == null) {
-                throw new DataAccessException("Could not create getCarCostList statement");
-            }
-
-            fillFragment(ps, filter, 1);
-            int first = (page-1)*pageSize;
-            ps.setInt(3, first);
-            ps.setInt(4, pageSize);
-            return getCarCostList(ps);
+    public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        StringBuilder builder = new StringBuilder(CAR_COST_QUERY);
+        appendCostFilter(builder, filter);
+        builder.append(" ORDER BY car_cost_created_at DESC LIMIT ?, ?");
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setInt(1, (page - 1) * pageSize);
+            ps.setInt(2, pageSize);
+            return toList(ps, JDBCCarCostDAO::populateCarCost);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of carcosts", ex);
         }
@@ -182,74 +161,32 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public void updateCarCost(CarCost carCost) throws DataAccessException {
         try {
             PreparedStatement ps = getUpdateCarCostStatement.value();
-            ps.setBigDecimal(1, carCost.getAmount());
+            ps.setInt(1, carCost.getAmount());
             ps.setString(2, carCost.getDescription());
             ps.setString(3, carCost.getStatus().name());
             ps.setDate(4, Date.valueOf(carCost.getDate()));
-            ps.setBigDecimal(5, carCost.getMileage());
+            ps.setInt(5, carCost.getKm());
             ps.setInt(6, carCost.getId());
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("CarCost update affected 0 rows.");
+            ps.executeUpdate();
         } catch (SQLException e){
             throw new DataAccessException("Unable to update CarCost", e);
         }
 
     }
 
-    private LazyStatement getCarCostStatement = new LazyStatement (
-            "SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
-                    "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
-                    "LEFT JOIN technicalcardetails ON car_id = details_id " +
-                    "WHERE car_cost_id=?"
-    );
-
     @Override
     public CarCost getCarCost(int id) throws DataAccessException {
-        try {
-            PreparedStatement ps = getCarCostStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                CAR_COST_QUERY + " WHERE car_cost_id = ?"
+        )){
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if(rs.next())
-                    return populateCarCost(rs, JDBCCarDAO.populateCar(rs, true));
-                else return null;
-            }catch (SQLException e){
-                throw new DataAccessException("Error reading reservation resultset", e);
-            }
+            return toSingleObject(ps, JDBCCarCostDAO::populateCarCost);
         } catch (SQLException e){
-            throw new DataAccessException("Unable to get reservation", e);
+            throw new DataAccessException("Unable to get car cost", e);
         }
     }
 
-    private List<CarCost> getCarCostList(PreparedStatement ps) throws DataAccessException {
-        List<CarCost> list = new ArrayList<>();
-        try (ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(populateCarCost(rs, JDBCCarDAO.populateCar(rs, false)));
-            }
-            return list;
-        }catch (SQLException e){
-            throw new DataAccessException("Error while reading carcost resultset", e);
-
-        }
-    }
-
-    private LazyStatement getEndPeriodStatement = new LazyStatement (
-            "UPDATE carcosts SET car_cost_billed = CURDATE() " +
-                    "WHERE car_cost_billed = NULL AND car_cost_status = 'ACCEPTED'"
-    );
-
-    @Override
-    public void endPeriod() throws DataAccessException {
-        try {
-            PreparedStatement ps = getEndPeriodStatement.value();
-
-            if(ps.executeUpdate() == 0)
-                throw new DataAccessException("Car Cost update affected 0 rows.");
-        } catch (SQLException e){
-            throw new DataAccessException("Unable to update car cost", e);
-        }
-    }
-
+    /*
     private LazyStatement getBillCarCostsStatement = new LazyStatement (
             "SELECT * FROM carcosts JOIN cars ON car_cost_car_id = car_id " +
                     "JOIN users ON car_owner_user_id = user_id LEFT JOIN addresses ON user_address_domicile_id = address_id " +
@@ -272,4 +209,5 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             throw new DataAccessException("Unable to retrieve the list of car costs", e);
         }
     }
+    */
 }

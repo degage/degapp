@@ -54,11 +54,19 @@ public final class FilterUtils {
     /**
      * Append to the given builder the 'ILIKE'-string that corresponds to this filter.
      */
-    public static void appendILikeString(StringBuilder builder, String key, String value) {
+    public static void appendILikeFilter(StringBuilder builder, String key, String value) {
         if (value != null) {
             builder.append(" AND ")
                     .append(key)
                     .append(" ILIKE '") ;
+            appendEscapedString(builder, value);
+            builder.append('\'');
+        }
+    }
+
+    public static void appendStringFilter(StringBuilder builder, String key, String value) {
+        if (value != null) {
+            builder.append(" AND ").append(key).append("= '") ;
             appendEscapedString(builder, value);
             builder.append('\'');
         }
