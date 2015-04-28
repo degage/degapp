@@ -107,7 +107,7 @@ public class Application extends Controller {
         return ok(
                 Routes.javascriptRouter("myJsRoutes",
                         // Routes
-                        javascript.Cars.getCarCostModal(),
+                        javascript.Costs.getCarCostModal(),
                         javascript.Cars.updatePrivileged(),
                         javascript.Cars.getCarInfoModal(),
                         javascript.Damages.editDamage(),
@@ -126,7 +126,7 @@ public class Application extends Controller {
                         // Routes
                         javascript.Approvals.pendingApprovalListPaged(),
                         javascript.Calendars.listAvailableCarsPage(),
-                        javascript.Cars.showCarCostsPage(),
+                        javascript.Costs.showCarCostsPage(),
                         javascript.Cars.showCarsPage(),
                         javascript.Damages.showDamagesPage(),
                         javascript.Damages.showDamagesPageOwner(),

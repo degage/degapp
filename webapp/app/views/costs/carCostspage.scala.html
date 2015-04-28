@@ -64,21 +64,21 @@
         </td>
         <td>
             <div class="btn-group btn-group-xs">
-                <a class="btn btn-primary" href="@routes.Cars.getCarCostProof(carCost.getId)">Link</a>
+                <a class="btn btn-primary" href="@routes.Costs.getCarCostProof(carCost.getId)">Link</a>
             </div>
         </td>
         @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
             <td>
             @carCost.getStatus match {
                 case ApprovalStatus.ACCEPTED => {
-                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Costs.refuseCarCost(carCost.getId,1)">Afkeuren</a>
                 }
                 case ApprovalStatus.REFUSED => {
-                    <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                    <a type="button" class="btn btn-xs btn-success" href="@routes.Costs.approveCarCost(carCost.getId,1)">Goedkeuren</a>
                 }
                 case ApprovalStatus.REQUEST => {
-                    <a type="button" class="btn btn-xs btn-success" href="@routes.Cars.approveCarCost(carCost.getId,1)">Goedkeuren</a>
-                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Cars.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                    <a type="button" class="btn btn-xs btn-success" href="@routes.Costs.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Costs.refuseCarCost(carCost.getId,1)">Afkeuren</a>
                 }
                 case _ => {}
             }

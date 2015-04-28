@@ -199,18 +199,20 @@ GET         /cars/edit                              controllers.Cars.editCar(id:
 POST        /cars/edit                              controllers.Cars.editCarPost(id: Int)
 GET         /cars/picture                           controllers.Cars.getPicture(id: Int)
 GET         /cars/registration                      controllers.Cars.getRegistrationPicture(id: Int)
-GET         /cars/modal/carcost                     controllers.Cars.getCarCostModal(id: Int)
 GET         /cars/modal/info                        controllers.Cars.getCarInfoModal(id: Int)
-POST        /cars/carcost/new                       controllers.Cars.addNewCarCost(id: Int)
-GET         /cars/carcosts                          controllers.Cars.showCarCosts()
-GET         /cars/carcosts/page                     controllers.Cars.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /cars/carcosts/approved                 controllers.Cars.approveCarCost(carCostId: Int, returnToDetail: Int)
-GET         /cars/carcosts/refused                  controllers.Cars.refuseCarCost(carCostId: Int, returnToDetail: Int)
-GET         /cars/carcosts/proof                    controllers.Cars.getCarCostProof(proofId: Int)
 GET         /cars/privileges/edit                   controllers.Cars.updatePrivileged(id : Int, values : String)
 
+# Costs
+GET         /costs/modal                            controllers.Costs.getCarCostModal(id: Int)
+POST        /costs/new                              controllers.Costs.addNewCarCost(id: Int)
+GET         /costs                                  controllers.Costs.showCarCosts()
+GET         /costs/page                             controllers.Costs.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /costs/approved                         controllers.Costs.approveCarCost(id: Int, returnToDetail: Int)
+GET         /costs/refused                          controllers.Costs.refuseCarCost(id: Int, returnToDetail: Int)
+GET         /costs/proof                            controllers.Costs.getCarCostProof(id: Int)
+
 # (Temporarily) disables
-#GET         /cars/availabilities/edit               controllers.Availabilities.updateAvailabilities(id : Int, values : String)
+#GET         /cars/availabilities/edit              controllers.Availabilities.updateAvailabilities(id : Int, values : String)
 
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()

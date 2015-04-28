@@ -31,7 +31,7 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.SettingDAO;
-import be.ugent.degage.db.models.Costs;
+import be.ugent.degage.db.models.CostSettings;
 import be.ugent.degage.db.models.Setting;
 
 import java.sql.*;
@@ -159,7 +159,7 @@ class JDBCSettingDAO extends AbstractDAO implements SettingDAO {
 
 
     @Override
-    public Costs getCostSettings(Instant instant) throws DataAccessException {
+    public CostSettings getCostSettings(Instant instant) throws DataAccessException {
         try {
             PreparedStatement ps = getCostsSettingsStatement.value();
 
@@ -191,7 +191,7 @@ class JDBCSettingDAO extends AbstractDAO implements SettingDAO {
                     deprecationString = rs.getString("setting_value");
             }
 
-            return new Costs(deprecationString, amountList, limitList);
+            return new CostSettings(deprecationString, amountList, limitList);
 
         } catch (SQLException ex) {
             throw new DataAccessException("Could not obtain all cost information", ex);

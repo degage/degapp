@@ -30,7 +30,7 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.Costs;
+import be.ugent.degage.db.models.CostSettings;
 import be.ugent.degage.db.models.Setting;
 
 
@@ -66,6 +66,6 @@ public interface SettingDAO {
     /**
      * Return all cost related settings valid at the given instant
      */
-    public Costs getCostSettings(Instant instant) throws DataAccessException;
+    public CostSettings getCostSettings(Instant instant) throws DataAccessException;
 
 }

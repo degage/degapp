@@ -34,7 +34,7 @@ import java.util.List;
 /**
  * Information needed for cost calculations
  */
-public class Costs {
+public class CostSettings {
 
     private double[] amounts;
 
@@ -42,7 +42,7 @@ public class Costs {
 
     private double deprecation;
 
-    public Costs (String deprecationString, List<String> amountStrings, List<String> limitStrings) {
+    public CostSettings(String deprecationString, List<String> amountStrings, List<String> limitStrings) {
         this.deprecation = Double.parseDouble(deprecationString);
         amounts = new double[amountStrings.size()];
         limits = new int[amounts.length - 1];

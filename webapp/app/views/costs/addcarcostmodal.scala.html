@@ -27,9 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Cars.CarCostModel], car: Car)
+@(form: Form[Costs.CostData], car: Car)
 
-@modalForm("Nieuwe autokost", routes.Cars.addNewCarCost(car.getId()), 'enctype -> "multipart/form-data"){
+@modalForm("Nieuwe autokost", routes.Costs.addNewCarCost(car.getId()), 'enctype -> "multipart/form-data"){
    <div class="row">
         @std.textField(form("description"), "Beschrijving")
         <div class="form-group col-md-6">
