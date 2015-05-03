@@ -46,7 +46,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
     private static final String CAR_COST_FIELDS =
             "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
-                    "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, category_id, category_description ";
+                    "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, " +
+                    "category_id, category_description, car_cost_spread ";
 
     public static final String CAR_COST_QUERY =
             "SELECT " + CAR_COST_FIELDS + " FROM carcosts " +
@@ -72,7 +73,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getInt("car_cost_proof"),
                 rs.getInt("car_cost_car_id"),
                 rs.getString("car_name"),
-                populateCategory(rs)
+                populateCategory(rs),
+                rs.getInt("car_spread")
         );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
@@ -86,8 +88,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                               String description, LocalDate date, int fileId, int categoryId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
-                        "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof, car_cost_category_id) VALUES (?,?,?,?,?,?,?)",
-                "car_cost_id"
+                        "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof, car_cost_category_id) VALUES (?,?,?,?,?,?,?)"
         )) {
             ps.setInt(1, carId);
             ps.setInt(2, amount);
@@ -102,10 +103,6 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.setInt(7, categoryId);
             if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when creating carcost.");
-            }
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                keys.next(); //if this fails we want an exception anyway
             }
         } catch (SQLException e) {
             throw new DataAccessException("Unable to create carcost", e);

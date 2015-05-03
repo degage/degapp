@@ -278,10 +278,11 @@ CREATE TABLE `carcostcategories` (
 
 CREATE TABLE `carcosts` (
 	`car_cost_id` INT NOT NULL AUTO_INCREMENT,
-    `car_cosy_category_id` INT NOT NULL,
+    `car_cost_category_id` INT NOT NULL,
 	`car_cost_car_id` INT NOT NULL,
 	`car_cost_proof` INT,
 	`car_cost_amount` INT NOT NULL,
+	`car_cost_spread` INT NOT NULL DEFAULT 1,
 	`car_cost_description` TEXT,
 	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'FROZEN') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
 	`car_cost_time` DATE,

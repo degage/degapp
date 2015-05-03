@@ -47,6 +47,7 @@ public class CarCost {
     private int proofId;
     private LocalDate billed;
     private CarCostCategory category;
+    private int spread; // see getter
 
     public int getId() {
         return id;
@@ -116,12 +117,20 @@ public class CarCost {
         return carName;
     }
 
+    /**
+     * The number of months over which this cost should be spread out. By default 1. A value of 0 indicates that
+     * this cost will be payed back outside the system.
+     */
+    public int getSpread() {
+        return spread;
+    }
+
     public CarCostCategory getCategory() {
         return category;
     }
 
     public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId,
-                   int carId, String carName, CarCostCategory category){
+                   int carId, String carName, CarCostCategory category, int spread){
         this.id = id;
         this.amount = amount;
         this.km = km;
@@ -132,5 +141,6 @@ public class CarCost {
         this.carId = carId;
         this.carName = carName;
         this.category = category;
+        this.spread = spread;
     }
 }
