@@ -27,11 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Costs.CostData], car: Car)
+@(form: Form[Costs.CostData], car: Car, categories: Iterable[CarCostCategory])
 
 @modalForm("Nieuwe autokost", routes.Costs.addNewCarCost(car.getId()), 'enctype -> "multipart/form-data"){
    <div class="row">
-        @std.textField(form("description"), "Beschrijving")
+        @selectCategory(categories,form("category"),"Type")
+        @std.textField(form("description"), "Toelichting")
         <div class="form-group col-md-6">
             <label class="control-label" for="amount">Bedrag</label>
             <input id="amount" name="amount" type="text" pattern="[0-9]+([,\.][0-9]+)?" title="Geef een (komma)getal in" placeholder="In euro" class="form-control input-md" value='@form("amount").value' required>

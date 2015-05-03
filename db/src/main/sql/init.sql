@@ -25,3 +25,12 @@ INSERT INTO `settings` (`setting_name`,`setting_value`) VALUES
         ("infosession_reminder","1440"),
         ("reservation_auto_accept","4320"), -- Minutes before reservation is automatically accepted
         ("maps_tile_server","http://tile.openstreetmap.org/%d/%d/%d.png");
+
+-- categories
+INSERT INTO  `carcostcategories` (category_id, category_description) VALUES
+        (1, "Onderhoud / herstellingen"),
+        (2, "Verzekering"),
+        (3, "Keuring"),
+        (4, "Pechverhelping"),
+        (5, "Schade"),
+        (6, "Andere");

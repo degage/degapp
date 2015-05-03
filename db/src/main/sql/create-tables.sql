@@ -270,8 +270,15 @@ CREATE TABLE `carprivileges` (
 	FOREIGN KEY (`car_privilege_car_id`) REFERENCES cars(`car_id`)
 );
 
+CREATE TABLE `carcostcategories` (
+    category_id INT NOT NULL,
+    category_description TEXT,
+    PRIMARY KEY (`category_id`)
+);
+
 CREATE TABLE `carcosts` (
 	`car_cost_id` INT NOT NULL AUTO_INCREMENT,
+    `car_cosy_category_id` INT NOT NULL,
 	`car_cost_car_id` INT NOT NULL,
 	`car_cost_proof` INT,
 	`car_cost_amount` INT NOT NULL,
@@ -284,6 +291,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
 	FOREIGN KEY (`car_cost_car_id`) REFERENCES cars(`car_id`),
+	FOREIGN KEY (`car_cost_category_id`) REFERENCES carcostcategories(`category_id`),
 	FOREIGN KEY (`car_cost_proof`) REFERENCES files(`file_id`)
 );
 

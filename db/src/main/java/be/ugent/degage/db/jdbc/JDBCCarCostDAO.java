@@ -35,6 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.ApprovalStatus;
+import be.ugent.degage.db.models.CarCostCategory;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -44,31 +45,21 @@ import java.time.LocalDate;
 class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
     private static final String CAR_COST_FIELDS =
-	    "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
-        "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name";
+            "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
+                    "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, category_id, category_description ";
 
     public static final String CAR_COST_QUERY =
-        "SELECT " + CAR_COST_FIELDS + " FROM carcosts JOIN cars ON car_cost_car_id = car_id ";
-
-    public static final String FILTER_FRAGMENT = " WHERE car_cost_status LIKE ? AND car_cost_car_id LIKE ?";
+            "SELECT " + CAR_COST_FIELDS + " FROM carcosts " +
+                    "JOIN carcostcategories ON car_cost_category_id = category_id " +
+                    "JOIN cars ON car_cost_car_id = car_id ";
 
     public JDBCCarCostDAO(JDBCDataAccessContext context) {
         super(context);
     }
 
-    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
-        if(filter == null) {
-            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = new JDBCFilter();
-        }
-        ps.setString(start, filter.getValue(FilterField.CAR_COST_STATUS));
-        String carId = filter.getValue(FilterField.CAR_ID);
-        if(carId.equals("") || carId.startsWith("-")) { // Not very nice programming, but works :D
-            carId = "%%";
-        }
-        ps.setString(start + 1, carId);
+    private static CarCostCategory populateCategory(ResultSet rs) throws SQLException {
+        return new CarCostCategory(rs.getInt("id"), rs.getString("description"));
     }
-
 
     public static CarCost populateCarCost(ResultSet rs) throws SQLException {
         Date carCostTime = rs.getDate("car_cost_time");
@@ -80,8 +71,9 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 carCostTime == null ? null : carCostTime.toLocalDate(),
                 rs.getInt("car_cost_proof"),
                 rs.getInt("car_cost_car_id"),
-                rs.getString("car_name")
-                );
+                rs.getString("car_name"),
+                populateCategory(rs)
+        );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
         Date carCostBilled = rs.getDate("car_cost_billed");
@@ -90,10 +82,11 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     @Override
-    public CarCost createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date, int fileId) throws DataAccessException {
+    public void createCarCost(int carId, String carName, int amount, int km,
+                              String description, LocalDate date, int fileId, int categoryId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
-                    "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof) VALUES (?,?,?,?,?,?)",
+                        "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof, car_cost_category_id) VALUES (?,?,?,?,?,?,?)",
                 "car_cost_id"
         )) {
             ps.setInt(1, carId);
@@ -106,14 +99,15 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             } else {
                 ps.setInt(6, fileId);
             }
-            if (ps.executeUpdate() == 0)
+            ps.setInt(7, categoryId);
+            if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when creating carcost.");
+            }
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next(); //if this fails we want an exception anyway
-                return new CarCost(keys.getInt(1), amount, km, description, date, fileId, carId, carName);
             }
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to create carcost", e);
         }
     }
@@ -152,7 +146,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         }
     }
 
-    private LazyStatement getUpdateCarCostStatement = new LazyStatement (
+    private LazyStatement getUpdateCarCostStatement = new LazyStatement(
             "UPDATE carcosts SET car_cost_amount = ? , car_cost_description = ? , car_cost_status = ? , car_cost_time = ? , car_cost_mileage = ?"
                     + " WHERE car_cost_id = ?"
     );
@@ -168,7 +162,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.setInt(5, carCost.getKm());
             ps.setInt(6, carCost.getId());
             ps.executeUpdate();
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to update CarCost", e);
         }
 
@@ -178,10 +172,10 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public CarCost getCarCost(int id) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 CAR_COST_QUERY + " WHERE car_cost_id = ?"
-        )){
+        )) {
             ps.setInt(1, id);
             return toSingleObject(ps, JDBCCarCostDAO::populateCarCost);
-        } catch (SQLException e){
+        } catch (SQLException e) {
             throw new DataAccessException("Unable to get car cost", e);
         }
     }
@@ -210,4 +204,30 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         }
     }
     */
+
+
+    @Override
+    public CarCostCategory getCategory(int id) {
+        // TODO: cache this
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT id, description FROM carcostcategories WHERE id = ?"
+        )) {
+            ps.setInt(1, id);
+            return toSingleObject(ps, JDBCCarCostDAO::populateCategory);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not list cost categories");
+        }
+    }
+
+    @Override
+    public Iterable<CarCostCategory> listCategories() {
+        // TODO: cache this
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT id, description FROM carcostcategories ORDER BY id "
+        )) {
+            return toList(ps, JDBCCarCostDAO::populateCategory);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not list cost categories");
+        }
+    }
 }

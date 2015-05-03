@@ -27,14 +27,15 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String)
+@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String, category: String)
 
 @* Kost goedgekeurd *@
 <p>Beste @user.getFirstName,</p>
 <p>Onderstaande autokost werd goedgekeurd door een beheerder:</p>
 <ul>
     <li><b>Auto:</b> @carName</li>
-    <li><b>Beschrijving:</b> @costDescription</li>
+    <li><b>Type:</b> @category</li>
+    <li><b>Toelichting:</b> @costDescription</li>
     <li><b>Bedrag:</b> @amount</li>
     <li><b>Datum:</b> @date</li>
 </ul>

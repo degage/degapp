@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.CarCost;
+import be.ugent.degage.db.models.CarCostCategory;
 
 import java.time.LocalDate;
 
@@ -41,7 +42,7 @@ import java.time.LocalDate;
  */
 public interface CarCostDAO {
 
-    public CarCost createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date, int fileId) throws DataAccessException;
+    public void createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date, int fileId, int categoryId) throws DataAccessException;
 
     public int getAmountOfCarCosts(Filter filter) throws DataAccessException;
 
@@ -52,5 +53,15 @@ public interface CarCostDAO {
     public CarCost getCarCost(int id) throws DataAccessException;
 
     //public List<CarCost> getBillCarCosts(LocalDate date, int car) throws DataAccessException;
+
+    /**
+     * Return cost category information for the given id
+     */
+    public CarCostCategory getCategory (int id);
+
+    /**
+     * Return a list of all car cost categories
+     */
+    public Iterable<CarCostCategory> listCategories ();
 
 }

@@ -41,8 +41,13 @@ public class Costs extends Controller {
     public static Result getCarCostModal(int id) {
         // TODO: hide from other users (badRequest)
 
-        Car car = DataAccess.getInjectedContext().getCarDAO().getCar(id);
-        return ok(addcarcostmodal.render(Form.form(CostData.class), car));
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(id);
+        return ok(addcarcostmodal.render(
+                Form.form(CostData.class),
+                car,
+                context.getCarCostDAO().listCategories()
+        ));
     }
 
     /**
@@ -76,12 +81,11 @@ public class Costs extends Controller {
                         FileDAO fdao = context.getFileDAO();
                         try {
                             File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
-                            CarCost carCost = dao.createCarCost(carId, car.getName(), model.amount.getValue(), model.mileage, model.description, model.time, file.getId());
-                            if (carCost == null) {
-                                flash("danger", "Failed to add the carcost to the database. Contact administrator.");
-                                return redirect(routes.Cars.detail(carId));
-                            }
-                            Notifier.sendCarCostRequest(carCost);
+                            dao.createCarCost(carId, car.getName(), model.amount.getValue(), model.mileage, model.description, model.time, file.getId(), model.category);
+                            Notifier.sendCarCostRequest(
+                                    model.time, car.getName(), model.amount, model.description,
+                                    dao.getCategory(model.category).getDescription()
+                                    );
                             flash("success", "Je autokost werd toegevoegd.");
                             return redirect(routes.Cars.detail(carId));
                         } catch (DataAccessException ex) {
@@ -220,6 +224,9 @@ public class Costs extends Controller {
 
 
     public static class CostData {
+
+        @Constraints.Required
+        public int category;
 
         @Constraints.Required
         public String description;

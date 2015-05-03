@@ -46,6 +46,7 @@ public class CarCost {
     private ApprovalStatus status;
     private int proofId;
     private LocalDate billed;
+    private CarCostCategory category;
 
     public int getId() {
         return id;
@@ -115,7 +116,12 @@ public class CarCost {
         return carName;
     }
 
-    public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId, int carId, String carName){
+    public CarCostCategory getCategory() {
+        return category;
+    }
+
+    public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId,
+                   int carId, String carName, CarCostCategory category){
         this.id = id;
         this.amount = amount;
         this.km = km;
@@ -125,5 +131,6 @@ public class CarCost {
         this.proofId = proofId;
         this.carId = carId;
         this.carName = carName;
+        this.category = category;
     }
 }

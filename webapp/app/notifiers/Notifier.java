@@ -46,6 +46,7 @@ import play.twirl.api.Txt;
 import providers.DataProvider;
 
 import java.text.MessageFormat;
+import java.time.LocalDate;
 
 
 /**
@@ -116,9 +117,10 @@ public class Notifier extends Mailer {
         String name = carCost.getCarName();
         String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String description = carCost.getDescription();
+        String category = carCost.getCategory().getDescription();
         createNotificationAndSend(owner, "costApproved",
-                views.txt.messages.costApproved.render(owner, name, description, amount, date),
-                views.html.messages.costApproved.render(owner, name, description, amount, date)
+                views.txt.messages.costApproved.render(owner, name, description, amount, date, category),
+                views.html.messages.costApproved.render(owner, name, description, amount, date, category)
         );
     }
 
@@ -127,9 +129,10 @@ public class Notifier extends Mailer {
         String name = carCost.getCarName();
         String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String description = carCost.getDescription();
+        String category = carCost.getCategory().getDescription();
         createNotificationAndSend(owner, "costRejected",
-                views.txt.messages.costRejected.render(owner, name, description, amount, date),
-                views.html.messages.costRejected.render(owner, name, description, amount, date)
+                views.txt.messages.costRejected.render(owner, name, description, amount, date, category),
+                views.html.messages.costRejected.render(owner, name, description, amount, date, category)
         );
     }
 
@@ -174,16 +177,13 @@ public class Notifier extends Mailer {
 
     }
 
-    public static void sendCarCostRequest(CarCost carCost) {
+    public static void sendCarCostRequest(LocalDate date, String carName, EurocentAmount amount, String costDescription, String category) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        UserRoleDAO userRoleDAO = context.getUserRoleDAO();
-        String date = Utils.toLocalizedDateString(carCost.getDate());
-        String carName = carCost.getCarName();
-        String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
-        String costDescription = carCost.getDescription();
-        for (UserHeader u : userRoleDAO.getUsersByRole(UserRole.CAR_ADMIN)) {
+        String dateString = Utils.toLocalizedDateString(date);
+        String amountString = amount.toString() + " euro";
+        for (UserHeader u : context.getUserRoleDAO().getUsersByRole(UserRole.CAR_ADMIN)) {
             createNotification(context, u, "costRequest",
-                    views.html.messages.costRequest.render(u, carName, costDescription, amount, date)
+                    views.html.messages.costRequest.render(u, carName, costDescription, amountString, dateString, category)
             );
         }
 

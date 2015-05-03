@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String)
+@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String, category: String)
 
 @* Kost niet goedgekeurd *@
 Beste @user.getFirstName,
@@ -35,7 +35,7 @@ Beste @user.getFirstName,
 Onderstaande autokost konden wij helaas *niet* goedgekeuren:
 
   Auto: @carName
-  Beschrijving: @costDescription
+  Toelichting: @costDescription
   Bedrag: @amount
   Datum: @date
 

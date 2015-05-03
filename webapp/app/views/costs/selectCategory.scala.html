@@ -1,0 +1,15 @@
+@*
+*@
+
+@(categories: Iterable[CarCostCategory], f: Field, label: String, css: String="col-xs-12")
+<div class="form-group @css @if(f.hasErrors) {has-error}" >
+    <label class="control-label" for="@f.id">@label</label>
+    <select name="@f.name" class="form-control" id="@f.id">
+        @foreach(categories) { item =>
+            @option(f.value.getOrElse(""),item.getId.toString){ @item.getDescription }
+        }
+    </select>
+    @f.errors.map { error =>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+    }
+</div>
