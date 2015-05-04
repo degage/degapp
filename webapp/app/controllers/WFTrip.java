@@ -43,7 +43,6 @@ import notifiers.Notifier;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
-import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import views.html.workflow.edittrip;

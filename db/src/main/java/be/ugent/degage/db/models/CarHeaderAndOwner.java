@@ -39,17 +39,14 @@ public class CarHeaderAndOwner extends CarHeader {
     /**
      * Create an object of this type.
      */
-    public CarHeaderAndOwner(int id, String name, String brand, String type, String email, boolean active) {
-        super(id, name, brand, type, email, active);
+    public CarHeaderAndOwner(int id, String name, String brand, String type, String email,
+                             boolean active, UserHeader owner) {
+        super(id, name, brand, type, email, active, owner == null ? 0 : owner.getId());
+        this.owner = owner;
     }
 
     public UserHeader getOwner() {
         return owner;
     }
-
-    public void setOwner(UserHeader owner) {
-        this.owner = owner;
-    }
-
 
 }

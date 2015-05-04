@@ -143,67 +143,59 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         super(context);
     }
 
-    public static Car populateCar(ResultSet rs, boolean withRest) throws SQLException {
-        // Extra check if car actually exists
-        if (rs.getObject("car_id") != null) {
-            Car car = new Car(
-                    rs.getInt("car_id"), rs.getString("car_name"),
-                    rs.getString("car_email"), rs.getString("car_brand"), rs.getString("car_type"),
-                    (Integer) rs.getObject("car_seats"), (Integer) rs.getObject("car_doors"),
-                    (Integer) rs.getObject("car_year"),
-                    rs.getBoolean("car_manual"), rs.getBoolean("car_gps"), rs.getBoolean("car_hook"),
-                    CarFuel.valueOf(rs.getString("car_fuel")),
-                    (Integer) rs.getObject("car_fuel_economy"),
-                    (Integer) rs.getObject("car_estimated_value"),
-                    (Integer) rs.getObject("car_owner_annual_km"),
-                    rs.getString("car_comments"),
-                    rs.getBoolean("car_active")
-            );
+    private static CarHeaderShort populateCarHeaderShort(ResultSet rs) throws SQLException {
+        return new CarHeaderShort(
+                rs.getInt("car_id"),
+                rs.getString("car_name"),
+                rs.getInt("car_owner_user_id")
+        );
+    }
 
-            int photoId = 0;
-            Address location = null;
-            UserHeader user = null;
-            TechnicalCarDetails technicalCarDetails = null;
-            CarInsurance insurance = null;
-            if (withRest) {
-                photoId = rs.getInt("car_images_id");
-                location = JDBCAddressDAO.populateAddress(rs);
-                user = JDBCUserDAO.populateUserHeader(rs);
+    private static Car populateCar(ResultSet rs) throws SQLException {
+        Car car = new Car(
+                rs.getInt("car_id"), rs.getString("car_name"),
+                rs.getString("car_email"), rs.getString("car_brand"), rs.getString("car_type"),
+                (Integer) rs.getObject("car_seats"), (Integer) rs.getObject("car_doors"),
+                (Integer) rs.getObject("car_year"),
+                rs.getBoolean("car_manual"), rs.getBoolean("car_gps"), rs.getBoolean("car_hook"),
+                CarFuel.valueOf(rs.getString("car_fuel")),
+                (Integer) rs.getObject("car_fuel_economy"),
+                (Integer) rs.getObject("car_estimated_value"),
+                (Integer) rs.getObject("car_owner_annual_km"),
+                rs.getString("car_comments"),
+                rs.getBoolean("car_active"),
+                JDBCUserDAO.populateUserHeader(rs)
+        );
 
-                technicalCarDetails = new TechnicalCarDetails(
+        car.setPhotoId(rs.getInt("car_images_id"));
+        car.setLocation(JDBCAddressDAO.populateAddress(rs));
+        car.setTechnicalCarDetails(
+                new TechnicalCarDetails(
                         rs.getString("details_car_license_plate"),
                         rs.getInt("details_car_registration"),
                         rs.getString("details_car_chassis_number")
-                );
-
-                String bonusMalus = rs.getString("insurance_bonus_malus");
-                String contractId = rs.getString("insurance_contract_id");
-
-                Date insuranceExpiration = rs.getDate("insurance_expiration");
-                insurance = new CarInsurance(
+                ));
+        Date insuranceExpiration = rs.getDate("insurance_expiration");
+        car.setInsurance(
+                new CarInsurance(
                         rs.getString("insurance_name"),
                         insuranceExpiration == null ? null : insuranceExpiration.toLocalDate(),
-                        bonusMalus,
-                        contractId);
-            }
-            car.setPhotoId(photoId);
-            car.setLocation(location);
-            car.setOwner(user);
-            car.setTechnicalCarDetails(technicalCarDetails);
-            car.setInsurance(insurance);
+                        rs.getString("insurance_bonus_malus"),
+                        rs.getString("insurance_contract_id")
+                ));
 
-            car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
+        car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
 
-            return car;
-        } else {
-            return null;
-        }
+        return car;
     }
 
-    public String getCarName(int carId) {
-        try (PreparedStatement ps = prepareStatement("SELECT car_name FROM cars WHERE car_id = ?")) {
+    @Override
+    public CarHeaderShort getCarHeaderShort(int carId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_id, car_name, car_owner_user_id FROM cars WHERE car_id = ?"
+        )) {
             ps.setInt(1, carId);
-            return toSingleObject(ps, rs -> rs.getString("car_name"));
+            return toSingleObject(ps, JDBCCarDAO::populateCarHeaderShort);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve name of car", ex);
         }
@@ -216,7 +208,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getString("car_brand"),
                 rs.getString("car_type"),
                 rs.getString("car_email"),
-                rs.getBoolean("car_active")
+                rs.getBoolean("car_active"),
+                rs.getInt("car_owner_user_id")
         );
     }
 
@@ -234,7 +227,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getBoolean("car_gps"),
                 rs.getBoolean("car_hook"),
                 CarFuel.valueOf(rs.getString("car_fuel")),
-                rs.getString("car_comments")
+                rs.getString("car_comments"),
+                null
         );
         result.setLocation(JDBCAddressDAO.populateAddress(rs));
         return result;
@@ -297,12 +291,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 Car car = new Car(id, name, email, brand, type,
                         seats, doors, year, manual, gps, hook, fuel,
                         fuelEconomy, estimatedValue, ownerAnnualKm,
-                        comments, active);
+                        comments, active, owner);
                 car.setPhotoId(photoId);
                 car.setLocation(location);
                 car.setTechnicalCarDetails(technicalCarDetails);
                 car.setInsurance(insurance);
-                car.setOwner(owner);
                 return car;
             }
         } catch (SQLException ex) {
@@ -455,13 +448,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         try {
             PreparedStatement ps = getCarStatement.value();
             ps.setInt(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateCar(rs, true);
-                } else {
-                    return null;
-                }
-            }
+            return toSingleObject(ps, JDBCCarDAO::populateCar);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
@@ -511,7 +498,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     private static final String NEW_CAR_QUERY =
             "SELECT car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
-                    "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, " +
+                    "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
                     "FROM cars JOIN addresses ON address_id=car_location ";
 
@@ -646,9 +633,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                             rs.getString("car_brand"),
                             rs.getString("car_type"),
                             rs.getString("car_email"),
-                            rs.getBoolean("car_active")
+                            rs.getBoolean("car_active"),
+                            owner
                     );
-                    result.setOwner(owner);
                     if (result.isActive() || !onlyActive) { // TODO: do this filter at car level
                         cars.add(result);
                     }
@@ -704,7 +691,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
 
                         rs.getString("car_comments"),
-                        rs.getBoolean("car_active")
+                        rs.getBoolean("car_active"),
+                        JDBCUserDAO.populateUserHeader(rs)
                 );
                 result.setLocation(JDBCAddressDAO.populateAddress(rs));
                 result.setTechnicalCarDetails(
@@ -722,7 +710,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                                 rs.getString("insurance_contract_id")
                         )
                 );
-                result.setOwner(JDBCUserDAO.populateUserHeader(rs));
                 cars.add(result);
             }
             return cars;
@@ -732,7 +719,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     }
 
     public static final String CAR_HEADER_FIELDS =
-            "car_id, car_name, car_brand, car_type, car_email, car_active ";
+            "car_id, car_name, car_brand, car_type, car_email, car_active, car_owner_user_id ";
 
 
     @Override

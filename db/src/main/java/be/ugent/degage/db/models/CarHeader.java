@@ -32,10 +32,8 @@ package be.ugent.degage.db.models;
 /**
  * Contains minimal information about a car.
  */
-public class CarHeader {
+public class CarHeader extends  CarHeaderShort {
 
-    private int id;
-    private String name;
     private String brand;
     private String type;
     private String email;
@@ -46,29 +44,12 @@ public class CarHeader {
      * Create an object containing the given information.
      */
     public CarHeader(int id, String name, String brand, String type, String email,
-                     boolean active) {
-        this.id = id;
-        this.name = name;
+                     boolean active, int ownerId) {
+        super (id, name, ownerId);
         this.brand = brand;
         this.type = type;
         this.email = email;
         this.active = active;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getEmail() {

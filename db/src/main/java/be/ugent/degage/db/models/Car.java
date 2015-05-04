@@ -48,8 +48,9 @@ public class Car extends CarHeaderLong {
     public Car(int id, String name, String email, String brand, String type,
                Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
                CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-               String comments, boolean active) {
-        super(id, name, brand, type, email, active, seats, doors, manual, gps, hook, fuel, comments);
+               String comments, boolean active, UserHeader owner) {
+        super(id, name, brand, type, email, active,
+                seats, doors, manual, gps, hook, fuel, comments, owner);
         this.year = year;
         this.fuelEconomy = fuelEconomy;
         this.estimatedValue = estimatedValue;

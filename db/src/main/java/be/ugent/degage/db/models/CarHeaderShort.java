@@ -1,4 +1,4 @@
-/* CostSettings.java
+/* CarHeaderShort.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -29,47 +29,35 @@
 
 package be.ugent.degage.db.models;
 
-import java.util.List;
-
 /**
- * Information needed for cost calculations
+ * Contains minimal information about a car: id, name and owner id
  */
-public class CostSettings {
+public class CarHeaderShort {
 
-    private double[] amounts;
+    private int id;
+    private String name;
+    private int ownerId;
 
-    private int[] limits;
-
-    private double deprecation;
-
-    public CostSettings(String deprecationString, List<String> amountStrings, List<String> limitStrings) {
-        this.deprecation = Double.parseDouble(deprecationString);
-        amounts = new double[amountStrings.size()];
-        limits = new int[amounts.length - 1];
-
-        for (int i = 0; i < amounts.length; i++) {
-            amounts[i] = Double.parseDouble(amountStrings.get(i));
-        }
-        for (int i = 0; i < limits.length; i++) {
-            limits[i] = Integer.parseInt(limitStrings.get(i));
-        }
+    public CarHeaderShort(int id, String name, int ownerId) {
+        this.id = id;
+        this.name = name;
+        this.ownerId = ownerId;
     }
 
-    public int getLevels () {
-        return amounts.length;
-    }
-
-    public double getCost(int level) {
-        return amounts[level];
-    }
-
-    public double getDeprecation () {
-        return deprecation;
-    }
-
-    public int getLimit(int level) {
-        return limits[level];
+    public int getId() {
+        return id;
     }
 
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public int getOwnerId() {
+        return ownerId;
+    }
 }

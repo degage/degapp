@@ -30,14 +30,11 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.dao.CarDAO;
-import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.models.*;
-import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
 import data.EurocentAmount;
@@ -48,15 +45,12 @@ import notifiers.Notifier;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
-import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import views.html.costs.carCostsAdmin;
 import views.html.costs.carCostspage;
 import views.html.costs.costs;
 
-import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDate;
 
 /**
@@ -69,12 +63,13 @@ public class Costs extends Controller {
     public static Result showCostsForCar(int carId) {
 
         // TODO: add authorization check
-
         DataAccessContext context = DataAccess.getInjectedContext();
+        CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
+
         return ok(costs.render(
                 Form.form(CostData.class),
                 carId,
-                context.getCarDAO().getCarName(carId),
+                car.getName(),
                 context.getCarCostDAO().listCategories()
         ));
     }
@@ -87,11 +82,14 @@ public class Costs extends Controller {
     @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
     public static Result doCreate(int carId) {
-        // TODO: add authorization check
 
         Form<CostData> form = Form.form(CostData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
+        CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
+
+        // TODO: add authorization check
+
 
         // additional validation of file part
         File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
@@ -100,7 +98,7 @@ public class Costs extends Controller {
         } else if (file.getContentType() == null) {
             form.reject("picture", "Het bestand  is van het verkeerde type");
         }
-        String carName = context.getCarDAO().getCarName(carId);
+        String carName = car.getName();
 
         if (form.hasErrors()) {
             return badRequest(costs.render(

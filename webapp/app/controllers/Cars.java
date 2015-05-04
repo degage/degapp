@@ -30,10 +30,8 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.PrivilegedDAO;
@@ -43,17 +41,14 @@ import controllers.util.Addresses;
 import controllers.util.ConfigurationHelper;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
-import data.EurocentAmount;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
-import notifiers.Notifier;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import views.html.cars.*;
 
 import java.io.IOException;
