@@ -27,11 +27,41 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Costs.CostData], carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(carCostList: Iterable[CarCost], form: Form[Costs.CostData], carId: Int, carName: String, categories: Iterable[CarCostCategory])
 
 @stdlayout("Autokosten", scripts=js.datetimepicker()) {
     @panel("Overzicht kosten (" + carName +")", "fa-money"){
-        <div class="col-xs-12"> TODO @* TODO *@
+        <div class="col-xs-12">
+            <table class="table table-striped table-bordered table-hover no-footer" >
+                <thead>
+                    <tr role="row">
+                        <th>Auto</th>
+                        <th>Type</th>
+                        <th>Toelichting</th>
+                        <th>Datum</th>
+                        <th>Bedrag</th>
+                        <th>Status</th>
+                        <th>Acties</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach.trOrElse(carCostList) { carCost =>
+                        <td>@carCost.getCarName</td>
+                        <td>@carCost.getCategory.getDescription</td>
+                        <td>@carCost.getDescription</td>
+                        <td>@Utils.toLocalizedDateString(carCost.getDate)</td>
+                        <td>@carCost.getAmount</td>
+                        <td>@refuels.statusname(carCost.getStatus)</td>
+                        <td>TODO</td>
+                    } {
+                        <tr>
+                            <td class="empty-row" colspan="7">
+                                Geen resultaten.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
     }
 

@@ -58,20 +58,29 @@ import java.time.LocalDate;
  */
 public class Costs extends Controller {
 
+    private static boolean isOwnerOrAdmin (CarHeaderShort car) {
+        return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
+    }
+
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showCostsForCar(int carId) {
 
         // TODO: add authorization check
         DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
         CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
-
-        return ok(costs.render(
-                Form.form(CostData.class),
-                carId,
-                car.getName(),
-                context.getCarCostDAO().listCategories()
-        ));
+        if (isOwnerOrAdmin(car)) {
+            return ok(costs.render(
+                    dao.listCostsOfCar(carId),
+                    Form.form(CostData.class),
+                    carId,
+                    car.getName(),
+                    dao.listCategories()
+            ));
+        } else {
+            return badRequest(); // hack?
+        }
     }
 
     /**
@@ -87,25 +96,29 @@ public class Costs extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
         CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
-
-        // TODO: add authorization check
-
+        if (!isOwnerOrAdmin(car)) {
+            return badRequest(); // hack?
+        }
 
         // additional validation of file part
+        // TODO: avoid copy and paste of this type of code
         File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
         if (file == null) {
             form.reject("picture", "Bestand met foto of scan  is verplicht");
         } else if (file.getContentType() == null) {
             form.reject("picture", "Het bestand  is van het verkeerde type");
+        } else if (form.hasErrors()) {
+            form.reject("picture", "Bestand opnieuw selecteren");
         }
         String carName = car.getName();
 
         if (form.hasErrors()) {
             return badRequest(costs.render(
+                    dao.listCostsOfCar(carId),
                     form, carId, carName, dao.listCategories()
             ));
         }
-
+        assert file != null; // keeps IDEA happy
         CostData data = form.get();
 
         dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time, file.getId(), data.category);

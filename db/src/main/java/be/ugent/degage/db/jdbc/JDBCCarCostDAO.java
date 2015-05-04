@@ -74,7 +74,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getInt("car_cost_car_id"),
                 rs.getString("car_name"),
                 populateCategory(rs),
-                rs.getInt("car_spread")
+                rs.getInt("car_cost_spread")
         );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
@@ -137,6 +137,19 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
+            return toList(ps, JDBCCarCostDAO::populateCarCost);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of carcosts", ex);
+        }
+    }
+
+    @Override
+    public Iterable<CarCost> listCostsOfCar (int carId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                CAR_COST_QUERY +
+                " WHERE car_cost_car_id = ?  ORDER BY car_cost_created_at"
+        )) {
+            ps.setInt(1, carId);
             return toList(ps, JDBCCarCostDAO::populateCarCost);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of carcosts", ex);

@@ -55,6 +55,11 @@ public interface CarCostDAO {
     //public List<CarCost> getBillCarCosts(LocalDate date, int car) throws DataAccessException;
 
     /**
+     * List all costs for a given car
+     */
+    public Iterable<CarCost> listCostsOfCar (int carId)   throws DataAccessException;
+
+    /**
      * Return cost category information for the given id
      */
     public CarCostCategory getCategory (int id);

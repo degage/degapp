@@ -36,6 +36,8 @@ import java.time.LocalDate;
  */
 public class CarCost {
 
+    // TODO: use CarHeaderShort
+
     private int id;
     private int carId;
     private String carName;
