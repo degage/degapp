@@ -52,7 +52,7 @@
                 }
                 <td>@statusname(reservation.getStatus)</td>
                 <td>
-                    <a class="btn btn-xs btn-primary" href="@routes.Trips.details(reservation.getId)">Details</a>
+                    @btnPrimary("Details",routes.Trips.details(reservation.getId))
                     @foreach(util.WorkflowAction.getCurrentActions(reservation))(_.asNarrowButton(reservation.getId))
                 </td>
         }{

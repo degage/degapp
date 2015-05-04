@@ -159,7 +159,7 @@
                                                     </div>
                                                 </td>
                                                 <td>
-                                                    <a class="btn btn-danger btn-xs" href="@routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId)">aanwezige verwijderen</a>
+                                                    @btnSuccess("aanwezige verwijderen", routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId))
                                                 </td>
                                             </tr>
                                         }

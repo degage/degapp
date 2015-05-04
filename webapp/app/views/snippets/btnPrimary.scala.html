@@ -1,4 +1,4 @@
-@* columns.scala.html
+@* btnPrimary.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,21 +27,5 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuel : Refuel, isAdmin: Boolean)
-
-@* Last four columns of a refuel table *@
-@* TODO: split according to driver/owner/admin *@
-
-<td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
-<td>@refuel.getAmount</td>
-<td>@refuel.getKm</td>
-<td>@statusname(refuel.getStatus)</td>
-<td>
-    @btnPrimary("Details", routes.Refuels.showDetails(refuel.getId))
-    @if(isAdmin) {
-        @if(refuel.getStatus == ApprovalStatus.REQUEST) {
-            @btnPrimary("Goed- of afkeuren ...", routes.RefuelApprove.approveOrReject(refuel.getId, false))
-        }
-    }
-</td>
-
+@(caption: String, call: Call)
+@btn(caption,call,"primary")

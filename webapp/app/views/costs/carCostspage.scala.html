@@ -71,14 +71,14 @@
             <td>
             @carCost.getStatus match {
                 case ApprovalStatus.ACCEPTED => {
-                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Costs.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                    @btnWarning("Afkeuren", routes.Costs.refuseCarCost(carCost.getId,1))
                 }
                 case ApprovalStatus.REFUSED => {
-                    <a type="button" class="btn btn-xs btn-success" href="@routes.Costs.approveCarCost(carCost.getId,1)">Goedkeuren</a>
+                    @btnSuccess("Goedkeuren",routes.Costs.approveCarCost(carCost.getId,1))
                 }
                 case ApprovalStatus.REQUEST => {
-                    <a type="button" class="btn btn-xs btn-success" href="@routes.Costs.approveCarCost(carCost.getId,1)">Goedkeuren</a>
-                    <a type="button" class="btn btn-xs btn-warning" href="@routes.Costs.refuseCarCost(carCost.getId,1)">Afkeuren</a>
+                    @btnSuccess("Goedkeuren",routes.Costs.approveCarCost(carCost.getId,1))
+                    @btnWarning("Afkeuren",routes.Costs.refuseCarCost(carCost.getId,1))
                 }
                 case _ => {}
             }

@@ -36,9 +36,8 @@
     @if(isAdmin && refuel.getStatus == ApprovalStatus.REQUEST) {
         @panel("Acties", "fa-pencil") {
            <div class="col-xs-12">
-           <a type="button" class="btn btn-xs btn-danger" href="@routes.RefuelApprove.approve(refuel.getId)">Goedkeuren</a>
-           <a type="button" class="btn btn-xs btn-primary"
-                       href="@routes.RefuelApprove.approveOrReject(refuel.getId, true)">Afkeuren ...</a>
+               @btnDanger("Goedkeuren",routes.RefuelApprove.approve(refuel.getId))
+               @btnPrimary("Afkeuren ...",routes.RefuelApprove.approveOrReject(refuel.getId, true))
            </div>
         }
     }

@@ -1,4 +1,4 @@
-@* button.scala.html
+@* btnDanger.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,5 +27,5 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(caption: String, call: Call, css: String)
-<a class="btn btn-xs btn-@css" href="@call">@caption</a>
+@(caption: String, call: Call)
+@btn(caption,call,"danger")

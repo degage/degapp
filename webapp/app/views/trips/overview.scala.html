@@ -137,8 +137,8 @@ $( function() {
             <a class="btn btn-xs btn-info" data-toggle="modal" data-target="#helpModal"
                href='@routes.Assets.at("modalhelp/overview.html")'><span class="fa fa-info"></span> Info</a>
             &nbsp;&nbsp;
-            <a class="btn btn-xs btn-warning" href="@routes.Trips.overview(car.getId,previousMonth)">Maand eerder</a>
-            <a class="btn btn-xs btn-warning" href="@routes.Trips.overview(car.getId,nextMonth)">Maand later</a>
+            @btnWarning("Maand eerder",routes.Trips.overview(car.getId,previousMonth))
+            @btnWarning("Maand later",routes.Trips.overview(car.getId,nextMonth))
         </div>
         <div class="col-xs-12">
             <h3>@car.getName - vanaf @thisMonthLocalized</h3>

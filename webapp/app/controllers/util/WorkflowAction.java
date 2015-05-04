@@ -90,11 +90,11 @@ public enum WorkflowAction {
     }
 
     public Html asNarrowButton (int reservationId) {
-        return views.html.workflow.button.render(shortCaption, callFunction.apply(reservationId), strength);
+        return views.html.snippets.btn.render(shortCaption, callFunction.apply(reservationId), strength);
     }
 
     public Html asWideButton (int reservationId) {
-        return views.html.workflow.button.render(longCaption, callFunction.apply(reservationId), strength);
+        return views.html.snippets.btn.render(longCaption, callFunction.apply(reservationId), strength);
     }
 
     /**
