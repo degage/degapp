@@ -59,7 +59,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     private static CarCostCategory populateCategory(ResultSet rs) throws SQLException {
-        return new CarCostCategory(rs.getInt("id"), rs.getString("description"));
+        return new CarCostCategory(rs.getInt("category_id"), rs.getString("category_description"));
     }
 
     public static CarCost populateCarCost(ResultSet rs) throws SQLException {
@@ -207,12 +207,12 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public CarCostCategory getCategory(int id) {
         // TODO: cache this
         try (PreparedStatement ps = prepareStatement(
-                "SELECT id, description FROM carcostcategories WHERE id = ?"
+                "SELECT category_id, category_description FROM carcostcategories WHERE category_id = ?"
         )) {
             ps.setInt(1, id);
             return toSingleObject(ps, JDBCCarCostDAO::populateCategory);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not list cost categories");
+            throw new DataAccessException("Could not list cost categories", ex);
         }
     }
 
@@ -220,11 +220,11 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public Iterable<CarCostCategory> listCategories() {
         // TODO: cache this
         try (PreparedStatement ps = prepareStatement(
-                "SELECT id, description FROM carcostcategories ORDER BY id "
+                "SELECT category_id, category_description FROM carcostcategories ORDER BY category_id "
         )) {
             return toList(ps, JDBCCarCostDAO::populateCategory);
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not list cost categories");
+            throw new DataAccessException("Could not list cost categories", ex);
         }
     }
 }

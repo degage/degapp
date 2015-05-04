@@ -203,8 +203,8 @@ GET         /cars/modal/info                        controllers.Cars.getCarInfoM
 GET         /cars/privileges/edit                   controllers.Cars.updatePrivileged(id : Int, values : String)
 
 # Costs
-GET         /costs/modal                            controllers.Costs.getCarCostModal(id: Int)
-POST        /costs/new                              controllers.Costs.addNewCarCost(id: Int)
+GET         /costs/car                              controllers.Costs.showCostsForCar(id: Int)
+POST        /costs/new                              controllers.Costs.doCreate(id: Int)
 GET         /costs                                  controllers.Costs.showCarCosts()
 GET         /costs/page                             controllers.Costs.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /costs/approved                         controllers.Costs.approveCarCost(id: Int, returnToDetail: Int)

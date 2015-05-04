@@ -187,7 +187,7 @@ public class WFTrip extends WFCommon {
             return badRequest(newtrip.render(form, trip));
         } else {
             TripDataExtended data = form.get();
-            Http.MultipartFormData.FilePart filePart = Controller.request().body().asMultipartFormData().getFile("picture");
+            Http.MultipartFormData.FilePart filePart = request().body().asMultipartFormData().getFile("picture");
 
             // process validation errors (delayed)
             if (data.someFilledIn() || filePart != null) {

@@ -1,18 +1,44 @@
-@*
-*@
+@* costs.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
-@(form: Form[Costs.CostData], carId: Int, carName: String)
+@(form: Form[Costs.CostData], carId: Int, carName: String, categories: Iterable[CarCostCategory])
 
 @stdlayout("Autokosten", scripts=js.datetimepicker()) {
-    @panel("Overzicht kosten (" + carName +")"){
+    @panel("Overzicht kosten (" + carName +")", "fa-money"){
         <div class="col-xs-12"> TODO @* TODO *@
         </div>
     }
 
-    @panel("Nieuwe kost") {
-        @helper.form(routes.Costs.addNewCarCost(carId), 'enctype -> "multipart/form-data"){
-            @std.textField(form("description"), "Beschrijving")
-
+    @panel("Nieuwe kost", "fa-pencil") {
+        @helper.form(routes.Costs.doCreate(carId), 'enctype -> "multipart/form-data"){
+            @selectCategory(categories,form("category"),"Type")
+            @std.textField(form("description"), "Toelichting", css="col-lg-6 col-xs-12")
             @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
             @std.fileField(form("picture"), "bonnetje/bewijsstuk:")
             @std.textField(form("mileage"), "Kilometerstand", css="col-sm-6")

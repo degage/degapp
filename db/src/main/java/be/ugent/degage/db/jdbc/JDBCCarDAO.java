@@ -200,6 +200,15 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
+    public String getCarName(int carId) {
+        try (PreparedStatement ps = prepareStatement("SELECT car_name FROM cars WHERE car_id = ?")) {
+            ps.setInt(1, carId);
+            return toSingleObject(ps, rs -> rs.getString("car_name"));
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve name of car", ex);
+        }
+    }
+
     public static CarHeader populateCarHeader(ResultSet rs) throws SQLException {
         return new CarHeader(
                 rs.getInt("car_id"),
@@ -497,7 +506,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         FilterUtils.appendWhenOneFilter(builder, "car_gps", filter.getValue(FilterField.CAR_GPS));
         FilterUtils.appendWhenOneFilter(builder, "car_hook", filter.getValue(FilterField.CAR_HOOK));
         FilterUtils.appendNotWhenOneFilter(builder, "car_manual", filter.getValue(FilterField.CAR_AUTOMATIC));
-
 
     }
 

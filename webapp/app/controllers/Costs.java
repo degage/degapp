@@ -1,3 +1,32 @@
+/* Costs.java
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ */
+
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
@@ -22,9 +51,9 @@ import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import views.html.costs.addcarcostmodal;
 import views.html.costs.carCostsAdmin;
 import views.html.costs.carCostspage;
+import views.html.costs.costs;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -35,17 +64,17 @@ import java.time.LocalDate;
  */
 public class Costs extends Controller {
 
-
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result getCarCostModal(int id) {
-        // TODO: hide from other users (badRequest)
+    public static Result showCostsForCar(int carId) {
+
+        // TODO: add authorization check
 
         DataAccessContext context = DataAccess.getInjectedContext();
-        Car car = context.getCarDAO().getCar(id);
-        return ok(addcarcostmodal.render(
+        return ok(costs.render(
                 Form.form(CostData.class),
-                car,
+                carId,
+                context.getCarDAO().getCarName(carId),
                 context.getCarCostDAO().listCategories()
         ));
     }
@@ -57,51 +86,36 @@ public class Costs extends Controller {
      */
     @AllowRoles({UserRole.CAR_OWNER})
     @InjectContext
-    public static Result addNewCarCost(int carId) {
-        Form<CostData> carCostForm = Form.form(CostData.class).bindFromRequest();
-        if (carCostForm.hasErrors()) {
-            flash("danger", "Kost toevoegen mislukt.");
-            return redirect(routes.Cars.detail(carId));
-        } else {
-            DataAccessContext context = DataAccess.getInjectedContext();
-            CarCostDAO dao = context.getCarCostDAO();
-            CostData model = carCostForm.get();
-            CarDAO cardao = context.getCarDAO();
-            Car car = cardao.getCar(carId);
-            Http.MultipartFormData body = request().body().asMultipartFormData();
-            Http.MultipartFormData.FilePart proof = body.getFile("picture");
-            if (proof != null) {
-                String contentType = proof.getContentType();
-                if (!FileHelper.isDocumentContentType(contentType)) {
-                    flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return redirect(routes.Cars.detail(carId));
-                } else {
-                    try {
-                        Path relativePath = FileHelper.saveFile(proof, ConfigurationHelper.getConfigurationString("uploads.carboundproofs"));
-                        FileDAO fdao = context.getFileDAO();
-                        try {
-                            File file = fdao.createFile(relativePath.toString(), proof.getFilename(), proof.getContentType());
-                            dao.createCarCost(carId, car.getName(), model.amount.getValue(), model.mileage, model.description, model.time, file.getId(), model.category);
-                            Notifier.sendCarCostRequest(
-                                    model.time, car.getName(), model.amount, model.description,
-                                    dao.getCategory(model.category).getDescription()
-                                    );
-                            flash("success", "Je autokost werd toegevoegd.");
-                            return redirect(routes.Cars.detail(carId));
-                        } catch (DataAccessException ex) {
-                            FileHelper.deleteFile(relativePath);
-                            throw ex;
-                        }
+    public static Result doCreate(int carId) {
+        // TODO: add authorization check
 
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex); //no more checked catch -> error page!
-                    }
-                }
-            } else {
-                flash("error", "Missing file");
-                return redirect(routes.Application.index());
-            }
+        Form<CostData> form = Form.form(CostData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+
+        // additional validation of file part
+        File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+        if (file == null) {
+            form.reject("picture", "Bestand met foto of scan  is verplicht");
+        } else if (file.getContentType() == null) {
+            form.reject("picture", "Het bestand  is van het verkeerde type");
         }
+        String carName = context.getCarDAO().getCarName(carId);
+
+        if (form.hasErrors()) {
+            return badRequest(costs.render(
+                    form, carId, carName, dao.listCategories()
+            ));
+        }
+
+        CostData data = form.get();
+
+        dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time, file.getId(), data.category);
+        Notifier.sendCarCostRequest(
+                data.time, carName, data.amount, data.description,
+                dao.getCategory(data.category).getDescription()
+        );
+        return redirect(routes.Costs.showCostsForCar(carId));
     }
 
     /**

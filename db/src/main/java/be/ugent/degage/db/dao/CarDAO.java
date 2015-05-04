@@ -45,6 +45,8 @@ public interface CarDAO {
     public void updateCar(Car car) throws DataAccessException;
 
 
+    public String getCarName(int id) throws DataAccessException;
+
     public Car getCar(int id) throws DataAccessException;
 
     /**
