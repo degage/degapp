@@ -223,7 +223,7 @@ public class WFTrip extends WFCommon {
             }
 
             trip.setStartKm(data.startKm);
-            trip.setStartKm(data.endKm); // for use in message sent later
+            trip.setEndKm(data.endKm); // for use in message sent later
 
             // change ride status according to whether current user is owner or not
             UserHeader owner = null;
@@ -275,7 +275,7 @@ public class WFTrip extends WFCommon {
             CarRideDAO dao = context.getCarRideDAO();
             dao.updateCarRideKm(reservationId, data.startKm, data.endKm);
             trip.setStartKm(data.startKm);
-            trip.setStartKm(data.endKm); // for use in message sent later
+            trip.setEndKm(data.endKm); // for use in message sent later
             if (isOwnerOrAdmin(trip)) {
                 // approve immediately
                 rdao.updateReservationStatus(reservationId, ReservationStatus.FINISHED);
