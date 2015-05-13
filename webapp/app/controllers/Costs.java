@@ -50,6 +50,7 @@ import play.twirl.api.Html;
 import views.html.costs.carCostsAdmin;
 import views.html.costs.carCostspage;
 import views.html.costs.costs;
+import views.html.costs.details;
 
 import java.time.LocalDate;
 
@@ -60,6 +61,10 @@ public class Costs extends Controller {
 
     private static boolean isOwnerOrAdmin (CarHeaderShort car) {
         return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
+    }
+
+    private static boolean isOwnerOrAdmin (CarCost cost) {
+        return CurrentUser.is(cost.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
@@ -128,6 +133,19 @@ public class Costs extends Controller {
         );
         return redirect(routes.Costs.showCostsForCar(carId));
     }
+
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+        @InjectContext
+    public static Result showCarCostDetail(int id) {
+        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
+        CarCost cost = dao.getCarCost(id);
+        if (isOwnerOrAdmin(cost)) {
+            return ok(details.render(cost));
+        } else {
+            return badRequest(); // not authorized
+        }
+    }
+
 
     /**
      * Method: GET

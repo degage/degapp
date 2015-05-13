@@ -206,6 +206,7 @@ GET         /cars/privileges/edit                   controllers.Cars.updatePrivi
 GET         /costs/car                              controllers.Costs.showCostsForCar(id: Int)
 POST        /costs/new                              controllers.Costs.doCreate(id: Int)
 GET         /costs                                  controllers.Costs.showCarCosts()
+GET         /costs/detail                           controllers.Costs.showCarCostDetail(id: Int)
 GET         /costs/page                             controllers.Costs.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /costs/approved                         controllers.Costs.approveCarCost(id: Int, returnToDetail: Int)
 GET         /costs/refused                          controllers.Costs.refuseCarCost(id: Int, returnToDetail: Int)

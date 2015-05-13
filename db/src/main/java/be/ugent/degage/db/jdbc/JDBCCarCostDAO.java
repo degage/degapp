@@ -46,7 +46,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
     private static final String CAR_COST_FIELDS =
             "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
-                    "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, " +
+                    "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, car_owner_user_id, " +
                     "category_id, category_description, car_cost_spread ";
 
     public static final String CAR_COST_QUERY =
@@ -73,6 +73,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getInt("car_cost_proof"),
                 rs.getInt("car_cost_car_id"),
                 rs.getString("car_name"),
+                rs.getInt("car_owner_user_id"),
                 populateCategory(rs),
                 rs.getInt("car_cost_spread")
         );

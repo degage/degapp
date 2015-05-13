@@ -41,6 +41,7 @@ public class CarCost {
     private int id;
     private int carId;
     private String carName;
+    private int ownerId;
     private int amount; // in eurocent
     private LocalDate date;
     private int km;
@@ -119,6 +120,10 @@ public class CarCost {
         return carName;
     }
 
+    public int getOwnerId() {
+        return ownerId;
+    }
+
     /**
      * The number of months over which this cost should be spread out. By default 1. A value of 0 indicates that
      * this cost will be payed back outside the system.
@@ -132,7 +137,7 @@ public class CarCost {
     }
 
     public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId,
-                   int carId, String carName, CarCostCategory category, int spread){
+                   int carId, String carName, int ownerId, CarCostCategory category, int spread){
         this.id = id;
         this.amount = amount;
         this.km = km;
@@ -144,5 +149,6 @@ public class CarCost {
         this.carName = carName;
         this.category = category;
         this.spread = spread;
+        this.ownerId = ownerId;
     }
 }
