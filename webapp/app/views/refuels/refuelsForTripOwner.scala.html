@@ -27,8 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuel], trip: TripAndCar,
-        nextId: Int, previousId: Int)
+@(form: Form[RefuelCommon.RefuelData], refuelList: Iterable[Refuels.RefuelWithImageType],
+        trip: TripAndCar, nextId: Int, previousId: Int)
 
 @* Lists all refuels for a given ride in a 'large' format, suitable for owners *@
 
@@ -62,9 +62,10 @@
         }
     </div>
 
-    @foreach.orElse(refuelList){ refuel =>
+    @foreach.orElse(refuelList){ rwi =>
+    @defining(rwi.refuel) { refuel =>
         @panel("Tankbeurt", "fa-beer") {
-            <div class="col-lg-4 col-xs-12">
+            <div class="@if(rwi.fileIsImage){col-lg-4 }else{} col-xs-12">
                 <dl class="dl-horizontal">
                     <dt>Bedrag</dt>
                     <dd>@data.EurocentAmount.toString(refuel.getEurocents)</dd>
@@ -74,16 +75,21 @@
                     <dd>@refuel.getKm</dd>
                     <dt>Status</dt>
                     <dd>@statusname(refuel.getStatus)</dd>
+                    <dt>Bonnetje/bewijsstuk</dt>
+                    <dd><a href="@routes.Refuels.getProof(refuel.getId)" target="_blank">Klik hier</a></dd>
                 </dl>
                 @if(refuel.getStatus == ApprovalStatus.REQUEST) {
                     @btnDanger("Goedkeuren",routes.RefuelApprove.approve(refuel.getId))
                     @btnPrimary("Afkeuren ...",routes.RefuelApprove.approveOrReject(refuel.getId, true))
                 }
             </div>
-            <div class="col-lg-8 col-xs-12">
-                <img src="@routes.Refuels.getProof(refuel.getId)">
-            </div>
+            @if(rwi.fileIsImage){
+                <div class="col-lg-8 col-xs-12">
+                    <img style="max-width: 98%;" src="@routes.Refuels.getProof(refuel.getId)">
+                </div>
+            }
         }
+    }
     }{
         <div class="col-xs-12 alert alert-warning"><p>Er werden voor deze rit (nog) geen tankbeurten ingegeven.</p></div>
     }

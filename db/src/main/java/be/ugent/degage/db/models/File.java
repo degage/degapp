@@ -75,6 +75,13 @@ public class File {
         this.contentType = contentType;
     }
 
+    /**
+     * Can this file be used as source for an HTML img tag?
+     */
+    public boolean isImage () {
+        return contentType.startsWith("image/");
+    }
+
     // TODO: remove equals and hashCode
     public boolean equals(Object o){
         if(o == null)                return false;

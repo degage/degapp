@@ -107,7 +107,7 @@ public class Costs extends Controller {
 
         // additional validation of file part
         // TODO: avoid copy and paste of this type of code
-        File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+        File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs");
         if (file == null) {
             form.reject("picture", "Bestand met foto of scan  is verplicht");
         } else if (file.getContentType() == null) {
@@ -135,12 +135,16 @@ public class Costs extends Controller {
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
-        @InjectContext
+    @InjectContext
     public static Result showCarCostDetail(int id) {
-        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
         CarCost cost = dao.getCarCost(id);
         if (isOwnerOrAdmin(cost)) {
-            return ok(details.render(cost));
+            return ok(details.render(
+                    cost,
+                    context.getFileDAO().getFile(cost.getProofId()).isImage()
+            ));
         } else {
             return badRequest(); // not authorized
         }

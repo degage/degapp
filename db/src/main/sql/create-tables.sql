@@ -61,7 +61,7 @@ CREATE TABLE `files` (
   `file_content_type` VARCHAR(64) NULL,
   `file_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `file_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`file_id`)
+	PRIMARY KEY (`file_id`)F
 );
 
 
@@ -282,7 +282,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_car_id` INT NOT NULL,
 	`car_cost_proof` INT,
 	`car_cost_amount` INT NOT NULL,
-	`car_cost_spread` INT NOT NULL DEFAULT 1,
+	`car_cost_spread` INT NOT NULL DEFAULT 12,
 	`car_cost_description` TEXT,
 	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'FROZEN') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
 	`car_cost_time` DATE,

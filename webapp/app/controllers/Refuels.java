@@ -32,6 +32,7 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
+import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.RefuelDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
 import be.ugent.degage.db.models.*;
@@ -44,6 +45,9 @@ import play.data.Form;
 import play.mvc.Result;
 import play.twirl.api.Html;
 import views.html.refuels.*;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 /**
  * Controller that displays information about refuels
@@ -162,15 +166,39 @@ public class Refuels extends RefuelCommon {
         }
     }
 
+    public static class RefuelWithImageType {
+        public Refuel refuel;
+        public boolean fileIsImage;
+
+        public RefuelWithImageType(Refuel refuel, boolean fileIsImage) {
+            this.refuel = refuel;
+            this.fileIsImage = fileIsImage;
+        }
+    }
+
+    private static Iterable<RefuelWithImageType> addImageTypes(FileDAO fdao, Iterable<Refuel> list) {
+        Collection<RefuelWithImageType> result = new ArrayList<>();
+        for (Refuel refuel : list) {
+            result.add(new RefuelWithImageType(
+                    refuel,
+                    fdao.getFile(refuel.getProofId()).isImage()
+            ));
+        }
+        return result;
+    }
+
     /**
      * Produces the correct html file for the given 'flow'
      */
     static Html refuelsForTrip(TripAndCar trip, Form<RefuelData> form, Iterable<Refuel> refuels, boolean ownerFlow) {
         // must be used in injected context
         if (ownerFlow) {
-            ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-
-            return refuelsForTripOwner.render(form, refuels, trip,
+            DataAccessContext context = DataAccess.getInjectedContext();
+            ReservationDAO dao = context.getReservationDAO();
+            return refuelsForTripOwner.render(
+                    form,
+                    addImageTypes(context.getFileDAO(), refuels),
+                    trip,
                     dao.getNextTripId(trip.getId()),
                     dao.getPreviousTripId(trip.getId())
             );

@@ -27,11 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(cost: CarCost)
+@(cost: CarCost, fileIsImage: Boolean)
 
 @stdlayout("Autokost", extrabc=breadcrumb("Kosten (" + cost.getCarName +")",routes.Costs.showCostsForCar(cost.getCarId))) {
    @panel("Details", "fa-money"){
-        <div class="col-lg-4 col-xs-12">
+        <div class="@if(fileIsImage){col-lg-4 }else{}col-xs-12">
             <dl class="dl-horizontal">
                 <dt>Auto</dt>
                 <dd>@cost.getCarName</dd>
@@ -45,11 +45,15 @@
                 <dd>@cost.getAmount</dd>
                 <dt>Status</dt>
                 <dd>@statusname(cost.getStatus)</dd>
+                <dt>Bonnetje/bewijsstuk</dt>
+                <dd><a href="@routes.Costs.getCarCostProof(cost.getId)" target="_blank">Klik hier</a></dd>
             </dl>
         </div>
-        <div class="col-lg-8 col-xs-12">
-            <img src="@routes.Costs.getCarCostProof(cost.getId)">
-        </div>
+        @if(fileIsImage){
+            <div class="col-lg-8 col-xs-12">
+                <img style="max-width: 98%;" src="@routes.Costs.getCarCostProof(cost.getId)">
+            </div>
+        }
    }
 }
 
