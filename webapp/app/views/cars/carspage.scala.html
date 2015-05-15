@@ -51,10 +51,10 @@
         </td>
         <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a></td>
         <td>
-            <div class="btn-group btn-group-xs">
-                <a class="btn btn-primary" href="@routes.Cars.editCar(car.getId)">Wijzig</a>
-                <a class="btn btn-success" href="@routes.Trips.overview(car.getId)">Km-standen</a>
-            </div>
+            @btnWarning("Wijzig", routes.Cars.editCar(car.getId))
+            @btnPrimary("Km-standen", routes.Trips.overview(car.getId))
+            @btnPrimary("Tankbeurten", routes.Refuels.startOverviewForCar(car.getId))
+            @btnPrimary("Kosten", routes.Costs.showCostsForCar(car.getId))
         </td>
     }{
         <tr>

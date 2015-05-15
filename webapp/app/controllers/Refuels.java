@@ -214,8 +214,7 @@ public class Refuels extends RefuelCommon {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.RESERVATION_ADMIN})
     @InjectContext
     public static Result startOverviewForCar(int carId) {
-        Car car = DataAccess.getInjectedContext().getCarDAO().getCar(carId);
-        if (CurrentUser.is(car.getOwner().getId())) {
+        if (isOwnerOrAdmin(DataAccess.getInjectedContext().getCarDAO().getCarHeaderShort(carId))) {
             return ok(startoverview.render(
                     Form.form(Calendars.DateData.class), carId
             ));
@@ -231,8 +230,7 @@ public class Refuels extends RefuelCommon {
     @InjectContext
     public static Result doStartOverviewForCar(int carId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        Car car = context.getCarDAO().getCar(carId);
-        if (!CurrentUser.is(car.getOwner().getId())) {
+        if (!isOwnerOrAdmin(context.getCarDAO().getCarHeaderShort(carId))) {
             return badRequest();
         }
 

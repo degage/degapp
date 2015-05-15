@@ -29,6 +29,7 @@
 
 package controllers;
 
+import be.ugent.degage.db.models.CarHeaderShort;
 import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.UserRole;
@@ -95,6 +96,11 @@ public class RefuelCommon extends WFCommon {
             return isOwnerOrAdmin(reservation);
         else
             return isDriverOrOwnerOrAdmin(reservation);
+    }
+
+    // TODO: also in CostsCommon - move to separate class or to CurrentUser?
+    protected static boolean isOwnerOrAdmin (CarHeaderShort car) {
+        return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
     }
 
     /**
