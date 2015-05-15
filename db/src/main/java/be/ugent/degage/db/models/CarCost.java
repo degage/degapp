@@ -51,6 +51,7 @@ public class CarCost {
     private LocalDate billed;
     private CarCostCategory category;
     private int spread; // see getter
+    private String comment; // when refused
 
     public int getId() {
         return id;
@@ -136,8 +137,13 @@ public class CarCost {
         return category;
     }
 
+    public String getComment() {
+        return comment;
+    }
+
     public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId,
-                   int carId, String carName, int ownerId, CarCostCategory category, int spread){
+                   int carId, String carName, int ownerId, CarCostCategory category, int spread,
+                   String comment){
         this.id = id;
         this.amount = amount;
         this.km = km;
@@ -150,5 +156,6 @@ public class CarCost {
         this.category = category;
         this.spread = spread;
         this.ownerId = ownerId;
+        this.comment = comment;
     }
 }

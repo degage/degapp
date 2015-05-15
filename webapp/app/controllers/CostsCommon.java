@@ -35,9 +35,13 @@ import be.ugent.degage.db.models.UserRole;
 import data.EurocentAmount;
 import db.CurrentUser;
 import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 import play.mvc.Controller;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Common super class for cost related controllers
@@ -67,6 +71,31 @@ public class CostsCommon extends Controller {
 
         @Constraints.Required
         public LocalDate time;
+
+        public int spread; // not always used
+
+        public List<ValidationError> validate() {
+            List<ValidationError> errors = new ArrayList<>();
+            if (amount.getValue() <= 0) {
+                errors.add(new ValidationError("amount", "Bedrag moet groter zijn dan 0"));
+            }
+            if (spread < 0) {
+                errors.add(new ValidationError("spread", "Spreiding mag niet negatief zijn"));
+            }
+            if (errors.isEmpty()) {
+                return null;
+            } else {
+                return errors;
+            }
+        }
+
+        public static CostData EMPTY;
+
+        static {
+            EMPTY = new CostData();
+            EMPTY.amount = new EurocentAmount();
+            EMPTY.spread = 12;
+        }
 
     }
 }

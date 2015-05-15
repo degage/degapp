@@ -59,7 +59,7 @@ public class Costs extends CostsCommon {
         if (isOwnerOrAdmin(car)) {
             return ok(costs.render(
                     dao.listCostsOfCar(carId),
-                    Form.form(CostData.class),
+                    Form.form(CostData.class).fill(CostData.EMPTY),
                     carId,
                     car.getName(),
                     dao.listCategories()
@@ -78,7 +78,11 @@ public class Costs extends CostsCommon {
         if (isOwnerOrAdmin(cost)) {
             return ok(details.render(
                     cost,
-                    context.getFileDAO().getFile(cost.getProofId()).isImage()
+                    context.getFileDAO().getFile(cost.getProofId()).isImage(),
+                    dao.getNextCostId(cost.getId()),
+                    dao.getPreviousCostId(cost.getId()),
+                    Form.form(CostData.class).fill(CostData.EMPTY),
+                    dao.listCategories()
             ));
         } else {
             return badRequest(); // not authorized

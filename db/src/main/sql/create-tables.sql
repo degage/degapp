@@ -288,6 +288,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_time` DATE,
 	`car_cost_mileage` INT,
 	`car_cost_billed` DATE DEFAULT NULL,
+	`car_cost_comment` VARCHAR(4096),
 	`car_cost_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`car_cost_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),

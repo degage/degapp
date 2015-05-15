@@ -1,4 +1,4 @@
-@* costs.scala.html
+@* newcostpanel.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
-     carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(carId: Int, form: Form[CostsCommon.CostData], categories: Iterable[CarCostCategory], isAdmin: Boolean)
 
-@stdlayout("Autokosten", scripts=js.datetimepicker()) {
-    @panel("Overzicht kosten (" + carName +")", "fa-money"){
-        <div class="col-xs-12">
-            @costsTable(carCostList){ cost =>
-                @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
-            }
-        </div>
+@panel("Nieuwe kost", "fa-pencil") {
+    @helper.form(routes.CostsCreate.doCreate(carId), 'enctype -> "multipart/form-data"){
+        @selectCategory(categories,form("category"),"Type")
+        @std.textField(form("description"), "Toelichting", css="col-lg-6 col-xs-12")
+        @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")
+        @std.fileField(form("picture"), "bonnetje/bewijsstuk:")
+        @std.textField(form("mileage"), "Kilometerstand", css="col-sm-6")
+        @std.datepicker(form("time"), "Datum", css="col-sm-6")
+        @if(isAdmin){
+            @std.numberField(form("spread"), "Spreiding (in maanden)", css="col-lg-5 col-xs-11")
+            <div class="col-xs-1">@btnModalHelp("costsAdmin.html")</div>
+            @std.submitButton("Doorsturen (en meteen goedkeuren)")
+        }else{
+            <div class="col-xs-12"><p>(Alle velden zijn verplicht)</p></div>
+            @std.submitButton("Doorsturen")
+        }
     }
-
-    @newcostpanel(carId,form,categories,db.CurrentUser hasRole UserRole.CAR_ADMIN)
-    @divModalHelp()
 }

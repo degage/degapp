@@ -47,7 +47,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     private static final String CAR_COST_FIELDS =
             "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
                     "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, car_owner_user_id, " +
-                    "category_id, category_description, car_cost_spread ";
+                    "category_id, category_description, car_cost_spread, car_cost_comment ";
 
     public static final String CAR_COST_QUERY =
             "SELECT " + CAR_COST_FIELDS + " FROM carcosts " +
@@ -75,7 +75,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getString("car_name"),
                 rs.getInt("car_owner_user_id"),
                 populateCategory(rs),
-                rs.getInt("car_cost_spread")
+                rs.getInt("car_cost_spread"),
+                rs.getString("car_cost_comment")
         );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
@@ -86,10 +87,13 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
     @Override
     public void createCarCost(int carId, String carName, int amount, int km,
-                              String description, LocalDate date, int fileId, int categoryId) throws DataAccessException {
+                              String description, LocalDate date,
+                              ApprovalStatus status, int spread,
+                              int fileId, int categoryId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
-                        "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof, car_cost_category_id) VALUES (?,?,?,?,?,?,?)"
+                        "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof, car_cost_category_id, " +
+                        "car_cost_status, car_cost_spread) VALUES (?,?,?,?,?,?,?,?,?)"
         )) {
             ps.setInt(1, carId);
             ps.setInt(2, amount);
@@ -102,6 +106,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 ps.setInt(6, fileId);
             }
             ps.setInt(7, categoryId);
+            ps.setString(8, status.name());
+            ps.setInt(9, spread);
             if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when creating carcost.");
             }
@@ -145,10 +151,10 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     @Override
-    public Iterable<CarCost> listCostsOfCar (int carId) throws DataAccessException {
+    public Iterable<CarCost> listCostsOfCar(int carId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 CAR_COST_QUERY +
-                " WHERE car_cost_car_id = ?  ORDER BY car_cost_created_at"
+                        " WHERE car_cost_car_id = ?  ORDER BY car_cost_created_at"
         )) {
             ps.setInt(1, carId);
             return toList(ps, JDBCCarCostDAO::populateCarCost);
@@ -239,6 +245,64 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             return toList(ps, JDBCCarCostDAO::populateCategory);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not list cost categories", ex);
+        }
+    }
+
+    public int getNextCostId(int costId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT r.car_cost_id FROM carcosts AS r JOIN carcosts AS o " +
+                        "USING(car_cost_car_id ) " +
+                        "WHERE o.car_cost_id = ? AND r.car_cost_id > o.car_cost_id  " +
+                        "ORDER BY r.car_cost_id ASC LIMIT 1"
+        )) {
+            ps.setInt(1, costId);
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while retrieving the next cost", ex);
+        }
+    }
+
+
+    public int getPreviousCostId(int costId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT r.car_cost_id FROM carcosts AS r JOIN carcosts AS o " +
+                        "USING(car_cost_car_id) " +
+                        "WHERE o.car_cost_id = ? AND r.car_cost_id < o.car_cost_id  " +
+                        "ORDER BY r.car_cost_id DESC LIMIT 1"
+        )) {
+            ps.setInt(1, costId);
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while retrieving the previous cost", ex);
+        }
+
+    }
+
+    @Override
+    public void approveCost(int costId, int spread) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carcosts SET car_cost_status = 'ACCEPTED', car_cost_spread = ? " +
+                        "WHERE car_cost_id = ?"
+        )) {
+            ps.setInt(1, spread);
+            ps.setInt(2, costId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while updating cost status ", ex);
+        }
+    }
+
+    @Override
+    public void rejectCost(int costId, String message) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carcosts SET car_cost_status = 'REFUSED', car_cost_comment = ? " +
+                        "WHERE car_cost_id = ?"
+        )) {
+            ps.setString(1, message);
+            ps.setInt(2, costId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while updating cost status ", ex);
         }
     }
 }

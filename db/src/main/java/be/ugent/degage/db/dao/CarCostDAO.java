@@ -32,6 +32,7 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
+import be.ugent.degage.db.models.ApprovalStatus;
 import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.CarCostCategory;
 
@@ -42,7 +43,9 @@ import java.time.LocalDate;
  */
 public interface CarCostDAO {
 
-    public void createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date, int fileId, int categoryId) throws DataAccessException;
+    public void createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date,
+                              ApprovalStatus status, int spread,
+                              int fileId, int categoryId) throws DataAccessException;
 
     public int getAmountOfCarCosts(Filter filter) throws DataAccessException;
 
@@ -68,5 +71,29 @@ public interface CarCostDAO {
      * Return a list of all car cost categories
      */
     public Iterable<CarCostCategory> listCategories ();
+
+    /**
+     * Return the next cost for the same car.
+     * @return 0 if this was the last in the list
+     */
+    public int getNextCostId (int costId) throws DataAccessException;
+
+
+    /**
+     * Return the previous cost for the same car.
+     * @return 0 if this was the first in the list
+     */
+    public int getPreviousCostId (int costId) throws DataAccessException;
+
+    /**
+     * Approve the cost and register the spread to be used in calculations
+     */
+    public void approveCost (int costId, int spread) throws DataAccessException;
+
+    /**
+     * Reject the status and store the reason why
+     */
+    public void rejectCost(int costId, String message) throws DataAccessException;
+
 
 }

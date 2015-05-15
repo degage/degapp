@@ -31,10 +31,12 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.CarCostDAO;
+import be.ugent.degage.db.models.ApprovalStatus;
 import be.ugent.degage.db.models.CarHeaderShort;
 import be.ugent.degage.db.models.File;
 import be.ugent.degage.db.models.UserRole;
 import controllers.util.FileHelper;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -58,7 +60,7 @@ public class CostsCreate extends CostsCommon {
         Form<CostData> form = Form.form(CostData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
-        CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
+        CarHeaderShort car = context.getCarDAO().getCarHeaderShort(carId);
         if (!isOwnerOrAdmin(car)) {
             return badRequest(); // hack?
         }
@@ -73,22 +75,35 @@ public class CostsCreate extends CostsCommon {
         } else if (form.hasErrors()) {
             form.reject("picture", "Bestand opnieuw selecteren");
         }
-        String carName = car.getName();
 
+        String carName = car.getName();
         if (form.hasErrors()) {
             return badRequest(costs.render(
                     dao.listCostsOfCar(carId),
                     form, carId, carName, dao.listCategories()
             ));
         }
-        assert file != null; // keeps IDEA happy
+
         CostData data = form.get();
 
-        dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time, file.getId(), data.category);
-        Notifier.sendCarCostRequest(
-                data.time, carName, data.amount, data.description,
-                dao.getCategory(data.category).getDescription()
-        );
+        boolean isAdmin = CurrentUser.hasRole(UserRole.CAR_ADMIN);
+
+//        if (isAdmin && data.spread == null) {
+//            form.reject("spread", "Gelieve een spreiding op te geven");
+//        }
+
+        assert file != null; // keeps IDEA happy
+
+        dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time,
+                isAdmin ? ApprovalStatus.ACCEPTED : ApprovalStatus.REQUEST,
+                isAdmin ? 12 : data.spread,
+                file.getId(), data.category);
+        if (! isAdmin) {
+            Notifier.sendCarCostRequest(
+                    data.time, carName, data.amount, data.description,
+                    dao.getCategory(data.category).getDescription()
+            );
+        }
         return redirect(routes.Costs.showCostsForCar(carId));
     }
 }

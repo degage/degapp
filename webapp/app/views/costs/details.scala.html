@@ -27,9 +27,28 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(cost: CarCost, fileIsImage: Boolean)
+@(cost: CarCost, fileIsImage: Boolean, nextId: Int, previousId: Int,
+      form: Form[CostsCommon.CostData], categories: Iterable[CarCostCategory])
 
 @stdlayout("Autokost", extrabc=breadcrumb("Kosten (" + cost.getCarName +")",routes.Costs.showCostsForCar(cost.getCarId))) {
+    @panel("Acties", "fa-pencil") {
+        <div class="col-xs-12">
+            <a class="btn btn-xs btn-default" data-toggle="collapse"
+                    href="#collapsedForm">Kost toevoegen (@cost.getCarName) ...</a>
+            @if(previousId > 0){
+                @btnPrimary("Vorige kost", routes.Costs.showCostDetail(previousId))
+            }
+            @if(nextId > 0){
+                @btnPrimary("Volgende kost", routes.Costs.showCostDetail(nextId))
+            }
+
+        </div>
+    }
+
+    <div class='collapse@if(form.hasErrors)(".in")' id="collapsedForm">
+        @newcostpanel(cost.getCarId,form,categories,true)
+    </div>
+
    @panel("Details", "fa-money"){
         <div class="@if(fileIsImage){col-lg-4 }else{}col-xs-12">
             <dl class="dl-horizontal">
@@ -48,6 +67,10 @@
                 <dt>Bonnetje/bewijsstuk</dt>
                 <dd><a href="@routes.Costs.getCarCostProof(cost.getId)" target="_blank">Klik hier</a></dd>
             </dl>
+            @if(cost.getStatus == ApprovalStatus.REQUEST) {
+                @btnDanger("Goedkeuren",routes.CostsApprove.approveCarCost(cost.getId,0))
+                @btnPrimary("Afkeuren ...",routes.CostsApprove.approveOrReject(cost.getId))
+            }
         </div>
         @if(fileIsImage){
             <div class="col-lg-8 col-xs-12">
@@ -55,5 +78,6 @@
             </div>
         }
    }
+   @divModalHelp()
 }
 

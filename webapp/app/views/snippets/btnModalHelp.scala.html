@@ -1,4 +1,4 @@
-@* costs.scala.html
+@* btnModalHelp.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
-     carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(fileName: String)
 
-@stdlayout("Autokosten", scripts=js.datetimepicker()) {
-    @panel("Overzicht kosten (" + carName +")", "fa-money"){
-        <div class="col-xs-12">
-            @costsTable(carCostList){ cost =>
-                @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
-            }
-        </div>
-    }
+@* needs @divModalHelp at the bottom of the page using it *@
 
-    @newcostpanel(carId,form,categories,db.CurrentUser hasRole UserRole.CAR_ADMIN)
-    @divModalHelp()
-}
+<a class="btn btn-xs btn-info" data-toggle="modal" data-target="#helpModal"
+   href='@routes.Assets.at("modalhelp/"+fileName)'><span class="fa fa-info"></span> Info</a>
