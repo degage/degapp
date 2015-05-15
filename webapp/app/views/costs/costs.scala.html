@@ -27,7 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], form: Form[Costs.CostData], carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
+     carId: Int, carName: String, categories: Iterable[CarCostCategory])
 
 @stdlayout("Autokosten", scripts=js.datetimepicker()) {
     @panel("Overzicht kosten (" + carName +")", "fa-money"){
@@ -39,7 +40,7 @@
     }
 
     @panel("Nieuwe kost", "fa-pencil") {
-        @helper.form(routes.Costs.doCreate(carId), 'enctype -> "multipart/form-data"){
+        @helper.form(routes.CostsCreate.doCreate(carId), 'enctype -> "multipart/form-data"){
             @selectCategory(categories,form("category"),"Type")
             @std.textField(form("description"), "Toelichting", css="col-lg-6 col-xs-12")
             @std.textField(form("amount"), "Bedrag in Euro (bv. 13,75)", css="col-sm-6")

@@ -33,7 +33,7 @@
     @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
     @cost.getStatus match {
         case ApprovalStatus.REQUEST => {
-            @btnPrimary("Goed- of afkeuren ...", routes.Costs.approveOrReject(cost.getId))
+            @btnPrimary("Goed- of afkeuren ...", routes.CostsApprove.approveOrReject(cost.getId))
         }
         case _ => {}
     }

@@ -33,38 +33,22 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarCostDAO;
-import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.FileHelper;
 import controllers.util.Pagination;
-import data.EurocentAmount;
-import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
-import notifiers.Notifier;
 import play.data.Form;
-import play.data.validation.Constraints;
-import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.costs.carCostsAdmin;
 import views.html.costs.carCostspage;
 import views.html.costs.costs;
 import views.html.costs.details;
 
-import java.time.LocalDate;
-
 /**
  * Controller for actions related to car costs
  */
-public class Costs extends Controller {
-
-    private static boolean isOwnerOrAdmin (CarHeaderShort car) {
-        return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
-    }
-
-    private static boolean isOwnerOrAdmin (CarCost cost) {
-        return CurrentUser.is(cost.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
-    }
+public class Costs extends CostsCommon {
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
@@ -83,52 +67,6 @@ public class Costs extends Controller {
         } else {
             return badRequest(); // hack?
         }
-    }
-
-    /**
-     * Method: POST
-     *
-     * @return redirect to the CarCostForm you just filled in or to the car-detail page
-     */
-    @AllowRoles({UserRole.CAR_OWNER})
-    @InjectContext
-    public static Result doCreate(int carId) {
-
-        Form<CostData> form = Form.form(CostData.class).bindFromRequest();
-        DataAccessContext context = DataAccess.getInjectedContext();
-        CarCostDAO dao = context.getCarCostDAO();
-        CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
-        if (!isOwnerOrAdmin(car)) {
-            return badRequest(); // hack?
-        }
-
-        // additional validation of file part
-        // TODO: avoid copy and paste of this type of code
-        File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs");
-        if (file == null) {
-            form.reject("picture", "Bestand met foto of scan  is verplicht");
-        } else if (file.getContentType() == null) {
-            form.reject("picture", "Het bestand  is van het verkeerde type");
-        } else if (form.hasErrors()) {
-            form.reject("picture", "Bestand opnieuw selecteren");
-        }
-        String carName = car.getName();
-
-        if (form.hasErrors()) {
-            return badRequest(costs.render(
-                    dao.listCostsOfCar(carId),
-                    form, carId, carName, dao.listCategories()
-            ));
-        }
-        assert file != null; // keeps IDEA happy
-        CostData data = form.get();
-
-        dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time, file.getId(), data.category);
-        Notifier.sendCarCostRequest(
-                data.time, carName, data.amount, data.description,
-                dao.getCategory(data.category).getDescription()
-        );
-        return redirect(routes.Costs.showCostsForCar(carId));
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
@@ -181,58 +119,6 @@ public class Costs extends Controller {
         return ok(carCostspage.render(listOfResults, page, amountOfResults, amountOfPages));
     }
 
-    /**
-     * Method: GET
-     * <p>
-     * Called when a car-bound cost of a car is approved by the car admin.
-     *
-     * @param carCostId The carCost being approved
-     * @return the carcost index page if returnToDetail is 0, car detail page if 1.
-     */
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result approveCarCost(int carCostId, int returnToDetail) {
-        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
-        CarCost carCost = dao.getCarCost(carCostId);
-        carCost.setStatus(ApprovalStatus.ACCEPTED);
-        dao.updateCarCost(carCost);
-        int carId = carCost.getCarId();
-        Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
-
-        flash("success", "Autokost met succes geaccepteerd");
-        if (returnToDetail == 0) {
-            return redirect(routes.Costs.showCosts(0));
-        } else {
-            return redirect(routes.Cars.detail(carId));
-        }
-    }
-
-    /**
-     * Method: GET
-     * <p>
-     * Called when a car-bound cost of a car is approved by the car admin.
-     *
-     * @param carCostId The carCost being approved
-     * @return the carcost index page
-     */
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result refuseCarCost(int carCostId, int returnToDetail) {
-        // TODO: very similar to approve
-        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
-        CarCost carCost = dao.getCarCost(carCostId);
-        carCost.setStatus(ApprovalStatus.REFUSED);
-        dao.updateCarCost(carCost);
-        int carId = carCost.getCarId();
-        Notifier.sendCarCostRejected(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
-        flash("success", "Autokost met succes geweigerd");
-        if (returnToDetail == 0) {
-            return redirect(routes.Costs.showCosts(0));
-        } else {
-            return redirect(routes.Cars.detail(carId));
-        }
-    }
-
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result getCarCostProof(int carCostId) {
@@ -245,36 +131,5 @@ public class Costs extends Controller {
         }
     }
 
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result approveOrReject(int carCostId) {
-        return ok(); // TODO
-    }
 
-
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result doApproveOrReject(int carCostId) {
-        return ok(); // TODO
-    }
-
-
-
-    public static class CostData {
-
-        @Constraints.Required
-        public int category;
-
-        @Constraints.Required
-        public String description;
-
-        @Constraints.Required
-        public EurocentAmount amount;
-
-        public int mileage;
-
-        @Constraints.Required
-        public LocalDate time;
-
-    }
 }

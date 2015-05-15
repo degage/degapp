@@ -1,4 +1,4 @@
-@* costsTable.scala.html
+/* CostsCommon.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -25,37 +25,48 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ */
 
-@(carCostList: Iterable[CarCost])(actions: CarCost => Html)
+package controllers;
 
-<table class="table table-striped table-bordered table-hover no-footer" >
-    <thead>
-        <tr role="row">
-            <th>Auto</th>
-            <th>Type</th>
-            <th>Toelichting</th>
-            <th>Datum</th>
-            <th>Bedrag</th>
-            <th>Status</th>
-            <th>Acties</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach.trOrElse(carCostList) { carCost =>
-            <td>@carCost.getCarName</td>
-            <td>@carCost.getCategory.getDescription</td>
-            <td>@carCost.getDescription</td>
-            <td>@Utils.toLocalizedDateString(carCost.getDate)</td>
-            <td>@carCost.getAmount</td>
-            <td>@statusname(carCost.getStatus)</td>
-            <td>@actions(carCost)</td>
-        } {
-            <tr>
-                <td class="empty-row" colspan="7">
-                    Geen resultaten.
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+import be.ugent.degage.db.models.CarCost;
+import be.ugent.degage.db.models.CarHeaderShort;
+import be.ugent.degage.db.models.UserRole;
+import data.EurocentAmount;
+import db.CurrentUser;
+import play.data.validation.Constraints;
+import play.mvc.Controller;
+
+import java.time.LocalDate;
+
+/**
+ * Common super class for cost related controllers
+ */
+public class CostsCommon extends Controller {
+
+    protected static boolean isOwnerOrAdmin (CarHeaderShort car) {
+        return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
+    }
+
+    protected static boolean isOwnerOrAdmin (CarCost cost) {
+        return CurrentUser.is(cost.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
+    }
+
+    public static class CostData {
+
+        @Constraints.Required
+        public int category;
+
+        @Constraints.Required
+        public String description;
+
+        @Constraints.Required
+        public EurocentAmount amount;
+
+        public int mileage;
+
+        @Constraints.Required
+        public LocalDate time;
+
+    }
+}
