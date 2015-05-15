@@ -113,7 +113,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     private static void appendCostFilter(StringBuilder builder, Filter filter) {
         StringBuilder b = new StringBuilder();
         FilterUtils.appendIdFilter(b, "car_cost_car_id", filter.getValue(FilterField.CAR_ID));
-        FilterUtils.appendStringFilter(b, "car_cost_status", filter.getValue(FilterField.CAR_COST_STATUS));
+        FilterUtils.appendStringFilter(b, "car_cost_status", filter.getValue(FilterField.STATUS));
         if (b.length() > 0) {
             builder.append(" WHERE ").append(b.substring(4));
         }

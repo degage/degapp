@@ -205,12 +205,14 @@ GET         /cars/privileges/edit                   controllers.Cars.updatePrivi
 # Costs
 GET         /costs/car                              controllers.Costs.showCostsForCar(id: Int)
 POST        /costs/new                              controllers.Costs.doCreate(id: Int)
-GET         /costs                                  controllers.Costs.showCarCosts()
-GET         /costs/detail                           controllers.Costs.showCarCostDetail(id: Int)
-GET         /costs/page                             controllers.Costs.showCarCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /costs/detail                           controllers.Costs.showCostDetail(id: Int)
+GET         /costs/list                             controllers.Costs.showCosts(tab : Int ?= 0)
+GET         /costs/page                             controllers.Costs.showCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+GET         /costs/proof                            controllers.Costs.getCarCostProof(id: Int)
+GET         /costs/aor                              controllers.Costs.approveOrReject(id: Int)
+POST        /costs/aor                              controllers.Costs.doApproveOrReject(id: Int)
 GET         /costs/approved                         controllers.Costs.approveCarCost(id: Int, returnToDetail: Int)
 GET         /costs/refused                          controllers.Costs.refuseCarCost(id: Int, returnToDetail: Int)
-GET         /costs/proof                            controllers.Costs.getCarCostProof(id: Int)
 
 # (Temporarily) disables
 #GET         /cars/availabilities/edit              controllers.Availabilities.updateAvailabilities(id : Int, values : String)

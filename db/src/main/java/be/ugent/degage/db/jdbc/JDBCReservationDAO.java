@@ -447,7 +447,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                                 " WHERE (car_owner_user_id LIKE ").append(id).
                 append(" OR reservation_user_id LIKE ").append(id).
                 append(") AND reservation_car_id LIKE ").append(carId);
-        appendStatusFilter(builder, filter.getValue(FilterField.RESERVATION_STATUS));
+        appendStatusFilter(builder, filter.getValue(FilterField.STATUS));
         return builder.toString();
     }
 

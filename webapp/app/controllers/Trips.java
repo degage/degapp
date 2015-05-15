@@ -209,7 +209,6 @@ public class Trips extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        User user = DataProvider.getUserProvider().getUser();
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
 
         if (field == null) {
@@ -219,9 +218,9 @@ public class Trips extends Controller {
         Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfReservations(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+        int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return ok(tripspage.render(user.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
     }
 
     private static boolean overviewAllowed (Car car) {

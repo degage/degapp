@@ -30,7 +30,5 @@
 @(title: String)
 
 @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)){
-@* TODO: incorporate these
-    @item(title, "Autokosten", "fa-money", routes.Cars.showCarCosts)
-*@
+    @item(title, "Autokosten", "fa-money", routes.Costs.showCosts(0))
 }

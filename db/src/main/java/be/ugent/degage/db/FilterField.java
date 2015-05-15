@@ -39,16 +39,16 @@ package be.ugent.degage.db;
 public enum FilterField {
 
     CAR_NAME(false), CAR_BRAND(false), CAR_SEATS(true), CAR_AUTOMATIC(true), CAR_GPS(true), CAR_HOOK(true), CAR_ID(true), CAR_FUEL(true), CAR_ACTIVE(true),
-    CAR_COST_STATUS(false), CAR_COST_DATE(true),
-    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true), REFUEL_NOT_STATUS(true),
+    CAR_COST_DATE(true),
+    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
     INFOSESSION_DATE(true), INFOSESSION_TYPE(false),
-    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true), RESERVATION_STATUS(true),
+    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true),
+    STATUS(true),
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
     NOTIFICATION_READ(true),
-    TEMPLATE_NAME(false),
     RECEIPT_DATE(true),
     FROM(true), UNTIL(true);
 
@@ -135,10 +135,7 @@ public enum FilterField {
                 field = RESERVATION_CAR_ID;
                 break;
             case "status":
-                field = RESERVATION_STATUS;
-                break;
-            case "car_cost_status":
-                field = CAR_COST_STATUS;
+                field = STATUS;
                 break;
             case "car_cost_date":
                 field = CAR_COST_DATE;
@@ -163,9 +160,6 @@ public enum FilterField {
                 break;
             case "refuel_car_id":
                 field = REFUEL_CAR_ID;
-                break;
-            case "template_name":
-                field = TEMPLATE_NAME;
                 break;
         }
         return field;

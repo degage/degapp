@@ -125,7 +125,7 @@ public class Application extends Controller {
                         // Routes
                         javascript.Approvals.pendingApprovalListPaged(),
                         javascript.Calendars.listAvailableCarsPage(),
-                        javascript.Costs.showCarCostsPage(),
+                        javascript.Costs.showCostsPage(),
                         javascript.Cars.showCarsPage(),
                         javascript.Damages.showDamagesPage(),
                         javascript.Damages.showDamagesPageOwner(),

@@ -46,7 +46,6 @@ import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import views.html.costs.carCostsAdmin;
 import views.html.costs.carCostspage;
 import views.html.costs.costs;
@@ -70,8 +69,6 @@ public class Costs extends Controller {
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showCostsForCar(int carId) {
-
-        // TODO: add authorization check
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
         CarHeaderShort car =  context.getCarDAO().getCarHeaderShort(carId);
@@ -136,7 +133,7 @@ public class Costs extends Controller {
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result showCarCostDetail(int id) {
+    public static Result showCostDetail(int id) {
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
         CarCost cost = dao.getCarCost(id);
@@ -158,54 +155,30 @@ public class Costs extends Controller {
      */
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result showCarCosts() {
-        return ok(carCostsAdmin.render());
+    public static Result showCosts(int tab) {
+        return ok(carCostsAdmin.render(tab));
     }
 
+    @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result showCarCostsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+    public static Result showCostsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
         FilterField field = FilterField.stringToField(orderBy);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-
-        // Check if admin or car owner
-        if (!CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
-            String carIdString = filter.getValue(FilterField.CAR_ID);
-            // TODO: not from filter??
-
-            if (carIdString.equals("")) {
-                return badRequest();
-            }
-            int carId = Integer.parseInt(carIdString);
-
-            CarDAO carDAO = DataAccess.getInjectedContext().getCarDAO();
-            if (!carDAO.isCarOfUser(carId, CurrentUser.getId())) {
-                flash("danger", "Je bent niet de eigenaar van deze auto.");
-                return badRequest();   // TODO: redirect
-            }
-
-        }
-
-        return ok(carCostList(page, pageSize, field, asc, filter));
-
-    }
-
-    // used in injected context
-    private static Html carCostList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
 
-        if (orderBy == null) {
-            orderBy = FilterField.CAR_COST_DATE;
+        if (field == null) {
+            field = FilterField.CAR_COST_DATE;
         }
 
-        Iterable<CarCost> listOfResults = dao.getCarCostList(orderBy, asc, page, pageSize, filter);
+        Iterable<CarCost> listOfResults = dao.getCarCostList(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfCarCosts(filter);
         int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return carCostspage.render(listOfResults, page, amountOfResults, amountOfPages);
+        return ok(carCostspage.render(listOfResults, page, amountOfResults, amountOfPages));
     }
 
     /**
@@ -228,7 +201,7 @@ public class Costs extends Controller {
 
         flash("success", "Autokost met succes geaccepteerd");
         if (returnToDetail == 0) {
-            return redirect(routes.Costs.showCarCosts());
+            return redirect(routes.Costs.showCosts(0));
         } else {
             return redirect(routes.Cars.detail(carId));
         }
@@ -254,20 +227,37 @@ public class Costs extends Controller {
         Notifier.sendCarCostRejected(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
         flash("success", "Autokost met succes geweigerd");
         if (returnToDetail == 0) {
-            return redirect(routes.Costs.showCarCosts());
+            return redirect(routes.Costs.showCosts(0));
         } else {
             return redirect(routes.Cars.detail(carId));
         }
     }
 
-    @AllowRoles
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result getCarCostProof(int carCostId) {
-        // TODO: check authorization
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCost carCost = context.getCarCostDAO().getCarCost(carCostId);
-        return FileHelper.getFileStreamResult(context.getFileDAO(), carCost.getProofId());
+        if (isOwnerOrAdmin(carCost)) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), carCost.getProofId());
+        } else {
+            return badRequest();
+        }
     }
+
+    @AllowRoles({UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result approveOrReject(int carCostId) {
+        return ok(); // TODO
+    }
+
+
+    @AllowRoles({UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doApproveOrReject(int carCostId) {
+        return ok(); // TODO
+    }
+
 
 
     public static class CostData {
