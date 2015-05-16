@@ -120,7 +120,8 @@ public class Costs extends CostsCommon {
         int amountOfResults = dao.getAmountOfCarCosts(filter);
         int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return ok(carCostspage.render(listOfResults, page, amountOfResults, amountOfPages));
+        return ok(carCostspage.render(listOfResults, searchString.endsWith("ACCEPTED"),
+                page, amountOfResults, amountOfPages));
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})

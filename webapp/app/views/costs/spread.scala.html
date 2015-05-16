@@ -1,4 +1,4 @@
-@* costs.scala.html
+@* spread.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
-     carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(spread: Int)
 
-@stdlayout("Autokosten", scripts=js.datetimepicker()) {
-    @panel("Overzicht kosten (" + carName +")", "fa-money"){
-        <div class="col-xs-12">
-            @costsTable(carCostList,true){ cost =>
-                @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
-            }
-        </div>
-    }
-
-    @newcostpanel(carId,form,categories,db.CurrentUser hasRole UserRole.CAR_ADMIN)
-    @divModalHelp()
+@spread match {
+   case 0 => {
+      ***
+   }
+   case 1 => {
+      1 maand
+   }
+   case _ => {
+      @spread maanden
+   }
 }

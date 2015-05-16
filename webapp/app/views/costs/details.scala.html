@@ -51,25 +51,9 @@
 
    @panel("Details", "fa-money"){
         <div class="@if(fileIsImage){col-lg-4 }else{}col-xs-12">
-            <dl class="dl-horizontal">
-                <dt>Auto</dt>
-                <dd>@cost.getCarName</dd>
-                <dt>Type</dt>
-                <dd>@cost.getCategory.getDescription</dd>
-                <dt>Toelichting</dt>
-                <dd>@cost.getDescription</dd>
-                <dt>Datum</dt>
-                <dd>@Utils.toLocalizedDateString(cost.getDate)</dd>
-                <dt>Bedrag</dt>
-                <dd>@cost.getAmount</dd>
-                <dt>Status</dt>
-                <dd>@statusname(cost.getStatus)</dd>
-                <dt>Bonnetje/bewijsstuk</dt>
-                <dd><a href="@routes.Costs.getCarCostProof(cost.getId)" target="_blank">Klik hier</a></dd>
-            </dl>
+            @detailsdl(cost)
             @if(cost.getStatus == ApprovalStatus.REQUEST) {
-                @btnDanger("Goedkeuren",routes.CostsApprove.approveCarCost(cost.getId,0))
-                @btnPrimary("Afkeuren ...",routes.CostsApprove.approveOrReject(cost.getId))
+                @btnPrimary("Goed- of afkeuren ...",routes.CostsApprove.approveOrReject(cost.getId))
             }
         </div>
         @if(fileIsImage){

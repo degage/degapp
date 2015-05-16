@@ -33,77 +33,102 @@ import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.models.ApprovalStatus;
 import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.UserRole;
+import com.google.common.base.Strings;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
+import play.data.Form;
+import play.data.validation.ValidationError;
 import play.mvc.Result;
+import views.html.costs.approveorreject;
+
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Handles approval / rejection of costs
  */
 public class CostsApprove extends CostsCommon {
 
-    /**
-     * Method: GET
-     * <p>
-     * Called when a car-bound cost of a car is approved by the car admin.
-     *
-     * @param carCostId The carCost being approved
-     * @return the carcost index page if returnToDetail is 0, car detail page if 1.
-     */
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result approveCarCost(int carCostId, int returnToDetail) {
-        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
-        CarCost carCost = dao.getCarCost(carCostId);
-        carCost.setStatus(ApprovalStatus.ACCEPTED);
-        dao.updateCarCost(carCost);
-        int carId = carCost.getCarId();
-        Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
-
-        flash("success", "Autokost met succes geaccepteerd");
-        if (returnToDetail == 0) {
-            return redirect(routes.Costs.showCosts(0));
-        } else {
-            return redirect(routes.Cars.detail(carId));
-        }
-    }
-
-    /**
-     * Method: GET
-     * <p>
-     * Called when a car-bound cost of a car is approved by the car admin.
-     *
-     * @param carCostId The carCost being approved
-     * @return the carcost index page
-     */
-    @AllowRoles({UserRole.CAR_ADMIN})
-    @InjectContext
-    public static Result refuseCarCost(int carCostId, int returnToDetail) {
-        // TODO: very similar to approve
-        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
-        CarCost carCost = dao.getCarCost(carCostId);
-        carCost.setStatus(ApprovalStatus.REFUSED);
-        dao.updateCarCost(carCost);
-        int carId = carCost.getCarId();
-        Notifier.sendCarCostRejected(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
-        flash("success", "Autokost met succes geweigerd");
-        if (returnToDetail == 0) {
-            return redirect(routes.Costs.showCosts(0));
-        } else {
-            return redirect(routes.Cars.detail(carId));
-        }
-    }
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result approveOrReject(int carCostId) {
-        return ok(); // TODO
+        return ok(approveorreject.render(
+                Form.form(ApprovalData.class).fill(ApprovalData.EMPTY),
+                DataAccess.getInjectedContext().getCarCostDAO().getCarCost(carCostId)
+        ));
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result doApproveOrReject(int carCostId) {
-        return ok(); // TODO
+        Form<ApprovalData> form = Form.form(ApprovalData.class).bindFromRequest();
+        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
+        if (form.hasErrors()) {
+            return badRequest(approveorreject.render(
+                    form, dao.getCarCost(carCostId)
+            ));
+        } else {
+            ApprovalData data = form.get();
+            switch (data.status) {
+                case "EXTERNAL":
+                    dao.approveCost(carCostId, 0);
+//Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+                    break;
+                case "ACCEPTED":
+                    dao.approveCost(carCostId, data.spread);
+//Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+                    break;
+                case "REFUSED":
+                    dao.rejectCost(carCostId, data.remarks);
+//Notifier.sendCarCostRejected(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+                    break;
+                default:
+                    return badRequest(); // hack?
+            }
+            // TODO: dispatch depending on the flow
+            return redirect(routes.Costs.showCostDetail(carCostId));
+        }
     }
+
+    public static class ApprovalData {
+
+        public String status;
+        public String remarks;
+
+        public Integer spread;
+
+        public List<ValidationError> validate() {
+            if ("REFUSED".equals(status)) {
+                if (remarks == null || remarks.trim().isEmpty()) {
+                    return Collections.singletonList(
+                            new ValidationError("remarks", "Je moet een reden opgeven voor de weigering")
+                    );
+                }
+            } else if ("ACCEPTED".equals(status)) {
+                if (spread == null) {
+                    return Collections.singletonList(
+                            new ValidationError("spread", "Ongeldige waarde")
+                    );
+                }
+                if (spread < 0) {
+                    return Collections.singletonList(
+                            new ValidationError("spread", "Spreiding mag niet negatief zijn")
+                    );
+                }
+            }
+            return null;
+        }
+
+        public static ApprovalData EMPTY;
+
+        static {
+            EMPTY = new ApprovalData();
+            EMPTY.spread = 12;
+        }
+
+    }
+
 }

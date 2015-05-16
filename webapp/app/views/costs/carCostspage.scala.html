@@ -27,9 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(carCostList: Iterable[CarCost], withSpread: Boolean, page : Int, amountOfResults : Int, amountOfPages : Int)
 
-@costsTable(carCostList){ cost =>
+@costsTable(carCostList,withSpread){ cost =>
     @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
     @cost.getStatus match {
         case ApprovalStatus.REQUEST => {

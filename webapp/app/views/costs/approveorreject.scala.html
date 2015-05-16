@@ -1,4 +1,4 @@
-@* costs.scala.html
+@* approveorreject.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,33 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
-     carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(form: Form[CostsApprove.ApprovalData], cost: CarCost)
 
-@stdlayout("Autokosten", scripts=js.datetimepicker()) {
-    @panel("Overzicht kosten (" + carName +")", "fa-money"){
+@stdlayout("Kost goed- of afkeuren", extrabc=breadcrumb("Autokosten",routes.Costs.showCostsForCar(cost.getCarId))){
+
+    @panel("Details", "fa-money"){
         <div class="col-xs-12">
-            @costsTable(carCostList,true){ cost =>
-                @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
-            }
+            @detailsdl(cost)
         </div>
     }
 
-    @newcostpanel(carId,form,categories,db.CurrentUser hasRole UserRole.CAR_ADMIN)
+    @helper.form(routes.CostsApprove.doApproveOrReject(cost.getId())) {
+
+        @panel("Goedkeuren", "fa-check-square") {
+            @std.numberField(form("spread"), "Spreiding (in maanden)", "col-sm-6 col-xs-12")
+            <div class="col-xs-12">
+                @btnModalHelp("costsAdmin.html")&nbsp;&nbsp;
+                <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
+                <button type="submit" class="btn btn-xs btn-success" name="status" value="EXTERNAL">Goedkeuren (maar zal buiten het systeem worden verrekend)</button>
+            </div>
+        }
+        @panel("Afkeuren", "fa-minus-square") {
+            @std.textArea(form("remarks"), "Reden voor afkeuring", 3)
+            <div class="col-xs-12">
+                <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
+            </div>
+        }
+    }
     @divModalHelp()
+
 }

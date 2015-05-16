@@ -210,8 +210,6 @@ GET         /costs/page                             controllers.Costs.showCostsP
 GET         /costs/proof                            controllers.Costs.getCarCostProof(id: Int)
 GET         /costs/aor                              controllers.CostsApprove.approveOrReject(id: Int)
 POST        /costs/aor                              controllers.CostsApprove.doApproveOrReject(id: Int)
-GET         /costs/approved                         controllers.CostsApprove.approveCarCost(id: Int, returnToDetail: Int)
-GET         /costs/refused                          controllers.CostsApprove.refuseCarCost(id: Int, returnToDetail: Int)
 POST        /costs/new                              controllers.CostsCreate.doCreate(id: Int)
 
 # (Temporarily) disables

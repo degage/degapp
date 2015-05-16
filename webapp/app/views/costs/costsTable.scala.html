@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost])(actions: CarCost => Html)
+@(carCostList: Iterable[CarCost], withSpread: Boolean)(actions: CarCost => Html)
 
 <table class="table table-striped table-bordered table-hover no-footer" >
     <thead>
@@ -37,6 +37,9 @@
             <th>Toelichting</th>
             <th>Datum</th>
             <th>Bedrag</th>
+            @if(withSpread){
+                <th>Spreiding</th>
+            }
             <th>Status</th>
             <th>Acties</th>
         </tr>
@@ -48,6 +51,9 @@
             <td>@carCost.getDescription</td>
             <td>@Utils.toLocalizedDateString(carCost.getDate)</td>
             <td>@carCost.getAmount</td>
+            @if(withSpread){
+                <td>@if(carCost.getStatus==ApprovalStatus.ACCEPTED)(spread(carCost.getSpread))else("")</td>
+            }
             <td>@statusname(carCost.getStatus)</td>
             <td>@actions(carCost)</td>
         } {

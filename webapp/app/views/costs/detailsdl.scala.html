@@ -1,4 +1,4 @@
-@* costs.scala.html
+@* detailsdl.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,25 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
-     carId: Int, carName: String, categories: Iterable[CarCostCategory])
+@(cost: CarCost)
 
-@stdlayout("Autokosten", scripts=js.datetimepicker()) {
-    @panel("Overzicht kosten (" + carName +")", "fa-money"){
-        <div class="col-xs-12">
-            @costsTable(carCostList,true){ cost =>
-                @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
-            }
-        </div>
+<dl class="dl-horizontal">
+    <dt>Auto</dt>
+    <dd>@cost.getCarName</dd>
+    <dt>Type</dt>
+    <dd>@cost.getCategory.getDescription</dd>
+    <dt>Toelichting</dt>
+    <dd>@cost.getDescription</dd>
+    <dt>Datum</dt>
+    <dd>@Utils.toLocalizedDateString(cost.getDate)</dd>
+    <dt>Bedrag</dt>
+    <dd>@cost.getAmount</dd>
+    @if(cost.getStatus==ApprovalStatus.ACCEPTED){
+        <dt>Spreiding</dt>
+        <dd>@spread(cost.getSpread)</dd>
     }
-
-    @newcostpanel(carId,form,categories,db.CurrentUser hasRole UserRole.CAR_ADMIN)
-    @divModalHelp()
-}
+    <dt>Status</dt>
+    <dd>@statusname(cost.getStatus)</dd>
+    <dt>Bonnetje/bewijsstuk</dt>
+    <dd><a href="@routes.Costs.getCarCostProof(cost.getId)" target="_blank">Klik hier</a></dd>
+</dl>
