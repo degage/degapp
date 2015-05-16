@@ -112,27 +112,27 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendCarCostApproved(UserHeader owner, CarCost carCost) {
+    public static void sendCarCostApproved(UserHeader owner, CarCost carCost, int newSpread) {
         String date = Utils.toLocalizedDateString(carCost.getDate());
         String name = carCost.getCarName();
         String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String description = carCost.getDescription();
         String category = carCost.getCategory().getDescription();
         createNotificationAndSend(owner, "costApproved",
-                views.txt.messages.costApproved.render(owner, name, description, amount, date, category),
-                views.html.messages.costApproved.render(owner, name, description, amount, date, category)
+                views.txt.messages.costApproved.render(owner, name, description, amount, date, category, newSpread),
+                views.html.messages.costApproved.render(owner, name, description, amount, date, category, newSpread)
         );
     }
 
-    public static void sendCarCostRejected(UserHeader owner, CarCost carCost) {
+    public static void sendCarCostRejected(UserHeader owner, CarCost carCost, String comment) {
         String date = Utils.toLocalizedDateString(carCost.getDate());
         String name = carCost.getCarName();
         String amount = EurocentAmount.toString(carCost.getAmount()) + " euro";
         String description = carCost.getDescription();
         String category = carCost.getCategory().getDescription();
         createNotificationAndSend(owner, "costRejected",
-                views.txt.messages.costRejected.render(owner, name, description, amount, date, category),
-                views.html.messages.costRejected.render(owner, name, description, amount, date, category)
+                views.txt.messages.costRejected.render(owner, name, description, amount, date, category, comment),
+                views.html.messages.costRejected.render(owner, name, description, amount, date, category, comment)
         );
     }
 

@@ -27,7 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String, category: String)
+@(user: UserHeader, carName: String, costDescription: String, amount: String,
+                    date: String, category: String, spread: Int)
 
 @* Kost goedgekeurd *@
 Beste @user.getFirstName,
@@ -40,3 +41,13 @@ Onderstaande autokost werd goedgekeurd door een beheerder:
   Bedrag: @amount
   Datum: @date
 
+@if(spread==0){
+De terugbetaling van dit bedrag zal afzonderlijk gebeuren - ttz.
+buiten het gebruikelijke systeem van (kwartaal)afrekeningen.
+}else{
+@if(spread==1){
+Dit bedrag zal integraal terugbetaald worden bij de volgende
+(kwartaal)afrekening.
+}else{
+De terugbetaling van dit bedrag zal gespreid worden over @spread maanden.
+}}

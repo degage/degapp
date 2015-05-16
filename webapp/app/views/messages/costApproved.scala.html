@@ -27,7 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String, category: String)
+@(user: UserHeader, carName: String, costDescription: String, amount: String,
+                    date: String, category: String, spread: Int)
 
 @* Kost goedgekeurd *@
 <p>Beste @user.getFirstName,</p>
@@ -39,3 +40,14 @@
     <li><b>Bedrag:</b> @amount</li>
     <li><b>Datum:</b> @date</li>
 </ul>
+@if(spread==0){
+    <p>De terugbetaling van dit bedrag zal afzonderlijk gebeuren - ttz. buiten het
+    systeem van (kwartaal)afrekeningen.</p>
+}else{
+  @if(spread==1){
+    <p>Dit bedrag zal integraal terugbetaald worden bij de volgende (kwartaal)afrekening.</p>
+  }else{
+    <p>De terugbetaling van dit bedrag zal gespreid worden over @spread maanden.</p>
+  }
+}
+

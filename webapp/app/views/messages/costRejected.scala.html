@@ -27,7 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, carName: String, costDescription: String, amount: String, date: String, category: String)
+@(user: UserHeader, carName: String, costDescription: String, amount: String,
+  date: String, category: String, comment: String)
 
 @* Kost niet goedgekeurd *@
 <p>Beste @user.getFirstName,</p>
@@ -39,3 +40,7 @@
     <li><b>Bedrag:</b> @amount</li>
     <li><b>Datum:</b> @date</li>
 </ul>
+<p>om de volgende reden:</p>
+<hr />
+@comment
+<hr />

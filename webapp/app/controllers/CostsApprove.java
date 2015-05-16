@@ -29,12 +29,11 @@
 
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.CarCostDAO;
-import be.ugent.degage.db.models.ApprovalStatus;
 import be.ugent.degage.db.models.CarCost;
+import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
-import com.google.common.base.Strings;
-import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
@@ -65,25 +64,29 @@ public class CostsApprove extends CostsCommon {
     @InjectContext
     public static Result doApproveOrReject(int carCostId) {
         Form<ApprovalData> form = Form.form(ApprovalData.class).bindFromRequest();
-        CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+        CarCost cost = dao.getCarCost(carCostId);
         if (form.hasErrors()) {
             return badRequest(approveorreject.render(
-                    form, dao.getCarCost(carCostId)
+                    form, cost
             ));
         } else {
+            UserHeader owner = context.getUserDAO().getUserHeader(cost.getOwnerId());
             ApprovalData data = form.get();
+
             switch (data.status) {
                 case "EXTERNAL":
                     dao.approveCost(carCostId, 0);
-//Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+                    Notifier.sendCarCostApproved(owner, cost, 0);
                     break;
                 case "ACCEPTED":
                     dao.approveCost(carCostId, data.spread);
-//Notifier.sendCarCostApproved(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+                    Notifier.sendCarCostApproved(owner, cost, data.spread);
                     break;
                 case "REFUSED":
                     dao.rejectCost(carCostId, data.remarks);
-//Notifier.sendCarCostRejected(DataAccess.getInjectedContext().getCarDAO().getOwnerOfCar(carId), carCost);
+                    Notifier.sendCarCostRejected(owner, cost, data.remarks);
                     break;
                 default:
                     return badRequest(); // hack?
