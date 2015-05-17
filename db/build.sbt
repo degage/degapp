@@ -2,7 +2,7 @@ name := "Degage - db layer"
 
 normalizedName := "db"
 
-version := "1.1-SNAPSHOT"
+version := "1.2-SNAPSHOT"
 
 organization := "be.ugent.degage"
 
