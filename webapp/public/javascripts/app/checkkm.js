@@ -35,9 +35,12 @@
 $( "#detailsModal" ).on ('show.bs.modal',
     function() {
         var startVal = $( "#startKm" ).val();
+        var startValNumeric = parseInt(startVal, 10);
         var endVal = $( "#endKm" ).val();
-        if (startVal > 0 && endVal >= startVal) {
-           newVal = endVal - startVal;
+        var endValNumeric = parseInt(endVal, 10);
+        if (!isNaN(startValNumeric) && !isNaN(endValNumeric) &&
+            startValNumeric > 0 && endValNumeric >= startValNumeric) {
+           newVal = endValNumeric - startValNumeric;
            $( "#submit" ).show();
            $( "#warning" ).show();
            $( "#error" ).hide();
