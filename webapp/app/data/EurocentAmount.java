@@ -76,22 +76,39 @@ public class EurocentAmount {
         }
     }
 
-    public static final Pattern PATTERN = Pattern.compile("-?[0-9]+[,.][0-9][0-9]");
+    public static final Pattern PATTERN = Pattern.compile("-?[0-9]+[,.][0-9][0-9]?");
 
     /**
      * Parse a string into an amount of eurocents.
      * If the string contains a decimal point or comma then it must be
-     * followed by exactly two digits.
+     * followed by one or two digits.
      * @throws java.lang.NumberFormatException
      */
     public static EurocentAmount parse (String str) {
         if (PATTERN.matcher(str).matches()) {
             int len = str.length();
-            return new EurocentAmount(
-               Integer.parseInt(str.substring(0, len-3)),
-               Integer.parseInt(str.substring(len-2, len))
-            );
+            int pos = str.lastIndexOf(',');
+            if (pos < 0) {
+                pos = str.lastIndexOf('.');
+            }
+            if (pos == len - 3) {
+                // two decimal digits
+                return new EurocentAmount(
+                        Integer.parseInt(str.substring(0, pos)),
+                        Integer.parseInt(str.substring(pos + 1, len))
+                );
+            } else if (pos == len - 2) {
+                 // one decimal digits
+                return new EurocentAmount(
+                        Integer.parseInt(str.substring(0, pos)),
+                        10*Integer.parseInt(str.substring(pos + 1, len))
+                );
+            } else {
+                // this should not happen
+                throw new RuntimeException("Unexpected error in parsing eurocent amount");
+            }
         } else {
+            // no decimal point or comma
             return new EurocentAmount(
                Integer.parseInt(str), 0
             );
