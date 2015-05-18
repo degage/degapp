@@ -208,8 +208,8 @@ GET         /costs/detail                           controllers.Costs.showCostDe
 GET         /costs/list                             controllers.Costs.showCosts(tab : Int ?= 0)
 GET         /costs/page                             controllers.Costs.showCostsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /costs/proof                            controllers.Costs.getCarCostProof(id: Int)
-GET         /costs/aor                              controllers.CostsApprove.approveOrReject(id: Int)
-POST        /costs/aor                              controllers.CostsApprove.doApproveOrReject(id: Int)
+GET         /costs/aor                              controllers.CostsApprove.approveOrReject(id: Int, h: Boolean)
+POST        /costs/aor                              controllers.CostsApprove.doApproveOrReject(id: Int, h: Boolean)
 POST        /costs/new                              controllers.CostsCreate.doCreate(id: Int)
 
 # (Temporarily) disables

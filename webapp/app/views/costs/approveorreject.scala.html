@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[CostsApprove.ApprovalData], cost: CarCost)
+@(form: Form[CostsApprove.ApprovalData], cost: CarCost, horizontal: Boolean)
 
 @stdlayout("Kost goed- of afkeuren", extrabc=breadcrumb("Autokosten",routes.Costs.showCostsForCar(cost.getCarId))){
 
@@ -37,7 +37,7 @@
         </div>
     }
 
-    @helper.form(routes.CostsApprove.doApproveOrReject(cost.getId())) {
+    @helper.form(routes.CostsApprove.doApproveOrReject(cost.getId(), horizontal)) {
 
         @panel("Goedkeuren", "fa-check-square") {
             @std.numberField(form("spread"), "Spreiding (in maanden)", "col-sm-6 col-xs-12")

@@ -53,7 +53,7 @@
         <div class="@if(fileIsImage){col-lg-4 }else{}col-xs-12">
             @detailsdl(cost)
             @if(cost.getStatus == ApprovalStatus.REQUEST && db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
-                @btnPrimary("Goed- of afkeuren ...",routes.CostsApprove.approveOrReject(cost.getId))
+                @btnPrimary("Goed- of afkeuren ...",routes.CostsApprove.approveOrReject(cost.getId, true))
             }
         </div>
         @if(fileIsImage){

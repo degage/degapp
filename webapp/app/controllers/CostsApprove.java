@@ -53,23 +53,24 @@ public class CostsApprove extends CostsCommon {
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result approveOrReject(int carCostId) {
+    public static Result approveOrReject(int carCostId, boolean horizontal) {
         return ok(approveorreject.render(
                 Form.form(ApprovalData.class).fill(ApprovalData.EMPTY),
-                DataAccess.getInjectedContext().getCarCostDAO().getCarCost(carCostId)
+                DataAccess.getInjectedContext().getCarCostDAO().getCarCost(carCostId),
+                horizontal
         ));
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result doApproveOrReject(int carCostId) {
+    public static Result doApproveOrReject(int carCostId, boolean horizontal) {
         Form<ApprovalData> form = Form.form(ApprovalData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
         CarCost cost = dao.getCarCost(carCostId);
         if (form.hasErrors()) {
             return badRequest(approveorreject.render(
-                    form, cost
+                    form, cost, horizontal
             ));
         } else {
             UserHeader owner = context.getUserDAO().getUserHeader(cost.getOwnerId());
@@ -91,8 +92,15 @@ public class CostsApprove extends CostsCommon {
                 default:
                     return badRequest(); // hack?
             }
-            // TODO: dispatch depending on the flow
-            return redirect(routes.Costs.showCostDetail(carCostId));
+            if (horizontal) {
+                // return to next cost for same car
+                int nextId = dao.getNextCostId(carCostId);
+                if (nextId > 0) {
+                    return redirect(routes.Costs.showCostDetail(nextId));
+                }
+            }
+            // else return to overview
+            return redirect(routes.Costs.showCostsForCar(cost.getCarId()));
         }
     }
 
