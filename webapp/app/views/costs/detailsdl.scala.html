@@ -48,4 +48,8 @@
     <dd>@statusname(cost.getStatus)</dd>
     <dt>Bonnetje/bewijsstuk</dt>
     <dd><a href="@routes.Costs.getCarCostProof(cost.getId)" target="_blank">Klik hier</a></dd>
+    @if(cost.getStatus==ApprovalStatus.REFUSED){
+        <dt>Opmerkingen</dt>
+        <dd>@cost.getComment</dd>
+    }
 </dl>
