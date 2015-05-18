@@ -39,7 +39,7 @@
     <dt>Datum</dt>
     <dd>@Utils.toLocalizedDateString(cost.getDate)</dd>
     <dt>Bedrag</dt>
-    <dd>@cost.getAmount</dd>
+    <dd>@data.EurocentAmount.toString(cost.getAmount) €</dd>
     @if(cost.getStatus==ApprovalStatus.ACCEPTED){
         <dt>Spreiding</dt>
         <dd>@spread(cost.getSpread)</dd>

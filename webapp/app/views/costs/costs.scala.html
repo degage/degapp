@@ -30,7 +30,7 @@
 @(carCostList: Iterable[CarCost], form: Form[CostsCommon.CostData],
      carId: Int, carName: String, categories: Iterable[CarCostCategory])
 
-@stdlayout("Autokosten", scripts=js.datetimepicker()) {
+@stdlayout("Autokosten", stylesheets=sheets("statuses"), scripts=js.datetimepicker()) {
     @panel("Overzicht kosten (" + carName +")", "fa-money"){
         <div class="col-xs-12">
             @costsTable(carCostList,true){ cost =>

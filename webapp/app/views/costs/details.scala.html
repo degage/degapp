@@ -30,7 +30,7 @@
 @(cost: CarCost, fileIsImage: Boolean, nextId: Int, previousId: Int,
       form: Form[CostsCommon.CostData], categories: Iterable[CarCostCategory])
 
-@stdlayout("Autokost", extrabc=breadcrumb("Kosten (" + cost.getCarName +")",routes.Costs.showCostsForCar(cost.getCarId))) {
+@stdlayout("Autokost", stylesheets=sheets("statuses"), extrabc=breadcrumb("Kosten (" + cost.getCarName +")",routes.Costs.showCostsForCar(cost.getCarId))) {
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
             <a class="btn btn-xs btn-default" data-toggle="collapse"
@@ -52,7 +52,7 @@
    @panel("Details", "fa-money"){
         <div class="@if(fileIsImage){col-lg-4 }else{}col-xs-12">
             @detailsdl(cost)
-            @if(cost.getStatus == ApprovalStatus.REQUEST) {
+            @if(cost.getStatus == ApprovalStatus.REQUEST && db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
                 @btnPrimary("Goed- of afkeuren ...",routes.CostsApprove.approveOrReject(cost.getId))
             }
         </div>

@@ -32,7 +32,7 @@
 @* Last four columns of a refuel table *@
 @* TODO: split according to driver/owner/admin *@
 
-<td>@data.EurocentAmount.toString(refuel.getEurocents)</td>
+<td class="numeric">@data.EurocentAmount.toString(refuel.getEurocents) €</td>
 <td>@refuel.getAmount</td>
 <td>@refuel.getKm</td>
 <td>@statusname(refuel.getStatus)</td>

@@ -50,7 +50,7 @@
             <td>@carCost.getCategory.getDescription</td>
             <td>@carCost.getDescription</td>
             <td>@Utils.toLocalizedDateString(carCost.getDate)</td>
-            <td>@carCost.getAmount</td>
+            <td class="numeric">@data.EurocentAmount.toString(carCost.getAmount) €</td>
             @if(withSpread){
                 <td>@if(carCost.getStatus==ApprovalStatus.ACCEPTED)(spread(carCost.getSpread))else("")</td>
             }

@@ -31,7 +31,7 @@
     @js.pagination("Refuels.showAllRefuelsPage")
     @js.userpicker()
 }
-@stdlayout("Tankbeurten (beheer)", scripts=scripts) {
+@stdlayout("Tankbeurten (beheer)", stylesheets=sheets("statuses"), scripts=scripts) {
 
     @panel("Zoek tankbeurten", "fa-search") {
         @search.carpicker("refuel_car_id", "Auto")
