@@ -47,11 +47,11 @@ import java.util.List;
  */
 public class CostsCommon extends Controller {
 
-    protected static boolean isOwnerOrAdmin (CarHeaderShort car) {
+    protected static boolean isOwnerOrAdmin(CarHeaderShort car) {
         return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
     }
 
-    protected static boolean isOwnerOrAdmin (CarCost cost) {
+    protected static boolean isOwnerOrAdmin(CarCost cost) {
         return CurrentUser.is(cost.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
     }
 
@@ -88,13 +88,20 @@ public class CostsCommon extends Controller {
             }
         }
 
-        public static CostData EMPTY;
-
-        static {
-            EMPTY = new CostData();
-            EMPTY.amount = new EurocentAmount();
-            EMPTY.spread = 12;
+        public CostData() {
+            amount = new EurocentAmount();
+            spread = 12;
         }
 
+        public CostData(CarCost cost) {
+            category = cost.getCategory().getId();
+            description = cost.getDescription();
+            amount = new EurocentAmount(cost.getAmount());
+            mileage = cost.getKm();
+            time = cost.getDate();
+            spread = cost.getSpread();
+        }
+
+        public static CostData EMPTY = new CostData();
     }
 }

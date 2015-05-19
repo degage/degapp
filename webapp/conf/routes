@@ -211,6 +211,9 @@ GET         /costs/proof                            controllers.Costs.getCarCost
 GET         /costs/aor                              controllers.CostsApprove.approveOrReject(id: Int, h: Boolean)
 POST        /costs/aor                              controllers.CostsApprove.doApproveOrReject(id: Int, h: Boolean)
 POST        /costs/new                              controllers.CostsCreate.doCreate(id: Int)
+GET         /costs/edit                             controllers.CostsCreate.showEdit(id: Int)
+POST        /costs/edit                             controllers.CostsCreate.doEdit(id: Int)
+POST        /costs/proof                            controllers.CostsCreate.doUpdateProof(id: Int)
 
 # (Temporarily) disables
 #GET         /cars/availabilities/edit              controllers.Availabilities.updateAvailabilities(id : Int, values : String)

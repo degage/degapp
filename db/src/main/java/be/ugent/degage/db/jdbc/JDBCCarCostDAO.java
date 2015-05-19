@@ -163,26 +163,39 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
         }
     }
 
-    private LazyStatement getUpdateCarCostStatement = new LazyStatement(
-            "UPDATE carcosts SET car_cost_amount = ? , car_cost_description = ? , car_cost_status = ? , car_cost_time = ? , car_cost_mileage = ?"
-                    + " WHERE car_cost_id = ?"
-    );
-
     @Override
-    public void updateCarCost(CarCost carCost) throws DataAccessException {
-        try {
-            PreparedStatement ps = getUpdateCarCostStatement.value();
-            ps.setInt(1, carCost.getAmount());
-            ps.setString(2, carCost.getDescription());
-            ps.setString(3, carCost.getStatus().name());
-            ps.setDate(4, Date.valueOf(carCost.getDate()));
-            ps.setInt(5, carCost.getKm());
-            ps.setInt(6, carCost.getId());
+    public void updateCarCost(int costId, int amount, String description,
+                                  LocalDate date, int km, int spread, int categoryId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carcosts " +
+                        "SET car_cost_amount=?, car_cost_description=?, car_cost_time=?, " +
+                        "car_cost_mileage=?, car_cost_spread=?, car_cost_category_id=? " +
+                "WHERE car_cost_id=?"
+        )){
+            ps.setInt(1, amount);
+            ps.setString(2, description);
+            ps.setDate(3, Date.valueOf(date));
+            ps.setInt(4, km);
+            ps.setInt(5, spread);
+            ps.setInt(6, categoryId);
+            ps.setInt(7, costId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to update CarCost", e);
         }
+    }
 
+    @Override
+    public void updateProof(int costId, int fileId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carcosts SET car_cost_proof=? WHERE car_cost_id=?"
+        )) {
+            ps.setInt(1, fileId);
+            ps.setInt(2, costId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Unable to update CarCost", e);
+        }
     }
 
     @Override

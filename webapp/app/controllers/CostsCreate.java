@@ -31,10 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.CarCostDAO;
-import be.ugent.degage.db.models.ApprovalStatus;
-import be.ugent.degage.db.models.CarHeaderShort;
-import be.ugent.degage.db.models.File;
-import be.ugent.degage.db.models.UserRole;
+import be.ugent.degage.db.models.*;
 import controllers.util.FileHelper;
 import db.CurrentUser;
 import db.DataAccess;
@@ -43,6 +40,7 @@ import notifiers.Notifier;
 import play.data.Form;
 import play.mvc.Result;
 import views.html.costs.costs;
+import views.html.costs.editcost;
 
 /**
  * Controller for registering new costs
@@ -53,7 +51,7 @@ public class CostsCreate extends CostsCommon {
     /**
      * Process form from {@link Costs#showCostsForCar(int)}
      */
-    @AllowRoles({UserRole.CAR_OWNER})
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result doCreate(int carId) {
 
@@ -98,7 +96,7 @@ public class CostsCreate extends CostsCommon {
                 isAdmin ? ApprovalStatus.ACCEPTED : ApprovalStatus.REQUEST,
                 isAdmin ? 12 : data.spread,
                 file.getId(), data.category);
-        if (! isAdmin) {
+        if (!isAdmin) {
             Notifier.sendCarCostRequest(
                     data.time, carName, data.amount, data.description,
                     dao.getCategory(data.category).getDescription()
@@ -106,4 +104,110 @@ public class CostsCreate extends CostsCommon {
         }
         return redirect(routes.Costs.showCostsForCar(carId));
     }
+
+    public static boolean isAllowedEdit(CarCost cost) {
+        return CurrentUser.hasRole(UserRole.CAR_ADMIN) ||
+                CurrentUser.is(cost.getOwnerId()) && cost.getStatus() == ApprovalStatus.REQUEST;
+    }
+
+    /**
+     * Show a form for editing a cost and for changing the proof document
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result showEdit(int costId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+        CarCost cost = dao.getCarCost(costId);
+        if (isAllowedEdit(cost)) {
+            return ok(editcost.render(
+                Form.form(CostData.class).fill(new CostData(cost)),
+                    dao.listCategories(),
+                    costId,
+                    cost.getCarId(),
+                    cost.getCarName(),
+                    CurrentUser.hasRole(UserRole.CAR_ADMIN)
+            ));
+        } else {
+            return badRequest();
+        }
+    }
+
+
+    /**
+     * Process the form for editing a cost
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doEdit(int costId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+        CarCost cost = dao.getCarCost(costId);
+        if (isAllowedEdit(cost)) {
+            Form<CostData> form = Form.form(CostData.class).bindFromRequest();
+            boolean isAdmin = CurrentUser.hasRole(UserRole.CAR_ADMIN);
+            if (form.hasErrors()) {
+                return badRequest(editcost.render(
+                    form,
+                    dao.listCategories(),
+                    costId,
+                    cost.getCarId(),
+                    cost.getCarName(),
+                    isAdmin
+                ));
+            } else {
+                CostData data = form.get();
+                if (!isAdmin) {
+                    data.spread = cost.getSpread();
+                }
+                dao.updateCarCost(costId, data.amount.getValue(), data.description, data.time, data.mileage, data.spread, data.category);
+            }
+            return redirect(routes.Costs.showCostDetail(costId));
+        } else {
+            return badRequest();
+        }
+    }
+
+    /**
+     * Process the form for changing the proof
+     */
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doUpdateProof(int costId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+        CarCost cost = dao.getCarCost(costId);
+        if (isAllowedEdit(cost)) {
+            // additional validation of file part
+            // TODO: avoid copy and paste of this type of code
+            // TODO: remove old file
+            Form<CostData> form = Form.form(CostData.class).fill(new CostData(cost));
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs");
+            if (file == null) {
+                form.reject("picture", "Bestand met foto of scan  is verplicht");
+            } else if (file.getContentType() == null) {
+                form.reject("picture", "Het bestand  is van het verkeerde type");
+            } else if (form.hasErrors()) {
+                form.reject("picture", "Bestand opnieuw selecteren");
+            }
+            // TODO: lots of code in common with doEdit
+            if (form.hasErrors()) {
+                return badRequest(editcost.render(
+                    form,
+                    dao.listCategories(),
+                    costId,
+                    cost.getCarId(),
+                    cost.getCarName(),
+                    CurrentUser.hasRole(UserRole.CAR_ADMIN)
+                ));
+            } else {
+                dao.updateProof (costId, file.getId());
+                return redirect(routes.Costs.showCostDetail(costId));
+            }
+        } else {
+            return badRequest();
+        }
+    }
+
+
 }

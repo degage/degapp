@@ -46,7 +46,11 @@ public class EurocentAmount {
     }
 
     public EurocentAmount() {
-        value  = 0;
+        this(0);
+    }
+
+    public EurocentAmount (int value) {
+        this.value = value;
     }
 
     public EurocentAmount (int euro, int cent) {

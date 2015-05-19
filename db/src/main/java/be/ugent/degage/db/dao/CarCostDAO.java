@@ -51,7 +51,10 @@ public interface CarCostDAO {
 
     public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
-    public void updateCarCost(CarCost carCost) throws DataAccessException;
+    public void updateCarCost(int costId, int amount, String description,
+                              LocalDate date, int km, int spread, int categoryId) throws DataAccessException;
+
+    public void updateProof(int costId, int fileId)   throws DataAccessException;
 
     public CarCost getCarCost(int id) throws DataAccessException;
 

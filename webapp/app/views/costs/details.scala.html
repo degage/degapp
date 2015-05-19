@@ -35,13 +35,15 @@
         <div class="col-xs-12">
             <a class="btn btn-xs btn-default" data-toggle="collapse"
                     href="#collapsedForm">Kost toevoegen (@cost.getCarName) ...</a>
+            @if(CostsCreate.isAllowedEdit(cost)){
+                @btnWarning("Wijzigen ...", routes.CostsCreate.showEdit(cost.getId))
+            }
             @if(previousId > 0){
                 @btnPrimary("Vorige kost", routes.Costs.showCostDetail(previousId))
             }
             @if(nextId > 0){
                 @btnPrimary("Volgende kost", routes.Costs.showCostDetail(nextId))
             }
-
         </div>
     }
 
