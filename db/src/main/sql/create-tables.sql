@@ -287,7 +287,8 @@ CREATE TABLE `carcosts` (
 	`car_cost_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'FROZEN') NOT NULL DEFAULT 'REQUEST', -- approved by car_admin
 	`car_cost_time` DATE,
 	`car_cost_mileage` INT,
-	`car_cost_billed` DATE DEFAULT NULL,
+	`car_cost_start` DATE,
+	`car_cost_already_paid` INT NOT NULL DEFAULT 0,
 	`car_cost_comment` VARCHAR(4096),
 	`car_cost_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`car_cost_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -440,6 +441,22 @@ CREATE TABLE `receipts` (
   PRIMARY KEY (`receipt_id`),
   FOREIGN KEY (`receipt_fileID`) REFERENCES files(`file_id`),
   FOREIGN KEY (`receipt_userID`) REFERENCES users(`user_id`)
+);
+
+CREATE TABLE `billing` (
+  `billing_id` INT NOT NULL AUTO_INCREMENT,
+  `billing_description` CHAR(128), -- ex. Kwartaal 1 2015
+  `billing_enddate` DATE,
+  `billing_months` INT,
+  `billing_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+);
+
+CREATE TABLE `km_price` (
+  `km_price_billing_id` INT NOT NULL,
+  `km_price_from` INT NOT NULL,
+  `km_price_eurocents` INT NOT NULL,
+  PRIMARY KEY (`km_price_billing_id`, `km_price_from`),
+  FOREIGN KEY (`km_price_billing_id`) REFERENCES `billing`
 );
 
 -- TRIGGERS

@@ -15,8 +15,9 @@
             @std.textField(form("mileage"), "Kilometerstand", css="col-sm-6")
             @std.datepicker(form("time"), "Datum", css="col-sm-6")
             @if(isAdmin){
-                @std.numberField(form("spread"), "Spreiding (in maanden)", css="col-lg-5 col-xs-11")
+                @std.numberField(form("spread"), "Spreiding (in maanden) ...", css="col-sm-5 col-xs-11")
                 <div class="col-xs-1">@btnModalHelp("costsAdmin.html")</div>
+                @std.datepicker(form("start"), "gerekend vanaf", css="col-sm-6 col-xs-12")
             }
             @std.submitButton("Wijzigen")
         }

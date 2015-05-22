@@ -85,17 +85,17 @@ public class CostsCreate extends CostsCommon {
         CostData data = form.get();
 
         boolean isAdmin = CurrentUser.hasRole(UserRole.CAR_ADMIN);
-
-//        if (isAdmin && data.spread == null) {
-//            form.reject("spread", "Gelieve een spreiding op te geven");
-//        }
+        if (data.start == null || ! isAdmin) {
+              data.start = data.time;
+        }
 
         assert file != null; // keeps IDEA happy
 
         dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time,
                 isAdmin ? ApprovalStatus.ACCEPTED : ApprovalStatus.REQUEST,
                 isAdmin ? 12 : data.spread,
-                file.getId(), data.category);
+                file.getId(), data.category,
+                data.start);
         if (!isAdmin) {
             Notifier.sendCarCostRequest(
                     data.time, carName, data.amount, data.description,
@@ -159,8 +159,12 @@ public class CostsCreate extends CostsCommon {
                 CostData data = form.get();
                 if (!isAdmin) {
                     data.spread = cost.getSpread();
+                    data.start = cost.getStartDate();
+                } else if (data.start == null) {
+                    data.start = cost.getDate();
                 }
-                dao.updateCarCost(costId, data.amount.getValue(), data.description, data.time, data.mileage, data.spread, data.category);
+                dao.updateCarCost(costId, data.amount.getValue(), data.description, data.time, data.mileage,
+                        data.spread, data.category, data.start);
             }
             return redirect(routes.Costs.showCostDetail(costId));
         } else {

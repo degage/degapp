@@ -46,8 +46,9 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
     private static final String CAR_COST_FIELDS =
             "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
-                    "car_cost_status, car_cost_time, car_cost_mileage, car_cost_billed, car_name, car_owner_user_id, " +
-                    "category_id, category_description, car_cost_spread, car_cost_comment ";
+                    "car_cost_status, car_cost_time, car_cost_mileage, car_name, car_owner_user_id, " +
+                    "category_id, category_description, car_cost_spread, " +
+                    "car_cost_comment, car_cost_already_paid, car_cost_start ";
 
     public static final String CAR_COST_QUERY =
             "SELECT " + CAR_COST_FIELDS + " FROM carcosts " +
@@ -63,7 +64,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     public static CarCost populateCarCost(ResultSet rs) throws SQLException {
-        Date carCostTime = rs.getDate("car_cost_time");
+        Date carCostTime = rs.getDate("car_cost_time");   // TODO can this happen?
         CarCost carCost = new CarCost(
                 rs.getInt("car_cost_id"),
                 rs.getInt("car_cost_amount"),
@@ -76,12 +77,12 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getInt("car_owner_user_id"),
                 populateCategory(rs),
                 rs.getInt("car_cost_spread"),
-                rs.getString("car_cost_comment")
+                rs.getString("car_cost_comment"),
+                rs.getDate("car_cost_start").toLocalDate(),
+                rs.getInt("car_cost_already_paid")
         );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
-        Date carCostBilled = rs.getDate("car_cost_billed");
-        carCost.setBilled(carCostBilled == null ? null : carCostBilled.toLocalDate());
         return carCost;
     }
 
@@ -89,11 +90,11 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public void createCarCost(int carId, String carName, int amount, int km,
                               String description, LocalDate date,
                               ApprovalStatus status, int spread,
-                              int fileId, int categoryId) throws DataAccessException {
+                              int fileId, int categoryId, LocalDate startDate) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO carcosts (car_cost_car_id, car_cost_amount, " +
                         "car_cost_description, car_cost_time, car_cost_mileage, car_cost_proof, car_cost_category_id, " +
-                        "car_cost_status, car_cost_spread) VALUES (?,?,?,?,?,?,?,?,?)"
+                        "car_cost_status, car_cost_spread, car_cost_start) VALUES (?,?,?,?,?,?,?,?,?,?)"
         )) {
             ps.setInt(1, carId);
             ps.setInt(2, amount);
@@ -108,6 +109,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.setInt(7, categoryId);
             ps.setString(8, status.name());
             ps.setInt(9, spread);
+            ps.setDate(10, Date.valueOf(startDate));
             if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when creating carcost.");
             }
@@ -154,7 +156,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public Iterable<CarCost> listCostsOfCar(int carId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 CAR_COST_QUERY +
-                        " WHERE car_cost_car_id = ?  ORDER BY car_cost_created_at"
+                        " WHERE car_cost_car_id = ?  ORDER BY car_cost_time DESC"
         )) {
             ps.setInt(1, carId);
             return toList(ps, JDBCCarCostDAO::populateCarCost);
@@ -165,11 +167,11 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
 
     @Override
     public void updateCarCost(int costId, int amount, String description,
-                                  LocalDate date, int km, int spread, int categoryId) throws DataAccessException {
+                                  LocalDate date, int km, int spread, int categoryId, LocalDate startDate) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE carcosts " +
                         "SET car_cost_amount=?, car_cost_description=?, car_cost_time=?, " +
-                        "car_cost_mileage=?, car_cost_spread=?, car_cost_category_id=? " +
+                        "car_cost_mileage=?, car_cost_spread=?, car_cost_category_id=?, car_cost_start=? " +
                 "WHERE car_cost_id=?"
         )){
             ps.setInt(1, amount);
@@ -178,7 +180,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.setInt(4, km);
             ps.setInt(5, spread);
             ps.setInt(6, categoryId);
-            ps.setInt(7, costId);
+            ps.setDate(7, Date.valueOf(startDate));
+            ps.setInt(8, costId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Unable to update CarCost", e);
@@ -292,13 +295,14 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     @Override
-    public void approveCost(int costId, int spread) throws DataAccessException {
+    public void approveCost(int costId, int spread, LocalDate startDate) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE carcosts SET car_cost_status = 'ACCEPTED', car_cost_spread = ? " +
+                "UPDATE carcosts SET car_cost_status = 'ACCEPTED', car_cost_spread = ?, car_cost_start = ? " +
                         "WHERE car_cost_id = ?"
         )) {
             ps.setInt(1, spread);
-            ps.setInt(2, costId);
+            ps.setDate(2, Date.valueOf(startDate));
+            ps.setInt(3, costId);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Error while updating cost status ", ex);

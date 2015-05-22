@@ -39,10 +39,18 @@
     <dt>Datum</dt>
     <dd>@Utils.toLocalizedDateString(cost.getDate)</dd>
     <dt>Bedrag</dt>
-    <dd>@data.EurocentAmount.toString(cost.getAmount) €</dd>
+    <dd>@data.EurocentAmount.toString(cost.getAmount) €
+    @if(cost.getAlreadyPaid > 0){
+        (reeds betaald: @data.EurocentAmount.toString(cost.getAlreadyPaid) €)
+    }
+    </dd>
     @if(cost.getStatus==ApprovalStatus.ACCEPTED){
         <dt>Spreiding</dt>
-        <dd>@spread(cost.getSpread)</dd>
+        <dd>@spread(cost.getSpread)
+        @if(cost.getSpread > 0 && cost.getStartDate != cost.getDate){
+            (vanaf @Utils.toLocalizedDateString(cost.getStartDate))
+        }
+        </dd>
     }
     <dt>Kilometerstand</dt>
     <dd>@cost.getKm</dd>

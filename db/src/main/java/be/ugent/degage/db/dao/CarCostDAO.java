@@ -45,14 +45,14 @@ public interface CarCostDAO {
 
     public void createCarCost(int carId, String carName, int amount, int km, String description, LocalDate date,
                               ApprovalStatus status, int spread,
-                              int fileId, int categoryId) throws DataAccessException;
+                              int fileId, int categoryId, LocalDate startDate) throws DataAccessException;
 
     public int getAmountOfCarCosts(Filter filter) throws DataAccessException;
 
     public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     public void updateCarCost(int costId, int amount, String description,
-                              LocalDate date, int km, int spread, int categoryId) throws DataAccessException;
+                              LocalDate date, int km, int spread, int categoryId, LocalDate startDate) throws DataAccessException;
 
     public void updateProof(int costId, int fileId)   throws DataAccessException;
 
@@ -91,7 +91,7 @@ public interface CarCostDAO {
     /**
      * Approve the cost and register the spread to be used in calculations
      */
-    public void approveCost (int costId, int spread) throws DataAccessException;
+    public void approveCost (int costId, int spread, LocalDate startDate) throws DataAccessException;
 
     /**
      * Reject the status and store the reason why

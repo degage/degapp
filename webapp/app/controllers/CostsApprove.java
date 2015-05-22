@@ -38,10 +38,12 @@ import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
+import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Result;
 import views.html.costs.approveorreject;
 
+import java.time.LocalDate;
 import java.util.Collections;
 import java.util.List;
 
@@ -54,92 +56,105 @@ public class CostsApprove extends CostsCommon {
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result approveOrReject(int carCostId, boolean horizontal) {
+        CarCost cost = DataAccess.getInjectedContext().getCarCostDAO().getCarCost(carCostId);
         return ok(approveorreject.render(
-                Form.form(ApprovalData.class).fill(ApprovalData.EMPTY),
-                DataAccess.getInjectedContext().getCarCostDAO().getCarCost(carCostId),
+                Form.form(ApprovalData.class).fill(new ApprovalData(12, cost.getDate())),
+                Form.form(RemarksData.class),
+                cost,
                 horizontal
         ));
     }
 
+    private static Result redirectAfterAOR(CarCost cost, boolean horizontal) {
+        if (horizontal) {
+            // return to next cost for same car
+            int nextId = DataAccess.getInjectedContext().getCarCostDAO().getNextCostId(cost.getId());
+            if (nextId > 0) {
+                return redirect(routes.Costs.showCostDetail(nextId));
+            }
+        }
+        // else return to overview
+        return redirect(routes.Costs.showCostsForCar(cost.getCarId()));
+
+    }
+
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result doApproveOrReject(int carCostId, boolean horizontal) {
+    public static Result doApprove(int carCostId, boolean horizontal) {
         Form<ApprovalData> form = Form.form(ApprovalData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         CarCostDAO dao = context.getCarCostDAO();
         CarCost cost = dao.getCarCost(carCostId);
         if (form.hasErrors()) {
             return badRequest(approveorreject.render(
-                    form, cost, horizontal
+                    form, Form.form(RemarksData.class), cost, horizontal
             ));
         } else {
             UserHeader owner = context.getUserDAO().getUserHeader(cost.getOwnerId());
             ApprovalData data = form.get();
+            dao.approveCost(carCostId, data.spread, data.start);
+            Notifier.sendCarCostApproved(owner, cost, data.spread);
+            return redirectAfterAOR(cost, horizontal);
+        }
+    }
 
-            switch (data.status) {
-                case "EXTERNAL":
-                    dao.approveCost(carCostId, 0);
-                    Notifier.sendCarCostApproved(owner, cost, 0);
-                    break;
-                case "ACCEPTED":
-                    dao.approveCost(carCostId, data.spread);
-                    Notifier.sendCarCostApproved(owner, cost, data.spread);
-                    break;
-                case "REFUSED":
-                    dao.rejectCost(carCostId, data.remarks);
-                    Notifier.sendCarCostRejected(owner, cost, data.remarks);
-                    break;
-                default:
-                    return badRequest(); // hack?
-            }
-            if (horizontal) {
-                // return to next cost for same car
-                int nextId = dao.getNextCostId(carCostId);
-                if (nextId > 0) {
-                    return redirect(routes.Costs.showCostDetail(nextId));
-                }
-            }
-            // else return to overview
-            return redirect(routes.Costs.showCostsForCar(cost.getCarId()));
+    @AllowRoles({UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doApproveExternal(int carCostId, boolean horizontal) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+        CarCost cost = dao.getCarCost(carCostId);
+        UserHeader owner = context.getUserDAO().getUserHeader(cost.getOwnerId());
+        dao.approveCost(carCostId, 0, cost.getDate());
+        Notifier.sendCarCostApproved(owner, cost, 0);
+
+        return redirectAfterAOR(cost, horizontal);
+    }
+
+    @AllowRoles({UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doReject(int carCostId, boolean horizontal) {
+        Form<RemarksData> form = Form.form(RemarksData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarCostDAO dao = context.getCarCostDAO();
+        CarCost cost = dao.getCarCost(carCostId);
+        if (form.hasErrors()) {
+            return badRequest(approveorreject.render(
+                    Form.form(ApprovalData.class).fill(new ApprovalData(12, cost.getDate())),
+                    form, cost, horizontal
+            ));
+        } else {
+            UserHeader owner = context.getUserDAO().getUserHeader(cost.getOwnerId());
+            RemarksData data = form.get();
+            dao.rejectCost(carCostId, data.remarks);
+            Notifier.sendCarCostRejected(owner, cost, data.remarks);
+            return redirectAfterAOR(cost, horizontal);
         }
     }
 
     public static class ApprovalData {
 
-        public String status;
-        public String remarks;
+        @Constraints.Required
+        @Constraints.Min(value = 0, message = "Mag niet negatief zijn") // {0} in error.min does not seem to work
+        public int spread;
 
-        public Integer spread;
+        @Constraints.Required
+        public LocalDate start;
 
-        public List<ValidationError> validate() {
-            if ("REFUSED".equals(status)) {
-                if (remarks == null || remarks.trim().isEmpty()) {
-                    return Collections.singletonList(
-                            new ValidationError("remarks", "Je moet een reden opgeven voor de weigering")
-                    );
-                }
-            } else if ("ACCEPTED".equals(status)) {
-                if (spread == null) {
-                    return Collections.singletonList(
-                            new ValidationError("spread", "Ongeldige waarde")
-                    );
-                }
-                if (spread < 0) {
-                    return Collections.singletonList(
-                            new ValidationError("spread", "Spreiding mag niet negatief zijn")
-                    );
-                }
-            }
-            return null;
+        public ApprovalData() {} // there must be a defaut constructor ??
+
+        public ApprovalData(int spread, LocalDate start) {
+            this.spread = spread;
+            this.start = start;
         }
 
-        public static ApprovalData EMPTY;
-
-        static {
-            EMPTY = new ApprovalData();
-            EMPTY.spread = 12;
-        }
 
     }
+
+    public static class RemarksData {
+        @Constraints.Required
+        public String remarks;
+    }
+
 
 }

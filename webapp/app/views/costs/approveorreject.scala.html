@@ -27,9 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[CostsApprove.ApprovalData], cost: CarCost, horizontal: Boolean)
+@(form1: Form[CostsApprove.ApprovalData], form2: Form[CostsApprove.RemarksData], cost: CarCost, horizontal: Boolean)
 
-@stdlayout("Kost goed- of afkeuren", extrabc=breadcrumb("Autokosten",routes.Costs.showCostsForCar(cost.getCarId))){
+@stdlayout("Kost goed- of afkeuren", scripts=js.datetimepicker(), extrabc=breadcrumb("Autokosten",routes.Costs.showCostsForCar(cost.getCarId))){
 
     @panel("Details", "fa-money"){
         <div class="col-xs-12">
@@ -37,23 +37,32 @@
         </div>
     }
 
-    @helper.form(routes.CostsApprove.doApproveOrReject(cost.getId(), horizontal)) {
-
-        @panel("Goedkeuren", "fa-check-square") {
-            @std.numberField(form("spread"), "Spreiding (in maanden)", "col-sm-6 col-xs-12")
+    @panel("Goedkeuren", "fa-check-square") {
+        @helper.form(routes.CostsApprove.doApprove(cost.getId(), horizontal)) {
+            @std.numberField(form1("spread"), "Spreiding (in maanden)", "col-sm-4 col-xs-12")
+            @std.datepicker(form1("start"), "gerekend vanaf", css="col-sm-4 col-xs-12")
             <div class="col-xs-12">
                 @btnModalHelp("costsAdmin.html")&nbsp;&nbsp;
                 <button type="submit" class="btn btn-xs btn-success" name="status" value="ACCEPTED">Goedkeuren</button>
-                <button type="submit" class="btn btn-xs btn-success" name="status" value="EXTERNAL">Goedkeuren (maar zal buiten het systeem worden verrekend)</button>
             </div>
         }
-        @panel("Afkeuren", "fa-minus-square") {
-            @std.textArea(form("remarks"), "Reden voor afkeuring", 3)
+    }
+    @panel("Goedkeuren (externe verwerking)", "fa-check-square") {
+        @helper.form(routes.CostsApprove.doApproveExternal(cost.getId(), horizontal)) {
+            <div class="col-xs-12">
+                <button type="submit" class="btn btn-xs btn-success" name="status" value="EXTERNAL">Buiten het systeem te verrekenen</button>
+            </div>
+        }
+    }
+    @panel("Afkeuren", "fa-minus-square") {
+        @helper.form(routes.CostsApprove.doReject(cost.getId(), horizontal)) {
+            @std.textArea(form2("remarks"), "Reden voor afkeuring", 3)
             <div class="col-xs-12">
                 <button type="submit" class="btn btn-xs btn-danger" name="status" value="REFUSED">Afkeuren</button>
             </div>
         }
     }
+
     @divModalHelp()
 
 }

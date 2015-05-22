@@ -48,9 +48,10 @@ public class CarCost {
     private String description;
     private ApprovalStatus status;
     private int proofId;
-    private LocalDate billed;
     private CarCostCategory category;
     private int spread; // see getter
+    private int alreadyPaid; // in eurocent
+    private LocalDate startDate;
     private String comment; // when refused
 
     public int getId() {
@@ -109,10 +110,6 @@ public class CarCost {
         this.proofId = proofId;
     }
 
-    public LocalDate getBilled() { return billed; }
-
-    public void setBilled(LocalDate billed) { this.billed = billed; }
-
     public int getCarId() {
         return carId;
     }
@@ -141,9 +138,17 @@ public class CarCost {
         return comment;
     }
 
+    public int getAlreadyPaid() {
+        return alreadyPaid;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
     public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId,
-                   int carId, String carName, int ownerId, CarCostCategory category, int spread,
-                   String comment){
+                   int carId, String carName, int ownerId, CarCostCategory category,
+                   int spread, String comment, LocalDate startDate, int alreadyPaid){
         this.id = id;
         this.amount = amount;
         this.km = km;
@@ -157,5 +162,7 @@ public class CarCost {
         this.spread = spread;
         this.ownerId = ownerId;
         this.comment = comment;
+        this.startDate = startDate;
+        this.alreadyPaid = alreadyPaid;
     }
 }

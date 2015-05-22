@@ -71,6 +71,8 @@ public class CostsCommon extends Controller {
         @Constraints.Required
         public LocalDate time;
 
+        public LocalDate start;  // not always used
+
         public int spread; // not always used
 
         public List<ValidationError> validate() {

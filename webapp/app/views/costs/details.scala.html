@@ -30,7 +30,7 @@
 @(cost: CarCost, fileIsImage: Boolean, nextId: Int, previousId: Int,
       form: Form[CostsCommon.CostData], categories: Iterable[CarCostCategory])
 
-@stdlayout("Autokost", stylesheets=sheets("statuses"), extrabc=breadcrumb("Kosten (" + cost.getCarName +")",routes.Costs.showCostsForCar(cost.getCarId))) {
+@stdlayout("Autokost", stylesheets=sheets("statuses"), scripts=js.datetimepicker(), extrabc=breadcrumb("Kosten (" + cost.getCarName +")",routes.Costs.showCostsForCar(cost.getCarId))) {
     @panel("Acties", "fa-pencil") {
         <div class="col-xs-12">
             <a class="btn btn-xs btn-default" data-toggle="collapse"
