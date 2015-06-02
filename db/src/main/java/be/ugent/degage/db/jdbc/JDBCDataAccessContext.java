@@ -298,4 +298,9 @@ class JDBCDataAccessContext implements DataAccessContext {
     public TripDAO getTripDAO() {
         return new JDBCTripDAO(this);
     }
+
+    @Override
+    public CheckDAO getCheckDAO() {
+        return new JDBCCheckDAO(this);
+    }
 }

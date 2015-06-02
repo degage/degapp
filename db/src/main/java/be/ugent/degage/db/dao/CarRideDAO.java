@@ -66,5 +66,4 @@ public interface CarRideDAO {
      */
     public int getPrevEndKm (int reservationId);
 
-
 }

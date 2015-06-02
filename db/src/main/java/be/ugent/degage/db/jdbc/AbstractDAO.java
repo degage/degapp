@@ -32,6 +32,7 @@ package be.ugent.degage.db.jdbc;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * Common superclass of the data access objects in this package.
@@ -119,8 +120,8 @@ class AbstractDAO {
     /**
      * Transforms a resultset into a list
      */
-    protected static<T> Iterable<T> toList (ResultSet rs, ResultSetConverter<T> fn) throws SQLException {
-        Collection<T> list = new ArrayList<>();
+    protected static<T> List<T> toList (ResultSet rs, ResultSetConverter<T> fn) throws SQLException {
+        List<T> list = new ArrayList<>();
         while (rs.next()) {
             list.add(fn.convert(rs));
         }
@@ -130,7 +131,7 @@ class AbstractDAO {
     /**
      * Executes a prepared statement and converts the result into a list
      */
-    protected static<T> Iterable<T> toList (PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
+    protected static<T> List<T> toList (PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
             return toList (rs, fn);
         }

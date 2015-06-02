@@ -181,6 +181,8 @@ CREATE TABLE `cars` (
 	`car_comments` VARCHAR(4096),
 	`car_active` BIT(1) NOT NULL DEFAULT 0,
 	`car_images_id` INT,
+	`car_deprec` INT, -- cents per 10 km
+	`car_deprec_limit` INT, -- no deprecation cost once this number of km is reached
 	`car_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`car_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_id`),
@@ -444,12 +446,18 @@ CREATE TABLE `receipts` (
 );
 
 CREATE TABLE `billing` (
-  `billing_id` INT NOT NULL AUTO_INCREMENT,
-  `billing_description` CHAR(128), -- ex. Kwartaal 1 2015
-  `billing_enddate` DATE,
-  `billing_months` INT,
-  `billing_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   `billing_id` INT NOT NULL AUTO_INCREMENT,
+   `billing_description` CHAR(128) NOT NULL, -- ex. Kwartaal 1 2015
+   `billing_limit` DATE NOT NULL, -- only what is *strictly* before this date will be billed
+   `billing_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+   PRIMARY KEY (`billing_id`)
 );
+
+CREATE TABLE `cars_billed` (
+    billing_id INT REFERENCES billing,
+    car_id INT REFERENCES cars,
+    PRIMARY KEY (`billing_id`, `car_id`)
+)
 
 CREATE TABLE `km_price` (
   `km_price_billing_id` INT NOT NULL,

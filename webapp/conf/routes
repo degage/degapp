@@ -265,6 +265,9 @@ GET         /reports/reservations                   controllers.Reports.getReser
 GET         /reports/reservations/owner             controllers.Reports.getReservationsForOwner()
 GET         /reports/cars                           controllers.Reports.getCars()
 
+#Billing
+GET         /billing/anom                           controllers.Billing.showAnomalies(id: Int, cid: Int)
+
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
 # Car Picker

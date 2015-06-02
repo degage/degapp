@@ -23,3 +23,5 @@ server.pid
 *~
 evolutions-*.sql
 .gitignore
+
+src/main/sql/checks.sql
