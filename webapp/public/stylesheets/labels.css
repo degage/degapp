@@ -2,30 +2,34 @@
     background-color: #00CC00;
 }
 
-.label-user_car {
+.label-car_user {
     background-color: #009900;
 }
 
-.label-user_owner {
+.label-car_owner {
     background-color: #006600;
 }
 
-.label-user_super {
+.label-super_user {
     background-color: #003300;
 }
 
-.label-admin_info {
+.label-infosession_admin {
     background-color: #0000FF;
 }
 
-.label-admin_mail {
+.label-mail_admin {
     background-color: #0000CC;
 }
 
-.label-admin_profile {
+.label-profile_admin {
     background-color: #000099;
 }
 
-.label-admin_reserv{
+.label-reservation_admin{
     background-color: #000066;
+}
+
+.label-car_admin {
+    background-color: #00CCCC;
 }
