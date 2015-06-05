@@ -135,7 +135,6 @@ public class Application extends Controller {
                         javascript.Messages.showReceivedMessagesPage(),
                         javascript.Messages.showSentMessagesPage(),
                         javascript.Notifications.showNotificationsPage(),
-                        javascript.Receipts.showReceiptsPage(),
                         javascript.Refuels.showUserRefuelsPage(),
                         javascript.Refuels.showOwnerRefuelsPage(),
                         javascript.Refuels.showAllRefuelsPage(),

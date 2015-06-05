@@ -130,34 +130,6 @@ public class Trips extends Controller {
     }
 
 
-    /* KEPT HERE FOR FUTURE REFERENCE
-    private static BigDecimal calculateDriveCost(int distance, boolean privileged, Costs costInfo) {
-        if (privileged) {
-            return BigDecimal.ZERO;
-        } else {
-            double cost = 0;
-            int levels = costInfo.getLevels();
-            int lower = 0;
-
-            for (int level = 0; level < levels; level++) {
-                int limit;
-
-                // TODO: refactor this
-                if (level == levels - 1 || distance <= (limit = costInfo.getLimit(level))) {
-                    cost += distance * costInfo.getCost(level);
-                    break;
-                } else {
-                    cost += (limit - lower) * costInfo.getCost(level);
-                    distance -= (limit - lower);
-                    lower = limit;
-                }
-            }
-
-            return new BigDecimal(cost);
-        }
-    }
-    */
-
     /**
      * Get the number of reservations/trips having the provided status.
      */

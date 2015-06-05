@@ -86,10 +86,6 @@ GET         /trips/admin                            controllers.Trips.showTripsA
 GET         /trips/overview                         controllers.Trips.overview(id: Int, date: String ?= null)
 POST        /trips/overview                         controllers.Trips.doOverview(id: Int, date: String)
 
-# Receipts
-GET         /receipts                               controllers.Receipts.index()
-GET         /receipts/page                          controllers.Receipts.showReceiptsPage(page: Int, asc: Int ?= 1,orderBy: String ?= "", filter: String ?= "")
-
 # Notifiers
 GET         /messages                               controllers.Messages.showMessages()
 GET         /messages/received/page                 controllers.Messages.showReceivedMessagesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
@@ -264,9 +260,6 @@ GET         /reports/users                          controllers.Reports.getUsers
 GET         /reports/reservations                   controllers.Reports.getReservations()
 GET         /reports/reservations/owner             controllers.Reports.getReservationsForOwner()
 GET         /reports/cars                           controllers.Reports.getCars()
-
-#Billing
-GET         /billing/anom                           controllers.Billing.showAnomalies(id: Int, cid: Int)
 
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
