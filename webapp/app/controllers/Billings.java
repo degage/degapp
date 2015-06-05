@@ -29,23 +29,42 @@
 
 package controllers;
 
+import be.ugent.degage.db.dao.BillingDAO;
 import be.ugent.degage.db.dao.CheckDAO;
+import be.ugent.degage.db.models.Billing;
 import be.ugent.degage.db.models.UserRole;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Result;
 import views.html.billing.anomalies;
+import views.html.billing.listUser;
 
 /**
  * Actions related to building.
  */
-public class Billing extends Application {
+public class Billings extends Application {
 
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result showAnomalies(int billingId, int carId) {
         Iterable<CheckDAO.TripAnomaly> list = DataAccess.getInjectedContext().getCheckDAO().getTripAnomalies(billingId, carId);
         return ok(anomalies.render(list));
+    }
+
+    /**
+     * Produce a list of all billings relevant to thecurrent user. Dispatch according to whether owner or not
+     *
+     * @return
+     */
+    @InjectContext
+    @AllowRoles
+    public static Result list() {
+        BillingDAO dao = DataAccess.getInjectedContext().getBillingDAO();
+        Iterable<Billing> billings = dao.listBillingsForUser(CurrentUser.getId());
+        // TODO: dispatch according to car owner and then add bills for cars
+
+        return ok(listUser.render(billings));
     }
 
 }
