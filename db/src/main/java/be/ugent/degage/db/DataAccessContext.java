@@ -84,6 +84,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public TripDAO getTripDAO();
 
+    public BillingDAO getBillingDAO();
+
     public void begin();
 
     public void commit();

@@ -102,7 +102,7 @@ class JDBCCheckDAO extends AbstractDAO implements CheckDAO {
 
     @Override
     public Iterable<TripAnomaly> getTripAnomalies(int billingId, int carId) throws DataAccessException {
-        Collection<TripAnomaly> result = new ArrayList<TripAnomaly>();
+        Collection<TripAnomaly> result = new ArrayList<>();
         List<KmDetails> details = getKmDetails(billingId, carId);
         if (details.size() > 0) {
 

@@ -448,7 +448,12 @@ CREATE TABLE `receipts` (
 CREATE TABLE `billing` (
    `billing_id` INT NOT NULL AUTO_INCREMENT,
    `billing_description` CHAR(128) NOT NULL, -- ex. Kwartaal 1 2015
+   `billing_prefix` CHAR(10) NOT NULL, -- used on invoice ex. 1-2015
    `billing_limit` DATE NOT NULL, -- only what is *strictly* before this date will be billed
+   `billing_start` DATE NOT NULL, -- only for informational purposes
+   `billing_status` ENUM (
+       'CREATED', 'PREPARING', 'SIMULATION', 'USERS_DONE', 'ALL_DONE'
+   ) NOT NULL DEFAULT 'CREATED',
    `billing_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    PRIMARY KEY (`billing_id`)
 );
@@ -457,14 +462,48 @@ CREATE TABLE `cars_billed` (
     billing_id INT REFERENCES billing,
     car_id INT REFERENCES cars,
     PRIMARY KEY (`billing_id`, `car_id`)
-)
+);
 
 CREATE TABLE `km_price` (
-  `km_price_billing_id` INT NOT NULL,
-  `km_price_from` INT NOT NULL,
-  `km_price_eurocents` INT NOT NULL,
-  PRIMARY KEY (`km_price_billing_id`, `km_price_from`),
-  FOREIGN KEY (`km_price_billing_id`) REFERENCES `billing`
+    `km_price_billing_id` INT NOT NULL,
+    `km_price_from` INT NOT NULL,
+    `km_price_eurocents` INT NOT NULL, -- price for interval - as printed
+    `km_price_factor` INT NOT NULL,    -- cummulative price (for computations)
+    PRIMARY KEY (`km_price_billing_id`, `km_price_from`),
+    FOREIGN KEY (`km_price_billing_id`) REFERENCES billing(billing_id)
+);
+
+CREATE TABLE `b_trip` (
+    bt_billing_id INT REFERENCES billing(billing_id),
+    bt_reservation_id INT REFERENCES reservations(reservation_id),
+    bt_user_id INT REFERENCES users(user_id),
+    bt_privileged BIT(1) NOT NULL DEFAULT 0,
+    bt_car_id INT REFERENCES cars(car_id),
+    bt_car_name VARCHAR(64) NOT NULL,
+    bt_datetime DATETIME NOT NULL,
+    bt_km INT NOT NULL DEFAULT 0,
+    bt_km_cost INT NOT NULL DEFAULT 0, -- total cost of km in eurocent
+    PRIMARY KEY (bt_billing_id, bt_reservation_id)
+);
+
+CREATE TABLE `b_fuel` (
+    bf_billing_id INT REFERENCES billing(billing_id),
+    bf_refuel_id INT REFERENCES refuels(refuel_id),
+    bf_reservation_id INT REFERENCES reservations(`reservation_id`),
+    bf_car_id INT REFERENCES cars(car_id),
+    bf_user_id INT REFERENCES users(user_id),
+    bf_privileged BIT(1) NOT NULL DEFAULT 0,
+    bf_car_name VARCHAR(64) NOT NULL,
+    bf_datetime DATETIME NOT NULL,
+    bf_fuel_cost INT NOT NULL DEFAULT 0, -- fuel paid (in eurocent)
+    PRIMARY KEY (bf_billing_id, bf_refuel_id)
+);
+
+CREATE TABLE b_user (
+    bu_billing_id INT REFERENCES billing(billing_id),
+    bu_user_id INT REFERENCES users(user_id),
+    bu_seq_nr INT,
+    PRIMARY KEY (bu_billing_id, bu_user_id)
 );
 
 -- TRIGGERS

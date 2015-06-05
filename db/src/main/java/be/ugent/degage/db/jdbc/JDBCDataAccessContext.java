@@ -303,4 +303,9 @@ class JDBCDataAccessContext implements DataAccessContext {
     public CheckDAO getCheckDAO() {
         return new JDBCCheckDAO(this);
     }
+
+    @Override
+    public BillingDAO getBillingDAO() {
+        return new JDBCBillingDAO(this);
+    }
 }
