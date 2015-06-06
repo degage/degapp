@@ -29,16 +29,21 @@
 
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.BillingDAO;
 import be.ugent.degage.db.dao.CheckDAO;
-import be.ugent.degage.db.models.Billing;
-import be.ugent.degage.db.models.UserRole;
+import be.ugent.degage.db.models.*;
+import com.google.common.primitives.Ints;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Result;
 import views.html.billing.anomalies;
 import views.html.billing.listUser;
+import views.html.billing.userInvoice;
+
+import java.time.LocalDate;
+import java.util.*;
 
 /**
  * Actions related to building.
@@ -59,12 +64,201 @@ public class Billings extends Application {
      */
     @InjectContext
     @AllowRoles
-    public static Result list() {
+    public static Result list(int userId) {
+        if (userId == 0) {
+            userId = CurrentUser.getId();
+        } else if (!CurrentUser.hasRole(UserRole.SUPER_USER)) {
+            return badRequest(); // not authorised
+        }
         BillingDAO dao = DataAccess.getInjectedContext().getBillingDAO();
-        Iterable<Billing> billings = dao.listBillingsForUser(CurrentUser.getId());
+        Iterable<Billing> billings = dao.listBillingsForUser(userId);
         // TODO: dispatch according to car owner and then add bills for cars
 
         return ok(listUser.render(billings));
     }
 
+    /**
+     * Represents a view of the price info for use in the tables
+     */
+    public static class KmPriceInfo {
+        public Iterable<String> ranges;
+        public Iterable<Integer> prices;
+
+        public KmPriceInfo(KmPriceDetails details) {
+            this.prices = Ints.asList(details.getPrices());
+            int[] froms = details.getFroms();
+
+            List<String> ranges = new ArrayList<>();
+            for (int i = 1; i < froms.length; i++) {
+                ranges.add(String.format("%d-%d km", froms[i - 1], froms[i] - 1));
+            }
+            ranges.add(String.format(">%d km", froms[froms.length - 1]));
+            // TODO? Reverse the list? Collections.reverse
+            this.prices = prices;
+            this.ranges = ranges;
+        }
+    }
+
+    /**
+     * Represents a single line in an invoice
+     */
+    public static class InvoiceLine {
+        public String carName;
+        public LocalDate date;
+
+        // the following fields can be null in case of a refuel cost
+        public Integer km;
+        public Integer[] kmSub;
+        public Integer kmCost;
+
+        // the following field can be null when there was no refueling
+        public Integer fuelCost;
+
+        // not used in view
+        private int reservationId;
+
+        // used for computing the totals
+        private InvoiceLine(int size) {
+            km = 0;
+            this.kmSub = new Integer[size];
+            Arrays.fill(kmSub, 0);
+            kmCost = 0;
+            fuelCost = 0;
+        }
+
+        private InvoiceLine(BillingDetails b) {
+            this.carName = b.getCarName();
+            this.date = b.getTime().toLocalDate();
+            this.reservationId = b.getReservationId();
+        }
+
+        public InvoiceLine(BillingDetailsTrip bt, KmPriceDetails list) {
+            this(bt);
+            this.km = bt.getKm();
+            this.kmCost = bt.getCost();
+            this.fuelCost = null;
+
+            int[] froms = list.getFroms();
+            Integer[] kmSub = new Integer[froms.length];
+            int pos = 1;
+            while (pos < froms.length && km >= froms[pos]) {
+                kmSub[pos - 1] = froms[pos] - froms[pos - 1];
+                pos++;
+            }
+            kmSub[pos - 1] = km - froms[pos - 1] + 1;
+            this.kmSub = kmSub;
+        }
+
+        public InvoiceLine(BillingDetailsFuel bf, KmPriceDetails list) {
+            this(bf);
+            this.km = null;
+            this.kmCost = null;
+            this.fuelCost = bf.getCost();
+
+            this.kmSub = new Integer[list.getFroms().length];
+
+        }
+
+        public void add(InvoiceLine line) {
+            if (line.km != null) {
+                km += line.km;
+                for (int i = 0; i < kmSub.length; i++) {
+                    if (line.kmSub[i] != null) {
+                        kmSub[i] += line.kmSub[i];
+                    }
+                }
+                kmCost += line.kmCost;
+            }
+            if (line.fuelCost != null) {
+                fuelCost += line.fuelCost;
+            }
+        }
+    }
+
+    private static class ILEntry {
+        public InvoiceLine t;       // trip
+        public List<InvoiceLine> f; // refuels for this trip
+
+        public ILEntry() {
+            f = new ArrayList<>();
+        }
+    }
+
+    private static Iterable<InvoiceLine> getInvoiceLines(
+            Iterable<BillingDetailsTrip> trips, Iterable<BillingDetailsFuel> fuels,
+            KmPriceDetails kmPrices) {
+        // store all invoice lines according to reservation id
+        Map<Integer, ILEntry> map = new HashMap<>();
+
+        for (BillingDetailsTrip trip : trips) {
+            int reservationId = trip.getReservationId();
+            ILEntry ile = new ILEntry();
+            ile.t = new InvoiceLine(trip, kmPrices);
+            map.put(reservationId, ile);
+        }
+
+        for (BillingDetailsFuel fuel : fuels) {
+            int reservationId = fuel.getReservationId();
+            ILEntry ile = map.get(reservationId);
+            if (ile == null) {
+                ile = new ILEntry();
+                map.put(reservationId, ile);
+            }
+            ile.f.add(new InvoiceLine(fuel, kmPrices));
+        }
+
+        // create the resulting list
+        List<InvoiceLine> result = new ArrayList<>();
+        for (ILEntry ile : map.values()) {
+            // merge top invoice lines
+            if (ile.t != null && !ile.f.isEmpty()) {
+                ile.t.fuelCost = ile.f.remove(0).fuelCost;
+            }
+            if (ile.t != null) {
+                result.add(ile.t);
+            }
+            result.addAll(ile.f);
+        }
+        Collections.sort(result, (x, y) -> x.date.compareTo(y.date));
+        return result;
+    }
+
+    private static InvoiceLine total(Iterable<InvoiceLine> list, int size) {
+        InvoiceLine result = new InvoiceLine(size);
+        for (InvoiceLine line : list) {
+            result.add(line);
+        }
+        return result;
+    }
+
+    @InjectContext
+    @AllowRoles
+    public static Result userDetails(int billingId, int userId) {
+        if (userId == 0) {
+            userId = CurrentUser.getId();
+        } else if (!CurrentUser.hasRole(UserRole.SUPER_USER)) {
+            return badRequest(); // not authorised
+        }
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        BillingDAO dao = context.getBillingDAO();
+        Billing billing = dao.getBilling(billingId);
+        BillingDetailsUser bUser = dao.getUserDetails(billingId, userId);
+
+        KmPriceDetails priceDetails = dao.getKmPriceDetails(billingId);
+
+        Iterable<InvoiceLine> invoiceLines = getInvoiceLines(
+                dao.listTripDetails(billingId, userId, false),
+                dao.listFuelDetails(billingId, userId, false),
+                priceDetails
+        );
+        return ok(userInvoice.render(
+                billing,
+                bUser.getIndex(),
+                context.getUserDAO().getUser(userId),
+                new KmPriceInfo(priceDetails),
+                invoiceLines,
+                total(invoiceLines, priceDetails.getFroms().length)
+        ));
+    }
 }

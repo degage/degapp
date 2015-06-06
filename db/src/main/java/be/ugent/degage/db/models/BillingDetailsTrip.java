@@ -34,40 +34,17 @@ import java.time.LocalDateTime;
 /**
  * Billing details for trips
  */
-public class BillingDetailsTrip {
+public class BillingDetailsTrip extends BillingDetails {
 
-    public int reservationId;
-
-    public String carName;
-    public int km;
-    public int cost; // total cost
-    public LocalDateTime time;
+    private int km;
 
     public BillingDetailsTrip(int reservationId, String carName, int km, int cost, LocalDateTime time) {
-        this.reservationId = reservationId;
-        this.carName = carName;
+        super(carName, cost, time, reservationId);
         this.km = km;
-        this.cost = cost;
-        this.time = time;
-    }
-
-    public int getReservationId() {
-        return reservationId;
-    }
-
-    public String getCarName() {
-        return carName;
     }
 
     public int getKm() {
         return km;
     }
 
-    public int getCost() {
-        return cost;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
-    }
 }

@@ -26,6 +26,7 @@ BEGIN
 END $$
 
 
+
 -- create bt_trip records for billing a certain car
 -- b_id: id of billing
 -- limit: limit date, only records before this date will be considered
@@ -56,13 +57,6 @@ BEGIN
        bt_privileged = 1
     WHERE bt_billing_id = b_id AND bt_car_id = c_id;
 
-    -- compute km costs
-    UPDATE b_trip
-       JOIN km_price ON km_price_billing_id=bt_billing_id
-    SET
-       bt_km_cost = bt_km_cost + km_price_factor*bt_km
-    WHERE
-        bt_billing_id = b_id AND bt_car_id = c_id AND bt_km >= km_price_from;
 END $$
 
 -- create
@@ -87,6 +81,41 @@ BEGIN
     SET
        bf_privileged = 1
     WHERE bf_billing_id = b_id AND bf_car_id = c_id;
+END $$
+
+-- compute the total cost of a trip from the price info and total kms
+-- b_id: id of billing
+-- c_id: id of car
+DROP PROCEDURE IF EXISTS billing_km_cost $$
+CREATE PROCEDURE billing_km_cost (b_id INT, c_id INT)
+BEGIN
+    -- set up everything for loop
+    DECLARE done BOOLEAN DEFAULT FALSE;
+    DECLARE _from,_factor INT;
+    DECLARE cur CURSOR FOR
+        SELECT km_price_from, km_price_factor FROM km_price
+        WHERE km_price_billing_id=b_id;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Reset cost to 0
+    UPDATE b_trip SET bt_km_cost = 0
+    WHERE bt_billing_id = b_id AND bt_car_id = c_id;
+
+    -- Compute cost
+    OPEN cur;
+
+    main: LOOP
+      FETCH cur INTO _from, _factor;
+      IF done THEN
+        LEAVE main;
+      END IF;
+
+      UPDATE b_trip SET bt_km_cost = bt_km_cost + _factor*(bt_km-_from+1)
+      WHERE  bt_billing_id = b_id AND bt_car_id = c_id AND bt_km >= _from;
+
+    END LOOP main;
+
+    CLOSE cur;
 END $$
 
 -- add sequence number to user bills
@@ -153,6 +182,7 @@ BEGIN
       LEAVE main;
     END IF;
     CALL billing_trip_aux(b_id, _id, lim, _name);
+    CALL billing_km_cost (b_id, _id);
     CALL billing_fuel_aux(b_id, _id, lim, _name);
   END LOOP main;
 

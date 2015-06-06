@@ -28,9 +28,11 @@ public interface BillingDAO {
     public BillingDetailsUser getUserDetails (int billingId, int userId);
 
     /**
-     * Retreive price information for the given billing, ordered by starting km
+     * Retreive price information for the given billing
      */
-    public Iterable<KmPrice> listKmPrices (int billingId);
+    // NOT USED ? public Iterable<KmPrice> listKmPrices (int billingId);
+
+    public KmPriceDetails getKmPriceDetails (int billingId);
 
     /**
      * Retreive all trip billing details for a given billing and user

@@ -3,10 +3,13 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.BillingDAO;
 import be.ugent.degage.db.models.*;
+import com.google.common.primitives.Ints;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * JDBC implementation of {@link BillingDAO}
@@ -67,7 +70,6 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         }
     }
 
-    @Override
     public Iterable<KmPrice> listKmPrices(int billingId) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT km_price_from, km_price_eurocents FROM km_price WHERE km_price_billing_id = ? " +
@@ -83,9 +85,33 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     }
 
     @Override
+    public KmPriceDetails getKmPriceDetails(int billingId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT km_price_from, km_price_eurocents FROM km_price WHERE km_price_billing_id = ? " +
+                        "ORDER BY km_price_from"
+        )) {
+            ps.setInt(1, billingId);
+            try (ResultSet rs = ps.executeQuery()) {
+                List<Integer> froms = new ArrayList<>();
+                List<Integer> prices = new ArrayList<>();
+                while (rs.next()) {
+                    prices.add(rs.getInt("km_price_eurocents"));
+                    froms.add(rs.getInt("km_price_from"));
+                }
+                return new KmPriceDetails(
+                        Ints.toArray(froms),
+                        Ints.toArray(prices)
+                );
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Cannot get km prices", ex);
+        }
+    }
+
+    @Override
     public BillingDetailsUser getUserDetails(int billingId, int userId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT bu_seq_nr FROM bu_user WHERE bu_billing_id = ? AND bu_user_id = ?"
+                "SELECT bu_seq_nr FROM b_user WHERE bu_billing_id = ? AND bu_user_id = ?"
         )) {
             ps.setInt (1, billingId);
             ps.setInt (2, userId);
@@ -112,7 +138,7 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                     rs.getInt("bt_km"),
                     rs.getInt("bt_km_cost"),
                     rs.getTimestamp("bt_datetime").toLocalDateTime()
-            )); // TODO
+            ));
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot get trip details", ex);
         }
@@ -121,20 +147,21 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     @Override
     public Iterable<BillingDetailsFuel> listFuelDetails(int billingId, int userId, boolean privileged) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT bu_refuel_id, bu_car_name, bu_fuel_cost, bu_datetime FROM b_fuel " +
-                        "WHERE bu_billing_id = ? AND bu_user_id = ? AND bu_privileged = ? " +
-                        "ORDER BY bu_datetime"
+                "SELECT bf_reservation_id, bf_refuel_id, bf_car_name, bf_fuel_cost, bf_datetime FROM b_fuel " +
+                        "WHERE bf_billing_id = ? AND bf_user_id = ? AND bf_privileged = ? " +
+                        "ORDER BY bf_datetime"
         )) {
             ps.setInt (1, billingId);
             ps.setInt (2, userId);
             ps.setBoolean(3, privileged);
             return toList (ps, rs -> new BillingDetailsFuel(
-                    rs.getInt("bu_refuel_id"),
-                    rs.getString("bu_car_name"),
-                    rs.getInt("bu_fuel_cost"),
-                    rs.getTimestamp("bu_datetime").toLocalDateTime()
+                    rs.getInt("bf_reservation_id"),
+                    rs.getInt("bf_refuel_id"),
+                    rs.getString("bf_car_name"),
+                    rs.getInt("bf_fuel_cost"),
+                    rs.getTimestamp("bf_datetime").toLocalDateTime()
 
-            )); // TODO
+            ));
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot get fuel details", ex);
         }

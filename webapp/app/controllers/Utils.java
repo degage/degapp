@@ -77,6 +77,13 @@ public final class Utils {
         return dateTime == null ? null : LOCALIZED_DATE_FORMATTER.format(dateTime);
     }
 
+    private static DateTimeFormatter LOCALIZED_SHORT_DATE_FORMATTER =
+            DateTimeFormatter.ofPattern("dd-MMM-yy", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
+
+    public static String toLocalizedDateStringShort(LocalDate localDate) {
+        return localDate == null ? null : LOCALIZED_SHORT_DATE_FORMATTER.format(localDate);
+    }
+
     private static DateTimeFormatter LOCALIZED_LONG_DATE_FORMATTER =
             DateTimeFormatter.ofPattern("dd MMMM yyyy", DEFAULT_LOCALE).withZone(ZoneId.systemDefault());
 

@@ -52,6 +52,14 @@ object foreach {
   }
 
   /**
+   * Iterate over the given Java array
+   */
+  def apply[T](array: Array[T])(block: T => Html): Html = {
+    new Html (array
+      .map (block)
+      .to[scala.collection.immutable.Seq])
+  }
+  /**
    * Iterate over the given Java iterable including an index
    */
   def withIndex[T](iterable: java.lang.Iterable[T])(block: (T, Int) => Html): Html = {

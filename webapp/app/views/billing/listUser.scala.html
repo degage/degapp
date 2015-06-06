@@ -23,7 +23,7 @@
                         <td>@Utils.toLocalizedDateString(billing.getStart)</td>
                         <td>@Utils.toLocalizedDateString(billing.getLimit minusDays 1)</td>
                         <td>@billing.getStatus</td>
-                        <td></td>
+                        <td>@btnPrimary("Details...", routes.Billings.userDetails(billing.getId))</td>
                         }{
                         <tr>
                             <td colspan="5" class="empty-row">

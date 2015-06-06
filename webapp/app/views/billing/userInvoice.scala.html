@@ -1,0 +1,138 @@
+@*
+
+*@
+
+@(billing: Billing, seqnr: Int, user: User, kpi: Billings.KmPriceInfo,
+           lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine)
+
+<html>
+   <head>
+       <style type="text/css">
+           #top {
+             margin-bottom: 24pt;
+           }
+           #top table th {
+             font-weight: normal;
+             text-align: right;
+           }
+           #top table td {
+              padding-left: 10pt;
+              font-weight: bold;
+           }
+           #data table {
+              border-collapse: collapse;
+              width: 100%;
+           }
+           #data table thead {
+              border-top: 2pt solid black;
+              border-bottom: 2pt solid black;
+              text-align:center;
+           }
+           #data table tbody td {
+              text-align:center;
+              border-bottom: 1pt solid black;
+              /* width: 12.5%; */
+           }
+           #data table tbody {
+              border-bottom: 2pt solid black;
+           }
+
+           #data table .numeric {
+              text-align:right;
+           }
+
+           #data table tfoot {
+               padding-top: 3ex;
+           }
+
+           #data table tfoot th {
+              border-top: 2pt solid black;
+              border-bottom: 2pt solid black;
+              padding-top: 3ex;
+              text-align: right;
+           }
+           #data table tfoot td {
+              border: none;
+           }
+       </style>
+   </head>
+   <body>
+      <div id="top">
+          <table>
+              <tbody>
+                  <tr><th>Afrekening n°:</th><td>A@billing.getPrefix-@("%04d".format(seqnr))</td></tr>
+                  <tr><th>Naam:</th><td>@user.getFullName</td></tr>
+                  @defining(user.getAddressDomicile){ address =>
+                      <tr><th>Adres:</th><td>@address.getStreet @address.getNum</td></tr>
+                      <tr><th></th><td>@address.getZip @address.getCity (@address.getCountry)</td></tr>
+                  }
+                  <tr><th>Periode:</th>
+                      <td>
+                          @Utils.toLocalizedDateString(billing.getStart) -
+                          @Utils.toLocalizedDateString(billing.getLimit minusDays 1)
+                      </td>
+                  </tr>
+              </tbody>
+          </table>
+      </div>
+      <div id="data">
+          <table>
+              <thead>
+                 <tr>
+                     <th>Auto</th>
+                     <th>Datum</th>
+                     <th>Aantal km</th>
+                     @foreach(kpi.ranges) { range => <th>@range</th> }
+                     <th>Kostprijs</th>
+                     <th>Tank-</th>
+                 </tr>
+                  <tr>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      @foreach(kpi.prices) { price => <td>@data.EurocentAmount.toString(price) €/km</td> }
+                      <th>kilometers</th>
+                      <th>beurten</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  @foreach.tr(lines) { line =>
+                    <td>@line.carName</td>
+                    <td>@Utils.toLocalizedDateStringShort(line.date)</td>
+                    <td class="numeric">@line.km</td>
+                    @foreach(line.kmSub) { value =>
+                        <td class="numeric">@if(value==null)("")else(value)</td>
+                    }
+                    <td class="numeric">@if(line.kmCost!=null){@data.EurocentAmount.toString(line.kmCost)}</td>
+                    <td class="numeric">@if(line.fuelCost!=null){@data.EurocentAmount.toString(line.fuelCost)}</td>
+                  }
+                  <tr>
+                      <th colspan="2" class="numeric">Totalen:</th>
+                      <th class="numeric">@totals.km</th>
+                      @foreach(totals.kmSub) { value =>
+                        <th class="numeric">@value</th>
+                      }
+                    <th class="numeric">@data.EurocentAmount.toString(totals.kmCost)</th>
+                    <th class="numeric">@data.EurocentAmount.toString(totals.fuelCost)</th>
+                  </tr>
+              </tbody>
+              <tfoot>
+                  <tr>
+                      <td colspan="4"></td>
+                      @if(totals.kmCost>totals.fuelCost){
+                      <th colspan="3">TOTAAL TE BETALEN:</th>
+                      }else{
+                      <th colspan="3">Totaal te ontvangen:</th>
+                      }
+                      <th>@data.EurocentAmount.toString(totals.kmCost-totals.fuelCost) €</th>
+                  </tr>
+              </tfoot>
+          </table>
+      </div>
+      <div id="text">
+          <p><b>OPGELET!</b> Dit is slechts een <b>simulatie</b>.
+              Gelieve dus nog <b>geen</b> betalingen uit te voeren.
+              De definitieve afrekening volgt binnenkort.</p>
+      </div>
+   </body>
+</html>

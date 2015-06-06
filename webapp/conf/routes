@@ -263,7 +263,8 @@ GET         /reports/cars                           controllers.Reports.getCars(
 
 #Billing
 GET         /billing/anom                           controllers.Billings.showAnomalies(id: Int, cid: Int)
-GET         /billing/list                           controllers.Billings.list()
+GET         /billing/list                           controllers.Billings.list(id: Int ?= 0)
+GET         /billing/user                           controllers.Billings.userDetails(id:Int, uid: Int ?= 0)
 
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")

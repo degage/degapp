@@ -34,6 +34,8 @@ package be.ugent.degage.db.models;
  */
 public class KmPrice {
 
+    // TODO: never used?
+
     private int fromKm;
     private int price;
 

@@ -34,34 +34,16 @@ import java.time.LocalDateTime;
 /**
  * Billing details for trips
  */
-public class BillingDetailsFuel {
+public class BillingDetailsFuel extends BillingDetails {
 
-    public int refuelId;
+    private int refuelId;
 
-    public String carName;
-    public int cost; // total cost
-    public LocalDateTime time;
-
-    public BillingDetailsFuel(int refuelId, String carName, int cost, LocalDateTime time) {
+    public BillingDetailsFuel(int reservationId, int refuelId, String carName, int cost, LocalDateTime time) {
+        super(carName,cost,time,reservationId);
         this.refuelId = refuelId;
-        this.carName = carName;
-        this.cost = cost;
-        this.time = time;
     }
 
     public int getRefuelId() {
         return refuelId;
-    }
-
-    public String getCarName() {
-        return carName;
-    }
-
-    public int getCost() {
-        return cost;
-    }
-
-    public LocalDateTime getTime() {
-        return time;
     }
 }

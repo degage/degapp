@@ -44,7 +44,6 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import play.twirl.api.Html;
-import providers.DataProvider;
 import views.html.trips.*;
 
 import java.text.MessageFormat;

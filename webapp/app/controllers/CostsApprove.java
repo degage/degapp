@@ -39,13 +39,10 @@ import db.InjectContext;
 import notifiers.Notifier;
 import play.data.Form;
 import play.data.validation.Constraints;
-import play.data.validation.ValidationError;
 import play.mvc.Result;
 import views.html.costs.approveorreject;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 
 /**
  * Handles approval / rejection of costs
