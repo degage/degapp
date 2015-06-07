@@ -1,0 +1,28 @@
+/*
+ * Page headers and footers
+ */
+div.header {
+    display: block; text-align: center;
+    position: running(header);
+}
+
+div.footer {
+    display: block; text-align: center;
+    position: running(footer);
+}
+
+div.content {page-break-after: always;}
+
+@page {
+     @top-center { content: element(header) }
+}
+
+@page {
+    @bottom-center { content: element(footer) }
+}
+
+
+/* This is a test */
+.blue {
+    color: blue;
+}
