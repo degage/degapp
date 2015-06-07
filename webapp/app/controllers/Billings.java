@@ -1,4 +1,4 @@
-/* Billing.java
+/* Billings.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -37,6 +37,7 @@ import com.google.common.primitives.Ints;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
+import it.innove.play.pdf.PdfGenerator;
 import play.mvc.Result;
 import views.html.billing.anomalies;
 import views.html.billing.listUser;
@@ -58,23 +59,22 @@ public class Billings extends Application {
     }
 
     /**
-     * Produce a list of all billings relevant to thecurrent user. Dispatch according to whether owner or not
-     *
-     * @return
+     * Produce a list of all billings relevant to the current user.
      */
     @InjectContext
     @AllowRoles
     public static Result list(int userId) {
         if (userId == 0) {
             userId = CurrentUser.getId();
-        } else if (!CurrentUser.hasRole(UserRole.SUPER_USER)) {
+        } else if (CurrentUser.isNot(userId) && !CurrentUser.hasRole(UserRole.SUPER_USER)) {
             return badRequest(); // not authorised
         }
         BillingDAO dao = DataAccess.getInjectedContext().getBillingDAO();
         Iterable<Billing> billings = dao.listBillingsForUser(userId);
+        // TODO: should only give non-privileged billings?
         // TODO: dispatch according to car owner and then add bills for cars
 
-        return ok(listUser.render(billings));
+        return ok(listUser.render(billings, userId));
     }
 
     /**
@@ -94,7 +94,6 @@ public class Billings extends Application {
             }
             ranges.add(String.format(">%d km", froms[froms.length - 1]));
             // TODO? Reverse the list? Collections.reverse
-            this.prices = prices;
             this.ranges = ranges;
         }
     }
@@ -115,7 +114,7 @@ public class Billings extends Application {
         public Integer fuelCost;
 
         // not used in view
-        private int reservationId;
+        //private int reservationId;
 
         // used for computing the totals
         private InvoiceLine(int size) {
@@ -129,7 +128,7 @@ public class Billings extends Application {
         private InvoiceLine(BillingDetails b) {
             this.carName = b.getCarName();
             this.date = b.getTime().toLocalDate();
-            this.reservationId = b.getReservationId();
+            //this.reservationId = b.getReservationId();
         }
 
         public InvoiceLine(BillingDetailsTrip bt, KmPriceDetails list) {
@@ -236,7 +235,7 @@ public class Billings extends Application {
     public static Result userDetails(int billingId, int userId) {
         if (userId == 0) {
             userId = CurrentUser.getId();
-        } else if (!CurrentUser.hasRole(UserRole.SUPER_USER)) {
+        } else if (CurrentUser.isNot(userId) && !CurrentUser.hasRole(UserRole.SUPER_USER)) {
             return badRequest(); // not authorised
         }
 
@@ -244,21 +243,25 @@ public class Billings extends Application {
         BillingDAO dao = context.getBillingDAO();
         Billing billing = dao.getBilling(billingId);
         BillingDetailsUser bUser = dao.getUserDetails(billingId, userId);
+        if (bUser != null) {
 
-        KmPriceDetails priceDetails = dao.getKmPriceDetails(billingId);
+            KmPriceDetails priceDetails = dao.getKmPriceDetails(billingId);
 
-        Iterable<InvoiceLine> invoiceLines = getInvoiceLines(
-                dao.listTripDetails(billingId, userId, false),
-                dao.listFuelDetails(billingId, userId, false),
-                priceDetails
-        );
-        return ok(userInvoice.render(
-                billing,
-                bUser.getIndex(),
-                context.getUserDAO().getUser(userId),
-                new KmPriceInfo(priceDetails),
-                invoiceLines,
-                total(invoiceLines, priceDetails.getFroms().length)
-        ));
+            Iterable<InvoiceLine> invoiceLines = getInvoiceLines(
+                    dao.listTripDetails(billingId, userId, false),
+                    dao.listFuelDetails(billingId, userId, false),
+                    priceDetails
+            );
+            return PdfGenerator.ok(userInvoice.render(
+                    billing,
+                    bUser.getIndex(),
+                    context.getUserDAO().getUser(userId),
+                    new KmPriceInfo(priceDetails),
+                    invoiceLines,
+                    total(invoiceLines, priceDetails.getFroms().length)
+            ), null);
+        } else {
+            return badRequest();
+        }
     }
 }

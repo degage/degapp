@@ -50,7 +50,8 @@
                     <td>
                         <div class="btn-group btn-group-xs">
                             @if(CurrentUser.hasRole(UserRole.SUPER_USER) && user.canLogin) {
-                                <a class="btn btn-warning" href="@routes.Users.impersonate(user.getId)">Impersoneer</a>
+                                @btnWarning("Impersoneer", routes.Users.impersonate(user.getId))
+                                @btnPrimary("Afrekeningen", routes.Billings.list(user.getId))
                             }
                         </div>
                     </td>

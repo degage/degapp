@@ -1,15 +1,43 @@
-@*
-
-*@
+@* userInvoice.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
 @(billing: Billing, seqnr: Int, user: User, kpi: Billings.KmPriceInfo,
            lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine)
 
 <html>
    <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link rel="stylesheet" media="print" href="public/stylesheets/pdf.css" />
        <style type="text/css">
            #top {
              margin-bottom: 24pt;
+             /* background: white url(public/images/degagelogo.png) no-repeat top right ; */
            }
            #top table th {
              font-weight: normal;
@@ -19,22 +47,28 @@
               padding-left: 10pt;
               font-weight: bold;
            }
+
+           #logo {
+                float:right;
+           }
+           #logo img {
+                width: 2in;
+           }
+
            #data table {
+              border-top: 1pt solid black;
               border-collapse: collapse;
               width: 100%;
            }
            #data table thead {
-              border-top: 2pt solid black;
-              border-bottom: 2pt solid black;
               text-align:center;
            }
+
            #data table tbody td {
               text-align:center;
-              border-bottom: 1pt solid black;
+              border-top: 0.5pt solid black;
+              border-bottom: 0.5pt solid black;
               /* width: 12.5%; */
-           }
-           #data table tbody {
-              border-bottom: 2pt solid black;
            }
 
            #data table .numeric {
@@ -46,17 +80,18 @@
            }
 
            #data table tfoot th {
-              border-top: 2pt solid black;
-              border-bottom: 2pt solid black;
+              border-top: 1pt solid black;
+              border-bottom: 1pt solid black;
               padding-top: 3ex;
               text-align: right;
            }
            #data table tfoot td {
-              border: none;
+              border-top: 1pt solid black;
            }
        </style>
    </head>
    <body>
+      <div id="logo"><img src="public/images/logo-brief.png"></div>
       <div id="top">
           <table>
               <tbody>

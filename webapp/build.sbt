@@ -13,7 +13,7 @@ libraryDependencies ++= Seq(
   cache
 )
 
-// For hikari                                                                      exit
+// For hikari
 
 resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/modules/releases/"))(Resolver.ivyStylePatterns)
 
@@ -31,7 +31,7 @@ libraryDependencies ++= Seq(
   "mysql"                   % "mysql-connector-java"         % "5.1.34",
   "org.apache.poi"          % "poi"                          % "3.8",
   "org.apache.poi"          % "poi-ooxml"                    % "3.9",
-  "com.itextpdf"            % "itextpdf"                     % "5.1.3",
+  "it.innove"               % "play2-pdf"                    % "1.1.3",
   "com.typesafe"            % "config"                       % "1.2.1"
   // "org.webjars"             % "jquery-ui"                    % "1.11.0-1", customized version stored in javascript/
 )
