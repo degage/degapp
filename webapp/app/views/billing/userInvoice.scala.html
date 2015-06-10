@@ -33,11 +33,19 @@
 <html>
    <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link rel="stylesheet" media="print" href="public/stylesheets/pdf.css" />
+        @* <link rel="stylesheet" media="print" href="public/stylesheets/pdf.css" /> *@
        <style type="text/css">
+           @@page {
+              size: A4;
+           }
+
+           body {
+             font-family: "Liberation Sans", Arial, sans-serif;
+             font-size: 75%;
+           }
+
            #top {
              margin-bottom: 24pt;
-             /* background: white url(public/images/degagelogo.png) no-repeat top right ; */
            }
            #top table th {
              font-weight: normal;
@@ -51,14 +59,12 @@
            #logo {
                 float:right;
            }
-           #logo img {
-                width: 2in;
-           }
 
            #data table {
               border-top: 1pt solid black;
               border-collapse: collapse;
               width: 100%;
+              font-size: 85%;
            }
            #data table thead {
               text-align:center;
@@ -73,6 +79,10 @@
 
            #data table .numeric {
               text-align:right;
+           }
+
+           #data table .km {
+              text-align:center;
            }
 
            #data table tfoot {
@@ -91,7 +101,7 @@
        </style>
    </head>
    <body>
-      <div id="logo"><img src="public/images/logo-brief.png"></div>
+      <div id="logo"><img src='public/images/logo-brief-2.5in.png'  width="2.5in"/></div>
       <div id="top">
           <table>
               <tbody>
@@ -134,18 +144,18 @@
                   @foreach.tr(lines) { line =>
                     <td>@line.carName</td>
                     <td>@Utils.toLocalizedDateStringShort(line.date)</td>
-                    <td class="numeric">@line.km</td>
+                    <td class="km">@line.km</td>
                     @foreach(line.kmSub) { value =>
-                        <td class="numeric">@if(value==null)("")else(value)</td>
+                        <td class="km">@if(value==null)("")else(value)</td>
                     }
                     <td class="numeric">@if(line.kmCost!=null){@data.EurocentAmount.toString(line.kmCost)}</td>
                     <td class="numeric">@if(line.fuelCost!=null){@data.EurocentAmount.toString(line.fuelCost)}</td>
                   }
                   <tr>
                       <th colspan="2" class="numeric">Totalen:</th>
-                      <th class="numeric">@totals.km</th>
+                      <th class="km">@totals.km</th>
                       @foreach(totals.kmSub) { value =>
-                        <th class="numeric">@value</th>
+                        <th class="km">@value</th>
                       }
                     <th class="numeric">@data.EurocentAmount.toString(totals.kmCost)</th>
                     <th class="numeric">@data.EurocentAmount.toString(totals.fuelCost)</th>

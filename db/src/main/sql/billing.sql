@@ -25,8 +25,6 @@ BEGIN
      WHERE bf_billing_id = b_id;
 END $$
 
-
-
 -- create bt_trip records for billing a certain car
 -- b_id: id of billing
 -- limit: limit date, only records before this date will be considered
@@ -43,11 +41,8 @@ BEGIN
        reservation_owner_id = reservation_user_id
     FROM reservations
         JOIN carrides ON reservation_id = car_ride_car_reservation_id
-    WHERE reservation_car_id = c_id AND reservation_status = 'FINISHED' AND reservation_from <  lim;
-
-    -- delete zero km trips
-    DELETE FROM b_trip
-        WHERE bt_billing_id = b_id AND bt_car_id = c_id AND bt_km <= 0;
+    WHERE reservation_car_id = c_id AND reservation_from <  lim
+        AND (reservation_status = 'FINISHED' OR reservation_status = 'FROZEN');
 
     -- adjust privileged flag for privileged users
     UPDATE b_trip
@@ -71,8 +66,8 @@ BEGIN
     FROM refuels
         JOIN reservations ON refuel_car_ride_id = reservation_id
         JOIN carrides ON reservation_id = car_ride_car_reservation_id
-    WHERE reservation_car_id = c_id AND reservation_status = 'FINISHED'
-        AND reservation_from <  lim AND refuel_status = 'ACCEPTED';
+    WHERE reservation_car_id = c_id AND (reservation_status = 'FINISHED' OR reservation_status = 'FROZEN')
+        AND reservation_from <  lim AND (refuel_status = 'ACCEPTED' OR refuel_status = 'FROZEN');
 
     -- adjust privileged flag for privileged users
     UPDATE b_fuel
@@ -194,7 +189,27 @@ BEGIN
   -- TODO: set status in billing
 END $$
 
+-- freeze all reservations and trips from the simulations (based on b_trip and b_fuel)
+DROP PROCEDURE IF EXISTS billing_freeze_trips $$
+CREATE PROCEDURE billing_freeze_trips (b_id INT)
+BEGIN
+    UPDATE reservations SET reservation_status = 'FROZEN'
+    WHERE reservation_id IN
+      (SELECT bt_reservation_id FROM b_trip WHERE bt_billing_id = b_id);
+
+    UPDATE reservations SET reservation_status = 'FROZEN'
+    WHERE reservation_id IN
+      (SELECT bf_reservation_id FROM b_fuel WHERE bf_billing_id = b_id);
+
+    UPDATE refuels SET refuel_status = 'FROZEN'
+    WHERE refuel_id IN
+      (SELECT bf_refuel_id FROM b_fuel WHERE bf_billing_id = b_id);
+END $$
+
 -- TODO: make sure refuels cannot be added to frozen reservations
+-- TODO: check remaining refuels for frozen reservations
+-- TODO: billing_trip_aux / billing_fuel_aux for finalizing invoices
+
 
 --
 DELIMITER ;

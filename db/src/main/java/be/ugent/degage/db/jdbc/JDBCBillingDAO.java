@@ -127,7 +127,7 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     public Iterable<BillingDetailsTrip> listTripDetails(int billingId, int userId, boolean privileged) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT bt_reservation_id, bt_car_name, bt_km, bt_km_cost, bt_datetime FROM b_trip " +
-                        "WHERE bt_billing_id = ? AND bt_user_id = ? AND bt_privileged = ? " +
+                        "WHERE bt_billing_id = ? AND bt_user_id = ? AND bt_privileged = ? AND bt_km > 0 " +
                         "ORDER BY bt_datetime")) {
             ps.setInt (1, billingId);
             ps.setInt (2, userId);
