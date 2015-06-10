@@ -5,6 +5,7 @@ import be.ugent.degage.db.dao.BillingDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.primitives.Ints;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -16,26 +17,31 @@ import java.util.List;
  */
 public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
 
+    private static final String BILLING_FIELDS =
+            "billing_id, billing_description, billing_prefix, billing_limit, billing_start, billing_status, billing_simulation_date ";
+
+
     public JDBCBillingDAO(JDBCDataAccessContext context) {
         super(context);
     }
 
     private static Billing populateBilling(ResultSet rs) throws SQLException {
+        Date simulationDate = rs.getDate("billing_simulation_date");
         return new Billing(
                 rs.getInt("billing_id"),
                 rs.getString("billing_description"),
                 rs.getString("billing_prefix"),
                 rs.getDate("billing_start").toLocalDate(),
                 rs.getDate("billing_limit").toLocalDate(),
-                BillingStatus.valueOf(rs.getString("billing_status"))
+                BillingStatus.valueOf(rs.getString("billing_status")),
+                simulationDate == null ? null : simulationDate.toLocalDate()
         );
     }
 
     @Override
     public Iterable<Billing> listAllBillings() {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT billing_id, billing_description, billing_prefix, billing_limit, billing_start, billing_status " +
-                        "FROM billing ORDER BY billing_limit DESC"
+                "SELECT " + BILLING_FIELDS + "FROM billing ORDER BY billing_limit DESC"
         )) {
             return toList(ps, JDBCBillingDAO::populateBilling);
         } catch (SQLException ex) {
@@ -46,7 +52,7 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     @Override
     public Iterable<Billing> listBillingsForUser(int userId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT billing_id, billing_description, billing_prefix, billing_limit, billing_start, billing_status " +
+                "SELECT " + BILLING_FIELDS +
                         "FROM billing JOIN b_user ON bu_billing_id = billing_id " +
                         "WHERE bu_user_id = ? ORDER BY billing_limit DESC"
         )) {
@@ -60,8 +66,7 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     @Override
     public Billing getBilling(int id) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT billing_id, billing_description, billing_prefix, billing_limit, billing_start, billing_status " +
-                        "FROM billing WHERE billing_id = ?"
+                "SELECT " + BILLING_FIELDS + "FROM billing WHERE billing_id = ?"
         )) {
             ps.setInt(1, id);
             return toSingleObject(ps, JDBCBillingDAO::populateBilling);
@@ -127,7 +132,7 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     public Iterable<BillingDetailsTrip> listTripDetails(int billingId, int userId, boolean privileged) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT bt_reservation_id, bt_car_name, bt_km, bt_km_cost, bt_datetime FROM b_trip " +
-                        "WHERE bt_billing_id = ? AND bt_user_id = ? AND bt_privileged = ? " +
+                        "WHERE bt_billing_id = ? AND bt_user_id = ? AND bt_privileged = ? AND bt_km > 0 " +
                         "ORDER BY bt_datetime")) {
             ps.setInt (1, billingId);
             ps.setInt (2, userId);

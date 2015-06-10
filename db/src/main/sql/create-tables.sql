@@ -98,6 +98,7 @@ CREATE TABLE `users` (
 	`user_degage_id` INT,
 	`user_date_joined` DATE,
 	`user_deposit` INT,
+	`user_vat` VARCHAR(32),
 	`user_last_notified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`user_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	`user_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -451,6 +452,7 @@ CREATE TABLE `billing` (
    `billing_prefix` CHAR(10) NOT NULL, -- used on invoice ex. 1-2015
    `billing_limit` DATE NOT NULL, -- only what is *strictly* before this date will be billed
    `billing_start` DATE NOT NULL, -- only for informational purposes
+   `billing_simulation_date` DATE, -- date at which the simulation was run
    `billing_status` ENUM (
        'CREATED', 'PREPARING', 'SIMULATION', 'USERS_DONE', 'ALL_DONE'
    ) NOT NULL DEFAULT 'CREATED',

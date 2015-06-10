@@ -27,17 +27,27 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(billing: Billing, seqnr: Int, user: User, kpi: Billings.KmPriceInfo,
+@import com.google.common.base.Strings;
+
+@(billing: Billing, billNr: String, user: User, kpi: Billings.KmPriceInfo,
            lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine)
 
 <html>
    <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-        <link rel="stylesheet" media="print" href="public/stylesheets/pdf.css" />
+        @* <link rel="stylesheet" media="print" href="public/stylesheets/pdf.css" /> *@
        <style type="text/css">
+           @@page {
+              size: A4;
+           }
+
+           body {
+             font-family: "Liberation Sans", Arial, sans-serif;
+             font-size: 75%;
+           }
+
            #top {
              margin-bottom: 24pt;
-             /* background: white url(public/images/degagelogo.png) no-repeat top right ; */
            }
            #top table th {
              font-weight: normal;
@@ -51,14 +61,12 @@
            #logo {
                 float:right;
            }
-           #logo img {
-                width: 2in;
-           }
 
            #data table {
               border-top: 1pt solid black;
               border-collapse: collapse;
               width: 100%;
+              font-size: 85%;
            }
            #data table thead {
               text-align:center;
@@ -73,6 +81,10 @@
 
            #data table .numeric {
               text-align:right;
+           }
+
+           #data table .km {
+              text-align:center;
            }
 
            #data table tfoot {
@@ -91,15 +103,18 @@
        </style>
    </head>
    <body>
-      <div id="logo"><img src="public/images/logo-brief.png"></div>
+      <div id="logo"><img src='public/images/logo-brief-2.5in.png'  width="2.5in"/></div>
       <div id="top">
           <table>
               <tbody>
-                  <tr><th>Afrekening n°:</th><td>A@billing.getPrefix-@("%04d".format(seqnr))</td></tr>
+                  <tr><th>Afrekening n°:</th><td>@billNr</td></tr>
                   <tr><th>Naam:</th><td>@user.getFullName</td></tr>
                   @defining(user.getAddressDomicile){ address =>
                       <tr><th>Adres:</th><td>@address.getStreet @address.getNum</td></tr>
                       <tr><th></th><td>@address.getZip @address.getCity (@address.getCountry)</td></tr>
+                  }
+                  @if(! Strings.isNullOrEmpty(user.getVatNr)) {
+                      <tr><th>BTW-nr.:</th><td>@user.getVatNr</td></tr>
                   }
                   <tr><th>Periode:</th>
                       <td>
@@ -134,18 +149,18 @@
                   @foreach.tr(lines) { line =>
                     <td>@line.carName</td>
                     <td>@Utils.toLocalizedDateStringShort(line.date)</td>
-                    <td class="numeric">@line.km</td>
+                    <td class="km">@line.km</td>
                     @foreach(line.kmSub) { value =>
-                        <td class="numeric">@if(value==null)("")else(value)</td>
+                        <td class="km">@if(value==null)("")else(value)</td>
                     }
                     <td class="numeric">@if(line.kmCost!=null){@data.EurocentAmount.toString(line.kmCost)}</td>
                     <td class="numeric">@if(line.fuelCost!=null){@data.EurocentAmount.toString(line.fuelCost)}</td>
                   }
                   <tr>
                       <th colspan="2" class="numeric">Totalen:</th>
-                      <th class="numeric">@totals.km</th>
+                      <th class="km">@totals.km</th>
                       @foreach(totals.kmSub) { value =>
-                        <th class="numeric">@value</th>
+                        <th class="km">@value</th>
                       }
                     <th class="numeric">@data.EurocentAmount.toString(totals.kmCost)</th>
                     <th class="numeric">@data.EurocentAmount.toString(totals.fuelCost)</th>
@@ -165,9 +180,11 @@
           </table>
       </div>
       <div id="text">
-          <p><b>OPGELET!</b> Dit is slechts een <b>simulatie</b>.
-              Gelieve dus nog <b>geen</b> betalingen uit te voeren.
-              De definitieve afrekening volgt binnenkort.</p>
+          <p>Dit is een <b>voorlopige afrekening</b>. Je dient deze nog niet te betalen.
+Gelieve de ritinformatie en tankbeurten na te kijken vóór
+              <b>@(Utils.toLocalizedDateString(billing.getSimulationDate.plusDays(7)))</b>.
+              Fouten of onvolledigheden meld je ons zo snel mogelijk via mail naar admin@@degage.be.
+Kort daarna volgt de definitieve afrekening.</p>
       </div>
    </body>
 </html>

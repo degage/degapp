@@ -58,7 +58,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
                     "users.user_damage_history, users.user_deposit, users.user_agree_terms, users.user_image_id, " +
-                    "users.user_date_joined, users.user_driver_license_date " +
+                    "users.user_date_joined, users.user_driver_license_date, users.user_vat " +
                     "FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
                     "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
@@ -116,6 +116,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
 
         user.setDeposit((Integer) rs.getObject("users.user_deposit"));
+        user.setVatNr(rs.getString("users.user_vat"));
 
         return user;
     }

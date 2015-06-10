@@ -252,9 +252,11 @@ public class Billings extends Application {
                     dao.listFuelDetails(billingId, userId, false),
                     priceDetails
             );
+            String billNr = String.format("A%s-%04d", billing.getPrefix(), bUser.getIndex());
+            response().setHeader ("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
             return PdfGenerator.ok(userInvoice.render(
                     billing,
-                    bUser.getIndex(),
+                    billNr,
                     context.getUserDAO().getUser(userId),
                     new KmPriceInfo(priceDetails),
                     invoiceLines,

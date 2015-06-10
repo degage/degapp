@@ -42,14 +42,17 @@ public class Billing {
     private LocalDate start;
     private LocalDate limit;
     private BillingStatus status;
+    private LocalDate simulationDate;
 
-    public Billing(int id, String description, String prefix, LocalDate start, LocalDate limit, BillingStatus status) {
+    public Billing(int id, String description, String prefix, LocalDate start, LocalDate limit,
+                   BillingStatus status, LocalDate simulationDate) {
         this.id = id;
         this.description = description;
         this.prefix = prefix;
         this.start = start;
         this.limit = limit;
         this.status = status;
+        this.simulationDate = simulationDate;
     }
 
     public int getId() {
@@ -74,5 +77,9 @@ public class Billing {
 
     public BillingStatus getStatus() {
         return status;
+    }
+
+    public LocalDate getSimulationDate() {
+        return simulationDate;
     }
 }

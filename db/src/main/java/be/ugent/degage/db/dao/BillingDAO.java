@@ -35,7 +35,7 @@ public interface BillingDAO {
     public KmPriceDetails getKmPriceDetails (int billingId);
 
     /**
-     * Retreive all trip billing details for a given billing and user
+     * Retreive all trip billing details for a given billing and user (except those with a zero or negative nr of kms)
      */
     public Iterable<BillingDetailsTrip> listTripDetails (int billingId, int userId, boolean privileged);
 

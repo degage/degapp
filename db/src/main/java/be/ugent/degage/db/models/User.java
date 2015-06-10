@@ -45,12 +45,14 @@ public class User extends UserHeader {
     private String identityId;
     private String nationalId;
     private String damageHistory;
+    private String vatNr;
 
     private int profilePictureId; //TODO, review if it's okay practice to -1 = NULL
 
     private boolean agreeTerms;
 
-    public User(int id, String email, String firstName, String lastName, UserStatus status, String phone, String cellPhone, Integer degageId) {
+    public User(int id, String email, String firstName, String lastName, UserStatus status,
+                String phone, String cellPhone, Integer degageId) {
         super(id, email, firstName, lastName, status, phone, cellPhone, degageId);
         this.profilePictureId = -1;
     }
@@ -145,5 +147,13 @@ public class User extends UserHeader {
 
     public void setDateJoined(LocalDate dateJoined) {
         this.dateJoined = dateJoined;
+    }
+
+    public String getVatNr() {
+        return vatNr;
+    }
+
+    public void setVatNr(String vatNr) {
+        this.vatNr = vatNr;
     }
 }
