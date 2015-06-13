@@ -63,9 +63,4 @@ public interface SettingDAO {
      */
     public Iterable<Setting> getSettings() throws DataAccessException;
 
-    /**
-     * Return all cost related settings valid at the given instant
-     */
-    public CostSettings getCostSettings(Instant instant) throws DataAccessException;
-
 }
