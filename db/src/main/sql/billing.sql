@@ -208,10 +208,30 @@ BEGIN
       (SELECT bf_refuel_id FROM b_fuel WHERE bf_billing_id = b_id);
 END $$
 
+DROP PROCEDURE IF EXISTS billing_user_finalize $$
+CREATE PROCEDURE billing_user_finalize (b_id INT)
+BEGIN
+    -- rerun simulation
+    CALL billing_user_simulate (b_id);
+
+    -- change status
+    UPDATE billing SET billing_status = 'USERS_DONE', billing_drivers_date=NOW() WHERE billing_id = b_id;
+
+    -- store totals
+    UPDATE b_user SET bu_km_cost = (
+           SELECT sum(bt_km_cost) FROM b_trip
+           WHERE bt_billing_id = b_id AND NOT bt_privileged AND bt_user_id = bu_user_id AND bt_km > 0
+    ) WHERE bu_billing_id = b_id;
+    UPDATE b_user SET bu_fuel_cost = (
+           SELECT sum(bf_fuel_cost) FROM b_fuel
+           WHERE bf_billing_id = b_id AND NOT bf_privileged AND bf_user_id = bu_user_id
+    ) WHERE bu_billing_id = b_id;
+END $$
+
 -- TODO: make sure refuels cannot be added to frozen reservations
 -- TODO: check remaining refuels for frozen reservations
 -- TODO: billing_trip_aux / billing_fuel_aux for finalizing invoices
 
-
+-- finalize user billing
 --
 DELIMITER ;

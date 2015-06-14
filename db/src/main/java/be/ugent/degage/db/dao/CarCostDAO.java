@@ -47,8 +47,10 @@ public interface CarCostDAO {
                               ApprovalStatus status, int spread,
                               int fileId, int categoryId, LocalDate startDate) throws DataAccessException;
 
+    // note: only count costs that have not been archived
     public int getAmountOfCarCosts(Filter filter) throws DataAccessException;
 
+    // note: only show costs that have not been archived
     public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     public void updateCarCost(int costId, int amount, String description,
@@ -58,10 +60,8 @@ public interface CarCostDAO {
 
     public CarCost getCarCost(int id) throws DataAccessException;
 
-    //public List<CarCost> getBillCarCosts(LocalDate date, int car) throws DataAccessException;
-
     /**
-     * List all costs for a given car
+     * List all costs for a given car. Only show costs that have not been archived
      */
     public Iterable<CarCost> listCostsOfCar (int carId)   throws DataAccessException;
 

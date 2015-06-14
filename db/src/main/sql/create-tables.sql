@@ -210,6 +210,7 @@ CREATE TABLE `reservations` (
 	`reservation_from` DATETIME NOT NULL,
 	`reservation_to` DATETIME NOT NULL,
 	`reservation_message` VARCHAR(4096),
+	`reservation_archived``  BIT(1) NOT NULL DEFAULT 0,
 	`reservation_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`reservation_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
@@ -293,6 +294,7 @@ CREATE TABLE `carcosts` (
 	`car_cost_start` DATE,
 	`car_cost_already_paid` INT NOT NULL DEFAULT 0,
 	`car_cost_comment` VARCHAR(4096),
+	`car_cost_archived` BIT(1) NOT NULL DEFAULT 0,
 	`car_cost_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`car_cost_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_cost_id`),
@@ -314,6 +316,7 @@ CREATE TABLE `carrides` (
   FOREIGN KEY (`car_ride_car_reservation_id`) REFERENCES reservations(`reservation_id`)
 );
 
+-- view of trips that are not archived
 CREATE VIEW `trips` AS
     SELECT
        reservation_id,
@@ -330,7 +333,8 @@ CREATE VIEW `trips` AS
        car_ride_end_km,
        car_ride_damage
     FROM reservations
-         LEFT JOIN carrides ON reservation_id = car_ride_car_reservation_id;
+         LEFT JOIN carrides ON reservation_id = car_ride_car_reservation_id
+         WHERE NOT reservation_archived;
 
 CREATE TABLE `refuels` (
 	`refuel_id` INT NOT NULL AUTO_INCREMENT,
@@ -338,10 +342,10 @@ CREATE TABLE `refuels` (
 	`refuel_file_id` INT,
 	`refuel_eurocents` INT,
 	`refuel_status` ENUM('REQUEST','ACCEPTED', 'REFUSED', 'FROZEN') NOT NULL DEFAULT 'REQUEST',
-	`refuel_billed` DATE DEFAULT NULL,
 	`refuel_km` INTEGER,
 	`refuel_amount` VARCHAR(16), -- amount of fuel, free format
 	`refuel_message` VARCHAR(4096),
+	`refuel_archived`  BIT(1) NOT NULL DEFAULT 0,
    	`refuel_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    	`refuel_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`refuel_id`),
@@ -453,6 +457,8 @@ CREATE TABLE `billing` (
    `billing_limit` DATE NOT NULL, -- only what is *strictly* before this date will be billed
    `billing_start` DATE NOT NULL, -- only for informational purposes
    `billing_simulation_date` DATE, -- date at which the simulation was run
+   `billing_drivers_date` DATE, -- date at which the drivers invoices were created
+   `billing_owners_date` DATE, -- date at which the owners invoices were created
    `billing_status` ENUM (
        'CREATED', 'PREPARING', 'SIMULATION', 'USERS_DONE', 'ALL_DONE'
    ) NOT NULL DEFAULT 'CREATED',
@@ -505,6 +511,8 @@ CREATE TABLE b_user (
     bu_billing_id INT REFERENCES billing(billing_id),
     bu_user_id INT REFERENCES users(user_id),
     bu_seq_nr INT,
+    bu_km_cost INT NOT NULL DEFAULT 0, -- total cost of kms over all trips (in drivers invoice)
+    bu_fuel_cost INT NOT NULL DEFAULT 0, -- total cost of fuel over all trips (in drivers invoice)
     PRIMARY KEY (bu_billing_id, bu_user_id)
 );
 

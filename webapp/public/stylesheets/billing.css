@@ -1,0 +1,79 @@
+/* billing.css
+   ===========
+*/
+
+@@page {
+  size: A4;
+}
+
+body {
+ font-family: "Liberation Sans", Arial, sans-serif;
+ font-size: 75%;
+}
+
+#top {
+ margin-bottom: 24pt;
+}
+#top table th {
+ font-weight: normal;
+ text-align: right;
+}
+#top table td {
+  padding-left: 10pt;
+  font-weight: bold;
+}
+
+#logo {
+    float:right;
+}
+
+#data table {
+  border-top: 1pt solid black;
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 85%;
+}
+
+#data table thead {
+  text-align:center;
+}
+
+#data table tbody td {
+  text-align:center;
+  border-top: 0.5pt solid black;
+  border-bottom: 0.5pt solid black;
+  /* width: 12.5%; */
+}
+
+#data table .numeric {
+  text-align:right;
+}
+
+#data table .km {
+  text-align:center;
+}
+
+#data table tfoot {
+   padding-top: 3ex;
+}
+
+#data table tfoot th {
+  border-top: 1pt solid black;
+  border-bottom: 1pt solid black;
+  padding-top: 3ex;
+  text-align: right;
+}
+
+#data table tfoot td {
+  border-top: 1pt solid black;
+}
+
+ul.note {
+  font-size: 90%;
+  list-style-type: none;
+  padding-left: 1em;
+}
+
+#text div.highlight {
+  background-color: #ffddaa;
+}

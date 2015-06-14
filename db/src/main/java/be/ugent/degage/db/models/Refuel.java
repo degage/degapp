@@ -29,8 +29,6 @@
 
 package be.ugent.degage.db.models;
 
-import java.time.LocalDate;
-
 /**
  * Contains information about a single refuel.
  */
@@ -39,7 +37,6 @@ public class Refuel {
     private int proofId;
     private int eurocents;
     private ApprovalStatus status;
-    private LocalDate billed;
     private int km;
     private String amount; // Amount of fuel (free format)
     private String message;
@@ -98,8 +95,4 @@ public class Refuel {
     public void setStatus(ApprovalStatus status) {
         this.status = status;
     }
-
-    public LocalDate getBilled() { return billed; }
-
-    public void setBilled(LocalDate billed) { this.billed = billed; }
 }

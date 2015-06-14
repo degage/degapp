@@ -30,7 +30,6 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.CostSettings;
 import be.ugent.degage.db.models.Setting;
 
 

@@ -39,9 +39,7 @@ import db.DataAccess;
 import db.InjectContext;
 import it.innove.play.pdf.PdfGenerator;
 import play.mvc.Result;
-import views.html.billing.anomalies;
-import views.html.billing.listUser;
-import views.html.billing.userInvoice;
+import views.html.billing.*;
 
 import java.time.LocalDate;
 import java.util.*;
@@ -228,6 +226,20 @@ public class Billings extends Application {
             result.add(line);
         }
         return result;
+
+
+    }
+
+    private static String structuredComment (int billingId, int xtra, BillingDetailsUser bdu) {
+        int pre = (3 * billingId + xtra) % 1000;
+        int mid = (bdu.getIndex() % 10000);
+        int end = (bdu.getUserId() % 1000);
+
+        int mod = (10000000*pre + 1000*mid + end) % 97;
+        if (mod == 0) {
+            mod =97;
+        }
+        return String.format ("+++%03d/%04d/%03d%02d+++", pre, mid, end, mod);
     }
 
     @InjectContext
@@ -253,15 +265,32 @@ public class Billings extends Application {
                     priceDetails
             );
             String billNr = String.format("A%s-%04d", billing.getPrefix(), bUser.getIndex());
-            response().setHeader ("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
-            return PdfGenerator.ok(userInvoice.render(
-                    billing,
-                    billNr,
-                    context.getUserDAO().getUser(userId),
-                    new KmPriceInfo(priceDetails),
-                    invoiceLines,
-                    total(invoiceLines, priceDetails.getFroms().length)
-            ), null);
+            response().setHeader("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
+            switch (billing.getStatus()) {
+                case SIMULATION:
+
+                    return PdfGenerator.ok(userInvoiceSimulation.render(
+                            billing,
+                            billNr,
+                            context.getUserDAO().getUser(userId),
+                            new KmPriceInfo(priceDetails),
+                            invoiceLines,
+                            total(invoiceLines, priceDetails.getFroms().length)
+                    ), null);
+                case USERS_DONE:
+                case ALL_DONE:
+                    return PdfGenerator.ok(userInvoiceFinal.render(
+                            billing,
+                            billNr,
+                            context.getUserDAO().getUser(userId),
+                            new KmPriceInfo(priceDetails),
+                            invoiceLines,
+                            total(invoiceLines, priceDetails.getFroms().length),
+                            structuredComment(billingId, 0, bUser)
+                    ), null);
+                default:
+                    return badRequest();
+            }
         } else {
             return badRequest();
         }

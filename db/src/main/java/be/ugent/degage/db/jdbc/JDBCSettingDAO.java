@@ -31,14 +31,12 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.SettingDAO;
-import be.ugent.degage.db.models.CostSettings;
 import be.ugent.degage.db.models.Setting;
 
 import java.sql.*;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 /**
  * JDBC implementation of SettingDAO

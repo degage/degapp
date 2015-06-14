@@ -116,8 +116,10 @@ public interface ReservationDAO {
 
     public void deleteReservation(Reservation reservation) throws DataAccessException;
 
+    // note: only counts reservations that are not archived
     public int getAmountOfReservations(Filter filter) throws DataAccessException;
 
+    // note: only shows reservations that are not archived
     public Iterable<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     public Iterable<ReservationHeader> listReservationsForCarInPeriod (int carID, LocalDateTime from, LocalDateTime to) throws DataAccessException;

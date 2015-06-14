@@ -35,20 +35,18 @@ import be.ugent.degage.db.models.Refuel;
 import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.ApprovalStatus;
 
-import java.time.LocalDate;
-
 /**
  * DAO for managing refuel information
  */
 public interface RefuelDAO {
 
     public int createRefuel(int reservationId, int eurocents, int fileId, ApprovalStatus status,
-                             int km, String amount) throws DataAccessException;
+                            int km, String amount) throws DataAccessException;
 
     /**
      * Update the status of the refuel record (but not the message)
      */
-    public void updateRefuelStatus (ApprovalStatus status, int refuelId) throws DataAccessException;
+    public void updateRefuelStatus(ApprovalStatus status, int refuelId) throws DataAccessException;
 
     /**
      * Set the status to refused and store the reason why
@@ -59,25 +57,18 @@ public interface RefuelDAO {
 
     public RefuelExtended getRefuelExtended(int refuelId) throws DataAccessException;
 
+    // note: only shows refuels that are not archived
     public Iterable<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
 
+    // note: only count refuels that are not archived
     public int getAmountOfRefuels(Filter filter) throws DataAccessException;
 
+    // note: only shows refuels that are not archived
     public Iterable<Refuel> getRefuelsForCarRide(int reservationId) throws DataAccessException;
 
     /**
      * Shows the number of outstanding refuel requests for a reservation with the given owner.
      */
     public int numberOfRefuelRequests(int ownerId) throws DataAccessException;
-
-    public Iterable<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException;
-
-
-    /**
-     * Return the total amount spent (in eurocent) for refuels for the given car billed at the given date
-     * @return two integers, first is for privileged drivers, second is for others
-     */
-    public int[] eurocentsSpentOnFuel (LocalDate date, int carId) throws DataAccessException;
-
 
 }

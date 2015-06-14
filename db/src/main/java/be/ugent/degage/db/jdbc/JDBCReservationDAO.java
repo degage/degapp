@@ -444,7 +444,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 append(
                         " FROM reservations INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
                                 " INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
-                                " WHERE (car_owner_user_id LIKE ").append(id).
+                                " WHERE NOT reservation_archived  AND (car_owner_user_id LIKE ").append(id).
                 append(" OR reservation_user_id LIKE ").append(id).
                 append(") AND reservation_car_id LIKE ").append(carId);
         appendStatusFilter(builder, filter.getValue(FilterField.STATUS));

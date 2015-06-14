@@ -38,7 +38,6 @@ import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.ApprovalStatus;
 
 import java.sql.*;
-import java.time.LocalDate;
 
 /**
  * JDBC implementation of {@link RefuelDAO}
@@ -47,7 +46,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private static final String REFUEL_FIELDS =
             "refuel_id, refuel_file_id, refuel_eurocents, refuel_status, " +
-                    "refuel_km, refuel_amount, refuel_message, refuel_billed ";
+                    "refuel_km, refuel_amount, refuel_message ";
 
     private static final String REFUEL_EXTENDED_QUERY =
             "SELECT " + REFUEL_FIELDS +
@@ -65,7 +64,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     }
 
     public static Refuel populateRefuel(ResultSet rs) throws SQLException {
-        Refuel refuel = new Refuel(
+        return new Refuel(
                 rs.getInt("refuel_id"),
                 rs.getInt("refuel_file_id"),
                 rs.getInt("refuel_eurocents"),
@@ -74,15 +73,10 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getString("refuel_amount"),
                 rs.getString("refuel_message")
         );
-
-        Date refuelBilled = rs.getDate("refuel_billed");
-        refuel.setBilled(refuelBilled == null ? null : refuelBilled.toLocalDate());
-
-        return refuel;
     }
 
     public static RefuelExtended populateRefuelExtended(ResultSet rs) throws SQLException {
-        RefuelExtended refuel = new RefuelExtended(
+        return new RefuelExtended(
                 rs.getInt("refuel_id"),
                 rs.getInt("refuel_file_id"),
                 rs.getInt("refuel_eurocents"),
@@ -101,11 +95,6 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getInt("car_ride_start_km"),
                 rs.getInt("car_ride_end_km")
         );
-
-        Date refuelBilled = rs.getDate("refuel_billed");
-        refuel.setBilled(refuelBilled == null ? null : refuelBilled.toLocalDate());
-
-        return refuel;
     }
 
 
@@ -212,22 +201,18 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
 
     private static void appendRefuelFilter(StringBuilder builder, Filter filter) {
         // build clause
-        StringBuilder b = new StringBuilder();
+        builder.append(" WHERE NOT refuel_archived ");
 
-        FilterUtils.appendIdFilter(b, "reservation_user_id", filter.getValue(FilterField.REFUEL_USER_ID));
-        FilterUtils.appendIdFilter(b, "reservation_car_id", filter.getValue(FilterField.REFUEL_CAR_ID));
+        FilterUtils.appendIdFilter(builder, "reservation_user_id", filter.getValue(FilterField.REFUEL_USER_ID));
+        FilterUtils.appendIdFilter(builder, "reservation_car_id", filter.getValue(FilterField.REFUEL_CAR_ID));
 
         String ownerFilter = filter.getValue(FilterField.REFUEL_OWNER_ID);
         if (!ownerFilter.isEmpty()) {
             if (Integer.parseInt(ownerFilter) >= 0) {
-                b.append(" AND (reservation_user_id = ").append(ownerFilter).
+                builder.append(" AND (reservation_user_id = ").append(ownerFilter).
                         append(" OR reservation_owner_id = ").append(ownerFilter).
                         append(")");
             }
-        }
-
-        if (b.length() > 0) {
-            builder.append(" WHERE ").append(b.substring(4));
         }
     }
 
@@ -271,7 +256,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
     @Override
     public Iterable<Refuel> getRefuelsForCarRide(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT " + REFUEL_FIELDS + " FROM refuels  WHERE refuel_car_ride_id = ? ORDER BY refuel_id DESC ")
+                "SELECT " + REFUEL_FIELDS + " FROM refuels  WHERE NOT refuel_archived AND refuel_car_ride_id = ? ORDER BY refuel_id DESC ")
         ) {
             ps.setInt(1, userId);
             return toList(ps, JDBCRefuelDAO::populateRefuel);
@@ -291,45 +276,6 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
             return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get number of refuel requests", ex);
-        }
-    }
-
-    @Override
-    public Iterable<Refuel> getBillRefuelsForLoaner(LocalDate date, int user) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(
-                "SELECT " + REFUEL_FIELDS + " FROM refuels  WHERE refuel_billed = ? AND reservation_user_id = ?"
-        )) {
-            ps.setDate(1, Date.valueOf(date));
-            ps.setInt(2, user);
-            return toList(ps, JDBCRefuelDAO::populateRefuel);
-        } catch (SQLException e) {
-            throw new DataAccessException("Unable to retrieve the list of refuels for user.", e);
-        }
-    }
-
-    private LazyStatement eurocentsSpentOnFuelStatement = new LazyStatement(
-            "SELECT SUM(refuel_eurocents) AS s, reservation_privileged " +
-                    "FROM refuels JOIN reservations ON refuel_car_ride_id = reservation_id " +
-                    "WHERE refuel_billed = ? AND reservation_car_id = ? " +
-                    "GROUP BY refuel_eurocents, reservation_privileged "
-    );
-
-    public int[] eurocentsSpentOnFuel(LocalDate date, int carId) throws DataAccessException {
-        try {
-            PreparedStatement ps = eurocentsSpentOnFuelStatement.value();
-            ps.setDate(1, Date.valueOf(date));
-            ps.setInt(2, carId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                int[] result = new int[2];
-                while (rs.next()) {
-                    int index = rs.getBoolean("reservation_privileged") ? 0 : 1;
-                    result[index] = rs.getInt("s");
-                }
-                return result;
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Unable to retrieve the list of refuels for car.", e);
         }
     }
 }
