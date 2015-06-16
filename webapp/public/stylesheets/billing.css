@@ -68,6 +68,18 @@ body {
   border-top: 1pt solid black;
 }
 
+#left {
+  float: left;
+  width: 30%;
+}
+#right {
+  float: right;
+  width: 68%;
+}
+#text {
+  clear: both;
+}
+
 ul.note {
   font-size: 90%;
   list-style-type: none;

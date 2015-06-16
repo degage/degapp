@@ -230,16 +230,16 @@ public class Billings extends Application {
 
     }
 
-    private static String structuredComment (int billingId, int xtra, BillingDetailsUser bdu) {
+    private static String structuredComment(int billingId, int xtra, BillingDetailsUser bdu) {
         int pre = (3 * billingId + xtra) % 1000;
         int mid = (bdu.getIndex() % 10000);
         int end = (bdu.getUserId() % 1000);
 
-        int mod = (10000000*pre + 1000*mid + end) % 97;
+        int mod = (10000000 * pre + 1000 * mid + end) % 97;
         if (mod == 0) {
-            mod =97;
+            mod = 97;
         }
-        return String.format ("+++%03d/%04d/%03d%02d+++", pre, mid, end, mod);
+        return String.format("+++%03d/%04d/%03d%02d+++", pre, mid, end, mod);
     }
 
     @InjectContext
@@ -295,4 +295,24 @@ public class Billings extends Application {
             return badRequest();
         }
     }
+
+    @InjectContext
+    @AllowRoles({UserRole.CAR_OWNER})
+    public static Result carDetails(int billingId, int carId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarHeaderShort car = context.getCarDAO().getCarHeaderShort(carId);
+        if (CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.SUPER_USER)) {
+            UserHeader owner = context.getUserDAO().getUserHeader(car.getOwnerId());
+            BillingDAO dao = context.getBillingDAO();
+            Billing billing = dao.getBilling(billingId);
+            String billNr = String.format("E%s-%04d", billing.getPrefix(), 0 /* TODO: bCar.getIndex()*/);
+            response().setHeader("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
+            return PdfGenerator.ok(carInvoice.render(
+                    billing, billNr, car, owner
+                    ), null);
+        } else {
+            return badRequest(); // hacker?
+        }
+    }
+
 }
