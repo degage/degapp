@@ -309,6 +309,7 @@ public class Billings extends Application {
             response().setHeader("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
             return PdfGenerator.ok(carInvoice.render(
                     billing, billNr, car, owner
+                    // TODO: add BillingDetailsOwner
                     ), null);
         } else {
             return badRequest(); // hacker?

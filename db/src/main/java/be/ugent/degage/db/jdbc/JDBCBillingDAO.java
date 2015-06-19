@@ -118,8 +118,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT bu_seq_nr FROM b_user WHERE bu_billing_id = ? AND bu_user_id = ?"
         )) {
-            ps.setInt (1, billingId);
-            ps.setInt (2, userId);
+            ps.setInt(1, billingId);
+            ps.setInt(2, userId);
             return toSingleObject(ps, rs -> new BillingDetailsUser(
                     userId, rs.getInt("bu_seq_nr")
             )); // TODO
@@ -134,10 +134,10 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                 "SELECT bt_reservation_id, bt_car_name, bt_km, bt_km_cost, bt_datetime FROM b_trip " +
                         "WHERE bt_billing_id = ? AND bt_user_id = ? AND bt_privileged = ? AND bt_km > 0 " +
                         "ORDER BY bt_datetime")) {
-            ps.setInt (1, billingId);
-            ps.setInt (2, userId);
+            ps.setInt(1, billingId);
+            ps.setInt(2, userId);
             ps.setBoolean(3, privileged);
-            return toList (ps, rs -> new BillingDetailsTrip(
+            return toList(ps, rs -> new BillingDetailsTrip(
                     rs.getInt("bt_reservation_id"),
                     rs.getString("bt_car_name"),
                     rs.getInt("bt_km"),
@@ -156,10 +156,10 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                         "WHERE bf_billing_id = ? AND bf_user_id = ? AND bf_privileged = ? " +
                         "ORDER BY bf_datetime"
         )) {
-            ps.setInt (1, billingId);
-            ps.setInt (2, userId);
+            ps.setInt(1, billingId);
+            ps.setInt(2, userId);
             ps.setBoolean(3, privileged);
-            return toList (ps, rs -> new BillingDetailsFuel(
+            return toList(ps, rs -> new BillingDetailsFuel(
                     rs.getInt("bf_reservation_id"),
                     rs.getInt("bf_refuel_id"),
                     rs.getString("bf_car_name"),
@@ -170,5 +170,41 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot get fuel details", ex);
         }
+    }
+
+    @Override
+    public Iterable<BillingDetailsOwner> listOwnerDetails(int billingId, int carId) {
+        // TODO: combine these into fewer SQL statements? Or at least maek a view?
+
+        // get names and ids of owners and cars
+        Iterable<UserHeader> users;
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT user_id, user_firstname, user_lastname " +
+                "FROM users JOIN (" +
+                        "SELECT car_privilege_user_id as u from carprivileges WHERE car_privilege_car_id=? " +
+                        "UNION " +
+                        "SELECT car_owner_user_id as u From cars WHERE car_id=?) AS t " +
+                "ON user_id=u"
+        )) {
+            users = toList(ps, rs -> new UserHeader(
+                    rs.getInt("user_id)"),
+                    null,
+                    rs.getString("user_firstname"),
+                    rs.getString("user_lastname"),
+                    null, null, null, null
+            ));
+        } catch (SQLException ex) {
+            throw new DataAccessException("Cannot get fuel details", ex);
+        }
+
+        List<BillingDetailsOwner> result = new ArrayList<>();
+        for (UserHeader user : users) {
+            result.add(new BillingDetailsOwner(
+                    user.getFullName(),
+                    listTripDetails(billingId, user.getId(), true),
+                    listFuelDetails(billingId, user.getId(), true)
+            ));
+        }
+        return result;
     }
 }

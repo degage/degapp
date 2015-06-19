@@ -40,10 +40,13 @@ public interface BillingDAO {
     public Iterable<BillingDetailsTrip> listTripDetails (int billingId, int userId, boolean privileged);
 
     /**
-     * Retreive all trip billing details for a given billing and user
+     * Retreive all fuel billing details for a given billing and user
      */
     public Iterable<BillingDetailsFuel> listFuelDetails (int billingId, int userId, boolean privileged);
 
-
+    /*
+     * Retreive all trip and billing details for the owner and privileged users of a given car
+     */
+    public Iterable<BillingDetailsOwner> listOwnerDetails (int billingId, int carId);
 
 }
