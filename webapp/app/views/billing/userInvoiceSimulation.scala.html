@@ -29,7 +29,7 @@
 
 @(billing: Billing, billNr: String, user: User, kpi: Billings.KmPriceInfo,
            lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine)
-@userInvoice(billing,billNr,user,kpi,lines,totals){
+@userInvoice(billing,billing.getSimulationDate,billNr,user,kpi,lines,totals){
           <p>Dit is een <b>voorlopige afrekening</b>. Je dient deze nog niet te betalen.
 Gelieve de ritinformatie en tankbeurten na te kijken vóór
               <b>@(Utils.toLocalizedDateString(billing.getSimulationDate.plusDays(7)))</b>.

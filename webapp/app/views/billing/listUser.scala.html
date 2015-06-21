@@ -48,7 +48,16 @@
                            <td>@billing.getDescription</td>
                         <td>@Utils.toLocalizedDateString(billing.getStart)</td>
                         <td>@Utils.toLocalizedDateString(billing.getLimit minusDays 1)</td>
-                        <td>@billing.getStatus</td>
+                        <td>@billing.getStatus match {
+                               case BillingStatus.SIMULATION => {
+                                   Lenersafrekening (simulatie)
+                               }
+                               case BillingStatus.USERS_DONE => {
+                                   Lenersafrekening
+                               }
+                               case _ => {}
+                            }
+                        </td>
                         <td>@btnPrimary("PDF downloaden", routes.Billings.userDetails(billing.getId, userId))</td>
                         }{
                         <tr>

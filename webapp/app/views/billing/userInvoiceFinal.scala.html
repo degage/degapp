@@ -29,7 +29,7 @@
 
 @(billing: Billing, billNr: String, user: User, kpi: Billings.KmPriceInfo,
            lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine, struct: String)
-@userInvoice(billing,billNr,user,kpi,lines,totals){
+@userInvoice(billing,billing.getDriversDate,billNr,user,kpi,lines,totals){
 @if(totals.kmCost>totals.fuelCost){
 <div class="highlight">
 <p>Gelieve dit bedrag te storten op rekeningnummer
@@ -37,15 +37,13 @@
 met vermelding
 van de gestructureerde mededeling <b>@struct</b>. </p>
 <p>De uiterste betalingsdatum is
-    <b>@(Utils.toLocalizedDateString(billing.getSimulationDate.plusDays(14)))</b>.
+    <b>@(Utils.toLocalizedDateString(billing.getDriversDate.plusDays(14)))</b>.
 </p>
 </div>
-<ul class="note">
-<li>Negatieve bedragen uit vorige kwartalen mag je afhouden, indien nog niet door ons terugbetaald.</li>
 }else{
 <p>Dit bedrag zal door ons worden terugbetaald.</p>
-<ul class="note">
 }
+<ul class="note">
 <li>Ben je niet akkoord met deze afrekening, reageer dan binnen de 7 dagen met een e-mail naar
     de administratie (admin@@degage.be).</li>
 </ul>

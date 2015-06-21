@@ -1,3 +1,32 @@
+/* JDBCBillingDAO.java
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
@@ -18,7 +47,8 @@ import java.util.List;
 public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
 
     private static final String BILLING_FIELDS =
-            "billing_id, billing_description, billing_prefix, billing_limit, billing_start, billing_status, billing_simulation_date ";
+            "billing_id, billing_description, billing_prefix, billing_limit, billing_start, billing_status, " +
+                    "billing_simulation_date, billing_drivers_date, billing_owners_date ";
 
 
     public JDBCBillingDAO(JDBCDataAccessContext context) {
@@ -27,6 +57,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
 
     private static Billing populateBilling(ResultSet rs) throws SQLException {
         Date simulationDate = rs.getDate("billing_simulation_date");
+        Date driversDate = rs.getDate("billing_drivers_date");
+        Date ownersDate = rs.getDate("billing_owners_date");
         return new Billing(
                 rs.getInt("billing_id"),
                 rs.getString("billing_description"),
@@ -34,7 +66,9 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                 rs.getDate("billing_start").toLocalDate(),
                 rs.getDate("billing_limit").toLocalDate(),
                 BillingStatus.valueOf(rs.getString("billing_status")),
-                simulationDate == null ? null : simulationDate.toLocalDate()
+                simulationDate == null ? null : simulationDate.toLocalDate(),
+                driversDate == null ? null : driversDate.toLocalDate(),
+                ownersDate == null ? null : ownersDate.toLocalDate()
         );
     }
 

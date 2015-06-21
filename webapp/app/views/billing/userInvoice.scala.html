@@ -29,7 +29,7 @@
 
 @import com.google.common.base.Strings;
 
-@(billing: Billing, billNr: String, user: User, kpi: Billings.KmPriceInfo,
+@(billing: Billing, invoiceDate: java.time.LocalDate, billNr: String, user: User, kpi: Billings.KmPriceInfo,
            lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine)(footer: Html)
 
 <html>
@@ -43,6 +43,7 @@
           <table>
               <tbody>
                   <tr><th>Afrekening n°:</th><td>@billNr</td></tr>
+                  <tr><th>Datum:</th><td>@Utils.toLocalizedDateString(invoiceDate)</td></tr>
                   <tr><th>Naam:</th><td>@user.getFullName</td></tr>
                   @defining(user.getAddressDomicile){ address =>
                       <tr><th>Adres:</th><td>@address.getStreet @address.getNum</td></tr>

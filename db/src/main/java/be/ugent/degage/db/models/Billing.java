@@ -43,9 +43,11 @@ public class Billing {
     private LocalDate limit;
     private BillingStatus status;
     private LocalDate simulationDate;
+    private LocalDate driversDate;
+    private LocalDate ownersDate;
 
     public Billing(int id, String description, String prefix, LocalDate start, LocalDate limit,
-                   BillingStatus status, LocalDate simulationDate) {
+                   BillingStatus status, LocalDate simulationDate, LocalDate driversDate, LocalDate ownersDate) {
         this.id = id;
         this.description = description;
         this.prefix = prefix;
@@ -53,6 +55,8 @@ public class Billing {
         this.limit = limit;
         this.status = status;
         this.simulationDate = simulationDate;
+        this.driversDate = driversDate;
+        this.ownersDate = ownersDate;
     }
 
     public int getId() {
@@ -81,5 +85,13 @@ public class Billing {
 
     public LocalDate getSimulationDate() {
         return simulationDate;
+    }
+
+    public LocalDate getDriversDate() {
+        return driversDate;
+    }
+
+    public LocalDate getOwnersDate() {
+        return ownersDate;
     }
 }

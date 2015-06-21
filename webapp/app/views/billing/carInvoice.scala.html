@@ -42,6 +42,7 @@
           <table>
               <tbody>
                   <tr><th>Afrekening n°:</th><td>@billNr</td></tr>
+                  <tr><th>Datum:</th><td>@Utils.toLocalizedDateString(billing.getOwnersDate)</td></tr>
                   <tr><th>Auto:</th><td>@car.getName</td></tr>
                   <tr><th>Eigenaar:</th><td>@owner.getFullName</td></tr>
                   <tr><th>Periode:</th>
