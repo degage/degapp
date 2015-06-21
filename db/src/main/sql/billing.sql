@@ -19,10 +19,9 @@ END $$
 DROP PROCEDURE IF EXISTS billing_reset_all $$
 CREATE PROCEDURE billing_reset_all (b_id INT)
 BEGIN
-  DELETE FROM b_trip
-     WHERE bt_billing_id = b_id;
-  DELETE FROM b_fuel
-     WHERE bf_billing_id = b_id;
+  DELETE FROM b_trip WHERE bt_billing_id = b_id;
+  DELETE FROM b_fuel WHERE bf_billing_id = b_id;
+  DELETE FROM b_user WHERE bu_billing_id = b_id;
 END $$
 
 -- create bt_trip records for billing a certain car
@@ -48,8 +47,13 @@ BEGIN
     UPDATE b_trip
        JOIN carprivileges ON
             car_privilege_user_id = bt_user_id AND car_privilege_car_id = bt_car_id
-    SET
-       bt_privileged = 1
+    SET bt_privileged = 1
+    WHERE bt_billing_id = b_id AND bt_car_id = c_id;
+
+    -- adjust privileged flag for owners (when owner has changed...)
+    UPDATE b_trip
+       JOIN cars ON car_owner_user_id = bt_user_id AND car_id = bt_car_id
+    SET bt_privileged = 1
     WHERE bt_billing_id = b_id AND bt_car_id = c_id;
 
 END $$
@@ -73,9 +77,15 @@ BEGIN
     UPDATE b_fuel
        JOIN carprivileges ON
             car_privilege_user_id = bf_user_id AND car_privilege_car_id = bf_car_id
-    SET
-       bf_privileged = 1
+    SET bf_privileged = 1
     WHERE bf_billing_id = b_id AND bf_car_id = c_id;
+
+    -- adjust privileged flag for owners (when owner has changed...)
+    UPDATE b_fuel
+       JOIN cars ON car_owner_user_id = bf_user_id AND car_id = bf_car_id
+    SET bf_privileged = 1
+    WHERE bf_billing_id = b_id AND bf_car_id = c_id;
+
 END $$
 
 -- compute the total cost of a trip from the price info and total kms
