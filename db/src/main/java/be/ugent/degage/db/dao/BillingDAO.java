@@ -44,7 +44,7 @@ public interface BillingDAO {
     /**
      * Return a list of billings relevant to a given user
      */
-    public Iterable<Billing> listBillingsForUser (int userId);
+    public Iterable<BillingInfo> listBillingsForUser (int userId);
 
     /**
      * Retreive the billing with the given id

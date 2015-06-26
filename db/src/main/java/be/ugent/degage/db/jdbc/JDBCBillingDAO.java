@@ -72,6 +72,18 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         );
     }
 
+    private static BillingInfo populateBillingInfo(ResultSet rs) throws SQLException {
+        return new BillingInfo(
+                rs.getInt("billing_id"),
+                rs.getString("billing_description"),
+                rs.getDate("billing_start").toLocalDate(),
+                rs.getDate("billing_limit").toLocalDate(),
+                BillingStatus.valueOf(rs.getString("billing_status")),
+                rs.getInt("car_id"),
+                rs.getString("car_name")
+        );
+    }
+
     @Override
     public Iterable<Billing> listAllBillings() {
         try (PreparedStatement ps = prepareStatement(
@@ -83,15 +95,25 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         }
     }
 
+    private static final String BILLING_INFO_FIELDS =
+            "billing_id, billing_description, billing_limit, billing_start, billing_status ";
+
     @Override
-    public Iterable<Billing> listBillingsForUser(int userId) {
+    public Iterable<BillingInfo> listBillingsForUser(int userId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT " + BILLING_FIELDS +
+                "(SELECT " + BILLING_INFO_FIELDS + ", 0 AS car_id, NULL AS car_name " +
                         "FROM billing JOIN b_user ON bu_billing_id = billing_id " +
-                        "WHERE bu_user_id = ? ORDER BY billing_limit DESC"
+                        "WHERE bu_user_id = ?)" +
+                        "UNION " +
+                        "(SELECT " + BILLING_INFO_FIELDS + ", cars.car_id, car_name " +
+                        "FROM billing JOIN cars_billed USING (billing_id) " +
+                        "JOIN cars ON cars.car_id = cars_billed.car_id " +
+                        "WHERE billing_status = 'ALL_DONE' AND car_owner_user_id = ?) " +
+                        "ORDER BY billing_limit DESC, car_id ASC"
         )) {
             ps.setInt(1, userId);
-            return toList(ps, JDBCBillingDAO::populateBilling);
+            ps.setInt(2, userId);
+            return toList(ps, JDBCBillingDAO::populateBillingInfo);
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot list billings for user", ex);
         }
@@ -213,15 +235,17 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         // get names and ids of owners and cars
         Iterable<UserHeader> users;
         try (PreparedStatement ps = prepareStatement(
-                "SELECT user_id, user_firstname, user_lastname " +
-                "FROM users JOIN (" +
+                "SELECT u, user_firstname, user_lastname " +
+                        "FROM users JOIN (" +
                         "SELECT car_privilege_user_id as u from carprivileges WHERE car_privilege_car_id=? " +
                         "UNION " +
                         "SELECT car_owner_user_id as u From cars WHERE car_id=?) AS t " +
-                "ON user_id=u"
+                        "ON user_id=u"
         )) {
+            ps.setInt(1, carId);
+            ps.setInt(2, carId);
             users = toList(ps, rs -> new UserHeader(
-                    rs.getInt("user_id)"),
+                    rs.getInt("u"),
                     null,
                     rs.getString("user_firstname"),
                     rs.getString("user_lastname"),

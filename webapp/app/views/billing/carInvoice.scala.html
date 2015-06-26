@@ -29,7 +29,7 @@
 
 @import com.google.common.base.Strings;
 
-@(billing: Billing, billNr: String, car: CarHeaderShort, owner: UserHeader)
+@(billing: Billing, billNr: String, car: CarHeaderShort, owner: UserHeader, tables: Iterable[Billings.OwnerTable])
 
 <html>
    <head>

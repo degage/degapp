@@ -67,11 +67,9 @@ public class Billings extends Application {
         } else if (CurrentUser.isNot(userId) && !CurrentUser.hasRole(UserRole.SUPER_USER)) {
             return badRequest(); // not authorised
         }
-        BillingDAO dao = DataAccess.getInjectedContext().getBillingDAO();
-        Iterable<Billing> billings = dao.listBillingsForUser(userId);
-        // TODO: should only give non-privileged billings?
-        // TODO: dispatch according to car owner and then add bills for cars
-
+        DataAccessContext context = DataAccess.getInjectedContext();
+        BillingDAO dao = context.getBillingDAO();
+        Iterable<BillingInfo> billings = dao.listBillingsForUser(userId);
         return ok(listUser.render(billings, userId));
     }
 
@@ -97,22 +95,43 @@ public class Billings extends Application {
     }
 
     /**
+     * A shortened version of {@link InvoiceLine} for use with car invoices
+     */
+    public static class ShortInvoiceLine {
+        public LocalDate date;
+        public Integer km;
+        public Integer fuelCost;
+
+        public ShortInvoiceLine() {} // needed for super class
+
+        public ShortInvoiceLine(BillingDetailsTrip bt) {
+            this.date = bt.getTime().toLocalDate();
+            this.km = bt.getKm();
+            this.fuelCost = null;
+        }
+
+        public ShortInvoiceLine(BillingDetailsFuel bf) {
+            this.date = bf.getTime().toLocalDate();
+            this.km = null;
+            this.fuelCost = bf.getCost();
+        }
+
+    }
+
+    /**
      * Represents a single line in an invoice
      */
-    public static class InvoiceLine {
+    public static class InvoiceLine extends ShortInvoiceLine {
         public String carName;
-        public LocalDate date;
+        //public LocalDate date;
 
         // the following fields can be null in case of a refuel cost
-        public Integer km;
+        //public Integer km;
         public Integer[] kmSub;
         public Integer kmCost;
 
         // the following field can be null when there was no refueling
-        public Integer fuelCost;
-
-        // not used in view
-        //private int reservationId;
+        //public Integer fuelCost;
 
         // used for computing the totals
         private InvoiceLine(int size) {
@@ -172,9 +191,9 @@ public class Billings extends Application {
         }
     }
 
-    private static class ILEntry {
-        public InvoiceLine t;       // trip
-        public List<InvoiceLine> f; // refuels for this trip
+    private static class ILEntry<T extends ShortInvoiceLine> {
+        public T t;       // trip
+        public List<T> f; // refuels for this trip
 
         public ILEntry() {
             f = new ArrayList<>();
@@ -185,20 +204,20 @@ public class Billings extends Application {
             Iterable<BillingDetailsTrip> trips, Iterable<BillingDetailsFuel> fuels,
             KmPriceDetails kmPrices) {
         // store all invoice lines according to reservation id
-        Map<Integer, ILEntry> map = new HashMap<>();
+        Map<Integer, ILEntry<InvoiceLine>> map = new HashMap<>();
 
         for (BillingDetailsTrip trip : trips) {
             int reservationId = trip.getReservationId();
-            ILEntry ile = new ILEntry();
+            ILEntry<InvoiceLine> ile = new ILEntry<>();
             ile.t = new InvoiceLine(trip, kmPrices);
             map.put(reservationId, ile);
         }
 
         for (BillingDetailsFuel fuel : fuels) {
             int reservationId = fuel.getReservationId();
-            ILEntry ile = map.get(reservationId);
+            ILEntry<InvoiceLine> ile = map.get(reservationId);
             if (ile == null) {
-                ile = new ILEntry();
+                ile = new ILEntry<>();
                 map.put(reservationId, ile);
             }
             ile.f.add(new InvoiceLine(fuel, kmPrices));
@@ -206,7 +225,7 @@ public class Billings extends Application {
 
         // create the resulting list
         List<InvoiceLine> result = new ArrayList<>();
-        for (ILEntry ile : map.values()) {
+        for (ILEntry<InvoiceLine> ile : map.values()) {
             // merge top invoice lines
             if (ile.t != null && !ile.f.isEmpty()) {
                 ile.t.fuelCost = ile.f.remove(0).fuelCost;
@@ -220,14 +239,67 @@ public class Billings extends Application {
         return result;
     }
 
+    // TODO: factor out code in common with getInvoiceLines
+    private static Iterable<ShortInvoiceLine> getShortInvoiceLines(
+            Iterable<BillingDetailsTrip> trips, Iterable<BillingDetailsFuel> fuels) {
+        // store all invoice lines according to reservation id
+        Map<Integer, ILEntry<ShortInvoiceLine>> map = new HashMap<>();
+
+        for (BillingDetailsTrip trip : trips) {
+            int reservationId = trip.getReservationId();
+            ILEntry<ShortInvoiceLine> ile = new ILEntry<>();
+            ile.t = new ShortInvoiceLine(trip);
+            map.put(reservationId, ile);
+        }
+
+        for (BillingDetailsFuel fuel : fuels) {
+            int reservationId = fuel.getReservationId();
+            ILEntry<ShortInvoiceLine> ile = map.get(reservationId);
+            if (ile == null) {
+                ile = new ILEntry<>();
+                map.put(reservationId, ile);
+            }
+            ile.f.add(new ShortInvoiceLine(fuel));
+        }
+
+        // create the resulting list
+        List<ShortInvoiceLine> result = new ArrayList<>();
+        for (ILEntry<ShortInvoiceLine> ile : map.values()) {
+            // merge top invoice lines
+            if (ile.t != null && !ile.f.isEmpty()) {
+                ile.t.fuelCost = ile.f.remove(0).fuelCost;
+            }
+            if (ile.t != null) {
+                result.add(ile.t);
+            }
+            result.addAll(ile.f);
+        }
+        Collections.sort(result, (x, y) -> x.date.compareTo(y.date));
+        return result;
+    }
+
+    public static class OwnerTable {
+        public String name;
+        public Iterable<ShortInvoiceLine> lines;
+    }
+
+    private static Iterable<OwnerTable> getOwnerTables (Iterable<BillingDetailsOwner> list) {
+        List<OwnerTable> result = new ArrayList<>();
+        for (BillingDetailsOwner details : list) {
+            OwnerTable ot = new OwnerTable();
+            ot.name = details.getUser();
+            ot.lines = getShortInvoiceLines(details.getTrips(), details.getRefuels());
+            result.add (ot);
+        }
+        return result;
+    }
+
     private static InvoiceLine total(Iterable<InvoiceLine> list, int size) {
         InvoiceLine result = new InvoiceLine(size);
         for (InvoiceLine line : list) {
             result.add(line);
         }
         return result;
-
-
     }
 
     private static String structuredComment(int billingId, int xtra, BillingDetailsUser bdu) {
@@ -296,6 +368,7 @@ public class Billings extends Application {
         }
     }
 
+
     @InjectContext
     @AllowRoles({UserRole.CAR_OWNER})
     public static Result carDetails(int billingId, int carId) {
@@ -307,8 +380,12 @@ public class Billings extends Application {
             Billing billing = dao.getBilling(billingId);
             String billNr = String.format("E%s-%04d", billing.getPrefix(), 0 /* TODO: bCar.getIndex()*/);
             response().setHeader("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
+
+            Iterable<BillingDetailsOwner> ownerDetails = dao.listOwnerDetails(billingId, carId);
+
             return PdfGenerator.ok(carInvoice.render(
-                    billing, billNr, car, owner
+                    billing, billNr, car, owner,
+                    getOwnerTables(ownerDetails)
                     // TODO: add BillingDetailsOwner
                     ), null);
         } else {
