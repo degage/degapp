@@ -27,6 +27,18 @@ body {
     float:right;
 }
 
+table .km {
+  text-align:center;
+}
+
+table .percentage {
+  text-align:right;
+}
+
+table .numeric {
+  text-align:right;
+}
+
 #data table {
   border-top: 1pt solid black;
   border-collapse: collapse;
@@ -38,6 +50,11 @@ body {
   text-align:center;
 }
 
+#data table thead td.caption {
+  text-align:center;
+  border-bottom: 1pt solid black;
+}
+
 #data table tbody td {
   text-align:center;
   border-top: 0.5pt solid black;
@@ -45,13 +62,18 @@ body {
   /* width: 12.5%; */
 }
 
-#data table .numeric {
+#data table tbody td.numeric {
   text-align:right;
 }
 
-#data table .km {
-  text-align:center;
+#data table tbody td.driver {
+  text-align: left;
+  border-top: 1pt solid black;
+  border-bottom: 1pt solid black;
+  padding-top: 5pt;
+  padding-bottom: 5pt;
 }
+
 
 #data table tfoot {
    padding-top: 3ex;
@@ -68,14 +90,24 @@ body {
   border-top: 1pt solid black;
 }
 
+
 #left {
   float: left;
-  width: 30%;
+  width: 35%;
 }
 #right {
   float: right;
-  width: 68%;
+  width: 60%;
 }
+
+#right table {
+  width: 100%;
+}
+
+#right table tbody td.filler {
+  width: 4em;
+}
+
 #text {
   clear: both;
 }

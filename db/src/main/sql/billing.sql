@@ -41,6 +41,7 @@ BEGIN
     FROM reservations
         JOIN carrides ON reservation_id = car_ride_car_reservation_id
     WHERE reservation_car_id = c_id AND reservation_from <  lim
+        AND NOT reservation_archived
         AND (reservation_status = 'FINISHED' OR reservation_status = 'FROZEN');
 
     -- adjust privileged flag for privileged users
@@ -70,7 +71,9 @@ BEGIN
     FROM refuels
         JOIN reservations ON refuel_car_ride_id = reservation_id
         JOIN carrides ON reservation_id = car_ride_car_reservation_id
-    WHERE reservation_car_id = c_id AND (reservation_status = 'FINISHED' OR reservation_status = 'FROZEN')
+    WHERE reservation_car_id = c_id
+        AND NOT refuel_archived
+        AND (reservation_status = 'FINISHED' OR reservation_status = 'FROZEN')
         AND reservation_from <  lim AND (refuel_status = 'ACCEPTED' OR refuel_status = 'FROZEN');
 
     -- adjust privileged flag for privileged users
@@ -133,9 +136,9 @@ BEGIN
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE _id INT;
   DECLARE cur CURSOR FOR
-      SELECT DISTINCT bt_user_id FROM b_trip WHERE NOT bt_privileged AND bt_km_cost > 0
+      SELECT DISTINCT bt_user_id FROM b_trip WHERE bt_billing_id = b_id AND NOT bt_privileged AND bt_km_cost > 0
       UNION
-      SELECT DISTINCT bf_user_id FROM b_fuel WHERE NOT bf_privileged;
+      SELECT DISTINCT bf_user_id FROM b_fuel WHERE bt_billing_id = b_id AND NOT bf_privileged;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
   -- Reset

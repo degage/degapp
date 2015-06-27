@@ -265,4 +265,29 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         }
         return result;
     }
+
+    @Override
+    public BillingDetailsCar getCarDetails(int billingId, int carId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT bc_first_km, bc_last_km,  bc_owner_km, bc_deprec_km, bc_fuel_total, " +
+                        "bc_fuel_owner, bc_fuel_due, bc_deprec_recup, car_deprec, bc_seq_nr " +
+                    "FROM b_cars JOIN cars ON bc_car_id = car_id " +
+                    "WHERE bc_billing_id = ? AND bc_car_id = ?"
+        )) {
+            ps.setInt(1, billingId);
+            ps.setInt(2, carId);
+            return toSingleObject(ps, rs ->
+                            new BillingDetailsCar(
+                                    rs.getInt("bc_first_km"), rs.getInt("bc_last_km"),
+                                    rs.getInt("bc_owner_km"), rs.getInt("bc_deprec_km"),
+                                    rs.getInt("bc_fuel_total"), rs.getInt("bc_fuel_owner"),
+                                    rs.getInt("car_deprec"), rs.getInt("bc_deprec_recup"),
+                                    rs.getInt("bc_fuel_due"), rs.getInt("bc_seq_nr")
+                            )
+            );
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retreive car billing details", ex);
+        }
+
+    }
 }

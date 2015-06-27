@@ -1,27 +1,27 @@
 @* carInvoice.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -29,7 +29,9 @@
 
 @import com.google.common.base.Strings;
 
-@(billing: Billing, billNr: String, car: CarHeaderShort, owner: UserHeader, tables: Iterable[Billings.OwnerTable])
+@(billing: Billing, billNr: String, car: CarHeaderShort, owner: UserHeader,
+  tables: Iterable[Billings.OwnerTable], totals: Billings.ShortInvoiceLine,
+  details: BillingDetailsCar)
 
 <html>
    <head>
@@ -58,31 +60,100 @@
           <div id="data">
               <table>
                   <thead>
-                     <tr>
-                         <th>Auto</th>
-                         <th>Datum</th>
-                         <th>Tank-</th>
-                     </tr>
-                      <tr>
-                          <td></td>
-                          <td></td>
-                          <th>beurten</th>
-                      </tr>
+                  <tr>
+                      <td class="caption" colspan="3">RITTEN MET DE EIGEN AUTO</td>
+                  </tr>
+                  <tr>
+                      <th>Datum</th>
+                      <th>Km</th>
+                      <th>Tank-</th>
+                  </tr>
+                  <tr>
+                      <td></td>
+                      <td></td>
+                      <th>beurten</th>
+                  </tr>
                   </thead>
                   <tbody>
+                    @foreach(tables) { table =>
+                        <tr><td class="driver" colspan="3">Bestuurder: <b>@table.name</b></td></tr>
+                        @foreach.trOrElse(table.lines) { line =>
+                            <td>@Utils.toLocalizedDateStringShort(line.date)</td>
+                            <td class="km">@line.km</td>
+                            <td class="numeric">@if(line.fuelCost!=null){@data.EurocentAmount.toString(line.fuelCost)}</td>
+                        }{
+                            <tr><td colspan="3">Geen ritten</td></tr>
+                        }
+                    }
                   </tbody>
                   <tfoot>
                       <tr>
                           <th>Totalen:</th>
-                          <th></th>
-                          <th></th>
+                          <th class="km">@totals.km</th>
+                          <th>@data.EurocentAmount.toString(totals.fuelCost)</th>
                       </tr>
                   </tfoot>
               </table>
           </div>
       </div>
       <div id="right">
-
+        <table>
+            <tbody>
+               <tr>
+                   <th colspan="2">Totaal aantal km deze periode</th>
+                   <td class="km">@details.getKm</td>
+                   <td/>
+               </tr>
+               <tr>
+                   <td class="filler"></td>
+                   <td>&nbsp;door eigenaar gereden</td>
+                   <td class="km">@details.getOwnerKm</td>
+                   <td/>
+               </tr>
+               <tr>
+                   <td/>
+                   <td>&nbsp;(= in %)</td>
+                   <td class="percentage">@(100*details.getOwnerKm/details.getKm)%</td>
+                   <td/>
+               </tr>
+               <tr>
+                   <td/>
+                   <td>&nbsp;door autodeler gereden</td>
+                   <td class="percentage">@(100*(details.getKm-details.getOwnerKm)/details.getKm)%</td>
+                   <td/>
+               </tr>
+               <tr>
+                   <th colspan="3">Recuperatie afschrijving</th>
+                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedDeprecationCost) €</th>
+               </tr>
+               <tr>
+                   <td/>
+                   <td>af te schrijven km (aan <b>@("0,%03d".format(details.getDeprecationFactor))</b> €/km)</td>
+                   <td class="km">@details.getDeprecationKm</td><td/>
+               </tr>
+               <tr>
+                   <td/>
+                   <td colspan="2">Totale afschrijving</td>
+                   <td class="numeric">@data.EurocentAmount.toString(details.getDeprecationFactor*details.getDeprecationKm/10) €</td>
+               </tr>
+                <tr>
+                    <th colspan="3">Saldo brandstof</th>
+                    <th class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelDue-details.getOwnerFuelPaid) €</th>
+                </tr>
+                <tr>
+                    <td/><td colspan="2">Totale brandstofkost (= @("0,%03d".format(details.getFuelCostFactor)) €/km)</td>
+                    <td class="numeric">@data.EurocentAmount.toString(details.getTotalFuelCost) €</td>
+                </tr>
+                <tr>
+                    <td/><td colspan="2">te betalen door eigenaar</td>
+                    <td class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelDue) €</td>
+                </tr>
+                <tr>
+                    <td/><td colspan="2">reeds betaald door eigenaar</td>
+                    <td class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelPaid) €</td>
+                </tr>
+            </tbody>
+        </table>
       </div>
       <div id="text">
           <ul class="note">

@@ -516,6 +516,21 @@ CREATE TABLE b_user (
     PRIMARY KEY (bu_billing_id, bu_user_id)
 );
 
+CREATE TABLE b_cars (
+    bc_billing_id INT REFERENCES billing(billing_id),
+    bc_car_id INT REFERENCES cars(car_id),
+    bc_first_km INT,
+    bc_last_km INT,
+    bc_owner_km INT,  -- kilometers driven by privileged users
+    bc_deprec_km INT, -- kilometers counted for deprecation
+    bc_fuel_total INT,      -- total fuel cost for this period
+    bc_fuel_owner INT,      -- fuel already paid by owner for this period
+    bc_fuel_due INT,        -- fuel to be paid by owner for this period
+    bc_deprec_recup INT,    -- deprecation cost to be recuperated by owner
+    bc_seq_nr INT,
+    PRIMARY KEY (bc_billing_id, bc_car_id)
+);
+
 -- TRIGGERS
 -- ~~~~~~~~
 

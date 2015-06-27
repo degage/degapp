@@ -78,4 +78,9 @@ public interface BillingDAO {
      */
     public Iterable<BillingDetailsOwner> listOwnerDetails (int billingId, int carId);
 
+    /**
+     * Retreive general billing details for a car
+     */
+    public BillingDetailsCar getCarDetails (int billingId, int carId);
+
 }

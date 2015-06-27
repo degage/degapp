@@ -102,7 +102,11 @@ public class Billings extends Application {
         public Integer km;
         public Integer fuelCost;
 
-        public ShortInvoiceLine() {} // needed for super class
+        public ShortInvoiceLine() {
+            this.date = null;
+            this.km = 0;
+            this.fuelCost = 0;
+        }
 
         public ShortInvoiceLine(BillingDetailsTrip bt) {
             this.date = bt.getTime().toLocalDate();
@@ -116,6 +120,14 @@ public class Billings extends Application {
             this.fuelCost = bf.getCost();
         }
 
+        public void add(ShortInvoiceLine line) {
+            if (line.km != null) {
+                km += line.km;
+            }
+            if (line.fuelCost != null) {
+                fuelCost += line.fuelCost;
+            }
+        }
     }
 
     /**
@@ -281,6 +293,7 @@ public class Billings extends Application {
     public static class OwnerTable {
         public String name;
         public Iterable<ShortInvoiceLine> lines;
+        public ShortInvoiceLine total;
     }
 
     private static Iterable<OwnerTable> getOwnerTables (Iterable<BillingDetailsOwner> list) {
@@ -289,6 +302,7 @@ public class Billings extends Application {
             OwnerTable ot = new OwnerTable();
             ot.name = details.getUser();
             ot.lines = getShortInvoiceLines(details.getTrips(), details.getRefuels());
+            ot.total = total(ot.lines);
             result.add (ot);
         }
         return result;
@@ -298,6 +312,22 @@ public class Billings extends Application {
         InvoiceLine result = new InvoiceLine(size);
         for (InvoiceLine line : list) {
             result.add(line);
+        }
+        return result;
+    }
+
+    private static ShortInvoiceLine total(Iterable<ShortInvoiceLine> list) {
+        ShortInvoiceLine result = new ShortInvoiceLine();
+        for (ShortInvoiceLine line : list) {
+            result.add(line);
+        }
+        return result;
+    }
+
+    private static ShortInvoiceLine tableTotal(Iterable<OwnerTable> tables) {
+        ShortInvoiceLine result = new ShortInvoiceLine();
+        for (OwnerTable table : tables) {
+            result.add(table.total);
         }
         return result;
     }
@@ -368,7 +398,6 @@ public class Billings extends Application {
         }
     }
 
-
     @InjectContext
     @AllowRoles({UserRole.CAR_OWNER})
     public static Result carDetails(int billingId, int carId) {
@@ -378,15 +407,17 @@ public class Billings extends Application {
             UserHeader owner = context.getUserDAO().getUserHeader(car.getOwnerId());
             BillingDAO dao = context.getBillingDAO();
             Billing billing = dao.getBilling(billingId);
-            String billNr = String.format("E%s-%04d", billing.getPrefix(), 0 /* TODO: bCar.getIndex()*/);
+            BillingDetailsCar bCar = dao.getCarDetails(billingId, carId);
+            String billNr = String.format("E%s-%04d", billing.getPrefix(), bCar.getIndex());
             response().setHeader("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
 
             Iterable<BillingDetailsOwner> ownerDetails = dao.listOwnerDetails(billingId, carId);
 
+            Iterable<OwnerTable> tables = getOwnerTables(ownerDetails);
             return PdfGenerator.ok(carInvoice.render(
                     billing, billNr, car, owner,
-                    getOwnerTables(ownerDetails)
-                    // TODO: add BillingDetailsOwner
+                    tables, tableTotal(tables),
+                    bCar
                     ), null);
         } else {
             return badRequest(); // hacker?
