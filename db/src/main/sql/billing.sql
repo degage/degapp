@@ -172,7 +172,8 @@ BEGIN
   DECLARE _id INT;
   DECLARE _name VARCHAR(64);
   DECLARE cur CURSOR FOR
-      SELECT car_id,car_name FROM cars_billed JOIN cars USING(car_id);
+      SELECT car_id,car_name FROM cars_billed JOIN cars USING(car_id)
+      WHERE billing_id = b_id;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
 
@@ -241,9 +242,238 @@ BEGIN
     ) WHERE bu_billing_id = b_id;
 END $$
 
+-- compiles the billing information for the given car
+-- b_id: id of billing
+-- lim: limit date, only records before this date will be considered
+-- c_id: id of car
+-- cd_factor: car deprecation factor
+-- cd_limit: car_deprec_limit for this car
+-- NOTE: uses information from the tables b_trip and b_fuel and b_costs
+DROP PROCEDURE IF EXISTS billing_car_aux $$
+CREATE PROCEDURE billing_car_aux (b_id INT, c_id INT, lim DATETIME, cd_factor INT, cd_limit INT)
+BEGIN
+    DECLARE first_km INT;
+    DECLARE last_km INT;
+
+    DECLARE owner_km INT;
+    DECLARE fuel_cost INT;
+    DECLARE fuel_owner INT;
+
+    DECLARE deprec_km INT;
+    DECLARE total_km INT;
+    DECLARE deprec_recup INT;
+    DECLARE fuel_due INT;
+
+    DECLARE car_cost INT;
+    DECLARE car_cost_recup INT;
+
+    SELECT MIN(car_ride_start_km), MAX(car_ride_end_km)
+        FROM reservations
+        JOIN carrides ON reservation_id = car_ride_car_reservation_id
+        WHERE reservation_car_id = c_id AND reservation_from <  lim
+            AND NOT reservation_archived
+            AND (reservation_status = 'FINISHED' OR reservation_status = 'FROZEN')
+    INTO first_km, last_km;
+
+    SELECT IFNULL(SUM(bt_km),0) FROM b_trip
+       WHERE bt_billing_id = b_id AND bt_car_id = c_id AND bt_privileged
+    INTO owner_km;
+
+    SELECT IFNULL(SUM(bf_fuel_cost),0) FROM b_fuel
+       WHERE bf_billing_id = b_id AND bf_car_id = c_id
+    INTO fuel_cost;
+
+    SELECT IFNULL(SUM(bf_fuel_cost),0) FROM b_fuel
+       WHERE bf_billing_id = b_id AND bf_car_id = c_id AND bf_privileged
+    INTO fuel_owner;
+
+    SELECT IFNULL(SUM(bcc_refunded),0) FROM b_costs
+       JOIN carcosts ON car_cost_id = bcc_cost_id
+       WHERE bcc_billing_id = b_id AND car_cost_car_id = c_id
+    INTO car_cost;
+
+    SET total_km = last_km - first_km;
+    SET deprec_km = GREATEST(LEAST(cd_limit, last_km) - first_km, 0);
+
+    IF deprec_km = 0 THEN
+        SET deprec_recup = 0;
+    ELSEIF total_km = deprec_km THEN
+        SET deprec_recup = cd_factor*(total_km-owner_km)/10;
+    ELSE
+        SET deprec_recup = cd_factor*deprec_km*(total_km-owner_km)/total_km/10;
+    END IF;
+
+    IF fuel_cost = 0 THEN
+       SET fuel_due = 0;
+    ELSEIF total_km = 0 THEN
+       SET fuel_due = 0;
+    ELSE
+       SET fuel_due = fuel_cost*owner_km / total_km;
+    END IF;
+
+    IF car_cost = 0 THEN
+       SET car_cost_recup = 0;
+    ELSEIF total_km = 0 THEN
+       SET car_cost_recup = 0;
+    ELSE
+       SET car_cost_recup = car_cost*(total_km-owner_km) / total_km;
+    END IF;
+
+    INSERT INTO b_cars(bc_billing_id, bc_car_id,
+                       bc_first_km, bc_last_km, bc_owner_km, bc_deprec_km,
+                       bc_fuel_total, bc_fuel_owner, bc_fuel_due, bc_deprec_recup,
+                       bc_costs, bc_costs_recup
+                       )
+    VALUES( b_id, c_id, first_km, last_km, owner_km, deprec_km,
+            fuel_cost, fuel_owner, fuel_due, deprec_recup, car_cost, car_cost_recup
+    );
+END $$
+
+-- add sequence number to car bills
+DROP PROCEDURE IF EXISTS billing_car_seq_nr $$
+CREATE PROCEDURE billing_car_seq_nr (b_id INT)
+BEGIN
+  DECLARE seq INT DEFAULT 1;
+
+  -- set up everything for loop
+  DECLARE done BOOLEAN DEFAULT FALSE;
+  DECLARE _id INT;
+  DECLARE cur CURSOR FOR
+      SELECT car_id FROM cars_billed WHERE billing_id = b_id;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  -- Set sequence numbers
+  OPEN cur;
+
+  main: LOOP
+    FETCH cur INTO _id;
+    IF done THEN
+      LEAVE main;
+    END IF;
+    UPDATE b_cars SET bc_seq_nr = seq WHERE bc_car_id = _id;
+    SET seq = seq + 1;
+  END LOOP main;
+
+  CLOSE cur;
+END  $$
+
+-- Compute portion of car cost that should be refunded in this period
+--
+-- b_i billing
+-- c_id cost id
+-- months number of months since start of cost
+-- spread number of months over which to spread the cost
+-- amount total cost
+DROP PROCEDURE IF EXISTS billing_cost_aux $$
+CREATE PROCEDURE billing_cost_aux (b_id INT, c_id INT, months INT, spread INT, amount INT)
+BEGIN
+  DECLARE refunded INT; -- amount already taken into account
+  DECLARE total INT;    -- total amount that must be taken into account
+
+  IF months >= spread THEN
+     SET total = amount;
+  ELSE
+     SET total = amount*months/spread;
+  END IF;
+
+  SELECT IFNULL(SUM(bcc_refunded),0) FROM b_costs WHERE bcc_cost_id=c_id AND bcc_billing_id < b_id
+  INTO refunded;
+
+  INSERT INTO b_costs(bcc_billing_id,bcc_cost_id,bcc_refunded)
+  VALUES (b_id, c_id, total-refunded);
+END $$
+
+DROP PROCEDURE IF EXISTS billing_cost $$
+CREATE PROCEDURE billing_cost (b_id INT)
+BEGIN
+  DECLARE lim DATETIME;
+
+  -- set up everything for loop
+  DECLARE done BOOLEAN DEFAULT FALSE;
+  DECLARE _id INT;
+  DECLARE _start DATE;
+  DECLARE _spread INT;
+  DECLARE _amount INT;
+
+  DECLARE cur CURSOR FOR
+      SELECT car_cost_id, car_cost_start, car_cost_spread, car_cost_amount
+      FROM cars_billed JOIN carcosts ON car_cost_car_id = car_id
+      WHERE billing_id = b_id
+        AND NOT car_cost_archived
+        AND (car_cost_status='ACCEPTED' OR car_cost_status='FROZEN')
+        AND car_cost_start < lim;
+
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+  SELECT billing_limit FROM billing WHERE billing_id = b_id INTO lim;
+
+  -- reset
+  DELETE FROM b_costs WHERE bcc_billing_id = b_id;
+
+  -- loop
+  OPEN cur;
+
+  main: LOOP
+    FETCH cur INTO _id, _start, _spread, _amount;
+    IF done THEN
+      LEAVE main;
+    END IF;
+    CALL billing_cost_aux(b_id, _id, 12*(YEAR(lim)-YEAR(_start)) + MONTH(lim) - MONTH(_start), _spread, _amount);
+  END LOOP main;
+
+END $$
+
+DROP PROCEDURE IF EXISTS billing_car_finalize $$
+CREATE PROCEDURE billing_car_finalize (b_id INT)
+BEGIN
+  DECLARE lim DATETIME;
+
+  -- set up everything for loop
+  DECLARE done BOOLEAN DEFAULT FALSE;
+  DECLARE _id INT;
+  DECLARE _cd_factor INT;
+  DECLARE _cd_limit INT;
+  DECLARE cur CURSOR FOR
+      SELECT car_id,car_deprec,car_deprec_limit
+        FROM cars_billed JOIN cars USING(car_id)
+        WHERE billing_id = b_id;
+  DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+
+  SELECT billing_limit FROM billing WHERE billing_id = b_id INTO lim;
+
+  -- clear results of earlier runs
+  DELETE FROM b_cars WHERE bc_billing_id = b_id;
+
+  -- compute costs
+  CALL billing_cost(b_id);
+
+  -- fill in b_cars for every car
+  OPEN cur;
+
+  main: LOOP
+    FETCH cur INTO _id, _cd_factor, _cd_limit;
+    IF done THEN
+      LEAVE main;
+    END IF;
+    CALL billing_car_aux(b_id, _id, lim, _cd_factor, _cd_limit);
+  END LOOP main;
+
+  CALL billing_car_seq_nr (b_id);
+
+  UPDATE billing SET billing_status = 'ALL_DONE', billing_owners_date=NOW()
+  WHERE billing_id = b_id;
+
+  UPDATE carcosts SET car_cost_status = 'FROZEN'
+  WHERE car_cost_id IN
+     (SELECT bcc_cost_id FROM b_costs WHERE bcc_billing_id = b_id);
+
+END $$
+
 -- TODO: make sure refuels cannot be added to frozen reservations
 -- TODO: check remaining refuels for frozen reservations
--- TODO: billing_trip_aux / billing_fuel_aux for finalizing invoices
+-- TODO: archiving evrything - freezing costs
 
 -- finalize user billing
 --

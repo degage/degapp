@@ -527,6 +527,8 @@ CREATE TABLE b_cars (
     bc_fuel_owner INT,      -- fuel already paid by owner for this period
     bc_fuel_due INT,        -- fuel to be paid by owner for this period
     bc_deprec_recup INT,    -- deprecation cost to be recuperated by owner
+    bc_costs INT,           -- total car costs for this period
+    bc_costs_recup INT,     -- recuperation of these car costs by owner
     bc_seq_nr INT,
     PRIMARY KEY (bc_billing_id, bc_car_id)
 );
