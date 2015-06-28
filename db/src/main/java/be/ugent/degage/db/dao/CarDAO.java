@@ -92,4 +92,6 @@ public interface CarDAO {
 
     public UserHeader getOwnerOfCar(int carId)  throws DataAccessException;
 
+    public CarDeprecation getDeprecation (int carId) throws DataAccessException;
+
 }

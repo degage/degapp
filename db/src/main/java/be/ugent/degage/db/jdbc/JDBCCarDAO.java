@@ -765,4 +765,18 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             throw new DataAccessException("Could not determine car ownwer");
         }
     }
+
+    @Override
+    public CarDeprecation getDeprecation(int carId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_deprec, car_deprec_limit FROM cars WHERE car_id = ?"
+        )) {
+            ps.setInt (1, carId);
+            return toSingleObject(ps, rs ->
+                        new CarDeprecation(rs.getInt("car_deprec_limit"),
+                                            rs.getInt("car_deprec")));
+        }  catch (SQLException ex) {
+            throw new DataAccessException("Could not determine car deprecation info");
+        }
+    }
 }

@@ -106,9 +106,9 @@
                   <tr>
                       <td colspan="4"></td>
                       @if(totals.kmCost>totals.fuelCost){
-                      <th colspan="3">TOTAAL TE BETALEN:</th>
+                          <th colspan="3">TOTAAL TE BETALEN:</th>
                       }else{
-                      <th colspan="3">Totaal te ontvangen:</th>
+                          <th colspan="3">Totaal te ontvangen:</th>
                       }
                       <th>@data.EurocentAmount.toString(totals.kmCost-totals.fuelCost) €</th>
                   </tr>

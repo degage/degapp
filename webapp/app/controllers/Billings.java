@@ -333,9 +333,13 @@ public class Billings extends Application {
     }
 
     private static String structuredComment(int billingId, int xtra, BillingDetailsUser bdu) {
+        return structuredComment (billingId, xtra, bdu.getIndex(), bdu.getUserId());
+    }
+
+    private static String structuredComment(int billingId, int xtra, int index, int id) {
         int pre = (3 * billingId + xtra) % 1000;
-        int mid = (bdu.getIndex() % 10000);
-        int end = (bdu.getUserId() % 1000);
+        int mid = (index % 10000);
+        int end = (id % 1000);
 
         int mod = (10000000 * pre + 1000 * mid + end) % 97;
         if (mod == 0) {
@@ -414,10 +418,17 @@ public class Billings extends Application {
             Iterable<BillingDetailsOwner> ownerDetails = dao.listOwnerDetails(billingId, carId);
 
             Iterable<OwnerTable> tables = getOwnerTables(ownerDetails);
+            CarDeprecation deprecation = context.getCarDAO().getDeprecation(carId);
+            int remainingValue = deprecation.getLimit()- bCar.getLastKm();
+            if (remainingValue <= 0) {
+                remainingValue = 0;
+            } else {
+                remainingValue = remainingValue * deprecation.getDeprec() / 1000;
+            }
             return PdfGenerator.ok(carInvoice.render(
                     billing, billNr, car, owner,
                     tables, tableTotal(tables),
-                    bCar
+                    bCar, remainingValue, structuredComment(billingId, 1, bCar.getIndex(), carId)
                     ), null);
         } else {
             return badRequest(); // hacker?

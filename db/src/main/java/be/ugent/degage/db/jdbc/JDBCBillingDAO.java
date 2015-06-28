@@ -270,7 +270,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
     public BillingDetailsCar getCarDetails(int billingId, int carId) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT bc_first_km, bc_last_km,  bc_owner_km, bc_deprec_km, bc_fuel_total, " +
-                        "bc_fuel_owner, bc_fuel_due, bc_deprec_recup, car_deprec, bc_seq_nr " +
+                        "bc_fuel_owner, bc_fuel_due, bc_deprec_recup, car_deprec, bc_seq_nr," +
+                        "bc_costs, bc_costs_recup " +
                     "FROM b_cars JOIN cars ON bc_car_id = car_id " +
                     "WHERE bc_billing_id = ? AND bc_car_id = ?"
         )) {
@@ -282,7 +283,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                                     rs.getInt("bc_owner_km"), rs.getInt("bc_deprec_km"),
                                     rs.getInt("bc_fuel_total"), rs.getInt("bc_fuel_owner"),
                                     rs.getInt("car_deprec"), rs.getInt("bc_deprec_recup"),
-                                    rs.getInt("bc_fuel_due"), rs.getInt("bc_seq_nr")
+                                    rs.getInt("bc_fuel_due"), rs.getInt("bc_seq_nr"),
+                                    rs.getInt("bc_costs"), rs.getInt("bc_costs_recup")
                             )
             );
         } catch (SQLException ex) {

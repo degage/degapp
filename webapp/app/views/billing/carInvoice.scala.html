@@ -31,7 +31,11 @@
 
 @(billing: Billing, billNr: String, car: CarHeaderShort, owner: UserHeader,
   tables: Iterable[Billings.OwnerTable], totals: Billings.ShortInvoiceLine,
-  details: BillingDetailsCar)
+  details: BillingDetailsCar, remainingValue: Int, struct: String)
+
+@cents(v:Int)={
+    @("0,%03d".format(v))
+}
 
 <html>
    <head>
@@ -39,6 +43,7 @@
         <link rel="stylesheet" media="print" href="/public/stylesheets/billing.css" /> @* Important: href must start with / *@
    </head>
    <body>
+      @defining(-details.getRecuperatedCarCosts+details.getOwnerFuelDue-details.getOwnerFuelPaid-details.getRecuperatedDeprecationCost) { total =>
       <div id="logo"><img src='/public/images/logo-brief-2.5in.png'  width="2.5in"/></div>
       <div id="top">
           <table>
@@ -128,7 +133,7 @@
                </tr>
                <tr>
                    <td/>
-                   <td>af te schrijven km (aan <b>@("0,%03d".format(details.getDeprecationFactor))</b> €/km)</td>
+                   <td>af te schrijven km (aan @cents(details.getDeprecationFactor) €/km)</td>
                    <td class="km">@details.getDeprecationKm</td><td/>
                </tr>
                <tr>
@@ -141,7 +146,7 @@
                     <th class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelDue-details.getOwnerFuelPaid) €</th>
                 </tr>
                 <tr>
-                    <td/><td colspan="2">Totale brandstofkost (= @("0,%03d".format(details.getFuelCostFactor)) €/km)</td>
+                    <td/><td colspan="2">Totale brandstofkost (= @cents(details.getFuelCostFactor) €/km)</td>
                     <td class="numeric">@data.EurocentAmount.toString(details.getTotalFuelCost) €</td>
                 </tr>
                 <tr>
@@ -152,15 +157,68 @@
                     <td/><td colspan="2">reeds betaald door eigenaar</td>
                     <td class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelPaid) €</td>
                 </tr>
+               <tr>
+                   <th colspan="3">Recuperatie autokosten</th>
+                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedCarCosts) €</th>
+               </tr>
+               <tr>
+                   <td/>
+                   <td colspan="2">af te schrijven voor deze periode (= @cents(details.getCarCosts*10/details.getKm) €/km)</td>
+                   <td class="numeric">@data.EurocentAmount.toString(details.getCarCosts) €</td>
+               </tr>
+               <tr><td class="vfiller"></td></tr>
+               <tr>
+                   <td class="info" colspan="4">Ter informatie:</td>
+               </tr>
+               <tr>
+                   <td/>
+                   <td colspan="2">Kost per km in deze periode</td>
+                   <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDeprecationFactor*details.getDeprecationKm)/details.getKm) €</td>
+               </tr>
+               <tr>
+                   <td/>
+                   <td colspan="2">Terugverdienbedrag (afschrijving + kosten)</td>
+                   <td class="numeric">@data.EurocentAmount.toString(details.getRecuperatedCarCosts+details.getRecuperatedDeprecationCost) €</td>
+               </tr>
+               <tr>
+                   <td/>
+                   <td colspan="2">Overblijvende af te schrijven waarde</td>
+                   <td class="numeric">@remainingValue €</td>
+               </tr>
             </tbody>
+            <tfoot>
+              <tr><td class="vfiller"></td></tr> @* vertical fill *@
+               <tr>
+                  @if(total > 0){
+                      <th colspan="3">TOTAAL TE BETALEN:</th>
+                  }else{
+                      <th colspan="3">Totaal te ontvangen:</th>
+                  }
+                  <th class="numeric">@data.EurocentAmount.toString(total) €</th>
+              </tr>
+            </tfoot>
         </table>
       </div>
       <div id="text">
-          <ul class="note">
-            <li>Ben je niet akkoord met deze afrekening, reageer dan binnen de 7 dagen met een e-mail naar
-                de administratie (admin@@degage.be).</li>
-          </ul>
-          <p>Degage! vzw - Fuchsiastraat 81, 9000 Gent</p>
+        @if(total > 0){
+            <div class="highlight">
+            <p>Gelieve dit bedrag te storten op rekeningnummer
+                <b>IBAN BE78 5230 8045 2986</b> - BIC code TRIOBEBB,
+            met vermelding
+            van de gestructureerde mededeling <b>@struct</b>. </p>
+            <p>De uiterste betalingsdatum is
+                <b>@(Utils.toLocalizedDateString(billing.getDriversDate.plusDays(14)))</b>.
+            </p>
+            </div>
+        }else{
+            <p>Dit bedrag zal door ons worden terugbetaald.</p>
+        }
+        <ul class="note">
+        <li>Ben je niet akkoord met deze afrekening, reageer dan binnen de 7 dagen met een e-mail naar
+            de administratie (admin@@degage.be).</li>
+        </ul>
+        <p>Degage! vzw - Fuchsiastraat 81, 9000 Gent</p>
       </div>
+   }
    </body>
 </html>

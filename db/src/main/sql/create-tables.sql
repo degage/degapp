@@ -533,6 +533,13 @@ CREATE TABLE b_cars (
     PRIMARY KEY (bc_billing_id, bc_car_id)
 );
 
+CREATE TABLE b_costs (
+    bcc_billing_id INT REFERENCES billing(billing_id),
+    bcc_cost_id INT REFERENCES carcosts(car_cost_id),
+    bcc_refunded INT, -- amount actually refunded for this cost during this period
+    PRIMARY KEY (bcc_billing_id, bcc_cost_id)
+);
+
 -- TRIGGERS
 -- ~~~~~~~~
 

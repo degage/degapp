@@ -102,10 +102,33 @@ table .numeric {
 
 #right table {
   width: 100%;
+  border-collapse: collapse;
 }
 
-#right table tbody td.filler {
+#right table tbody {
+  border-bottom: 0.5pt solid black;
+}
+
+#right table td.filler {
   width: 4em;
+}
+
+#right table td.vfiller {
+  height: 2ex;
+}
+
+#right table tfoot tr th {
+  padding-top: 1ex;
+  border-top: 1pt solid black;
+  border-bottom: 1pt solid black;
+  padding-bottom: 3pt;
+}
+
+#right table tr td.info {
+  padding-top: 1ex;
+  border-top: 0.5pt solid black;
+  border-bottom: 0.5pt solid black;
+  padding-bottom: 3pt;
 }
 
 #text {
