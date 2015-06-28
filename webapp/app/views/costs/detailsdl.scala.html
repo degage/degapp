@@ -41,10 +41,10 @@
     <dt>Bedrag</dt>
     <dd>@data.EurocentAmount.toString(cost.getAmount) €
     @if(cost.getAlreadyPaid > 0){
-        (reeds betaald: @data.EurocentAmount.toString(cost.getAlreadyPaid) €)
+        (reeds afgeschreven: @data.EurocentAmount.toString(cost.getAlreadyPaid) €)
     }
     </dd>
-    @if(cost.getStatus==ApprovalStatus.ACCEPTED){
+    @if(cost.getStatus==ApprovalStatus.ACCEPTED||cost.getStatus==ApprovalStatus.FROZEN){
         <dt>Spreiding</dt>
         <dd>@spread(cost.getSpread)
         @if(cost.getSpread > 0 && cost.getStartDate != cost.getDate){
@@ -55,7 +55,7 @@
     <dt>Kilometerstand</dt>
     <dd>@cost.getKm</dd>
     <dt>Status</dt>
-    <dd>@statusname(cost.getStatus)</dd>
+    <dd>@coststatusname(cost.getStatus)</dd>
     <dt>Bonnetje/bewijsstuk</dt>
     <dd><a href="@routes.Costs.getCarCostProof(cost.getId)" target="_blank">Klik hier</a></dd>
     @if(cost.getStatus==ApprovalStatus.REFUSED){

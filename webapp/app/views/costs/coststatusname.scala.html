@@ -1,0 +1,14 @@
+@*
+*@
+
+@(status: ApprovalStatus)
+
+@* Status name is displayed differently in the frozen case (to avoid confusion) *@
+
+@if(status == ApprovalStatus.FROZEN){
+<span class="@status.name.toLowerCase">
+    <span class="fa fa-check-square"></span> (Gedeeltelijk) verwerkt.
+</span>
+}else {
+    @statusname(status)
+}
