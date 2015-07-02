@@ -105,96 +105,116 @@
         <table>
             <tbody>
                <tr>
-                   <th colspan="2">Totaal aantal km deze periode</th>
+                   <th>Totaal aantal kms deze periode</th>
                    <td class="km">@details.getKm</td>
-                   <td/>
                </tr>
                <tr>
-                   <td class="filler"></td>
-                   <td>&nbsp;door eigenaar gereden</td>
+                   <td>door eigenaar(s) gereden kms</td>
                    <td class="km">@details.getOwnerKm</td>
-                   <td/>
                </tr>
                <tr>
-                   <td/>
-                   <td>&nbsp;(= in %)</td>
-                   <td class="percentage">@(100*details.getOwnerKm/details.getKm)%</td>
-                   <td/>
+                   <td>% kms eigenaar</td>
+                   <td class="km">@(100*details.getOwnerKm/details.getKm)%</td>
                </tr>
                <tr>
-                   <td/>
-                   <td>&nbsp;door autodeler gereden</td>
-                   <td class="percentage">@(100*(details.getKm-details.getOwnerKm)/details.getKm)%</td>
-                   <td/>
+                   <td>door ontleners gereden kms</td>
+                   <td class="km">@(details.getKm-details.getOwnerKm)</td>
                </tr>
                <tr>
-                   <th colspan="3">Recuperatie afschrijving</th>
-                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedDeprecationCost) €</th>
+                   <td>% gedeelde kms</td>
+                   <td class="km">@(100*(details.getKm-details.getOwnerKm)/details.getKm)%</td>
                </tr>
                <tr>
-                   <td/>
-                   <td>af te schrijven km (aan @cents(details.getDeprecationFactor) €/km)</td>
+                   <td class="vfiller"></td>
+               </tr>
+               <tr><th>1. Afschrijving van de auto</th></tr>
+               <tr>
+                   <td>af te schrijven kms</td>
                    <td class="km">@details.getDeprecationKm</td><td/>
                </tr>
                <tr>
-                   <td/>
-                   <td colspan="2">Totale afschrijving</td>
+                   <td>afschrijving per km</td>
+                   <td class="numeric">@cents(details.getDeprecationFactor) €</td><td/>
+               </tr>
+               <tr>
+                   <td>af te schrijven waarde</td>
                    <td class="numeric">@data.EurocentAmount.toString(details.getDeprecationFactor*details.getDeprecationKm/10) €</td>
                </tr>
+               <tr>
+                   <th>recuperatie afschrijving</th>
+                   <td></td>
+                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedDeprecationCost)  €</th>
+               </tr>
+               <tr>
+                   <td class="vfiller"></td>
+               </tr>
+               <tr><th>2. Autokosten</th></tr>
+               <tr>
+                   <td>autokosten voor deze periode</td>
+                   <td class="numeric">@data.EurocentAmount.toString(details.getCarCosts) €</td>
+               </tr>
+               <tr>
+                   <td>autokost per km</td>
+                   <td class="numeric">@cents(details.getCarCosts*10/details.getKm) €</td>
+               </tr>
+               <tr>
+                   <th>recuperatie autokosten</th>
+                   <td></td>
+                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedCarCosts)  €</th>
+               </tr>
+               <tr>
+                   <td class="vfiller"></td>
+               </tr>
+               <tr><th>3. Brandstof</th></tr>
+               <tr>
+                   <td>totaal bedrag tankbeurten</td>
+                   <td class="numeric">@data.EurocentAmount.toString(details.getTotalFuelCost) €</td>
+               </tr>
+               <tr>
+                   <td>brandstofprijs per km</td>
+                   <td class="numeric">@cents(details.getFuelCostFactor) €</td>
+               </tr>
                 <tr>
-                    <th colspan="3">Saldo brandstof</th>
-                    <th class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelDue-details.getOwnerFuelPaid) €</th>
-                </tr>
-                <tr>
-                    <td/><td colspan="2">Totale brandstofkost (= @cents(details.getFuelCostFactor) €/km)</td>
-                    <td class="numeric">@data.EurocentAmount.toString(details.getTotalFuelCost) €</td>
-                </tr>
-                <tr>
-                    <td/><td colspan="2">te betalen door eigenaar</td>
+                    <td>te betalen brandstof eigenaar</td>
                     <td class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelDue) €</td>
                 </tr>
                 <tr>
-                    <td/><td colspan="2">reeds betaald door eigenaar</td>
+                    <td>reeds betaalde brandstof door eigenaar</td>
                     <td class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelPaid) €</td>
                 </tr>
                <tr>
-                   <th colspan="3">Recuperatie autokosten</th>
-                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedCarCosts) €</th>
-               </tr>
-               <tr>
-                   <td/>
-                   <td colspan="2">af te schrijven voor deze periode (= @cents(details.getCarCosts*10/details.getKm) €/km)</td>
-                   <td class="numeric">@data.EurocentAmount.toString(details.getCarCosts) €</td>
+                   <th>saldo brandstof</th> <td/>
+                   <th class="numeric">@data.EurocentAmount.toString(details.getOwnerFuelDue-details.getOwnerFuelPaid)  €</th>
                </tr>
                <tr><td class="vfiller"></td></tr>
                <tr>
                    <td class="info" colspan="4">Ter informatie:</td>
                </tr>
                <tr>
-                   <td/>
-                   <td colspan="2">Kost per km in deze periode</td>
+                   <td>kilometerprijs in deze periode (1 + 2 + 3)</td>
                    <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDeprecationFactor*details.getDeprecationKm)/details.getKm) €</td>
                </tr>
                <tr>
-                   <td/>
-                   <td colspan="2">Terugverdienbedrag (afschrijving + kosten)</td>
-                   <td class="numeric">@data.EurocentAmount.toString(details.getRecuperatedCarCosts+details.getRecuperatedDeprecationCost) €</td>
+                   <td>terugverdienbedrag (1 + 2)</td>
+                   <td class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedCarCosts-details.getRecuperatedDeprecationCost) €</td>
                </tr>
                <tr>
-                   <td/>
-                   <td colspan="2">Overblijvende af te schrijven waarde</td>
-                   <td class="numeric">@remainingValue €</td>
+                   <td>waarde van de auto op @Utils.toLocalizedDateString(billing.getLimit minusDays 1)</td>
+                   <td class="numeric">@remainingValue&nbsp €</td>
+               </tr>
+               <tr>
+                   <td class="vfiller"></td>
                </tr>
             </tbody>
             <tfoot>
               <tr><td class="vfiller"></td></tr> @* vertical fill *@
                <tr>
                   @if(total > 0){
-                      <th colspan="3">TOTAAL TE BETALEN:</th>
+                      <th colspan="2">TOTAAL TE BETALEN:</th>
                   }else{
-                      <th colspan="3">Totaal te ontvangen:</th>
+                      <th colspan="2">Totaal te ontvangen:</th>
                   }
-                  <th class="numeric">@data.EurocentAmount.toString(total) €</th>
+                  <th class="numeric">@data.EurocentAmount.toString(total)  €</th>
               </tr>
             </tfoot>
         </table>
