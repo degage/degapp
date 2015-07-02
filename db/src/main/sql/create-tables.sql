@@ -540,6 +540,61 @@ CREATE TABLE b_costs (
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
 
+DELIMITER $$
+
+DROP FUNCTION IF EXISTS structured_comment $$
+CREATE FUNCTION structured_comment (b_id INT, xtra INT, ix INT, id INT)
+   RETURNS VARCHAR(20) DETERMINISTIC
+BEGIN
+   DECLARE pre INT;
+   DECLARE mid INT;
+   DECLARE e INT;
+   DECLARE m INT;
+
+   SET pre = (3*b_id + xtra) % 1000;
+   SET mid = ix % 10000;
+   SET e = id % 1000;
+   SET m = (10000000 * pre + 1000 * mid + e) % 97;
+   IF m = 0 THEN
+      SET m = 97;
+   END IF;
+   RETURN CONCAT ("+++",
+       SUBSTRING(1000+pre FROM -3),
+       "/",
+       SUBSTRING(10000+mid FROM -4),
+       "/",
+       SUBSTRING(1000+e FROM -3),
+       SUBSTRING(100+m FROM -2),
+       "+++"
+   );
+END $$
+
+DELIMITER ;
+
+-- reporting
+CREATE VIEW b_car_overview AS
+  SELECT
+     bc_billing_id AS billing_id,
+     bc_car_id AS car_id,
+     car_name AS name,
+     bc_fuel_due - bc_fuel_owner AS fuel,
+     - bc_deprec_recup AS deprec,
+     - bc_costs_recup AS  costs,
+     bc_fuel_due - bc_fuel_owner - bc_deprec_recup - bc_costs_recup AS total,
+     structured_comment(bc_billing_id,1,bc_seq_nr,bc_car_id) as sc
+  FROM b_cars JOIN cars ON cars.car_id = b_cars.bc_car_id;
+
+CREATE VIEW b_user_overview AS
+  SELECT
+     bu_billing_id AS billing_id,
+     bu_user_id AS user_id,
+     concat(user_lastname, ", ", user_firstname) AS name,
+     bu_km_cost AS km,
+     bu_fuel_cost AS fuel,
+     bu_km_cost - bu_fuel_cost AS total,
+     structured_comment(bu_billing_id,0,bu_seq_nr,bu_user_id) as sc
+  FROM b_user JOIN users ON users.user_id = b_user.bu_user_id;
+
 -- TRIGGERS
 -- ~~~~~~~~
 
