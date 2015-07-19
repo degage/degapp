@@ -30,7 +30,5 @@
 package be.ugent.degage.db.models;
 
 public enum JobType {
-    IS_REMINDER,
-    RES_REMINDER,
-    REPORT
+    IS_REMINDER
 }

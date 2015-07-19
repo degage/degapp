@@ -77,7 +77,7 @@ public final class Scheduler {
 
         // change ride status from ACCEPTED to REQUEST_DETAILS for every ride with an
         // end date later than now
-        // TODO: can we avoid doing this actively - e.g., by
+        /* now done by the mysql event scheduler
         schedule(Duration.create(12, TimeUnit.MINUTES),
                 new RunnableInContext("Finish rides") {
                     @Override
@@ -85,9 +85,7 @@ public final class Scheduler {
                         context.getReservationDAO().adjustReservationStatuses();
                     }
                 });
-
-        // make sure that at least one report job is planned
-        // TODO: checkInitialReports();
+                */
 
         // schedule 'jobs' to be run at a fixed interval (standard: every five minutes)
         schedule(Duration.create(db.Utils.getSchedulerInterval(), TimeUnit.SECONDS),
@@ -101,27 +99,6 @@ public final class Scheduler {
                 }
         );
     }
-
-    /**
-     * Checks if there's a report already scheduled, and if not, schedule one
-     */
-    private static void checkInitialReports() {
-        // TODO: currently not used
-        new RunnableInContext("Launch initial reports") {
-            @Override
-            public void runInContext(DataAccessContext context) {
-                JobDAO dao = context.getJobDAO();
-                if (!dao.existsJobOfType(JobType.REPORT)) {
-                    dao.createJob(JobType.REPORT, 0,
-                            // TODO: bug
-                            // Unable to obtain Instant from TemporalAccessor: 2015-02-01T00:00 of type java.time.LocalDateTime
-                            Instant.from(LocalDate.now().with(TemporalAdjusters.firstDayOfNextMonth()).atStartOfDay())
-                    );
-                }
-            }
-        }.run();
-    }
-
     private static void schedule(FiniteDuration repeatDuration, Runnable task) {
         Akka.system().scheduler().schedule(
                 Duration.create(0, TimeUnit.MILLISECONDS), //Initial delay 0 milliseconds

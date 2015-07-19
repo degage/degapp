@@ -126,12 +126,7 @@ public interface ReservationDAO {
 
     public int numberOfReservationsWithStatus(ReservationStatus status, int userId, boolean userIsLoaner);
 
-    /**
-     * Migrate reservations with status 'ACCEPTED' to status 'REQUEST_DETAILS' when the entire reservation is in the past
-     */
-    public void adjustReservationStatuses();
-
-    /**
+   /**
      * List of reservations for a certain car. Used in {@link #listCRInfo}
      */
     public static class CRInfo {

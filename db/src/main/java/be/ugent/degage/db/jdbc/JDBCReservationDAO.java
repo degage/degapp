@@ -514,20 +514,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    private static final String ADJUST_STATEMENT =
-            "UPDATE reservations SET reservation_status='REQUEST_DETAILS' " +
-                    " WHERE reservation_from < NOW() AND reservation_status = 'ACCEPTED' ";
-
-    @Override
-    public void adjustReservationStatuses() {
-        try (Statement stat = createStatement()) {
-            stat.executeUpdate(ADJUST_STATEMENT); // it is possible that no records are affected
-        } catch (SQLException ex) {
-            throw new DataAccessException("Error while updating the reservations statuses", ex);
-        }
-    }
-
-
     private LazyStatement listCRInfoStatement = new LazyStatement(
             "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
                     "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE_WIDE +

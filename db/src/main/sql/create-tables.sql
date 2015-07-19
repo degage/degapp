@@ -430,7 +430,7 @@ CREATE TABLE `approvals` (
 
 CREATE TABLE `jobs` (
   `job_id` BIGINT(20) NOT NULL AUTO_INCREMENT,
-  `job_type` ENUM('IS_REMINDER','RES_REMINDER','REPORT') NOT NULL DEFAULT 'REPORT',
+  `job_type` ENUM('IS_REMINDER') NOT NULL DEFAULT 'IS_REMINDER',
   `job_ref_id` INT NULL DEFAULT '0',
   `job_time` TIMESTAMP,
   `job_finished` BIT(1) NOT NULL DEFAULT b'0',
@@ -539,6 +539,16 @@ CREATE TABLE b_costs (
     bcc_refunded INT, -- amount actually refunded for this cost during this period
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
+-- EVENTS
+------------------------------------------------------
+
+DROP EVENT IF EXISTS update_reservation_status;
+CREATE EVENT update_reservation_status
+   ON SCHEDULE EVERY 6 MINUTE
+COMMENT 'Updates reservations from future to past'
+DO
+   UPDATE reservations SET reservation_status='REQUEST_DETAILS'
+     WHERE reservation_from < NOW() AND reservation_status = 'ACCEPTED';
 
 DELIMITER $$
 
