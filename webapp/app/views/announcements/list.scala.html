@@ -1,4 +1,4 @@
-/* AnnouncementDAO.java
+@* list.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,42 +24,18 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
- */
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
-package be.ugent.degage.db.dao;
+@(list : Iterable[Announcement])
 
-import be.ugent.degage.db.models.Announcement;
+@stdlayout("Aankondigingen") {
 
-/**
- * Processes announcements
- */
-public interface AnnouncementDAO {
-
-    /**
-     * Get the description field of the announcement with the given key
-     */
-    public String getAnnouncementDescription(String key);
-
-    /**
-     * Get the announcement for the given key. Does not contain
-     * the markdown.
-     */
-    public Announcement getAnnouncement (String key);
-
-    /**
-     * Get the announcement for the given key, markdown included.
-     */
-    public Announcement getAnnouncementFull (String key);
-
-    /**
-     * Update HTML and Markdown for the given key
-     */
-    public void updateAnnouncement (String key, String html, String markdown);
-
-    /**
-     * Get the list of all announcements. Does not contain the markdown.
-     */
-    public Iterable<Announcement> listAnnouncements ();
+    @foreach(list) { announcement =>
+        @panel(announcement.getDescription){
+            <div class="col-xs-12">@Html(announcement.getHtml)</div>
+            <div class="col-xs-4">@btnWarning("Wijzigen", routes.Announcements.edit(announcement.getKey))</div>
+        }
+    }
 
 }

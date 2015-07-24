@@ -22,7 +22,8 @@ libraryDependencies ++= Seq(
   "com.edulify"             %% "play-hikaricp"               % "1.5.0-fork-2",    // 1.5.0 adapted to use hikari 2.3.2
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
-  "com.typesafe.akka"       %% "akka-actor"                  % "2.3.0",
+  // "com.typesafe.akka"       %% "akka-actor"                  % "2.0.3",
+  "org.pegdown"             %  "pegdown"                     % "1.4.0",
   "org.webjars"             %  "bootstrap"                   % "3.3.1",
   "org.webjars"             % "jquery"                       % "2.1.1",
   "org.webjars"             % "bootstrap-datetimepicker"     % "2.2.0", // Timepicker for bootstrap v3

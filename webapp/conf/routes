@@ -267,6 +267,11 @@ GET         /billing/list                           controllers.Billings.list(id
 GET         /billing/user                           controllers.Billings.userDetails(id:Int, uid: Int ?= 0)
 GET         /billing/car                            controllers.Billings.carDetails(id: Int, cid: Int)
 
+#Announcements
+GET         /announcements                          controllers.Announcements.index()
+GET         /announcements/edit                     controllers.Announcements.edit(key: String)
+POST        /announcements/edit                     controllers.Announcements.doEdit(key: String)
+
 # User Picker
 GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
 # Car Picker

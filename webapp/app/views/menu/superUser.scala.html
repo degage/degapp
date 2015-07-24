@@ -31,6 +31,7 @@
 
 @if(db.CurrentUser.hasRole(UserRole.SUPER_USER)){
     @item(title, "Rollen", "fa-wrench", routes.UserRoles.index)
+    @item(title, "Aankondigingen", "fa-bars", routes.Announcements.index)
 @* TODO: incorporate these
     @item(title, "Systeemvariabelen", "fa-wrench", routes.Settings.sysvarsOverview)
     @item(title, "Rapportering", "fa-files-o", routes.Reports.index)

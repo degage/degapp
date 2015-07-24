@@ -149,6 +149,19 @@ class AbstractDAO {
         }
     }
 
+    /**
+     * Executes a prepared statement and converts the first result into a string, or 0 if no result.
+     */
+    protected static String toSingleString(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getString(1);
+            } else {
+                return null;
+            }
+        }
+    }
+
      /**
      * Executes a prepared statement and converts the first result into an object, or null if no result.
      */

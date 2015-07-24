@@ -1,4 +1,4 @@
-/* AnnouncementDAO.java
+@* edit.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,42 +24,26 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
- */
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
 
-package be.ugent.degage.db.dao;
+@(form: play.data.Form[Announcements.Data], key:String, caption: String, html:String, markdown: String)
+@* Can be used both for previewing and editing. *@
 
-import be.ugent.degage.db.models.Announcement;
+@stdlayout("Aankondiging "+caption,extrabc=breadcrumb("Aankondigingen",routes.Announcements.index)){
 
-/**
- * Processes announcements
- */
-public interface AnnouncementDAO {
+    @panel("Preview", "fa-eye"){
+      <div class="col-xs-12">@Html(html)</div>
+    }
 
-    /**
-     * Get the description field of the announcement with the given key
-     */
-    public String getAnnouncementDescription(String key);
-
-    /**
-     * Get the announcement for the given key. Does not contain
-     * the markdown.
-     */
-    public Announcement getAnnouncement (String key);
-
-    /**
-     * Get the announcement for the given key, markdown included.
-     */
-    public Announcement getAnnouncementFull (String key);
-
-    /**
-     * Update HTML and Markdown for the given key
-     */
-    public void updateAnnouncement (String key, String html, String markdown);
-
-    /**
-     * Get the list of all announcements. Does not contain the markdown.
-     */
-    public Iterable<Announcement> listAnnouncements ();
+    @panel("Aanpassen", "fa-pencil"){
+        @helper.form(routes.Announcements.doEdit(key)){
+            @std.textArea(form("markdown"), "Aankondiging (gebruik markdown syntax)", 20)
+            <div class="col-sm-12 col-xs-6">
+                <button type="submit" class="btn btn-xs btn-success" name="action" value="preview">Preview</button>
+                <button type="submit" class="btn btn-xs btn-warning" name="action" value="default">Wijzigingen opslaan</button>
+            </div>
+        }
+    }
 
 }

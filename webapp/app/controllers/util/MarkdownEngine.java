@@ -1,4 +1,4 @@
-/* AnnouncementDAO.java
+/* MarkdownEngine.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,42 +24,24 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ * distribution).  If not, see http://www.gnu.org/licenses/.
  */
 
-package be.ugent.degage.db.dao;
+package controllers.util;
 
-import be.ugent.degage.db.models.Announcement;
+import org.pegdown.Extensions;
+import org.pegdown.PegDownProcessor;
 
 /**
- * Processes announcements
+ * Engine for converting markdown to HTML.
  */
-public interface AnnouncementDAO {
+public class MarkdownEngine {
 
-    /**
-     * Get the description field of the announcement with the given key
-     */
-    public String getAnnouncementDescription(String key);
+    private static final PegDownProcessor processor = new PegDownProcessor(
+            Extensions.SUPPRESS_ALL_HTML
+    );
 
-    /**
-     * Get the announcement for the given key. Does not contain
-     * the markdown.
-     */
-    public Announcement getAnnouncement (String key);
-
-    /**
-     * Get the announcement for the given key, markdown included.
-     */
-    public Announcement getAnnouncementFull (String key);
-
-    /**
-     * Update HTML and Markdown for the given key
-     */
-    public void updateAnnouncement (String key, String html, String markdown);
-
-    /**
-     * Get the list of all announcements. Does not contain the markdown.
-     */
-    public Iterable<Announcement> listAnnouncements ();
-
+    public static synchronized String toHtml(String markdown) {
+        return processor.markdownToHtml(markdown);
+    }
 }
