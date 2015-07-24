@@ -63,6 +63,7 @@ public class Application extends Controller {
             return redirect(routes.Login.login(null));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
+            String headerHtml = context.getAnnouncementDAO().getAnnouncement("header").getHtml();
             if (CurrentUser.hasFullStatus() || CurrentUser.hasRole(UserRole.SUPER_USER)) {
                 // normal dashboard if user has full status
                 if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
@@ -75,9 +76,9 @@ public class Application extends Controller {
                         data.period = "week";
                         ofclist.add(Calendars.getOverviewForCar(data));
                     }
-                    return ok(dashboardOwner.render(ofclist));
+                    return ok(dashboardOwner.render(headerHtml, ofclist));
                 } else {
-                    return ok(dashboardFullUser.render());
+                    return ok(dashboardFullUser.render(headerHtml));
                 }
             } else {
                 // reduced dashboard
@@ -88,6 +89,7 @@ public class Application extends Controller {
                 );
                 return ok(
                         dashboardRegistered.render(
+                                headerHtml,
                                 currentUser,
                                 pc.getPercentage(),
                                 InfoSessions.didUserGoToInfoSession(),

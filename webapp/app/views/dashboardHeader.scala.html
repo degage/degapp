@@ -27,14 +27,10 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(showNotice: Boolean = true)
+@(headerHtml: String, showNotice: Boolean = true)
 
 <div class="row">
     <div class="col-xs-12 alert alert-info">
-        <p><b>Degapp</b> (beta) is de nieuwe plek voor het beheer van onze autodeelvloot.
-        Je kan er deelauto's mee opzoeken en reserveren. Na een rit kan de ontlener of eigenaar
-            kilometerstanden en tankbeurten ingeven.
-        Afspreken voor het afhalen van de sleutels en de auto doe je <i>buiten</i> dit systeem.</p>
-        <p>Vragen of suggesties stuur je naar <a href="mailto:degapp@@degage.be">degapp@@degage.be</a>.</p>
+        @Html(headerHtml)
     </div>
 </div>

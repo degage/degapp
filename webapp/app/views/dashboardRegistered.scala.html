@@ -27,14 +27,14 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
+@(headerHtml: String, user: User, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
 
 @app("Welkom"){
     @breadcrumbs {
     }
 
     <div id="page-wrapper">        @* Does not use maincontent because of header *@
-        @dashboardHeader()
+        @dashboardHeader(headerHtml)
         @flashes()
         <div class="row">
             <div class="col-xs-12">

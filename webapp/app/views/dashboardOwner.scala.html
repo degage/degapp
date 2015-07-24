@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(ofclist: java.lang.Iterable[Calendars.OverviewForCar])
+@(headerHtml: String, ofclist: java.lang.Iterable[Calendars.OverviewForCar])
 
 @import providers.DataProvider
 @import db.CurrentUser
@@ -45,7 +45,7 @@
     }
 
     <div id="page-wrapper">        @* Does not use maincontent because of header *@
-        @dashboardHeader()
+        @dashboardHeader(headerHtml)
         @calendars.reservationpanelowner(ofclist)
 
         <div class="row">

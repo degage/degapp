@@ -409,6 +409,15 @@ CREATE TABLE `notifications` ( -- from system to user
 	FOREIGN KEY (`notification_user_id`) REFERENCES users(`user_id`)
 );
 
+CREATE TABLE announcements (
+    `announcement_key` VARCHAR(16),
+    `announcement_description` VARCHAR(64),
+    `announcement_html` TEXT NOT NULL,
+    `announcement_md` TEXT NOT NULL,
+    `announcement_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (announcement_key)
+);
+
 CREATE TABLE `approvals` (
   `approval_id` INT NOT NULL AUTO_INCREMENT,
   `approval_user` INT NULL DEFAULT NULL,

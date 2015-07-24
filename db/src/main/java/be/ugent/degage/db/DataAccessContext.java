@@ -32,7 +32,6 @@ package be.ugent.degage.db;
 import be.ugent.degage.db.dao.*;
 
 /**
- * Created by Cedric on 2/16/14.
  */
 public interface DataAccessContext extends AutoCloseable {
     public UserDAO getUserDAO();
@@ -44,6 +43,8 @@ public interface DataAccessContext extends AutoCloseable {
     public MessageDAO getMessageDAO();
 
     public AddressDAO getAddressDAO();
+
+    public AnnouncementDAO getAnnouncementDAO();
     
     public CarDAO getCarDAO();
 

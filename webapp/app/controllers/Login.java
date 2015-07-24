@@ -58,11 +58,13 @@ public class Login extends Controller {
         public String password;
 
         public String validate() {
-            if (email == null || email.length() < 5)
+            if (email == null || email.length() < 5) {
                 return "Emailadres ontbreekt";
-            else if (password == null || password.length() == 0)
+            } else if (password == null || password.length() == 0) {
                 return "Wachtwoord ontbreekt";
-            else return null;
+            } else {
+                return null;
+            }
         }
     }
 
@@ -72,10 +74,13 @@ public class Login extends Controller {
      *
      * @return The login index page
      */
-    // needs no injected context
+    @InjectContext
     public static Result login(String redirect) {
         CurrentUser.clear(); // also clears the flash...
-        return ok(login.render(Form.form(LoginModel.class), redirect));
+        return ok(login.render(
+                DataAccess.getInjectedContext().getAnnouncementDAO().getAnnouncement("login").getHtml(),
+                Form.form(LoginModel.class),
+                redirect));
     }
 
     public static class EmailData {
@@ -132,16 +137,17 @@ public class Login extends Controller {
 
         public List<ValidationError> validate() {
             // TODO: password strength validation
-            if (!password.equals(password_repeat))
+            if (!password.equals(password_repeat)) {
                 return Collections.singletonList(new ValidationError(
                         "password_repeat", "Beide wachtwoorden moeten gelijk zijn"
                 ));
-            else
+            } else {
                 return null;
+            }
         }
     }
 
-     /**
+    /**
      * Asks the user to enter email and a new password
      */
     @InjectContext
@@ -166,7 +172,7 @@ public class Login extends Controller {
                     form.reject("email", "Dit moet het e-mailadres zijn waarnaar de 'wachtwoord vergeten'-e-mail is verzonden");
                     return badRequest(pwreset.render(form, uuid));
                 default: // OK
-                    flash ("success", "Je nieuwe wachtwoord is met succes aangemaakt. Log in om verder te gaan.");
+                    flash("success", "Je nieuwe wachtwoord is met succes aangemaakt. Log in om verder te gaan.");
                     return redirect(routes.Login.login(null));
             }
         }
@@ -182,16 +188,17 @@ public class Login extends Controller {
     @InjectContext
     public static Result authenticate(String redirect) {
         Form<LoginModel> loginForm = Form.form(LoginModel.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        String loginHtml = context.getAnnouncementDAO().getAnnouncement("login").getHtml();
         if (loginForm.hasErrors()) {
-            return badRequest(login.render(loginForm, redirect));
+            return badRequest(login.render(loginHtml, loginForm, redirect));
         } else {
-            DataAccessContext context = DataAccess.getInjectedContext();
             UserHeader user = context.getUserDAO().getUserWithPassword(loginForm.get().email, loginForm.get().password);
 
             if (user != null) {
-                if  (!user.canLogin()) {
+                if (!user.canLogin()) {
                     loginForm.reject("Deze account werd verwijderd of geblokkeerd. Gelieve de administrator te contacteren.");
-                    return badRequest(login.render(loginForm, redirect));
+                    return badRequest(login.render(loginHtml, loginForm, redirect));
                 } else {
                     CurrentUser.set(user, context.getUserRoleDAO().getUserRoles(user.getId()));
                     if (redirect != null) {
@@ -204,14 +211,14 @@ public class Login extends Controller {
                 }
             } else {
                 loginForm.reject("Foute gebruikersnaam of wachtwoord.");
-                return badRequest(login.render(loginForm, redirect));
+                return badRequest(login.render(loginHtml, loginForm, redirect));
             }
         }
     }
 
     @AllowRoles
     @InjectContext
-    public static Result setAdmin () {
+    public static Result setAdmin() {
         if (CurrentUser.canPromote()) {
             CurrentUser.setAdmin(DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(CurrentUser.getId()));
             return redirect(routes.Application.index());
@@ -222,15 +229,15 @@ public class Login extends Controller {
 
     @AllowRoles
     @InjectContext
-    public static Result clearAdmin () {
+    public static Result clearAdmin() {
         CurrentUser.clearAdmin(DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(CurrentUser.getId()));
         return redirect(routes.Application.index());
     }
 
-   /**
+    /**
      * Shows the screen for a registration request
      */
-    public static Result requestRegistration () {
+    public static Result requestRegistration() {
         return ok(request.render(Form.form(EmailData.class)));
     }
 
@@ -257,7 +264,7 @@ public class Login extends Controller {
      * Next step in the registration procedure. Ask for password, name. etc
      */
     public static Result registerVerification(String uuid) {
-        return ok (register.render(Form.form(RegisterData.class), uuid));
+        return ok(register.render(Form.form(RegisterData.class), uuid));
     }
 
     public static class RegisterData extends PasswordResetData {
@@ -288,7 +295,7 @@ public class Login extends Controller {
                     form.reject("email", "Dit moet het e-mailadres zijn waarnaar de registratie-e-mail is verzonden");
                     return badRequest(register.render(form, uuid));
                 default: // OK
-                    flash ("success", "Je bent geregistreerd als gebruiker bij de webapplicatie. Log in om verder te gaan.");
+                    flash("success", "Je bent geregistreerd als gebruiker bij de webapplicatie. Log in om verder te gaan.");
                     return redirect(routes.Login.login(null));
             }
         }
