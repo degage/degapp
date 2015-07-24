@@ -109,7 +109,7 @@ class JDBCAnnouncementDAO extends AbstractDAO implements AnnouncementDAO {
     @Override
     public void updateAnnouncement(String key, String html, String markdown) {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE announcements SET announcement_html = ?, announcement_md = ? WHERE key = ?"
+                "UPDATE announcements SET announcement_html = ?, announcement_md = ? WHERE announcement_key = ?"
         )) {
             ps.setString(1,html);
             ps.setString(2,markdown);

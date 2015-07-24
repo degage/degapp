@@ -30,7 +30,7 @@
 @(form: play.data.Form[Announcements.Data], key:String, caption: String, html:String, markdown: String)
 @* Can be used both for previewing and editing. *@
 
-@stdlayout("Aankondiging "+caption,extrabc=breadcrumb("Aankondigingen",routes.Announcements.index)){
+@stdlayout("Aankondiging wijzigen",extrabc=breadcrumb("Aankondigingen",routes.Announcements.index)){
 
     @panel("Preview", "fa-eye"){
       <div class="col-xs-12">@Html(html)</div>
@@ -38,7 +38,8 @@
 
     @panel("Aanpassen", "fa-pencil"){
         @helper.form(routes.Announcements.doEdit(key)){
-            @std.textArea(form("markdown"), "Aankondiging (gebruik markdown syntax)", 20)
+            @std.static(caption, "Soort aankondiging")
+            @std.textArea(form("markdown"), "Tekst — gebruik 'Markdown' syntax", 20)
             <div class="col-sm-12 col-xs-6">
                 <button type="submit" class="btn btn-xs btn-success" name="action" value="preview">Preview</button>
                 <button type="submit" class="btn btn-xs btn-warning" name="action" value="default">Wijzigingen opslaan</button>

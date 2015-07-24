@@ -29,8 +29,10 @@
 
 package controllers;
 
+import be.ugent.degage.db.dao.AnnouncementDAO;
 import be.ugent.degage.db.models.Announcement;
 import be.ugent.degage.db.models.UserRole;
+import controllers.util.MarkdownEngine;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
@@ -84,9 +86,21 @@ public class Announcements extends Controller {
     @AllowRoles(UserRole.SUPER_USER)
     public static Result doEdit(String key) {
         // TODO: also allow save instead of only preview
-        Announcement announcement = DataAccess.getInjectedContext().getAnnouncementDAO().getAnnouncement(key);
         Data data = Form.form(Data.class).bindFromRequest().get();
-        String html =
-        return ok();
+        AnnouncementDAO dao = DataAccess.getInjectedContext().getAnnouncementDAO();
+        if ("default".equals(data.action)) {
+            // save
+            dao.updateAnnouncement(key, MarkdownEngine.toHtml(data.markdown), data.markdown);
+            return redirect(routes.Announcements.index());
+        } else {
+            // preview
+            return ok(edit.render(
+                    Form.form(Data.class).fill(data),
+                    key,
+                    dao.getAnnouncementDescription(key),
+                    MarkdownEngine.toHtml(data.markdown),
+                    data.markdown
+            ));
+        }
     }
 }
