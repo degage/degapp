@@ -28,6 +28,7 @@
  *@
 
 @(actionName: String, initialLoad: Boolean = true)
+<script type='text/javascript' src='@routes.Assets.at("lib/js-cookie/js.cookie.js")'></script>
 <script type='text/javascript' src='@routes.Application.paginationRoutes()'></script>
 <script>
     var route = paginationJsRoutes.controllers.@actionName;

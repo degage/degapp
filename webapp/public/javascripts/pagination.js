@@ -40,6 +40,10 @@
  *  <p id="pagination" name="@amountOfResults, @amountOfPages"></p>
  */
 
+/**
+ * Now uses cookie 'ps' to store preferred page size.
+ */
+
 /* Variables we can overwrite after we included the script */
 var previousBtnTxt = "<";
 var nextBtnTxt = ">";
@@ -57,8 +61,9 @@ if(typeof beginPage == 'undefined') {
     var beginPage = 1;
 }
 if(typeof beginPageSize == 'undefined') {
-    var beginPageSize = 10;
+    var beginPageSize = beginPageSize || Cookies.get("ps") || 10;
 }
+
 if(typeof beginAsc == 'undefined') {
     var beginAsc = 1;
 }
@@ -230,6 +235,7 @@ function loadPage(page, pageSize, asc, orderBy, search) {
                 $('#selectPageSize').val(pageSize);
                 $('#selectPageSize').change(function() {
                     var newPageSize = $(this).val();
+                    Cookies.set("ps", newPageSize, {expires: 30});
                     var newPage = parseInt((((page-1) * pageSize) / newPageSize)+1);
                     loadPage(newPage, newPageSize, asc, orderBy, search);
                 });
