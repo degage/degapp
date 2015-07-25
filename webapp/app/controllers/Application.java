@@ -85,7 +85,8 @@ public class Application extends Controller {
                 User currentUser = DataProvider.getUserProvider().getUser();
                 ProfileCompleteness pc = new ProfileCompleteness(
                         currentUser,
-                        context.getFileDAO().hasLicenseFile(currentUser.getId())
+                        context.getFileDAO().hasLicenseFile(currentUser.getId()),
+                        context.getUserDAO().getUserPicture(currentUser.getId()) > 0
                 );
                 return ok(
                         dashboardRegistered.render(

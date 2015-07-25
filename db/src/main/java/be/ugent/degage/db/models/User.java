@@ -47,23 +47,13 @@ public class User extends UserHeader {
     private String damageHistory;
     private String vatNr;
 
-    private int profilePictureId; //TODO, review if it's okay practice to -1 = NULL
+    // private int profilePictureId; // picture must be retrieved separately
 
     private boolean agreeTerms;
 
     public User(int id, String email, String firstName, String lastName, UserStatus status,
                 String phone, String cellPhone, Integer degageId) {
         super(id, email, firstName, lastName, status, phone, cellPhone, degageId);
-        this.profilePictureId = -1;
-    }
-
-
-    public int getProfilePictureId() {
-        return profilePictureId;
-    }
-
-    public void setProfilePictureId(int profilePictureId) {
-        this.profilePictureId = profilePictureId;
     }
 
     public Address getAddressDomicile() {

@@ -74,7 +74,12 @@ public interface UserDAO {
     public void updateUserMainProfile(User user) throws DataAccessException;
 
     /**
-     * Update the user picture
+     * Return the index of the user picture, or 0 if no picture was registered
+     */
+    public int getUserPicture (int userId);
+
+    /**
+     * Update the user picture.
      */
     public void updateUserPicture (int userId, int fileId);
 

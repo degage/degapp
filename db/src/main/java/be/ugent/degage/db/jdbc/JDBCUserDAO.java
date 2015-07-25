@@ -57,7 +57,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
-                    "users.user_damage_history, users.user_deposit, users.user_agree_terms, users.user_image_id, " +
+                    "users.user_damage_history, users.user_deposit, users.user_agree_terms,  " +
                     "users.user_date_joined, users.user_driver_license_date, users.user_vat " +
                     "FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
@@ -99,10 +99,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         user.setAddressResidence(JDBCAddressDAO.populateAddress(rs, "residenceAddresses"));
         user.setDamageHistory(rs.getString("users.user_damage_history"));
         user.setAgreeTerms(rs.getBoolean("users.user_agree_terms"));
-
-        if (rs.getObject("users.user_image_id") != null) {
-            user.setProfilePictureId(rs.getInt("users.user_image_id"));
-        }
 
         user.setLicense(rs.getString("users.user_driver_license_id"));
 
@@ -154,17 +150,19 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     @Override
     public UserHeader getUserByEmail(String email) {
-        if (email == null || email.isEmpty())
+        if (email == null || email.isEmpty()) {
             return null;
+        }
 
         try {
             PreparedStatement ps = getUserByEmailStatement.value();
             ps.setString(1, email.trim().toLowerCase());
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
+                if (rs.next()) {
                     return populateUserHeader(rs);
-                else
+                } else {
                     return null;
+                }
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
@@ -189,8 +187,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     } else {
                         return null;
                     }
-                } else
+                } else {
                     return null;
+                }
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
@@ -241,8 +240,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return populateUser(rs);
-                } else
+                } else {
                     return null;
+                }
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by id.", ex);
@@ -262,8 +262,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     return populateUserHeader(rs);
-                } else
+                } else {
                     return null;
+                }
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by id.", ex);
@@ -333,33 +334,38 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
             ps.setInt(5, user.getId());
 
-            if (ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("User update affected 0 rows.");
+            }
 
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user main profile", ex);
         }
     }
 
-    private LazyStatement updateUserPictureStatement = new LazyStatement(
-            "UPDATE users SET user_image_id = ? WHERE user_id = ?"
-    );
+    @Override
+    public int getUserPicture(int userId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT user_image_id FROM users WHERE user_id = ?"
+        )) {
+            ps.setInt(1, userId);
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to getuser picture", ex);
+        }
+    }
 
     @Override
     public void updateUserPicture(int userId, int fileId) {
-        try {
-            PreparedStatement ps = updateUserPictureStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_image_id = ? WHERE user_id = ?"
+        )) {
             ps.setInt(1, fileId);
             ps.setInt(2, userId);
-
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("User update affected 0 rows.");
-            }
-
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user picture", ex);
         }
-
     }
 
     private LazyStatement updateUserLicenseDataStatement = new LazyStatement(
@@ -433,8 +439,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         try {
             PreparedStatement ps = deleteUserStatement.value();
             ps.setInt(1, userId);
-            if (ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when deleting (=updating to DROPPED) user.");
+            }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not delete user", ex);
         }
@@ -468,10 +475,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             fillFragment(ps, filter, 1);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next())
+                if (rs.next()) {
                     return rs.getInt("amount_of_users");
-                else
+                } else {
                     return 0;
+                }
             }
 
         } catch (SQLException ex) {

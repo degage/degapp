@@ -91,7 +91,7 @@ public class ProfileCompleteness {
      * Compute how much the profile is complete for the given user
      * @param user Fully initialized user record
      */
-    public ProfileCompleteness (User user, boolean hasLicenseFile) {
+    public ProfileCompleteness (User user, boolean hasLicenseFile, boolean hasPicture) {
         set = EnumSet.noneOf(Item.class);
         if (!isBlank(user.getFirstName())) {
             set.add(Item.FIRST_NAME);
@@ -121,7 +121,7 @@ public class ProfileCompleteness {
         if (!isBlank(user.getLicense())) {
             set.add(Item.LICENSE_NUMBER);
         }
-        if (user.getProfilePictureId() != 0) {
+        if (hasPicture) {
             set.add(Item.PROFILE_PICTURE);
         }
         if (hasLicenseFile) {

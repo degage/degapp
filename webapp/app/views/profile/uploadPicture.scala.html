@@ -32,16 +32,17 @@
 
     @breadcrumbs{
         @breadcrumb("Profiel", routes.Profile.index(userId))
-        @breadcrumb("Bewerken")
+        @breadcrumb("Foto uploaden")
     }
 
     @maincontent("Profielfoto wijzigen"){
-       @panel("Bestand uploaden", "fa-wrench"){
+       @panel("Profielfoto uploaden", "fa-file-image-o"){
             @flashes()
             @helper.form(routes.Profile.profilePictureUploadPost(userId), 'enctype -> "multipart/form-data") {
-                <input type="file" name="picture">
-                <br>
-                <input class="btn btn-sm btn-success" type="submit" value="Doorsturen">
+                <div class="form-group col-sm-4">
+                    <input type="file" name="picture" class="form-control input-md">
+                </div>
+                @std.submitButton("Doorsturen", css="col-sm-4")
             }
         }
     }

@@ -87,8 +87,8 @@ public class Profile extends Controller {
     @InjectContext
     public static Result getProfilePicture(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        int profilePictureId = context.getUserDAO().getUser(userId).getProfilePictureId();
-        if (profilePictureId >= 0) {
+        int profilePictureId = context.getUserDAO().getUserPicture(userId);
+        if (profilePictureId > 0) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), profilePictureId);
         } else {
             return FileHelper.getPublicFile("images/user.png", "image/png");
@@ -125,15 +125,11 @@ public class Profile extends Controller {
                 try {
                     DataAccessContext context = DataAccess.getInjectedContext();
                     UserDAO dao = context.getUserDAO();
-                    User user = dao.getUser(userId);
-
                     FileDAO fdao = context.getFileDAO();
-                    UserDAO udao = context.getUserDAO();
                     File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
-                    int oldPictureId = user.getProfilePictureId();
-                    udao.updateUserPicture(userId, file.getId());
-
-                    if (oldPictureId != -1) {
+                    int oldPictureId = dao.getUserPicture(userId);
+                    dao.updateUserPicture(userId, file.getId());
+                    if (oldPictureId > 0) {
                         File oldPicture = fdao.getFile(oldPictureId);
                         FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
                         fdao.deleteFile(oldPictureId);
@@ -175,13 +171,15 @@ public class Profile extends Controller {
     @InjectContext
     public static Result index(int userId) {
         DataAccessContext context = DataAccess.getInjectedContext();
-        User user = context.getUserDAO().getUser(userId);
+        UserDAO dao = context.getUserDAO();
+        User user = dao.getUser(userId);
 
         // Only a profile admin or user itself can edit
         if (canEditProfile(userId)) {
             ProfileCompleteness pc = new ProfileCompleteness(
                     user,
-                    context.getFileDAO().hasLicenseFile(userId)
+                    context.getFileDAO().hasLicenseFile(userId),
+                    dao.getUserPicture(userId) > 0
             );
             return ok(index.render(user, pc.getPercentage()));
         } else if (CurrentUser.hasFullStatus()) { // TODO: remove reference to currentUser
