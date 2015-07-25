@@ -33,7 +33,10 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.BillingAdmDAO;
 
 import java.sql.CallableStatement;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.time.LocalDate;
 
 /**
  * JDBC implementation of {@link BillingAdmDAO}
@@ -53,4 +56,20 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
             throw new DataAccessException("Could not archive billing", e);
         }
     }
+
+    @Override
+    public void createBilling(String description, String prefix, LocalDate start, LocalDate limit) {
+        try (PreparedStatement ps = prepareStatement(
+                "INSERT INTO billing(billing_description,billing_prefix,billing_start,billing_limit) VALUES (?,?,?,?)"
+        )) {
+            ps.setString(1, description);
+            ps.setString(2, prefix);
+            ps.setDate(3, Date.valueOf(start));
+            ps.setDate(4, Date.valueOf(limit));
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not create billing", e);
+        }
+    }
+
 }

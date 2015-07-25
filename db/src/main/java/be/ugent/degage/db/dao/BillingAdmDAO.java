@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.dao;
 
+import java.time.LocalDate;
+
 /**
  * Data access object for billing administration
  */
@@ -39,4 +41,9 @@ public interface BillingAdmDAO {
      * archive mode.
      */
     public void archive (int billingId);
+
+    /**
+     * Create a new billing.
+     */
+    public void createBilling (String description, String prefix, LocalDate start, LocalDate limit);
 }

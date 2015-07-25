@@ -270,6 +270,7 @@ GET         /billing/car                            controllers.Billings.carDeta
 GET         /billadm/list                            controllers.BillingsAdmin.listAll()
 GET         /billadm/anom                           controllers.BillingsAdmin.showAnomalies(id: Int, cid: Int)
 GET         /billadm/archive                        controllers.BillingsAdmin.archive(id: Int)
+POST        /billadm/create                         controllers.BillingsAdmin.doCreate()
 
 #Announcements
 GET         /announcements                          controllers.Announcements.index()
