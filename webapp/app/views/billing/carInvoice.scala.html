@@ -106,7 +106,7 @@
             <tbody>
                <tr>
                    <th>Totaal aantal kms deze periode</th>
-                   <td class="km">@details.getKm</td>
+                   <td class="km">@details.getTotalKm</td>
                </tr>
                <tr>
                    <td>door eigenaar(s) gereden kms</td>
@@ -114,15 +114,15 @@
                </tr>
                <tr>
                    <td>% kms eigenaar</td>
-                   <td class="km">@(100*details.getOwnerKm/details.getKm)%</td>
+                   <td class="km">@(100*details.getOwnerKm/details.getTotalKm)%</td>
                </tr>
                <tr>
                    <td>door ontleners gereden kms</td>
-                   <td class="km">@(details.getKm-details.getOwnerKm)</td>
+                   <td class="km">@(details.getTotalKm-details.getOwnerKm)</td>
                </tr>
                <tr>
                    <td>% gedeelde kms</td>
-                   <td class="km">@(100*(details.getKm-details.getOwnerKm)/details.getKm)%</td>
+                   <td class="km">@(100*(details.getTotalKm-details.getOwnerKm)/details.getTotalKm)%</td>
                </tr>
                <tr>
                    <td class="vfiller"></td>
@@ -155,7 +155,7 @@
                </tr>
                <tr>
                    <td>autokost per km</td>
-                   <td class="numeric">@cents(details.getCarCosts*10/details.getKm) €</td>
+                   <td class="numeric">@cents(details.getCarCosts*10/details.getTotalKm) €</td>
                </tr>
                <tr>
                    <th>recuperatie autokosten</th>
@@ -192,7 +192,7 @@
                </tr>
                <tr>
                    <td>kilometerprijs in deze periode (1 + 2 + 3)</td>
-                   <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDeprecationFactor*details.getDeprecationKm)/details.getKm) €</td>
+                   <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDeprecationFactor*details.getDeprecationKm)/details.getTotalKm) €</td>
                </tr>
                <tr>
                    <td>terugverdienbedrag (1 + 2)</td>

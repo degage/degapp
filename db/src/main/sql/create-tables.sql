@@ -184,6 +184,7 @@ CREATE TABLE `cars` (
 	`car_images_id` INT,
 	`car_deprec` INT, -- cents per 10 km
 	`car_deprec_limit` INT, -- no deprecation cost once this number of km is reached
+	`car_deprec_last` INT, -- last km for which the deprecation cost was already billed
 	`car_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`car_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`car_id`),
@@ -530,6 +531,7 @@ CREATE TABLE b_cars (
     bc_car_id INT REFERENCES cars(car_id),
     bc_first_km INT,
     bc_last_km INT,
+    bc_total_km INT,  -- sum of all trips  (need not be the same as bc_last_km - bc_first_km)
     bc_owner_km INT,  -- kilometers driven by privileged users
     bc_deprec_km INT, -- kilometers counted for deprecation
     bc_fuel_total INT,      -- total fuel cost for this period

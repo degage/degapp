@@ -36,7 +36,10 @@ public class BillingDetailsCar {
 
     private int firstKm; // mileage of first km in this period
 
-    private int lastKm; // mileage of last lm in this period
+    private int lastKm; // mileage of last km in this period
+
+    private int totalKm; // total number of kms driven. Need not be the difference between lastKm - firstKm as
+                         // some of the trips may be/have been handled in a different period
 
     private int ownerKm; // total number of kms driven by owner (or privileged person)
 
@@ -58,12 +61,13 @@ public class BillingDetailsCar {
 
     private int recuperatedCarCosts;
 
-    public BillingDetailsCar(int firstKm, int lastKm, int ownerKm, int deprecationKm,
+    public BillingDetailsCar(int firstKm, int lastKm, int totalKm, int ownerKm, int deprecationKm,
                              int totalFuelCost, int ownerFuelPaid, int deprecationFactor,
                              int recuperatedDeprecationCost, int ownerFuelDue, int index,
                              int carCosts, int recuperatedCarCosts) {
         this.firstKm = firstKm;
         this.lastKm = lastKm;
+        this.totalKm = totalKm;
         this.ownerKm = ownerKm;
         this.deprecationKm = deprecationKm;
         this.totalFuelCost = totalFuelCost;
@@ -76,6 +80,7 @@ public class BillingDetailsCar {
         this.recuperatedCarCosts = recuperatedCarCosts;
     }
 
+    // TODO: no longer used?
     public int getFirstKm() {
         return firstKm;
     }
@@ -84,11 +89,8 @@ public class BillingDetailsCar {
         return lastKm;
     }
 
-    /**
-     * Total number of kms for this period
-     */
-    public int getKm() {
-        return lastKm - firstKm;
+    public int getTotalKm() {
+        return totalKm;
     }
 
     public int getOwnerKm() {

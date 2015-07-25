@@ -248,9 +248,10 @@ END $$
 -- c_id: id of car
 -- cd_factor: car deprecation factor
 -- cd_limit: car_deprec_limit for this car
+-- cd_last: car_deprec_last for this car
 -- NOTE: uses information from the tables b_trip and b_fuel and b_costs
 DROP PROCEDURE IF EXISTS billing_car_aux $$
-CREATE PROCEDURE billing_car_aux (b_id INT, c_id INT, lim DATETIME, cd_factor INT, cd_limit INT)
+CREATE PROCEDURE billing_car_aux (b_id INT, c_id INT, lim DATETIME, cd_factor INT, cd_limit INT, cd_last INT)
 BEGIN
     DECLARE first_km INT;
     DECLARE last_km INT;
@@ -276,6 +277,10 @@ BEGIN
     INTO first_km, last_km;
 
     SELECT IFNULL(SUM(bt_km),0) FROM b_trip
+       WHERE bt_billing_id = b_id AND bt_car_id = c_id
+    INTO total_km;
+
+    SELECT IFNULL(SUM(bt_km),0) FROM b_trip
        WHERE bt_billing_id = b_id AND bt_car_id = c_id AND bt_privileged
     INTO owner_km;
 
@@ -292,8 +297,7 @@ BEGIN
        WHERE bcc_billing_id = b_id AND car_cost_car_id = c_id
     INTO car_cost;
 
-    SET total_km = last_km - first_km;
-    SET deprec_km = GREATEST(LEAST(cd_limit, last_km) - first_km, 0);
+    SET deprec_km = GREATEST(LEAST(cd_limit, last_km) - cd_last, 0);
 
     IF deprec_km = 0 THEN
         SET deprec_recup = 0;
@@ -320,11 +324,11 @@ BEGIN
     END IF;
 
     INSERT INTO b_cars(bc_billing_id, bc_car_id,
-                       bc_first_km, bc_last_km, bc_owner_km, bc_deprec_km,
+                       bc_first_km, bc_last_km, bc_total_km, bc_owner_km, bc_deprec_km,
                        bc_fuel_total, bc_fuel_owner, bc_fuel_due, bc_deprec_recup,
                        bc_costs, bc_costs_recup
                        )
-    VALUES( b_id, c_id, first_km, last_km, owner_km, deprec_km,
+    VALUES( b_id, c_id, first_km, last_km, total_km, owner_km, deprec_km,
             fuel_cost, fuel_owner, fuel_due, deprec_recup, car_cost, car_cost_recup
     );
 END $$
@@ -434,8 +438,9 @@ BEGIN
   DECLARE _id INT;
   DECLARE _cd_factor INT;
   DECLARE _cd_limit INT;
+  DECLARE _cd_last INT;
   DECLARE cur CURSOR FOR
-      SELECT car_id,car_deprec,car_deprec_limit
+      SELECT car_id,car_deprec,car_deprec_limit,car_deprec_last
         FROM cars_billed JOIN cars USING(car_id)
         WHERE billing_id = b_id;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
@@ -453,11 +458,11 @@ BEGIN
   OPEN cur;
 
   main: LOOP
-    FETCH cur INTO _id, _cd_factor, _cd_limit;
+    FETCH cur INTO _id, _cd_factor, _cd_limit, _cd_last;
     IF done THEN
       LEAVE main;
     END IF;
-    CALL billing_car_aux(b_id, _id, lim, _cd_factor, _cd_limit);
+    CALL billing_car_aux(b_id, _id, lim, _cd_factor, _cd_limit, _cd_last);
   END LOOP main;
 
   CALL billing_car_seq_nr (b_id);
