@@ -120,7 +120,8 @@ public class Costs extends CostsCommon {
         int amountOfResults = dao.getAmountOfCarCosts(filter);
         int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return ok(carCostspage.render(listOfResults, searchString.endsWith("ACCEPTED"),
+        return ok(carCostspage.render(listOfResults,
+                searchString.endsWith("ACCEPTED") || searchString.endsWith("FROZEN"),
                 page, amountOfResults, amountOfPages));
     }
 

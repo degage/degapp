@@ -34,10 +34,11 @@
         <tr role="row">
             <th>Auto</th>
             <th>Type</th>
-            <th>Toelichting</th>
+            <th width="30%">Toelichting</th>
             <th>Datum</th>
             <th>Bedrag</th>
             @if(withSpread){
+                <th>Afgeschr.</th>
                 <th>Spreiding</th>
             }
             <th>Status</th>
@@ -52,7 +53,12 @@
             <td>@Utils.toLocalizedDateString(carCost.getDate)</td>
             <td class="numeric">@data.EurocentAmount.toString(carCost.getAmount) €</td>
             @if(withSpread){
-                <td>@if(carCost.getStatus==ApprovalStatus.ACCEPTED||carCost.getStatus==ApprovalStatus.FROZEN)(spread(carCost.getSpread))else("")</td>
+                @if(carCost.getStatus==ApprovalStatus.ACCEPTED||carCost.getStatus==ApprovalStatus.FROZEN){
+                   <td class="numeric">@data.EurocentAmount.toString(carCost.getAlreadyPaid) €</td>
+                   <td>@spread(carCost.getSpread)</td>
+                }else{
+                    <td></td><td></td>
+                }
             }
             <td>@coststatusname(carCost.getStatus)</td>
             <td>@actions(carCost)</td>
