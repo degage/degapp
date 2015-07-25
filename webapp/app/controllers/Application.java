@@ -30,6 +30,7 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserRole;
@@ -41,7 +42,6 @@ import db.InjectContext;
 import play.Routes;
 import play.mvc.Controller;
 import play.mvc.Result;
-import providers.DataProvider;
 import views.html.dashboardFullUser;
 import views.html.dashboardOwner;
 import views.html.dashboardRegistered;
@@ -82,19 +82,20 @@ public class Application extends Controller {
                 }
             } else {
                 // reduced dashboard
-                User currentUser = DataProvider.getUserProvider().getUser();
+                UserDAO userDAO = context.getUserDAO();
+                User user = userDAO.getUser(CurrentUser.getId());
                 ProfileCompleteness pc = new ProfileCompleteness(
-                        currentUser,
-                        context.getFileDAO().hasLicenseFile(currentUser.getId()),
-                        context.getUserDAO().getUserPicture(currentUser.getId()) > 0
+                        user,
+                        context.getFileDAO().hasLicenseFile(CurrentUser.getId()),
+                        userDAO.getUserPicture(CurrentUser.getId()) > 0
                 );
                 return ok(
                         dashboardRegistered.render(
                                 headerHtml,
-                                currentUser,
+                                user.getFirstName(),
                                 pc.getPercentage(),
                                 InfoSessions.didUserGoToInfoSession(),
-                                context.getApprovalDAO().hasApprovalPending(currentUser.getId())
+                                context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())
                         )
                 );
             }

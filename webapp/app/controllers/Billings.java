@@ -31,7 +31,6 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.BillingDAO;
-import be.ugent.degage.db.dao.CheckDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.primitives.Ints;
 import db.CurrentUser;

@@ -37,16 +37,7 @@ import db.DataAccess;
 public class DataProvider {
 
     //TODO: this class needs a decent implementation or alternative
-    private static UserProvider userProvider;
-
     private static CommunicationProvider communicationProvider;
-
-    public static UserProvider getUserProvider() {
-        if (userProvider == null) {
-            userProvider = new UserProvider(DataAccess.getProvider());
-        }
-        return userProvider;
-    }
 
     public static CommunicationProvider getCommunicationProvider() {
         if (communicationProvider == null) {

@@ -44,6 +44,8 @@ import java.util.List;
 public class CommunicationProvider {
 
     // TODO: make these obsolete and have them computed in injected context
+    // TODO: move caching (if at all necessary) to DAO.
+    // TODO: make the three first messages and notifications appear by AJAX in a separate call?
 
     public static final int AMOUNT_OF_VISIBLE_NOTIFICATIONS = 3;
     public static final int AMOUNT_OF_VISIBLE_MESSAGES = 3;
@@ -125,7 +127,7 @@ public class CommunicationProvider {
      */
     public int getNumberOfUnreadMessages() {
         // TODO: use injected context for this
-        Integer userId = CurrentUser.getId();
+        int userId = CurrentUser.getId();
         String key = String.format(MESSAGE_NUMBER_BY_ID, userId);
         Object obj = Cache.get(key);
         if (obj == null || !(obj instanceof List)) {

@@ -33,7 +33,6 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.Notification;
-import be.ugent.degage.db.models.User;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
@@ -96,10 +95,9 @@ public class Notifications extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result markNotificationAsRead(int notificationId) {
-        User user = DataProvider.getUserProvider().getUser();
         NotificationDAO dao = DataAccess.getInjectedContext().getNotificationDAO();
         dao.markNotificationAsRead(notificationId);
-        DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
+        DataProvider.getCommunicationProvider().invalidateNotifications(CurrentUser.getId());
         return redirect(routes.Notifications.showNotifications());
     }
 
@@ -111,10 +109,9 @@ public class Notifications extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result markAllNotificationsAsRead() {
-        User user = DataProvider.getUserProvider().getUser();
         NotificationDAO dao = DataAccess.getInjectedContext().getNotificationDAO();
-        dao.markAllNotificationsAsRead(user.getId());
-        DataProvider.getCommunicationProvider().invalidateNotifications(user.getId());
+        dao.markAllNotificationsAsRead(CurrentUser.getId());
+        DataProvider.getCommunicationProvider().invalidateNotifications(CurrentUser.getId());
         return redirect(routes.Notifications.showNotifications());
     }
 

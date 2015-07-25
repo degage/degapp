@@ -42,7 +42,6 @@ import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
-import providers.DataProvider;
 import views.html.infosession.*;
 
 import java.time.Instant;
@@ -107,12 +106,13 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result newSession() {
-        User user = DataProvider.getUserProvider().getUser();
 
         InfoSessionCreationModel model = new InfoSessionCreationModel();
-        model.userId = user.getId();
-        model.userIdAsString = user.getFullName();
-        model.address.populate(user.getAddressResidence());
+        model.userId = CurrentUser.getId();
+        model.userIdAsString = CurrentUser.getFullName();
+        model.address.populate(
+                DataAccess.getInjectedContext().getUserDAO().getUser(CurrentUser.getId()).getAddressResidence()
+        );
         model.type = "NORMAL";
         return ok(addinfosession.render(
                 Form.form(InfoSessionCreationModel.class).fill(model))

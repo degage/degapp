@@ -27,8 +27,6 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@import providers.DataProvider;
-
 @app("Rollen", sheets("labels"), js.pagination("UserRoles.showUsersPage")) {
     @breadcrumbs{
         @breadcrumb("Rollen")
@@ -41,7 +39,7 @@
                 @flashes()
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <a class="btn btn-default" href="@routes.UserRoles.edit(DataProvider.getUserProvider.getUser().getId)">
+                        <a class="btn btn-default" href="@routes.UserRoles.edit(db.CurrentUser.getId)">
                             Eigen rollen bewerken</a>
                     </div>
                         <!-- /.panel-body -->

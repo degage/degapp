@@ -31,7 +31,6 @@ package notifiers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.NotificationDAO;
-import be.ugent.degage.db.dao.UserRoleDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.Utils;

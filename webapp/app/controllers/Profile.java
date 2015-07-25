@@ -48,7 +48,6 @@ import play.data.validation.Constraints;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import providers.DataProvider;
 import views.html.profile.*;
 
 import javax.imageio.IIOException;
@@ -663,7 +662,6 @@ public class Profile extends Controller {
 
             flash("success", "De profielgegevens werden met succes aangepast");
 
-            DataProvider.getUserProvider().invalidateUser(userId); //invalidate cache
             return redirect(routes.Profile.index(userId));
         } else {
             return mustBeProfileAdmin();

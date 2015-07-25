@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(headerHtml: String, user: User, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
+@(headerHtml: String, firstName: String, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
 
 @app("Welkom"){
     @breadcrumbs {
@@ -40,7 +40,7 @@
             <div class="col-xs-12">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                            Welkom @user.getFirstName! Om volwaardig lid te kunnen worden, moet je eerst nog
+                            Welkom @firstName! Om volwaardig lid te kunnen worden, moet je eerst nog
                             enkele stappen doorlopen.
                     </div>
                 </div>

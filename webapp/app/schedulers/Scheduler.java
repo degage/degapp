@@ -30,9 +30,7 @@
 package schedulers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.models.Job;
-import be.ugent.degage.db.models.JobType;
 import be.ugent.degage.db.models.UserHeader;
 import db.RunnableInContext;
 import notifiers.Notifier;
@@ -40,9 +38,6 @@ import play.libs.Akka;
 import scala.concurrent.duration.Duration;
 import scala.concurrent.duration.FiniteDuration;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.temporal.TemporalAdjusters;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;

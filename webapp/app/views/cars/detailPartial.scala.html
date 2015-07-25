@@ -28,10 +28,8 @@
  *@
 
 @(car: Car, mapDetails: Maps.MapDetails = null)
-@import providers.DataProvider
 @import db.CurrentUser
 @defining(CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
-    @defining(DataProvider.getUserProvider().getUser()) { user =>
         <div class="row">
             <div class="col-lg-3">
                 <div class="panel panel-default">
@@ -124,5 +122,5 @@
             </div>
             <!-- /col-md-9 -->
         </div>
-    }
+
 }

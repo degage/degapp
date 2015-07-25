@@ -101,13 +101,11 @@ public class CurrentUser {
     }
 
     /**
-     * Retrieve the id of the current user, or null if there is no current user.
-     *
-     * Important, do not compare this result with ==, use {@link #is} or {2link #isNot} instead
+     * Retrieve the id of the current user, or 0 if there is no current user.
      */
-    public static Integer getId () {
+    public static int getId () {
         String idString = Controller.session("id");
-        return idString == null ? null : Integer.parseInt(idString);
+        return idString == null ? 0 : Integer.parseInt(idString);
     }
 
     /**

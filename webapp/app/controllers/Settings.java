@@ -41,7 +41,6 @@ import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
-import providers.DataProvider;
 import views.html.settings.*;
 
 import java.time.Instant;
@@ -115,7 +114,6 @@ public class Settings extends Controller {
             UserDAO dao = context.getUserDAO();
 
             if (dao.changePassword(CurrentUser.getId(), data.oldpw, data.newpw)) {
-                DataProvider.getUserProvider().invalidateUser(CurrentUser.getId());
                 flash("success", "Het wachtwoord werd met succes aangepast.");
                 return redirect(routes.Application.index());
             } else {

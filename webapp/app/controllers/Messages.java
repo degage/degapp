@@ -31,7 +31,6 @@ package controllers;
 
 import be.ugent.degage.db.dao.MessageDAO;
 import be.ugent.degage.db.models.Message;
-import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
 import db.CurrentUser;
 import db.DataAccess;
@@ -246,10 +245,9 @@ public class Messages extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result markMessageAsRead(int messageId) {
-        User user = DataProvider.getUserProvider().getUser();
         MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
         dao.markMessageAsRead(messageId);
-        DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
+        DataProvider.getCommunicationProvider().invalidateMessages(CurrentUser.getId());
         return redirect(routes.Messages.showMessages());
     }
 
@@ -261,10 +259,9 @@ public class Messages extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result markAllMessagesAsRead() {
-        User user = DataProvider.getUserProvider().getUser();
         MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
-        dao.markAllMessagesAsRead(user.getId());
-        DataProvider.getCommunicationProvider().invalidateMessages(user.getId());
+        dao.markAllMessagesAsRead(CurrentUser.getId());
+        DataProvider.getCommunicationProvider().invalidateMessages(CurrentUser.getId());
         return redirect(routes.Messages.showMessages());
     }
 }
