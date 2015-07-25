@@ -254,13 +254,6 @@ GET         /damages/finished                       controllers.Damages.setDamag
 GET         /maps/tile                              controllers.Maps.getMap(zoom: Int, x: Int, y:Int)
 GET         /maps/test                              controllers.Maps.showMap()
 
-# Reports
-GET         /reports                                controllers.Reports.index()
-GET         /reports/users                          controllers.Reports.getUsers()
-GET         /reports/reservations                   controllers.Reports.getReservations()
-GET         /reports/reservations/owner             controllers.Reports.getReservationsForOwner()
-GET         /reports/cars                           controllers.Reports.getCars()
-
 #Billing (reporting)
 GET         /billing/list                           controllers.Billings.list(id: Int ?= 0)
 GET         /billing/user                           controllers.Billings.userDetails(id:Int, uid: Int ?= 0)
