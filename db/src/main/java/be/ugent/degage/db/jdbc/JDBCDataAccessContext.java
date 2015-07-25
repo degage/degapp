@@ -310,6 +310,11 @@ class JDBCDataAccessContext implements DataAccessContext {
     }
 
     @Override
+    public BillingAdmDAO getBillingAdmDAO() {
+        return new JDBCBillingAdmDAO(this);
+    }
+
+    @Override
     public AnnouncementDAO getAnnouncementDAO() {
         return new JDBCAnnouncementDAO(this);
     }

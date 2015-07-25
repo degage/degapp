@@ -91,6 +91,13 @@ class AbstractDAO {
     }
 
     /**
+     * Convenience method for creating a call in the current context
+     */
+    protected CallableStatement prepareCall(String call) throws SQLException {
+        return context.getConnection().prepareCall(call);
+    }
+
+    /**
      * Convenience method for creating a prepared statement in the current context
      */
     protected PreparedStatement prepareStatement(String sql) throws SQLException {

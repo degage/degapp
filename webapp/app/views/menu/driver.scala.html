@@ -51,7 +51,7 @@
     )
     @item(title,  "Tankbeurten", "fa-beer", routes.Refuels.showRefuels, extra=Refuels.numberOfRefuelRequests())
     @if(CurrentUser.hasRole(UserRole.SUPER_USER)){
-        @item(title,  "Afrekeningen (beheer)", "fa-money", routes.Billings.listAll())
+        @item(title,  "Afrekeningen (beheer)", "fa-money", routes.BillingsAdmin.listAll())
     }else{
         @item(title,  "Afrekeningen", "fa-money", routes.Billings.list())
     }

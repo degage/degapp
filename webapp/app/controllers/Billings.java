@@ -38,6 +38,7 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import it.innove.play.pdf.PdfGenerator;
+import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.billing.*;
 
@@ -45,35 +46,9 @@ import java.time.LocalDate;
 import java.util.*;
 
 /**
- * Actions related to building.
+ * Actions related to billing (reporting).
  */
-public class Billings extends Application {
-
-    @InjectContext
-    @AllowRoles(UserRole.SUPER_USER)
-    public static Result showAnomalies(int billingId, int carId) {
-        Iterable<CheckDAO.TripAnomaly> list = DataAccess.getInjectedContext().getCheckDAO().getTripAnomalies(billingId, carId);
-        return ok(anomalies.render(list));
-    }
-
-    private static boolean allArchived (Iterable<Billing> list) {
-        for (Billing billing : list) {
-            if (billing.getStatus() != BillingStatus.ARCHIVED) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * Produce a list of all billings for administration purposes.
-     */
-    @InjectContext
-    @AllowRoles(UserRole.SUPER_USER)
-    public static Result listAll() {
-        Iterable<Billing> list = DataAccess.getInjectedContext().getBillingDAO().listAllBillings();
-        return ok(listAll.render(list, allArchived(list)));
-    }
+public class Billings extends Controller {
 
     /**
      * Produce a list of all billings relevant to the current user.

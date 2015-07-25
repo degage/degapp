@@ -87,6 +87,8 @@ public interface DataAccessContext extends AutoCloseable {
 
     public BillingDAO getBillingDAO();
 
+    public BillingAdmDAO getBillingAdmDAO();
+
     public void begin();
 
     public void commit();

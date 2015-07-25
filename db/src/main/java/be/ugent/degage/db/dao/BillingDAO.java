@@ -32,7 +32,7 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.models.*;
 
 /**
- * Data access object related to billing.
+ * Data access object related to billing (reports).
  */
 public interface BillingDAO {
 

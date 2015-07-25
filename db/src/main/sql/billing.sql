@@ -476,6 +476,60 @@ BEGIN
 
 END $$
 
+DROP PROCEDURE IF EXISTS billing_archive $$
+CREATE PROCEDURE billing_archive (b_id INT)
+BEGIN
+
+  DECLARE lim INT;
+  SELECT billing_limit FROM billing WHERE billing_id = b_id INTO lim;
+
+  -- trips: two options TODO
+  -- 1. Archive everything that should have been billed, for every car that was billed
+  -- UPDATE reservations
+  --   JOIN cars_billed ON car_id = reservation_car_id
+  --      SET reservation_archived = TRUE
+  --   WHERE billing_id = b_id AND reservation_from < lim;
+  -- 2. Archive everything that was billed, plus old cancellations
+  UPDATE reservations JOIN b_trip ON reservation_id = bt_reservation_id
+       SET reservation_archived = TRUE
+    WHERE bt_billing_id = b_id;
+  UPDATE reservations
+       SET reservation_archived = TRUE
+       WHERE reservation_from < lim AND reservation_status < 4; -- [ENUM INDEX]
+
+  -- refuels
+  UPDATE refuels JOIN b_fuel ON refuel_id = bf_refuel_id
+       SET refuel_archived = TRUE
+    WHERE bf_billing_id = b_id;
+  UPDATE refuels JOIN reservations ON refuel_car_ride_id = reservation_id
+       SET refuel_archived = TRUE
+       WHERE reservation_from < lim AND refuel_status = 'REFUSED';
+
+  -- save what has already been paid
+  UPDATE carcosts
+     JOIN ( SELECT SUM(bcc_refunded) AS r, bcc_cost_id FROM b_costs GROUP BY bcc_cost_id
+     ) AS tab ON bcc_cost_id = car_cost_id
+     SET car_cost_already_paid = r
+     WHERE NOT car_cost_archived;
+
+  -- costs that are finished can be archived
+  UPDATE carcosts
+    SET car_cost_archived = true
+    WHERE car_cost_amount <= car_cost_already_paid;
+  UPDATE carcosts
+    SET car_cost_archived = true
+    WHERE car_cost_start < lim AND car_cost_status='REFUSED';
+
+  -- adjust car_deprec_last
+  UPDATE cars JOIN b_cars ON car_id = bc_car_id
+    SET car_deprec_last = bc_total_km
+    WHERE bc_billing_id = b_id;
+
+  -- set status
+  UPDATE billing SET billing_status='ARCHIVED' WHERE billing_id = b_id;
+
+END $$
+
 -- TODO: make sure refuels cannot be added to frozen reservations
 -- TODO: check remaining refuels for frozen reservations
 -- TODO: archiving evrything - freezing costs
