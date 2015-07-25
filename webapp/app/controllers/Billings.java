@@ -56,6 +56,25 @@ public class Billings extends Application {
         return ok(anomalies.render(list));
     }
 
+    private static boolean allArchived (Iterable<Billing> list) {
+        for (Billing billing : list) {
+            if (billing.getStatus() != BillingStatus.ARCHIVED) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Produce a list of all billings for administration purposes.
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result listAll() {
+        Iterable<Billing> list = DataAccess.getInjectedContext().getBillingDAO().listAllBillings();
+        return ok(listAll.render(list, allArchived(list)));
+    }
+
     /**
      * Produce a list of all billings relevant to the current user.
      */

@@ -1,0 +1,67 @@
+@* listAll.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(list: Iterable[Billing], allArchived: Boolean)
+
+@stdlayout("Afrekeningen (beheer)") {
+@panel("Nieuw kwartaal opstarten", "fa-pencil"){
+   @if(allArchived){
+      @* TODO *@
+   } else {
+     <div class="alert alert-warning col-xs-12">Je kan geen nieuwe kwartaalafrekening opstarten zolang de vorige nog niet
+     is afgesloten (en de bijbehorende ritten, tankbeurten en kosten niet zijn gearchiveerd).</div>
+   }
+}
+@panel("Afrekeningen", "fa-bar-chart-o") {
+<div class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
+        <thead>
+        <tr role="row">
+            <th>Afrekening</th>
+            <th>Van</th>
+            <th>Tot</th>
+            <th>Type</th>
+            <th>Acties</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach(list){ billing =>
+            <tr>
+                <td>@billing.getDescription</td>
+                <td>@Utils.toLocalizedDateString(billing.getStart)</td>
+                <td>@Utils.toLocalizedDateString(billing.getLimit minusDays 1)</td>
+                <td>@billing.getStatus</td>
+                <td/>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+}
+}

@@ -469,7 +469,7 @@ CREATE TABLE `billing` (
    `billing_drivers_date` DATE, -- date at which the drivers invoices were created
    `billing_owners_date` DATE, -- date at which the owners invoices were created
    `billing_status` ENUM (
-       'CREATED', 'PREPARING', 'SIMULATION', 'USERS_DONE', 'ALL_DONE'
+       'CREATED', 'PREPARING', 'SIMULATION', 'USERS_DONE', 'ALL_DONE', 'ARCHIVED'
    ) NOT NULL DEFAULT 'CREATED',
    `billing_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
    PRIMARY KEY (`billing_id`)

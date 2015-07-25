@@ -266,6 +266,7 @@ GET         /billing/anom                           controllers.Billings.showAno
 GET         /billing/list                           controllers.Billings.list(id: Int ?= 0)
 GET         /billing/user                           controllers.Billings.userDetails(id:Int, uid: Int ?= 0)
 GET         /billing/car                            controllers.Billings.carDetails(id: Int, cid: Int)
+GET         /billing/all                            controllers.Billings.listAll()
 
 #Announcements
 GET         /announcements                          controllers.Announcements.index()

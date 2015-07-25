@@ -41,7 +41,8 @@ public enum BillingStatus {
     PREPARING("In voorbereiding"),
     SIMULATION ("Simulatie lenersafrekening"),
     USERS_DONE ("Lenersafrekening afgewerkt"),
-    ALL_DONE ("Volledig afgewerkt");
+    ALL_DONE ("Eigenaarsafrekening afgewerkt"),
+    ARCHIVED ("Afgesloten (gearchiveerd)");
 
     private String description;
 
