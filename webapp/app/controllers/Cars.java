@@ -44,6 +44,7 @@ import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
+import play.api.data.validation.ValidationError;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
@@ -151,7 +152,7 @@ public class Cars extends Controller {
         public String validate() {
             /* TODO: dit moeten Field Errors worden, en niet één global error */
             String error = "";
-           if (Strings.isNullOrEmpty(address.street)) {
+            if (Strings.isNullOrEmpty(address.street)) {
                 error += "Geef het adres op.";
             }
             if (name.length() <= 0) {
@@ -331,7 +332,7 @@ public class Cars extends Controller {
 
             // TODO: fill in real email address
             Car car = dao.createCar(
-                    model.name, model.name.toLowerCase()+"@degage.be",
+                    model.name, model.name.toLowerCase() + "@degage.be",
                     model.brand, model.type,
                     model.address.toAddress(), model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook,
@@ -623,6 +624,54 @@ public class Cars extends Controller {
             }
         } else {
             return badRequest();
+        }
+    }
+
+    public static class DepreciationData {
+        @Constraints.Required
+        public int cents;
+
+        @Constraints.Required
+        public int limit;
+
+        public int last;
+
+    }
+
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result showDepreciation(int carId) {
+        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        CarHeaderShort car = dao.getCarHeaderShort(carId);
+        if (isOwnerOrAdmin(car)) {
+            CarDepreciation deprec = dao.getDepreciation(carId);
+            if (deprec.getLastKm() == 0 && CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+                DepreciationData data = new DepreciationData();
+                data.cents = deprec.getCentsPerTenKilometer();
+                data.limit = deprec.getLimit();
+                Form<DepreciationData> form = Form.form(DepreciationData.class).fill(data);
+                return ok(editdeprec.render(form, carId, car.getName()));
+            } else {
+                // cannot be edited
+                return ok(depreciation.render(carId, car.getName(), deprec));
+            }
+        } else {
+            return badRequest();
+        }
+    }
+
+    @AllowRoles({UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doEditDepreciation(int carId) {
+        Form<DepreciationData> form = Form.form(DepreciationData.class).bindFromRequest();
+        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        if (form.hasErrors()) {
+            CarHeaderShort car = dao.getCarHeaderShort(carId);
+            return ok(editdeprec.render(form, carId, car.getName()));
+        } else {
+            DepreciationData data = form.get();
+            dao.updateDepreciation(carId, data.cents, data.limit, data.last);
+            return redirect(routes.Cars.showDepreciation(carId));
         }
     }
 }

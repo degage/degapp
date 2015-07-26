@@ -92,4 +92,6 @@ public interface CarDAO {
 
     public CarDepreciation getDepreciation(int carId) throws DataAccessException;
 
+    public void updateDepreciation (int carId, int cents, int limit, int last) throws DataAccessException;
+
 }

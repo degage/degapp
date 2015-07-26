@@ -199,6 +199,9 @@ GET         /cars/modal/info                        controllers.Cars.getCarInfoM
 GET         /cars/privileges/edit                   controllers.Cars.updatePrivileged(id : Int, values : String)
 GET         /cars/changepicture                     controllers.Cars.pictureUpload(id: Int)
 POST        /cars/changepicture                     controllers.Cars.doPictureUpload(id: Int)
+GET         /cars/deprec                            controllers.Cars.showDepreciation(id: Int)
+POST        /cars/deprec                            controllers.Cars.doEditDepreciation(id: Int)
+
 # Costs
 GET         /costs/car                              controllers.Costs.showCostsForCar(id: Int)
 GET         /costs/detail                           controllers.Costs.showCostDetail(id: Int)

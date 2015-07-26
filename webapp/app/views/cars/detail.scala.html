@@ -78,6 +78,7 @@
             <div class="col-xs-12">
                 @btnPrimary("Basisinformatie wijzigen", routes.Cars.editCar(car.getId))
                 @btnPrimary("Foto wijzigen", routes.Cars.pictureUpload(car.getId))
+                @btnWarning("Afschrijvingsinfo", routes.Cars.showDepreciation(car.getId))
             </div>
         }
     }

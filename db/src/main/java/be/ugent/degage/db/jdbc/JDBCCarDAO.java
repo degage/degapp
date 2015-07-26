@@ -633,4 +633,20 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             throw new DataAccessException("Failed to update car picture", ex);
         }
     }
+
+    @Override
+    public void updateDepreciation(int carId, int cents, int limit, int last) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE cars SET car_deprec = ?, car_deprec_limit = ?, car_deprec_last = ? WHERE car_id = ?"
+        )) {
+            ps.setInt(1, cents);
+            ps.setInt(2, limit);
+            ps.setInt(3, last);
+            ps.setInt(4, carId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update car deprecation info", ex);
+        }
+
+    }
 }
