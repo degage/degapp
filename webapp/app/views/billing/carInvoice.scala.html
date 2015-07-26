@@ -43,7 +43,7 @@
         <link rel="stylesheet" media="print" href="/public/stylesheets/billing.css" /> @* Important: href must start with / *@
    </head>
    <body>
-      @defining(-details.getRecuperatedCarCosts+details.getOwnerFuelDue-details.getOwnerFuelPaid-details.getRecuperatedDeprecationCost) { total =>
+      @defining(-details.getRecuperatedCarCosts+details.getOwnerFuelDue-details.getOwnerFuelPaid-details.getRecuperatedDepreciationCost) { total =>
       <div id="logo"><img src='/public/images/logo-brief-2.5in.png'  width="2.5in"/></div>
       <div id="top">
           <table>
@@ -130,20 +130,20 @@
                <tr><th>1. Afschrijving van de auto</th></tr>
                <tr>
                    <td>af te schrijven kms</td>
-                   <td class="km">@details.getDeprecationKm</td><td/>
+                   <td class="km">@details.getDepreciationKm</td><td/>
                </tr>
                <tr>
                    <td>afschrijving per km</td>
-                   <td class="numeric">@cents(details.getDeprecationFactor) €</td><td/>
+                   <td class="numeric">@cents(details.getDepreciationFactor) €</td><td/>
                </tr>
                <tr>
                    <td>af te schrijven waarde</td>
-                   <td class="numeric">@data.EurocentAmount.toString(details.getDeprecationFactor*details.getDeprecationKm/10) €</td>
+                   <td class="numeric">@data.EurocentAmount.toString(details.getDepreciationFactor*details.getDepreciationKm/10) €</td>
                </tr>
                <tr>
                    <th>recuperatie afschrijving</th>
                    <td></td>
-                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedDeprecationCost)  €</th>
+                   <th class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedDepreciationCost)  €</th>
                </tr>
                <tr>
                    <td class="vfiller"></td>
@@ -192,11 +192,11 @@
                </tr>
                <tr>
                    <td>kilometerprijs in deze periode (1 + 2 + 3)</td>
-                   <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDeprecationFactor*details.getDeprecationKm)/details.getTotalKm) €</td>
+                   <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDepreciationFactor*details.getDepreciationKm)/details.getTotalKm) €</td>
                </tr>
                <tr>
                    <td>terugverdienbedrag (1 + 2)</td>
-                   <td class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedCarCosts-details.getRecuperatedDeprecationCost) €</td>
+                   <td class="numeric">@data.EurocentAmount.toString(-details.getRecuperatedCarCosts-details.getRecuperatedDepreciationCost) €</td>
                </tr>
                <tr>
                    <td>waarde van de auto op @Utils.toLocalizedDateString(billing.getLimit minusDays 1)</td>

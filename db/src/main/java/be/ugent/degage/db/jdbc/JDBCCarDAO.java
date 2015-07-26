@@ -151,12 +151,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                          TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-            "INSERT INTO cars(car_name, car_type, car_brand, " +
-                    "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
-                    "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_owner_user_id, car_comments, car_active, car_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            "car_id"
-        )){
+                "INSERT INTO cars(car_name, car_type, car_brand, " +
+                        "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
+                        "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
+                        "car_owner_user_id, car_comments, car_active, car_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "car_id"
+        )) {
 
             ps.setString(1, name);
             ps.setString(2, type);
@@ -270,8 +270,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
             ps.setInt(6, carId);
 
-            if (ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("Address update affected 0 rows.");
+            }
 
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update car location.", ex);
@@ -281,10 +282,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     @Override
     public void updateCar(Car car) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-            "UPDATE cars SET car_name=?, car_type=? , car_brand=? ,  " +
-                    "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
-                    "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_owner_user_id=? , car_comments=?, car_active=?, car_email=? WHERE car_id = ?"
+                "UPDATE cars SET car_name=?, car_type=? , car_brand=? ,  " +
+                        "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
+                        "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
+                        "car_owner_user_id=? , car_comments=?, car_active=?, car_email=? WHERE car_id = ?"
 
         )) {
             ps.setString(1, car.getName());
@@ -318,8 +319,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
             ps.setInt(18, carId);
 
-            if (ps.executeUpdate() == 0)
+            if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when updating car.");
+            }
 
             updateTechnicalCarDetails(carId, car.getTechnicalCarDetails());
             updateInsurance(carId, car.getInsurance());
@@ -580,28 +582,30 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     @Override
     public UserHeader getOwnerOfCar(int carId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-           "SELECT " + JDBCUserDAO.USER_HEADER_FIELDS +
-               "FROM cars JOIN users ON user_id=car_owner_user_id " +
-               "WHERE car_id = ?"
+                "SELECT " + JDBCUserDAO.USER_HEADER_FIELDS +
+                        "FROM cars JOIN users ON user_id=car_owner_user_id " +
+                        "WHERE car_id = ?"
         )) {
             ps.setInt(1, carId);
             return toSingleObject(ps, JDBCUserDAO::populateUserHeader);
-        }  catch (SQLException ex) {
+        } catch (SQLException ex) {
             throw new DataAccessException("Could not determine car ownwer");
         }
     }
 
     @Override
-    public CarDeprecation getDeprecation(int carId) throws DataAccessException {
+    public CarDepreciation getDepreciation(int carId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT car_deprec, car_deprec_limit FROM cars WHERE car_id = ?"
+                "SELECT car_deprec, car_deprec_limit, car_deprec_last FROM cars WHERE car_id = ?"
         )) {
-            ps.setInt (1, carId);
+            ps.setInt(1, carId);
             return toSingleObject(ps, rs ->
-                        new CarDeprecation(rs.getInt("car_deprec_limit"),
-                                            rs.getInt("car_deprec")));
-        }  catch (SQLException ex) {
-            throw new DataAccessException("Could not determine car deprecation info");
+                    new CarDepreciation(rs.getInt("car_deprec_limit"),
+                            rs.getInt("car_deprec"),
+                            rs.getInt("car_deprec_last")
+                    ));
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not determine car depreciation info");
         }
     }
 

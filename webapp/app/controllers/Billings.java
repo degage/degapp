@@ -411,12 +411,12 @@ public class Billings extends Controller {
             Iterable<BillingDetailsOwner> ownerDetails = dao.listOwnerDetails(billingId, carId);
 
             Iterable<OwnerTable> tables = getOwnerTables(ownerDetails);
-            CarDeprecation deprecation = context.getCarDAO().getDeprecation(carId);
-            int remainingValue = deprecation.getLimit()- bCar.getLastKm();
+            CarDepreciation depreciation = context.getCarDAO().getDepreciation(carId);
+            int remainingValue = depreciation.getLimit()- bCar.getLastKm();
             if (remainingValue <= 0) {
                 remainingValue = 0;
             } else {
-                remainingValue = remainingValue * deprecation.getDeprec() / 1000;
+                remainingValue = remainingValue * depreciation.getCentsPerTenKilometer() / 1000;
             }
             return PdfGenerator.ok(carInvoice.render(
                     billing, billNr, car, owner,

@@ -246,7 +246,7 @@ END $$
 -- b_id: id of billing
 -- lim: limit date, only records before this date will be considered
 -- c_id: id of car
--- cd_factor: car deprecation factor
+-- cd_factor: car depreciation factor
 -- cd_limit: car_deprec_limit for this car
 -- cd_last: car_deprec_last for this car
 -- NOTE: uses information from the tables b_trip and b_fuel and b_costs
@@ -522,7 +522,7 @@ BEGIN
 
   -- adjust car_deprec_last
   UPDATE cars JOIN b_cars ON car_id = bc_car_id
-    SET car_deprec_last = bc_total_km
+    SET car_deprec_last = bc_last_km
     WHERE bc_billing_id = b_id;
 
   -- set status

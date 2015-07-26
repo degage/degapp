@@ -1,4 +1,4 @@
-/* CarDeprecation.java
+/* CarDepreciation.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -30,24 +30,41 @@
 package be.ugent.degage.db.models;
 
 /**
- * Stores information on car deprecation
+ * Stores information on car depreciation
  */
-public class CarDeprecation {
+public class CarDepreciation {
 
     private int limit; // in km
 
     private int deprec; // in cents per 10 km
 
-    public CarDeprecation(int limit, int deprec) {
+    private int last; //in km
+
+    public CarDepreciation(int limit, int deprec, int last) {
         this.limit = limit;
         this.deprec = deprec;
+        this.last = last;
     }
 
+    /**
+     * Km at which the car is fully deprecated
+     */
     public int getLimit() {
         return limit;
     }
 
-    public int getDeprec() {
+    /**
+     * Number of cents per 10 km to depreciate the value of the car with
+     */
+    public int getCentsPerTenKilometer() {
         return deprec;
+    }
+
+    /**
+     * Last km upto which the depreciation cost has already been taken into
+     * consideration
+     */
+    public int getLastKm() {
+        return last;
     }
 }

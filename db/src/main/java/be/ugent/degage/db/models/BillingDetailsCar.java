@@ -43,15 +43,15 @@ public class BillingDetailsCar {
 
     private int ownerKm; // total number of kms driven by owner (or privileged person)
 
-    private int deprecationKm; // kms to be taken into account for the deprecation cost
+    private int depreciationKm; // kms to be taken into account for the depreciation cost
 
     private int totalFuelCost;
 
     private int ownerFuelPaid;
 
-    private int deprecationFactor; // in eurocent per 10 km
+    private int depreciationFactor; // in eurocent per 10 km
 
-    private int recuperatedDeprecationCost;
+    private int recuperatedDepreciationCost;
 
     private int ownerFuelDue;
 
@@ -61,19 +61,19 @@ public class BillingDetailsCar {
 
     private int recuperatedCarCosts;
 
-    public BillingDetailsCar(int firstKm, int lastKm, int totalKm, int ownerKm, int deprecationKm,
-                             int totalFuelCost, int ownerFuelPaid, int deprecationFactor,
-                             int recuperatedDeprecationCost, int ownerFuelDue, int index,
+    public BillingDetailsCar(int firstKm, int lastKm, int totalKm, int ownerKm, int depreciationKm,
+                             int totalFuelCost, int ownerFuelPaid, int depreciationFactor,
+                             int recuperatedDepreciationCost, int ownerFuelDue, int index,
                              int carCosts, int recuperatedCarCosts) {
         this.firstKm = firstKm;
         this.lastKm = lastKm;
         this.totalKm = totalKm;
         this.ownerKm = ownerKm;
-        this.deprecationKm = deprecationKm;
+        this.depreciationKm = depreciationKm;
         this.totalFuelCost = totalFuelCost;
         this.ownerFuelPaid = ownerFuelPaid;
-        this.deprecationFactor = deprecationFactor;
-        this.recuperatedDeprecationCost = recuperatedDeprecationCost;
+        this.depreciationFactor = depreciationFactor;
+        this.recuperatedDepreciationCost = recuperatedDepreciationCost;
         this.ownerFuelDue = ownerFuelDue;
         this.index = index;
         this.carCosts = carCosts;
@@ -97,8 +97,8 @@ public class BillingDetailsCar {
         return ownerKm;
     }
 
-    public int getDeprecationKm() {
-        return deprecationKm;
+    public int getDepreciationKm() {
+        return depreciationKm;
     }
 
     public int getTotalFuelCost() {
@@ -120,16 +120,16 @@ public class BillingDetailsCar {
         return ownerFuelPaid;
     }
 
-    public int getDeprecationFactor() {
-        return deprecationFactor;
+    public int getDepreciationFactor() {
+        return depreciationFactor;
     }
 
-    public int getTotalDeprecationCost() {
-        return deprecationFactor*deprecationKm/10;
+    public int getTotalDepreciationCost() {
+        return depreciationFactor*depreciationKm/10;
     }
 
-    public int getRecuperatedDeprecationCost() {
-        return recuperatedDeprecationCost;
+    public int getRecuperatedDepreciationCost() {
+        return recuperatedDepreciationCost;
     }
 
     public int getOwnerFuelDue() {

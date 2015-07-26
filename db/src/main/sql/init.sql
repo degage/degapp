@@ -12,7 +12,6 @@ INSERT INTO `userroles` (`userrole_userid`, `userrole_role`)
 -- settings
 INSERT INTO `settings` (`setting_name`,`setting_value`) VALUES
         ("show_profile","true"),
-        ("deprecation_cost","0.8"),
         ("show_maps","false"),
         ("infosessions_page_size","10"),
         ("scheduler_interval","300"),
