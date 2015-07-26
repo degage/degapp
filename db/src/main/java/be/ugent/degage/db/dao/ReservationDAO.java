@@ -79,18 +79,19 @@ public interface ReservationDAO {
 
     /**
      * Return the first accepted reservation that follows the given reservation, unless it is more
-     * than a day removed (for the same car)
+     * than a day removed (for the same car). Archived reservations are not returned.
      */
     public Reservation getNextReservation(int reservationId) throws DataAccessException;
 
     /**
      * Return the last accepted  reservation that preceeds the given reservation, unless it is more
-     * than a day removed
+     * than a day removed. Archived reservations are not returned.
      */
     public Reservation getPreviousReservation(int reservationId) throws DataAccessException;
 
     /**
-     * Return the first trip (that has actually taken place) that follows the given reservation, for the same car.
+     * Return the first trip (that has actually taken place) that follows the given reservation,
+     * for the same car. Archived reservations are not returned.
      * @return 0 if no such trip
      */
     public int getNextTripId (int reservationId) throws DataAccessException;
@@ -98,6 +99,7 @@ public interface ReservationDAO {
 
     /**
      * Return the last trip (that has actually taken place) that preceeds the given reservation, for the same car.
+     * Archived reservations are not returned.
      * @return 0 if no such trip
      */
     public int getPreviousTripId (int reservationId) throws DataAccessException;

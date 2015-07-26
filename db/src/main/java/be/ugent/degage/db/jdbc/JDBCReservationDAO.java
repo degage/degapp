@@ -288,6 +288,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     "ON r.reservation_car_id = o.reservation_car_id " +
                     "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
+                    "AND NOT r.reservation_archived " +
                     "AND r.reservation_status = 'ACCEPTED' " +
                     "AND r.reservation_from >= o.reservation_to  " +
                     "AND r.reservation_from <= o.reservation_to + INTERVAL 1 DAY " +
@@ -318,6 +319,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     "ON r.reservation_car_id = o.reservation_car_id " +
                     "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
+                    "AND NOT r.reservation_archived " +
                     "AND r.reservation_status = 'ACCEPTED' " +
                     "AND r.reservation_to <= o.reservation_from  " +
                     "AND r.reservation_to + INTERVAL 1 DAY >= o.reservation_from " +
@@ -351,6 +353,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 "SELECT r.reservation_id FROM reservations AS r JOIN reservations AS o " +
                         "ON r.reservation_car_id = o.reservation_car_id " +
                         "WHERE o.reservation_id = ? " +
+                        "AND NOT r.reservation_archived " +
                         "AND r.reservation_status > 5  " +       // [ENUM INDEX]
                         "AND r.reservation_from > o.reservation_from  " +
                         "ORDER BY r.reservation_from ASC LIMIT 1"
@@ -368,6 +371,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 "SELECT r.reservation_id FROM reservations AS r JOIN reservations AS o " +
                         "ON r.reservation_car_id = o.reservation_car_id " +
                         "WHERE o.reservation_id = ? " +
+                        "AND NOT r.reservation_archived " +
                         "AND r.reservation_status > 5  " +       // [ENUM INDEX]
                         "AND r.reservation_from < o.reservation_from  " +
                         "ORDER BY r.reservation_from DESC LIMIT 1"
@@ -384,6 +388,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT reservation_id FROM reservations " +
                         "WHERE reservation_from >= ? " +
+                        "AND NOT reservation_archived " +
                         "AND reservation_car_id = ? " +
                         "AND reservation_status > 5  " +       // [ENUM INDEX]
                         "ORDER BY reservation_from ASC LIMIT 1"
@@ -498,7 +503,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         try (Statement statement = createStatement()) {
             String sql = "SELECT COUNT(*) as result FROM reservations " +
                     "INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
-                    "WHERE reservations.reservation_status = '" + status.name() + "'";
+                    "WHERE NOT reservation_archived AND reservations.reservation_status = '" + status.name() + "'";
             if (userIsLoaner)
                 sql += " AND (car_owner_user_id = " + userId + " OR reservation_user_id = " + userId + ")";
             else
