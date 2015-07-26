@@ -68,6 +68,9 @@
                 <td>@billing.getStatus</td>
                 <td>
                     @billing.getStatus match {
+                        case BillingStatus.CREATED => {
+                             @btnPrimary("Selecteer auto's", routes.BillingsAdmin.selectCars(billing.getId))
+                        }
                         case BillingStatus.ALL_DONE => {
                              @btnDanger("Afsluiten (archiveren)", routes.BillingsAdmin.archive(billing.getId))
                         }

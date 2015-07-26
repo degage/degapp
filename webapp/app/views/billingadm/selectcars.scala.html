@@ -1,0 +1,79 @@
+@* selectcars.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@import be.ugent.degage.db.dao.BillingAdmDAO
+
+@(billing: Billing, list: Iterable[List[BillingAdmDAO.CarInfo]])
+
+@stylesheets={
+   <style>
+       .incomplete { text-decoration: line-through; color: red; }
+       .nodata { color: darkgrey; }
+       table { margin-left: 20px; margin-right: 20px; width: auto !important; display: inline-table; }
+   </style>
+}
+
+@css(info:BillingAdmDAO.CarInfo)=@{if(info.nodata)("nodata")else(if(info.incomplete)("incomplete")else("data"))}
+
+@stdlayout("Beheer afrekening", stylesheets=stylesheets, extrabc=breadcrumb("Afrekeningen", routes.BillingsAdmin.listAll())) {
+
+    @panel("Afrekening", "fa-money") {
+        <div class="col-xs-8">
+            <dl class="dl-horizontal">
+                <dt>Titel:</dt><dd>@billing.getDescription</dd>
+                <dt>Prefix:</dt><dd>@billing.getPrefix</dd>
+                <dt>Periode:</dt><dd>@Utils.toLocalizedDateString(billing.getStart) - @Utils.toLocalizedDateString(billing.getLimit minusDays 1)</dd>
+            </dl>
+        </div>
+    }
+
+    @panel("Af te rekenen auto's", "fa-car"){
+       <div class="col-xs-12">
+           <p><b>Legende:</b>
+               <ul>
+               <li><span class="incomplete">Afschrijvingsinformatie onvolledig.</span> </li>
+               <li><span class="nodata">Geen ritten of tankbeurten.</span></li>
+               </ul>
+           <b>Opgelet!</b> Zorg er ook voor dat de geprivelegieerden voor de auto's correct zijn vooraleer de simulaties te starten.
+           </p>
+       </div>
+       <div class="col-xs-12">
+           @foreach(list) { column =>
+               <table class="table table-striped table-bordered table-hover no-footer" >
+
+               @foreach.tr(column){ info =>
+                   <td class=@css(info)>@info.carName</td>
+                   <td><input type="checkbox" @if(!info.nodata && !info.incomplete){checked}></td>
+               }
+               </table>
+           }
+       </div>
+    }
+
+}

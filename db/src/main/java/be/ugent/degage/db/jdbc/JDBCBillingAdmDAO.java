@@ -37,6 +37,7 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * JDBC implementation of {@link BillingAdmDAO}
@@ -72,4 +73,35 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
         }
     }
 
+    @Override
+    public List<CarInfo> listCarBillingInfo(int billingId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_id, car_name, " +
+                        "(car_deprec IS NULL OR car_deprec = 0 OR car_deprec_limit IS NULL OR car_deprec_limit = 0 " +
+                        " OR car_deprec_last IS NULL OR car_deprec = 0) AS incomplete, d " +
+                "FROM cars " +
+                "LEFT JOIN ( SELECT reservation_car_id AS id, 1 as d FROM trips,billing " +
+                        "WHERE reservation_status > 5 AND reservation_from < billing_limit AND billing_id = ? " + //[ENUM INDEX]
+                        "UNION " +
+                        "SELECT reservation_car_id AS id, 1 as d FROM refuels " +
+                            "JOIN reservations ON reservation_id = refuel_car_ride_id " +
+                            "JOIN billing " +
+                        " WHERE refuel_status != 'REFUSED' AND NOT refuel_archived AND reservation_from < billing_limit AND billing_id = ? " +
+                ") AS tmp ON car_id=id  ORDER BY car_name"
+        )) {
+            ps.setInt(1, billingId);
+            ps.setInt(2, billingId);
+            //System.err.println(ps);
+            return toList(ps, rs -> {
+                CarInfo info = new CarInfo();
+                info.carId = rs.getInt("car_id");
+                info.carName = rs.getString("car_name");
+                info.incomplete = rs.getBoolean("incomplete");
+                info.nodata = rs.getObject("d") == null;
+                return info;
+            });
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not create billing", e);
+        }
+    }
 }

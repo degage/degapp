@@ -29,6 +29,7 @@
 
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.CheckDAO;
 import be.ugent.degage.db.models.Billing;
 import be.ugent.degage.db.models.BillingStatus;
@@ -42,6 +43,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.billingadm.anomalies;
 import views.html.billingadm.listAll;
+import views.html.billingadm.selectcars;
 
 import java.time.LocalDate;
 import java.util.Collections;
@@ -131,5 +133,16 @@ public class BillingsAdmin extends Controller {
             );
             return redirect(routes.BillingsAdmin.listAll());
         }
+    }
+
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result selectCars(int billingId) {
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        return ok (selectcars.render(
+                context.getBillingDAO().getBilling(billingId),
+                Utils.splitList(context.getBillingAdmDAO().listCarBillingInfo(billingId), 3)
+        ));
     }
 }

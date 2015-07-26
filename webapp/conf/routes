@@ -264,10 +264,11 @@ GET         /billing/user                           controllers.Billings.userDet
 GET         /billing/car                            controllers.Billings.carDetails(id: Int, cid: Int)
 
 # Billing (admin)
-GET         /billadm/list                            controllers.BillingsAdmin.listAll()
+GET         /billadm/list                           controllers.BillingsAdmin.listAll()
 GET         /billadm/anom                           controllers.BillingsAdmin.showAnomalies(id: Int, cid: Int)
 GET         /billadm/archive                        controllers.BillingsAdmin.archive(id: Int)
 POST        /billadm/create                         controllers.BillingsAdmin.doCreate()
+GET         /billadm/cars                           controllers.BillingsAdmin.selectCars(id: Int)
 
 #Announcements
 GET         /announcements                          controllers.Announcements.index()

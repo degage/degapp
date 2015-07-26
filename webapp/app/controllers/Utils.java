@@ -32,6 +32,9 @@ package controllers;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 
 /**
@@ -135,5 +138,27 @@ public final class Utils {
             }
             return i == length;
         }
+    }
+
+    /**
+     * Split a list into a number of lists
+     */
+    public static<T> Iterable<List<T>> splitList (List<T> list, int columns) {
+        List<List<T>> result = new ArrayList<>(columns);
+        for (int i = 0; i < columns; i++) {
+            result.add(new ArrayList<T>());
+        }
+        int height = (list.size() + columns - 1) / columns;
+        int row = 0;
+        int column = 0;
+        for (T element : list) {
+            if (row == height) {
+                row = 0;
+                column ++;
+            }
+            result.get(column).add(element);
+            row ++;
+        }
+        return result;
     }
 }

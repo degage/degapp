@@ -480,7 +480,7 @@ DROP PROCEDURE IF EXISTS billing_archive $$
 CREATE PROCEDURE billing_archive (b_id INT)
 BEGIN
 
-  DECLARE lim INT;
+  DECLARE lim DATETIME;
   SELECT billing_limit FROM billing WHERE billing_id = b_id INTO lim;
 
   -- trips: two options TODO

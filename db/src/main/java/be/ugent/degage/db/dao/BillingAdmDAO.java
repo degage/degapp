@@ -30,6 +30,7 @@
 package be.ugent.degage.db.dao;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Data access object for billing administration
@@ -40,10 +41,22 @@ public interface BillingAdmDAO {
      * Finalize a billing period. Puts all related trips, costs and refuels into
      * archive mode.
      */
-    public void archive (int billingId);
+    public void archive(int billingId);
 
     /**
      * Create a new billing.
      */
-    public void createBilling (String description, String prefix, LocalDate start, LocalDate limit);
+    public void createBilling(String description, String prefix, LocalDate start, LocalDate limit);
+
+    public static class CarInfo {
+        public int carId;
+        public String carName;
+        public boolean nodata; // true if there is nothing to be billed for this car
+        public boolean incomplete; // true if the depreciation information for that car is not complete
+    }
+
+    /**
+     * Return information about cars that are eligible for billing
+     */
+    public List<CarInfo> listCarBillingInfo(int billingId);
 }
