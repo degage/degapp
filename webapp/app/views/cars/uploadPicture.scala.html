@@ -27,11 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(userId: Int, userName: String)
+@(carId: Int, carName: String)
 
-@stdlayout("Profielfoto uploaden",extrabc=breadcrumb(userName, routes.Profile.index(userId))) {
-   @panel("Profielfoto uploaden voor " + userName, "fa-file-image-o"){
-        @helper.form(routes.Profile.profilePictureUploadPost(userId), 'enctype -> "multipart/form-data") {
+@stdlayout("Autofoto uploaden",extrabc=breadcrumb(carName, routes.Cars.detail(carId))) {
+   @panel("Foto uploaden voor " + carName, "fa-file-image-o"){
+        @helper.form(routes.Cars.doPictureUpload(carId), 'enctype -> "multipart/form-data") {
             <div class="form-group col-sm-4">
                 <input type="file" name="picture" class="form-control input-md">
             </div>

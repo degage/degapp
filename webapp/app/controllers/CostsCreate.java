@@ -65,7 +65,7 @@ public class CostsCreate extends CostsCommon {
 
         // additional validation of file part
         // TODO: avoid copy and paste of this type of code
-        File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs");
+        File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs", 0);
         if (file == null) {
             form.reject("picture", "Bestand met foto of scan  is verplicht");
         } else if (file.getContentType() == null) {
@@ -186,7 +186,7 @@ public class CostsCreate extends CostsCommon {
             // TODO: avoid copy and paste of this type of code
             // TODO: remove old file
             Form<CostData> form = Form.form(CostData.class).fill(new CostData(cost));
-            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs");
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.costs", 0);
             if (file == null) {
                 form.reject("picture", "Bestand met foto of scan  is verplicht");
             } else if (file.getContentType() == null) {

@@ -351,7 +351,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.setInt(1, userId);
             return toSingleInt(ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to getuser picture", ex);
+            throw new DataAccessException("Failed to get user picture", ex);
         }
     }
 

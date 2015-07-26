@@ -64,7 +64,7 @@ public class RefuelCreate extends RefuelCommon {
             return badRequest(Refuels.refuelsForTrip(trip, form, refuels, ownerFlow));
         } else {
             RefuelData data = form.get();
-            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs", 0);
             if (file == null) {
                 form.reject("picture", "Bestand met foto of scan van bonnetje is verplicht");
                 return badRequest(Refuels.refuelsForTrip(trip, form, refuels, ownerFlow));

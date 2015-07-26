@@ -52,93 +52,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     "FROM cars JOIN users ON car_owner_user_id = user_id " +
                     "WHERE car_name LIKE ? AND car_brand LIKE ? ";
 
-    /*
-        public static final String FILTER_FRAGMENT = " WHERE cars.car_name LIKE ? AND cars.car_id LIKE ? AND cars.car_brand LIKE ? " +
-                "AND ( cars.car_manual = ? OR cars.car_manual LIKE ? ) " +
-                "AND cars.car_gps >= ? AND cars.car_hook >= ? AND cars.car_seats >= ? AND addresses.address_zipcode LIKE ? AND cars.car_fuel LIKE ? " +
-                "AND cars.car_id NOT IN (SELECT DISTINCT(car_id) FROM cars INNER JOIN reservations " +
-                "ON reservations.reservation_car_id = cars.car_id " +
-                "WHERE ? < reservations.reservation_to AND ? > reservations.reservation_from) " +
-                "AND ( cars.car_active = ? OR cars.car_active LIKE ? )" +
-                // FILTER ON CAR AVAILABILITY
-                // We want all cars or car doesn't have any availabilities specified
-                "AND (? OR caravailabilities.car_availability_id IS NULL " +
-                // Car is always available (e.g. Mondag 0:00 -> Monday 0:00 or Monday 1:00 -> Monday 0:55)
-                "OR (caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week " +
-                "AND caravailabilities.car_availability_begin_time >= caravailabilities.car_availability_end_time " +
-                "AND TIMEDIFF(caravailabilities.car_availability_begin_time, caravailabilities.car_availability_end_time) <= TIME('0:05')) " +
-                // Car is always available (e.g. Monday 0:00 -> Sunday 23:55)
-                "OR (caravailabilities.car_availability_begin_day_of_week - 1 = caravailabilities.car_availability_end_day_of_week % 7 " +
-                "AND caravailabilities.car_availability_begin_time = TIME('0:00') AND caravailabilities.car_availability_end_time >= TIME('23:55')) " +
-                // Car is only available in certain intervals
-                "OR (DATE_SUB(?, INTERVAL 1 WEEK) < ? " +
-                "AND (NOT(DAYOFWEEK(?) = caravailabilities.car_availability_begin_day_of_week AND TIME(?) < caravailabilities.car_availability_begin_time) " +
-                "OR (caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week AND caravailabilities.car_availability_begin_time > caravailabilities.car_availability_end_time AND TIME(?) BETWEEN TIME(?) AND caravailabilities.car_availability_end_time)) " +
-                "AND (NOT(DAYOFWEEK(?) = caravailabilities.car_availability_end_day_of_week AND TIME(?) > caravailabilities.car_availability_end_time) " +
-                "OR (caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week AND caravailabilities.car_availability_begin_time > caravailabilities.car_availability_end_time AND TIME(?) BETWEEN caravailabilities.car_availability_begin_time AND TIME(?))) " +
-                "AND DATEDIFF(DATE_ADD(?, INTERVAL (caravailabilities.car_availability_end_day_of_week - DAYOFWEEK(?) + 7) % 7 DAY), DATE_SUB(?, INTERVAL (DAYOFWEEK(?) - caravailabilities.car_availability_begin_day_of_week + 7) % 7 DAY)) " +
-                "< IF(caravailabilities.car_availability_begin_day_of_week = caravailabilities.car_availability_end_day_of_week AND caravailabilities.car_availability_end_time < caravailabilities.car_availability_begin_time, 8, 7))) ";
-
-        private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
-            if(filter == null) {
-                // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-                filter = new JDBCFilter();
-            }
-            ps.setString(start, filter.getValue(FilterField.CAR_NAME));
-            String carId = filter.getValue(FilterField.CAR_ID);
-            if(carId.equals("")) { // Not very nice programming, but works :D
-                carId = "%%";
-            }
-            ps.setString(start+1, carId);
-
-            ps.setString(start+2, filter.getValue(FilterField.CAR_BRAND));
-
-            String manual = filter.getValue(FilterField.CAR_AUTOMATIC);
-            ps.setString(start+3, manual);
-            String s = ""; // This will match nothing
-            if(manual.equals("-1") || manual.equals("")) { // Not very nice programming, but works :D
-                s = "%%"; // This will match everything
-            }
-            ps.setString(start+4, s);
-
-            ps.setString(start+5, filter.getValue(FilterField.CAR_GPS));
-            ps.setString(start+6, filter.getValue(FilterField.CAR_HOOK));
-            ps.setString(start+7, filter.getValue(FilterField.CAR_SEATS));
-            ps.setString(start+8, filter.getValue(FilterField.ZIPCODE));
-            String fuel = filter.getValue(FilterField.CAR_FUEL);
-            if(fuel.equals("All") || fuel.equals(""))
-                fuel = "%%";
-            ps.setString(start+9, fuel);
-            ps.setString(start+10, filter.getValue(FilterField.FROM));
-            ps.setString(start+11, filter.getValue(FilterField.UNTIL));
-            String active = filter.getValue(FilterField.CAR_ACTIVE);
-            ps.setString(start+12, active);
-            String s2 = ""; // This will match nothing
-            if(active.equals("-1") || active.equals("")) { // Not very nice programming, but works :D
-                s2 = "%%"; // This will match everything
-            }
-            ps.setString(start+13, s2);
-            if (filter.getValue(FilterField.FROM).equals("")) { // Do we want a list of all cars or only available ones?
-                ps.setBoolean(start + 14, true);
-            } else {
-                ps.setBoolean(start + 14, false);
-            }
-            ps.setString(start+15, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+16, filter.getValue(FilterField.FROM));
-            ps.setString(start+17, filter.getValue(FilterField.FROM));
-            ps.setString(start+18, filter.getValue(FilterField.FROM));
-            ps.setString(start+19, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+20, filter.getValue(FilterField.FROM));
-            ps.setString(start+21, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+22, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+23, filter.getValue(FilterField.FROM));
-            ps.setString(start+24, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+25, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+26, filter.getValue(FilterField.UNTIL));
-            ps.setString(start+27, filter.getValue(FilterField.FROM));
-            ps.setString(start+28, filter.getValue(FilterField.FROM));
-        }
-    */
     public JDBCCarDAO(JDBCDataAccessContext context) {
         super(context);
     }
@@ -167,7 +80,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 JDBCUserDAO.populateUserHeader(rs)
         );
 
-        car.setPhotoId(rs.getInt("car_images_id"));
         car.setLocation(JDBCAddressDAO.populateAddress(rs));
         car.setTechnicalCarDetails(
                 new TechnicalCarDetails(
@@ -234,19 +146,18 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         return result;
     }
 
-    private LazyStatement createCarStatement = new LazyStatement(
-            "INSERT INTO cars(car_name, car_type, car_brand, " +
-                    "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
-                    "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                    "car_owner_user_id, car_comments, car_active, car_images_id, car_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-            "car_id");
-
     @Override
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, int photoId) throws DataAccessException {
-        try {
-            PreparedStatement ps = createCarStatement.value();
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+            "INSERT INTO cars(car_name, car_type, car_brand, " +
+                    "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
+                    "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
+                    "car_owner_user_id, car_comments, car_active, car_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            "car_id"
+        )){
+
             ps.setString(1, name);
             ps.setString(2, type);
             ps.setString(3, brand);
@@ -269,15 +180,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             ps.setString(15, comments);
             ps.setBoolean(16, active);
 
-            if (photoId == 0) {
-                ps.setNull(17, Types.INTEGER); // 0 not allowed because of foreign key constraint
-            } else {
-                ps.setInt(17, photoId);
-            }
-            ps.setString(18, email);
+            ps.setString(17, email);
 
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when creating car.");
+            ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
                 keys.next();
@@ -292,7 +197,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                         seats, doors, year, manual, gps, hook, fuel,
                         fuelEconomy, estimatedValue, ownerAnnualKm,
                         comments, active, owner);
-                car.setPhotoId(photoId);
                 car.setLocation(location);
                 car.setTechnicalCarDetails(technicalCarDetails);
                 car.setInsurance(insurance);
@@ -374,16 +278,15 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-    private LazyStatement updateCarStatement = new LazyStatement(
+    @Override
+    public void updateCar(Car car) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
             "UPDATE cars SET car_name=?, car_type=? , car_brand=? ,  " +
                     "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                     "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                    "car_owner_user_id=? , car_comments=?, car_active=?, car_images_id=?, car_email=? WHERE car_id = ?");
+                    "car_owner_user_id=? , car_comments=?, car_active=?, car_email=? WHERE car_id = ?"
 
-    @Override
-    public void updateCar(Car car) throws DataAccessException {
-        try {
-            PreparedStatement ps = updateCarStatement.value();
+        )) {
             ps.setString(1, car.getName());
             ps.setString(2, car.getType());
             ps.setString(3, car.getBrand());
@@ -409,18 +312,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             ps.setString(15, car.getComments());
             ps.setBoolean(16, car.isActive());
 
-            int photoId = car.getPhotoId();
-            if (photoId == 0) {
-                ps.setNull(17, Types.INTEGER); // 0 not allowed because of foreign key constraint
-            } else {
-                ps.setInt(17, photoId);
-            }
-
-            ps.setString(18, car.getEmail());
+            ps.setString(17, car.getEmail());
 
             int carId = car.getId();
 
-            ps.setInt(19, carId);
+            ps.setInt(18, carId);
 
             if (ps.executeUpdate() == 0)
                 throw new DataAccessException("No rows were affected when updating car.");
@@ -647,77 +543,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-    public static final String LIST_ALL_CARS_QUERY =
-            "SELECT car_id, car_name, car_email, car_brand, car_type," +
-                    JDBCAddressDAO.ADDRESS_FIELDS + ", " +
-                    "car_seats, car_doors, car_year, car_manual, car_gps, car_hook," +
-                    "car_fuel, car_fuel_economy, car_estimated_value, car_owner_annual_km," +
-                    "car_comments, car_active, " +
-                    "insurance_id, insurance_name, insurance_expiration, " +
-                    "insurance_contract_id, insurance_bonus_malus, " +
-                    "details_id, details_car_license_plate, details_car_chassis_number, " +
-                    USER_HEADER_FIELDS +
-                    "FROM cars " +
-                    "LEFT JOIN addresses ON address_id=car_location " +
-                    "LEFT JOIN users ON user_id=car_owner_user_id " +
-                    "LEFT JOIN technicalcardetails ON details_id = car_id " +
-                    "LEFT JOIN carinsurances ON insurance_id = car_id " +
-                    "WHERE car_active ORDER BY car_name";
-
-    @Override
-    public Iterable<Car> listAllCars() throws DataAccessException {
-        // TODO: is this used? DO we need all this information here?
-        try (Statement stat = createStatement();
-             ResultSet rs = stat.executeQuery(LIST_ALL_CARS_QUERY)) {
-            Collection<Car> cars = new ArrayList<>();
-            while (rs.next()) {
-                Date insuranceExpiration = rs.getDate("insurance_expiration"); // can be null and must be converted
-                Car result = new Car(
-                        rs.getInt("car_id"),
-                        rs.getString("car_name"),
-                        rs.getString("car_email"),
-                        rs.getString("car_brand"),
-                        rs.getString("car_type"),
-                        (Integer) rs.getObject("car_seats"),
-                        (Integer) rs.getObject("car_doors"),
-                        (Integer) rs.getObject("car_year"),
-                        rs.getBoolean("car_manual"),
-                        rs.getBoolean("car_gps"),
-                        rs.getBoolean("car_hook"),
-                        CarFuel.valueOf(rs.getString("car_fuel")),
-                        (Integer) rs.getObject("car_fuel_economy"),
-                        (Integer) rs.getObject("car_estimated_value"),
-                        (Integer) rs.getObject("car_owner_annual_km"),
-
-
-                        rs.getString("car_comments"),
-                        rs.getBoolean("car_active"),
-                        JDBCUserDAO.populateUserHeader(rs)
-                );
-                result.setLocation(JDBCAddressDAO.populateAddress(rs));
-                result.setTechnicalCarDetails(
-                        new TechnicalCarDetails(
-                                rs.getString("details_car_license_plate"),
-                                0,
-                                rs.getString("details_car_chassis_number")
-                        )
-                );
-                result.setInsurance(
-                        new CarInsurance(
-                                rs.getString("insurance_name"),
-                                insuranceExpiration == null ? null : insuranceExpiration.toLocalDate(),
-                                rs.getString("insurance_bonus_malus"),
-                                rs.getString("insurance_contract_id")
-                        )
-                );
-                cars.add(result);
-            }
-            return cars;
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not retrieve a list of cars", ex);
-        }
-    }
-
     public static final String CAR_HEADER_FIELDS =
             "car_id, car_name, car_brand, car_type, car_email, car_active, car_owner_user_id ";
 
@@ -777,6 +602,31 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                                             rs.getInt("car_deprec")));
         }  catch (SQLException ex) {
             throw new DataAccessException("Could not determine car deprecation info");
+        }
+    }
+
+    @Override
+    public int getCarPicture(int carId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_images_id FROM cars WHERE car_id = ?"
+        )) {
+            ps.setInt(1, carId);
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to get car picture", ex);
+        }
+    }
+
+    @Override
+    public void updateCarPicture(int carId, int fileId) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE cars SET car_images_id = ? WHERE car_id = ?"
+        )) {
+            ps.setInt(1, fileId);
+            ps.setInt(2, carId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update car picture", ex);
         }
     }
 }

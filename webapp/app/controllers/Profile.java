@@ -30,7 +30,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
@@ -42,7 +41,6 @@ import data.ProfileCompleteness;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
-import play.Logger;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
@@ -50,9 +48,7 @@ import play.mvc.Http;
 import play.mvc.Result;
 import views.html.profile.*;
 
-import javax.imageio.IIOException;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 
@@ -73,7 +69,8 @@ public class Profile extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result profilePictureUpload(int userId) {
-        return ok(uploadPicture.render(userId));
+        UserHeader user = DataAccess.getInjectedContext().getUserDAO().getUserHeader(userId);
+        return ok(uploadPicture.render(userId, user.toString()));
     }
 
     /**
@@ -100,53 +97,20 @@ public class Profile extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result profilePictureUploadPost(int userId) {
-        // We load the other user(by id)
+        UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
         if (canEditProfile(userId)) {
-
-            // Start saving the actual picture
-            Http.MultipartFormData body = request().body().asMultipartFormData();
-            Http.MultipartFormData.FilePart picture = body.getFile("picture");
-
-            if (picture == null) {
-                flash("danger", "Geen bestand gekozen");
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.IMAGE_CONTENT_TYPES, "uploads.profile", 450);
+            if (file == null) {
+                flash("danger", "Je moet een bestand kiezen");
                 return redirect(routes.Profile.profilePictureUpload(userId));
-            }
-
-            String contentType = picture.getContentType();
-            if (!FileHelper.isImageContentType(contentType)) { // Check the content type using MIME
+            } else if (file.getContentType() == null) {
                 flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten.");
                 return redirect(routes.Profile.profilePictureUpload(userId));
-            }
-
-            try {
-                Path relativePath = FileHelper.saveResizedImage(picture, ConfigurationHelper.getConfigurationString("uploads.profile"), 450);
-
-                try {
-                    DataAccessContext context = DataAccess.getInjectedContext();
-                    UserDAO dao = context.getUserDAO();
-                    FileDAO fdao = context.getFileDAO();
-                    File file = fdao.createFile(relativePath.toString(), picture.getFilename(), picture.getContentType());
-                    int oldPictureId = dao.getUserPicture(userId);
-                    dao.updateUserPicture(userId, file.getId());
-                    if (oldPictureId > 0) {
-                        File oldPicture = fdao.getFile(oldPictureId);
-                        FileHelper.deleteFile(Paths.get(oldPicture.getPath())); // String -> nio.Path
-                        fdao.deleteFile(oldPictureId);
-                    }
-
-                    flash("success", "De profielfoto werd met succes aangepast.");
-                    return redirect(routes.Profile.index(userId));
-                } catch (DataAccessException ex) {
-                    FileHelper.deleteFile(relativePath);
-                    throw ex;
-                }
-            } catch (IIOException ex) {
-                // This means imagereader failed.
-                Logger.error("Failed profile picture resize: " + ex.getMessage());
-                flash("danger", "Er is iets mis met het afbeeldingsbestand. Probeer opnieuw met een ander bestand.");
-                return redirect(routes.Profile.profilePictureUpload(userId));
-            } catch (IOException ex) {
-                throw new DataAccessException("Fout bij het uploaden", ex); //no more checked catch -> error page!
+            } else {
+                int oldPictureId = dao.getUserPicture(userId);
+                dao.updateUserPicture(userId, file.getId());
+                FileHelper.deleteOldFile(oldPictureId);
+                return redirect(routes.Profile.index(userId));
             }
         } else {
             return mustBeProfileAdmin();

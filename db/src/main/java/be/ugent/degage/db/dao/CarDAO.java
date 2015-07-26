@@ -41,18 +41,16 @@ public interface CarDAO {
 
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active, int photoId) throws DataAccessException;
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, UserHeader owner, String comments, boolean active) throws DataAccessException;
     public void updateCar(Car car) throws DataAccessException;
 
+    public int getCarPicture (int carId);
+
+    public void updateCarPicture (int carId, int fileId);
 
     public CarHeaderShort getCarHeaderShort(int carId) throws DataAccessException;
 
     public Car getCar(int id) throws DataAccessException;
-
-    /**
-     * Return a list of (almost) all cars, with full information. Only shows cars that are active.
-     */
-    public Iterable<Car> listAllCars () throws DataAccessException;
 
     /**
      * Returns a filtered list of cars. Only active cars are shown. Always contains a location. Owner is

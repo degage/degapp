@@ -62,6 +62,12 @@ import java.util.Collection;
  */
 public class Cars extends Controller {
 
+    // TODO: also in CostsCommon
+    private static boolean isOwnerOrAdmin(CarHeaderShort car) {
+        return CurrentUser.is(car.getOwnerId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN);
+    }
+
+
     public static class CarModel {
 
         @Constraints.Required
@@ -121,19 +127,15 @@ public class Cars extends Controller {
             comments = car.getComments();
             active = car.isActive();
 
-            if (car.getTechnicalCarDetails() != null) {
-                licensePlate = car.getTechnicalCarDetails().getLicensePlate();
-                chassisNumber = car.getTechnicalCarDetails().getChassisNumber();
-            }
+            TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
+            licensePlate = technicalCarDetails.getLicensePlate();
+            chassisNumber = technicalCarDetails.getChassisNumber();
 
-            if (car.getInsurance() != null) {
-                insuranceName = car.getInsurance().getName();
-                if (car.getInsurance().getExpiration() != null) {
-                    expiration = car.getInsurance().getExpiration();
-                }
-                bonusMalus = car.getInsurance().getBonusMalus();
-                polisNr = car.getInsurance().getPolisNr();
-            }
+            CarInsurance insurance = car.getInsurance();
+            insuranceName = insurance.getName();
+            expiration = insurance.getExpiration();
+            bonusMalus = insurance.getBonusMalus();
+            polisNr = insurance.getPolisNr();
 
             address.populate(car.getLocation());
         }
@@ -255,7 +257,7 @@ public class Cars extends Controller {
     public static Result getPicture(int carId) {
         //TODO: checks on whether other person can see this
         DataAccessContext context = DataAccess.getInjectedContext();
-        int photoId = context.getCarDAO().getCar(carId).getPhotoId();
+        int photoId = context.getCarDAO().getCarPicture(carId);
         if (photoId > 0) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), photoId);
         } else {
@@ -321,26 +323,6 @@ public class Cars extends Controller {
                     }
                 }
             }
-            int carPictureFileId = 0;
-            if (photoFilePart != null) {
-                String contentType = photoFilePart.getContentType();
-                if (!FileHelper.isImageContentType(contentType)) {
-                    flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
-                    return badRequest(add.render(carForm));
-                } else {
-                    try {
-                        Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
-                        FileDAO fdao = context.getFileDAO();
-                        carPictureFileId = fdao.createFile(
-                                relativePath.toString(),
-                                photoFilePart.getFilename(),
-                                photoFilePart.getContentType()
-                        ).getId();
-                    } catch (IOException ex) {
-                        throw new RuntimeException(ex); //no more checked catch -> error page!
-                    }
-                }
-            }
 
             TechnicalCarDetails technicalCarDetails =
                     new TechnicalCarDetails(model.licensePlate, registrationPictureFileId, model.chassisNumber);
@@ -349,12 +331,13 @@ public class Cars extends Controller {
 
             // TODO: fill in real email address
             Car car = dao.createCar(
-                    model.name, "(onbekend)", model.brand, model.type,
+                    model.name, model.name.toLowerCase()+"@degage.be",
+                    model.brand, model.type,
                     model.address.toAddress(), model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
                     model.ownerAnnualKm, technicalCarDetails, insurance, owner,
-                    model.comments, model.active, carPictureFileId
+                    model.comments, model.active
             );
 
 
@@ -379,21 +362,13 @@ public class Cars extends Controller {
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
         Car car = dao.getCar(carId);
 
-        if (car == null) {
-            flash("danger", "Auto met ID=" + carId + " bestaat niet.");
-            return badRequest();
+        if (isOwnerOrAdmin(car)) {
+            CarModel model = new CarModel();
+            model.populate(car);
+            Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
+            return ok(edit.render(editForm, car));
         } else {
-            if (CurrentUser.is(car.getOwner().getId()) || CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
-
-                CarModel model = new CarModel();
-                model.populate(car);
-
-                Form<CarModel> editForm = Form.form(CarModel.class).fill(model);
-                return ok(edit.render(editForm, car));
-            } else {
-                flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-                return badRequest();  // TODO: redirect
-            }
+            return badRequest();  // hacker!
         }
     }
 
@@ -417,14 +392,8 @@ public class Cars extends Controller {
             flash("danger", "Form has errors");
             return badRequest(edit.render(editForm, car));
         }
-        if (car == null) {
-            flash("danger", "Car met ID=" + carId + " bestaat niet.");
-            return badRequest();
-        }
-
-        if (CurrentUser.isNot(car.getOwner().getId()) && !CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
-            flash("danger", "Je hebt geen rechten tot het bewerken van deze wagen.");
-            return badRequest();
+        if (!isOwnerOrAdmin(car)) {
+            return badRequest(); // hacker!
         }
 
         CarModel model = editForm.get();
@@ -465,28 +434,6 @@ public class Cars extends Controller {
             }
         }
 
-        int pictureId = 0;
-        if (photoFilePart != null) {
-            String contentType = photoFilePart.getContentType();
-            if (!FileHelper.isImageContentType(contentType)) {
-                flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten als foto. (ontvangen MIME-type: " + contentType + ")");
-                return redirect(routes.Cars.detail(car.getId()));
-            } else {
-                try {
-                    Path relativePath = FileHelper.saveFile(photoFilePart, ConfigurationHelper.getConfigurationString("uploads.carphotos"));
-                    FileDAO fdao = context.getFileDAO();
-                    pictureId = fdao.createFile(
-                            relativePath.toString(),
-                            photoFilePart.getFilename(),
-                            photoFilePart.getContentType()
-                    ).getId();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex); //no more checked catch -> error page!
-                }
-            }
-        }
-
-
         TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
         technicalCarDetails.setLicensePlate(model.licensePlate);
         technicalCarDetails.setChassisNumber(model.chassisNumber);
@@ -504,9 +451,6 @@ public class Cars extends Controller {
         car.setComments(model.comments);
 
         car.setActive(model.active);
-        if (pictureId != 0) {
-            car.setPhotoId(pictureId);
-        }
 
         dao.updateCar(car);
 
@@ -638,7 +582,47 @@ public class Cars extends Controller {
     public static Result getRegistrationPicture(int carId) {
         // TODO: check authorization
         DataAccessContext context = DataAccess.getInjectedContext();
-        TechnicalCarDetails details = context.getCarDAO().getCar(carId).getTechnicalCarDetails();
-        return FileHelper.getFileStreamResult(context.getFileDAO(), details.getRegistrationId());
+        Car car = context.getCarDAO().getCar(carId);
+        if (isOwnerOrAdmin(car)) {
+            TechnicalCarDetails details = car.getTechnicalCarDetails(); // TODO: no need to get the whole car for this
+            return FileHelper.getFileStreamResult(context.getFileDAO(), details.getRegistrationId());
+        } else {
+            return badRequest(); // hacker!
+        }
+    }
+
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result pictureUpload(int carId) {
+        CarHeaderShort car = DataAccess.getInjectedContext().getCarDAO().getCarHeaderShort(carId);
+        if (isOwnerOrAdmin(car)) {
+            return ok(uploadPicture.render(carId, car.getName()));
+        } else {
+            return badRequest();
+        }
+    }
+
+    @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
+    @InjectContext
+    public static Result doPictureUpload(int carId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarDAO dao = context.getCarDAO();
+        if (isOwnerOrAdmin(dao.getCarHeaderShort(carId))) {
+            File file = FileHelper.getFileFromRequest("picture", FileHelper.IMAGE_CONTENT_TYPES, "uploads.carphotos", 0);
+            if (file == null) {
+                flash("danger", "Je moet een bestand kiezen");
+                return redirect(routes.Cars.pictureUpload(carId));
+            } else if (file.getContentType() == null) {
+                flash("danger", "Verkeerd bestandstype opgegeven. Enkel afbeeldingen zijn toegelaten.");
+                return redirect(routes.Cars.pictureUpload(carId));
+            } else {
+                int oldPictureId = dao.getCarPicture(carId);
+                dao.updateCarPicture(carId, file.getId());
+                FileHelper.deleteOldFile(oldPictureId);
+                return redirect(routes.Cars.detail(carId));
+            }
+        } else {
+            return badRequest();
+        }
     }
 }

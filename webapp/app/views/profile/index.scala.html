@@ -41,16 +41,17 @@
                 <div class="progress">
                     <div class="progress-bar progress-bar-success" role="progressbar" aria-valuenow="@completeness" aria-valuemin="0" aria-valuemax="100" style="width : @completeness%;">@completeness% compleet</div>
                 </div>
+            <div class="col-xs-12">
 
-                <a class="btn btn-primary btn-sm" href="@routes.Profile.edit(user.getId)">Profielinformatie wijzigen</a>
-                <a class="btn btn-primary btn-sm" href="@routes.Profile.profilePictureUpload(user.getId)">Profielfoto wijzigen</a>
-                <a class="btn btn-primary btn-sm" href="@routes.Profile.editDriversLicense(user.getId)">Rijbewijsgegevens wijzigen</a>
-                <a class="btn btn-primary btn-sm" href="@routes.Profile.editIdentityCard(user.getId)">Identiteitsgegevens wijzigen</a>
+                @btnPrimary("Profielinformatie wijzigen",routes.Profile.edit(user.getId))
+                @btnPrimary("Profielfoto wijzigen",routes.Profile.profilePictureUpload(user.getId))
+                @btnPrimary("Rijbewijsgegevens wijzigen",routes.Profile.editDriversLicense(user.getId))
+                @btnPrimary("Identiteitsgegevens wijzigen",routes.Profile.editIdentityCard(user.getId))
 
                 @if(db.CurrentUser hasRole UserRole.PROFILE_ADMIN){
-                    <a class="btn btn-warning btn-sm" href="@routes.Profile.editUserStatus(user.getId)">Gebruikersstatus wijzigen</a>
-                    <a class="btn btn-warning btn-sm" href="@routes.Profile.deposit(user.getId)">Waarborg</a>
-                    <a class="btn btn-warning btn-sm" href="@routes.Profile.updateEmail(user.getId)">E-mailadres aanpassen</a>
+                    @btnWarning("Gebruikersstatus wijzigen",routes.Profile.editUserStatus(user.getId))
+                    @btnWarning("Waarborg",routes.Profile.deposit(user.getId))
+                    @btnWarning("E-mailadres aanpassen",routes.Profile.updateEmail(user.getId))
                 }
             </div>
         }

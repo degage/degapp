@@ -41,10 +41,6 @@ public class Car extends CarHeaderLong {
     private TechnicalCarDetails technicalCarDetails;
     private CarInsurance insurance;
 
-    // TODO: move to CarHeaderLong?
-    private int photoId;
-
-
     public Car(int id, String name, String email, String brand, String type,
                Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
                CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
@@ -106,13 +102,5 @@ public class Car extends CarHeaderLong {
         this.insurance = insurance;
     }
 
-
-    public int getPhotoId() {
-        return photoId;
-    }
-
-    public void setPhotoId(int photoId) {
-        this.photoId = photoId;
-    }
 
 }

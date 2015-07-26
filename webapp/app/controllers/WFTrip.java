@@ -237,7 +237,8 @@ public class WFTrip extends WFCommon {
 
             // add first refuel, if present
             if (filePart != null) {
-                File file = FileHelper.getFileFromFilePart(filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs");
+                File file = FileHelper.getFileFromFilePart(
+                        filePart, FileHelper.DOCUMENT_CONTENT_TYPES, "uploads.refuelproofs", 0);
                 if (file == null || file.getContentType() == null) {
                     form.reject("picture", "Het bestand  is van het verkeerde type");
                     return badRequest(newtrip.render(form, trip));
