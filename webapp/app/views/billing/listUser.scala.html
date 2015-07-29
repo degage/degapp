@@ -54,7 +54,7 @@
                             case BillingStatus.SIMULATION => {
                                 Lenersafrekening (simulatie)
                             }
-                            case BillingStatus.USERS_DONE | BillingStatus.ALL_DONE => {
+                            case BillingStatus.USERS_DONE | BillingStatus.ALL_DONE | BillingStatus.ARCHIVED => {
                                 Lenersafrekening
                             }
                             case _ => {}

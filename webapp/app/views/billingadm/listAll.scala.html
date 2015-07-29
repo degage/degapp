@@ -58,11 +58,21 @@
                             @btnPrimary("Selecteer auto's...", routes.BillingsAdmin.selectCars(billing.getId))
                             @btnPrimary("Aandachtspunten...", routes.BillingsAdmin.showAnomalies(billing.getId))
                         }
-                        case BillingStatus.PREPARING | BillingStatus.SIMULATION => {
+                        case BillingStatus.PREPARING => {
                             @btnPrimary("Km-prijzen...", routes.BillingsAdmin.showPrices(billing.getId))
                             @btnPrimary("Selecteer auto's...", routes.BillingsAdmin.selectCars(billing.getId))
                             @btnPrimary("Aandachtspunten...", routes.BillingsAdmin.showAnomalies(billing.getId))
                             @btnWarning("Start simulatie...", routes.BillingsAdmin.simulation(billing.getId))
+                        }
+                        case BillingStatus.SIMULATION => {
+                            @btnPrimary("Km-prijzen...", routes.BillingsAdmin.showPrices(billing.getId))
+                            @btnPrimary("Selecteer auto's...", routes.BillingsAdmin.selectCars(billing.getId))
+                            @btnPrimary("Aandachtspunten...", routes.BillingsAdmin.showAnomalies(billing.getId))
+                            @btnWarning("Herstart simulatie...", routes.BillingsAdmin.simulation(billing.getId))
+                            @btnWarning("Definitieve lenersafrekening...", routes.BillingsAdmin.userInvoices(billing.getId))
+                        }
+                        case BillingStatus.USERS_DONE => {
+                            @btnWarning("Definitieve eigenaarsafrekening...", routes.BillingsAdmin.carInvoices(billing.getId))
                         }
                         case BillingStatus.ALL_DONE => {
                              @btnDanger("Afsluiten (archiveren)", routes.BillingsAdmin.archive(billing.getId))

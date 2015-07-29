@@ -37,7 +37,6 @@ import be.ugent.degage.db.models.Billing;
 import be.ugent.degage.db.models.BillingStatus;
 import be.ugent.degage.db.models.KmPrice;
 import be.ugent.degage.db.models.UserRole;
-import data.EurocentAmount;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
@@ -47,7 +46,6 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.billingadm.*;
 
-import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -218,7 +216,7 @@ public class BillingsAdmin extends Controller {
                     form.get().included.keySet()
             );
             dao.updateToPreparing(billingId);
-            return redirect(routes.BillingsAdmin.selectCars(billingId));
+            return redirect(routes.BillingsAdmin.listAll());
         }
     }
 
@@ -258,7 +256,12 @@ public class BillingsAdmin extends Controller {
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result userInvoices(int billingId) {
-        return ok();
+        Billing billing = DataAccess.getInjectedContext().getBillingDAO().getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.SIMULATION) {
+            return ok(showUserInvoices.render(billing));
+        } else {
+            return badRequest(); // hacking?
+        }
     }
 
     /**
@@ -267,7 +270,14 @@ public class BillingsAdmin extends Controller {
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result doUserInvoices(int billingId) {
-        return redirect(routes.BillingsAdmin.listAll());
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Billing billing = context.getBillingDAO().getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.SIMULATION) {
+            context.getBillingAdmDAO().computeUserInvoices(billingId);
+            return redirect(routes.BillingsAdmin.listAll());
+        } else {
+            return badRequest(); // hacking?
+        }
     }
 
     /**
@@ -276,7 +286,12 @@ public class BillingsAdmin extends Controller {
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result carInvoices(int billingId) {
-        return ok();
+        Billing billing = DataAccess.getInjectedContext().getBillingDAO().getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.USERS_DONE) {
+            return ok(showCarInvoices.render(billing));
+        } else {
+            return badRequest(); // hacking?
+        }
     }
 
     /**
@@ -285,7 +300,15 @@ public class BillingsAdmin extends Controller {
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result doCarInvoices(int billingId) {
-        return redirect(routes.BillingsAdmin.listAll());
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Billing billing = context.getBillingDAO().getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.USERS_DONE) {
+            context.getBillingAdmDAO().computeCarInvoices(billingId);
+            return redirect(routes.BillingsAdmin.listAll());
+        } else {
+            return badRequest(); // hacking?
+        }
     }
 
     public static class PriceDataElement {

@@ -33,7 +33,6 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
@@ -146,7 +145,7 @@ public final class Utils {
     public static<T> Iterable<List<T>> splitList (List<T> list, int columns) {
         List<List<T>> result = new ArrayList<>(columns);
         for (int i = 0; i < columns; i++) {
-            result.add(new ArrayList<T>());
+            result.add(new ArrayList<>());
         }
         int height = (list.size() + columns - 1) / columns;
         int row = 0;

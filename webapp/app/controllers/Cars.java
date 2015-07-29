@@ -44,7 +44,6 @@ import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
-import play.api.data.validation.ValidationError;
 import play.data.Form;
 import play.data.validation.Constraints;
 import play.mvc.Controller;
@@ -303,7 +302,6 @@ public class Cars extends Controller {
             }
             Http.MultipartFormData body = request().body().asMultipartFormData();
             Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
-            Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
             int registrationPictureFileId = 0;
             if (registrationFile != null) {
                 String contentType = registrationFile.getContentType();
@@ -414,7 +412,6 @@ public class Cars extends Controller {
 
         Http.MultipartFormData body = request().body().asMultipartFormData();
         Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
-        Http.MultipartFormData.FilePart photoFilePart = body.getFile("picture");
         int fileId = 0;
         if (registrationFile != null) {
             String contentType = registrationFile.getContentType();
