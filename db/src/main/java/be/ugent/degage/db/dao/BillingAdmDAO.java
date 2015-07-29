@@ -38,6 +38,21 @@ import java.util.List;
 public interface BillingAdmDAO {
 
     /**
+     * Compute a simulation for the given billing
+     */
+    public void computeSimulation(int billingId);
+
+    /**
+     * Compute the (final) user invoices for this billing
+     */
+    public void computeUserInvoices(int billingId);
+
+    /**
+     * Compute the car invoices for this billing
+     */
+    public void computeCarInvoices(int billingId);
+
+    /**
      * Finalize a billing period. Puts all related trips, costs and refuels into
      * archive mode.
      */
@@ -51,6 +66,7 @@ public interface BillingAdmDAO {
     public static class CarInfo {
         public int carId;
         public String carName;
+        public boolean included; // whether or not already included in cars_billed
         public boolean nodata; // true if there is nothing to be billed for this car
         public boolean incomplete; // true if the depreciation information for that car is not complete
     }
@@ -59,4 +75,15 @@ public interface BillingAdmDAO {
      * Return information about cars that are eligible for billing
      */
     public List<CarInfo> listCarBillingInfo(int billingId);
+
+    /**
+     * Update the cars billed table. Clears all values for the given billing and includes the cars
+     * whose ids are given in the list.
+     */
+    public void updateCarsBilled(int billingId, Iterable<Integer> carsToInclude);
+
+    /**
+     * Update the status of the given billing from CREATED to PREPARING
+     */
+    public void updateToPreparing(int billingId);
 }

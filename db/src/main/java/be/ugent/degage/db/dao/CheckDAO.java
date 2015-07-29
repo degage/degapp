@@ -43,7 +43,8 @@ public interface CheckDAO {
     /**
      * Return a list of anomalies concerning finished trips
      *
-     * @param carId The car for which the anomalies should be checked
+     * @param carId     The car for which the anomalies should be checked, if zero then
+     *                  check all cars.
      * @param billingId Only check trips that start before the limit date in this billing
      */
     public Iterable<TripAnomaly> getTripAnomalies(int billingId, int carId);
@@ -52,6 +53,7 @@ public interface CheckDAO {
     public class TripAnomaly {
         public AnomalyType type;
         public int carId;  // id of the car
+        public String carName;
 
         public int firstId;
         public int secondId; // ids of the reservations
@@ -60,6 +62,24 @@ public interface CheckDAO {
         public int firstEndKm;
         public int secondStartKm;
 
+    }
+
+    /**
+     * Return a list of anomalies concerning  refuels
+     *
+     * @param carId     The car for which the anomalies should be checked, if zero then
+     *                  check all cars.
+     * @param billingId Only check trips that start before the limit date in this billing
+     */
+    public Iterable<RefuelAnomaly> getRefuelAnomalies(int billingId, int carId);
+
+    public class RefuelAnomaly {
+        public int carId;  // id of the car
+        public String carName;
+        public int reservationId;
+        public int refuelId;
+        public LocalDateTime from;
+        public int eurocents;
     }
 
 

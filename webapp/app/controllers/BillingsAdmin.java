@@ -30,6 +30,7 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.BillingAdmDAO;
 import be.ugent.degage.db.dao.CheckDAO;
 import be.ugent.degage.db.models.Billing;
 import be.ugent.degage.db.models.BillingStatus;
@@ -44,21 +45,58 @@ import play.mvc.Result;
 import views.html.billingadm.anomalies;
 import views.html.billingadm.listAll;
 import views.html.billingadm.selectcars;
+import views.html.billingadm.showSimulation;
 
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * Actions related to billing (management).
  */
 public class BillingsAdmin extends Controller {
 
+    public static class CarData {
+        public int carId;
+
+        public String carIdAsString;
+    }
+
+
+    /**
+     * Show anomalies for the given billing and for all cars
+     */
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
-    public static Result showAnomalies(int billingId, int carId) {
-        Iterable<CheckDAO.TripAnomaly> list = DataAccess.getInjectedContext().getCheckDAO().getTripAnomalies(billingId, carId);
-        return ok(anomalies.render(list));
+    public static Result showAnomalies(int billingId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CheckDAO dao = context.getCheckDAO();
+        return ok(anomalies.render(
+                Form.form(CarData.class),
+                context.getBillingDAO().getBilling(billingId),
+                dao.getTripAnomalies(billingId, 0),
+                dao.getRefuelAnomalies(billingId, 0)
+        ));
+    }
+
+    /**
+     * Show anomalies for the given billing and restricted to a selected car
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result doShowAnomalies(int billingId) {
+        Form<CarData> form = Form.form(CarData.class).bindFromRequest();
+        DataAccessContext context = DataAccess.getInjectedContext();
+        if (form.hasErrors()) {
+            return showAnomalies(billingId);
+        } else {
+            CheckDAO dao = context.getCheckDAO();
+            return ok(anomalies.render(
+                    form,
+                    context.getBillingDAO().getBilling(billingId),
+                    dao.getTripAnomalies(billingId, form.get().carId),
+                    dao.getRefuelAnomalies(billingId, form.get().carId)
+            ));
+        }
     }
 
     private static boolean allArchived(Iterable<Billing> list) {
@@ -135,14 +173,119 @@ public class BillingsAdmin extends Controller {
         }
     }
 
+    public static class CarsBilledData {
+        public Map<Integer, Boolean> included;
+
+        public CarsBilledData() {
+            included = new HashMap<>();
+        }
+
+        public CarsBilledData(Iterable<BillingAdmDAO.CarInfo> list) {
+            this();
+            for (BillingAdmDAO.CarInfo info : list) {
+                if (!info.nodata && !info.incomplete && info.included) {
+                    included.put(info.carId, true);
+                }
+            }
+        }
+
+    }
+
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result selectCars(int billingId) {
-
         DataAccessContext context = DataAccess.getInjectedContext();
-        return ok (selectcars.render(
+        List<BillingAdmDAO.CarInfo> infoList = context.getBillingAdmDAO().listCarBillingInfo(billingId);
+        Form<CarsBilledData> form = Form.form(CarsBilledData.class).fill(new CarsBilledData(infoList));
+        return ok(selectcars.render(
+                form,
                 context.getBillingDAO().getBilling(billingId),
-                Utils.splitList(context.getBillingAdmDAO().listCarBillingInfo(billingId), 3)
+                Utils.splitList(infoList, 3)
         ));
     }
+
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result doSelectCars(int billingId) {
+        Form<CarsBilledData> form = Form.form(CarsBilledData.class).bindFromRequest();
+        if (form.hasErrors()) {
+            return badRequest(); // this should not happen
+        } else {
+            BillingAdmDAO dao = DataAccess.getInjectedContext().getBillingAdmDAO();
+            dao.updateCarsBilled(
+                    billingId,
+                    form.get().included.keySet()
+            );
+            dao.updateToPreparing(billingId);
+            return redirect(routes.BillingsAdmin.selectCars(billingId));
+        }
+    }
+
+    /**
+     * Show the page which can launch a simulation
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result simulation(int billingId) {
+        Billing billing = DataAccess.getInjectedContext().getBillingDAO().getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.PREPARING || billing.getStatus() == BillingStatus.SIMULATION) {
+            return ok(showSimulation.render(billing));
+        } else {
+            return badRequest(); // hacking?
+        }
+    }
+
+    /**
+     * Start simulation
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result doSimulation(int billingId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Billing billing = context.getBillingDAO().getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.PREPARING || billing.getStatus() == BillingStatus.SIMULATION) {
+            context.getBillingAdmDAO().computeSimulation(billingId);
+            return redirect(routes.BillingsAdmin.listAll());
+        } else {
+            return badRequest(); // hacking?
+        }
+    }
+
+    /**
+     * Show the page which finalizes the user invoices
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result userInvoices(int billingId) {
+        return ok();
+    }
+
+    /**
+     * Start simulation
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result doUserInvoices(int billingId) {
+        return redirect(routes.BillingsAdmin.listAll());
+    }
+
+    /**
+     * Show the page which finalizes the car invoices
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result carInvoices(int billingId) {
+        return ok();
+    }
+
+    /**
+     * Start simulation
+     */
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result doCarInvoices(int billingId) {
+        return redirect(routes.BillingsAdmin.listAll());
+    }
+
+
 }

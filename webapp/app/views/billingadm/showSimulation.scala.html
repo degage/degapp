@@ -1,0 +1,56 @@
+@* showSimulation.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@import be.ugent.degage.db.dao.BillingAdmDAO
+
+@(billing: Billing)
+
+@stdlayout("Start simulatie", extrabc=breadcrumb("Afrekeningen", routes.BillingsAdmin.listAll())) {
+
+    @billingPanel(billing)
+
+    @panel("Simulatie", "fa-money"){
+       <div class="col-xs-12">
+           <p><b>Opgelet!</b>
+           <ul>
+              <li>Eenmaal een simulatie is opgestart, worden de ritten en tankbeurten voor de betreffende perioden
+                  <i>bevroren</i>. Dit betekent dat enkel nog de administratoren er veranderingen kunnen aanbrengen.</li>
+              <li>Zorg er ook voor dat de geprivilegieerden voor de auto's correct zijn vooraleer de simulaties te starten.</li>
+              <li>Wanneer je de lijst van auto's aanpast waarvoor een afrekening moet gemaakt worden, moet je een nieuwe
+              simulatie opstarten.</li>
+           </ul>
+           Een simulatie is niet definitief en kan opnieuw worden opgestart. Dit verandert echter ook de datums op de afrekeningen.
+           </p>
+       </div>
+       @helper.form(routes.BillingsAdmin.doSimulation(billing.getId)){
+           @std.submitButton("Start simulatie")
+       }
+    }
+
+}

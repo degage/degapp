@@ -59,6 +59,36 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     }
 
     @Override
+    public void computeSimulation (int billingId) {
+        try (CallableStatement cs = prepareCall("{call billing_simulation(?)}" )) {
+            cs.setInt(1,billingId);
+            cs.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not start simulation", e);
+        }
+    }
+
+    @Override
+    public void computeUserInvoices (int billingId) {
+        try (CallableStatement cs = prepareCall("{call billing_user_finalize(?)}" )) {
+            cs.setInt(1,billingId);
+            cs.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not finalize user invoices", e);
+        }
+    }
+
+    @Override
+    public void computeCarInvoices (int billingId) {
+        try (CallableStatement cs = prepareCall("{call billing_car_finalize(?)}" )) {
+            cs.setInt(1,billingId);
+            cs.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not finalize car invoices", e);
+        }
+    }
+
+    @Override
     public void createBilling(String description, String prefix, LocalDate start, LocalDate limit) {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO billing(billing_description,billing_prefix,billing_start,billing_limit) VALUES (?,?,?,?)"
@@ -76,10 +106,10 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     @Override
     public List<CarInfo> listCarBillingInfo(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT car_id, car_name, " +
+                "SELECT car_id, car_name, included, " +
                         "(car_deprec IS NULL OR car_deprec = 0 OR car_deprec_limit IS NULL OR car_deprec_limit = 0 " +
                         " OR car_deprec_last IS NULL OR car_deprec = 0) AS incomplete, d " +
-                "FROM cars " +
+                "FROM cars_billed " +
                 "LEFT JOIN ( SELECT reservation_car_id AS id, 1 as d FROM trips,billing " +
                         "WHERE reservation_status > 5 AND reservation_from < billing_limit AND billing_id = ? " + //[ENUM INDEX]
                         "UNION " +
@@ -87,16 +117,19 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                             "JOIN reservations ON reservation_id = refuel_car_ride_id " +
                             "JOIN billing " +
                         " WHERE refuel_status != 'REFUSED' AND NOT refuel_archived AND reservation_from < billing_limit AND billing_id = ? " +
-                ") AS tmp ON car_id=id  ORDER BY car_name"
+                ") AS tmp ON car_id=id " +
+                "JOIN cars USING(car_id) WHERE billing_id = ? ORDER BY car_name"
         )) {
             ps.setInt(1, billingId);
             ps.setInt(2, billingId);
+            ps.setInt(3, billingId);
             //System.err.println(ps);
             return toList(ps, rs -> {
                 CarInfo info = new CarInfo();
                 info.carId = rs.getInt("car_id");
                 info.carName = rs.getString("car_name");
                 info.incomplete = rs.getBoolean("incomplete");
+                info.included = rs.getBoolean("included");
                 info.nodata = rs.getObject("d") == null;
                 return info;
             });
@@ -104,4 +137,46 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
             throw new DataAccessException("Could not create billing", e);
         }
     }
+
+    @Override
+    public void updateCarsBilled(int billingId, Iterable<Integer> carsToInclude) {
+        // clear all
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE cars_billed SET included=FALSE WHERE billing_id = ?"
+        )) {
+            ps.setInt(1, billingId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not reset cars_billed", e);
+        }
+
+        // include indicated cars
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE cars_billed SET included=TRUE WHERE billing_id = ? AND car_id = ?"
+        )) {
+            // batch update
+            for (Integer carId : carsToInclude) {
+                ps.setInt(1, billingId);
+                ps.setInt(2, carId);
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not set cars_billed", e);
+        }
+    }
+
+    @Override
+    public void updateToPreparing(int billingId) {
+        try (PreparedStatement ps = prepareStatement(
+             "UPDATE billing SET billing_status='PREPARING' " +
+                "WHERE billing_status='CREATED' AND billing_id = ?"
+        )) {
+            ps.setInt(1,billingId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not change billing status", e);
+        }
+    }
+
 }

@@ -29,7 +29,7 @@
 
 @import be.ugent.degage.db.dao.BillingAdmDAO
 
-@(billing: Billing, list: Iterable[List[BillingAdmDAO.CarInfo]])
+@(form: Form[BillingsAdmin.CarsBilledData], billing: Billing, list: Iterable[List[BillingAdmDAO.CarInfo]])
 
 @stylesheets={
    <style>
@@ -40,18 +40,15 @@
 }
 
 @css(info:BillingAdmDAO.CarInfo)=@{if(info.nodata)("nodata")else(if(info.incomplete)("incomplete")else("data"))}
-
-@stdlayout("Beheer afrekening", stylesheets=stylesheets, extrabc=breadcrumb("Afrekeningen", routes.BillingsAdmin.listAll())) {
-
-    @panel("Afrekening", "fa-money") {
-        <div class="col-xs-8">
-            <dl class="dl-horizontal">
-                <dt>Titel:</dt><dd>@billing.getDescription</dd>
-                <dt>Prefix:</dt><dd>@billing.getPrefix</dd>
-                <dt>Periode:</dt><dd>@Utils.toLocalizedDateString(billing.getStart) - @Utils.toLocalizedDateString(billing.getLimit minusDays 1)</dd>
-            </dl>
-        </div>
+@include(carId: Int, form: Form[BillingsAdmin.CarsBilledData])={
+    @defining(form("included["+carId+"]")) { field =>
+        <input type="checkbox" value="true" name="@field.name" @if(field.value){checked}>
     }
+}
+
+@stdlayout("Af te rekenen auto's", stylesheets=stylesheets, extrabc=breadcrumb("Afrekeningen", routes.BillingsAdmin.listAll())) {
+
+    @billingPanel(billing)
 
     @panel("Af te rekenen auto's", "fa-car"){
        <div class="col-xs-12">
@@ -60,20 +57,28 @@
                <li><span class="incomplete">Afschrijvingsinformatie onvolledig.</span> </li>
                <li><span class="nodata">Geen ritten of tankbeurten.</span></li>
                </ul>
-           <b>Opgelet!</b> Zorg er ook voor dat de geprivelegieerden voor de auto's correct zijn vooraleer de simulaties te starten.
+           <b>Opgelet!</b> Zorg er ook voor dat de geprivilegieerden voor de auto's correct zijn vooraleer de simulaties te starten.
            </p>
        </div>
-       <div class="col-xs-12">
-           @foreach(list) { column =>
-               <table class="table table-striped table-bordered table-hover no-footer" >
-
-               @foreach.tr(column){ info =>
-                   <td class=@css(info)>@info.carName</td>
-                   <td><input type="checkbox" @if(!info.nodata && !info.incomplete){checked}></td>
+       @helper.form(routes.BillingsAdmin.doSelectCars(billing.getId)){
+           <div class="col-xs-12">
+               @foreach(list) { column =>
+                   <table class="table table-striped table-bordered table-hover no-footer" >
+                   @foreach.tr(column){ info =>
+                       <td class=@css(info)>@info.carName</td>
+                       <td>@if(!info.nodata && !info.incomplete){
+                            @include(info.carId,form)
+                           }
+                       </td>
+                   }
+                   </table>
                }
-               </table>
-           }
-       </div>
+           </div>
+           <div class="col-xs-12">
+                <button type="button" class="btn btn-xs btn-primary" onclick="$('input:checkbox').prop('checked','checked');">Alles aanvinken</button>
+                <button type="submit" class="btn btn-xs btn-success" name="submit" value="default">Doorsturen</button>
+           </div>
+       }
     }
 
 }

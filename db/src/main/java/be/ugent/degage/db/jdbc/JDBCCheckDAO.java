@@ -52,41 +52,53 @@ class JDBCCheckDAO extends AbstractDAO implements CheckDAO {
         public int startKm;
         public int endKm;
         public int reservationId;
+        public int carId;
+        public String carName;
         public LocalDateTime time;
 
-        public KmDetails(int startKm, int endKm, int reservationId, LocalDateTime time) {
+        public KmDetails(int startKm, int endKm, int reservationId, LocalDateTime time, int carId, String carName) {
             this.startKm = startKm;
             this.endKm = endKm;
             this.time =  time;
             this.reservationId = reservationId;
+            this.carId = carId;
+            this.carName = carName;
         }
 
     }
 
     private List<KmDetails> getKmDetails(int billingId, int carId) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(
-                "SELECT car_ride_start_km, car_ride_end_km, reservation_id, reservation_from " +
-                        "FROM trips, billing " +
-                "WHERE billing_id = ? AND reservation_car_id = ? AND reservation_status = 'FINISHED' " +
-                    "AND reservation_from < billing_limit " +
-                "ORDER BY car_ride_start_km, car_ride_end_km"
-        )) {
+        StringBuilder b = new StringBuilder();
+        b.append ("SELECT car_ride_start_km, car_ride_end_km, reservation_id, reservation_from, car_name, car_id " +
+                  "FROM billing, trips JOIN cars ON car_id = reservation_car_id " +
+                  "WHERE billing_id = ? AND (reservation_status = 'FINISHED' || reservation_status='FROZEN') " +
+                  "AND reservation_from < billing_limit ");
+        if (carId > 0) {
+            b.append ("AND reservation_car_id = ? ");
+        }
+        b.append ("ORDER BY car_name, car_ride_start_km, car_ride_end_km");
+        try (PreparedStatement ps = prepareStatement(b.toString())) {
             ps.setInt(1, billingId);
-            ps.setInt(2, carId);
+            if (carId > 0) {
+                ps.setInt(2, carId);
+            }
             return toList(ps, rs -> new KmDetails(
                     rs.getInt("car_ride_start_km" ),
                     rs.getInt("car_ride_end_km" ),
                     rs.getInt("reservation_id" ),
-                    rs.getTimestamp("reservation_from").toLocalDateTime()
+                    rs.getTimestamp("reservation_from").toLocalDateTime(),
+                    rs.getInt("car_id"),
+                    rs.getString("car_name")
             ));
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch km details", ex);
         }
     }
 
-    private TripAnomaly createAnomaly (KmDetails first, KmDetails second, int carId, AnomalyType type) {
+    private TripAnomaly createAnomaly (KmDetails first, KmDetails second, AnomalyType type) {
         TripAnomaly anomaly = new TripAnomaly();
-        anomaly.carId = carId;
+        anomaly.carId = first.carId;
+        anomaly.carName = first.carName;
         anomaly.type = type;
 
         anomaly.firstId = first.reservationId;
@@ -110,20 +122,64 @@ class JDBCCheckDAO extends AbstractDAO implements CheckDAO {
             for (int i = 1; i < details.size(); i++) {
                 KmDetails prev = details.get (i-1);
                 KmDetails current = details.get (i);
-                if (current.startKm < prev.endKm) {
-                    result.add(createAnomaly(prev, current, carId, AnomalyType.OVERLAP));
-                } else if (current.startKm > prev.endKm) {
-                    result.add(createAnomaly(prev, current, carId, AnomalyType.GAP));
+                if (current.carId == prev.carId) {
+                    if (current.startKm < prev.endKm) {
+                        result.add(createAnomaly(prev, current, AnomalyType.OVERLAP));
+                    } else if (current.startKm > prev.endKm) {
+                        result.add(createAnomaly(prev, current, AnomalyType.GAP));
+                    }
                 }
             }
 
             // zero length
             for (KmDetails current: details) {
                 if (current.startKm == current.endKm) {
-                    result.add(createAnomaly(current, current, carId, AnomalyType.ZERO_KM));
+                    result.add(createAnomaly(current, current, AnomalyType.ZERO_KM));
                 }
             }
         }
         return result;
+    }
+
+    @Override
+    public Iterable<RefuelAnomaly> getRefuelAnomalies(int billingId, int carId) {
+        StringBuilder b = new StringBuilder(
+                "SELECT car_id, car_name, reservation_id, reservation_from, " +
+                        "doubles.refuel_eurocents, refuel_id " +
+                "FROM ( SELECT reservation_car_id, refuel_eurocents FROM billing, refuels " +
+                        "JOIN reservations ON reservation_id = refuel_car_ride_id " +
+                        "WHERE NOT refuel_archived " +
+                        "AND reservation_from < billing_limit AND billing_id = ? " +
+                        "AND (refuel_status='FROZEN' OR refuel_status='ACCEPTED') ");
+        if (carId > 0) {
+            b.append ("AND reservation_car_id = ? ");
+        }
+        b.append ("GROUP BY refuel_eurocents,reservation_car_id  HAVING COUNT(reservation_car_id) > 1 " +
+                        ") AS doubles " +
+                "JOIN refuels USING (refuel_eurocents) " +
+                "JOIN reservations AS orig " +
+                        "ON refuel_car_ride_id = reservation_id  AND orig.reservation_car_id = doubles.reservation_car_id " +
+                "JOIN cars ON car_id = orig.reservation_car_id " +
+                "ORDER BY car_name, doubles.refuel_eurocents, reservation_id"
+        );
+
+        try (PreparedStatement ps = prepareStatement( b.toString()  )) {
+            ps.setInt(1, billingId);
+            if (carId > 0) {
+                ps.setInt(2, carId);
+            }
+            return toList( ps, rs -> {
+                RefuelAnomaly ano = new RefuelAnomaly();
+                ano.carId = rs.getInt("car_id");
+                ano.carName = rs.getString("car_name");
+                ano.reservationId = rs.getInt("reservation_id");
+                ano.refuelId = rs.getInt("refuel_id");
+                ano.eurocents = rs.getInt("refuel_eurocents");
+                ano.from = rs.getTimestamp("reservation_from").toLocalDateTime();
+                return ano;
+            });
+        } catch (SQLException e){
+            throw new DataAccessException("Could not get refuel anomalies", e);
+        }
     }
 }

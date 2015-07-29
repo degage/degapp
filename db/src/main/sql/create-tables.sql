@@ -479,6 +479,7 @@ CREATE TABLE `billing` (
 CREATE TABLE `cars_billed` (
     billing_id INT REFERENCES billing,
     car_id INT REFERENCES cars,
+    included BIT(1) NOT NULL DEFAULT b'0',
     PRIMARY KEY (`billing_id`, `car_id`)
 );
 
@@ -672,6 +673,12 @@ BEGIN
     IF new.reservation_created_at IS NULL THEN
         SET new.reservation_created_at = now();
     END IF;
+END $$
+
+CREATE TRIGGER billing_ins AFTER INSERT ON billing FOR EACH ROW
+BEGIN
+  INSERT INTO cars_billed(billing_id,car_id,included)
+     SELECT NEW.billing_id,car_id,FALSE FROM cars;
 END $$
 
 DELIMITER ;

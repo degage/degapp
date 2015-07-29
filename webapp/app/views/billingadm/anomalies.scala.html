@@ -27,17 +27,35 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@import be.ugent.degage.db.dao.CheckDAO.{TripAnomaly,AnomalyType}
+@import be.ugent.degage.db.dao.CheckDAO.{TripAnomaly,AnomalyType,RefuelAnomaly}
 
-@(list: Iterable[TripAnomaly])
+@(form: Form[BillingsAdmin.CarData], billing: Billing, list: Iterable[TripAnomaly], list2: Iterable[RefuelAnomaly])
 
-@stdlayout("Anomalieën") {
+@stdlayout("Aandachtspunten", scripts=js.userpicker(), extrabc=breadcrumb("Afrekeningen", routes.BillingsAdmin.listAll())) {
+
+   @billingPanel(billing)
+
+   @panel("Selecteer auto", "fa-search") {
+        @helper.form(routes.BillingsAdmin.doShowAnomalies(billing.getId)) {
+            @std.carpicker(form("carId"),form("carIdAsString"),"Auto",css="col-sm-4")
+            @std.submitButton("Zoek / filter")
+        }
+   }
 
    @panel() {
-        <div id="resultsTable" class="table-responsive col-xs-12">
-            <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        @* Tabs *@
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" class="active"><a href="#trips" aria-controls="home" role="tab" data-toggle="tab">Ritten</a></li>
+            <li role="presentation"><a href="#refuels" aria-controls="profile" role="tab" data-toggle="tab">Tankbeurten</a></li>
+        </ul>
+
+        @* Trip anomalies *@
+        <div class="tab-content">
+        <div class="tab-pane active col-xs-12" id="trips">
+            <table class="table table-striped table-bordered table-hover no-footer">
                 <thead>
                     <tr role="row">
+                        <th>Auto</th>
                         <th>Soort</th>
                         <th>Rit 1</th>
                         <th>Rit 2</th>
@@ -46,6 +64,7 @@
                 </thead>
                 <tbody>
                     @foreach.trOrElse(list) { ano =>
+                        <td>@ano.carName</td>
                         <td>
                             @(ano.`type`) match {
                                 case AnomalyType.ZERO_KM => { Rit van 0 km }
@@ -54,19 +73,44 @@
                                 case _ => { Onbekend }
                             }
                         </td>
-                        <td>@Utils.toLocalizedString(ano.firstTime)</td>
+                        <td><a href="@routes.Trips.overview(ano.carId,Utils.toDateString(ano.firstTime withDayOfMonth 1))">@Utils.toLocalizedString(ano.firstTime)</a></td>
                         <td>@Utils.toLocalizedString(ano.secondTime)</td>
                         <td>@ano.firstEndKm</td>
                         <td>@ano.secondStartKm</td>
                     }{
                     <tr>
-                        <td class="empty-row" colspan="5">Geen anomalieën</td>
+                        <td class="empty-row" colspan="6">Geen aandachtspunten</td>
                     </tr>
                     }
                 </tbody>
             </table>
         </div>
-
+        @* Refuel anomalies *@
+         <div class="tab-pane col-xs-12" id="refuels">
+            <table class="table table-striped table-bordered table-hover no-footer">
+                <thead>
+                    <tr role="row">
+                        <th>Auto</th>
+                        <th>Rit</th>
+                        <th>Bedrag</th>
+                        <th>Tankbeurt</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach.trOrElse(list2) { ano =>
+                        <td>@ano.carName</td>
+                        <td>@ano.from</td>
+                        <td>@data.EurocentAmount.toString(ano.eurocents)</td>
+                        <td>@btnPrimary("Details", routes.Refuels.showDetails(ano.refuelId))</td>
+                    }{
+                    <tr>
+                        <td class="empty-row" colspan="4">Geen aandachtspunten</td>
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+       </div>
    }
 
 }

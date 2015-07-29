@@ -265,10 +265,18 @@ GET         /billing/car                            controllers.Billings.carDeta
 
 # Billing (admin)
 GET         /billadm/list                           controllers.BillingsAdmin.listAll()
-GET         /billadm/anom                           controllers.BillingsAdmin.showAnomalies(id: Int, cid: Int)
+GET         /billadm/anom                           controllers.BillingsAdmin.showAnomalies(id: Int)
+POST        /billadm/anom                           controllers.BillingsAdmin.doShowAnomalies(id: Int)
 GET         /billadm/archive                        controllers.BillingsAdmin.archive(id: Int)
 POST        /billadm/create                         controllers.BillingsAdmin.doCreate()
-GET         /billadm/cars                           controllers.BillingsAdmin.selectCars(id: Int)
+GET         /billadm/select                         controllers.BillingsAdmin.selectCars(id: Int)
+POST        /billadm/select                         controllers.BillingsAdmin.doSelectCars(id: Int)
+GET         /billadm/simulation                     controllers.BillingsAdmin.simulation(id: Int)
+POST        /billadm/simulation                     controllers.BillingsAdmin.doSimulation(id: Int)
+GET         /billadm/users                          controllers.BillingsAdmin.userInvoices(id: Int)
+POST        /billadm/users                          controllers.BillingsAdmin.doUserInvoices(id: Int)
+GET         /billadm/cars                           controllers.BillingsAdmin.carInvoices(id: Int)
+POST        /billadm/cars                           controllers.BillingsAdmin.doCarInvoices(id: Int)
 
 #Announcements
 GET         /announcements                          controllers.Announcements.index()

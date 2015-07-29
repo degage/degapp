@@ -138,7 +138,7 @@ BEGIN
   DECLARE cur CURSOR FOR
       SELECT DISTINCT bt_user_id FROM b_trip WHERE bt_billing_id = b_id AND NOT bt_privileged AND bt_km_cost > 0
       UNION
-      SELECT DISTINCT bf_user_id FROM b_fuel WHERE bt_billing_id = b_id AND NOT bf_privileged;
+      SELECT DISTINCT bf_user_id FROM b_fuel WHERE bf_billing_id = b_id AND NOT bf_privileged;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
   -- Reset
@@ -173,7 +173,7 @@ BEGIN
   DECLARE _name VARCHAR(64);
   DECLARE cur CURSOR FOR
       SELECT car_id,car_name FROM cars_billed JOIN cars USING(car_id)
-      WHERE billing_id = b_id;
+      WHERE billing_id = b_id AND included;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
 
@@ -200,12 +200,9 @@ BEGIN
   CALL billing_user_seq_nr(b_id);
 
   UPDATE billing SET billing_simulation_date = now() WHERE billing_id = b_id;
-
-  -- TODO: freeze all simulated reservations and trips
-  -- TODO: set status in billing
 END $$
 
--- freeze all reservations and trips from the simulations (based on b_trip and b_fuel)
+-- freeze all reservations and refuels from the simulations (based on b_trip and b_fuel)
 DROP PROCEDURE IF EXISTS billing_freeze_trips $$
 CREATE PROCEDURE billing_freeze_trips (b_id INT)
 BEGIN
@@ -220,6 +217,17 @@ BEGIN
     UPDATE refuels SET refuel_status = 'FROZEN'
     WHERE refuel_id IN
       (SELECT bf_refuel_id FROM b_fuel WHERE bf_billing_id = b_id);
+END $$
+
+-- perform a user simulation, freeze records and change status of billing
+DROP PROCEDURE IF EXISTS billing_simulation $$
+CREATE PROCEDURE billing_simulation (b_id INT)
+BEGIN
+    CALL billing_user_simulate (b_id);
+    CALL billing_freeze_trips (b_id);
+    -- change status
+    UPDATE billing SET billing_status = 'SIMULATION' WHERE billing_id = b_id;
+
 END $$
 
 DROP PROCEDURE IF EXISTS billing_user_finalize $$
@@ -343,7 +351,7 @@ BEGIN
   DECLARE done BOOLEAN DEFAULT FALSE;
   DECLARE _id INT;
   DECLARE cur CURSOR FOR
-      SELECT car_id FROM cars_billed WHERE billing_id = b_id;
+      SELECT car_id FROM cars_billed WHERE billing_id = b_id AND included;
 
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
@@ -403,7 +411,7 @@ BEGIN
   DECLARE cur CURSOR FOR
       SELECT car_cost_id, car_cost_start, car_cost_spread, car_cost_amount
       FROM cars_billed JOIN carcosts ON car_cost_car_id = car_id
-      WHERE billing_id = b_id
+      WHERE billing_id = b_id AND included
         AND NOT car_cost_archived
         AND (car_cost_status='ACCEPTED' OR car_cost_status='FROZEN')
         AND car_cost_start < lim;
@@ -442,7 +450,7 @@ BEGIN
   DECLARE cur CURSOR FOR
       SELECT car_id,car_deprec,car_deprec_limit,car_deprec_last
         FROM cars_billed JOIN cars USING(car_id)
-        WHERE billing_id = b_id;
+        WHERE billing_id = b_id AND included;
   DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
 
 
