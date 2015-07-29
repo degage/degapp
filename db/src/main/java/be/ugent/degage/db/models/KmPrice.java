@@ -34,21 +34,25 @@ package be.ugent.degage.db.models;
  */
 public class KmPrice {
 
-    // TODO: never used?
-
     private int fromKm;
-    private int price;
+    private int eurocents;
+    private int factor;
 
-    public KmPrice(int fromKm, int price) {
+    public KmPrice(int fromKm, int eurocents, int factor) {
         this.fromKm = fromKm;
-        this.price = price;
+        this.eurocents = eurocents;
+        this.factor = factor;
     }
 
     public int getFromKm() {
         return fromKm;
     }
 
-    public int getPrice() {
-        return price;
+    public int getEurocents() {
+        return eurocents;
+    }
+
+    public int getFactor() {
+        return factor;
     }
 }

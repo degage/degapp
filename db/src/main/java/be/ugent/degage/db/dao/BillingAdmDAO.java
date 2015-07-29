@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.dao;
 
+import be.ugent.degage.db.models.KmPrice;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -86,4 +88,12 @@ public interface BillingAdmDAO {
      * Update the status of the given billing from CREATED to PREPARING
      */
     public void updateToPreparing(int billingId);
+
+
+    /**
+     * Update the pricing for the given billing. Replaces all existing pricing information
+     * for this billing.
+     */
+    public void updatePricing(int billingId, Iterable<KmPrice> pricing);
+
 }

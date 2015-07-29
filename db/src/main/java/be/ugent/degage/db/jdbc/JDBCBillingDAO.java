@@ -133,13 +133,14 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
 
     public Iterable<KmPrice> listKmPrices(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT km_price_from, km_price_eurocents FROM km_price WHERE km_price_billing_id = ? " +
-                        "ORDER BY km_price_from"
+                "SELECT km_price_from, km_price_eurocents, km_price_factor " +
+                        "FROM km_price WHERE km_price_billing_id = ? ORDER BY km_price_from"
         )) {
             ps.setInt(1, billingId);
             return toList(ps, rs ->
-                            new KmPrice(rs.getInt("km_price_from"), rs.getInt("km_price_eurocents"))
-            );
+                    new KmPrice(rs.getInt("km_price_from"),
+                            rs.getInt("km_price_eurocents"),
+                            rs.getInt("km_price_factor")));
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot get km prices", ex);
         }
@@ -272,8 +273,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                 "SELECT bc_first_km, bc_last_km,  bc_total_km, bc_owner_km, bc_deprec_km, bc_fuel_total, " +
                         "bc_fuel_owner, bc_fuel_due, bc_deprec_recup, car_deprec, bc_seq_nr," +
                         "bc_costs, bc_costs_recup " +
-                    "FROM b_cars JOIN cars ON bc_car_id = car_id " +
-                    "WHERE bc_billing_id = ? AND bc_car_id = ?"
+                        "FROM b_cars JOIN cars ON bc_car_id = car_id " +
+                        "WHERE bc_billing_id = ? AND bc_car_id = ?"
         )) {
             ps.setInt(1, billingId);
             ps.setInt(2, carId);

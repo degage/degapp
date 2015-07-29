@@ -31,10 +31,13 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.BillingAdmDAO;
+import be.ugent.degage.db.dao.BillingDAO;
 import be.ugent.degage.db.dao.CheckDAO;
 import be.ugent.degage.db.models.Billing;
 import be.ugent.degage.db.models.BillingStatus;
+import be.ugent.degage.db.models.KmPrice;
 import be.ugent.degage.db.models.UserRole;
+import data.EurocentAmount;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
@@ -42,11 +45,9 @@ import play.data.validation.Constraints;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
 import play.mvc.Result;
-import views.html.billingadm.anomalies;
-import views.html.billingadm.listAll;
-import views.html.billingadm.selectcars;
-import views.html.billingadm.showSimulation;
+import views.html.billingadm.*;
 
+import javax.validation.Valid;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -287,5 +288,126 @@ public class BillingsAdmin extends Controller {
         return redirect(routes.BillingsAdmin.listAll());
     }
 
+    public static class PriceDataElement {
+        public int kilometer;
+
+        public int eurocents;
+    }
+
+    public static class PriceData {
+
+        public static final int MAX_SIZE = 6;
+
+        public PriceDataElement[] elements;
+
+        public PriceData() {
+            elements = new PriceDataElement[MAX_SIZE];
+            for (int i = 0; i < MAX_SIZE; i++) {
+                elements[i] = new PriceDataElement();
+            }
+        }
+
+        public List<ValidationError> validate () {
+            List<ValidationError> list = new ArrayList<>();
+            //
+            if (elements[0].kilometer != 1) {
+                list.add(new ValidationError("elements[0].kilometer", "Eerste kilometergrens moet 1 zijn"));
+            }
+            //
+            for (int i=0; i < MAX_SIZE; i++) {
+                 if (elements[i].kilometer == 0 && elements[i].eurocents != 0) {
+                    list.add(new ValidationError("elements["+i+"].kilometer", "Beide velden invullen"));
+                } else if (elements[i].kilometer != 0 && elements[i].eurocents == 0) {
+                    list.add(new ValidationError("elements["+i+"].eurocents", "Beide velden invullen"));
+                }
+            }
+            if (!list.isEmpty()) {
+                return list;
+            }
+            //
+            int size = 1;
+            while (size < MAX_SIZE && elements[size].kilometer != 0) {
+                size ++;
+            }
+            for (int i = size; i < MAX_SIZE; i++) {
+                if (elements[i].kilometer != 0) {
+                    list.add(new ValidationError("elements["+i+"].kilometer", "Ingevulde velden moeten aaneensluiten"));
+                }
+            }
+            if (!list.isEmpty()) {
+                return list;
+            }
+
+            for (int i = 1; i < size; i++) {
+                if (elements[i-1].kilometer >= elements[i].kilometer) {
+                    list.add(new ValidationError("elements["+i+"].kilometer", "Kilometergrenzen moeten in stijgende volgorde staan"));
+                }
+            }
+            for (int i = 0; i < size; i++) {
+                if (elements[i].eurocents <= 0) {
+                    list.add(new ValidationError("elements["+i+"].eurocents", "Bedrag moet positief zijn"));
+                }
+            }
+
+            return list.isEmpty() ? null : list;
+        }
+
+        public void fill (Iterable<KmPrice> list) {
+            int c = 0;
+            for (KmPrice kmPrice : list) {
+                elements[c].kilometer = kmPrice.getFromKm();
+                elements[c].eurocents = kmPrice.getEurocents();
+                c++;
+            }
+        }
+
+        public Iterable<KmPrice> export () {
+            Collection<KmPrice> list = new ArrayList<>();
+            int last = 0;
+            int i = 0;
+            while (i < MAX_SIZE && elements[i].kilometer != 0) {
+                list.add(new KmPrice(elements[i].kilometer, elements[i].eurocents, elements[i].eurocents - last));
+                last = elements[i].eurocents;
+                i ++;
+            }
+            return list;
+        }
+
+    }
+
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result showPrices(int billingId) {
+        BillingDAO dao = DataAccess.getInjectedContext().getBillingDAO();
+        Billing billing = dao.getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.CREATED || billing.getStatus() == BillingStatus.PREPARING || billing.getStatus() == BillingStatus.SIMULATION) {
+            PriceData data = new PriceData();
+            data.fill(dao.listKmPrices(billingId));
+            Form<PriceData> form = Form.form(PriceData.class).fill(data);
+            return ok(editPrices.render(billing, form));
+        } else {  // TODO: show prices only
+            return badRequest(); // hacking?
+        }
+    }
+
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result doEditPrices(int billingId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        BillingDAO dao = context.getBillingDAO();
+        Billing billing = dao.getBilling(billingId);
+        if (billing.getStatus() == BillingStatus.CREATED || billing.getStatus() == BillingStatus.PREPARING || billing.getStatus() == BillingStatus.SIMULATION) {
+            Form<PriceData> form = Form.form(PriceData.class).bindFromRequest();
+            if (form.hasErrors()) {
+                return badRequest(editPrices.render(billing, form));
+            } else {
+                context.getBillingAdmDAO().updatePricing(billingId, form.get().export());
+                return redirect(routes.BillingsAdmin.listAll());
+            }
+        }
+        else {  // TODO: show prices only
+            return badRequest(); // hacking?
+        }
+    }
 
 }

@@ -59,7 +59,7 @@ public interface BillingDAO {
     /**
      * Retreive price information for the given billing
      */
-    // NOT USED ? public Iterable<KmPrice> listKmPrices (int billingId);
+    public Iterable<KmPrice> listKmPrices (int billingId);
 
     public KmPriceDetails getKmPriceDetails (int billingId);
 

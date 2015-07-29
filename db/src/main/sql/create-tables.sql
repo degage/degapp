@@ -677,8 +677,16 @@ END $$
 
 CREATE TRIGGER billing_ins AFTER INSERT ON billing FOR EACH ROW
 BEGIN
+  DECLARE old INT;
+
   INSERT INTO cars_billed(billing_id,car_id,included)
      SELECT NEW.billing_id,car_id,FALSE FROM cars;
+
+  SELECT MAX(km_price_billing_id) FROM km_price INTO old;
+
+  INSERT INTO km_price(km_price_billing_id,km_price_from,km_price_eurocents,km_price_factor)
+      SELECT NEW.billing_id,km_price_from,km_price_eurocents,km_price_factor
+      FROM km_price WHERE km_price_billing_id = old;
 END $$
 
 DELIMITER ;

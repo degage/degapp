@@ -31,6 +31,7 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.BillingAdmDAO;
+import be.ugent.degage.db.models.KmPrice;
 
 import java.sql.CallableStatement;
 import java.sql.Date;
@@ -176,6 +177,34 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not change billing status", e);
+        }
+    }
+
+        @Override
+    public void updatePricing (int billingId, Iterable<KmPrice> pricing) {
+        // first delete original pricing
+        try (PreparedStatement ps = prepareStatement(
+                "DELETE FROM km_price WHERE km_price_billing_id = ?"
+        )) {
+            ps.setInt(1, billingId );
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not remove original pricing", e);
+        }
+        try (PreparedStatement ps = prepareStatement(
+                "INSERT INTO km_price(km_price_billing_id,km_price_from,km_price_eurocents,km_price_factor) " +
+                "VALUES (?,?,?,?)"
+        )) {
+            for (KmPrice price : pricing) {
+                ps.setInt(1,billingId);
+                ps.setInt(2,price.getFromKm());
+                ps.setInt(3,price.getEurocents());
+                ps.setInt(4,price.getFactor());
+                ps.addBatch();
+            }
+            ps.executeBatch();
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not update pricing", e);
         }
     }
 

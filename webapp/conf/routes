@@ -265,6 +265,8 @@ GET         /billing/car                            controllers.Billings.carDeta
 
 # Billing (admin)
 GET         /billadm/list                           controllers.BillingsAdmin.listAll()
+GET         /billadm/prices                         controllers.BillingsAdmin.showPrices(id: Int)
+POST        /billadm/prices                         controllers.BillingsAdmin.doEditPrices(id: Int)
 GET         /billadm/anom                           controllers.BillingsAdmin.showAnomalies(id: Int)
 POST        /billadm/anom                           controllers.BillingsAdmin.doShowAnomalies(id: Int)
 GET         /billadm/archive                        controllers.BillingsAdmin.archive(id: Int)
