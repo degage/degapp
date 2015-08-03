@@ -99,7 +99,7 @@
                 <tbody>
                     @foreach.trOrElse(list2) { ano =>
                         <td>@ano.carName</td>
-                        <td>@ano.from</td>
+                        <td><a href="@routes.Refuels.showRefuelsForTrip(ano.reservationId,true)">@Utils.toLocalizedString(ano.from)</a></td>
                         <td>@data.EurocentAmount.toString(ano.eurocents)</td>
                         <td>@btnPrimary("Details", routes.Refuels.showDetails(ano.refuelId))</td>
                     }{

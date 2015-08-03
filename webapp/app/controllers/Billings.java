@@ -378,6 +378,7 @@ public class Billings extends Controller {
                     ), null);
                 case USERS_DONE:
                 case ALL_DONE:
+                case ARCHIVED:
                     return PdfGenerator.ok(userInvoiceFinal.render(
                             billing,
                             billNr,
@@ -404,6 +405,9 @@ public class Billings extends Controller {
             UserHeader owner = context.getUserDAO().getUserHeader(car.getOwnerId());
             BillingDAO dao = context.getBillingDAO();
             Billing billing = dao.getBilling(billingId);
+            if (billing.getStatus() != BillingStatus.ALL_DONE && billing.getStatus() != BillingStatus.ARCHIVED) {
+                return badRequest(); // hacker?
+            }
             BillingDetailsCar bCar = dao.getCarDetails(billingId, carId);
             String billNr = String.format("E%s-%04d", billing.getPrefix(), bCar.getIndex());
             response().setHeader("Content-Disposition", "attachment; filename=" + billNr + ".pdf");
