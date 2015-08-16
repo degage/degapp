@@ -19,6 +19,7 @@ resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/mo
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.2-SNAPSHOT",
+  "be.ugent.caagt"           % "sheeter"                      % "1.0-SNAPSHOT",
   "com.edulify"             %% "play-hikaricp"               % "1.5.0-fork-2",    // 1.5.0 adapted to use hikari 2.3.2
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
@@ -32,8 +33,6 @@ libraryDependencies ++= Seq(
   "org.webjars"             % "jquery_are-you-sure"          % "1.5.0", // checks user does not leave page when form data is changed
   "org.webjars"             % "js-cookie"                    % "2.0.2", // cookie manipulation
   "mysql"                   % "mysql-connector-java"         % "5.1.34",
-  "org.apache.poi"          % "poi"                          % "3.8",
-  "org.apache.poi"          % "poi-ooxml"                    % "3.9",
   "com.itextpdf"            % "itextpdf"                     % "5.5.6",      // most recent version, shoul override version use by next module?
   "it.innove"               % "play2-pdf"                    % "1.1.3-fork", // adapted to iText 5
   "com.typesafe"            % "config"                       % "1.2.1"

@@ -51,8 +51,8 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
 
     @Override
     public void archive(int billingId) {
-        try (CallableStatement cs = prepareCall("{call billing_archive(?)}" )) {
-            cs.setInt(1,billingId);
+        try (CallableStatement cs = prepareCall("{call billing_archive(?)}")) {
+            cs.setInt(1, billingId);
             cs.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not archive billing", e);
@@ -60,9 +60,9 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     }
 
     @Override
-    public void computeSimulation (int billingId) {
-        try (CallableStatement cs = prepareCall("{call billing_simulation(?)}" )) {
-            cs.setInt(1,billingId);
+    public void computeSimulation(int billingId) {
+        try (CallableStatement cs = prepareCall("{call billing_simulation(?)}")) {
+            cs.setInt(1, billingId);
             cs.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not start simulation", e);
@@ -70,9 +70,9 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     }
 
     @Override
-    public void computeUserInvoices (int billingId) {
-        try (CallableStatement cs = prepareCall("{call billing_user_finalize(?)}" )) {
-            cs.setInt(1,billingId);
+    public void computeUserInvoices(int billingId) {
+        try (CallableStatement cs = prepareCall("{call billing_user_finalize(?)}")) {
+            cs.setInt(1, billingId);
             cs.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not finalize user invoices", e);
@@ -80,9 +80,9 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     }
 
     @Override
-    public void computeCarInvoices (int billingId) {
-        try (CallableStatement cs = prepareCall("{call billing_car_finalize(?)}" )) {
-            cs.setInt(1,billingId);
+    public void computeCarInvoices(int billingId) {
+        try (CallableStatement cs = prepareCall("{call billing_car_finalize(?)}")) {
+            cs.setInt(1, billingId);
             cs.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not finalize car invoices", e);
@@ -110,16 +110,16 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 "SELECT car_id, car_name, included, " +
                         "(car_deprec IS NULL OR car_deprec = 0 OR car_deprec_limit IS NULL OR car_deprec_limit = 0 " +
                         " OR car_deprec_last IS NULL OR car_deprec = 0) AS incomplete, d " +
-                "FROM cars_billed " +
-                "LEFT JOIN ( SELECT reservation_car_id AS id, 1 as d FROM trips,billing " +
+                        "FROM cars_billed " +
+                        "LEFT JOIN ( SELECT reservation_car_id AS id, 1 as d FROM trips,billing " +
                         "WHERE reservation_status > 5 AND reservation_from < billing_limit AND billing_id = ? " + //[ENUM INDEX]
                         "UNION " +
                         "SELECT reservation_car_id AS id, 1 as d FROM refuels " +
-                            "JOIN reservations ON reservation_id = refuel_car_ride_id " +
-                            "JOIN billing " +
+                        "JOIN reservations ON reservation_id = refuel_car_ride_id " +
+                        "JOIN billing " +
                         " WHERE refuel_status != 'REFUSED' AND NOT refuel_archived AND reservation_from < billing_limit AND billing_id = ? " +
-                ") AS tmp ON car_id=id " +
-                "JOIN cars USING(car_id) WHERE billing_id = ? ORDER BY car_name"
+                        ") AS tmp ON car_id=id " +
+                        "JOIN cars USING(car_id) WHERE billing_id = ? ORDER BY car_name"
         )) {
             ps.setInt(1, billingId);
             ps.setInt(2, billingId);
@@ -170,36 +170,36 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     @Override
     public void updateToPreparing(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-             "UPDATE billing SET billing_status='PREPARING' " +
-                "WHERE billing_status='CREATED' AND billing_id = ?"
+                "UPDATE billing SET billing_status='PREPARING' " +
+                        "WHERE billing_status='CREATED' AND billing_id = ?"
         )) {
-            ps.setInt(1,billingId);
+            ps.setInt(1, billingId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not change billing status", e);
         }
     }
 
-        @Override
-    public void updatePricing (int billingId, Iterable<KmPrice> pricing) {
+    @Override
+    public void updatePricing(int billingId, Iterable<KmPrice> pricing) {
         // first delete original pricing
         try (PreparedStatement ps = prepareStatement(
                 "DELETE FROM km_price WHERE km_price_billing_id = ?"
         )) {
-            ps.setInt(1, billingId );
+            ps.setInt(1, billingId);
             ps.executeUpdate();
         } catch (SQLException e) {
             throw new DataAccessException("Could not remove original pricing", e);
         }
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO km_price(km_price_billing_id,km_price_from,km_price_eurocents,km_price_factor) " +
-                "VALUES (?,?,?,?)"
+                        "VALUES (?,?,?,?)"
         )) {
             for (KmPrice price : pricing) {
-                ps.setInt(1,billingId);
-                ps.setInt(2,price.getFromKm());
-                ps.setInt(3,price.getEurocents());
-                ps.setInt(4,price.getFactor());
+                ps.setInt(1, billingId);
+                ps.setInt(2, price.getFromKm());
+                ps.setInt(3, price.getEurocents());
+                ps.setInt(4, price.getFactor());
                 ps.addBatch();
             }
             ps.executeBatch();
@@ -208,4 +208,25 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
         }
     }
 
+    @Override
+    public Iterable<CarBillingInfo> listCarBillingOverview(int billingId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_id, name, fuel, deprec, costs, total, sc FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
+        )) {
+            ps.setInt(1, billingId);
+            return toList (ps, rs -> {
+                CarBillingInfo cbi = new CarBillingInfo();
+                cbi.carId = rs.getInt ("car_id");
+                cbi.carName = rs.getString ("name");
+                cbi.fuel = rs.getInt("fuel");
+                cbi.deprec = rs.getInt("deprec");
+                cbi.costs = rs.getInt("costs");
+                cbi.total = rs.getInt("total");
+                cbi.structuredComment = rs.getString("sc");
+                return cbi;
+            });
+        }catch (SQLException e) {
+            throw new DataAccessException("Could not update pricing", e);
+        }
+    }
 }

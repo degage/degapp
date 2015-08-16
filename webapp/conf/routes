@@ -290,6 +290,9 @@ GET         /userpicker                             controllers.UserPicker.getLi
 # Car Picker
 GET         /carpicker                              controllers.CarPicker.getList(search: String ?= "")
 
+# Reporting
+GET         /reports/billadm/car                    controllers.Reports.billingCarOverview(id: Int)
+
 # Javascript routing
 GET         /assets/javascripts/routes              controllers.Application.javascriptRoutes()
 GET         /assets/javascripts/paginationRoutes    controllers.Application.paginationRoutes()

@@ -96,4 +96,21 @@ public interface BillingAdmDAO {
      */
     public void updatePricing(int billingId, Iterable<KmPrice> pricing);
 
+
+    public static class CarBillingInfo {
+        public int carId;
+        public String carName;
+        // amounts are in EUROCENT
+        public int fuel;
+        public int deprec;
+        public int costs;
+        public int total;
+        public String structuredComment;
+    }
+
+    /**
+     * Return information about car invoices per person
+     */
+    public Iterable<CarBillingInfo> listCarBillingOverview (int billingId);
+
 }
