@@ -109,8 +109,24 @@ public interface BillingAdmDAO {
     }
 
     /**
-     * Return information about car invoices per person
+     * Return information about car invoices per car
      */
     public Iterable<CarBillingInfo> listCarBillingOverview (int billingId);
+
+    public static class UserBillingInfo {
+        public int userId;
+        public String userName;
+        // amounts are in EUROCENT
+        public int km;
+        public int fuel;
+        public int total;
+        public String structuredComment;
+    }
+
+    /**
+     * Return information about user invoices, per user
+     */
+    public Iterable<UserBillingInfo> listUserBillingOverview (int billingId);
+
 
 }

@@ -81,4 +81,36 @@ public class Reports extends Controller {
         }
     }
 
+    private static WorkbookDefinition billingUserWorkbook;
+
+    static {
+        billingUserWorkbook = new WorkbookDefinition(
+                // TODO: set sheet name (dynamically)
+                new TableDefinition<BillingAdmDAO.UserBillingInfo>(
+                        new NumericColumnDefinition<>("Gebruiker ID", ubi -> ubi.userId),
+                        new StringColumnDefinition<>("Gebruiker NAAM", ubi -> ubi.userName),
+                        new EurocentColumnDefinition<>("Kost kilometers", ubi -> ubi.km),
+                        new EurocentColumnDefinition<>("Brandstof betaald", ubi -> ubi.fuel),
+                        new EurocentColumnDefinition<>("Totaal", ubi -> ubi.total),
+                        new StringColumnDefinition<>(null, ubi -> ubi.structuredComment)
+                ));
+    }
+
+    @InjectContext
+    @AllowRoles(UserRole.SUPER_USER)
+    public static Result billingUserOverview(int billingId) {
+
+        DataAccessContext context = DataAccess.getInjectedContext();
+        String prefix = context.getBillingDAO().getBilling(billingId).getPrefix();
+        Iterable<BillingAdmDAO.UserBillingInfo> list = context.getBillingAdmDAO().listUserBillingOverview(billingId);
+        try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
+            billingUserWorkbook.write(out, "A"+prefix, list);
+            response().setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response().setHeader("Content-Disposition", "attachment; filename=A" + prefix + ".xlsx");
+            response().setHeader(CACHE_CONTROL, "no-cache, must-revalidate");
+            return ok(new ByteArrayInputStream(out.toByteArray()));
+        } catch (IOException ex) {
+            throw new RuntimeException("Could not create file to download", ex);
+        }
+    }
 }

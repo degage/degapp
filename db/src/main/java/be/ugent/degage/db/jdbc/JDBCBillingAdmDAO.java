@@ -214,10 +214,10 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 "SELECT car_id, name, fuel, deprec, costs, total, sc FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
         )) {
             ps.setInt(1, billingId);
-            return toList (ps, rs -> {
+            return toList(ps, rs -> {
                 CarBillingInfo cbi = new CarBillingInfo();
-                cbi.carId = rs.getInt ("car_id");
-                cbi.carName = rs.getString ("name");
+                cbi.carId = rs.getInt("car_id");
+                cbi.carName = rs.getString("name");
                 cbi.fuel = rs.getInt("fuel");
                 cbi.deprec = rs.getInt("deprec");
                 cbi.costs = rs.getInt("costs");
@@ -225,8 +225,29 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 cbi.structuredComment = rs.getString("sc");
                 return cbi;
             });
-        }catch (SQLException e) {
-            throw new DataAccessException("Could not update pricing", e);
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not list billing", e);
+        }
+    }
+
+    @Override
+    public Iterable<UserBillingInfo> listUserBillingOverview(int billingId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT user_id, name, km, fuel, total, sc FROM b_user_overview WHERE billing_id = ? ORDER BY user_id"
+        )) {
+            ps.setInt(1, billingId);
+            return toList(ps, rs -> {
+                UserBillingInfo ubi = new UserBillingInfo();
+                ubi.userId = rs.getInt("user_id");
+                ubi.userName = rs.getString("name");
+                ubi.km = rs.getInt("km");
+                ubi.fuel = rs.getInt("fuel");
+                ubi.total = rs.getInt("total");
+                ubi.structuredComment = rs.getString("sc");
+                return ubi;
+            });
+        } catch (SQLException e) {
+            throw new DataAccessException("Could not list billing", e);
         }
     }
 }

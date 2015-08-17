@@ -73,9 +73,18 @@
                         }
                         case BillingStatus.USERS_DONE => {
                             @btnWarning("Definitieve eigenaarsafrekening...", routes.BillingsAdmin.carInvoices(billing.getId))
+                            @btnExcel("A"+billing.getPrefix, routes.Reports.billingUserOverview(billing.getId))
                         }
                         case BillingStatus.ALL_DONE => {
-                             @btnDanger("Afsluiten (archiveren)", routes.BillingsAdmin.archive(billing.getId))
+                            @btnExcel("A"+billing.getPrefix, routes.Reports.billingUserOverview(billing.getId))
+                            @btnExcel("E"+billing.getPrefix, routes.Reports.billingCarOverview(billing.getId))
+                            @btnDanger("Afsluiten (archiveren)", routes.BillingsAdmin.archive(billing.getId))
+                        }
+                        case BillingStatus.ARCHIVED => {
+                            @if(billing.getId > 1){
+                                @btnExcel("A"+billing.getPrefix, routes.Reports.billingUserOverview(billing.getId))
+                                @btnExcel("E"+billing.getPrefix, routes.Reports.billingCarOverview(billing.getId))
+                            }
                         }
                         case _ => {
                         }
