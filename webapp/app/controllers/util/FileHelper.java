@@ -225,11 +225,13 @@ public class FileHelper {
      * @param id Id of the file to be deleted. If negative or zero, nothingis deleted.
      */
     public static void deleteOldFile (int id) {
-        FileDAO fileDAO = DataAccess.getInjectedContext().getFileDAO();
-        FileHelper.deleteFile(
-                Paths.get(fileDAO.getFile(id).getPath())
-        );
-        fileDAO.deleteFile(id);
+        if (id > 0) {
+            FileDAO fileDAO = DataAccess.getInjectedContext().getFileDAO();
+            FileHelper.deleteFile(
+                    Paths.get(fileDAO.getFile(id).getPath())
+            );
+            fileDAO.deleteFile(id);
+        }
     }
 
 }
