@@ -113,8 +113,8 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                         "FROM cars_billed " +
                         "LEFT JOIN ( SELECT reservation_car_id AS id, 1 as d FROM trips,billing " +
                         "WHERE reservation_status > 5 AND reservation_from < billing_limit AND billing_id = ? " + //[ENUM INDEX]
-                        "UNION " +
-                        "SELECT reservation_car_id AS id, 1 as d FROM refuels " +
+                "UNION " +
+                "SELECT reservation_car_id AS id, 1 as d FROM refuels " +
                         "JOIN reservations ON reservation_id = refuel_car_ride_id " +
                         "JOIN billing " +
                         " WHERE refuel_status != 'REFUSED' AND NOT refuel_archived AND reservation_from < billing_limit AND billing_id = ? " +

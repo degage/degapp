@@ -104,11 +104,12 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
                 "(SELECT " + BILLING_INFO_FIELDS + ", 0 AS car_id, NULL AS car_name " +
                         "FROM billing JOIN b_user ON bu_billing_id = billing_id " +
                         "WHERE bu_user_id = ?)" +
-                        "UNION " +
-                        "(SELECT " + BILLING_INFO_FIELDS + ", cars.car_id, car_name " +
+                "UNION " +
+                "(SELECT " + BILLING_INFO_FIELDS + ", cars.car_id, car_name " +
                         "FROM billing JOIN cars_billed USING (billing_id) " +
                         "JOIN cars ON cars.car_id = cars_billed.car_id " +
-                        "WHERE (billing_status = 'ALL_DONE' OR billing_status = 'ARCHIVED') " +
+                        "WHERE cars_billed.included AND " +
+                        "(billing_status = 'ALL_DONE' OR billing_status = 'ARCHIVED') " +
                         "   AND car_owner_user_id = ?) " +
                         "ORDER BY billing_limit DESC, car_id ASC"
         )) {
