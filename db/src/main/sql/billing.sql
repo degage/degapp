@@ -375,7 +375,7 @@ END  $$
 -- b_i billing
 -- c_id cost id
 -- months number of months since start of cost
--- spread number of months over which to spread the cost
+-- spread number of months over which to spread the cost (should be > zero)
 -- amount total cost
 DROP PROCEDURE IF EXISTS billing_cost_aux $$
 CREATE PROCEDURE billing_cost_aux (b_id INT, c_id INT, months INT, spread INT, amount INT)
@@ -413,6 +413,7 @@ BEGIN
       FROM cars_billed JOIN carcosts ON car_cost_car_id = car_id
       WHERE billing_id = b_id AND included
         AND NOT car_cost_archived
+        AND car_cost_spread > 0 -- =0 means: will be handled outside the system
         AND (car_cost_status='ACCEPTED' OR car_cost_status='FROZEN')
         AND car_cost_start < lim;
 
