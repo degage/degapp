@@ -191,7 +191,7 @@ public class Calendars extends Controller {
     public static Result overview (String dateString) {
         LocalDate date = dateString == null ? LocalDate.now() : Utils.toLocalDate(dateString);
         LocalDateTime from = date.atTime(OverviewLine.START_HOUR, 0);
-        LocalDateTime until = date.atTime(OverviewLine.END_HOUR, 0);
+        LocalDateTime until = date.plusDays(OverviewLine.END_HOUR/24).atTime(OverviewLine.END_HOUR % 24, 0);
 
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
         Iterable<ReservationDAO.CRInfo> list = dao.listCRInfo(from,until);

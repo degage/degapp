@@ -28,7 +28,7 @@
  *@
 
 @(title: String, faClass: String, lines: Iterable[util.OverviewLine],
-                 percentage:Int = 25)(header: => Html)(footer: => Html)
+                 percentage:Int = 15)(header: => Html)(footer: => Html)
 
 @* Overview panel for use in overview and overviewcar templates. *@
 
@@ -41,7 +41,7 @@
                 <th class="res-car">&nbsp;</th>
                 @for(i <- START_HOUR until END_HOUR) {
                     <th class="res-hour" colspan="@INTERVALS_PER_HOUR"
-                        width="@(75.0/(END_HOUR-START_HOUR))%">@i:00</th>
+                        width="@((100.0-percentage)/(END_HOUR-START_HOUR))%">@i:00</th>
                 }
             </tr>
             @foreach.tr(lines) { line =>

@@ -44,13 +44,15 @@ import java.time.LocalTime;
  */
 public class OverviewLine {
 
-    public static final int START_HOUR = 7;
-    public static final int END_HOUR = 22;
+    public static final int START_HOUR = 7;   // must be < 24
+    public static final int END_HOUR = 24;    // can be >= 24
 
     private static final int MINUTES_PER_INTERVAL = 15; // must be exactly divisible into 60
-    public static final int INTERVALS_PER_HOUR = 60/ MINUTES_PER_INTERVAL;
+    public static final int INTERVALS_PER_HOUR = 60 / MINUTES_PER_INTERVAL;
 
-    public static final int NUMBER_OF_INTERVALS = (END_HOUR-START_HOUR)* INTERVALS_PER_HOUR;
+    public static final int NUMBER_OF_INTERVALS = (END_HOUR - START_HOUR) * INTERVALS_PER_HOUR;
+
+    public static final long SECONDS_IN_DAY = 24 * 3600L;
 
 
     public int carId;
@@ -63,8 +65,8 @@ public class OverviewLine {
     private void fillFreeTimes(LocalDate date, Iterable<ReservationHeader> reservations) {
         // by default all times are free
         for (int i = 0; i < freeTimes.length; i++) {
-            LocalTime localTime = LocalTime.ofSecondOfDay(3600L * START_HOUR + 60L * i * MINUTES_PER_INTERVAL);
-            LocalDateTime time = date.atTime(localTime);
+            long secondOfDay = 3600L * START_HOUR + 60L * i * MINUTES_PER_INTERVAL;
+            LocalDateTime time = date.plusDays(secondOfDay / SECONDS_IN_DAY).atTime(LocalTime.ofSecondOfDay(secondOfDay % SECONDS_IN_DAY));
             freeTimes[i] = Utils.toString(time);
         }
         // block all reserved times for this date
@@ -72,7 +74,7 @@ public class OverviewLine {
 
         for (ReservationHeader reservation : reservations) {
             long startIndex = Duration.between(startMoment, reservation.getFrom()).toMinutes() / MINUTES_PER_INTERVAL;
-            long endIndex = (Duration.between(startMoment, reservation.getUntil()).toMinutes() + MINUTES_PER_INTERVAL-1) / MINUTES_PER_INTERVAL;
+            long endIndex = (Duration.between(startMoment, reservation.getUntil()).toMinutes() + MINUTES_PER_INTERVAL - 1) / MINUTES_PER_INTERVAL;
             if (startIndex < 0) {
                 startIndex = 0;
             }
@@ -80,7 +82,7 @@ public class OverviewLine {
                 endIndex = freeTimes.length;
             }
             if (startIndex < freeTimes.length && endIndex > 0) {
-                for (int i = (int)startIndex; i < (int)endIndex; i++) {
+                for (int i = (int) startIndex; i < (int) endIndex; i++) {
                     freeTimes[i] = null;
                 }
             }
@@ -90,7 +92,7 @@ public class OverviewLine {
     /**
      * Populate this line from a CRInfo object
      */
-    public void populate (ReservationDAO.CRInfo info, LocalDate date) {
+    public void populate(ReservationDAO.CRInfo info, LocalDate date) {
         carId = info.carId;
         lineHeader = views.html.calendars.carheader.render(info.carName, info.carId);
         fillFreeTimes(date, info.reservations);
@@ -99,7 +101,7 @@ public class OverviewLine {
     /**
      * Populate this line from car reservations
      */
-    public void populate (Iterable<ReservationHeader> reservations, int carId, LocalDate date) {
+    public void populate(Iterable<ReservationHeader> reservations, int carId, LocalDate date) {
         this.carId = carId;
         lineHeader = new Html(Utils.toLocalizedWeekDayString(date));
         fillFreeTimes(date, reservations);
@@ -108,7 +110,7 @@ public class OverviewLine {
     /**
      * Is there still a free period on this line?
      */
-    public boolean hasFree () {
+    public boolean hasFree() {
         for (String freeTime : freeTimes) {
             if (freeTime != null) {
                 return true;
