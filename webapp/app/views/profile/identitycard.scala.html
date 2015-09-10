@@ -27,47 +27,41 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(userId: Int, form: Form[Profile.IdentityCardData], listOfFiles: Iterable[File])
+@(userId: Int, form: Form[Profile.IdentityCardData], listOfFiles: Iterable[File], canDelete: Boolean)
 
-    @app("Identiteitsgegevens wijzigen") {
+@stdlayout("Identiteitsgegevens", extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
 
-    @breadcrumbs{
-        @breadcrumb("Profiel", routes.Profile.index(userId))
-        @breadcrumb("Identiteitsgegevens wijzigen")
+@* TODO: shares a lot of code with driverslicense.scala.html *@
+
+    @panel("Gegevens", "fa-pencil"){
+        @helper.form(routes.Profile.editIdentityCardPost(userId)) {
+            @std.textField(form("cardNumber"), "Nummer v/d identiteitskaart", css="col-md-4")
+            @std.textField(form("nationalNumber"), "Rijksregisternummer", css="col-md-4")
+            @std.submitButton("Wijzigen")
+        }
     }
-
-    @maincontent("Identiteitsgegevens wijzigen"){
-
-        @flashes()
-
-        @panel("Gegevens", "fa-pencil"){
-            @helper.form(routes.Profile.editIdentityCardPost(userId)) {
-                @std.textField(form("cardNumber"), "Nummer v/d identiteitskaart", css="col-md-4")
-                @std.textField(form("nationalNumber"), "Rijksregisternummer", css="col-md-4")
-                @std.submitButton("Wijzigen")
-            }
-        }
-        @* TODO: shares a lot of code with driverslicense.scala.html *@
-        @panel("Nieuw bestand uploaden") {
-            @helper.form(routes.Profile.addIdentityCardFile(userId), 'enctype -> "multipart/form-data") {
-                <div class="form-group col-xs-12">
-                    <input type="file" name="file">
-                    <br>
-                    <input class="btn btn-sm btn-success" type="submit" value="Doorsturen">
-                </div>
-             }
-        }
-        @panel("Reeds geüploade bestanden", "fa-list-ul") {
-            <ul>
-            @foreach.orElse(listOfFiles){ file =>
-                <li>
-                    <a href="@routes.Profile.viewIdentityFile(userId, file.getId)" target="_blank">@file.getFileName</a>
+    @panel("Nieuw bestand uploaden") {
+        @helper.form(routes.Profile.addIdentityCardFile(userId), 'enctype -> "multipart/form-data") {
+            <div class="form-group col-xs-12">
+                <input type="file" name="file">
+                <br>
+                <input class="btn btn-sm btn-success" type="submit" value="Doorsturen">
+            </div>
+         }
+    }
+    @panel("Reeds geüploade bestanden", "fa-list-ul") {
+        <ul>
+        @foreach.orElse(listOfFiles){ file =>
+            <li>
+                <a href="@routes.Profile.viewIdentityFile(userId, file.getId)" target="_blank">@file.getFileName</a>
+                @if(canDelete){
                     <a href="@routes.Profile.deleteIdentityFile(userId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
-                </li>
-             }{
-               Nog geen bestanden geupload.
-             }
-            </ul>
-        }
+                }
+            </li>
+         }{
+           Nog geen bestanden geupload.
+         }
+        </ul>
     }
+
 }

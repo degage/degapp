@@ -27,46 +27,38 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(userId: Int, form: Form[Profile.DriversLicenseData], listOfFiles: Iterable[File])
+@(userId: Int, form: Form[Profile.DriversLicenseData], listOfFiles: Iterable[File], canDelete: Boolean)
 
-@app("Rijbewijsgegevens wijzigen", scripts=js.datetimepicker()) {
+@stdlayout("Rijbewijs", scripts=js.datetimepicker(), extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
 
-    @breadcrumbs{
-        @breadcrumb("Profiel", routes.Profile.index(userId))
-        @breadcrumb("Rijbewijsgegevens wijzigen")
+    @panel("Gegevens", "fa-pencil"){
+        @helper.form(routes.Profile.editDriversLicensePost(userId)) {
+            @std.textField(form("cardNumber"), "Nummer v/h rijbewijs", css="col-md-4")
+            @std.datepicker(form("cardDate"), "Datum van afgifte", css="col-md-4", startView=4)
+            @std.submitButton("Wijzigen")
+        }
     }
-
-    @maincontent("Rijbewijsgegevens wijzigen"){
-
-        @flashes()
-
-        @panel("Gegevens", "fa-pencil"){
-            @helper.form(routes.Profile.editDriversLicensePost(userId)) {
-                @std.textField(form("cardNumber"), "Nummer v/h rijbewijs", css="col-md-4")
-                @std.datepicker(form("cardDate"), "Datum van afgifte", css="col-md-4", startView=4)
-                @std.submitButton("Wijzigen")
-            }
-        }
-        @panel("Nieuw bestand uploaden") {
-            @helper.form(routes.Profile.addDriversLicenseFile(userId), 'enctype -> "multipart/form-data") {
-                <div class="form-group col-xs-12">
-                    <input type="file" name="file">
-                    <br>
-                    <input class="btn btn-sm btn-success" type="submit" value="Doorsturen">
-                </div>
-             }
-        }
-        @panel("Reeds geüploade bestanden", "fa-list-ul") {
-            <ul>
-            @foreach.orElse(listOfFiles){ file =>
-                <li>
-                    <a href="@routes.Profile.viewLicenseFile(userId, file.getId)" target="_blank">@file.getFileName</a>
+    @panel("Nieuw bestand uploaden") {
+        @helper.form(routes.Profile.addDriversLicenseFile(userId), 'enctype -> "multipart/form-data") {
+            <div class="form-group col-xs-12">
+                <input type="file" name="file">
+                <br>
+                <input class="btn btn-sm btn-success" type="submit" value="Doorsturen">
+            </div>
+         }
+    }
+    @panel("Reeds geüploade bestanden", "fa-list-ul") {
+        <ul>
+        @foreach.orElse(listOfFiles){ file =>
+            <li>
+                <a href="@routes.Profile.viewLicenseFile(userId, file.getId)" target="_blank">@file.getFileName</a>
+                @if(canDelete){
                     <a href="@routes.Profile.deleteLicenseFile(userId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
-                </li>
-             }{
-               Nog geen bestanden geupload.
-             }
-            </ul>
-        }
+                }
+            </li>
+         }{
+           Nog geen bestanden geupload.
+         }
+        </ul>
     }
 }

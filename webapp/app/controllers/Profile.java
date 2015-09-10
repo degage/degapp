@@ -52,8 +52,9 @@ import java.io.IOException;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 
+import static be.ugent.degage.db.dao.FileDAO.UserFileType.ID;
+import static be.ugent.degage.db.dao.FileDAO.UserFileType.LICENSE;
 import static controllers.util.Addresses.updateAddress;
-import static be.ugent.degage.db.dao.FileDAO.UserFileType.*;
 
 public class Profile extends Controller {
 
@@ -192,7 +193,8 @@ public class Profile extends Controller {
                     userId,
                     Form.form(IdentityCardData.class).fill(new IdentityCardData().populate(
                             user.getIdentityId(), user.getNationalId())),
-                    context.getFileDAO().getUserFiles(userId, ID))
+                    context.getFileDAO().getUserFiles(userId, ID),
+                    CurrentUser.hasRole(UserRole.PROFILE_ADMIN))
             );
         } else {
             return mustBeProfileAdmin();
@@ -266,7 +268,7 @@ public class Profile extends Controller {
      * @param fileId The file to delete
      * @return A redirect to the identity card page overview
      */
-    @AllowRoles({})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result deleteIdentityFile(final int userId, int fileId) {
         deleteUserFile(userId, fileId, ID);
@@ -282,7 +284,7 @@ public class Profile extends Controller {
      * @param fileId The file to delete
      * @return A redirect to the identity card page overview
      */
-    @AllowRoles({})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result deleteLicenseFile(final int userId, int fileId) {
         deleteUserFile(userId, fileId, LICENSE);
@@ -304,7 +306,8 @@ public class Profile extends Controller {
             Iterable<File> listOfFiles = context.getFileDAO().getUserFiles(userId, ID);
             Form<IdentityCardData> form = Form.form(IdentityCardData.class).bindFromRequest();
             if (form.hasErrors()) {
-                return badRequest(identitycard.render(userId, form, listOfFiles));
+                return badRequest(identitycard.render(userId, form, listOfFiles,
+                    CurrentUser.hasRole(UserRole.PROFILE_ADMIN)));
             } else {
                 IdentityCardData data = form.get();
                 context.getUserDAO().updateUserIdentityData(userId, data.cardNumber, data.nationalNumber);
@@ -377,7 +380,8 @@ public class Profile extends Controller {
                     userId,
                     Form.form(DriversLicenseData.class).fill(
                             new DriversLicenseData().populate(user.getLicense(), user.getLicenseDate())),
-                    context.getFileDAO().getUserFiles(userId, LICENSE)
+                    context.getFileDAO().getUserFiles(userId, LICENSE),
+                    CurrentUser.hasRole(UserRole.PROFILE_ADMIN)
                     )
             );
         } else {
@@ -395,7 +399,8 @@ public class Profile extends Controller {
             Iterable<File> listOfFiles = context.getFileDAO().getUserFiles(userId, LICENSE);
             Form<DriversLicenseData> form = Form.form(DriversLicenseData.class).bindFromRequest();
             if (form.hasErrors()) {
-                return badRequest(driverslicense.render(userId, form, listOfFiles));
+                return badRequest(driverslicense.render(userId, form, listOfFiles,
+                    CurrentUser.hasRole(UserRole.PROFILE_ADMIN)));
             } else {
                 UserDAO udao = context.getUserDAO();
                 DriversLicenseData data = form.get();
