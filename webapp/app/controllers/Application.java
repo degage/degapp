@@ -30,6 +30,7 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.FileDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.CarHeader;
 import be.ugent.degage.db.models.User;
@@ -86,7 +87,7 @@ public class Application extends Controller {
                 User user = userDAO.getUser(CurrentUser.getId());
                 ProfileCompleteness pc = new ProfileCompleteness(
                         user,
-                        context.getFileDAO().hasLicenseFile(CurrentUser.getId()),
+                        context.getFileDAO().hasUserFile(CurrentUser.getId(), FileDAO.UserFileType.LICENSE),
                         userDAO.getUserPicture(CurrentUser.getId()) > 0
                 );
                 return ok(

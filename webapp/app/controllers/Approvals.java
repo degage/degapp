@@ -55,8 +55,6 @@ public class Approvals extends Controller {
         FileDAO fdao = context.getFileDAO();
         // TODO: minimize data transfer by using a query with true/false results
         User user = udao.getUser(userId); // gets the full user instead of small cached one
-        Iterable<File> identityFiles = fdao.getIdFiles(userId);
-        Iterable<File> licenseFiles = fdao.getLicenseFiles(userId);
 
         Collection<String> errors = new ArrayList<>();
         if (Strings.isNullOrEmpty(user.getAddressDomicile().getStreet())) {
@@ -67,12 +65,12 @@ public class Approvals extends Controller {
         }
         if (user.getIdentityId() == null) {
             errors.add("Identiteitsgegevens ontbreken.");
-        } else if (!identityFiles.iterator().hasNext()) {
+        } else if (!fdao.hasUserFile(userId, FileDAO.UserFileType.ID)) {
             errors.add("Scan identiteitskaart ontbreekt");
         }
         if (user.getLicense() == null) {
             errors.add("Rijbewijs ontbreekt.");
-        } else if (!licenseFiles.iterator().hasNext()) {
+        } else if (!fdao.hasUserFile(userId, FileDAO.UserFileType.LICENSE)) {
             errors.add("Ingescand rijbewijs ontbreekt");
         }
         if (!user.isPayedDeposit()) {

@@ -222,14 +222,12 @@ public class FileHelper {
 
     /**
      * Delete a file from the database and from the upload area. (Should only be used with an injected context.)
-     * @param id Id of the file to be deleted. If negative or zero, nothingis deleted.
+     * @param id Id of the file to be deleted. If negative or zero, nothing is deleted.
      */
     public static void deleteOldFile (int id) {
         if (id > 0) {
             FileDAO fileDAO = DataAccess.getInjectedContext().getFileDAO();
-            FileHelper.deleteFile(
-                    Paths.get(fileDAO.getFile(id).getPath())
-            );
+            deleteFile( Paths.get(fileDAO.getFile(id).getPath()) );
             fileDAO.deleteFile(id);
         }
     }

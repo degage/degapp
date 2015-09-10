@@ -37,6 +37,8 @@ import be.ugent.degage.db.models.File;
  */
 public interface FileDAO {
 
+    // GENERAL FILES
+
     /**
      * Return the file with given id, or null if it does not exist
      */
@@ -52,15 +54,39 @@ public interface FileDAO {
      */
     public void deleteFile(int fileId) throws DataAccessException;
 
-    /**
-     * Delete an image file for an identity card
-     */
-    public void deleteIdFile(int userId, int fileId) throws DataAccessException;
+    // USER FILES
+
+    public enum UserFileType {
+        ID, LICENSE // TODO: add DAMAGE?
+    }
 
     /**
-     * Delete an image file for a drivers license
+     * Delete an image file for an identity card or a drivers license
      */
-    public void deleteLicenseFile(int userId, int fileId) throws DataAccessException;
+    public void deleteUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException;
+
+
+    /**
+     * Return all the image files for an identity card or a drivers license
+     */
+    public Iterable<File> getUserFiles(int userId, UserFileType uft) throws DataAccessException;
+
+    /**
+     * Return a single user image file, or null if it does not exist
+     */
+    public File  getUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException;
+
+    /**
+     * Add an image file for an identity card  or a drivers license
+     */
+    public void addUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException;
+
+    /**
+     * Did the given user upload at least one file of the given type? (Used to check completeness of profile.)
+     */
+    public boolean hasUserFile (int userId, UserFileType uft) throws DataAccessException;
+
+    // DAMAGE FILES
 
     /**
      * Return the image files for a damage case
@@ -72,28 +98,4 @@ public interface FileDAO {
      */
     public void addDamageFile(int damageId, int fileId) throws DataAccessException;
 
-    /**
-     * Return the image files for an identity card
-     */
-    public Iterable<File> getIdFiles(int userId) throws DataAccessException;
-
-    /**
-     * Add an image file for an identity card
-     */
-    public void addIdFile(int userId, int fileId) throws DataAccessException;
-
-    /**
-     * Return the image files for a drivers license
-     */
-    public Iterable<File> getLicenseFiles(int userId) throws DataAccessException;
-
-    /**
-     * Did the given user upload at least one license file? (Used to check completeness of profile.)
-     */
-    public boolean hasLicenseFile (int userId) throws DataAccessException;
-
-    /**
-     * Add an image file for a drivers license
-     */
-    public void addLicenseFile(int userId, int fileId) throws DataAccessException;
 }
