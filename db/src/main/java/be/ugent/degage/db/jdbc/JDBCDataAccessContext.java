@@ -57,7 +57,6 @@ class JDBCDataAccessContext implements DataAccessContext {
     private CarRideDAO carRideDAO;
     private DamageDAO damageDAO;
     private DamageLogDAO damageLogDAO;
-    private ReceiptDAO receiptDAO;
     private RefuelDAO refuelDAO;
     private SchedulerDAO schedulerDAO;
     private NotificationDAO notificationDAO;
@@ -276,14 +275,6 @@ class JDBCDataAccessContext implements DataAccessContext {
             settingDAO = new JDBCSettingDAO(this);
         }
         return settingDAO;
-    }
-
-    @Override
-    public ReceiptDAO getReceiptDAO() {
-        if(receiptDAO == null){
-            receiptDAO = new JDBCReceiptDAO(this);
-        }
-        return receiptDAO;
     }
 
     @Override
