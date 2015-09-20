@@ -492,10 +492,12 @@ public class Profile extends Controller {
     }
 
     public static class DepositData {
-        public Integer amount;
+        public Integer amount; // deposit
+        public Integer fee;
 
-        public DepositData populate(Integer amount) {
+        public DepositData populate(Integer amount, Integer fee) {
             this.amount = amount;
+            this.fee = fee;
             return this;
         }
     }
@@ -505,7 +507,7 @@ public class Profile extends Controller {
     public static Result deposit(int userId) {
         User user = DataAccess.getInjectedContext().getUserDAO().getUser(userId);
         return ok(deposit.render(
-                Form.form(DepositData.class).fill(new DepositData().populate(user.getDeposit())),
+                Form.form(DepositData.class).fill(new DepositData().populate(user.getDeposit(), user.getFee())),
                 user)
         );
     }
@@ -518,7 +520,8 @@ public class Profile extends Controller {
         if (form.hasErrors()) {
             return badRequest(deposit.render(form, userDAO.getUser(userId)));
         } else {
-            userDAO.updateUserDeposit(userId, form.get().amount);
+            DepositData data = form.get();
+            userDAO.updateUserDepositAndFee(userId, data.amount, data.fee);
             return redirect(routes.Profile.index(userId));
         }
     }

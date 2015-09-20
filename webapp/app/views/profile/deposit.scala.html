@@ -29,11 +29,12 @@
 
 @(form: Form[Profile.DepositData], user: User)
 
-@stdlayout("Waarborg",extrabc=breadcrumb("Profiel", routes.Profile.index(user.getId))){
-    @panel("Gestorte waarborg", "fa-euro"){
+@stdlayout("Waarborg / instapgeld",extrabc=breadcrumb("Profiel", routes.Profile.index(user.getId))){
+    @panel("Betaalde bedragen", "fa-euro"){
         @helper.form(routes.Profile.depositPost(user.getId)){
-            @std.static(user.getFullName, "Gebruiker",css="col-md-6 col-lg-3")
-            @std.numberField(form("amount"), "Bedrag v/d betaalde waarborg (leeg = niet betaald)", css="col-md-6 col-lg-5")
+            @std.static(user.getFullName, "Gebruiker",css="col-md-4 col-lg-3")
+            @std.numberField(form("amount"), "Waarborg in € (leeg = niet betaald)", css="col-md-4 col-lg-3")
+            @std.numberField(form("fee"), "Instapgeld in € (leeg = onbekend)", css="col-md-4 col-lg-3")
             @std.submitButton("Wijzigen")
         }
     }

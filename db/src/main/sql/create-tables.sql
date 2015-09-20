@@ -98,6 +98,7 @@ CREATE TABLE `users` (
 	`user_degage_id` INT,
 	`user_date_joined` DATE,
 	`user_deposit` INT,
+	`user_fee` INT DEFAULT 0, -- one time membership fee, null means unknown
 	`user_vat` VARCHAR(32),
 	`user_last_notified` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`user_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

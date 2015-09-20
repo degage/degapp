@@ -57,7 +57,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
-                    "users.user_damage_history, users.user_deposit, users.user_agree_terms,  " +
+                    "users.user_damage_history, users.user_deposit, users.user_fee, users.user_agree_terms,  " +
                     "users.user_date_joined, users.user_driver_license_date, users.user_vat " +
                     "FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
@@ -112,6 +112,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
 
         user.setDeposit((Integer) rs.getObject("users.user_deposit"));
+        user.setFee((Integer) rs.getObject("users.user_fee"));
         user.setVatNr(rs.getString("users.user_vat"));
 
         return user;
@@ -410,20 +411,16 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    private LazyStatement updateUserDepositStatement = new LazyStatement(
-            "UPDATE users SET user_deposit = ? WHERE user_id = ?"
-    );
-
     @Override
-    public void updateUserDeposit(int userId, Integer deposit) {
-        try {
-            PreparedStatement ps = updateUserDepositStatement.value();
+    public void updateUserDepositAndFee(int userId, Integer deposit, Integer fee) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_deposit = ?, user_fee = ? WHERE user_id = ?"
+        )) {
             ps.setObject(1, deposit, Types.INTEGER);
-            ps.setInt(2, userId);
+            ps.setObject(2, fee, Types.INTEGER);
+            ps.setInt(3, userId);
 
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("User update affected 0 rows.");
-            }
+            ps.executeUpdate();
 
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user deposit", ex);

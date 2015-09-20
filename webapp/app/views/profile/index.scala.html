@@ -50,7 +50,7 @@
 
                 @if(db.CurrentUser hasRole UserRole.PROFILE_ADMIN){
                     @btnWarning("Gebruikersstatus wijzigen",routes.Profile.editUserStatus(user.getId))
-                    @btnWarning("Waarborg",routes.Profile.deposit(user.getId))
+                    @btnWarning("Waarborg / instapgeld",routes.Profile.deposit(user.getId))
                     @btnWarning("E-mailadres aanpassen",routes.Profile.updateEmail(user.getId))
                 }
             </div>

@@ -42,6 +42,7 @@ public class User extends UserHeader {
     private LocalDate licenseDate;
     private LocalDate dateJoined;
     private Integer deposit;
+    private Integer fee;
     private String identityId;
     private String nationalId;
     private String damageHistory;
@@ -129,6 +130,14 @@ public class User extends UserHeader {
 
     public void setDeposit(Integer deposit) {
         this.deposit = deposit;
+    }
+
+    public Integer getFee() {
+        return fee;
+    }
+
+    public void setFee(Integer fee) {
+        this.fee = fee;
     }
 
     public LocalDate getDateJoined() {
