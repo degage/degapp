@@ -30,9 +30,11 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
+import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -159,13 +161,14 @@ public class Approvals extends Controller {
 
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result pendingApprovalListPaged(int page) {
+    public static Result pendingApprovalListPaged(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+        // searchString not used
         DataAccessContext context = DataAccess.getInjectedContext();
-        int pageSize = Integer.parseInt(context.getSettingDAO().getSettingForNow("infosessions_page_size"));
-            // TODO: standard size of a page should be in application.conf, not in database
         ApprovalDAO dao = context.getApprovalDAO();
+        FilterField field = FilterField.stringToField(orderBy, FilterField.USER_NAME);
+        boolean asc = Pagination.parseBoolean(ascInt);
         int amountOfResults = dao.getApprovalCount();
-        return ok(approvalpage.render(dao.getApprovals(page, pageSize),
+        return ok(approvalpage.render(dao.getApprovals(field, asc, page, pageSize),
                 page,
                 amountOfResults,
                 (amountOfResults + pageSize - 1) / pageSize));

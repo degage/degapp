@@ -170,7 +170,7 @@ GET         /infosessions                           controllers.InfoSessions.sho
 # Approvals for membership
 GET         /approval                               controllers.Approvals.requestApproval()
 POST        /approval                               controllers.Approvals.requestApprovalPost()
-GET         /approvals/page                         controllers.Approvals.pendingApprovalListPaged(page: Int)
+GET         /approvals/page                         controllers.Approvals.pendingApprovalListPaged(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /approvals                              controllers.Approvals.pendingApprovalList()
 GET         /approval/details                       controllers.Approvals.approvalDetails(id: Int)
 POST        /approval/details                       controllers.Approvals.approvalAdminAction(id: Int)

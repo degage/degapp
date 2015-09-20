@@ -42,12 +42,12 @@ public enum FilterField {
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
-    INFOSESSION_DATE(true), INFOSESSION_TYPE(false),
+    INFOSESSION_TYPE(false),
     RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true),
     STATUS(true),
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
     NOTIFICATION_READ(true),
-    RECEIPT_DATE(true),
+    INSTANT(true),
     FROM(true), UNTIL(true);
 
     boolean exactValue;

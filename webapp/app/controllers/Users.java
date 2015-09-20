@@ -74,13 +74,13 @@ public class Users extends Controller {
     @InjectContext
     public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy, FilterField.USER_NAME);
+        FilterField field = FilterField.stringToField(orderBy, FilterField.USER_NAME);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
 
-        List<User> listOfUsers = dao.getUserList(carField, asc, page, pageSize, filter);
+        List<User> listOfUsers = dao.getUserList(field, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfUsers(filter);
 

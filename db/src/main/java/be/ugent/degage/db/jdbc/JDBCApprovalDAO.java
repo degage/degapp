@@ -29,13 +29,13 @@
 
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.dao.ApprovalDAO;
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.models.*;
+import be.ugent.degage.db.FilterField;
+import be.ugent.degage.db.dao.ApprovalDAO;
+import be.ugent.degage.db.models.Approval;
+import be.ugent.degage.db.models.UserHeader;
 
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Created by Cedric on 3/30/2014.
@@ -81,7 +81,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                     "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
     );
 
-    private Approval populateApprovalPartial(ResultSet rs) throws SQLException {
+    private static Approval populateApprovalPartial(ResultSet rs) throws SQLException {
         // note that admin can be null
 
         UserHeader admin =
@@ -119,28 +119,28 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         }
     }
 
-    private LazyStatement getPagedApprovalsStatement = new LazyStatement(
-            "SELECT approval_id, approval_submission, approval_status, " +
+    @Override
+    public Iterable<Approval> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
+        String sql = "SELECT approval_id, approval_submission, approval_status, " +
                     USERS_USER_HEADER_FIELDS + ","  + ADMINS_USER_HEADER_FIELDS +
             "FROM approvals " +
             "LEFT JOIN users users ON approval_user = users.user_id " +
             "LEFT JOIN users admins ON approval_admin = admins.user_id " +
-            "ORDER BY approval_submission DESC LIMIT ? OFFSET ?"
-    );
-
-    @Override
-    public Iterable<Approval> getApprovals(int page, int pageSize) throws DataAccessException {
-        try {
-            PreparedStatement ps = getPagedApprovalsStatement.value();
+            "ORDER BY ";
+        String ascString = asc ? "asc" : "desc";
+        switch (orderBy) {
+            case USER_NAME:
+                sql += "users.user_lastname " + ascString + ", users.user_firstname " + ascString;
+                break;
+            default: // should be 'instant'
+                sql += "approval_submission " + ascString;
+                break;
+        }
+        sql += " LIMIT ? OFFSET ?";
+        try (PreparedStatement ps = prepareStatement(sql)) {
             ps.setInt(1, pageSize);
             ps.setInt(2, (page - 1) * pageSize);
-            try (ResultSet rs = ps.executeQuery()) {
-                Collection<Approval> approvals = new ArrayList<>();
-                while (rs.next()) {
-                    approvals.add(populateApprovalPartial(rs));
-                }
-                return approvals;
-            }
+            return toList(ps, JDBCApprovalDAO::populateApprovalPartial);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get paged approvals for user.", ex);
         }

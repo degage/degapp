@@ -29,6 +29,10 @@
 
 @()
 
-@stdlayout("Goedkeuringen gebruikers", scripts=js.pagination("Approvals.pendingApprovalListPaged")) {
+@scripts = {
+    @js.pagination("Approvals.pendingApprovalListPaged")
+    <script>beginAsc = 0; beginOrder = "instant";</script>
+}
+@stdlayout("Goedkeuringen gebruikers", scripts=scripts) {
     @resultsTablePanel()
 }
