@@ -229,15 +229,11 @@ public class Cars extends Controller {
     @InjectContext
     public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy);
+        FilterField carField = FilterField.stringToField(orderBy, FilterField.NAME);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-
-        if (carField == null) {
-            carField = FilterField.CAR_NAME;
-        }
         Iterable<CarHeaderAndOwner> listOfCars = dao.listCarsAndOwners(carField, asc, page, pageSize, filter, false);
 
         int numberOfResults = dao.countCars(filter);

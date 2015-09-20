@@ -74,10 +74,7 @@ public class Calendars extends Controller {
     @InjectContext
     public static Result listAvailableCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
 
-        FilterField field = FilterField.stringToField(orderBy);
-        if (field == null) {
-            field = FilterField.CAR_NAME;
-        }
+        FilterField field = FilterField.stringToField(orderBy, FilterField.NAME);
 
         boolean asc = Pagination.parseBoolean(ascInt);
 
@@ -116,7 +113,6 @@ public class Calendars extends Controller {
 
     /**
      * Shows a list of cars with restricted information in order to make a reservation
-     * @return
      */
     @AllowRoles
     @InjectContext
@@ -184,7 +180,6 @@ public class Calendars extends Controller {
     /**
      * Show a calendar overview of reservations during a certain day. Do not show cars
      * that are not available
-     * @return
      */
     @AllowRoles
     @InjectContext

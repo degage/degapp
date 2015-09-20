@@ -105,15 +105,11 @@ public class Costs extends CostsCommon {
     @InjectContext
     public static Result showCostsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField field = FilterField.stringToField(orderBy);
+        FilterField field = FilterField.stringToField(orderBy, FilterField.CAR_COST_DATE);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
-
-        if (field == null) {
-            field = FilterField.CAR_COST_DATE;
-        }
 
         Iterable<CarCost> listOfResults = dao.getCarCostList(field, asc, page, pageSize, filter);
 

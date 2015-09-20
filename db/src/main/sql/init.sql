@@ -13,7 +13,6 @@ INSERT INTO `userroles` (`userrole_userid`, `userrole_role`)
 INSERT INTO `settings` (`setting_name`,`setting_value`) VALUES
         ("show_profile","true"),
         ("show_maps","false"),
-        ("infosessions_page_size","10"),
         ("scheduler_interval","300"),
         ("infosession_reminder","1440"),
         ("reservation_auto_accept","4320"), -- Minutes before reservation is automatically accepted

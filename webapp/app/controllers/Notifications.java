@@ -65,7 +65,7 @@ public class Notifications extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result showNotificationsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        FilterField field = FilterField.stringToField(orderBy);
+        FilterField field = FilterField.stringToField(orderBy, null); // TODO: not used by dao?
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);

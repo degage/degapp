@@ -51,7 +51,7 @@ public class Pagination {
                 if(s2.length == 2) {
                     String field = s2[0];
                     String value = s2[1];
-                    filter.putValue(FilterField.stringToField(field), value);
+                    filter.putValue(FilterField.stringToField(field, null), value);
                 }
             }
         }

@@ -43,7 +43,6 @@ import db.InjectContext;
 import play.Play;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import views.html.users.users;
 import views.html.users.userspage;
 
@@ -75,26 +74,17 @@ public class Users extends Controller {
     @InjectContext
     public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy);
+        FilterField carField = FilterField.stringToField(orderBy, FilterField.USER_NAME);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(userList(page, pageSize, carField, asc, filter));
-    }
-
-    // only in injected context
-    private static Html userList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
 
-        if (orderBy == null) {
-            orderBy = FilterField.USER_NAME;
-        }
-        List<User> listOfUsers = dao.getUserList(orderBy, asc, page, pageSize, filter);
+        List<User> listOfUsers = dao.getUserList(carField, asc, page, pageSize, filter);
 
         int amountOfResults = dao.getAmountOfUsers(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return userspage.render(listOfUsers, page, amountOfResults, amountOfPages);
+        return ok(userspage.render(listOfUsers, page, amountOfResults, (amountOfResults + pageSize - 1) / pageSize));
     }
 
     @AllowRoles({UserRole.SUPER_USER})

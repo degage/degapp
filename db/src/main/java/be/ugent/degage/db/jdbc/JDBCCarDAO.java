@@ -362,8 +362,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT COUNT(*) AS count FROM cars WHERE car_name LIKE ? AND car_brand LIKE ?"
         )) {
-            ps.setString(1, filter.getValue(FilterField.CAR_NAME));
-            ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
+            ps.setString(1, filter.getValue(FilterField.NAME));
+            ps.setString(2, filter.getValue(FilterField.BRAND));
             return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of cars", ex);
@@ -375,22 +375,22 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         FilterUtils.appendIdFilter(builder, "car_id", filter.getValue(FilterField.CAR_ID));
 
         // filter on car_seats
-        String carSeats = filter.getValue(FilterField.CAR_SEATS);
+        String carSeats = filter.getValue(FilterField.SEATS);
         if (!carSeats.isEmpty()) {
             Integer.parseInt(carSeats); // check that this is an integer - avoid SQL injection
             builder.append(" AND car_seats >= ").append(carSeats);
         }
 
         // filter on car_fuel
-        String carFuel = filter.getValue(FilterField.CAR_FUEL);
+        String carFuel = filter.getValue(FilterField.FUEL);
         if (!carFuel.isEmpty() && !carFuel.equals("ALL")) {
             CarFuel.valueOf(carFuel);  // protects against SQL injection
             builder.append(" AND car_fuel = '").append(carFuel).append('\'');
         }
 
-        FilterUtils.appendWhenOneFilter(builder, "car_gps", filter.getValue(FilterField.CAR_GPS));
-        FilterUtils.appendWhenOneFilter(builder, "car_hook", filter.getValue(FilterField.CAR_HOOK));
-        FilterUtils.appendNotWhenOneFilter(builder, "car_manual", filter.getValue(FilterField.CAR_AUTOMATIC));
+        FilterUtils.appendWhenOneFilter(builder, "car_gps", filter.getValue(FilterField.GPS));
+        FilterUtils.appendWhenOneFilter(builder, "car_hook", filter.getValue(FilterField.HOOK));
+        FilterUtils.appendNotWhenOneFilter(builder, "car_manual", filter.getValue(FilterField.AUTOMATIC));
 
     }
 
@@ -425,10 +425,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
         builder.append(SELECT_NOT_OVERLAP);
 
-        if (orderBy == FilterField.CAR_NAME) {
+        if (orderBy == FilterField.NAME) {
             builder.append(" ORDER BY car_name ");
             builder.append(asc ? "ASC" : "DESC");
-        } else if (orderBy == FilterField.CAR_BRAND) {
+        } else if (orderBy == FilterField.BRAND) {
             builder.append(" ORDER BY car_brand ");
             builder.append(asc ? "ASC" : "DESC");
         }
@@ -506,16 +506,16 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         try {
             PreparedStatement ps = null;
             switch (orderBy) {
-                case CAR_NAME:
+                case NAME:
                     ps = asc ? listCarsPageByNameAscStatement.value() : listCarsPageByNameDescStatement.value();
                     break;
-                case CAR_BRAND:
+                case BRAND:
                     ps = asc ? listCarsPageByBrandAscStatement.value() : listCarsPageByBrandDescStatement.value();
                     break;
             }
 
-            ps.setString(1, filter.getValue(FilterField.CAR_NAME));
-            ps.setString(2, filter.getValue(FilterField.CAR_BRAND));
+            ps.setString(1, filter.getValue(FilterField.NAME));
+            ps.setString(2, filter.getValue(FilterField.BRAND));
 
             ps.setInt(3, (page - 1) * pageSize);
             ps.setInt(4, pageSize);

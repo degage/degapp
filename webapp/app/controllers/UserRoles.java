@@ -44,7 +44,6 @@ import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import scala.Tuple2;
 import views.html.userroles.editroles;
 import views.html.userroles.overview;
@@ -66,6 +65,12 @@ public class UserRoles extends Controller {
         return ok(overview.render());
     }
 
+    public static class UserWithRoles {
+        public Iterable<UserRole> roleSet;
+        public int id;
+        public String fullName;
+    }
+
     /**
      * @param page         The page in the userlists
      * @param ascInt       An integer representing ascending (1) or descending (0)
@@ -77,29 +82,14 @@ public class UserRoles extends Controller {
     @InjectContext
     public static Result showUsersPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy);
+        FilterField carField = FilterField.stringToField(orderBy, FilterField.USER_NAME);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(userList(page, pageSize, carField, asc, filter)); // TODO: inline userList
-    }
-
-    public static class UserWithRoles {
-        public Iterable<UserRole> roleSet;
-        public int id;
-        public String fullName;
-    }
-
-    // called within an injected context
-    private static Html userList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
         UserRoleDAO urdao = context.getUserRoleDAO();
-
-        if (orderBy == null) {
-            orderBy = FilterField.USER_NAME;
-        }
-        List<User> listOfUsers = dao.getUserList(orderBy, asc, page, pageSize, filter);
+        List<User> listOfUsers = dao.getUserList(carField, asc, page, pageSize, filter);
 
         List<UserWithRoles> list = new ArrayList<>();
         for (User user : listOfUsers) {
@@ -111,9 +101,9 @@ public class UserRoles extends Controller {
         }
 
         int amountOfResults = dao.getAmountOfUsers(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
+        int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return userspage.render(list, page, amountOfResults, amountOfPages);
+        return ok(userspage.render(list, page, amountOfResults, amountOfPages));
     }
 
     /**

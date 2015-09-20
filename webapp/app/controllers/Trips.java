@@ -146,16 +146,13 @@ public class Trips extends Controller {
     @InjectContext
     public static Result showTripsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField field = FilterField.stringToField(orderBy);
+        FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
 
-        if (field == null) {
-            field = FilterField.FROM;
-        }
 
         // We only want reservations from the current user (or his car(s))
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, CurrentUser.getId());
@@ -175,16 +172,12 @@ public class Trips extends Controller {
     @InjectContext
     public static Result showTripsAdminPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField field = FilterField.stringToField(orderBy);
+        FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
 
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-
-        if (field == null) {
-            field = FilterField.FROM;
-        }
 
         Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
 
