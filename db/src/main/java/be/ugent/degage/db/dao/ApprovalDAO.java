@@ -32,14 +32,15 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Approval;
+import be.ugent.degage.db.models.ApprovalListInfo;
 
 /**
- * Created by Cedric on 3/30/2014.
+ * Data access object for approvals
  */
 public interface ApprovalDAO {
 
     public boolean hasApprovalPending (int userId) throws DataAccessException;
-    public Iterable<Approval> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException;
+    public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException;
     public int getApprovalCount() throws DataAccessException;
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException;
     public Approval getApproval(int approvalId) throws DataAccessException;

@@ -27,20 +27,23 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approvals: Iterable[Approval], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(approvals: Iterable[ApprovalListInfo], page : Int, amountOfResults : Int, amountOfPages : Int)
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
     <thead>
         <tr role="row">
             <th name="user_name" class="sortable" tabindex="0" >Naam</th>
             <th>Status</th>
-            <th>Contractverantwoordelijke</th>
             <th name="instant" class="sortable" tabindex="1">Ingediend</th>
+            <th>Admin</th>
+            <th>Lid</th>
+            <th>Borg</th>
+            <th>Instap</th>
             <th>Acties</th>
         </tr>
     </thead>
     <tbody>
         @foreach.trOrElse(approvals) { approval =>
-            <td> <a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser</a></td>
+            <td> <a href="@routes.Profile.index(approval.getUserId)">@approval.getUserName</a></td>
             <td>
                 @approval.getStatus match {
                     case Approval.ApprovalStatus.PENDING => { <span class="label label-default">In afwachting</span> }
@@ -48,18 +51,16 @@
                     case Approval.ApprovalStatus.ACCEPTED => { <span class="label label-success">Goedgekeurd</span> }
                 }
             </td>
-            <td>
-                @if(approval.getAdmin != null) {
-                    <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin</a>
-                } else {
-                    /
-                }
-            </td>
             <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
+            <td>@if(approval.isAdminAssigned) { <span class="fa fa-check"></span> } else { } </td>
+            <td>@if(approval.isFullUser) { <span class="fa fa-check"></span> } else { } </td>
+            <td>@if(approval.getDeposit!=null) { @approval.getDeposit } else { } </td>
+            <td>@if(approval.getFee!=null) { @approval.getFee } else { } </td>
             <td>
                 <div class="btn-group btn-group-xs">
-                    <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
-                    @if(approval.getAdmin != null) {
+                    @if(! approval.isAdminAssigned){
+                        <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
+                    } else {
                         <a class="btn btn-primary" href="@routes.Approvals.approvalDetails(approval.getId)">Afronden</a>
                     }
                 </div>

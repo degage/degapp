@@ -33,22 +33,23 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.ApprovalDAO;
 import be.ugent.degage.db.models.Approval;
+import be.ugent.degage.db.models.ApprovalListInfo;
 import be.ugent.degage.db.models.UserHeader;
 
 import java.sql.*;
 
 /**
- * Created by Cedric on 3/30/2014.
+ * JDBC implementation of {@link ApprovalDAO}
  */
 class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     private static final String USERS_USER_HEADER_FIELDS =
             "users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
-            "       users.user_status, users.user_phone, users.user_cellphone, users.user_degage_id ";
+                    "       users.user_status, users.user_phone, users.user_cellphone, users.user_degage_id ";
 
     private static final String ADMINS_USER_HEADER_FIELDS =
             "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, " +
-            "       admins.user_status, admins.user_phone, admins.user_cellphone, admins.user_degage_id ";
+                    "       admins.user_status, admins.user_phone, admins.user_cellphone, admins.user_degage_id ";
 
 
     private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +
@@ -81,27 +82,6 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                     "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
     );
 
-    private static Approval populateApprovalPartial(ResultSet rs) throws SQLException {
-        // note that admin can be null
-
-        UserHeader admin =
-                rs.getString ("admins.user_status") == null ?
-                        null :
-                        JDBCUserDAO.populateUserHeader(rs, "admins");
-        return new Approval(
-                rs.getInt("approval_id"),
-                JDBCUserDAO.populateUserHeader(rs, "users"),
-                admin,
-                rs.getTimestamp("approval_submission").toInstant(),
-                null,
-                null,
-                Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
-                null,
-                null
-        );
-    }
-
-
     private LazyStatement hasApprovalPendingStatement = new LazyStatement(
             "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
     );
@@ -120,17 +100,16 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public Iterable<Approval> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
-        String sql = "SELECT approval_id, approval_submission, approval_status, " +
-                    USERS_USER_HEADER_FIELDS + ","  + ADMINS_USER_HEADER_FIELDS +
-            "FROM approvals " +
-            "LEFT JOIN users users ON approval_user = users.user_id " +
-            "LEFT JOIN users admins ON approval_admin = admins.user_id " +
-            "ORDER BY ";
+    public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
+        String sql =
+                "SELECT approval_id, approval_submission, approval_status, approval_admin IS NOT NULL as has_admin, " +
+                        "approval_user, user_lastname, user_firstname, user_deposit, user_fee, user_status = 'FULL' as full_user " +
+                        "FROM approvals JOIN users ON approval_user = user_id " +
+                        "ORDER BY ";
         String ascString = asc ? "asc" : "desc";
         switch (orderBy) {
             case USER_NAME:
-                sql += "users.user_lastname " + ascString + ", users.user_firstname " + ascString;
+                sql += "user_lastname " + ascString + ", user_firstname " + ascString;
                 break;
             default: // should be 'instant'
                 sql += "approval_submission " + ascString;
@@ -140,10 +119,26 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         try (PreparedStatement ps = prepareStatement(sql)) {
             ps.setInt(1, pageSize);
             ps.setInt(2, (page - 1) * pageSize);
-            return toList(ps, JDBCApprovalDAO::populateApprovalPartial);
-        } catch (SQLException ex) {
+            return toList(ps, rs -> new ApprovalListInfo(
+                            rs.getInt("approval_id"),
+                            rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
+                            rs.getInt("approval_user"),
+                            Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
+                            rs.getBoolean("has_admin"),
+                            rs.getBoolean("full_user"),
+                            rs.getTimestamp("approval_submission").toInstant(),
+                            (Integer) rs.getObject("user_deposit"),
+                            (Integer) rs.getObject("user_fee")
+                    )
+            );
+        } catch (
+                SQLException ex
+                )
+
+        {
             throw new DataAccessException("Failed to get paged approvals for user.", ex);
         }
+
     }
 
     private LazyStatement countApprovalsStatement = new LazyStatement("SELECT COUNT(*) FROM approvals");
@@ -193,9 +188,9 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                 if (rs.next()) {
                     Timestamp approvalDate = rs.getTimestamp("approval_date");
                     // note that admin can be null
-                    UserHeader admin = rs.getString ("admins.user_status") == null ?
-                        null :
-                        JDBCUserDAO.populateUserHeader(rs, "admins");
+                    UserHeader admin = rs.getString("admins.user_status") == null ?
+                            null :
+                            JDBCUserDAO.populateUserHeader(rs, "admins");
                     return new Approval(
                             rs.getInt("approval_id"),
                             JDBCUserDAO.populateUserHeader(rs, "users"),
