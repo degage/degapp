@@ -27,12 +27,15 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(f: Field, label: Any, css: String="col-xs-12")
-<div class="form-group @css @if(f.hasErrors) {has-error}">
-    <label class="checkbox-inline">
-        <input id="@f.id"  name="@f.name" type="checkbox" @if(f.value==Some("true")){checked}> @label
-    </label>
-    @f.errors.map { error =>
+@(field: Field, label: Any, text: Any, css: String="col-xs-12")
+<div class="form-group @css @if(field.hasErrors) {has-error}">
+    <label class="control-label" for="@field.id">@label</label>
+    <div class="checkbox">
+       <label>
+         <input id="@field.id"  name="@field.name" type="checkbox" @if(field.value==Some("true")){checked}> @text
+       </label>
+    </div>
+    @field.errors.map { error =>
         <span class="help-block">@play.api.i18n.Messages(error.message)</span>
     }
 </div>

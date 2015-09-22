@@ -42,7 +42,9 @@
 
     @panel("Lidmaatschap aanvragen"){
         @helper.form(routes.Approvals.requestApprovalPost) {
-            @std.checkbox(form("acceptsTerms"), "Ik aanvaard de algemene voorwaarden (zie onderaan)")
+            <div class="form-group col-xs-12">
+                @std.checkboxInline(form("acceptsTerms"), "Ik aanvaard de algemene voorwaarden (zie onderaan)")
+            </div>
             @std.textArea(form("message"), "Opmerkingen", 4)
             @std.submitButton("Aanvraag indienen")
             <div class="form-group col-xs-12" >
