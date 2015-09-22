@@ -29,13 +29,16 @@
 
 package be.ugent.degage.db.dao;
 
-import java.time.LocalDate;
-import java.util.List;
-
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.models.*;
+import be.ugent.degage.db.models.Membership;
+import be.ugent.degage.db.models.User;
+import be.ugent.degage.db.models.UserHeader;
+import be.ugent.degage.db.models.UserStatus;
+
+import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Data access objects for users
@@ -67,6 +70,11 @@ public interface UserDAO {
      * Return partial information on the user with the given id,
      */
     public UserHeader getUserHeader(int userId) throws DataAccessException;
+
+    /**
+     * Return membership information of the user with the given id
+     */
+    public Membership getMembership (int userId) throws DataAccessException;
 
     /**
      * Update the main profile information about a user, i.e., names and telephone numbers
@@ -101,7 +109,7 @@ public interface UserDAO {
     /**
      * Update the deposit/fee of the user
      */
-    public void updateUserDepositAndFee(int userId, Integer deposit, Integer fee);
+    public void updateUserMembership(int userId, Integer deposit, Integer fee, LocalDate contract);
 
     /**
      * Update the email address of a user.

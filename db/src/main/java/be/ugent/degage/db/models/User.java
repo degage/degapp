@@ -124,21 +124,6 @@ public class User extends UserHeader {
         this.licenseDate = licenseDate;
     }
 
-    public Integer getDeposit() {
-        return deposit;
-    }
-
-    public void setDeposit(Integer deposit) {
-        this.deposit = deposit;
-    }
-
-    public Integer getFee() {
-        return fee;
-    }
-
-    public void setFee(Integer fee) {
-        this.fee = fee;
-    }
 
     public LocalDate getDateJoined() {
         return dateJoined;

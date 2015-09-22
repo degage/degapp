@@ -494,10 +494,20 @@ public class Profile extends Controller {
     public static class DepositData {
         public Integer amount; // deposit
         public Integer fee;
+        public boolean signed;
+        public String date;
 
-        public DepositData populate(Integer amount, Integer fee) {
-            this.amount = amount;
-            this.fee = fee;
+        public DepositData populate(Membership membership) {
+            this.amount = membership.getDeposit();
+            this.fee = membership.getFee();
+            LocalDate d = membership.getContractDate();
+            if (d == null) {
+                this.date = "";
+                this.signed = false;
+            } else {
+                this.date = Utils.toDateString(d);
+                this.signed = true;
+            }
             return this;
         }
     }
@@ -505,10 +515,11 @@ public class Profile extends Controller {
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result deposit(int userId) {
-        User user = DataAccess.getInjectedContext().getUserDAO().getUser(userId);
+        Membership membership = DataAccess.getInjectedContext().getUserDAO().getMembership(userId);
         return ok(deposit.render(
-                Form.form(DepositData.class).fill(new DepositData().populate(user.getDeposit(), user.getFee())),
-                user)
+                Form.form(DepositData.class).fill(new DepositData().populate(membership)),
+                membership.getId(),
+                membership.getFullName())
         );
     }
 
@@ -518,10 +529,15 @@ public class Profile extends Controller {
         Form<DepositData> form = Form.form(DepositData.class).bindFromRequest();
         UserDAO userDAO = DataAccess.getInjectedContext().getUserDAO();
         if (form.hasErrors()) {
-            return badRequest(deposit.render(form, userDAO.getUser(userId)));
+            Membership membership = userDAO.getMembership(userId);
+            return badRequest(deposit.render(form, membership.getId(), membership.getFullName()));
         } else {
             DepositData data = form.get();
-            userDAO.updateUserDepositAndFee(userId, data.amount, data.fee);
+            userDAO.updateUserMembership(userId,
+                    data.amount, data.fee,
+                    data.signed ? Utils.toLocalDate(data.date): null
+            );
+
             return redirect(routes.Profile.index(userId));
         }
     }
