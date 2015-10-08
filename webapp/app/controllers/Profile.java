@@ -147,7 +147,7 @@ public class Profile extends Controller {
                     dao.getUserPicture(userId) > 0
             );
             return ok(index.render(user, pc.getPercentage()));
-        } else if (CurrentUser.hasFullStatus()) { // TODO: remove reference to currentUser
+        } else if (CurrentUser.hasFullStatus()) {
             return ok(profile.render(user)); // public profile
         } else { // if not yet full user and profile is not ones own
             return mustBeProfileAdmin();
@@ -494,20 +494,10 @@ public class Profile extends Controller {
     public static class DepositData {
         public Integer amount; // deposit
         public Integer fee;
-        public boolean signed;
-        public String date;
 
         public DepositData populate(Membership membership) {
             this.amount = membership.getDeposit();
             this.fee = membership.getFee();
-            LocalDate d = membership.getContractDate();
-            if (d == null) {
-                this.date = "";
-                this.signed = false;
-            } else {
-                this.date = Utils.toDateString(d);
-                this.signed = true;
-            }
             return this;
         }
     }
@@ -518,7 +508,7 @@ public class Profile extends Controller {
         Membership membership = DataAccess.getInjectedContext().getUserDAO().getMembership(userId);
         return ok(deposit.render(
                 Form.form(DepositData.class).fill(new DepositData().populate(membership)),
-                membership.getId(),
+                userId,
                 membership.getFullName())
         );
     }
@@ -533,10 +523,7 @@ public class Profile extends Controller {
             return badRequest(deposit.render(form, membership.getId(), membership.getFullName()));
         } else {
             DepositData data = form.get();
-            userDAO.updateUserMembership(userId,
-                    data.amount, data.fee,
-                    data.signed ? Utils.toLocalDate(data.date): null
-            );
+            userDAO.updateUserMembership(userId, data.amount, data.fee);
 
             return redirect(routes.Profile.index(userId));
         }

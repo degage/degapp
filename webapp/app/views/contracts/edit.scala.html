@@ -1,4 +1,4 @@
-@* deposit.scala.html
+@* edit.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,14 +27,32 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Profile.DepositData], userId: Int, userName: String)
+@(form: Form[Contracts.Data], userId: Int, userName: String)
 
-@stdlayout("Lidmaatschap",extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
-    @panel("Betaalde bedragen", "fa-euro"){
-        @helper.form(routes.Profile.depositPost(userId)){
+@scripts={
+    @js.datetimepicker();
+<script>
+    $(function(){
+       $checkbox=$("#signed");
+       $datebox=$("#date-container").parent();
+       showhide=function(){
+           if ($checkbox.prop('checked')) {
+              $datebox.show();
+           } else {
+              $datebox.hide();
+           }
+       };
+       $checkbox.change(showhide);
+       showhide();
+      });
+</script>}
+
+@stdlayout("Contract",scripts=scripts,extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
+    @panel("Contractgegevens", "fa-pencil"){
+        @helper.form(routes.Contracts.contractPost(userId)){
             @std.static(userName, "Gebruiker",css="col-md-4 col-lg-2")
-            @std.numberField(form("amount"), "Waarborg in € (leeg = niet betaald)", css="col-md-4")
-            @std.numberField(form("fee"), "Instapgeld in € (leeg = onbekend)", css="col-md-4")
+            @std.checkbox(form("signed"), "Contract", "getekend?", css="col-md-4 col-lg-2")
+            @std.datepicker(form("date"), "datum van ondertekening", css="col-md-4")
             @std.submitButton("Wijzigen")
         }
     }

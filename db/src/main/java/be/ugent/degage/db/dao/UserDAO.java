@@ -109,7 +109,12 @@ public interface UserDAO {
     /**
      * Update the deposit/fee of the user
      */
-    public void updateUserMembership(int userId, Integer deposit, Integer fee, LocalDate contract);
+    public void updateUserMembership(int userId, Integer deposit, Integer fee);
+
+    /**
+     * Update the contract information of the user
+     */
+    public void updateUserContract(int userId, LocalDate contract);
 
     /**
      * Update the email address of a user.

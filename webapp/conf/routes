@@ -130,6 +130,10 @@ POST        /profile/deposit                        controllers.Profile.depositP
 GET         /profile/email                          controllers.Profile.updateEmail(userId: Int)
 POST        /profile/email                          controllers.Profile.updateEmailPost(userId: Int)
 
+# Contract management
+GET         /contracts/edit                         controllers.Contracts.contract(userId: Int)
+POST        /contracts/edit                         controllers.Contracts.contractPost(userId: Int)
+
 # Users
 GET         /users                                  controllers.Users.showUsers()
 GET         /users/page                             controllers.Users.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")

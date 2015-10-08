@@ -372,18 +372,13 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public void updateUserMembership(int userId, Integer deposit, Integer fee, LocalDate contract) {
+    public void updateUserMembership(int userId, Integer deposit, Integer fee) {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE users SET user_deposit = ?, user_fee = ?, user_contract = ? WHERE user_id = ?"
+                "UPDATE users SET user_deposit = ?, user_fee = ? WHERE user_id = ?"
         )) {
             ps.setObject(1, deposit, Types.INTEGER);
             ps.setObject(2, fee, Types.INTEGER);
-            if (contract == null) {
-                ps.setNull(3, Types.DATE);
-            } else {
-                ps.setDate(3, Date.valueOf(contract));
-            }
-            ps.setInt(4, userId);
+            ps.setInt(3, userId);
             ps.executeUpdate();
 
         } catch (SQLException ex) {
@@ -391,9 +386,23 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    private LazyStatement deleteUserStatement = new LazyStatement(
-            "UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?"
-    );
+    @Override
+    public void updateUserContract(int userId, LocalDate contract) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_contract = ? WHERE user_id = ?"
+        )) {
+            if (contract == null) {
+                ps.setNull(1, Types.DATE);
+            } else {
+                ps.setDate(1, Date.valueOf(contract));
+            }
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user contract information", ex);
+        }
+    }
 
     @Override
     public void deleteUser(int userId) throws DataAccessException {
