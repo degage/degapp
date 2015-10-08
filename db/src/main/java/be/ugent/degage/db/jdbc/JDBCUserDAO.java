@@ -42,7 +42,6 @@ import org.mindrot.jbcrypt.BCrypt;
 import java.sql.*;
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -146,40 +145,23 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
 
-    private LazyStatement getUserByEmailStatement = new LazyStatement(
-            "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_email = ?"
-    );
-
     @Override
     public UserHeader getUserByEmail(String email) {
-        if (email == null || email.isEmpty()) {
-            return null;
-        }
-
-        try {
-            PreparedStatement ps = getUserByEmailStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_email = ?"
+        )) {
             ps.setString(1, email.trim().toLowerCase());
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateUserHeader(rs);
-                } else {
-                    return null;
-                }
-            }
+            return toSingleObject(ps, JDBCUserDAO::populateUserHeader);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
         }
     }
 
-    private LazyStatement getUserByPasswordStatement = new LazyStatement(
-            "SELECT " + USER_HEADER_FIELDS + ", user_password FROM users WHERE user_email = ?"
-    );
-
-
     @Override
     public UserHeader getUserWithPassword(String email, String password) throws DataAccessException {
-        try {
-            PreparedStatement ps = getUserByPasswordStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS + ", user_password FROM users WHERE user_email = ?"
+        )) {
             ps.setString(1, email.trim().toLowerCase());
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
@@ -194,58 +176,44 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 }
             }
         } catch (SQLException ex) {
-            throw new DataAccessException("Could not fetch user by email.", ex);
+            throw new DataAccessException("Could not fetch user by password.", ex);
         }
     }
 
-
-    private LazyStatement getPasswordByIdStatement = new LazyStatement(
-            "SELECT user_password FROM users WHERE user_id = ?"
-    );
-
-    private LazyStatement updatePasswordStatement = new LazyStatement(
-            "UPDATE users SET user_password = ? WHERE user_id = ?"
-    );
-
     @Override
     public boolean changePassword(int userId, String oldPassword, String newPassword) throws DataAccessException {
-        try {
-            PreparedStatement ps = getPasswordByIdStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT user_password FROM users WHERE user_id = ?"
+        )) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 if (!rs.next() || !BCrypt.checkpw(oldPassword, rs.getString("user_password"))) {
                     return false;
                 }
             }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retreive password", ex);
+        }
 
-            ps = updatePasswordStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_password = ? WHERE user_id = ?"
+        )) {
             ps.setString(1, BCrypt.hashpw(newPassword, BCrypt.gensalt(12)));
             ps.setInt(2, userId);
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("Could not change password");
-            }
+            ps.executeUpdate();
             return true;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not change password", ex);
         }
     }
 
-    private LazyStatement getUserByIdStatement = new LazyStatement(
-            USER_QUERY + " WHERE users.user_id = ?"
-    );
-
     @Override
     public User getUser(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getUserByIdStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                USER_QUERY + " WHERE users.user_id = ?"
+        )) {
             ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateUser(rs);
-                } else {
-                    return null;
-                }
-            }
+            return toSingleObject(ps, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by id.", ex);
         }
@@ -260,40 +228,31 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         )) {
             ps.setInt(1, userId);
             return toSingleObject(ps, rs -> {
-                        Date contractDate = rs.getDate("user_contract");
-                        return new Membership(userId,
-                                rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
-                                (Integer) rs.getObject("user_deposit"),
-                                (Integer) rs.getObject("user_fee"),
-                                contractDate == null ? null : contractDate.toLocalDate());
-                    });
+                Date contractDate = rs.getDate("user_contract");
+                return new Membership(userId,
+                        rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
+                        (Integer) rs.getObject("user_deposit"),
+                        (Integer) rs.getObject("user_fee"),
+                        contractDate == null ? null : contractDate.toLocalDate());
+            });
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by id.", ex);
         }
     }
-
-    private LazyStatement smallGetUserByIdStatement = new LazyStatement(
-            "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_id = ?"
-    );
 
     @Override
     public UserHeader getUserHeader(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = smallGetUserByIdStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_id = ?"
+        )) {
             ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateUserHeader(rs);
-                } else {
-                    return null;
-                }
-            }
+            return toSingleObject(ps, JDBCUserDAO::populateUserHeader);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by id.", ex);
         }
-
     }
 
+    @Override
     public void updateUserStatus(int userId, UserStatus status) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement("UPDATE users SET user_status=? WHERE user_id = ?")) {
             ps.setString(1, status.name());
@@ -340,26 +299,18 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    private LazyStatement updateUserMainProfileStatement = new LazyStatement(
-            "UPDATE users SET user_firstname=?, user_lastname=?,  user_phone=?, user_cellphone=? WHERE user_id = ?"
-    );
-
     @Override
     public void updateUserMainProfile(User user) throws DataAccessException {
-        try {
-            PreparedStatement ps = updateUserMainProfileStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_firstname=?, user_lastname=?,  user_phone=?, user_cellphone=? WHERE user_id = ?"
+        )) {
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
-
             ps.setString(3, user.getPhone());
             ps.setString(4, user.getCellPhone());
-
             ps.setInt(5, user.getId());
 
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("User update affected 0 rows.");
-            }
-
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user main profile", ex);
         }
@@ -390,42 +341,30 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
-    private LazyStatement updateUserLicenseDataStatement = new LazyStatement(
-            "UPDATE users SET user_driver_license_id = ?, user_driver_license_date = ? WHERE user_id = ?"
-    );
-
     @Override
     public void updateUserLicenseData(int userId, String license, LocalDate date) {
-        try {
-            PreparedStatement ps = updateUserLicenseDataStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_driver_license_id = ?, user_driver_license_date = ? WHERE user_id = ?"
+        )) {
             ps.setString(1, license);
             ps.setDate(2, date == null ? null : Date.valueOf(date));
             ps.setInt(3, userId);
-
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("User update affected 0 rows.");
-            }
-
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user license data", ex);
         }
     }
 
-    private LazyStatement updateUserIdentityDataStatement = new LazyStatement(
-            "UPDATE users SET user_identity_card_id = ?, user_identity_card_registration_nr = ? WHERE user_id = ?"
-    );
-
     @Override
     public void updateUserIdentityData(int userId, String identityId, String nationalId) {
-        try {
-            PreparedStatement ps = updateUserIdentityDataStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_identity_card_id = ?, user_identity_card_registration_nr = ? WHERE user_id = ?"
+        )) {
             ps.setString(1, identityId);
             ps.setString(2, nationalId);
             ps.setInt(3, userId);
 
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("User update affected 0 rows.");
-            }
+            ps.executeUpdate();
 
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user identity data", ex);
@@ -458,52 +397,28 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     @Override
     public void deleteUser(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = deleteUserStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_status = 'DROPPED' WHERE user_id = ?"
+        )) {
             ps.setInt(1, userId);
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("No rows were affected when deleting (=updating to DROPPED) user.");
-            }
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Could not delete user", ex);
         }
-
     }
 
     // TODO: refactor filters
 
-    private LazyStatement getUserListPageByNameAscStatement = new LazyStatement(
-            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname asc, users.user_firstname asc LIMIT ?, ?"
-    );
-
-    private LazyStatement getUserListPageByNameDescStatement = new LazyStatement(
-            USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname desc, users.user_firstname desc LIMIT ?, ?"
-    );
-
-    private LazyStatement getAmountOfUsersStatement = new LazyStatement(
-            "SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT
-    );
-
-
     /**
      * @param filter The filter to apply to
-     * @return The amount of filtered cars
-     * @throws DataAccessException
      */
     @Override
     public int getAmountOfUsers(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfUsersStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+            "SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT
+        )) {
             fillFragment(ps, filter, 1);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("amount_of_users");
-                } else {
-                    return 0;
-                }
-            }
-
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get count of users", ex);
         }
@@ -511,40 +426,29 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     @Override
     public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = null;
-            switch (orderBy) {
-                case USER_NAME:
-                    ps = asc ? getUserListPageByNameAscStatement.value() : getUserListPageByNameDescStatement.value();
-                    break;
-            }
-            if (ps == null) {
-                throw new DataAccessException("Could not create getUserList statement");
-            }
+        if (orderBy != FilterField.USER_NAME) {
+             throw new DataAccessException("Could not create getUserList statement");
+        }
+        String sql = USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname asc, users.user_firstname ";
+        sql += asc ? "asc" : "desc";
+        sql += " LIMIT ?, ? ";
 
+        try (PreparedStatement ps = prepareStatement(sql)) {
             fillFragment(ps, filter, 1);
             int first = (page - 1) * pageSize;
             ps.setInt(5, first);
             ps.setInt(6, pageSize);
-            List<User> users = new ArrayList<>();
-            try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) {
-                    users.add(populateUser(rs));
-                }
-                return users;
-            }
+            return toList(ps, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);
         }
     }
 
-
-    public static final String UPDATE_USER_EMAIL_STATEMENT =
-            "UPDATE users SET user_email = ? WHERE user_id = ?";
-
     @Override
     public boolean updateUserEmail(int userId, String email) {
-        try (PreparedStatement ps = prepareStatement(UPDATE_USER_EMAIL_STATEMENT)) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_email = ? WHERE user_id = ?"
+        )) {
             ps.setString(1, email);
             ps.setInt(2, userId);
             ps.executeUpdate();
