@@ -49,7 +49,9 @@
                 @btnPrimary("Identiteitsgegevens wijzigen",routes.Profile.editIdentityCard(user.getId))
 
                 @if(db.CurrentUser hasRole UserRole.PROFILE_ADMIN){
-                    @btnWarning("Gebruikersstatus wijzigen",routes.Profile.editUserStatus(user.getId))
+                    @if(user.getStatus != UserStatus.REGISTERED && user.getStatus != UserStatus.FULL_VALIDATING) {
+                        @btnWarning("Gebruikersstatus wijzigen",routes.Profile.editUserStatus(user.getId))
+                    }
                     @btnWarning("Lidmaatschap",routes.Profile.deposit(user.getId))
                     @btnWarning("Contract",routes.Contracts.contract(user.getId))
                     @btnWarning("E-mailadres aanpassen",routes.Profile.updateEmail(user.getId))

@@ -63,7 +63,9 @@
                     @if(! approval.isAdminAssigned){
                         <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
                     } else {
-                        <a class="btn btn-primary" href="@routes.Approvals.approvalDetails(approval.getId)">Afronden</a>
+                      @if(approval.getStatus != Approval.ApprovalStatus.ACCEPTED) {
+                          <a class="btn btn-primary" href="@routes.Approvals.approvalDetails(approval.getId)">Afronden</a>
+                      }
                     }
                 </div>
             </td>

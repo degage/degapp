@@ -446,26 +446,19 @@ public class Profile extends Controller {
     }
 
 
-    public static class UserStatusData {
-        public String status;
-    }
-
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result editUserStatus(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
         UserHeader user = udao.getUserHeader(userId);
-        UserStatusData data = new UserStatusData();
-        UserStatus userStatus = user.getStatus();
-        data.status = userStatus.name();
-        switch (userStatus) {
-            case REGISTERED:
-            case FULL_VALIDATING:
-                return ok(editstatusRegistered.render(user));
+        switch (user.getStatus()) {
             case FULL:
                 return ok(editstatusFull.render(user));
-            default: // BLOCKED or DROPPED
+            case BLOCKED:
+            case DROPPED:
                 return ok(editstatusBlocked.render(user));
+            default: // this page should not be called when user not yet full
+                return badRequest();
         }
     }
 
@@ -480,14 +473,6 @@ public class Profile extends Controller {
     @InjectContext
     public static Result unblockUser(int userId) {
         DataAccess.getInjectedContext().getUserDAO().updateUserStatus(userId, UserStatus.REGISTERED);
-        return redirect(routes.Profile.editUserStatus(userId));
-    }
-
-    @AllowRoles({UserRole.PROFILE_ADMIN})
-    @InjectContext
-    public static Result makeFullUser(int userId) {
-        // TODO: update approvals table in database
-        Approvals.makeFullUser(userId, false, null);
         return redirect(routes.Profile.editUserStatus(userId));
     }
 
