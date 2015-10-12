@@ -36,6 +36,7 @@
             <th name="instant" class="sortable" tabindex="1">Ingediend</th>
             <th>Admin</th>
             <th>Lid</th>
+            <th>Getekend</th>
             <th>Borg</th>
             <th>Instap</th>
             <th>Acties</th>
@@ -52,8 +53,9 @@
                 }
             </td>
             <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
-            <td>@if(approval.isAdminAssigned) { <span class="fa fa-check"></span> } else { } </td>
-            <td>@if(approval.isFullUser) { <span class="fa fa-check"></span> } else { } </td>
+            <td>@checkIf(approval.isAdminAssigned) </td>
+            <td>@checkIf(approval.isFullUser) </td>
+            <td>@checkIf(approval.isContractSigned) </td>
             <td>@if(approval.getDeposit!=null) { @approval.getDeposit } else { } </td>
             <td>@if(approval.getFee!=null) { @approval.getFee } else { } </td>
             <td>

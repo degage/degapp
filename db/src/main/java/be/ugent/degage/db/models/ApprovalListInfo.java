@@ -42,18 +42,20 @@ public class ApprovalListInfo {
     private Approval.ApprovalStatus status;
     private boolean adminAssigned;
     private boolean fullUser;
+    private boolean contractSigned;
     private Instant submitted;
     private Integer deposit;
     private Integer fee;
 
     public ApprovalListInfo(int id, String userName, int userId, Approval.ApprovalStatus status,
-                            boolean adminAssigned, boolean fullUser, Instant submitted, Integer deposit, Integer fee) {
+                            boolean adminAssigned, boolean fullUser, boolean contractSigned, Instant submitted, Integer deposit, Integer fee) {
         this.id = id;
         this.userName = userName;
         this.userId = userId;
         this.status = status;
         this.adminAssigned = adminAssigned;
         this.fullUser = fullUser;
+        this.contractSigned = contractSigned;
         this.submitted = submitted;
         this.deposit = deposit;
         this.fee = fee;
@@ -81,6 +83,10 @@ public class ApprovalListInfo {
 
     public boolean isFullUser() {
         return fullUser;
+    }
+
+    public boolean isContractSigned() {
+        return contractSigned;
     }
 
     public Instant getSubmitted() {

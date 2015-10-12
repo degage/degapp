@@ -103,7 +103,8 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
         String sql =
                 "SELECT approval_id, approval_submission, approval_status, approval_admin IS NOT NULL as has_admin, " +
-                        "approval_user, user_lastname, user_firstname, user_deposit, user_fee, user_status = 'FULL' as full_user " +
+                        "approval_user, user_lastname, user_firstname, user_deposit, user_fee, " +
+                        "user_status = 'FULL' as full_user, user_contract IS NOT NULL as contract_signed " +
                         "FROM approvals JOIN users ON approval_user = user_id " +
                         "ORDER BY ";
         String ascString = asc ? "asc" : "desc";
@@ -126,6 +127,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                             Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
                             rs.getBoolean("has_admin"),
                             rs.getBoolean("full_user"),
+                            rs.getBoolean("contract_signed"),
                             rs.getTimestamp("approval_submission").toInstant(),
                             (Integer) rs.getObject("user_deposit"),
                             (Integer) rs.getObject("user_fee")

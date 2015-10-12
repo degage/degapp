@@ -71,11 +71,6 @@ public class Approval {
     public String getUserMessage() {
         return userMessage;
     }
-
-    public void setUserMessage(String userMessage) {
-        this.userMessage = userMessage;
-    }
-
     public String getAdminMessage() {
         return adminMessage;
     }
@@ -100,29 +95,13 @@ public class Approval {
     public void setAdmin(UserHeader admin) {
         this.admin = admin;
     }
-
-    public Instant getSubmitted() {
-        return submitted;
-    }
-
-    public void setSubmitted(Instant submitted) {
-        this.submitted = submitted;
-    }
-
-    public Instant getReviewed() {
-        return reviewed;
-    }
-
-    public void setReviewed(Instant reviewed) {
-        this.reviewed = reviewed;
-    }
+//
+//    public Instant getSubmitted() {
+//        return submitted;
+//    }
 
     public InfoSession getSession() {
         return session;
-    }
-
-    public void setSession(InfoSession session) {
-        this.session = session;
     }
 
     public ApprovalStatus getStatus() {
