@@ -345,8 +345,7 @@ public class Notifier extends Mailer {
     }
 
 
-    public static void sendContractManagerAssignedMail(UserHeader user, Approval approval) {
-        UserHeader admin = approval.getAdmin();
+    public static void sendContractManagerAssignedMail(UserHeader user, UserHeader admin) {
         createNotificationAndSend(user, "managerAssigned",
                 views.txt.messages.managerAssigned.render(user, admin, 75, 30), // TODO: not hardcoded
                 views.html.messages.managerAssigned.render(user, admin, 75, 30)

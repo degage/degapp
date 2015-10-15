@@ -46,7 +46,8 @@ public interface ApprovalDAO {
     public Approval getApproval(int approvalId) throws DataAccessException;
 
     /**
-     * Create approval with submit time set to now
+     * Create approval with submit time set to now. Indicates that the user wants to become a member. Changes the
+     * state of the user to FULL_VALIDATING.
      */
     public void createApproval(int userId, int sessionId, String userMessage) throws DataAccessException;
 

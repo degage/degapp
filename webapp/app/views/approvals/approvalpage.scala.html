@@ -47,9 +47,9 @@
             <td> <a href="@routes.Profile.index(approval.getUserId)">@approval.getUserName</a></td>
             <td>
                 @approval.getStatus match {
-                    case Approval.ApprovalStatus.PENDING => { <span class="label label-default">In afwachting</span> }
-                    case Approval.ApprovalStatus.DENIED => { <span class="label label-danger">Afgekeurd</span> }
-                    case Approval.ApprovalStatus.ACCEPTED => { <span class="label label-success">Goedgekeurd</span> }
+                    case MembershipStatus.PENDING => { <span class="label label-default">In afwachting</span> }
+                    case MembershipStatus.DENIED => { <span class="label label-danger">Afgekeurd</span> }
+                    case MembershipStatus.ACCEPTED => { <span class="label label-success">Goedgekeurd</span> }
                 }
             </td>
             <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
@@ -63,7 +63,7 @@
                     @if(! approval.isAdminAssigned){
                         <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
                     } else {
-                      @if(approval.getStatus != Approval.ApprovalStatus.ACCEPTED) {
+                      @if(approval.getStatus != MembershipStatus.ACCEPTED) {
                           <a class="btn btn-primary" href="@routes.Approvals.approvalDetails(approval.getId)">Afronden</a>
                       }
                     }

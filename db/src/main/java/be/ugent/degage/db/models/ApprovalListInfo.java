@@ -39,7 +39,7 @@ public class ApprovalListInfo {
     private int id;
     private String userName;
     private int userId;
-    private Approval.ApprovalStatus status;
+    private MembershipStatus status;
     private boolean adminAssigned;
     private boolean fullUser;
     private boolean contractSigned;
@@ -47,7 +47,7 @@ public class ApprovalListInfo {
     private Integer deposit;
     private Integer fee;
 
-    public ApprovalListInfo(int id, String userName, int userId, Approval.ApprovalStatus status,
+    public ApprovalListInfo(int id, String userName, int userId, MembershipStatus status,
                             boolean adminAssigned, boolean fullUser, boolean contractSigned, Instant submitted, Integer deposit, Integer fee) {
         this.id = id;
         this.userName = userName;
@@ -73,7 +73,7 @@ public class ApprovalListInfo {
         return userId;
     }
 
-    public Approval.ApprovalStatus getStatus() {
+    public MembershipStatus getStatus() {
         return status;
     }
 

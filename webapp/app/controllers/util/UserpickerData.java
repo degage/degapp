@@ -1,4 +1,4 @@
-@* setcontractadmin.scala.html
+/* UserpickerData.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -25,19 +25,40 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ */
 
-@(approval: Approval, user: UserHeader, enrollStatus: EnrollementStatus,form: Form[util.UserpickerData])
+package controllers.util;
 
-@stdlayout("Contractverantwoordelijke",
-           scripts=js.userpicker(),
-           extrabc=breadcrumb("Goedkeuringsaanvragen",routes.Approvals.pendingApprovalList)) {
-    @approvaluserpartial(approval, user, enrollStatus)
+import be.ugent.degage.db.models.UserHeader;
+import play.data.validation.Constraints;
+import play.data.validation.ValidationError;
 
-    @panel("Aanvraag", "fa-pencil-square-o") {
-        @helper.form(routes.Approvals.approvalAdminPost(approval.getId)) {
-            @std.userpicker(form("userId"), form("userIdAsString"), "Contractverantwoordelijke")
-            @std.submitButton("Contractverantwoordelijke toewijzen")
+import java.util.Collections;
+import java.util.List;
+
+/**
+ * Data for a form that uses a userpicker.
+ */
+public class UserpickerData {
+    public Integer userId;
+
+    @Constraints.Required
+    public String userIdAsString;
+
+    public List<ValidationError> validate() {
+        if (userId == null || userId <= 0) {
+            // needed for those cases where a string is input which does not correspond with a real person
+            return Collections.singletonList(new ValidationError("userId", "Gelieve een bestaande persoon te selecteren"));
+        } else {
+            return null;
         }
     }
+
+    public void populate(UserHeader user) {
+        if (user != null) {
+            userId = user.getId();
+            userIdAsString = user.getFullName();
+        }
+    }
+
 }

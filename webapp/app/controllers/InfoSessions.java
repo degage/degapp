@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.*;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
+import controllers.util.UserpickerData;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -339,31 +340,6 @@ public class InfoSessions extends Controller {
         );
         flash("success", "De gebruikersstatus werd met succes aangepast.");
         return redirect(routes.InfoSessions.detail(sessionId));
-    }
-
-    // TODO: make this generally available for extension
-    public static class UserpickerData {
-        public Integer userId;
-
-        @Constraints.Required
-        public String userIdAsString;
-
-        public List<ValidationError> validate() {
-            if (userId == null || userId <= 0) {
-                // needed for those cases where a string is input which does not correspond with a real person
-                return Collections.singletonList(new ValidationError("userId", "Gelieve een bestaande persoon te selecteren"));
-            } else {
-                return null;
-            }
-        }
-
-        public void populate (UserHeader user) {
-            if (user != null) {
-                userId = user.getId();
-                userIdAsString = user.getFullName();
-            }
-        }
-
     }
 
     /**

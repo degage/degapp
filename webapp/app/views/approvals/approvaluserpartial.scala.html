@@ -27,12 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approval: Approval, enrollStatus: EnrollementStatus)
+@(approval: Approval, user: UserHeader, enrollStatus: EnrollementStatus)
 @panel("Gebruiker", "fa-user"){
    <div class="col-xs-12">
        <dl class="dl-horizontal">
            <dt>Naam</dt>
-           <dd><a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser.getFullName</a></dd>
+           <dd><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></dd>
            <dt>Infosessiestatus</dt>
            <dd> @* TODO: refactor *@
                 @if(approval.getSession == null) {

@@ -29,35 +29,23 @@
 
 package be.ugent.degage.db.models;
 
-import java.time.Instant;
-
 /**
- * Created by Cedric on 3/30/2014.
+ *
  */
 public class Approval {
 
-    public enum ApprovalStatus {
-        PENDING,
-        ACCEPTED,
-        DENIED
-    }
-
     private int id;
-    private UserHeader user;
-    private UserHeader admin;
-    private Instant submitted;
-    private Instant reviewed;
+    private int userId;
+    private int adminId;
     private InfoSession session;
-    private ApprovalStatus status;
+    private MembershipStatus status;
     private String userMessage;
     private String adminMessage;
 
-    public Approval(int id, UserHeader user, UserHeader admin, Instant submitted, Instant reviewed, InfoSession session, ApprovalStatus status, String userMessage, String adminMessage) {
+    public Approval(int id, int userId, int adminId, InfoSession session, MembershipStatus status, String userMessage, String adminMessage) {
         this.id = id;
-        this.user = user;
-        this.admin = admin;
-        this.submitted = submitted;
-        this.reviewed = reviewed;
+        this.userId = userId;
+        this.adminId = adminId;
         this.session = session;
         this.status = status;
         this.userMessage = userMessage;
@@ -79,36 +67,27 @@ public class Approval {
         this.adminMessage = adminMessage;
     }
 
-
-    public UserHeader getUser() {
-        return user;
+    public int getUserId() {
+        return userId;
     }
 
-    public void setUser(UserHeader user) {
-        this.user = user;
+    public int getAdminId() {
+        return adminId;
     }
 
-    public UserHeader getAdmin() {
-        return admin;
+    public void setAdminId(int adminId) {
+        this.adminId = adminId;
     }
-
-    public void setAdmin(UserHeader admin) {
-        this.admin = admin;
-    }
-//
-//    public Instant getSubmitted() {
-//        return submitted;
-//    }
 
     public InfoSession getSession() {
         return session;
     }
 
-    public ApprovalStatus getStatus() {
+    public MembershipStatus getStatus() {
         return status;
     }
 
-    public void setStatus(ApprovalStatus status) {
+    public void setStatus(MembershipStatus status) {
         this.status = status;
     }
 }

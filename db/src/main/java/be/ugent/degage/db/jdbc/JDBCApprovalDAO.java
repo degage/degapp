@@ -34,9 +34,12 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.ApprovalDAO;
 import be.ugent.degage.db.models.Approval;
 import be.ugent.degage.db.models.ApprovalListInfo;
-import be.ugent.degage.db.models.UserHeader;
+import be.ugent.degage.db.models.MembershipStatus;
 
-import java.sql.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
 
 /**
  * JDBC implementation of {@link ApprovalDAO}
@@ -57,29 +60,21 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             USERS_USER_HEADER_FIELDS + "," + ADMINS_USER_HEADER_FIELDS + "," +
             "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_comments ";
 
-    private static final String APPROVAL_QUERY = "SELECT " + APPROVAL_FIELDS + " FROM approvals " +
-            "LEFT JOIN users users ON approval_user = users.user_id " +
-            "LEFT JOIN users admins ON approval_admin = admins.user_id " +
+    private static final String APPROVAL_FIELDS_SHORT = "approval_id, approval_user, approval_admin, approval_status, " +
+            "approval_infosession, approval_user_message, approval_admin_message, " +
+            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_comments ";
+
+    private static final String APPROVAL_QUERY_SHORT = "SELECT " + APPROVAL_FIELDS_SHORT + " FROM approvals " +
             "LEFT JOIN infosessions AS ses ON approval_infosession = infosession_id ";
 
     public JDBCApprovalDAO(JDBCDataAccessContext context) {
         super(context);
     }
 
-    private LazyStatement getApprovalByIdStatement = new LazyStatement(
-            APPROVAL_QUERY + "WHERE approval_id = ?"
-    );
-
     private LazyStatement getCreateApprovalStatement = new LazyStatement(
             "INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message) " +
                     "VALUES(?,?,?,?)",
             "approval_id"
-    );
-
-    private LazyStatement getUpdateApprovalStatement = new LazyStatement(
-            "UPDATE approvals SET approval_user=?, approval_admin=?, " +
-                    "approval_date=NOW(), approval_status=?, approval_infosession=?," +
-                    "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
     );
 
     private LazyStatement hasApprovalPendingStatement = new LazyStatement(
@@ -124,7 +119,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                             rs.getInt("approval_id"),
                             rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
                             rs.getInt("approval_user"),
-                            Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
+                            MembershipStatus.valueOf(rs.getString("approval_status")),
                             rs.getBoolean("has_admin"),
                             rs.getBoolean("full_user"),
                             rs.getBoolean("contract_signed"),
@@ -182,57 +177,54 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     @Override
     public Approval getApproval(int approvalId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getApprovalByIdStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                APPROVAL_QUERY_SHORT + "WHERE approval_id = ?"
+        )) {
             ps.setInt(1, approvalId);
-
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    Timestamp approvalDate = rs.getTimestamp("approval_date");
-                    // note that admin can be null
-                    UserHeader admin = rs.getString("admins.user_status") == null ?
-                            null :
-                            JDBCUserDAO.populateUserHeader(rs, "admins");
-                    return new Approval(
-                            rs.getInt("approval_id"),
-                            JDBCUserDAO.populateUserHeader(rs, "users"),
-                            admin,
-                            rs.getTimestamp("approval_submission").toInstant(),
-                            approvalDate == null ? null : approvalDate.toInstant(),
-                            rs.getObject("infosession_type") == null ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs),
-                            Approval.ApprovalStatus.valueOf(rs.getString("approval_status")),
+            return toSingleObject(ps, rs ->
+                    new Approval(
+                            approvalId,
+                            rs.getInt("approval_user"),
+                            rs.getInt("approval_admin"), // 0 means null
+                            rs.getInt("approval_infosession") == 0 ? null : JDBCInfoSessionDAO.populateInfoSessionPartial(rs),
+                            MembershipStatus.valueOf(rs.getString("approval_status")),
                             rs.getString("approval_user_message"),
                             rs.getString("approval_admin_message")
-                    );
-                } else {
-                    return null;
-                }
-            }
+                    ));
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to get approvals for user.", ex);
+            throw new DataAccessException("Failed to get approval info for user.", ex);
         }
     }
 
     /**
-     * Creates a new PENDING approval with submission time as current time
+     * Creates a new PENDING approval with submission time as current time. Also
+     * changes the user status to pending.
      */
     @Override
     public void createApproval(int userId, int sessionId, String userMessage) {
-        // TODO: change user into driverId, session into sessionId
-        try {
-            PreparedStatement ps = getCreateApprovalStatement.value();
+        // TODO: use trigger or stored procedure to combine both statements
+        try (PreparedStatement ps = prepareStatement(
+                "INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message) " +
+                        "VALUES(?,'PENDING',?,?)"
 
+        )) {
             ps.setInt(1, userId);
-            ps.setString(2, Approval.ApprovalStatus.PENDING.name());
-            ps.setInt(3, sessionId);
-            ps.setString(4, userMessage);
-
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("No rows were affected when creating approval request.");
-            }
+            ps.setInt(2, sessionId);
+            ps.setString(3, userMessage);
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create approval request", ex);
         }
+
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_status = 'FULL_VALIDATING' WHERE user_id = ?"
+        )) {
+            ps.setInt(1, userId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not change user status", ex);
+        }
+
     }
 
     /**
@@ -241,13 +233,16 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
      */
     @Override
     public void updateApproval(Approval approval) throws DataAccessException {
-        try {
-            PreparedStatement ps = getUpdateApprovalStatement.value();
-            ps.setInt(1, approval.getUser().getId());
-            if (approval.getAdmin() == null) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE approvals SET approval_user=?, approval_admin=?, " +
+                        "approval_date=NOW(), approval_status=?, approval_infosession=?," +
+                        "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
+        )) {
+            ps.setInt(1, approval.getUserId());
+            if (approval.getAdminId() == 0) {
                 ps.setNull(2, Types.INTEGER);
             } else {
-                ps.setInt(2, approval.getAdmin().getId());
+                ps.setInt(2, approval.getAdminId());
             }
             ps.setString(3, approval.getStatus().name());
             if (approval.getSession() == null) {
@@ -263,7 +258,6 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("Approval update affected 0 rows.");
             }
-
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update approval", ex);
         }

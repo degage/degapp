@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approval: Approval, enrollStatus: EnrollementStatus, reasons: Iterable[String] = null, form: Form[Approvals.ApprovalAdminData])
+@(approval: Approval, user: UserHeader, enrollStatus: EnrollementStatus, reasons: Iterable[String] = null, form: Form[Approvals.ApprovalAdminData])
 
 @stdlayout("Goedkeuringsaanvraag") {
     @if(reasons.iterator.hasNext) {
@@ -40,7 +40,7 @@
             </div>
         }
     }
-    @approvaluserpartial(approval, enrollStatus)
+    @approvaluserpartial(approval, user, enrollStatus)
 
     @panel("Aanvraag", "fa-pencil-square-o"){
         @helper.form(routes.Approvals.approvalAdminAction(approval.getId)) {
