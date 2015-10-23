@@ -175,8 +175,8 @@ GET         /approval                               controllers.Approvals.reques
 POST        /approval                               controllers.Approvals.requestApprovalPost()
 GET         /approvals/page                         controllers.Approvals.pendingApprovalListPaged(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /approvals                              controllers.Approvals.pendingApprovalList()
-GET         /approval/details                       controllers.Approvals.approvalDetails(id: Int)
-POST        /approval/details                       controllers.Approvals.approvalAdminAction(id: Int)
+GET         /approval/aor                           controllers.Approvals.approvalApproveReject(id: Int)
+POST        /approval/aor                           controllers.Approvals.approvalApproveRejectPost(id: Int)
 GET         /approval/admin                         controllers.Approvals.approvalAdmin(id: Int)
 POST        /approval/admin                         controllers.Approvals.approvalAdminPost(id: Int)
 

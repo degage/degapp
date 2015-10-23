@@ -175,49 +175,6 @@ public class Approvals extends Controller {
                 (amountOfResults + pageSize - 1) / pageSize));
     }
 
-    // used in injected context
-    private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminData> form, boolean bad) {
-        EnrollementStatus status = EnrollementStatus.ABSENT;
-        int userId = ap.getUserId();
-        if (ap.getSession() != null) {
-            InfoSessionDAO idao = context.getInfoSessionDAO();
-            status = idao.getUserEnrollmentStatus(ap.getSession().getId(), userId);
-        }
-        UserHeader user = context.getUserDAO().getUserHeader(userId);
-        Iterable<String> reasons = checkApprovalConditions(userId, context.getUserDAO(), context.getFileDAO());
-        if (!bad) {
-            return ok(approvaladmin.render(ap, user, status, reasons, form));
-        } else {
-            return badRequest(approvaladmin.render(ap, user, status, reasons, form));
-        }
-    }
-
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
-    @InjectContext
-    public static Result approvalDetails(int approvalId) {
-        DataAccessContext context = DataAccess.getInjectedContext();
-        ApprovalDAO dao = context.getApprovalDAO();
-        Approval ap = dao.getApproval(approvalId);
-        if (ap.getAdminId() == 0) {
-            flash("danger", "Gelieve eerst een contractverantwoordelijke op te geven.");
-            return redirect(routes.Approvals.approvalAdmin(approvalId));
-        } else {
-            ApprovalAdminData data = new ApprovalAdminData();
-            data.message = ap.getAdminMessage();
-            if (ap.getStatus() == MembershipStatus.ACCEPTED || ap.getStatus() == MembershipStatus.PENDING) {
-                data.status = ApprovalAdminData.Action.ACCEPT.name();
-            } else {
-                data.status = ApprovalAdminData.Action.DENY.name();
-            }
-            Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(ap.getUserId());
-
-            data.owner = userRoles.contains(UserRole.CAR_OWNER);
-
-            return approvalForm(ap, context, Form.form(ApprovalAdminData.class).fill(data), false);
-        }
-
-    }
-
     /**
      * Show the page that assigns a contract administrator for the given approval record.
      */
@@ -276,15 +233,53 @@ public class Approvals extends Controller {
         }
     }
 
+public static class ApprovalAdminData {
+        public String message;
+        public String action;
+    }
+
+    // used in injected context
+    private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminData> form, boolean bad) {
+        EnrollementStatus status = EnrollementStatus.ABSENT;
+        int userId = ap.getUserId();
+        if (ap.getSession() != null) {
+            InfoSessionDAO idao = context.getInfoSessionDAO();
+            status = idao.getUserEnrollmentStatus(ap.getSession().getId(), userId);
+        }
+        UserHeader user = context.getUserDAO().getUserHeader(userId);
+        Iterable<String> reasons = checkApprovalConditions(userId, context.getUserDAO(), context.getFileDAO());
+        if (!bad) {
+            return ok(approvaladmin.render(ap, user, status, reasons, form));
+        } else {
+            return badRequest(approvaladmin.render(ap, user, status, reasons, form));
+        }
+    }
+
     /**
-     * Method: POST
-     *
-     * @param approvalId
-     * @return
+     * Show the page that allows approval or rejection of membership
      */
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result approvalAdminAction(int approvalId) {
+    public static Result approvalApproveReject(int approvalId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        ApprovalDAO dao = context.getApprovalDAO();
+        Approval ap = dao.getApproval(approvalId);
+        if (ap.getAdminId() == 0) {
+            flash("danger", "Gelieve eerst een contractverantwoordelijke op te geven.");
+            return redirect(routes.Approvals.approvalAdmin(approvalId));
+        } else {
+            ApprovalAdminData data = new ApprovalAdminData();
+            data.message = ap.getAdminMessage();
+            return approvalForm(ap, context, Form.form(ApprovalAdminData.class).fill(data), false);
+        }
+    }
+
+    /**
+     * Process approval or rejection of membership
+     */
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result approvalApproveRejectPost(int approvalId) {
         Form<ApprovalAdminData> form = Form.form(ApprovalAdminData.class).bindFromRequest();
         DataAccessContext context = DataAccess.getInjectedContext();
         ApprovalDAO dao = context.getApprovalDAO();
@@ -295,22 +290,27 @@ public class Approvals extends Controller {
         }
 
         ApprovalAdminData data = form.get();
-        ApprovalAdminData.Action action = data.getAction();
-
-
         UserDAO udao = context.getUserDAO();
-        ap.setAdminId(CurrentUser.getId());
-        ap.setAdminMessage(data.message);
-
-        if (action == ApprovalAdminData.Action.ACCEPT) {
-            ap.setStatus(MembershipStatus.ACCEPTED);
-            dao.updateApproval(ap);
+        if ("reject".equals(data.action)) {
+            //TODO Warning, if status was not pending, possibly have to remove user roles? But should not be called in that situation
+            dao.setApprovalStatus(approvalId, MembershipStatus.DENIED, data.message);
+            Notifier.sendMembershipRejected(udao.getUserHeader(ap.getUserId()), data.message);
+            flash("success", "De aanvraag werd afgekeurd.");
+            return redirect(routes.Approvals.pendingApprovalList());
+        } else {
+            boolean owner = false;
+            if ("owner".equals(data.action)) {
+                owner = true;
+            } else if (! "accept".equals(data.action)) {
+                return badRequest();
+            }
+            dao.setApprovalStatus(approvalId, MembershipStatus.ACCEPTED, data.message);
             int userId = ap.getUserId();
             udao.makeUserFull(userId);
 
             // Add the new user roles
             UserRoleDAO roleDao = context.getUserRoleDAO();
-            if (data.owner) {
+            if (owner) {
                 roleDao.addUserRole(userId, UserRole.CAR_OWNER);
             }
             roleDao.addUserRole(userId, UserRole.CAR_USER); // always
@@ -318,42 +318,6 @@ public class Approvals extends Controller {
             flash("success", "De gebruiker is volwaardig lid geworden.");
 
             return redirect(routes.Approvals.pendingApprovalList());
-        } else if (action == ApprovalAdminData.Action.DENY) {
-            //TODO Warning, if status was not pending, possibly have to remove user roles
-            ap.setStatus(MembershipStatus.DENIED);
-            dao.updateApproval(ap);
-            Notifier.sendMembershipRejected(udao.getUserHeader(ap.getUserId()), data.message);
-            flash("success", "De aanvraag werd afgekeurd.");
-
-            return redirect(routes.Approvals.pendingApprovalList());
-        } else {
-            return badRequest();
-        }
-    }
-
-    public static class ApprovalAdminData {
-        public String message;
-        public String status;
-        public boolean owner;
-
-        public enum Action {
-            ACCEPT("Aanvaarden"),
-            DENY("Verwerpen");
-
-            private String description;
-
-            Action(String description) {
-                this.description = description;
-            }
-
-            @Override
-            public String toString() {
-                return description;
-            }
-        }
-
-        public Action getAction() {
-            return Enum.valueOf(Action.class, status);
         }
     }
 }

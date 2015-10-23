@@ -43,14 +43,14 @@
     @approvaluserpartial(approval, user, enrollStatus)
 
     @panel("Aanvraag", "fa-pencil-square-o"){
-        @helper.form(routes.Approvals.approvalAdminAction(approval.getId)) {
+        @helper.form(routes.Approvals.approvalApproveRejectPost(approval.getId)) {
                 @formErrors(form)
-                @std.selectEnum(classOf[Approvals.ApprovalAdminData.Action],form("status"),"Actie")
-                <div class="form-group col-xs-12">
-                    @std.checkboxInline(form("sharer"),"Wordt eigenaar van een deelauto")
-                </div>
                 @std.textArea(form("message"),"Opmerkingen", 4)
-                @std.submitButton("Verzenden")
+            <div class="col-sm-12 col-xs-6">
+                <button type="submit" class="btn btn-xs btn-success" name="action" value="accept">Aanvaarden (gewoon lid)</button>
+                <button type="submit" class="btn btn-xs btn-success" name="action" value="owner">Aanvaarden (eigenaar)</button>
+                <button type="submit" class="btn btn-xs btn-danger" name="action" value="reject">Verwerpen</button>
+            </div>
         }
     }
 }

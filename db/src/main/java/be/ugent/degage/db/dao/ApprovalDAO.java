@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Approval;
 import be.ugent.degage.db.models.ApprovalListInfo;
+import be.ugent.degage.db.models.MembershipStatus;
 
 /**
  * Data access object for approvals
@@ -52,7 +53,7 @@ public interface ApprovalDAO {
     public void createApproval(int userId, int sessionId, String userMessage) throws DataAccessException;
 
     /**
-     Update the approval record and set the review date to now
+     * Change the status of the approval (and store admin message). Also stores review date.
      */
-    public void updateApproval(Approval approval) throws DataAccessException;
+    public void setApprovalStatus (int approvalId, MembershipStatus status, String message) throws DataAccessException;
 }

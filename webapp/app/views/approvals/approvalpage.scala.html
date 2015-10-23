@@ -63,8 +63,12 @@
                     @if(! approval.isAdminAssigned){
                         <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
                     } else {
-                      @if(approval.getStatus != MembershipStatus.ACCEPTED) {
-                          <a class="btn btn-primary" href="@routes.Approvals.approvalDetails(approval.getId)">Afronden</a>
+                      @if(approval.getStatus == MembershipStatus.PENDING) {
+                          <a class="btn btn-primary" href="@routes.Approvals.approvalApproveReject(approval.getId)">Afronden</a>
+                      } else {
+                         @if(approval.getStatus == MembershipStatus.DENIED) {
+                             <a class="btn btn-warning" href="@routes.Approvals.approvalApproveReject(approval.getId)">Aanpassen</a>
+                         }
                       }
                     }
                 </div>

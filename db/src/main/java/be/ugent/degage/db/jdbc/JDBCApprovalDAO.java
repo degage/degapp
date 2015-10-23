@@ -39,26 +39,11 @@ import be.ugent.degage.db.models.MembershipStatus;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Types;
 
 /**
  * JDBC implementation of {@link ApprovalDAO}
  */
 class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
-
-    private static final String USERS_USER_HEADER_FIELDS =
-            "users.user_id, users.user_firstname, users.user_lastname, users.user_email, " +
-                    "       users.user_status, users.user_phone, users.user_cellphone, users.user_degage_id ";
-
-    private static final String ADMINS_USER_HEADER_FIELDS =
-            "admins.user_id, admins.user_firstname, admins.user_lastname, admins.user_email, " +
-                    "       admins.user_status, admins.user_phone, admins.user_cellphone, admins.user_degage_id ";
-
-
-    private static final String APPROVAL_FIELDS = "approval_id, approval_user, approval_admin, approval_submission, " +
-            "approval_date, approval_status, approval_infosession, approval_user_message, approval_admin_message, " +
-            USERS_USER_HEADER_FIELDS + "," + ADMINS_USER_HEADER_FIELDS + "," +
-            "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_comments ";
 
     private static final String APPROVAL_FIELDS_SHORT = "approval_id, approval_user, approval_admin, approval_status, " +
             "approval_infosession, approval_user_message, approval_admin_message, " +
@@ -70,12 +55,6 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     public JDBCApprovalDAO(JDBCDataAccessContext context) {
         super(context);
     }
-
-    private LazyStatement getCreateApprovalStatement = new LazyStatement(
-            "INSERT INTO approvals(approval_user, approval_status, approval_infosession, approval_user_message) " +
-                    "VALUES(?,?,?,?)",
-            "approval_id"
-    );
 
     private LazyStatement hasApprovalPendingStatement = new LazyStatement(
             "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
@@ -227,37 +206,15 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     }
 
-    /**
-     * Updates user, admin, infosession and status
-     * Sets review time to now, does NOT update submission time
-     */
     @Override
-    public void updateApproval(Approval approval) throws DataAccessException {
+    public void setApprovalStatus(int approvalId, MembershipStatus status, String message) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE approvals SET approval_user=?, approval_admin=?, " +
-                        "approval_date=NOW(), approval_status=?, approval_infosession=?," +
-                        "approval_user_message=?,approval_admin_message=? WHERE approval_id = ?"
+                "UPDATE approvals SET approval_date=NOW(), approval_status=?, approval_admin_message=? WHERE approval_id = ?"
         )) {
-            ps.setInt(1, approval.getUserId());
-            if (approval.getAdminId() == 0) {
-                ps.setNull(2, Types.INTEGER);
-            } else {
-                ps.setInt(2, approval.getAdminId());
-            }
-            ps.setString(3, approval.getStatus().name());
-            if (approval.getSession() == null) {
-                ps.setNull(4, Types.INTEGER);
-            } else {
-                ps.setInt(4, approval.getSession().getId());
-            }
-            ps.setString(5, approval.getUserMessage());
-            ps.setString(6, approval.getAdminMessage());
-
-            ps.setInt(7, approval.getId());
-
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("Approval update affected 0 rows.");
-            }
+            ps.setString(1, status.name());
+            ps.setString(2, message);
+            ps.setInt(3, approvalId);
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update approval", ex);
         }
