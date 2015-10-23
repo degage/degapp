@@ -154,7 +154,7 @@ public class Approvals extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalList() {
-        return ok(approvals.render());
+        return ok(approvaltabs.render(0));
     }
 
     /**
@@ -168,8 +168,10 @@ public class Approvals extends Controller {
         ApprovalDAO dao = context.getApprovalDAO();
         FilterField field = FilterField.stringToField(orderBy, FilterField.USER_NAME);
         boolean asc = Pagination.parseBoolean(ascInt);
-        int amountOfResults = dao.getApprovalCount();
-        return ok(approvalpage.render(dao.getApprovals(field, asc, page, pageSize),
+        searchString = searchString.substring(searchString.lastIndexOf('=') + 1);
+        MembershipStatus membershipStatus = MembershipStatus.valueOf(searchString);
+        int amountOfResults = dao.getApprovalCount(membershipStatus);
+        return ok(approvalpage.render(dao.getApprovals(field, asc, page, pageSize, membershipStatus),
                 page,
                 amountOfResults,
                 (amountOfResults + pageSize - 1) / pageSize));

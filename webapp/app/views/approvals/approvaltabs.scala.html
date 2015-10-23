@@ -1,0 +1,84 @@
+@* approvaltabs.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(tab: Int)
+
+@scripts = {
+    @js.pagination("Approvals.pendingApprovalListPaged")
+    <script>
+    beginAsc = 0; beginOrder = "instant";
+
+    @* almost a copy of carCostsAdmin.scala.html = trips.js + tabscripts.scala.html *@
+
+    function clickHandler() {
+        $('li[id^="tab"] input').removeClass('searchTextField');
+
+        if(typeof $(this).find('input') != 'undefined') {
+            $(this).find('input').addClass('searchTextField');
+        }
+        $('#searchButton').click();
+    }
+
+    $(document).ready(function() {
+        $('li[id^="tab"]').on('click', clickHandler);
+
+        loadFirstPage(
+          @tab match {
+             case 0 => { "status=PENDING" }
+             case 1 => { "status=ACCEPTED" }
+             case _ => { "status=DENIED" }
+          }
+        );
+
+    });
+    </script>
+}
+
+@stdlayout("Goedkeuringen gebruikers", scripts=scripts) {
+
+    <div class="row">
+        <div class="col-lg-12">
+            <ul class="nav nav-tabs" id="myTab">
+                <li id="tab_pending" @if(tab == 0) { class="active" } ><a href="#resultpanel" data-toggle="tab">In afwachting</a>
+                  <input name="status" value="PENDING" class="searchTextField hidden">
+                </li>
+                <li id="tab_accepted" @if(tab == 1) { class="active" } ><a href="#resultpanel" data-toggle="tab">Goedgekeurd</a>
+                  <input name="status" value="ACCEPTED" class="searchTextField hidden">
+                </li>
+                <li id="tab_refused" @if(tab == 2) { class="active" } ><a href="#resultpanel" data-toggle="tab">Afgekeurd</a>
+                  <input name="status" value="DENIED" class="searchTextField hidden">
+                </li>
+                <li class="hidden"><button id="searchButton"></button></li>
+            </ul>
+        </div>
+    </div>
+
+    @resultsTablePanel(tabbed=true)
+
+}

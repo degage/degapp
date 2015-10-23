@@ -56,14 +56,11 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         super(context);
     }
 
-    private LazyStatement hasApprovalPendingStatement = new LazyStatement(
-            "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
-    );
-
     @Override
     public boolean hasApprovalPending(int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = hasApprovalPendingStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+             "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
+        )) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
@@ -74,13 +71,16 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
+    public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException {
         String sql =
                 "SELECT approval_id, approval_submission, approval_status, approval_admin IS NOT NULL as has_admin, " +
                         "approval_user, user_lastname, user_firstname, user_deposit, user_fee, " +
                         "user_status = 'FULL' as full_user, user_contract IS NOT NULL as contract_signed " +
-                        "FROM approvals JOIN users ON approval_user = user_id " +
-                        "ORDER BY ";
+                        "FROM approvals JOIN users ON approval_user = user_id ";
+        if (status != null) {
+            sql += "WHERE approval_status = '" +  status.name() + "' ";
+        }
+        sql += "ORDER BY ";
         String ascString = asc ? "asc" : "desc";
         switch (orderBy) {
             case USER_NAME:
@@ -117,38 +117,27 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
 
     }
 
-    private LazyStatement countApprovalsStatement = new LazyStatement("SELECT COUNT(*) FROM approvals");
-
     @Override
-    public int getApprovalCount() throws DataAccessException {
-        try {
-            PreparedStatement ps = countApprovalsStatement.value();
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1);
-                } else {
-                    throw new DataAccessException("Failed to get approval count. Empty resultset.");
-                }
-
-            }
+    public int getApprovalCount(MembershipStatus status) throws DataAccessException {
+        String sql = "SELECT COUNT(*) FROM approvals";
+        if (status != null) {
+            sql += " WHERE approval_status = '" +  status.name() + "' ";
+        }
+        try (PreparedStatement ps = prepareStatement(sql)) {
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get approval count.", ex);
         }
     }
 
-    private LazyStatement setApprovalAdminStatement = new LazyStatement(
-            "UPDATE approvals SET approval_admin=? WHERE approval_id=?"
-    );
-
     @Override
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException {
-        try {
-            PreparedStatement ps = setApprovalAdminStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+            "UPDATE approvals SET approval_admin=? WHERE approval_id=?"
+        )) {
             ps.setInt(1, adminId);
             ps.setInt(2, approvalId);
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("Failed to update approval admin, no rows affected.");
-            }
+            ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to prepare change approval admin query.", ex);
         }
