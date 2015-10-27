@@ -32,7 +32,7 @@ package be.ugent.degage.db.models;
 /**
  * Represents partial information for a single user. Used in lists or in combination with other data types.
  */
-public class UserHeader {
+public class UserHeader extends UserHeaderShort {
 
     private int id;
     private String email;
@@ -45,30 +45,12 @@ public class UserHeader {
     private Integer degageId;
 
     public UserHeader(int id, String email, String firstName, String lastName, UserStatus status, String phone, String cellPhone, Integer degageId){
-        this.id = id;
+        super (id, firstName, lastName);
         this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
         this.status = status;
         this.phone = phone;
         this.cellPhone = cellPhone;
         this.degageId = degageId;
-    }
-
-    public void setId(int id){
-        this.id = id;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public String getFirstName() {
-        return firstName;
-    }
-
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
     }
 
     public String getEmail() {
@@ -77,14 +59,6 @@ public class UserHeader {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
     }
 
     public UserStatus getStatus() {
@@ -111,14 +85,6 @@ public class UserHeader {
         this.phone = phone;
     }
 
-    @Override
-    public String toString(){
-        return firstName + " " + lastName;
-    }
-
-    public String getFullName() {
-        return lastName + ", " + firstName;
-    }
 
     public Integer getDegageId() {
         return degageId;

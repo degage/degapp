@@ -33,10 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.Membership;
-import be.ugent.degage.db.models.User;
-import be.ugent.degage.db.models.UserHeader;
-import be.ugent.degage.db.models.UserStatus;
+import be.ugent.degage.db.models.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.*;
@@ -49,8 +46,11 @@ import java.util.List;
  */
 class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
+    static final String USER_HEADER_SHORT_FIELDS =
+            "user_id, user_firstname, user_lastname ";
+
     static final String USER_HEADER_FIELDS =
-            "user_id, user_firstname, user_lastname, user_email, user_status, user_phone, user_cellphone, user_degage_id ";
+            USER_HEADER_SHORT_FIELDS + ", user_email, user_status, user_phone, user_cellphone, user_degage_id ";
 
     private static final String USER_QUERY =
             "SELECT " + USER_HEADER_FIELDS + ",  " +
@@ -128,6 +128,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 rs.getString("user_phone"),
                 rs.getString("user_cellphone"),
                 (Integer) rs.getObject("user_degage_id")
+        );
+    }
+
+    public static UserHeaderShort populateUserHeaderShort(ResultSet rs, String tableName) throws SQLException {
+        return new UserHeaderShort(
+                rs.getInt(tableName + ".user_id"),
+                rs.getString(tableName + ".user_firstname"),
+                rs.getString(tableName + ".user_lastname")
         );
     }
 
