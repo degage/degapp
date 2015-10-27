@@ -132,11 +132,16 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     public static UserHeaderShort populateUserHeaderShort(ResultSet rs, String tableName) throws SQLException {
-        return new UserHeaderShort(
-                rs.getInt(tableName + ".user_id"),
-                rs.getString(tableName + ".user_firstname"),
-                rs.getString(tableName + ".user_lastname")
-        );
+        int id = rs.getInt(tableName + ".user_id");
+        if (rs.wasNull()) {
+            return null;
+        } else {
+            return new UserHeaderShort(
+                    id,
+                    rs.getString(tableName + ".user_firstname"),
+                    rs.getString(tableName + ".user_lastname")
+            );
+        }
     }
 
     public static UserHeader populateUserHeader(ResultSet rs, String tableName) throws SQLException {

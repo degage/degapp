@@ -43,16 +43,20 @@
     </thead>
     <tbody>
         @foreach.trOrElse(approvals) { approval =>
-            <td> <a href="@routes.Profile.index(approval.getUserId)">@approval.getUserName</a></td>
+            <td> <a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser.getFullName</a></td>
             <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
-            <td>@checkIf(approval.isAdminAssigned) </td>
-            <td>@checkIf(approval.isFullUser) </td>
-            <td>@checkIf(approval.isContractSigned) </td>
-            <td>@if(approval.getDeposit!=null) { @approval.getDeposit } else { } </td>
-            <td>@if(approval.getFee!=null) { @approval.getFee } else { } </td>
+            <td>@if(approval.isAdminAssigned) {
+                <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin.getFullName</a>
+            }
+            </td>
+            @* note: null is printed as blank *@
+            <td>@Utils.toLocalizedDateString(approval.getDateJoined)</td>
+            <td>@Utils.toLocalizedDateString(approval.getContractDate)</td>
+            <td>@approval.getDeposit</td>
+            <td>@approval.getFee</td>
             <td>
                 <div class="btn-group btn-group-xs">
-                    @if(! approval.isAdminAssigned){
+                    @if(! approval.isAdminAssigned) {
                         <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
                     } else {
                       @if(approval.getStatus == MembershipStatus.PENDING) {

@@ -36,6 +36,7 @@ import be.ugent.degage.db.models.Approval;
 import be.ugent.degage.db.models.ApprovalListInfo;
 import be.ugent.degage.db.models.MembershipStatus;
 
+import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,7 +60,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     @Override
     public boolean hasApprovalPending(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-             "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
+                "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
         )) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
@@ -73,12 +74,15 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     @Override
     public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException {
         String sql =
-                "SELECT approval_id, approval_submission, approval_status, approval_admin IS NOT NULL as has_admin, " +
-                        "approval_user, user_lastname, user_firstname, user_deposit, user_fee, " +
-                        "user_status = 'FULL' as full_user, user_contract IS NOT NULL as contract_signed " +
-                        "FROM approvals JOIN users ON approval_user = user_id ";
+                "SELECT approval_id, approval_submission, approval_status, " +
+                        "admins.user_id, admins.user_lastname, admins.user_firstname, " +
+                        "users.user_id, users.user_lastname, users.user_firstname, " +
+                        "users.user_deposit, users.user_fee, users.user_date_joined, users.user_contract " +
+                        "FROM approvals " +
+                            "JOIN users ON approval_user = user_id " +
+                            "LEFT JOIN users as admins ON approval_admin = admins.user_id ";
         if (status != null) {
-            sql += "WHERE approval_status = '" +  status.name() + "' ";
+            sql += "WHERE approval_status = '" + status.name() + "' ";
         }
         sql += "ORDER BY ";
         String ascString = asc ? "asc" : "desc";
@@ -94,34 +98,31 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         try (PreparedStatement ps = prepareStatement(sql)) {
             ps.setInt(1, pageSize);
             ps.setInt(2, (page - 1) * pageSize);
-            return toList(ps, rs -> new ApprovalListInfo(
+            return toList(ps, rs -> {
+                Date contractDate = rs.getDate("users.user_contract");
+                Date dateJoined = rs.getDate("users.user_date_joined");
+                return new ApprovalListInfo(
                             rs.getInt("approval_id"),
-                            rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
-                            rs.getInt("approval_user"),
+                            JDBCUserDAO.populateUserHeaderShort(rs, "users"),
                             MembershipStatus.valueOf(rs.getString("approval_status")),
-                            rs.getBoolean("has_admin"),
-                            rs.getBoolean("full_user"),
-                            rs.getBoolean("contract_signed"),
+                            JDBCUserDAO.populateUserHeaderShort(rs, "admins"),
+                            dateJoined == null ? null : dateJoined.toLocalDate(),
+                            contractDate == null ? null : contractDate.toLocalDate(),
                             rs.getTimestamp("approval_submission").toInstant(),
                             (Integer) rs.getObject("user_deposit"),
                             (Integer) rs.getObject("user_fee")
-                    )
-            );
-        } catch (
-                SQLException ex
-                )
-
-        {
+                    );
+            });
+        } catch (SQLException ex) {
             throw new DataAccessException("Failed to get paged approvals for user.", ex);
         }
-
     }
 
     @Override
     public int getApprovalCount(MembershipStatus status) throws DataAccessException {
         String sql = "SELECT COUNT(*) FROM approvals";
         if (status != null) {
-            sql += " WHERE approval_status = '" +  status.name() + "' ";
+            sql += " WHERE approval_status = '" + status.name() + "' ";
         }
         try (PreparedStatement ps = prepareStatement(sql)) {
             return toSingleInt(ps);
@@ -133,7 +134,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     @Override
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-            "UPDATE approvals SET approval_admin=? WHERE approval_id=?"
+                "UPDATE approvals SET approval_admin=? WHERE approval_id=?"
         )) {
             ps.setInt(1, adminId);
             ps.setInt(2, approvalId);

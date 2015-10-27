@@ -30,6 +30,7 @@
 package be.ugent.degage.db.models;
 
 import java.time.Instant;
+import java.time.LocalDate;
 
 /**
  * Information about approvals and related users for use in lists
@@ -37,25 +38,23 @@ import java.time.Instant;
 public class ApprovalListInfo {
 
     private int id;
-    private String userName;
-    private int userId;
+    private UserHeaderShort user;
     private MembershipStatus status;
-    private boolean adminAssigned;
-    private boolean fullUser;
-    private boolean contractSigned;
+    private UserHeaderShort admin;
+    private LocalDate dateJoined;
+    private LocalDate contractDate;
     private Instant submitted;
     private Integer deposit;
     private Integer fee;
 
-    public ApprovalListInfo(int id, String userName, int userId, MembershipStatus status,
-                            boolean adminAssigned, boolean fullUser, boolean contractSigned, Instant submitted, Integer deposit, Integer fee) {
+    public ApprovalListInfo(int id, UserHeaderShort user, MembershipStatus status, UserHeaderShort admin,
+                            LocalDate dateJoined, LocalDate contractDate, Instant submitted, Integer deposit, Integer fee) {
         this.id = id;
-        this.userName = userName;
-        this.userId = userId;
+        this.user = user;
         this.status = status;
-        this.adminAssigned = adminAssigned;
-        this.fullUser = fullUser;
-        this.contractSigned = contractSigned;
+        this.admin = admin;
+        this.dateJoined = dateJoined;
+        this.contractDate = contractDate;
         this.submitted = submitted;
         this.deposit = deposit;
         this.fee = fee;
@@ -65,28 +64,32 @@ public class ApprovalListInfo {
         return id;
     }
 
-    public String getUserName() {
-        return userName;
+    public UserHeaderShort getUser() {
+        return user;
     }
 
-    public int getUserId() {
-        return userId;
+    public boolean isAdminAssigned () {
+        return admin != null;
+    }
+
+    public UserHeaderShort getAdmin() {
+        return admin;
     }
 
     public MembershipStatus getStatus() {
         return status;
     }
 
-    public boolean isAdminAssigned() {
-        return adminAssigned;
-    }
-
-    public boolean isFullUser() {
-        return fullUser;
-    }
-
     public boolean isContractSigned() {
-        return contractSigned;
+        return contractDate != null;
+    }
+
+    public LocalDate getContractDate() {
+        return contractDate;
+    }
+
+    public LocalDate getDateJoined() {
+        return dateJoined;
     }
 
     public Instant getSubmitted() {

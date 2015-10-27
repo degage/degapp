@@ -117,8 +117,8 @@ public class Approvals extends Controller {
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 return ok(approvalrequest.render(
-                                checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
-                                Form.form(RequestApprovalData.class) )
+                        checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
+                        Form.form(RequestApprovalData.class))
                 );
             }
         }
@@ -134,8 +134,8 @@ public class Approvals extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         if (form.hasErrors()) {
             return badRequest(approvalrequest.render(
-                            checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
-                            form
+                    checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
+                    form
                     )
             );
         } else {
@@ -235,7 +235,7 @@ public class Approvals extends Controller {
         }
     }
 
-public static class ApprovalAdminData {
+    public static class ApprovalAdminData {
         public String message;
         public String action;
     }
@@ -303,7 +303,7 @@ public static class ApprovalAdminData {
             boolean owner = false;
             if ("owner".equals(data.action)) {
                 owner = true;
-            } else if (! "accept".equals(data.action)) {
+            } else if (!"accept".equals(data.action)) {
                 return badRequest();
             }
             dao.setApprovalStatus(approvalId, MembershipStatus.ACCEPTED, data.message);
