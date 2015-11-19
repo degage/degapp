@@ -201,8 +201,8 @@ CREATE TABLE `reservations` (
 	-- marked with [ENUM INDEX]
     `reservation_status` ENUM(
         'REFUSED', 'CANCELLED', 'CANCELLED_LATE', -- first those that are 'deleted'
-        'ACCEPTED', -- no ride available, must be in the future
         'REQUEST',  -- no ride available, can be in the past
+        'ACCEPTED', -- no ride available, must be in the future
         'REQUEST_DETAILS', 'DETAILS_PROVIDED', 'DETAILS_REJECTED', 'FINISHED',
         'FROZEN'
         ) NOT NULL DEFAULT 'REQUEST',

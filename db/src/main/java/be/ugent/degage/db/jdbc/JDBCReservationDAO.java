@@ -29,7 +29,13 @@
 
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.*;
+import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.Filter;
+import be.ugent.degage.db.FilterField;
+import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
+import be.ugent.degage.db.models.ReservationStatus;
 
 import java.sql.*;
 import java.time.Instant;
@@ -38,12 +44,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
-
-import be.ugent.degage.db.dao.ReservationDAO;
-import be.ugent.degage.db.models.Reservation;
-import be.ugent.degage.db.models.ReservationHeader;
-import be.ugent.degage.db.models.ReservationStatus;
-
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 
@@ -320,7 +320,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
                     "AND NOT r.reservation_archived " +
-                    "AND r.reservation_status = 'ACCEPTED' " +
+                    "AND r.reservation_status > 4 " +  // [ENUM INDEX] = accepted or already in the past
                     "AND r.reservation_to <= o.reservation_from  " +
                     "AND r.reservation_to + INTERVAL 1 DAY >= o.reservation_from " +
                     "ORDER BY r.reservation_to DESC LIMIT 1"

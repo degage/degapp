@@ -113,7 +113,7 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT " + TRIP_FIELDS +
                 "FROM trips JOIN users ON user_id = reservation_user_id " +
-                "WHERE reservation_status > 4 " + // [ENUM INDEX]
+                "WHERE reservation_status > 3 " + // [ENUM INDEX]
                 "    AND reservation_from >= ? AND reservation_from <= ?" +
                 "    AND reservation_car_id = ? ORDER BY reservation_from"
         )) {
