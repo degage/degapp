@@ -260,23 +260,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     );
 
     private void updateLocation(int carId, Address location) {
-        try {
-            PreparedStatement ps = updateLocationStatement.value();
-            ps.setString(1, location.getCity());
-            ps.setString(2, location.getZip());
-            ps.setString(3, location.getStreet());
-            ps.setString(4, location.getNum());
-            ps.setString(5, location.getCountry());
-
-            ps.setInt(6, carId);
-
-            if (ps.executeUpdate() == 0) {
-                throw new DataAccessException("Address update affected 0 rows.");
-            }
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to update car location.", ex);
-        }
+        JDBCAddressDAO.updateLocation (
+                getConnection(),
+                "JOIN cars ON car_location=address_id", "car_id",
+                carId, location
+        );
     }
 
     @Override

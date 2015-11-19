@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.models.Address;
 
+import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -131,6 +132,29 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
 
         } catch(SQLException ex){
             throw new DataAccessException("Failed to execute address deletion query.", ex);
+        }
+    }
+
+    // used to update addresses as part of updates of other tables
+
+    static void updateLocation(Connection conn, String joinSQL, String idName, int id, Address location) {
+        try (PreparedStatement ps = conn.prepareStatement(
+                "UPDATE addresses " + joinSQL +
+                " SET address_city = ?, address_zipcode = ?, address_street = ?, address_number = ?, address_country=? " +
+                "WHERE " + idName + " = ?"
+        )) {
+            ps.setString(1, location.getCity());
+            ps.setString(2, location.getZip());
+            ps.setString(3, location.getStreet());
+            ps.setString(4, location.getNum());
+            ps.setString(5, location.getCountry());
+
+            ps.setInt(6, id);
+
+            ps.executeUpdate();
+
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update location.", ex);
         }
     }
 
