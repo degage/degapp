@@ -59,7 +59,7 @@ import static controllers.util.Addresses.updateAddress;
 public class Profile extends Controller {
 
     private static Result mustBeProfileAdmin() {
-        return badRequest(views.html.unauthorized.render(new UserRole[]{UserRole.PROFILE_ADMIN}));
+        return badRequest(views.html.errors.unauthorized.render());
     }
 
     /**
@@ -71,8 +71,13 @@ public class Profile extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result profilePictureUpload(int userId) {
-        UserHeader user = DataAccess.getInjectedContext().getUserDAO().getUserHeader(userId);
-        return ok(uploadPicture.render(userId, user.toString()));
+        if (canEditProfile(userId)) {
+            // TODO avoid these checks by introducing an annotation
+            UserHeader user = DataAccess.getInjectedContext().getUserDAO().getUserHeader(userId);
+            return ok(uploadPicture.render(userId, user.toString()));
+        } else {
+            return mustBeProfileAdmin();
+        }
     }
 
     /**
@@ -84,8 +89,11 @@ public class Profile extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result getProfilePicture(int userId) {
+        int profilePictureId = 0;
         DataAccessContext context = DataAccess.getInjectedContext();
-        int profilePictureId = context.getUserDAO().getUserPicture(userId);
+        if (canSeeProfile(userId)) {
+            profilePictureId = context.getUserDAO().getUserPicture(userId);
+        }
         if (profilePictureId > 0) {
             return FileHelper.getFileStreamResult(context.getFileDAO(), profilePictureId);
         } else {
@@ -99,8 +107,9 @@ public class Profile extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result profilePictureUploadPost(int userId) {
-        UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
         if (canEditProfile(userId)) {
+            UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
+
             File file = FileHelper.getFileFromRequest("picture", FileHelper.IMAGE_CONTENT_TYPES, "uploads.profile", 450);
             if (file == null) {
                 flash("danger", "Je moet een bestand kiezen");
@@ -147,18 +156,36 @@ public class Profile extends Controller {
                     dao.getUserPicture(userId) > 0
             );
             return ok(index.render(user, pc.getPercentage()));
-        } else if (CurrentUser.hasFullStatus()) {
-            return ok(profile.render(user)); // public profile
+        } else if (canSeeProfile(userId)) {
+            return ok(profile.render(user)); // only 'public' part of the profile
         } else { // if not yet full user and profile is not ones own
-            return mustBeProfileAdmin();
+            return badRequest(views.html.errors.privacy.render());
         }
     }
 
     /**
-     * Returns whether the currentUser can edit the profile of the given user
+     * Returns whether the current user can edit the profile of the given user
      */
     private static boolean canEditProfile(int userId) {
         return CurrentUser.is(userId) || CurrentUser.hasRole(UserRole.PROFILE_ADMIN);
+    }
+
+    /**
+     * Returns whether the current user is allowed to see the main profile page of the
+     * given user.
+     */
+    private static boolean canSeeProfile(int userId) {
+        // use in injected context only
+        if (canEditProfile(userId)) {
+            return true;
+        } else if (!CurrentUser.hasFullStatus()) {
+            return false;
+        } else if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
+            return DataAccess.getInjectedContext().getUserDAO().canSeeProfile(CurrentUser.getId(), userId);
+        } else {
+            // TODO: contract admin can see profiles
+            return false;
+        }
     }
 
     public static class IdentityCardData {
@@ -245,6 +272,7 @@ public class Profile extends Controller {
             return result;
         }
     }
+
     // use only in injected context
     private static boolean deleteUserFile(int userId, int fileId, FileDAO.UserFileType uft) {
         FileDAO fdao = DataAccess.getInjectedContext().getFileDAO();
@@ -252,12 +280,13 @@ public class Profile extends Controller {
         if (file == null) {
             flash("danger", "Bestand niet gevonden.");
             return false;
-        } else {
+        } else if (canEditProfile(userId)){
             fdao.deleteUserFile(userId, fileId, uft);
             FileHelper.deleteFile(Paths.get(file.getPath()));
             return true;
+        } else {
+            return false;
         }
-
     }
 
     /**
@@ -307,7 +336,7 @@ public class Profile extends Controller {
             Form<IdentityCardData> form = Form.form(IdentityCardData.class).bindFromRequest();
             if (form.hasErrors()) {
                 return badRequest(identitycard.render(userId, form, listOfFiles,
-                    CurrentUser.hasRole(UserRole.PROFILE_ADMIN)));
+                        CurrentUser.hasRole(UserRole.PROFILE_ADMIN)));
             } else {
                 IdentityCardData data = form.get();
                 context.getUserDAO().updateUserIdentityData(userId, data.cardNumber, data.nationalNumber);
@@ -400,7 +429,7 @@ public class Profile extends Controller {
             Form<DriversLicenseData> form = Form.form(DriversLicenseData.class).bindFromRequest();
             if (form.hasErrors()) {
                 return badRequest(driverslicense.render(userId, form, listOfFiles,
-                    CurrentUser.hasRole(UserRole.PROFILE_ADMIN)));
+                        CurrentUser.hasRole(UserRole.PROFILE_ADMIN)));
             } else {
                 UserDAO udao = context.getUserDAO();
                 DriversLicenseData data = form.get();

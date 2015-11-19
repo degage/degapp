@@ -1,4 +1,4 @@
-@* profile.scala.html
+@* unauthorized.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,21 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User)
+@()
 
-@* Displays the public profile of a given user different from the current user. Does not allow editing. *@
+@errorPage("Onvoldoende rechten") {
 
-@stdlayout("Profiel") {
-    <div class="row">
-        @smallProfile(user)
-        <div class="col-md-8">
-            @panel("Woonplaats", "fa-home") {
-                @defining(user.getAddressResidence) { address =>
-                    <div class="col-xs-12">
-                        <p>@address</p>
-                    </div>
-                }
-            }
-        </div>
-    </div>
+    <p>Het systeem weigert u de toelating tot de gevraagde pagina.</p>
+    <p>Gebruik de 'terug'-knop van uw browser om terug te keren naar de pagina waar u vandaan komt.</p>
+
 }
+

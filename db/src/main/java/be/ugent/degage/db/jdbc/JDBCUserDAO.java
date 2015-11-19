@@ -483,4 +483,22 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             }
         }
     }
+
+    @Override
+    public boolean canSeeProfile (int ownerId, int userId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT 1 FROM reservations " +
+                    "JOIN cars ON reservation_car_id = car_id " +
+                    "WHERE car_owner_user_id = ? AND reservation_user_id = ? " +
+                        "AND (reservation_from + INTERVAL 120 DAY) > NOW() LIMIT 1"
+        )) {
+            ps.setInt (1, ownerId);
+            ps.setInt (2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of users", ex);
+        }
+    }
 }

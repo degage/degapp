@@ -137,4 +137,11 @@ public interface UserDAO {
     public int getAmountOfUsers(Filter filter) throws DataAccessException;
     public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
+    /**
+     * Is the given car owner allowed to see the profile of the given user?
+     */
+    public boolean canSeeProfile (int ownerId, int userId) ;
+
+
+
 }
