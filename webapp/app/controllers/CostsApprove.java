@@ -55,7 +55,7 @@ public class CostsApprove extends CostsCommon {
     public static Result approveOrReject(int carCostId, boolean horizontal) {
         CarCost cost = DataAccess.getInjectedContext().getCarCostDAO().getCarCost(carCostId);
         return ok(approveorreject.render(
-                Form.form(ApprovalData.class).fill(new ApprovalData(12, cost.getDate())),
+                Form.form(ApprovalData.class).fill(new ApprovalData(cost)),
                 Form.form(RemarksData.class),
                 cost,
                 horizontal
@@ -117,7 +117,7 @@ public class CostsApprove extends CostsCommon {
         CarCost cost = dao.getCarCost(carCostId);
         if (form.hasErrors()) {
             return badRequest(approveorreject.render(
-                    Form.form(ApprovalData.class).fill(new ApprovalData(12, cost.getDate())),
+                    Form.form(ApprovalData.class).fill(new ApprovalData(cost)),
                     form, cost, horizontal
             ));
         } else {
@@ -140,9 +140,9 @@ public class CostsApprove extends CostsCommon {
 
         public ApprovalData() {} // there must be a defaut constructor ??
 
-        public ApprovalData(int spread, LocalDate start) {
-            this.spread = spread;
-            this.start = start;
+        public ApprovalData(CarCost cost) {
+            this.spread = cost.getSpread();
+            this.start = cost.getStartDate();
         }
 
 

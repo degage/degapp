@@ -93,7 +93,7 @@ public class CostsCreate extends CostsCommon {
 
         dao.createCarCost(carId, carName, data.amount.getValue(), data.mileage, data.description, data.time,
                 isAdmin ? ApprovalStatus.ACCEPTED : ApprovalStatus.REQUEST,
-                isAdmin ? 12 : data.spread,
+                isAdmin ? data.spread : 12,
                 file.getId(), data.category,
                 data.start);
         if (!isAdmin) {
@@ -157,6 +157,7 @@ public class CostsCreate extends CostsCommon {
                 ));
             } else {
                 CostData data = form.get();
+                //System.out.printf("data.spread = %s, admin = %s, data.start = %s\n", data.spread, isAdmin, data.start);
                 if (!isAdmin) {
                     data.spread = cost.getSpread();
                     data.start = cost.getStartDate();

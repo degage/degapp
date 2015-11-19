@@ -102,6 +102,7 @@ public class CostsCommon extends Controller {
             mileage = cost.getKm();
             time = cost.getDate();
             spread = cost.getSpread();
+            start = cost.getStartDate();
         }
 
         public static CostData EMPTY = new CostData();
