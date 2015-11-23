@@ -180,11 +180,12 @@ public class Profile extends Controller {
             return true;
         } else if (!CurrentUser.hasFullStatus()) {
             return false;
-        } else if (CurrentUser.hasRole(UserRole.CAR_OWNER)) {
-            return DataAccess.getInjectedContext().getUserDAO().canSeeProfile(CurrentUser.getId(), userId);
         } else {
             // TODO: contract admin can see profiles
-            return false;
+            UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
+            return dao.canSeeProfileAsUser(CurrentUser.getId(), userId) ||
+                    (CurrentUser.hasRole(UserRole.CAR_OWNER) &&
+                            dao.canSeeProfileAsOwner(CurrentUser.getId(), userId));
         }
     }
 
@@ -280,7 +281,7 @@ public class Profile extends Controller {
         if (file == null) {
             flash("danger", "Bestand niet gevonden.");
             return false;
-        } else if (canEditProfile(userId)){
+        } else if (canEditProfile(userId)) {
             fdao.deleteUserFile(userId, fileId, uft);
             FileHelper.deleteFile(Paths.get(file.getPath()));
             return true;

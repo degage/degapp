@@ -140,7 +140,12 @@ public interface UserDAO {
     /**
      * Is the given car owner allowed to see the profile of the given user?
      */
-    public boolean canSeeProfile (int ownerId, int userId) ;
+    public boolean canSeeProfileAsOwner (int ownerId, int userId) ;
+
+    /**
+     * Is the given user allowed to see the profile of the given owner?
+     */
+    public boolean canSeeProfileAsUser (int userId, int ownerId) ;
 
 
 
