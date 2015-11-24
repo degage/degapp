@@ -55,8 +55,9 @@ public interface CarDAO {
     /**
      * Returns a filtered list of cars. Only active cars are shown. Always contains a location. Owner is
      * left null.
+     * @param uid User whose preferences will be used in sorting the cars
      */
-    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, int uid) throws DataAccessException;
 
     /**
      * Number of cars that can be returned by equivalent call to {@link #listActiveCars}
@@ -65,9 +66,9 @@ public interface CarDAO {
 
     /**
      * Returns a list of all active cars. Similar to {@link #listActiveCars} but
-     * unfiltered and withou pagination
+     * unfiltered and without pagination
      */
-    public Iterable<CarHeaderLong> listAllActiveCars();
+    public Iterable<CarHeaderLong> listAllActiveCars(int uid);
 
     /**
      * Return a filtered list of cars. Does not contain location information.

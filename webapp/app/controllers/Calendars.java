@@ -37,6 +37,7 @@ import be.ugent.degage.db.models.CarHeaderLong;
 import be.ugent.degage.db.models.ReservationHeader;
 import controllers.util.OverviewLine;
 import controllers.util.Pagination;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
@@ -103,7 +104,7 @@ public class Calendars extends Controller {
         }
 
         CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        Iterable<CarHeaderLong> listOfCars = dao.listActiveCars(field, asc, page, pageSize, filter);
+        Iterable<CarHeaderLong> listOfCars = dao.listActiveCars(field, asc, page, pageSize, filter, CurrentUser.getId());
 
         int numberOfResults = dao.countActiveCars(filter);
         int numberOfPages = (numberOfResults + pageSize - 1) / pageSize;
@@ -118,7 +119,7 @@ public class Calendars extends Controller {
     @InjectContext
     public static Result showCarsForReservation() {
         return ok(carsforreservation.render(
-                DataAccess.getInjectedContext().getCarDAO().listAllActiveCars()
+                DataAccess.getInjectedContext().getCarDAO().listAllActiveCars(CurrentUser.getId())
         ));
     }
 

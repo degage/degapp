@@ -244,30 +244,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    /* no longer used
-    private LazyStatement getReservationHeaderForRefuelStatement = new LazyStatement(
-            "SELECT " + RESERVATION_HEADER_FIELDS +
-                    " FROM refuels JOIN reservations ON refuel_car_ride_id=reservation_id WHERE refuel_id=?"
-    );
-
-    @Override
-    public ReservationHeader getReservationHeaderForRefuel(int refuelId) throws DataAccessException {
-        try {
-            PreparedStatement ps = getReservationHeaderForRefuelStatement.value();
-            ps.setInt(1, refuelId);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return populateReservationHeader(rs);
-                } else {
-                    return null;
-                }
-            }
-        } catch (SQLException e) {
-            throw new DataAccessException("Unable to get reservation header", e);
-        }
-    }
-    */
-
     private Reservation populateNextPrevious(ResultSet rs) throws SQLException {
         return new Reservation(
                 rs.getInt("r.reservation_id"),
@@ -519,16 +495,13 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    private LazyStatement listCRInfoStatement = new LazyStatement(
-            "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
-                    "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE_WIDE +
-                    "WHERE car_active " +
-                    "ORDER BY car_name, reservation_from"
-    );
-
     public Iterable<CRInfo> listCRInfo(LocalDateTime from, LocalDateTime until) {
-        try {
-            PreparedStatement ps = listCRInfoStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
+                        "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE_WIDE +
+                        "WHERE car_active " +
+                        "ORDER BY car_name, reservation_from"
+        )) {
             ps.setTimestamp(1, Timestamp.valueOf(from));
             ps.setTimestamp(2, Timestamp.valueOf(until));
             try (ResultSet rs = ps.executeQuery()) {

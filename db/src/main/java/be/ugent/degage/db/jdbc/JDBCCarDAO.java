@@ -29,10 +29,10 @@
 
 package be.ugent.degage.db.jdbc;
 
-import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
+import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.models.*;
 
 import java.sql.*;
@@ -383,13 +383,14 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     }
 
     private static final String NEW_CAR_QUERY =
-            "SELECT car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
+            "SELECT cars.car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
-                    "FROM cars JOIN addresses ON address_id=car_location ";
+                    "FROM cars JOIN addresses ON address_id=car_location " +
+            "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? ";
 
     private static final String SELECT_NOT_OVERLAP =
-            " AND car_id NOT IN (" +
+            " AND cars.car_id NOT IN (" +
                     "SELECT reservation_car_id FROM reservations " +
                     "WHERE reservation_to >= ? AND reservation_from <= ? " +
                     "AND reservation_status > 3 " +  // [ENUM INDEX]
@@ -404,7 +405,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, int userId) throws DataAccessException {
         // build query
         StringBuilder builder = new StringBuilder(NEW_CAR_QUERY);
         builder.append(" WHERE car_active ");
@@ -412,12 +413,13 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         appendCarFilter(builder, filter);
 
         builder.append(SELECT_NOT_OVERLAP);
+        builder.append (" ORDER BY IFNULL(user_id,0) DESC");
 
         if (orderBy == FilterField.NAME) {
-            builder.append(" ORDER BY car_name ");
+            builder.append(", car_name ");
             builder.append(asc ? "ASC" : "DESC");
         } else if (orderBy == FilterField.BRAND) {
-            builder.append(" ORDER BY car_brand ");
+            builder.append(", car_brand ");
             builder.append(asc ? "ASC" : "DESC");
         }
 
@@ -426,11 +428,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         //System.err.println("QUERY = " + builder.toString());
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
-
-            ps.setString(1, filter.getValue(FilterField.FROM));
-            ps.setString(2, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
-            ps.setInt(3, (page - 1) * pageSize);
-            ps.setInt(4, pageSize);
+            ps.setInt(1, userId);
+            ps.setString(2, filter.getValue(FilterField.FROM));
+            ps.setString(3, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
+            ps.setInt(4, (page - 1) * pageSize);
+            ps.setInt(5, pageSize);
 
             return toList(ps, JDBCCarDAO::populateCarHeaderLong);
         } catch (SQLException ex) {
@@ -465,10 +467,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     }
 
     @Override
-    public Iterable<CarHeaderLong> listAllActiveCars() {
+    public Iterable<CarHeaderLong> listAllActiveCars(int userId) {
         try (PreparedStatement ps = prepareStatement(
-                NEW_CAR_QUERY + "WHERE car_active ORDER BY car_name"
+                NEW_CAR_QUERY + "WHERE car_active ORDER BY IFNULL(USER_ID,0) desc, car_name asc"
         )) {
+            ps.setInt (1, userId);
             return toList(ps, JDBCCarDAO::populateCarHeaderLong);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get list of cars", ex);
