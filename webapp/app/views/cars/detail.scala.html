@@ -31,47 +31,7 @@
 
 @import db.CurrentUser
 
-@scripts = {
-    @js.datetimepicker()
-    @js.usesajax()
-    @js.userpicker()
-    @* Temporary disabled
-    @js.pagination("Cars.showCarCostsPage")
-    *@
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/tabsWithHiddenInput.js")'></script>
-
-    <!-- For maps: -->
-    <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
-    <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
-
-    @* Used in detailCosts *@
-    <script>
-    function loadModal ( carId ) {
-        $.ajax(myJsRoutes.controllers.Cars.getCarCostModal(carId))
-        .done (function (html) {
-            $ ("#resultModal").html (html) ;
-            $ ('#detailsModal').modal ('show') ;
-        })
-        .fail (function ( ) {
-            // TODO: make clearer
-            $ ( "#resultModal" ).html ("Er ging iets mis...") ;
-        });
-    }
-    </script>
-
-    <script>
-        userpickerRoute = "@routes.UserPicker.getList()"
-    </script>
-    @* Temporary disabled
-    <script src='@routes.Assets.at("javascripts/updateCarPrivileges.js")'></script>
-    *@
-}
-
-@dayOptions(value: String) = {
-   @options(value, "0" -> "Zondag", "1" -> "Maandag", "2" -> "Dinsdag", "3" -> "Woensdag", "4" -> "Donderdag", "5" -> "Vrijdag", "6" -> "Zaterdag")
-}
-
-@stdlayout("Autodetails", sheets("jquery-ui-1.10.4.custom.min", "/lib/leaflet/leaflet"), scripts, extrabc=breadcrumb("Auto's", routes.Cars.showCars())) {
+@stdlayout("Autodetails", sheets("jquery-ui-1.10.4.custom.min", "/lib/leaflet/leaflet"), extrabc=breadcrumb("Auto's", routes.Cars.showCars())) {
 
     @if((CurrentUser hasRole UserRole.CAR_ADMIN) || (CurrentUser is car.getOwner.getId)) {
         @panel(){
@@ -84,18 +44,4 @@
     }
 
     @detailPartial(car, mapDetails)
-
-    @if((CurrentUser is car.getOwner.getId) || (CurrentUser hasRole UserRole.CAR_ADMIN)) {
-
-                @* Temporarily disabled. Do not forget to reenable the Java Script above
-                    <!-- Geprivilegeerden -->
-                    @detailPrivileged(car.getId,privilegedUsers)
-                    <!-- Autogebonden kosten -->
-                    @detailCosts(car.getId)
-                *@
-                <div class="alert alert-warning">
-                    <p>De interface voor het opgeven van geprivilegieerden en voor het indienen
-                        van autokosten werd tijdelijk verwijderd. Even geduld...</p>
-                </div>
-    }
 }

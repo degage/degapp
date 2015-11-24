@@ -57,7 +57,7 @@ public class Users extends Controller {
     /**
      * @return The users index-page with all users
      */
-    @AllowRoles({UserRole.CAR_USER, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result showUsers() {
         return ok(users.render());

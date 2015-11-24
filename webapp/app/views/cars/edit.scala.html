@@ -32,16 +32,7 @@
 @import providers.DataProvider
 @import db.CurrentUser
 
-@scripts = {
-    @js.datetimepicker()
-    @js.userpicker()
-}
-
-@app("Bewerk auto", scripts=scripts) {
-@breadcrumbs{
-    @breadcrumb("Bewerk auto")
-}
-@maincontent("Bewerk auto"){
+@stdlayout("Bewerk auto", scripts=js.datetimepicker()) {
 
     @helper.form(routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
         <div class="row">
@@ -115,5 +106,4 @@
             </div>
         </div>
         }
-    }
 }
