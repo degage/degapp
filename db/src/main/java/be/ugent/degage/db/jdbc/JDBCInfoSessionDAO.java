@@ -332,7 +332,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     @Override
-    public Integer getInfoSessionWherePresent(int userId) throws DataAccessException {
+    public int getInfoSessionWherePresent(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT infosession_id FROM infosessionenrollees " +
                         " WHERE infosession_enrollee_id = ? AND infosession_enrollment_status = 'PRESENT' "

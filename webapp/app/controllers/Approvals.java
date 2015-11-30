@@ -112,7 +112,7 @@ public class Approvals extends Controller {
             if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())) {
                 flash("warning", "We nemen op dit moment je aanvraag om lid te worden in beschouwing.");
                 return redirect(routes.Application.index());
-            } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == null) {
+            } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == 0) {
                 flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
@@ -139,8 +139,8 @@ public class Approvals extends Controller {
                     )
             );
         } else {
-            Integer isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
-            if (isp == null) {
+            int isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
+            if (isp == 0) {
                 flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {

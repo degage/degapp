@@ -476,7 +476,7 @@ public class InfoSessions extends Controller {
     // TODO: only used in dashboard
     public static boolean didUserGoToInfoSession() {
         return DataAccess.getInjectedContext().getInfoSessionDAO().
-                getInfoSessionWherePresent(CurrentUser.getId()) != null;
+                getInfoSessionWherePresent(CurrentUser.getId()) != 0;
     }
 
     /*

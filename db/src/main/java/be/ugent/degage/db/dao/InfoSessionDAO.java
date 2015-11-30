@@ -85,10 +85,10 @@ public interface InfoSessionDAO {
     public InfoSession getAttendingInfoSession(int userId) throws DataAccessException;
 
     /**
-     * Return the id of the infosession where the given user was present, or null if
+     * Return the id of the infosession where the given user was present, or 0 if
      * none found.
      */
-    public Integer getInfoSessionWherePresent(int userId) throws DataAccessException;
+    public int getInfoSessionWherePresent(int userId) throws DataAccessException;
 
     public static class LastSessionResult {
         public InfoSession session;
