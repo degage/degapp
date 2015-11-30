@@ -495,15 +495,17 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    public Iterable<CRInfo> listCRInfo(LocalDateTime from, LocalDateTime until) {
+    public Iterable<CRInfo> listCRInfo(LocalDateTime from, LocalDateTime until, int userId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
-                        "LEFT JOIN reservations ON reservation_car_id = car_id " + OVERLAP_CLAUSE_WIDE +
+                "SELECT cars.car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
+                        "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? " +
+                        "LEFT JOIN reservations ON reservation_car_id = cars.car_id " + OVERLAP_CLAUSE_WIDE +
                         "WHERE car_active " +
-                        "ORDER BY car_name, reservation_from"
+                        "ORDER BY ifnull(user_id,0) DESC, car_name ASC, reservation_from ASC"
         )) {
-            ps.setTimestamp(1, Timestamp.valueOf(from));
-            ps.setTimestamp(2, Timestamp.valueOf(until));
+            ps.setInt(1, userId);
+            ps.setTimestamp(2, Timestamp.valueOf(from));
+            ps.setTimestamp(3, Timestamp.valueOf(until));
             try (ResultSet rs = ps.executeQuery()) {
                 Collection<CRInfo> result = new ArrayList<>();
                 CRInfo crInfo = null;

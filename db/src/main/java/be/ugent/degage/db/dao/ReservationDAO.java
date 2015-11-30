@@ -32,7 +32,9 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.models.*;
+import be.ugent.degage.db.models.Reservation;
+import be.ugent.degage.db.models.ReservationHeader;
+import be.ugent.degage.db.models.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -141,8 +143,9 @@ public interface ReservationDAO {
 
     /**
      * Return information on all reservations (except those cancelled) during a certain period of time, ordered by car.
+     * @param uid User id used for sorting the cars
      */
-    public Iterable<CRInfo> listCRInfo (LocalDateTime from, LocalDateTime to);
+    public Iterable<CRInfo> listCRInfo (LocalDateTime from, LocalDateTime to, int uid);
 
 
 }

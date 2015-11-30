@@ -50,6 +50,8 @@ POST        /calendar/car                           controllers.Calendars.overvi
 GET         /calendar/car/index                     controllers.Calendars.indexWithCar(carName: String, id: Int)
 GET         /calendar/date                          controllers.Calendars.overview(date: String ?= null)
 POST        /calendar/date                          controllers.Calendars.overviewPost()
+GET         /calendar/prefs                         controllers.Calendars.carPreferences()
+POST        /calendar/prefs                         controllers.Calendars.doCarPreferences()
 
 # Reservation workflow
 GET         /reservation/create                     controllers.WFCreate.create(carId: Int, from: String, until: String)

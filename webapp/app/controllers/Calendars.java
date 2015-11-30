@@ -190,7 +190,7 @@ public class Calendars extends Controller {
         LocalDateTime until = date.plusDays(OverviewLine.END_HOUR/24).atTime(OverviewLine.END_HOUR % 24, 0);
 
         ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-        Iterable<ReservationDAO.CRInfo> list = dao.listCRInfo(from,until);
+        Iterable<ReservationDAO.CRInfo> list = dao.listCRInfo(from, until, CurrentUser.getId());
         Collection<OverviewLine> lines = new ArrayList<>();
         for (ReservationDAO.CRInfo crInfo : list) {
             OverviewLine line = new OverviewLine();
@@ -262,6 +262,19 @@ public class Calendars extends Controller {
         }
         return lines;
     }
+
+    @AllowRoles
+    @InjectContext
+    public static Result carPreferences () {
+        return ok();
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result doCarPreferences () {
+        return redirect(routes.Calendars.showCarsForReservation());
+    }
+
 
 }
 
