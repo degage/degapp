@@ -30,14 +30,16 @@
 package controllers;
 
 import be.ugent.degage.db.dao.MembershipDAO;
-import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Membership;
 import be.ugent.degage.db.models.UserRole;
+import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
+import views.html.contracts.contracts;
+import views.html.contracts.contractsPage;
 import views.html.contracts.edit;
 
 import java.time.LocalDate;
@@ -93,13 +95,19 @@ public class Contracts extends Controller {
     @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result showContracts(int tab) {
-        return null; // TODO return ok(contracts.render(tab));
+        return ok(contracts.render(tab));
     }
 
     @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result showContractsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        return null; // TODO
+        MembershipDAO dao = DataAccess.getInjectedContext().getMembershipDAO();
+        boolean signed = searchString.endsWith("ACCEPTED");
+        Iterable<Membership> list = dao.getContractees(CurrentUser.getId(), signed, page, pageSize);
+        // TODO
+        int amountOfResults = dao.countContractees(CurrentUser.getId(), signed);
+        int amountOfPages = (amountOfResults + pageSize - 1) / pageSize;
+        return ok(contractsPage.render(list, page, amountOfResults, amountOfPages));
     }
 
 

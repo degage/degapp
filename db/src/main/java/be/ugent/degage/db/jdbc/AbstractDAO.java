@@ -50,12 +50,12 @@ class AbstractDAO {
 
         private String[] primaryKeys;
 
-        public LazyStatement (String sql) {
+        public LazyStatement(String sql) {
             this.sql = sql;
             this.primaryKeys = null;
         }
 
-        public LazyStatement (String sql, String... primaryKeys) {
+        public LazyStatement(String sql, String... primaryKeys) {
             this.sql = sql;
             this.primaryKeys = primaryKeys;
         }
@@ -116,17 +116,18 @@ class AbstractDAO {
 
     /**
      * Converts the current result set record to an object of the given type
+     *
      * @param <T>
      */
     @FunctionalInterface
     interface ResultSetConverter<T> {
-        public T convert (ResultSet rs) throws SQLException;
+        public T convert(ResultSet rs) throws SQLException;
     }
 
     /**
      * Transforms a resultset into a list
      */
-    protected static<T> List<T> toList (ResultSet rs, ResultSetConverter<T> fn) throws SQLException {
+    protected static <T> List<T> toList(ResultSet rs, ResultSetConverter<T> fn) throws SQLException {
         List<T> list = new ArrayList<>();
         while (rs.next()) {
             list.add(fn.convert(rs));
@@ -137,9 +138,18 @@ class AbstractDAO {
     /**
      * Executes a prepared statement and converts the result into a list
      */
-    protected static<T> List<T> toList (PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
+    protected static <T> List<T> toList(PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
-            return toList (rs, fn);
+            return toList(rs, fn);
+        }
+    }
+
+    /**
+     * Executes a prepared statement and returns true if and only if there is a result
+     */
+    protected static boolean isNonEmpty(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            return rs.next();
         }
     }
 
@@ -169,10 +179,10 @@ class AbstractDAO {
         }
     }
 
-     /**
+    /**
      * Executes a prepared statement and converts the first result into an object, or null if no result.
      */
-    protected static<T> T toSingleObject(PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
+    protected static <T> T toSingleObject(PreparedStatement ps, ResultSetConverter<T> fn) throws SQLException {
         try (ResultSet rs = ps.executeQuery()) {
             if (rs.next()) {
                 return fn.convert(rs);

@@ -109,28 +109,43 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
         )) {
             ps.setInt(1, adminId);
             ps.setInt(2, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            return isNonEmpty(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
+
+    private String getContracteesSQL(String fields, boolean signed) {
+        String sql = "SELECT " + fields + " FROM approvals JOIN users ON approval_user = user_id " +
+                "WHERE approval_admin = ? AND user_contract IS ";
+        if (signed) {
+            sql += "NOT ";
+        }
+        sql += "NULL ORDER BY user_id DESC";
+        return sql;
+    }
+
+    @Override
+    public Iterable<Membership> getContractees(int adminId, boolean signed, int page, int pageSize) {
+        String sql = getContracteesSQL(
+                "user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract",
+                signed) +  " LIMIT ?,?";
+        try (PreparedStatement ps = prepareStatement(sql)) {
+            ps.setInt(1, adminId);
+            ps.setInt(2, (page - 1) * pageSize);
+            ps.setInt(3, pageSize);
+            return toList(ps, JDBCMembershipDAO::populateMembership);
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
         }
     }
 
     @Override
-    public Iterable<Membership> getContractees(int adminId, boolean signed) {
-        String sql = "SELECT user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
-                "FROM approvals JOIN users ON approval_user = user_id " +
-                "WHERE approval_admin = ? AND user_contract IS ";
-        if (signed) {
-            sql += "NOT ";
-        }
-        sql += "NULL ORDER BY user_id DESC";
+    public int countContractees(int adminId, boolean signed) {
+        String sql = getContracteesSQL("count(*)", signed);
         try (PreparedStatement ps = prepareStatement(sql)) {
             ps.setInt(1, adminId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return toList (rs, JDBCMembershipDAO::populateMembership);
-            }
+            return toSingleInt(ps);
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
         }
