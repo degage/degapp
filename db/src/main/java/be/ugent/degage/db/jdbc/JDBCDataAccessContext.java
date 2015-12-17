@@ -51,7 +51,6 @@ class JDBCDataAccessContext implements DataAccessContext {
     private ReservationDAO reservationDAO;
     private CarDAO carDAO;
     private PrivilegedDAO privilegedDAO;
-    private AvailabilityDAO availabilityDAO;
     private CarCostDAO carCostDAO;
     private UserRoleDAO userRoleDAO;
     private CarRideDAO carRideDAO;
@@ -170,16 +169,6 @@ class JDBCDataAccessContext implements DataAccessContext {
         }
         return privilegedDAO;
     }
-
-    /* (Temporarily) disabled
-    @Override
-	public AvailabilityDAO getAvailabilityDAO() {
-		if(availabilityDAO == null){
-            availabilityDAO = new JDBCAvailabilityDAO(this);
-        }
-        return availabilityDAO;
-	}
-	*/
 
     @Override
     public CarCostDAO getCarCostDAO() {
@@ -303,6 +292,11 @@ class JDBCDataAccessContext implements DataAccessContext {
     @Override
     public BillingAdmDAO getBillingAdmDAO() {
         return new JDBCBillingAdmDAO(this);
+    }
+
+    @Override
+    public MembershipDAO getMembershipDAO() {
+        return new JDBCMembershipDAO(this);
     }
 
     @Override

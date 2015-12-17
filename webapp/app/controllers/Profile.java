@@ -32,6 +32,7 @@ package controllers;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.AddressDAO;
 import be.ugent.degage.db.dao.FileDAO;
+import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
@@ -520,7 +521,7 @@ public class Profile extends Controller {
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result deposit(int userId) {
-        Membership membership = DataAccess.getInjectedContext().getUserDAO().getMembership(userId);
+        Membership membership = DataAccess.getInjectedContext().getMembershipDAO().getMembership(userId);
         return ok(deposit.render(
                 Form.form(DepositData.class).fill(new DepositData().populate(membership)),
                 userId,
@@ -532,13 +533,13 @@ public class Profile extends Controller {
     @InjectContext
     public static Result depositPost(int userId) {
         Form<DepositData> form = Form.form(DepositData.class).bindFromRequest();
-        UserDAO userDAO = DataAccess.getInjectedContext().getUserDAO();
+        MembershipDAO dao = DataAccess.getInjectedContext().getMembershipDAO();
         if (form.hasErrors()) {
-            Membership membership = userDAO.getMembership(userId);
+            Membership membership = dao.getMembership(userId);
             return badRequest(deposit.render(form, membership.getId(), membership.getFullName()));
         } else {
             DepositData data = form.get();
-            userDAO.updateUserMembership(userId, data.amount, data.fee);
+            dao.updateUserMembership(userId, data.amount, data.fee);
 
             return redirect(routes.Profile.index(userId));
         }

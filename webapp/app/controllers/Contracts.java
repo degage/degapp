@@ -29,6 +29,7 @@
 
 package controllers;
 
+import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.Membership;
 import be.ugent.degage.db.models.UserRole;
@@ -65,7 +66,7 @@ public class Contracts extends Controller {
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result contract(int userId) {
-        Membership membership = DataAccess.getInjectedContext().getUserDAO().getMembership(userId);
+        Membership membership = DataAccess.getInjectedContext().getMembershipDAO().getMembership(userId);
         return ok(edit.render(
                 Form.form(Data.class).fill(new Data().populate(membership.getContractDate())),
                 userId,
@@ -78,13 +79,13 @@ public class Contracts extends Controller {
     @InjectContext
     public static Result contractPost(int userId) {
         Form<Data> form = Form.form(Data.class).bindFromRequest();
-        UserDAO userDAO = DataAccess.getInjectedContext().getUserDAO();
+        MembershipDAO dao = DataAccess.getInjectedContext().getMembershipDAO();
         if (form.hasErrors()) {
-            Membership membership = userDAO.getMembership(userId);
+            Membership membership = dao.getMembership(userId);
             return badRequest(edit.render(form, membership.getId(), membership.getFullName()));
         } else {
             Data data = form.get();
-            userDAO.updateUserContract(userId, data.signed ? Utils.toLocalDate(data.date) : null);
+            dao.updateUserContract(userId, data.signed ? Utils.toLocalDate(data.date) : null);
             return redirect(routes.Profile.index(userId));
         }
     }

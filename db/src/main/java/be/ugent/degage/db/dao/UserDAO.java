@@ -32,7 +32,6 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.models.Membership;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserStatus;
@@ -72,11 +71,6 @@ public interface UserDAO {
     public UserHeader getUserHeader(int userId) throws DataAccessException;
 
     /**
-     * Return membership information of the user with the given id
-     */
-    public Membership getMembership (int userId) throws DataAccessException;
-
-    /**
      * Update the main profile information about a user, i.e., names and telephone numbers
      */
     public void updateUserMainProfile(User user) throws DataAccessException;
@@ -105,16 +99,6 @@ public interface UserDAO {
      * Update the user status
      */
     public void updateUserStatus(int userId, UserStatus status);
-
-    /**
-     * Update the deposit/fee of the user
-     */
-    public void updateUserMembership(int userId, Integer deposit, Integer fee);
-
-    /**
-     * Update the contract information of the user
-     */
-    public void updateUserContract(int userId, LocalDate contract);
 
     /**
      * Update the email address of a user.

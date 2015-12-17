@@ -12,6 +12,7 @@ CREATE DATABASE IF NOT EXISTS degage
 
 CREATE USER 'degage'@'localhost'
    IDENTIFIED BY 'DeGaGe';
+ALTER USER 'degage'@'localhost' PASSWORD EXPIRE NEVER;
 
 GRANT ALL ON degage.* TO 'degage'@'localhost';
 GRANT FILE ON *.* TO 'degage'@'localhost';
