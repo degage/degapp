@@ -186,8 +186,11 @@ public class CurrentUser {
         return isAdmin(getRoles());
     }
 
+    /**
+     * These roles can promote to an administrator menu (which then depends on the specific role)
+     */
     private static final Set<UserRole> ADMIN_ROLES
-            = EnumSet.of(UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN,
+            = EnumSet.of(UserRole.CAR_ADMIN, UserRole.INFOSESSION_ADMIN, UserRole.CONTRACT_ADMIN,
                          UserRole.PROFILE_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.SUPER_USER);
 
     private static boolean isAdmin(Set<UserRole> roleSet) {

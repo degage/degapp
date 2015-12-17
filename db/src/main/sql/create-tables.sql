@@ -137,7 +137,8 @@ CREATE TABLE licensefiles (
 
 CREATE TABLE `userroles` (
 	`userrole_userid` INT NOT NULL,
-	`userrole_role` ENUM('SUPER_USER', 'CAR_OWNER', 'CAR_USER', 'INFOSESSION_ADMIN', 'MAIL_ADMIN', 'PROFILE_ADMIN', 'RESERVATION_ADMIN', 'CAR_ADMIN') NOT NULL,
+	`userrole_role` ENUM('SUPER_USER', 'CAR_OWNER', 'CAR_USER', 'INFOSESSION_ADMIN', 'CONTRACT_ADMIN', 'PROFILE_ADMIN',
+	                     'RESERVATION_ADMIN', 'CAR_ADMIN') NOT NULL,
 	PRIMARY KEY (`userrole_userid`, `userrole_role`),
 	FOREIGN KEY (`userrole_userid`) REFERENCES users(`user_id`)
 );

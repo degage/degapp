@@ -109,9 +109,6 @@ public class UserRoles extends Controller {
     /**
      * Method: GET
      * Returns a form to edit a users roles
-     *
-     * @param userId
-     * @return
      */
     @AllowRoles({UserRole.SUPER_USER})
     @InjectContext
@@ -127,7 +124,8 @@ public class UserRoles extends Controller {
 
     // Editable roles
     public static final Set<UserRole> EDITABLE_ROLES = EnumSet.of(
-            UserRole.CAR_OWNER, UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN, UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN, UserRole.SUPER_USER
+            UserRole.CAR_OWNER, UserRole.INFOSESSION_ADMIN, UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN,
+            UserRole.RESERVATION_ADMIN, UserRole.CAR_ADMIN, UserRole.SUPER_USER
     );
 
     /**
