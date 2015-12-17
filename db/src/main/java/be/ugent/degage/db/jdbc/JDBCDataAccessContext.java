@@ -43,28 +43,6 @@ import java.sql.SQLException;
 class JDBCDataAccessContext implements DataAccessContext {
 
     private Connection connection;
-
-    // TODO: no need to use lazy instantiation. DAOs have almost no state.
-    private UserDAO userDAO;
-    private InfoSessionDAO infoSessionDAO;
-    private AddressDAO addressDAO;
-    private ReservationDAO reservationDAO;
-    private CarDAO carDAO;
-    private PrivilegedDAO privilegedDAO;
-    private CarCostDAO carCostDAO;
-    private UserRoleDAO userRoleDAO;
-    private CarRideDAO carRideDAO;
-    private DamageDAO damageDAO;
-    private DamageLogDAO damageLogDAO;
-    private RefuelDAO refuelDAO;
-    private SchedulerDAO schedulerDAO;
-    private NotificationDAO notificationDAO;
-    private MessageDAO messageDAO;
-    private ApprovalDAO approvalDAO;
-    private FileDAO fileDAO;
-    private SettingDAO settingDAO;
-    private JobDAO jobDAO;
-    private VerificationDAO verificationDAO;
     
     public JDBCDataAccessContext(Connection connection) {
         this.connection = connection;
@@ -116,162 +94,102 @@ class JDBCDataAccessContext implements DataAccessContext {
 
     @Override
     public UserDAO getUserDAO() {
-        if (userDAO == null) {
-            userDAO = new JDBCUserDAO(this);
-        }
-        return userDAO;
+        return new JDBCUserDAO(this);
     }
 
     @Override
     public InfoSessionDAO getInfoSessionDAO() {
-        if(infoSessionDAO == null){
-            infoSessionDAO = new JDBCInfoSessionDAO(this);
-        }
-        return infoSessionDAO;
+        return  new JDBCInfoSessionDAO(this);
     }
 
     @Override
     public NotificationDAO getNotificationDAO() {
-        if(notificationDAO == null){
-            notificationDAO = new JDBCNotificationDAO(this);
-        }
-        return notificationDAO;
+        return new JDBCNotificationDAO(this);
     }
 
     @Override
     public MessageDAO getMessageDAO() {
-        if(messageDAO == null){
-            messageDAO = new JDBCMessageDAO(this);
-        }
-        return messageDAO;
+        return new JDBCMessageDAO(this);
     }
 
     @Override
     public AddressDAO getAddressDAO() {
-        if(addressDAO == null){
-            addressDAO = new JDBCAddressDAO(this);
-        }
-        return addressDAO;
+        return new JDBCAddressDAO(this);
     }
 
 	@Override
 	public CarDAO getCarDAO() {
-		if(carDAO == null){
-            carDAO = new JDBCCarDAO(this);
-        }
-        return carDAO;
+		return new JDBCCarDAO(this);
 	}
 
     @Override
     public PrivilegedDAO getPrivilegedDAO() {
-        if (privilegedDAO == null) {
-            privilegedDAO = new JDBCPrivilegedDAO(this);
-        }
-        return privilegedDAO;
+        return new JDBCPrivilegedDAO(this);
     }
 
     @Override
     public CarCostDAO getCarCostDAO() {
-        if(carCostDAO == null){
-            carCostDAO = new JDBCCarCostDAO(this);
-        }
-        return carCostDAO;
+        return new JDBCCarCostDAO(this);
     }
 
 	@Override
 	public ReservationDAO getReservationDAO() {
-		if(reservationDAO == null){
-            reservationDAO = new JDBCReservationDAO(this);
-        }
-        return reservationDAO;
+		return new JDBCReservationDAO(this);
 	}
 
     @Override
     public DamageDAO getDamageDAO() {
-        if(damageDAO == null){
-            damageDAO = new JDBCDamageDAO(this);
-        }
-        return damageDAO;
+        return new JDBCDamageDAO(this);
     }
 
     @Override
     public DamageLogDAO getDamageLogDAO() {
-        if(damageLogDAO == null){
-            damageLogDAO = new JDBCDamageLogDAO(this);
-        }
-        return damageLogDAO;
+        return new JDBCDamageLogDAO(this);
     }
 
     @Override
 	public UserRoleDAO getUserRoleDAO() {
-		if(userRoleDAO == null){
-			userRoleDAO = new JDBCUserRoleDAO(this);
-        }
-        return userRoleDAO;
+		return new JDBCUserRoleDAO(this);
 	}
 
     @Override
     public CarRideDAO getCarRideDAO() {
-        if(carRideDAO == null){
-            carRideDAO = new JDBCCarRideDAO(this);
-        }
-        return carRideDAO;
+        return new JDBCCarRideDAO(this);
     }
 
     @Override
     public RefuelDAO getRefuelDAO() {
-        if(refuelDAO == null){
-            refuelDAO = new JDBCRefuelDAO(this);
-        }
-        return refuelDAO;
+        return new JDBCRefuelDAO(this);
     }
 
     @Override
     public SchedulerDAO getSchedulerDAO() {
-        if(schedulerDAO == null){
-            schedulerDAO = new JDBCSchedulerDAO(this);
-        }
-        return schedulerDAO;
+        return new JDBCSchedulerDAO(this);
     }
 
     @Override
     public ApprovalDAO getApprovalDAO() {
-        if(approvalDAO == null){
-            approvalDAO = new JDBCApprovalDAO(this);
-        }
-        return approvalDAO;
+        return new JDBCApprovalDAO(this);
     }
 
     @Override
     public JobDAO getJobDAO() {
-        if(jobDAO == null){
-            jobDAO = new JDBCJobDAO(this);
-        }
-        return jobDAO;
+        return new JDBCJobDAO(this);
     }
 
     @Override
     public FileDAO getFileDAO() {
-        if(fileDAO == null){
-            fileDAO = new JDBCFileDAO(this);
-        }
-        return fileDAO;
+        return new JDBCFileDAO(this);
     }
 
     @Override
     public SettingDAO getSettingDAO() {
-        if(settingDAO == null){
-            settingDAO = new JDBCSettingDAO(this);
-        }
-        return settingDAO;
+        return new JDBCSettingDAO(this);
     }
 
     @Override
     public VerificationDAO getVerificationDAO() {
-        if(verificationDAO == null){
-            verificationDAO = new JDBCVerificationDAO(this);
-        }
-        return verificationDAO;
+        return new JDBCVerificationDAO(this);
     }
 
     @Override
