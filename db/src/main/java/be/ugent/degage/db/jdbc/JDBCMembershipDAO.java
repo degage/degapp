@@ -1,13 +1,39 @@
+/* JDBCMembershipDAO.java
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Kris Coolsaet
+ * Department of Applied Mathematics, Computer Science and Statistics
+ * Ghent University 
+ * Krijgslaan 281-S9
+ * B-9000 GENT Belgium
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.models.Membership;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Types;
+import java.sql.*;
 import java.time.LocalDate;
 
 /**
@@ -19,21 +45,25 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
         super(context);
     }
 
+    private static Membership populateMembership(ResultSet rs) throws SQLException {
+        Date contractDate = rs.getDate("user_contract");
+
+        return new Membership(
+                rs.getInt("user_id"),
+                rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
+                (Integer) rs.getObject("user_deposit"),
+                (Integer) rs.getObject("user_fee"),
+                contractDate == null ? null : contractDate.toLocalDate());
+    }
+
     @Override
     public Membership getMembership(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
+                "SELECT user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
                         "FROM users WHERE user_id = ?"
         )) {
             ps.setInt(1, userId);
-            return toSingleObject(ps, rs -> {
-                Date contractDate = rs.getDate("user_contract");
-                return new Membership(userId,
-                        rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
-                        (Integer) rs.getObject("user_deposit"),
-                        (Integer) rs.getObject("user_fee"),
-                        contractDate == null ? null : contractDate.toLocalDate());
-            });
+            return toSingleObject(ps, JDBCMembershipDAO::populateMembership);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by id.", ex);
         }
@@ -72,4 +102,37 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
         }
     }
 
+    @Override
+    public boolean isContractAdminOf(int adminId, int userId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT 1 FROM approvals WHERE approval_admin = ? AND approval_user = ?"
+        )) {
+            ps.setInt(1, adminId);
+            ps.setInt(2, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next();
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
+
+    @Override
+    public Iterable<Membership> getContractees(int adminId, boolean signed) {
+        String sql = "SELECT user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
+                "FROM approvals JOIN users ON approval_user = user_id " +
+                "WHERE approval_admin = ? AND user_contract IS ";
+        if (signed) {
+            sql += "NOT ";
+        }
+        sql += "NULL ORDER BY user_id DESC";
+        try (PreparedStatement ps = prepareStatement(sql)) {
+            ps.setInt(1, adminId);
+            try (ResultSet rs = ps.executeQuery()) {
+                return toList (rs, JDBCMembershipDAO::populateMembership);
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
 }

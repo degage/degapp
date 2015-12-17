@@ -182,11 +182,19 @@ public class Profile extends Controller {
         } else if (!CurrentUser.hasFullStatus()) {
             return false;
         } else {
-            // TODO: contract admin can see profiles
-            UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
-            return dao.canSeeProfileAsUser(CurrentUser.getId(), userId) ||
+            DataAccessContext context = DataAccess.getInjectedContext();
+            int id = CurrentUser.getId();
+
+            // contract admins can see contractees
+            if (CurrentUser.hasRole(UserRole.CONTRACT_ADMIN) && context.getMembershipDAO().isContractAdminOf(id, userId)) {
+                return true;
+            }
+            UserDAO dao = context.getUserDAO();
+
+            //
+            return dao.canSeeProfileAsUser(id, userId) ||
                     (CurrentUser.hasRole(UserRole.CAR_OWNER) &&
-                            dao.canSeeProfileAsOwner(CurrentUser.getId(), userId));
+                            dao.canSeeProfileAsOwner(id, userId));
         }
     }
 

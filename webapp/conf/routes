@@ -132,8 +132,12 @@ GET         /profile/email                          controllers.Profile.updateEm
 POST        /profile/email                          controllers.Profile.updateEmailPost(userId: Int)
 
 # Contract management
+GET         /contracts                              controllers.Contracts.showContracts(tab : Int ?= 0)
+GET         /contracts/page                         controllers.Contracts.showContractsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+
 GET         /contracts/edit                         controllers.Contracts.contract(userId: Int)
 POST        /contracts/edit                         controllers.Contracts.contractPost(userId: Int)
+
 
 # Users
 GET         /users                                  controllers.Users.showUsers()

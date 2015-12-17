@@ -30,7 +30,7 @@
 package be.ugent.degage.db;
 
 /**
- * Created by Cedric on 2/16/14.
+ * Wraps a data access related exception into a more abstract unchecked exception
  */
 public class DataAccessException extends RuntimeException {
 
@@ -45,12 +45,20 @@ public class DataAccessException extends RuntimeException {
         this(desc, null);
     }
 
+    public DataAccessException(Exception ex) { this(null, ex); }
+
     public Exception getInnerException() {
         return innerException;
     }
 
     @Override
     public String getMessage(){
-        return super.getMessage() + " -- " + (innerException != null ? innerException.getMessage() : "");
+        String message = super.getMessage();
+        String innerMessage = innerException != null ? innerException.getMessage() : "";
+        if (message == null) {
+            return innerMessage;
+        } else {
+            return message + " -- " + innerMessage;
+        }
     }
 }

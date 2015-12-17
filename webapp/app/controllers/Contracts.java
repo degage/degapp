@@ -63,7 +63,7 @@ public class Contracts extends Controller {
         }
     }
 
-    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result contract(int userId) {
         Membership membership = DataAccess.getInjectedContext().getMembershipDAO().getMembership(userId);
@@ -75,7 +75,7 @@ public class Contracts extends Controller {
         );
     }
 
-    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result contractPost(int userId) {
         Form<Data> form = Form.form(Data.class).bindFromRequest();
@@ -89,4 +89,18 @@ public class Contracts extends Controller {
             return redirect(routes.Profile.index(userId));
         }
     }
+
+    @AllowRoles({UserRole.CONTRACT_ADMIN})
+    @InjectContext
+    public static Result showContracts(int tab) {
+        return null; // TODO return ok(contracts.render(tab));
+    }
+
+    @AllowRoles({UserRole.CONTRACT_ADMIN})
+    @InjectContext
+    public static Result showContractsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+        return null; // TODO
+    }
+
+
 }
