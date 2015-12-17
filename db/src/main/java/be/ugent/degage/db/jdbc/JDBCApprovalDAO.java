@@ -88,7 +88,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         String ascString = asc ? "asc" : "desc";
         switch (orderBy) {
             case USER_NAME:
-                sql += "user_lastname " + ascString + ", user_firstname " + ascString;
+                sql += "users.user_lastname " + ascString + ", users.user_firstname " + ascString;
                 break;
             default: // should be 'instant'
                 sql += "approval_submission " + ascString;
