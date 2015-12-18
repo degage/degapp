@@ -99,7 +99,7 @@ public class Messages extends Controller {
                 return null;
             }
         }
-}
+    }
 
     /**
      * Method: GET
@@ -115,26 +115,18 @@ public class Messages extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result showReceivedMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        int userId = CurrentUser.getId();
-        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
         return ok(messagespage.render(
-                        dao.listMessagesTo(userId, page, pageSize),
-                        dao.countMessagesTo(userId),
-                        (int) Math.ceil(dao.countMessagesFrom(userId) / (double) pageSize),
-                        true)
+                DataAccess.getInjectedContext().getMessageDAO().listMessagesTo(CurrentUser.getId(), page, pageSize),
+                true)
         );
     }
 
     @AllowRoles({})
     @InjectContext
     public static Result showSentMessagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        int userId = CurrentUser.getId();
-        MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
         return ok(messagespage.render(
-                        dao.listMessagesFrom(userId, page, pageSize),
-                        dao.countMessagesFrom(userId),
-                        (int) Math.ceil(dao.countMessagesFrom(userId) / (double) pageSize),
-                        false)
+                DataAccess.getInjectedContext().getMessageDAO().listMessagesFrom(CurrentUser.getId(), page, pageSize),
+                false)
         );
     }
 
@@ -179,12 +171,12 @@ public class Messages extends Controller {
     @AllowRoles({})
     @InjectContext
     public static Result sendReplyTo(int messageId) {
-            // TODO: check whether message was meant for this user.
+        // TODO: check whether message was meant for this user.
         Form<BasicMessageData> form = Form.form(BasicMessageData.class).bindFromRequest();
         Message message = DataAccess.getInjectedContext().getMessageDAO().getReplyHeader(messageId);
         UserHeader initialReceiver = message.getUser();
         if (form.hasErrors()) {
-            return  ok(reply.render(form, messageId, initialReceiver.getFullName()));
+            return ok(reply.render(form, messageId, initialReceiver.getFullName()));
         } else {
             return sendMessage(form.get(), initialReceiver.getId());
         }
@@ -219,8 +211,8 @@ public class Messages extends Controller {
         } else {
             MessageToOwnerData data = form.get();
             return sendMessage(
-                data,
-                DataAccess.getInjectedContext().getCarDAO().getCar(data.carId).getOwner().getId()
+                    data,
+                    DataAccess.getInjectedContext().getCarDAO().getCar(data.carId).getOwner().getId()
             );
         }
     }
@@ -231,7 +223,7 @@ public class Messages extends Controller {
         dao.createMessage(CurrentUser.getId(), receiverId, data.subject, data.body);
         DataProvider.getCommunicationProvider().invalidateMessages(receiverId); // invalidate the message
         DataProvider.getCommunicationProvider().invalidateMessageNumber(receiverId);
-        return redirect( routes.Messages.showMessages() );
+        return redirect(routes.Messages.showMessages());
     }
 
     /**

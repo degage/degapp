@@ -31,6 +31,7 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.Message;
+import be.ugent.degage.db.models.Page;
 
 /**
  *
@@ -40,22 +41,12 @@ public interface MessageDAO {
     /**
      * List all messages with the given receiver
      */
-    public Iterable<Message> listMessagesTo (int receiverId, int page, int pageSize) throws DataAccessException;
-
-    /**
-     * Count all messages with the given receiver
-     */
-    public int countMessagesTo (int receiverId) throws DataAccessException;
+    public Page<Message> listMessagesTo (int receiverId, int page, int pageSize) throws DataAccessException;
 
     /**
      * List all messages with the given sender
      */
-    public Iterable<Message> listMessagesFrom (int senderId, int page, int pageSize) throws DataAccessException;
-
-   /**
-     * Count all messages with the given sender
-     */
-    public int countMessagesFrom (int senderId) throws DataAccessException;
+    public Page<Message> listMessagesFrom (int senderId, int page, int pageSize) throws DataAccessException;
 
     /**
      * List all unread messages with the given receiver, but not paged and restricted to a maximum number
