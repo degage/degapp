@@ -33,13 +33,13 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.Notification;
+import be.ugent.degage.db.models.Page;
 import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
-import play.twirl.api.Html;
 import providers.DataProvider;
 import views.html.notifiers.notifications;
 import views.html.notifiers.notificationspage;
@@ -71,19 +71,11 @@ public class Notifications extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
 
         filter.putValue(FilterField.USER_ID, CurrentUser.getId());
-        return ok(notificationList(page, pageSize, field, asc, filter));
-    }
-
-    // used with injected context
-    private static Html notificationList(int page, int pageSize, FilterField orderBy, boolean asc, Filter filter) {
         NotificationDAO dao = DataAccess.getInjectedContext().getNotificationDAO();
 
-        List<Notification> list = dao.getNotificationList(orderBy, asc, page, pageSize, filter);
+        Page<Notification> list = dao.getNotificationList(field, asc, page, pageSize, CurrentUser.getId(), searchString.endsWith("1"));
 
-        int amountOfResults = dao.getAmountOfNotifications(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
-
-        return notificationspage.render(list, amountOfResults, amountOfPages);
+        return ok(notificationspage.render(list));
     }
 
     /**

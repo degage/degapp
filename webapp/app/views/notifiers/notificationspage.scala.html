@@ -27,10 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(notifications: List[Notification], amountOfResults : Int, amountOfPages : Int)
-@import org.joda.time.format.DateTimeFormat
+@(notifications: Page[Notification])
 <ul class="chat">
-@for((notification, index) <- notifications.zipWithIndex) {
+    @foreach(notifications) { notification =>
         <li>
             <div class="chat-body clearfix">
                 <div class="header">
@@ -55,7 +54,6 @@
         </li>
 }
 </ul>
-
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+@pagination(notifications)
 
 

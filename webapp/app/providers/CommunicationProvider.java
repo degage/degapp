@@ -66,10 +66,7 @@ public class CommunicationProvider {
         if (obj == null || !(obj instanceof List)) {
             try (DataAccessContext context = provider.getDataAccessContext()) {
                 // TODO: use injected context for this
-                Filter filter = new JDBCFilter();
-
-                filter.putValue(FilterField.USER_ID, userId);
-                List<Notification> notifications = context.getNotificationDAO().getNotificationList(null, false, 1, AMOUNT_OF_VISIBLE_NOTIFICATIONS, filter);
+                List<Notification> notifications = context.getNotificationDAO().getNotificationListForUser(userId, AMOUNT_OF_VISIBLE_NOTIFICATIONS);
                 Cache.set(key, notifications);
                 return notifications;
             }
