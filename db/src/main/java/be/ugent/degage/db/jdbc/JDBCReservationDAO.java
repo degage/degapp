@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.Reservation;
 import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.ReservationStatus;
@@ -402,8 +403,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
     }
 
-    // TODO: make two different methods depending on value of getAmount
-    private String getReservationsPageStatement(boolean getAmount, String amount, Filter filter) {
+    private String getReservationsPageStatement(Filter filter) {
         String id;
         String userOrOwner = filter.getValue(FilterField.RESERVATION_USER_OR_OWNER_ID);
         if (userOrOwner.equals("") || userOrOwner.startsWith("-")) {
@@ -420,10 +420,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         }
         // TODO: replace * by actual fields
         StringBuilder builder = new StringBuilder();
-        builder.append("SELECT ").
-                append(getAmount ? " COUNT(reservation_id) AS " + amount : " * ").
-                append(
-                        " FROM reservations INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
+        builder.append("SELECT SQL_CALC_FOUND_ROWS * FROM reservations INNER JOIN cars ON reservations.reservation_car_id = cars.car_id " +
                                 " INNER JOIN users ON reservations.reservation_user_id = users.user_id " +
                                 " WHERE NOT reservation_archived  AND (car_owner_user_id LIKE ").append(id).
                 append(" OR reservation_user_id LIKE ").append(id).
@@ -432,30 +429,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         return builder.toString();
     }
 
-    private String getReservationsPageStatement(Filter filter) {
-        return getReservationsPageStatement(false, "", filter);
-    }
-
     @Override
-    public int getAmountOfReservations(Filter filter) throws DataAccessException {
-        try {
-            String amount = "amount";
-            Statement statement = createStatement();
-            String sql = getReservationsPageStatement(true, amount, filter);
-            try (ResultSet rs = statement.executeQuery(sql)) {
-                if (rs.next())
-                    return rs.getInt("amount");
-                else return 0;
-            } catch (SQLException ex) {
-                throw new DataAccessException("Error reading count of reservations", ex);
-            }
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of reservations", ex);
-        }
-    }
-
-    @Override
-    public Iterable<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Page<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         try {
             String sql = getReservationsPageStatement(filter);
             sql += " ORDER BY ";
@@ -467,7 +442,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
             }
             sql += " LIMIT " + (page - 1) * pageSize + ", " + pageSize;
             try (PreparedStatement ps = prepareStatement(sql)) {
-                return toList(ps, JDBCReservationDAO::populateReservation);
+                return toPage(ps, pageSize, JDBCReservationDAO::populateReservation);
             }
         } catch (Exception ex) {
             throw new DataAccessException("Could not retrieve a list of reservations", ex);

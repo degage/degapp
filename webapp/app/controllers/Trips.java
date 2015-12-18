@@ -151,18 +151,16 @@ public class Trips extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-
 
         // We only want reservations from the current user (or his car(s))
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, CurrentUser.getId());
 
-        Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
-
-        int amountOfResults = dao.getAmountOfReservations(filter);
-        int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
-
-        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        return ok(tripspage.render(
+                CurrentUser.getId(),
+                DataAccess.getInjectedContext().getReservationDAO().getReservationListPage(field, asc, page, pageSize, filter),
+                ascInt,
+                orderBy,
+                searchString));
     }
 
     /**
@@ -177,14 +175,12 @@ public class Trips extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
 
-        ReservationDAO dao = DataAccess.getInjectedContext().getReservationDAO();
-
-        Iterable<Reservation> listOfReservations = dao.getReservationListPage(field, asc, page, pageSize, filter);
-
-        int amountOfResults = dao.getAmountOfReservations(filter);
-        int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
-
-        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        return ok(tripspage.render(
+                CurrentUser.getId(),
+                DataAccess.getInjectedContext().getReservationDAO().getReservationListPage(field, asc, page, pageSize, filter),
+                ascInt,
+                orderBy,
+                searchString));
     }
 
     private static boolean overviewAllowed (Car car) {
