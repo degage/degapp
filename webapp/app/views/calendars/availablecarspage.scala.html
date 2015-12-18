@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(cars: Iterable[CarHeaderLong], page : Int, numberOfCars : Int, numberOfPages: Int, fromString: String, untilString: String)
+@(cars: Page[CarHeaderLong], fromString: String, untilString: String)
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
     <thead>
         <tr role="row">
@@ -58,4 +58,5 @@
     }
     </tbody>
 </table>
-<p id="pagination" name="@numberOfCars,@numberOfPages"></p>
+@pagination(cars)
+

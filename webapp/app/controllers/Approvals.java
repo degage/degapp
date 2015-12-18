@@ -170,11 +170,8 @@ public class Approvals extends Controller {
         boolean asc = Pagination.parseBoolean(ascInt);
         searchString = searchString.substring(searchString.lastIndexOf('=') + 1);
         MembershipStatus membershipStatus = MembershipStatus.valueOf(searchString);
-        int amountOfResults = dao.getApprovalCount(membershipStatus);
-        return ok(approvalpage.render(dao.getApprovals(field, asc, page, pageSize, membershipStatus),
-                page,
-                amountOfResults,
-                (amountOfResults + pageSize - 1) / pageSize));
+        Page<ApprovalListInfo> approvals = dao.getApprovals(field, asc, page, pageSize, membershipStatus);
+        return ok(approvalpage.render(approvals));
     }
 
     /**

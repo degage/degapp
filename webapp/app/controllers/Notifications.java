@@ -83,7 +83,7 @@ public class Notifications extends Controller {
         int amountOfResults = dao.getAmountOfNotifications(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return notificationspage.render(list, page, amountOfResults, amountOfPages);
+        return notificationspage.render(list, amountOfResults, amountOfPages);
     }
 
     /**

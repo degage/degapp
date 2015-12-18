@@ -104,7 +104,6 @@ public class Refuels extends RefuelCommon {
         int amountOfResults = dao.getAmountOfRefuels(filter);
         return refuelspage.render(
                 dao.getRefuels(page, pageSize, filter),
-                page,
                 amountOfResults,
                 (amountOfResults + pageSize - 1) / pageSize);
     }

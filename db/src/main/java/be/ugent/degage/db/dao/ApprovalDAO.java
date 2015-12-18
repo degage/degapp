@@ -34,6 +34,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Approval;
 import be.ugent.degage.db.models.ApprovalListInfo;
 import be.ugent.degage.db.models.MembershipStatus;
+import be.ugent.degage.db.models.Page;
 
 /**
  * Data access object for approvals
@@ -41,8 +42,7 @@ import be.ugent.degage.db.models.MembershipStatus;
 public interface ApprovalDAO {
 
     public boolean hasApprovalPending (int userId) throws DataAccessException;
-    public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException;
-    public int getApprovalCount(MembershipStatus status) throws DataAccessException;
+    public Page<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException;
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException;
     public Approval getApproval(int approvalId) throws DataAccessException;
 

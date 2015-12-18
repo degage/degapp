@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(notifications: List[Notification], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(notifications: List[Notification], amountOfResults : Int, amountOfPages : Int)
 @import org.joda.time.format.DateTimeFormat
 <ul class="chat">
 @for((notification, index) <- notifications.zipWithIndex) {

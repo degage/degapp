@@ -123,13 +123,13 @@ public class Damages extends Controller {
     @AllowRoles
     @InjectContext
     public static Result showDamagesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        return ok(damagespage.render(DataAccess.getInjectedContext().getDamageDAO().listDamagesForDriver(CurrentUser.getId()), 0, 0, 0));
+        return ok(damagespage.render(DataAccess.getInjectedContext().getDamageDAO().listDamagesForDriver(CurrentUser.getId()), 0, 0));
     }
 
     @AllowRoles
     @InjectContext
     public static Result showDamagesPageOwner(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        return ok(damagespage.render(DataAccess.getInjectedContext().getDamageDAO().listDamagesForOwner(CurrentUser.getId()), 0, 0, 0));
+        return ok(damagespage.render(DataAccess.getInjectedContext().getDamageDAO().listDamagesForOwner(CurrentUser.getId()), 0, 0));
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
@@ -143,7 +143,7 @@ public class Damages extends Controller {
         int amountOfResults = dao.getAmountOfDamages(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return ok(damagespage.render( dao.getDamages(page, pageSize, filter), page, amountOfResults, amountOfPages));
+        return ok(damagespage.render( dao.getDamages(page, pageSize, filter), amountOfResults, amountOfPages));
     }
 
     /**

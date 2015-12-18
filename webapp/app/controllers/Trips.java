@@ -162,7 +162,7 @@ public class Trips extends Controller {
         int amountOfResults = dao.getAmountOfReservations(filter);
         int amountOfPages = (int) Math.ceil(amountOfResults / (double) pageSize);
 
-        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
     }
 
     /**
@@ -184,7 +184,7 @@ public class Trips extends Controller {
         int amountOfResults = dao.getAmountOfReservations(filter);
         int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, page, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
+        return ok(tripspage.render(CurrentUser.getId(), listOfReservations, amountOfResults, amountOfPages, ascInt, orderBy, searchString));
     }
 
     private static boolean overviewAllowed (Car car) {

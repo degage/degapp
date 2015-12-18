@@ -107,7 +107,7 @@ public class Contracts extends Controller {
         // TODO
         int amountOfResults = dao.countContractees(CurrentUser.getId(), signed);
         int amountOfPages = (amountOfResults + pageSize - 1) / pageSize;
-        return ok(contractsPage.render(list, page, amountOfResults, amountOfPages));
+        return ok(contractsPage.render(list, amountOfResults, amountOfPages));
     }
 
 

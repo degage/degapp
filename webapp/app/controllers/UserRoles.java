@@ -89,6 +89,8 @@ public class UserRoles extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         UserDAO dao = context.getUserDAO();
         UserRoleDAO urdao = context.getUserRoleDAO();
+
+        // TODO: obtain this information with a single database call...
         List<User> listOfUsers = dao.getUserList(carField, asc, page, pageSize, filter);
 
         List<UserWithRoles> list = new ArrayList<>();
@@ -103,7 +105,7 @@ public class UserRoles extends Controller {
         int amountOfResults = dao.getAmountOfUsers(filter);
         int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
 
-        return ok(userspage.render(list, page, amountOfResults, amountOfPages));
+        return ok(userspage.render(list, amountOfResults, amountOfPages));
     }
 
     /**

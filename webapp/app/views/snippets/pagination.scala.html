@@ -1,4 +1,4 @@
-@* carCostspage.scala.html
+@* pagination.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,15 +27,6 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], withSpread: Boolean, amountOfResults : Int, amountOfPages : Int)
+@(page: Page[_])
+<p id="pagination" name="@page.getFullSize,@page.getNrOfPages"></p>
 
-@costsTable(carCostList,withSpread){ cost =>
-    @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
-    @cost.getStatus match {
-        case ApprovalStatus.REQUEST => {
-            @btnPrimary("Goed- of afkeuren ...", routes.CostsApprove.approveOrReject(cost.getId, false))
-        }
-        case _ => {}
-    }
-}
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>

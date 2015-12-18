@@ -46,6 +46,8 @@ import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
  */
 class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
+    // TODO: remove lazy statements
+
     public static final String LIST_CAR_QUERY =
             "SELECT car_id, car_name, car_brand, car_type, car_email, car_active, " +
                     USER_HEADER_FIELDS +
@@ -383,7 +385,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     }
 
     private static final String NEW_CAR_QUERY =
-            "SELECT cars.car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
+            "SELECT SQL_CALC_FOUND_ROWS cars.car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
                     "FROM cars JOIN addresses ON address_id=car_location " +
@@ -405,7 +407,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
      * @return List of cars with custom ordering and filtering
      */
     @Override
-    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, int userId) throws DataAccessException {
+    public Page<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, int userId) throws DataAccessException {
         // build query
         StringBuilder builder = new StringBuilder(NEW_CAR_QUERY);
         builder.append(" WHERE car_active ");
@@ -434,35 +436,9 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             ps.setInt(4, (page - 1) * pageSize);
             ps.setInt(5, pageSize);
 
-            return toList(ps, JDBCCarDAO::populateCarHeaderLong);
+            return toPage(ps, pageSize, JDBCCarDAO::populateCarHeaderLong);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of cars", ex);
-        }
-    }
-
-    /**
-     * @param filter The filter to apply to
-     * @return The amount of filtered cars
-     * @throws DataAccessException
-     */
-    @Override
-    public int countActiveCars(Filter filter) throws DataAccessException {
-        // build query
-        StringBuilder builder = new StringBuilder(
-                "SELECT count(*) AS amount_of_cars FROM cars "
-        );
-        builder.append(" WHERE car_active ");
-
-        appendCarFilter(builder, filter);
-
-        builder.append(SELECT_NOT_OVERLAP);
-
-        try (PreparedStatement ps = prepareStatement(builder.toString())) {
-            ps.setString(1, filter.getValue(FilterField.FROM));
-            ps.setString(2, filter.getValue(FilterField.UNTIL));   // TODO: use time stamps instead of strings
-            return toSingleInt(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of cars", ex);
         }
     }
 

@@ -84,7 +84,7 @@ public class Users extends Controller {
 
         int amountOfResults = dao.getAmountOfUsers(filter);
 
-        return ok(userspage.render(listOfUsers, page, amountOfResults, (amountOfResults + pageSize - 1) / pageSize));
+        return ok(userspage.render(listOfUsers, amountOfResults, (amountOfResults + pageSize - 1) / pageSize));
     }
 
     @AllowRoles({UserRole.SUPER_USER})

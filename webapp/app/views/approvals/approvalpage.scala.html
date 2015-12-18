@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approvals: Iterable[ApprovalListInfo], page : Int, amountOfResults : Int, amountOfPages : Int)
+@(approvals: Page[ApprovalListInfo])
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
     <thead>
         <tr role="row">
@@ -78,4 +78,4 @@
         }
     </tbody>
 </table>
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+@pagination(approvals)

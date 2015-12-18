@@ -27,8 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(messageList: Iterable[Message], page : Int, amountOfResults : Int, amountOfPages : Int, userIsReceiver: Boolean)
-@import org.joda.time.format.DateTimeFormat
+@(messageList: Iterable[Message], amountOfResults : Int, amountOfPages : Int, userIsReceiver: Boolean)
 <ul class="chat">
     @foreach(messageList){ message =>
         <li>

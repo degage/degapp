@@ -29,8 +29,11 @@
 
 package be.ugent.degage.db.jdbc;
 
+import be.ugent.degage.db.models.Page;
+
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -142,6 +145,26 @@ class AbstractDAO {
         try (ResultSet rs = ps.executeQuery()) {
             return toList(rs, fn);
         }
+    }
+
+    /**
+     * Executes a prepared statement and converts it into a page. Executes a 'found rows query' on the same connection
+     */
+    protected static <T> Page<T> toPage(PreparedStatement ps, int pageSize, ResultSetConverter<T> fn) throws SQLException {
+        Connection connection = ps.getConnection();
+        Page<T> page = new Page<>(new ArrayList<>(), pageSize);
+        Collection<T> base = page.getBase();
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                base.add(fn.convert(rs));
+            }
+        }
+        try (Statement statement = connection.createStatement();
+             ResultSet rs = statement.executeQuery("SELECT FOUND_ROWS()")) {
+            rs.next();
+            page.setFullSize(rs.getInt(1));
+        }
+        return page;
     }
 
     /**

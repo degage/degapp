@@ -57,12 +57,7 @@ public interface CarDAO {
      * left null.
      * @param uid User whose preferences will be used in sorting the cars
      */
-    public Iterable<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, int uid) throws DataAccessException;
-
-    /**
-     * Number of cars that can be returned by equivalent call to {@link #listActiveCars}
-     */
-    public int countActiveCars(Filter filter) throws DataAccessException;
+    public Page<CarHeaderLong> listActiveCars(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter, int uid) throws DataAccessException;
 
     /**
      * Returns a list of all active cars. Similar to {@link #listActiveCars} but

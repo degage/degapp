@@ -239,7 +239,7 @@ public class Cars extends Controller {
         int numberOfResults = dao.countCars(filter);
         int numberOfPages = (int) Math.ceil(numberOfResults / (double) pageSize);
 
-        return ok(views.html.cars.carspage.render(listOfCars, page, numberOfResults, numberOfPages));
+        return ok(views.html.cars.carspage.render(listOfCars, numberOfResults, numberOfPages));
     }
 
     /**

@@ -35,6 +35,7 @@ import be.ugent.degage.db.dao.ApprovalDAO;
 import be.ugent.degage.db.models.Approval;
 import be.ugent.degage.db.models.ApprovalListInfo;
 import be.ugent.degage.db.models.MembershipStatus;
+import be.ugent.degage.db.models.Page;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -72,9 +73,9 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public Iterable<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException {
+    public Page<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException {
         String sql =
-                "SELECT approval_id, approval_submission, approval_status, " +
+                "SELECT SQL_CALC_FOUND_ROWS approval_id, approval_submission, approval_status, " +
                         "admins.user_id, admins.user_lastname, admins.user_firstname, " +
                         "users.user_id, users.user_lastname, users.user_firstname, " +
                         "users.user_deposit, users.user_fee, users.user_date_joined, users.user_contract " +
@@ -98,7 +99,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
         try (PreparedStatement ps = prepareStatement(sql)) {
             ps.setInt(1, pageSize);
             ps.setInt(2, (page - 1) * pageSize);
-            return toList(ps, rs -> {
+            return toPage(ps, pageSize, rs -> {
                 Date contractDate = rs.getDate("users.user_contract");
                 Date dateJoined = rs.getDate("users.user_date_joined");
                 return new ApprovalListInfo(
@@ -115,19 +116,6 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
             });
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get paged approvals for user.", ex);
-        }
-    }
-
-    @Override
-    public int getApprovalCount(MembershipStatus status) throws DataAccessException {
-        String sql = "SELECT COUNT(*) FROM approvals";
-        if (status != null) {
-            sql += " WHERE approval_status = '" + status.name() + "' ";
-        }
-        try (PreparedStatement ps = prepareStatement(sql)) {
-            return toSingleInt(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Failed to get approval count.", ex);
         }
     }
 

@@ -119,7 +119,6 @@ public class Messages extends Controller {
         MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
         return ok(messagespage.render(
                         dao.listMessagesTo(userId, page, pageSize),
-                        page,
                         dao.countMessagesTo(userId),
                         (int) Math.ceil(dao.countMessagesFrom(userId) / (double) pageSize),
                         true)
@@ -133,7 +132,6 @@ public class Messages extends Controller {
         MessageDAO dao = DataAccess.getInjectedContext().getMessageDAO();
         return ok(messagespage.render(
                         dao.listMessagesFrom(userId, page, pageSize),
-                        page,
                         dao.countMessagesFrom(userId),
                         (int) Math.ceil(dao.countMessagesFrom(userId) / (double) pageSize),
                         false)

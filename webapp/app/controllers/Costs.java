@@ -118,7 +118,7 @@ public class Costs extends CostsCommon {
 
         return ok(carCostspage.render(listOfResults,
                 searchString.endsWith("ACCEPTED") || searchString.endsWith("FROZEN"),
-                page, amountOfResults, amountOfPages));
+                amountOfResults, amountOfPages));
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
