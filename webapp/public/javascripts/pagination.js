@@ -298,7 +298,7 @@ function loadFirstPage(searchString) {
 }
 
 /*
- * Create a string "field1:value1,field2:value2" and so on
+ * Create a string "field1=value1,field2=value2" and so on
  */
 function createSearchString(fields, values) {
     var searchString = "";

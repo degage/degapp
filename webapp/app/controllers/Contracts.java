@@ -31,6 +31,7 @@ package controllers;
 
 import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.models.Membership;
+import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.UserRole;
 import db.CurrentUser;
 import db.DataAccess;
@@ -101,13 +102,10 @@ public class Contracts extends Controller {
     @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result showContractsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-        MembershipDAO dao = DataAccess.getInjectedContext().getMembershipDAO();
-        boolean signed = searchString.endsWith("ACCEPTED");
-        Iterable<Membership> list = dao.getContractees(CurrentUser.getId(), signed, page, pageSize);
-        // TODO
-        int amountOfResults = dao.countContractees(CurrentUser.getId(), signed);
-        int amountOfPages = (amountOfResults + pageSize - 1) / pageSize;
-        return ok(contractsPage.render(list, amountOfResults, amountOfPages));
+        return ok(contractsPage.render(DataAccess.getInjectedContext().getMembershipDAO().getContractees(
+                CurrentUser.getId(),
+                searchString.endsWith("ACCEPTED"),
+                page, pageSize)));
     }
 
 

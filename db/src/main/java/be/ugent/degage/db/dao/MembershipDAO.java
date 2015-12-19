@@ -31,6 +31,7 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.models.Membership;
+import be.ugent.degage.db.models.Page;
 
 import java.time.LocalDate;
 
@@ -63,11 +64,6 @@ public interface MembershipDAO {
      * Give a paged list of all contractees of a certain administrator.
      * @param signed whether to show those that are signed or those that are not signed
      */
-    public Iterable<Membership> getContractees (int adminId, boolean signed, int page, int pageSize);
-
-    /**
-     * Returns the count corresponding to the list above
-     */
-    public int countContractees (int adminId, boolean signed);
+    public Page<Membership> getContractees (int adminId, boolean signed, int page, int pageSize);
 
 }

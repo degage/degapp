@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(list: Iterable[Membership], amountOfResults : Int, amountOfPages : Int)
+@(list: Page[Membership])
 
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-contracts">
     <thead>
@@ -47,4 +47,4 @@
         }
     </tbody>
 </table>
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+@pagination(list)

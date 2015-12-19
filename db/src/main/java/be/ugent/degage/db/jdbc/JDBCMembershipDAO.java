@@ -32,6 +32,7 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.models.Membership;
+import be.ugent.degage.db.models.Page;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -115,37 +116,20 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
         }
     }
 
-    private String getContracteesSQL(String fields, boolean signed) {
-        String sql = "SELECT " + fields + " FROM approvals JOIN users ON approval_user = user_id " +
+    @Override
+    public Page<Membership> getContractees(int adminId, boolean signed, int page, int pageSize) {
+        String sql = "SELECT SQL_CALC_FOUND_ROWS user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
+                "FROM approvals JOIN users ON approval_user = user_id " +
                 "WHERE approval_admin = ? AND user_contract IS ";
         if (signed) {
             sql += "NOT ";
         }
-        sql += "NULL ORDER BY user_id DESC";
-        return sql;
-    }
-
-    @Override
-    public Iterable<Membership> getContractees(int adminId, boolean signed, int page, int pageSize) {
-        String sql = getContracteesSQL(
-                "user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract",
-                signed) +  " LIMIT ?,?";
+        sql += "NULL ORDER BY user_id DESC LIMIT ?,?";
         try (PreparedStatement ps = prepareStatement(sql)) {
             ps.setInt(1, adminId);
             ps.setInt(2, (page - 1) * pageSize);
             ps.setInt(3, pageSize);
-            return toList(ps, JDBCMembershipDAO::populateMembership);
-        } catch (SQLException ex) {
-            throw new DataAccessException(ex);
-        }
-    }
-
-    @Override
-    public int countContractees(int adminId, boolean signed) {
-        String sql = getContracteesSQL("count(*)", signed);
-        try (PreparedStatement ps = prepareStatement(sql)) {
-            ps.setInt(1, adminId);
-            return toSingleInt(ps);
+            return toPage(ps, pageSize, JDBCMembershipDAO::populateMembership);
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
         }
