@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carCostList: Iterable[CarCost], withSpread: Boolean, amountOfResults : Int, amountOfPages : Int)
+@(carCostList: Page[CarCost], withSpread: Boolean)
 
 @costsTable(carCostList,withSpread){ cost =>
     @btnPrimary("Details...",routes.Costs.showCostDetail(cost.getId))
@@ -38,4 +38,4 @@
         case _ => {}
     }
 }
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+@pagination(carCostList)

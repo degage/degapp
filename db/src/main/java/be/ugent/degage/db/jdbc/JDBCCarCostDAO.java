@@ -36,6 +36,7 @@ import be.ugent.degage.db.dao.CarCostDAO;
 import be.ugent.degage.db.models.ApprovalStatus;
 import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.CarCostCategory;
+import be.ugent.degage.db.models.Page;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -125,25 +126,16 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     @Override
-    public int getAmountOfCarCosts(Filter filter) throws DataAccessException {
-        StringBuilder builder = new StringBuilder("SELECT count(*) AS amount_of_carcosts FROM carcosts ");
-        appendCostFilter(builder, filter);
-        try (PreparedStatement ps = prepareStatement(builder.toString())) {
-            return toSingleInt(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of carcosts", ex);
-        }
-    }
-
-    @Override
-    public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        StringBuilder builder = new StringBuilder(CAR_COST_QUERY);
+    public Page<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        StringBuilder builder = new StringBuilder("SELECT SQL_CALC_FOUND_ROWS " + CAR_COST_FIELDS + " FROM carcosts " +
+                "JOIN carcostcategories ON car_cost_category_id = category_id " +
+                "JOIN cars ON car_cost_car_id = car_id ");
         appendCostFilter(builder, filter);
         builder.append(" ORDER BY car_cost_created_at ").append(asc?"ASC":"DESC").append(" LIMIT ?, ?");
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
-            return toList(ps, JDBCCarCostDAO::populateCarCost);
+            return toPage(ps, pageSize, JDBCCarCostDAO::populateCarCost);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of carcosts", ex);
         }

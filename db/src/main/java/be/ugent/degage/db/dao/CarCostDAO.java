@@ -35,6 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.ApprovalStatus;
 import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.CarCostCategory;
+import be.ugent.degage.db.models.Page;
 
 import java.time.LocalDate;
 
@@ -47,11 +48,8 @@ public interface CarCostDAO {
                               ApprovalStatus status, int spread,
                               int fileId, int categoryId, LocalDate startDate) throws DataAccessException;
 
-    // note: only count costs that have not been archived
-    public int getAmountOfCarCosts(Filter filter) throws DataAccessException;
-
-    // note: only show costs that have not been archived
-    public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+     // note: only show costs that have not been archived
+    public Page<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     public void updateCarCost(int costId, int amount, String description,
                               LocalDate date, int km, int spread, int categoryId, LocalDate startDate) throws DataAccessException;

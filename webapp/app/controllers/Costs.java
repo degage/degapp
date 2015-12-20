@@ -111,14 +111,10 @@ public class Costs extends CostsCommon {
         Filter filter = Pagination.parseFilter(searchString);
         CarCostDAO dao = DataAccess.getInjectedContext().getCarCostDAO();
 
-        Iterable<CarCost> listOfResults = dao.getCarCostList(field, asc, page, pageSize, filter);
-
-        int amountOfResults = dao.getAmountOfCarCosts(filter);
-        int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
-
-        return ok(carCostspage.render(listOfResults,
-                searchString.endsWith("ACCEPTED") || searchString.endsWith("FROZEN"),
-                amountOfResults, amountOfPages));
+        return ok(carCostspage.render(
+                dao.getCarCostList(field, asc, page, pageSize, filter),
+                searchString.endsWith("ACCEPTED") || searchString.endsWith("FROZEN")
+        ));
     }
 
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
