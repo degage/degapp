@@ -28,11 +28,7 @@
  *@
 
 @(tab: Int)
-@scripts = {
-    @js.pagination("Trips.showTripsPage", initialLoad = false)
-    <script>beginAsc = @(1-tab%2);</script>
-    @tabscripts(tab)
-}
-@stdlayout("Ritten", scripts=scripts, stylesheets=sheets("statuses")) {
+
+@stdlayout("Ritten", scripts=js.paginationWithTabs("Trips.showTripsPage", tab), stylesheets=sheets("statuses")) {
     @triptabs(tab)
 }

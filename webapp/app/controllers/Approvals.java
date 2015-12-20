@@ -153,8 +153,8 @@ public class Approvals extends Controller {
 
     @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result pendingApprovalList() {
-        return ok(approvaltabs.render(0));
+    public static Result pendingApprovalList(int tab) {
+        return ok(approvaltabs.render(tab));
     }
 
     /**
@@ -224,7 +224,7 @@ public class Approvals extends Controller {
                 adao.setApprovalAdmin(id, userId);
                 Notifier.sendContractManagerAssignedMail(user, contractManager);
                 flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
-                return redirect(routes.Approvals.pendingApprovalList());
+                return redirect(routes.Approvals.pendingApprovalList(1));
             } else {
                 flash("danger", contractManager + " heeft geen infosessie beheerdersrechten.");
                 return redirect(routes.Approvals.approvalAdmin(id));
@@ -295,7 +295,7 @@ public class Approvals extends Controller {
             dao.setApprovalStatus(approvalId, MembershipStatus.DENIED, data.message);
             Notifier.sendMembershipRejected(udao.getUserHeader(ap.getUserId()), data.message);
             flash("success", "De aanvraag werd afgekeurd.");
-            return redirect(routes.Approvals.pendingApprovalList());
+            return redirect(routes.Approvals.pendingApprovalList(2));
         } else {
             boolean owner = false;
             if ("owner".equals(data.action)) {
@@ -316,7 +316,7 @@ public class Approvals extends Controller {
             Notifier.sendMembershipApproved(udao.getUserHeader(userId), data.message);
             flash("success", "De gebruiker is volwaardig lid geworden.");
 
-            return redirect(routes.Approvals.pendingApprovalList());
+            return redirect(routes.Approvals.pendingApprovalList(1));
         }
     }
 }

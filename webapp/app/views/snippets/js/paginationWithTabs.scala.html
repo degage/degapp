@@ -1,4 +1,4 @@
-@* tabscripts.scala.html
+@* pagination.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,20 +27,29 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(tab: Int)
+@(actionName: String, tab: Int = 0)
+<script type='text/javascript' src='@routes.Assets.at("lib/js-cookie/js.cookie.js")'></script>
+<script type='text/javascript' src='@routes.Application.paginationRoutes()'></script>
+<script>
+    var route = paginationJsRoutes.controllers.@actionName;
 
-@* Scripts for tab selection in trips overview page *@
+    function clickHandler() {
+        $('li[id^="tab"] input').removeClass('searchTextField');
 
-<script type="text/javascript" src='@routes.Assets.at("javascripts/app/trips.js")'></script>
+        if(typeof $(this).find('input') != 'undefined') {
+            $(this).find('input').addClass('searchTextField');
+            beginAsc = $(this).data("asc");
+        }
+        $('#searchButton').click();
+    }
 
-<script>$(document).ready(function(){
-    beginAsc = @(1-tab%2);
-    loadFirstPage(
-      @tab match {
-         case 0 => { "status=ACCEPTED" }
-         case 1 => { "status=REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" }
-         case 2 => { "status=REQUEST" }
-         case _ => { "status=REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" }
-      }
-    );});
+    $(document).ready(function () {
+        $(window).resize(forceResponsiveTables);
+        forceResponsiveTables();
+        $('li[id^="tab"]').on('click', clickHandler);
+        $field=$('#tab_'+@tab+' input')
+        beginAsc = $field.data("asc");
+        loadFirstPage($field.attr('name')+"="+$field.attr('value'));
+    });
 </script>
+<script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>

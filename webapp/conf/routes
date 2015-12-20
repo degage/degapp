@@ -180,7 +180,7 @@ GET         /infosessions                           controllers.InfoSessions.sho
 GET         /approval                               controllers.Approvals.requestApproval()
 POST        /approval                               controllers.Approvals.requestApprovalPost()
 GET         /approvals/page                         controllers.Approvals.pendingApprovalListPaged(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
-GET         /approvals                              controllers.Approvals.pendingApprovalList()
+GET         /approvals                              controllers.Approvals.pendingApprovalList(tab: Int ?= 0)
 GET         /approval/aor                           controllers.Approvals.approvalApproveReject(id: Int)
 POST        /approval/aor                           controllers.Approvals.approvalApproveRejectPost(id: Int)
 GET         /approval/admin                         controllers.Approvals.approvalAdmin(id: Int)

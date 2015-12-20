@@ -29,39 +29,13 @@
 
 @(tab: Int)
 
-<div class="row">
-    <div class="col-lg-12">
-        <ul class="nav nav-tabs">
-          <li id="tab_planned" data-asc="1" @if(tab == 0) { class="active" } ><a href="#resultpanel" data-toggle="tab">
-              Gepland</a>
-              <input name="status" value="ACCEPTED" class="searchTextField hidden">
-          </li>
-          <li id="tab_passed" data-asc="0" @if(tab == 1) { class="active" }><a href="#resultpanel" data-toggle="tab">
-              Voorbij
-              @defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
-                      Trips.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
-                  @if(amount > 0) { (@amount) }
-              }
-              </a>
-              <input name="status" value="REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" class="hidden">
-          </li>
-          <li id="tab_request" data-asc="1" @if(tab == 2) { class="active" }><a href="#resultpanel" data-toggle="tab">
-              Aanvragen
-              @defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
-                  @if(amount > 0) {
-                      (@amount)
-                  }
-              }
-              </a>
-              <input name="status" value="REQUEST" class="hidden">
-          </li>
-            <li id="tab_others" data-asc="0" @if(tab == 3) { class="active" }><a href="#resultpanel" data-toggle="tab">
-                Andere</a>
-                <input name="status" value="REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" class="hidden">
-            </li>
-          <li class="hidden"><button id="searchButton"></button></li>
-        </ul>
-    </div>
-</div>
-<!-- Tab panes -->
-@resultsTablePanel(tabbed=true)
+@tabbedPagination(tab,"status",
+    "ACCEPTED" -> ("Gepland",true),
+    "REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" ->
+          (defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
+                  Trips.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
+              "Voorbij" + ( if(amount > 0) " ("+amount+")" else "" ) }.toString,false),
+    "REQUEST" ->
+          (defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
+              "Aanvragen" + ( if(amount > 0) " ("+amount+")" else "" ) }.toString,true),
+    "REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" -> ("Andere",false))

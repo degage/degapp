@@ -33,7 +33,7 @@
     @item(title, "Gebruikers", "fa-users", routes.Users.showUsers)
 }
 @if(db.CurrentUser.hasSomeRole(UserRole.PROFILE_ADMIN, UserRole.INFOSESSION_ADMIN )){
-    @item(title, "Goedkeuring", "fa-plus-square-o", routes.Approvals.pendingApprovalList, "Goedkeuring gebruikers")
+    @item(title, "Goedkeuring", "fa-plus-square-o", routes.Approvals.pendingApprovalList(0), "Goedkeuring gebruikers")
 }
 @if(db.CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)){
     @item(title, "Infosessies", "fa-lightbulb-o", routes.InfoSessions.showSessions)

@@ -1,0 +1,21 @@
+@* *@
+
+@(tab: Int, name: String, values: (String,(String,Boolean))*)
+
+<div class="row">
+    <div class="col-lg-12">
+        <ul class="nav nav-tabs" id="myTab">
+            @for(((value,(text,asc)),index) <- values.zipWithIndex) {
+                <li id="tab_@index" @if(tab == index) { class="active" }
+                    data-asc=@if(asc){"1"} else {"0"}
+                ><a href="#resultpanel" data-toggle="tab">@text</a>
+                    <input name="@name" value="@value" class="searchTextField hidden">
+                </li>
+            }
+            <li class="hidden"><button id="searchButton"></button></li>
+        </ul>
+    </div>
+</div>
+
+@resultsTablePanel(tabbed=true)
+

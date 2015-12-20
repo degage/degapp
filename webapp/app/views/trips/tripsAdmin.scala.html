@@ -28,10 +28,8 @@
  *@
 
 @scripts = {
-    @js.pagination("Trips.showTripsAdminPage")
-    <script>beginAsc = 1;</script>
+    @js.paginationWithTabs("Trips.showTripsAdminPage", 2)
     @js.userpicker()
-    <script type="text/javascript" src='@routes.Assets.at("javascripts/app/trips.js")'></script>
 }
 @stdlayout("Ritten (beheer)", scripts=scripts, stylesheets=sheets("statuses")) {
 
@@ -55,32 +53,12 @@
         </div>
             <!-- /.panel-body -->
     </div>
-    <div class="row">
-        <div class="col-lg-12">
-                <!-- Nav tabs -->
-            <ul class="nav nav-tabs">
-                <li id="tab_planned" data-asc="1" class="active"><a href="#resultpanel" data-toggle="tab">
-                    Gepland</a>
-                    <input name="status" value="ACCEPTED" class="searchTextField hidden">
-                </li>
-                <li id="tab_passed"  data-asc="0" ><a href="#resultpanel" data-toggle="tab">
-                    Voorbij</a>
-                    <input name="status" value="REQUEST_DETAILS|DETAILS_PROVIDED|FINISHED" class="hidden">
-                </li>
-                <li id="tab_request" data-asc="1" ><a href="#resultpanel" data-toggle="tab">
-                    Aanvragen</a>
-                    <input name="status" value="REQUEST" class="hidden">
-                </li>
-                <li id="tab_others" data-asc="0"  ><a href="#resultpanel" data-toggle="tab">
-                    Andere</a>
-                    <input name="status" value="REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" class="hidden">
-                </li>
-            </ul>
 
-            @resultsTablePanel(tabbed=true)
+    @* simpler than @tabtrips, does not contain counts *@
+    @tabbedPagination(2,"status",
+        "ACCEPTED" -> ("Gepland", true),
+        "REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" -> ("Voorbij",false),
+        "REQUEST" -> ("Aanvragen",true),
+        "REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" -> ("Andere",false))
 
-        </div>
-            <!-- /col-lg-12 -->
-    </div>
-        <!-- /row -->
 }

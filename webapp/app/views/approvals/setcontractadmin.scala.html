@@ -31,7 +31,7 @@
 
 @stdlayout("Contractverantwoordelijke",
            scripts=js.userpicker(),
-           extrabc=breadcrumb("Goedkeuringsaanvragen",routes.Approvals.pendingApprovalList)) {
+           extrabc=breadcrumb("Goedkeuringsaanvragen",routes.Approvals.pendingApprovalList(0))) {
     @approvaluserpartial(approval, user, enrollStatus)
 
     @panel("Aanvraag", "fa-pencil-square-o") {

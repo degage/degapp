@@ -31,16 +31,12 @@
 
 @import providers.DataProvider
 @import db.CurrentUser
-@scripts={
-    @js.pagination("Trips.showTripsPage", initialLoad = false)
-    @trips.tabscripts(2)
-}
 @stylesheets={
-@sheets("statuses")
-@sheets("reservationtable")
+    @sheets("statuses")
+    @sheets("reservationtable")
 }
 
-@app("Welkom", stylesheets=stylesheets, scripts=scripts){
+@app("Welkom", stylesheets=stylesheets, scripts=js.paginationWithTabs("Trips.showTripsPage", 2)){
     @breadcrumbs {
     }
 
