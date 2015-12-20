@@ -50,9 +50,6 @@ public interface JobDAO {
 
     /**
      * Delete the job of the given type and reference id.
-     * @param type
-     * @param refId
-     * @throws DataAccessException
      */
     public void deleteJob(JobType type, int refId) throws DataAccessException;
 

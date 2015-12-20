@@ -31,6 +31,7 @@ package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
+import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.Refuel;
 import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.ApprovalStatus;
@@ -58,10 +59,7 @@ public interface RefuelDAO {
     public RefuelExtended getRefuelExtended(int refuelId) throws DataAccessException;
 
     // note: only shows refuels that are not archived
-    public Iterable<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
-
-    // note: only count refuels that are not archived
-    public int getAmountOfRefuels(Filter filter) throws DataAccessException;
+    public Page<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException;
 
     // note: only shows refuels that are not archived
     public Iterable<Refuel> getRefuelsForCarRide(int reservationId) throws DataAccessException;

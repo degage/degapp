@@ -74,7 +74,6 @@ public class Refuel {
 
     /**
      * Amount of fuel (free format)
-     * @return
      */
     public String getAmount() {
         return amount;

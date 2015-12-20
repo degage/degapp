@@ -92,7 +92,6 @@ public class UserHeader extends UserHeaderShort {
 
     /**
      * Has this user status {@link UserStatus#FULL}?
-     * @return
      */
     public boolean hasFullStatus() {
         return status == UserStatus.FULL;

@@ -27,36 +27,36 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuelList: Iterable[RefuelExtended], amountOfResults : Int, amountOfPages : Int)
+@(refuelList: Page[RefuelExtended])
 
 @defining(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
-        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
-            <thead>
-                <tr role="row">
-                    <th>Auto</th>
-                    <th>Autorit</th>
-                    <th>Bestuurder</th>
-                    <th>Bedrag</th>
-                    <th>Liters</th>
-                    <th>Km-stand</th>
-                    <th>Status</th>
-                    <th>Acties</th>
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
+        <thead>
+            <tr role="row">
+                <th>Auto</th>
+                <th>Autorit</th>
+                <th>Bestuurder</th>
+                <th>Bedrag</th>
+                <th>Liters</th>
+                <th>Km-stand</th>
+                <th>Status</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach.trOrElse(refuelList) { refuel =>
+                <td><a href="@routes.Cars.detail(refuel.getCarId)">@refuel.getCarName</a></td>
+                <td><a href="@routes.Trips.details(refuel.getReservationId)">@Utils.toLocalizedDateString(refuel.getReservationFrom)</a></td>
+                <td><a href="@routes.Profile.index(refuel.getDriverId)">@refuel.getDriverName</a></td>
+                @columns(refuel,isAdmin)
+            }{
+                <tr>
+                    <td class="empty-row" colspan="7">
+                        Geen resultaten.
+                    </td>
                 </tr>
-            </thead>
-            <tbody>
-                @foreach.trOrElse(refuelList) { refuel =>
-                    <td><a href="@routes.Cars.detail(refuel.getCarId)">@refuel.getCarName</a></td>
-                    <td><a href="@routes.Trips.details(refuel.getReservationId)">@Utils.toLocalizedDateString(refuel.getReservationFrom)</a></td>
-                    <td><a href="@routes.Profile.index(refuel.getDriverId)">@refuel.getDriverName</a></td>
-                    @columns(refuel,isAdmin)
-                }{
-                    <tr>
-                        <td class="empty-row" colspan="7">
-                            Geen resultaten.
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-        <p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+            }
+        </tbody>
+    </table>
+    @pagination(refuelList)
 }

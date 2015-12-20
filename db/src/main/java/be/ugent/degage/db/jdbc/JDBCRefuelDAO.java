@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.RefuelDAO;
+import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.Refuel;
 import be.ugent.degage.db.models.RefuelExtended;
 import be.ugent.degage.db.models.ApprovalStatus;
@@ -49,7 +50,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                     "refuel_km, refuel_amount, refuel_message ";
 
     private static final String REFUEL_EXTENDED_QUERY =
-            "SELECT " + REFUEL_FIELDS +
+            "SELECT SQL_CALC_FOUND_ROWS " + REFUEL_FIELDS +
                     ", reservation_id, reservation_from, reservation_to, reservation_user_id, reservation_owner_id," +
                     "car_id, car_name, user_firstname, user_lastname, car_ride_start_km, car_ride_end_km " +
             "FROM refuels " +
@@ -216,30 +217,8 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         }
     }
 
-    private static final String AMOUNT_OF_REFUELS_STATEMENT =
-            "SELECT count(*) AS amount_of_refuels FROM refuels " +
-                    "LEFT JOIN reservations ON refuel_car_ride_id = reservation_id ";
-
     @Override
-    public int getAmountOfRefuels(Filter filter) throws DataAccessException {
-        StringBuilder builder = new StringBuilder(AMOUNT_OF_REFUELS_STATEMENT);
-        appendRefuelFilter(builder, filter);
-        //System.err.println("SQL = " + builder.toString());
-        try (Statement stat = createStatement();
-             ResultSet rs = stat.executeQuery(builder.toString())) {
-            if (rs.next()) {
-                return rs.getInt("amount_of_refuels");
-            } else {
-                return 0;
-            }
-
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of refuels", ex);
-        }
-    }
-
-    @Override
-    public Iterable<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException {
+    public Page<RefuelExtended> getRefuels(int page, int pageSize, Filter filter) throws DataAccessException {
         StringBuilder builder = new StringBuilder(REFUEL_EXTENDED_QUERY);
         appendRefuelFilter(builder, filter);
         builder.append(" ORDER BY refuel_created_at DESC LIMIT ?,?");
@@ -247,7 +226,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
-            return toList(ps, JDBCRefuelDAO::populateRefuelExtended);
+            return toPage(ps, pageSize, JDBCRefuelDAO::populateRefuelExtended);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of refuels", ex);
         }
