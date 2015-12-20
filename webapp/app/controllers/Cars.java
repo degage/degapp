@@ -30,7 +30,6 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.dao.FileDAO;
@@ -229,17 +228,15 @@ public class Cars extends Controller {
     @InjectContext
     public static Result showCarsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // TODO: orderBy not as String-argument?
-        FilterField carField = FilterField.stringToField(orderBy, FilterField.NAME);
 
-        boolean asc = Pagination.parseBoolean(ascInt);
-        Filter filter = Pagination.parseFilter(searchString);
-        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-        Iterable<CarHeaderAndOwner> listOfCars = dao.listCarsAndOwners(carField, asc, page, pageSize, filter, false);
-
-        int numberOfResults = dao.countCars(filter);
-        int numberOfPages = (int) Math.ceil(numberOfResults / (double) pageSize);
-
-        return ok(views.html.cars.carspage.render(listOfCars, numberOfResults, numberOfPages));
+        return ok(views.html.cars.carspage.render(
+                DataAccess.getInjectedContext().getCarDAO().listCarsAndOwners(
+                        FilterField.stringToField(orderBy, FilterField.NAME),
+                        Pagination.parseBoolean(ascInt),
+                        page, pageSize,
+                        Pagination.parseFilter(searchString)
+                )
+        ));
     }
 
     /**
@@ -555,9 +552,9 @@ public class Cars extends Controller {
         CarDAO dao = context.getCarDAO();
         Car car = dao.getCar(carId);
         return ok(detail.render(
-                        car,
-                        context.getPrivilegedDAO().getPrivileged(carId),
-                        null)
+                car,
+                context.getPrivilegedDAO().getPrivileged(carId),
+                null)
         );
     }
 

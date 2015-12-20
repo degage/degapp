@@ -44,6 +44,8 @@ public class CarHeaderLong extends CarHeaderAndOwner {
     private boolean hook;
     private CarFuel fuel;
 
+    private UserHeader owner;
+
 
     /**
      * Create an object containing the given information.
@@ -52,7 +54,8 @@ public class CarHeaderLong extends CarHeaderAndOwner {
                          boolean active, Integer seats, Integer doors,
                          boolean manual, boolean gps, boolean hook, CarFuel fuel,
                          String comments, UserHeader owner) {
-        super(id, name, brand, type, email, active, owner);
+        super(id, name, brand, type, email, active, owner == null ? 0 : owner.getId(), owner == null ? "" : owner.toString());
+        this.owner = owner;
         this.seats = seats;
         this.doors = doors;
         this.manual = manual;
@@ -60,6 +63,10 @@ public class CarHeaderLong extends CarHeaderAndOwner {
         this.hook = hook;
         this.fuel = fuel;
         this.comments = comments;
+    }
+
+    public UserHeader getOwner() {
+        return owner;
     }
 
     public Integer getSeats() {

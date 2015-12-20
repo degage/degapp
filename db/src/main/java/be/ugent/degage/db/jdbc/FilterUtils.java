@@ -52,22 +52,22 @@ public final class FilterUtils {
 
 
     /**
-     * Append to the given builder the 'ILIKE'-string that corresponds to this filter.
+     * Append to the given builder the AND-clause for containing a string
      */
-    public static void appendILikeFilter(StringBuilder builder, String key, String value) {
-        if (value != null) {
+    public static void appendContainsFilter(StringBuilder builder, String field, String str) {
+        if (str != null && ! str.isEmpty()) {
             builder.append(" AND ")
-                    .append(key)
-                    .append(" ILIKE '") ;
-            appendEscapedString(builder, value);
-            builder.append('\'');
+                    .append(field)
+                    .append(" LIKE '%") ;
+            appendEscapedString(builder, str);
+            builder.append("%'");
         }
     }
 
-    public static void appendStringFilter(StringBuilder builder, String key, String value) {
-        if (value != null) {
-            builder.append(" AND ").append(key).append("= '") ;
-            appendEscapedString(builder, value);
+    public static void appendStringFilter(StringBuilder builder, String field, String str) {
+        if (str != null) {
+            builder.append(" AND ").append(field).append("= '") ;
+            appendEscapedString(builder, str);
             builder.append('\'');
         }
     }
@@ -75,10 +75,10 @@ public final class FilterUtils {
     /**
      * Append to a given builder the AND-clause for an integer
      */
-    public static void appendIntFilter (StringBuilder builder, String key, String value) {
+    public static void appendIntFilter (StringBuilder builder, String field, String value) {
         if(! value.isEmpty()) {
             Integer.parseInt(value); // check that this is an integer - avoid SQL injection
-            builder.append (" AND ").append(key).append(" = ").append(value);
+            builder.append (" AND ").append(field).append(" = ").append(value);
         }
     }
 
@@ -86,10 +86,10 @@ public final class FilterUtils {
      * Append to a given builder the AND-clause for an id. Negative ids are considered shorthand
      * for null.
      */
-    public static void appendIdFilter (StringBuilder builder, String key, String value) {
+    public static void appendIdFilter (StringBuilder builder, String field, String value) {
         if(! value.isEmpty()) {
             if (Integer.parseInt(value) >= 0) {
-                builder.append(" AND ").append(key).append(" = ").append(value);
+                builder.append(" AND ").append(field).append(" = ").append(value);
             }
         }
     }
@@ -97,31 +97,31 @@ public final class FilterUtils {
     /**
      * Append to a given builder the AND-clause for a boolean, when one
      */
-    public static void appendWhenOneFilter (StringBuilder builder, String key, String value) {
+    public static void appendWhenOneFilter (StringBuilder builder, String field, String value) {
         if(value.equals("1")) {
-            builder.append (" AND ").append(key);
+            builder.append (" AND ").append(field);
         }
     }
 
     /**
      * Append to a given builder the AND-clause for a boolean, when not one
      */
-    public static void appendNotWhenOneFilter (StringBuilder builder, String key, String value) {
+    public static void appendNotWhenOneFilter (StringBuilder builder, String field, String value) {
         if(value.equals("1")) {
-            builder.append (" AND NOT ").append(key);
+            builder.append (" AND NOT ").append(field);
         }
     }
 
     /**
      * Append to a given builder the AND-clause for a tristate
      */
-    public static void appendTristateFilter (StringBuilder builder, String key, String value) {
+    public static void appendTristateFilter (StringBuilder builder, String field, String value) {
         if(! value.isEmpty()) {
             int v = Integer.parseInt(value);
             if (v > 0) {
-                builder.append (" AND ").append(key);
+                builder.append (" AND ").append(field);
             } else if (v == 0) {
-                builder.append (" AND NOT ").append(key);
+                builder.append (" AND NOT ").append(field);
             }
         }
     }

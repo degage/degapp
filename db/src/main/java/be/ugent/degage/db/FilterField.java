@@ -36,7 +36,7 @@ import com.google.common.base.Strings;
  */
 public enum FilterField {
 
-    NAME(false), BRAND(false), SEATS(true), AUTOMATIC(true), GPS(true), HOOK(true), CAR_ID(true), FUEL(true), CAR_ACTIVE(true),
+    NAME(true), BRAND(true), SEATS(true), AUTOMATIC(true), GPS(true), HOOK(true), CAR_ID(true), FUEL(true), CAR_ACTIVE(true),
     CAR_COST_DATE(true),
     REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),

@@ -30,23 +30,22 @@
 package be.ugent.degage.db.models;
 
 /**
- * Extends {@link CarHeader} with an owner field.
+ * Extends {@link CarHeader} with an owner name field.
  */
 public class CarHeaderAndOwner extends CarHeader {
 
-    private UserHeader owner;
+    private String ownerName;
 
     /**
      * Create an object of this type.
      */
     public CarHeaderAndOwner(int id, String name, String brand, String type, String email,
-                             boolean active, UserHeader owner) {
-        super(id, name, brand, type, email, active, owner == null ? 0 : owner.getId());
-        this.owner = owner;
+                             boolean active, int ownerId, String ownerName) {
+        super(id, name, brand, type, email, active, ownerId);
+        this.ownerName = ownerName;
     }
 
-    public UserHeader getOwner() {
-        return owner;
+    public String getOwnerName() {
+        return ownerName;
     }
-
 }

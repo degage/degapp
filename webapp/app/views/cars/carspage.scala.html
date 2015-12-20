@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(cars: Iterable[CarHeaderAndOwner], numberOfCars : Int, numberOfPages : Int)
+@(cars: Page[CarHeaderAndOwner])
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
     <thead>
         <tr role="row">
@@ -49,7 +49,7 @@
                 <span class="label label-danger">Non-actief</span>
             }
         </td>
-        <td><a href="@routes.Profile.index(car.getOwner.getId)">@car.getOwner</a></td>
+        <td><a href="@routes.Profile.index(car.getOwnerId)">@car.getOwnerName</a></td>
         <td>
             @btnWarning("Wijzig", routes.Cars.editCar(car.getId))
             @btnPrimary("Km-standen", routes.Trips.overview(car.getId))
@@ -65,4 +65,4 @@
     }
     </tbody>
 </table>
-<p id="pagination" name="@numberOfCars,@numberOfPages"></p>
+@pagination(cars)
