@@ -32,10 +32,7 @@ package be.ugent.degage.db.dao;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.models.User;
-import be.ugent.degage.db.models.UserHeader;
-import be.ugent.degage.db.models.UserHeaderShort;
-import be.ugent.degage.db.models.UserStatus;
+import be.ugent.degage.db.models.*;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -121,9 +118,7 @@ public interface UserDAO {
     public void deleteUser(int userId) throws DataAccessException;
 
     // TODO: below
-    public int getAmountOfUsers(Filter filter) throws DataAccessException;
-
-    public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+    public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     /**
      * Is the given car owner allowed to see the profile of the given user?

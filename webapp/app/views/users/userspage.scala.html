@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(users: List[User], amountOfResults : Int, amountOfPages : Int)
+@(users: Page[User])
 @import db.CurrentUser
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
     <thead>
@@ -37,27 +37,18 @@
         </tr>
     </thead>
     <tbody>
-        @if(users.isEmpty) {
-            <tr>
-                <td class="empty-row" colspan="6">
-                    Geen enkele gebruiker voldoet aan jouw zoekterm(men)
-                </td>
-            </tr>
-        } else {
-            @for(user <- users) {
-                <tr>
-                    <td><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></td>
-                    <td>
-                        <div class="btn-group btn-group-xs">
-                            @if(CurrentUser.hasRole(UserRole.SUPER_USER) && user.canLogin) {
-                                @btnWarning("Impersoneer", routes.Users.impersonate(user.getId))
-                                @btnPrimary("Afrekeningen", routes.Billings.list(user.getId))
-                            }
-                        </div>
-                    </td>
-                </tr>
-            }
-        }
+        @foreach.trOrElse(users) { user =>
+            <td><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></td>
+            <td>
+                <div class="btn-group btn-group-xs">
+                    @if(CurrentUser.hasRole(UserRole.SUPER_USER) && user.canLogin) {
+                        @btnWarning("Impersoneer", routes.Users.impersonate(user.getId))
+                        @btnPrimary("Afrekeningen", routes.Billings.list(user.getId))
+                    }
+                </div>
+            </td>
+        }{ @noresults() }
     </tbody>
 </table>
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+@pagination(users)
+

@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
+import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
@@ -80,11 +81,8 @@ public class Users extends Controller {
         Filter filter = Pagination.parseFilter(searchString);
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
 
-        List<User> listOfUsers = dao.getUserList(field, asc, page, pageSize, filter);
-
-        int amountOfResults = dao.getAmountOfUsers(filter);
-
-        return ok(userspage.render(listOfUsers, amountOfResults, (amountOfResults + pageSize - 1) / pageSize));
+        Page<User> listOfUsers = dao.getUserList(field, asc, page, pageSize, filter);
+        return ok(userspage.render(listOfUsers));
     }
 
     @AllowRoles({UserRole.SUPER_USER})

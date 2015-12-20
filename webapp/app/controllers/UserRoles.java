@@ -35,6 +35,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.dao.UserRoleDAO;
+import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
@@ -91,7 +92,7 @@ public class UserRoles extends Controller {
         UserRoleDAO urdao = context.getUserRoleDAO();
 
         // TODO: obtain this information with a single database call...
-        List<User> listOfUsers = dao.getUserList(carField, asc, page, pageSize, filter);
+        Page<User> listOfUsers = dao.getUserList(carField, asc, page, pageSize, filter);
 
         List<UserWithRoles> list = new ArrayList<>();
         for (User user : listOfUsers) {
@@ -101,11 +102,7 @@ public class UserRoles extends Controller {
             uwr.fullName = user.getFullName();
             list.add (uwr);
         }
-
-        int amountOfResults = dao.getAmountOfUsers(filter);
-        int amountOfPages = (amountOfResults + pageSize - 1)/ pageSize;
-
-        return ok(userspage.render(list, amountOfResults, amountOfPages));
+        return ok(userspage.render(new Page<>(list,pageSize,listOfUsers.getFullSize())));
     }
 
     /**

@@ -50,11 +50,16 @@ public class Page<T> implements Iterable<T> {
     private int fullSize;
 
     public Page(Collection<T> base, int pageSize) {
-        this.base = base;
-        this.fullSize = -1;
-        this.pageSize = pageSize;
+        this(base,pageSize,-1);
     }
 
+    // occasionaly used to make pages of lists prepared in the web tier
+    public Page(Collection<T> base, int pageSize, int fullSize) {
+        this.base = base;
+        this.fullSize = fullSize;
+        this.pageSize = pageSize;
+
+    }
     public int getFullSize() {
         return fullSize;
     }

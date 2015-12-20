@@ -27,8 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(users: Iterable[UserRoles.UserWithRoles], amountOfResults : Int, amountOfPages : Int)
-@import scala.collection.mutable.Map;
+@(users: Page[UserRoles.UserWithRoles])
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-userroles">
     <thead>
         <tr role="row">
@@ -38,27 +37,20 @@
         </tr>
     </thead>
     <tbody>
-        @if(!users.iterator.hasNext) {
-            <tr>
-                <td class="empty-row" colspan="6">
-                    Geen enkele gebruiker voldoet aan jouw zoekterm(men)
-                </td>
-            </tr>
-        } else {
-            @foreach.tr(users) { user =>
-                <td><a href="@routes.Profile.index(user.id)">@user.fullName</a></td>
-                <td>
-                    @foreach(user.roleSet){ role =>
-                        <span class="label label-@(role.name.toLowerCase)">@role</span>
-                    }
-                </td>
-                <td>
-                    <div class="btn-group btn-group-xs">
-                        <a href="@routes.UserRoles.edit(user.id)" class="btn btn-primary">Rollen bewerken</a>
-                    </div>
-                </td>
-            }
-        }
+        @foreach.trOrElse(users) { user =>
+            <td><a href="@routes.Profile.index(user.id)">@user.fullName</a></td>
+            <td>
+                @foreach(user.roleSet){ role =>
+                    <span class="label label-@(role.name.toLowerCase)">@role</span>
+                }
+            </td>
+            <td>
+                <div class="btn-group btn-group-xs">
+                    <a href="@routes.UserRoles.edit(user.id)" class="btn btn-primary">Rollen bewerken</a>
+                </div>
+            </td>
+        }{ @noresults() }
     </tbody>
 </table>
-<p id="pagination" name="@amountOfResults,@amountOfPages"></p>
+@pagination(users)
+

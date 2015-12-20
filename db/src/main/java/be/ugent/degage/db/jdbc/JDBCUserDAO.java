@@ -33,10 +33,7 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.UserDAO;
-import be.ugent.degage.db.models.User;
-import be.ugent.degage.db.models.UserHeader;
-import be.ugent.degage.db.models.UserHeaderShort;
-import be.ugent.degage.db.models.UserStatus;
+import be.ugent.degage.db.models.*;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.sql.Date;
@@ -59,7 +56,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             USER_HEADER_SHORT_FIELDS + ", user_email, user_status, user_phone, user_cellphone, user_degage_id ";
 
     private static final String USER_QUERY =
-            "SELECT " + USER_HEADER_FIELDS + ",  " +
+            "SELECT SQL_CALC_FOUND_ROWS " + USER_HEADER_FIELDS + ",  " +
                     "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
                     "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
                     "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
@@ -392,36 +389,20 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     // TODO: refactor filters
 
-    /**
-     * @param filter The filter to apply to
-     */
     @Override
-    public int getAmountOfUsers(Filter filter) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(
-                "SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT
-        )) {
-            fillFragment(ps, filter, 1);
-            return toSingleInt(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of users", ex);
-        }
-    }
-
-    @Override
-    public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         if (orderBy != FilterField.USER_NAME) {
             throw new DataAccessException("Could not create getUserList statement");
         }
-        String sql = USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname asc, users.user_firstname ";
-        sql += asc ? "asc" : "desc";
-        sql += " LIMIT ?, ? ";
+        String sql = USER_QUERY + FILTER_FRAGMENT +
+                "ORDER BY users.user_lastname " + (asc?"ASC":"DESC") +
+                ", users.user_firstname " + (asc?"ASC":"DESC") + " LIMIT ?, ?";
 
         try (PreparedStatement ps = prepareStatement(sql)) {
             fillFragment(ps, filter, 1);
-            int first = (page - 1) * pageSize;
-            ps.setInt(5, first);
+            ps.setInt(5, (page - 1) * pageSize);
             ps.setInt(6, pageSize);
-            return toList(ps, JDBCUserDAO::populateUser);
+            return toPage(ps, pageSize, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);
         }
