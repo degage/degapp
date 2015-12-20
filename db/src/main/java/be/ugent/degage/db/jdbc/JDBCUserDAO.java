@@ -150,6 +150,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
+    public static UserHeaderShort populateUserHeaderShort(ResultSet rs) throws SQLException {
+        return new UserHeaderShort(
+                rs.getInt("user_id"),
+                rs.getString("user_firstname"),
+                rs.getString("user_lastname")
+        );
+    }
+
     public static UserHeader populateUserHeader(ResultSet rs, String tableName) throws SQLException {
         return new UserHeader(
                 rs.getInt(tableName + ".user_id"),
@@ -390,7 +398,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     @Override
     public int getAmountOfUsers(Filter filter) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-            "SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT
+                "SELECT COUNT(user_id) AS amount_of_users FROM users" + FILTER_FRAGMENT
         )) {
             fillFragment(ps, filter, 1);
             return toSingleInt(ps);
@@ -402,7 +410,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     @Override
     public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         if (orderBy != FilterField.USER_NAME) {
-             throw new DataAccessException("Could not create getUserList statement");
+            throw new DataAccessException("Could not create getUserList statement");
         }
         String sql = USER_QUERY + FILTER_FRAGMENT + "ORDER BY users.user_lastname asc, users.user_firstname ";
         sql += asc ? "asc" : "desc";
@@ -438,15 +446,15 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public boolean canSeeProfileAsOwner (int ownerId, int userId) {
+    public boolean canSeeProfileAsOwner(int ownerId, int userId) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT 1 FROM reservations " +
-                    "JOIN cars ON reservation_car_id = car_id " +
-                    "WHERE car_owner_user_id = ? AND reservation_user_id = ? " +
+                        "JOIN cars ON reservation_car_id = car_id " +
+                        "WHERE car_owner_user_id = ? AND reservation_user_id = ? " +
                         "AND (reservation_from + INTERVAL 120 DAY) > NOW() LIMIT 1"
         )) {
-            ps.setInt (1, ownerId);
-            ps.setInt (2, userId);
+            ps.setInt(1, ownerId);
+            ps.setInt(2, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
@@ -456,22 +464,38 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public boolean canSeeProfileAsUser (int userId, int ownerId) {
+    public boolean canSeeProfileAsUser(int userId, int ownerId) {
         // TODO? Only ownerIds with correct role
         try (PreparedStatement ps = prepareStatement(
                 "SELECT 1 FROM reservations " +
-                    "JOIN cars ON reservation_car_id = car_id " +
-                    "WHERE car_owner_user_id = ? AND reservation_user_id = ? " +
+                        "JOIN cars ON reservation_car_id = car_id " +
+                        "WHERE car_owner_user_id = ? AND reservation_user_id = ? " +
                         "AND reservation_status > 4 " + // [ENUM INDEX] = at least accepted
                         "AND (reservation_from + INTERVAL 120 DAY) > NOW() LIMIT 1"
         )) {
-            ps.setInt (1, ownerId);
-            ps.setInt (2, userId);
+            ps.setInt(1, ownerId);
+            ps.setInt(2, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 return rs.next();
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Could not privacy information", ex);
+        }
+    }
+
+    @Override
+    public Iterable<UserHeaderShort> listUserByName(String str, int limit) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT user_id, user_firstname, user_lastname FROM users " +
+                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')" +
+                        "ORDER BY user_lastname ASC, user_firstname ASC " +
+                        "LIMIT ?"
+        )) {
+            ps.setString(1, str);
+            ps.setInt(2, limit);
+            return toList(ps, JDBCUserDAO::populateUserHeaderShort);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
         }
     }
 }

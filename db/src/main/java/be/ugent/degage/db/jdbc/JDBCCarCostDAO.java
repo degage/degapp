@@ -33,8 +33,8 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarCostDAO;
-import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.ApprovalStatus;
+import be.ugent.degage.db.models.CarCost;
 import be.ugent.degage.db.models.CarCostCategory;
 
 import java.sql.*;
@@ -139,7 +139,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public Iterable<CarCost> getCarCostList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         StringBuilder builder = new StringBuilder(CAR_COST_QUERY);
         appendCostFilter(builder, filter);
-        builder.append(" ORDER BY car_cost_created_at DESC LIMIT ?, ?");
+        builder.append(" ORDER BY car_cost_created_at ").append(asc?"ASC":"DESC").append(" LIMIT ?, ?");
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);

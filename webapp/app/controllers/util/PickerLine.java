@@ -1,4 +1,4 @@
-/* UserPicker.java
+/* PickerLine.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,33 +27,50 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  */
 
-package controllers;
+package controllers.util;
 
-import be.ugent.degage.db.models.UserHeaderShort;
-import controllers.util.PickerLine;
-import db.DataAccess;
-import db.InjectContext;
-import play.mvc.Controller;
-import play.mvc.Result;
+/**
+ * Contains information needed for a single line in a user/carpicker dropdownmenu
+ */
+public class PickerLine {
+    private String prefix;
 
-import java.util.ArrayList;
-import java.util.Collection;
+    private String suffix;
 
-public class UserPicker extends Controller {
+    private String strong;
 
-    private static final int MAX_VISIBLE_RESULTS = 10;
+    private int id;
 
-    @AllowRoles
-    @InjectContext
-    public static Result getList(String search) {
-        if (search.isEmpty()) {
-            return ok(); // normally does not occur
+    public PickerLine(String value, String search, int id) {
+        this.id = id;
+        search = search.trim().toLowerCase();
+        int len = search.length();
+        int pos = value.toLowerCase().indexOf(search);
+        if (pos >= 0) {
+            this.prefix = value.substring(0, pos);
+            this.strong = value.substring(pos, pos + len);
+            this.suffix = value.substring(pos + len);
         } else {
-            Collection<PickerLine> lines = new ArrayList<>();
-            for (UserHeaderShort user : DataAccess.getInjectedContext().getUserDAO().listUserByName(search, MAX_VISIBLE_RESULTS)) {
-                lines.add (new PickerLine(user.getFullName(),search, user.getId()));
-            }
-            return ok(views.html.picker.pickerlines.render(lines));
+            // should not happen
+            this.prefix = value;
+            this.strong = "";
+            this.suffix = "";
         }
+    }
+
+    public String getPrefix() {
+        return prefix;
+    }
+
+    public String getSuffix() {
+        return suffix;
+    }
+
+    public String getStrong() {
+        return strong;
+    }
+
+    public int getId() {
+        return id;
     }
 }

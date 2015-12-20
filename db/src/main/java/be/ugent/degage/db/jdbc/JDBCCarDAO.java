@@ -262,7 +262,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     );
 
     private void updateLocation(int carId, Address location) {
-        JDBCAddressDAO.updateLocation (
+        JDBCAddressDAO.updateLocation(
                 getConnection(),
                 "JOIN cars ON car_location=address_id", "car_id",
                 carId, location
@@ -389,7 +389,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
                     "FROM cars JOIN addresses ON address_id=car_location " +
-            "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? ";
+                    "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? ";
 
     private static final String SELECT_NOT_OVERLAP =
             " AND cars.car_id NOT IN (" +
@@ -415,7 +415,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         appendCarFilter(builder, filter);
 
         builder.append(SELECT_NOT_OVERLAP);
-        builder.append (" ORDER BY IFNULL(user_id,0) DESC");
+        builder.append(" ORDER BY IFNULL(user_id,0) DESC");
 
         if (orderBy == FilterField.NAME) {
             builder.append(", car_name ");
@@ -447,7 +447,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         try (PreparedStatement ps = prepareStatement(
                 NEW_CAR_QUERY + "WHERE car_active ORDER BY IFNULL(USER_ID,0) desc, car_name asc"
         )) {
-            ps.setInt (1, userId);
+            ps.setInt(1, userId);
             return toList(ps, JDBCCarDAO::populateCarHeaderLong);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not get list of cars", ex);
@@ -615,5 +615,21 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             throw new DataAccessException("Failed to update car deprecation info", ex);
         }
 
+    }
+
+    @Override
+    public Iterable<CarHeaderShort> listCarByName(String str, int limit) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT car_id, car_name, car_owner_user_id FROM cars " +
+                        "WHERE car_name LIKE CONCAT ('%', ?, '%') " +
+                        "ORDER BY car_name ASC " +
+                        "LIMIT ?"
+        )) {
+            ps.setString(1, str);
+            ps.setInt(2, limit);
+            return toList(ps, JDBCCarDAO::populateCarHeaderShort);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
     }
 }

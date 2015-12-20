@@ -29,16 +29,15 @@
 
 package controllers;
 
-import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.CarDAO;
-import be.ugent.degage.db.jdbc.JDBCFilter;
-import be.ugent.degage.db.models.CarHeader;
-import be.ugent.degage.db.models.CarHeaderAndOwner;
+import be.ugent.degage.db.models.CarHeaderShort;
+import controllers.util.PickerLine;
 import db.DataAccess;
 import db.InjectContext;
 import play.mvc.Controller;
 import play.mvc.Result;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public class CarPicker extends Controller {
 
@@ -47,27 +46,14 @@ public class CarPicker extends Controller {
     @AllowRoles
     @InjectContext
     public static Result getList(String search) {
-        search = search.trim();
-        if (!search.isEmpty()) {
-            search = search.replaceAll("\\s+", " ");
-            CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
-            String cars = "";
-            Filter filter = new JDBCFilter();
-            filter.putValue(FilterField.NAME, search);
-            // TODO: add a method to the dao that corresponds directly to what we want here (CarHeader is already sufficient, id + name would even be better
-            // TODO: if we can combine this with a similar change in the user picker...)
-            Iterable<CarHeaderAndOwner> results = dao.listCarsAndOwners(FilterField.NAME, true, 1, MAX_VISIBLE_RESULTS, filter, true);
-            for (CarHeader car : results) {
-                String value = car.getName();
-                for (String part : search.split(" ")) {
-                    value = value.replaceAll("(?i)\\b(" + part + ")", "<#>$1</#>");
-                }
-
-                cars += "<li data-uid=\"" + car.getId() + "\"><a href=\"javascript:void(0)\"><span>" + value.replace("#", "strong") + "</span> (" + car.getId() + ")</a></li>";
-            }
-            return ok(cars);
+        if (search.isEmpty()) {
+            return ok(); // normally does not occur
         } else {
-            return ok(); // TODO: avoid this case
+            Collection<PickerLine> lines = new ArrayList<>();
+            for (CarHeaderShort car : DataAccess.getInjectedContext().getCarDAO().listCarByName(search, MAX_VISIBLE_RESULTS)) {
+                lines.add (new PickerLine(car.getName(),search, car.getId()));
+            }
+            return ok(views.html.picker.pickerlines.render(lines));
         }
     }
 }

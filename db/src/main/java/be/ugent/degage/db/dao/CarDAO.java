@@ -90,4 +90,11 @@ public interface CarDAO {
 
     public void updateDepreciation (int carId, int cents, int limit, int last) throws DataAccessException;
 
+
+
+    /**
+     * Return a car list for cars with name containing the given string. Used in pickers.
+     */
+    public Iterable<CarHeaderShort> listCarByName(String str, int limit);
+
 }

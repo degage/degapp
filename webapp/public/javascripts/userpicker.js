@@ -5,12 +5,13 @@ $(initUserPicker);
 function initUserPicker() {
     $(".userpicker > input[type=text]").on("input", function() {
         var userpicker = $(this).parent();
-
-        $.get(userpicker.data("url") + "?search=" + userpicker.find("input[type=text]").val(), function(data) {
-            userpicker.find(".dropdown-menu").html(data);
-            userpicker.find("input[type=text]").dropdown("toggle");
-        });
-
+        var search = userpicker.find("input[type=text]").val();
+        if (search) {
+            $.get(userpicker.data("url") + "?search=" + userpicker.find("input[type=text]").val(), function(data) {
+                userpicker.find(".dropdown-menu").html(data);
+                userpicker.find("input[type=text]").dropdown("toggle");
+            });
+        }
         userpicker.find("input[type=hidden]").val("");
         userpicker.find("div").html("");
     });
@@ -52,7 +53,6 @@ function initUserPicker() {
         userpicker.find("input[type=text]").val($(this).find("span").text());
         userpicker.find("input[type=hidden]").val($(this).data("uid"));
         userpicker.find("div").html($(this).data("uid"));
-        userpicker.find(".dropdown-menu").html("<li data-uid=\"" + $(this).data("uid") + "\"><a href=\"javascript:void(0)\"><span><strong>" + $(this).find("span").text() + "</strong></span> (" + $(this).data("uid") + ")</a></li>");
         // :tabbable eeds jquery-ui
         // $(":input:tabbable").eq($(":input:tabbable").index(userpicker.find("input[type=text]")) + 1).focus();
         $(":input").eq($(":input").index(userpicker.find("input[type=text]")) + 1).focus();

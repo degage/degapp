@@ -34,6 +34,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
+import be.ugent.degage.db.models.UserHeaderShort;
 import be.ugent.degage.db.models.UserStatus;
 
 import java.time.LocalDate;
@@ -52,13 +53,14 @@ public interface UserDAO {
     /**
      * Return the user with the given email address and (plain text) password.
      */
-    public UserHeader getUserWithPassword (String email, String password) throws DataAccessException;
+    public UserHeader getUserWithPassword(String email, String password) throws DataAccessException;
 
     /**
      * Change the password of the given user.
+     *
      * @return true if and only the old password was correct
      */
-    public boolean changePassword (int userId, String oldPassword, String newPassword) throws DataAccessException;
+    public boolean changePassword(int userId, String oldPassword, String newPassword) throws DataAccessException;
 
     /**
      * Return the user with the given id
@@ -78,22 +80,22 @@ public interface UserDAO {
     /**
      * Return the index of the user picture, or 0 if no picture was registered
      */
-    public int getUserPicture (int userId);
+    public int getUserPicture(int userId);
 
     /**
      * Update the user picture.
      */
-    public void updateUserPicture (int userId, int fileId);
+    public void updateUserPicture(int userId, int fileId);
 
     /**
      * Update the drivers license data for a user
      */
-    public void updateUserLicenseData (int userId, String license, LocalDate date);
+    public void updateUserLicenseData(int userId, String license, LocalDate date);
 
     /**
      * Update identity data for a user
      */
-    public void updateUserIdentityData (int userId, String identityId, String nationalId);
+    public void updateUserIdentityData(int userId, String identityId, String nationalId);
 
     /**
      * Update the user status
@@ -102,35 +104,41 @@ public interface UserDAO {
 
     /**
      * Update the email address of a user.
+     *
      * @return true if succeeded, false if mail address existed already
      */
-    public boolean updateUserEmail (int userId, String email);
+    public boolean updateUserEmail(int userId, String email);
 
     /**
      * Make user a full member. Creates a new degage id if the user did not have one.
      */
-    public void makeUserFull (int userId);
+    public void makeUserFull(int userId);
 
 
     /**
      * Delete the user with the given id
      */
-	public void deleteUser(int userId) throws DataAccessException;
+    public void deleteUser(int userId) throws DataAccessException;
 
     // TODO: below
     public int getAmountOfUsers(Filter filter) throws DataAccessException;
+
     public List<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
     /**
      * Is the given car owner allowed to see the profile of the given user?
      */
-    public boolean canSeeProfileAsOwner (int ownerId, int userId) ;
+    public boolean canSeeProfileAsOwner(int ownerId, int userId);
 
     /**
      * Is the given user allowed to see the profile of the given owner?
      */
-    public boolean canSeeProfileAsUser (int userId, int ownerId) ;
+    public boolean canSeeProfileAsUser(int userId, int ownerId);
 
 
+    /**
+     * Return a user list for users with fist and/or last name containing the given string. Used in pickers.
+     */
+    public Iterable<UserHeaderShort> listUserByName(String str, int limit);
 
 }

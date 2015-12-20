@@ -1,4 +1,4 @@
-/* UserPicker.java
+@* pickerlines.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -25,35 +25,15 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- */
+ *@
 
-package controllers;
+@(lines: Iterable[util.PickerLine])
 
-import be.ugent.degage.db.models.UserHeaderShort;
-import controllers.util.PickerLine;
-import db.DataAccess;
-import db.InjectContext;
-import play.mvc.Controller;
-import play.mvc.Result;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-public class UserPicker extends Controller {
-
-    private static final int MAX_VISIBLE_RESULTS = 10;
-
-    @AllowRoles
-    @InjectContext
-    public static Result getList(String search) {
-        if (search.isEmpty()) {
-            return ok(); // normally does not occur
-        } else {
-            Collection<PickerLine> lines = new ArrayList<>();
-            for (UserHeaderShort user : DataAccess.getInjectedContext().getUserDAO().listUserByName(search, MAX_VISIBLE_RESULTS)) {
-                lines.add (new PickerLine(user.getFullName(),search, user.getId()));
-            }
-            return ok(views.html.picker.pickerlines.render(lines));
-        }
-    }
+@foreach(lines) { line =>
+   <li data-uid="@line.getId">
+       <a href="#">
+           <span>@line.getPrefix<strong>@line.getStrong</strong>@line.getSuffix</span> (@line.getId)
+       </a>
+   </li>
 }
+
