@@ -47,7 +47,7 @@
       });
 </script>}
 
-@stdlayout("Contract",scripts=scripts,extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
+@stdlayout("Contract",scripts=scripts,extrabc=breadcrumb("Contracten", routes.Contracts.showContracts(0))){
     @panel("Contractgegevens", "fa-pencil"){
         @helper.form(routes.Contracts.contractPost(userId)){
             @std.static(userName, "Gebruiker",css="col-md-4 col-lg-2")

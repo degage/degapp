@@ -1,4 +1,4 @@
-@* contracts.scala.html
+@* contractAdmin.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(tab: Int)
+@(title: String)
 
-@* TODO: this is almost a copy of approvaltabs.scala.html *@
-@scripts = {
-    @js.paginationWithTabs("Contracts.showContractsPage",tab)
-    <script>beginOrder = "instant";</script>
-}
-
-@stdlayout("Contracten", scripts=scripts) {
-
-    @tabbedPagination(tab, "status",
-        "PENDING" -> ("Niet getekend",true),
-        "ACCEPTED" -> ("Getekend",true),
-        "FROZEN" -> ("Afgewerkt",false) )
+@if(db.CurrentUser.hasRole(UserRole.CONTRACT_ADMIN)){
+    @item(title, "Contracten", "fa-pencil-square-o", routes.Contracts.showContracts())
 }

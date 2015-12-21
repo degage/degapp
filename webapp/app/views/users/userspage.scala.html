@@ -43,6 +43,7 @@
                 <div class="btn-group btn-group-xs">
                     @if(CurrentUser.hasRole(UserRole.SUPER_USER) && user.canLogin) {
                         @btnWarning("Impersoneer", routes.Users.impersonate(user.getId))
+                        @btnWarning("Contract", routes.Contracts.contract(user.getId))
                         @btnPrimary("Afrekeningen", routes.Billings.list(user.getId))
                     }
                 </div>

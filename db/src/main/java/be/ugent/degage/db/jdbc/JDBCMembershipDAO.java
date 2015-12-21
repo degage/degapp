@@ -32,6 +32,7 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.models.Membership;
+import be.ugent.degage.db.models.MembershipStatus;
 import be.ugent.degage.db.models.Page;
 
 import java.sql.*;
@@ -49,19 +50,23 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
     private static Membership populateMembership(ResultSet rs) throws SQLException {
         Date contractDate = rs.getDate("user_contract");
 
+        String approval_status = rs.getString("approval_status");
         return new Membership(
                 rs.getInt("user_id"),
+                rs.getInt("approval_id"),
                 rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
                 (Integer) rs.getObject("user_deposit"),
                 (Integer) rs.getObject("user_fee"),
-                contractDate == null ? null : contractDate.toLocalDate());
+                contractDate == null ? null : contractDate.toLocalDate(),
+                approval_status == null ? null : MembershipStatus.valueOf(approval_status)
+        );
     }
 
     @Override
     public Membership getMembership(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
-                        "FROM users WHERE user_id = ?"
+                "SELECT user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract, approval_id, approval_status " +
+                        "FROM users LEFT JOIN approvals ON approval_user = user_id WHERE user_id = ?"
         )) {
             ps.setInt(1, userId);
             return toSingleObject(ps, JDBCMembershipDAO::populateMembership);
@@ -117,15 +122,25 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
     }
 
     @Override
-    public Page<Membership> getContractees(int adminId, boolean signed, int page, int pageSize) {
-        String sql = "SELECT SQL_CALC_FOUND_ROWS user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract " +
+    public Page<Membership> getContractees(int adminId, int type , int page, int pageSize) {
+        StringBuilder builder = new StringBuilder (
+                "SELECT SQL_CALC_FOUND_ROWS user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract, approval_id, approval_status " +
                 "FROM approvals JOIN users ON approval_user = user_id " +
-                "WHERE approval_admin = ? AND user_contract IS ";
-        if (signed) {
-            sql += "NOT ";
+                "WHERE approval_admin = ? AND ");
+        switch (type) {
+            case 0:
+                builder.append ("user_contract IS NULL");
+                break;
+            case 1:
+                builder.append ("user_contract IS NOT NULL AND approval_status = 'PENDING'");
+                break;
+            default: // 2
+                builder.append ("user_contract IS NOT NULL AND approval_status != 'PENDING'");
+                break;
         }
-        sql += "NULL ORDER BY user_id DESC LIMIT ?,?";
-        try (PreparedStatement ps = prepareStatement(sql)) {
+        builder.append (" ORDER BY user_id DESC LIMIT ?,?");
+        //System.err.println("SQL = " + builder.toString());
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, adminId);
             ps.setInt(2, (page - 1) * pageSize);
             ps.setInt(3, pageSize);

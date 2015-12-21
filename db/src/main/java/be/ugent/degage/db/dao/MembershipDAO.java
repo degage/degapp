@@ -62,8 +62,8 @@ public interface MembershipDAO {
 
     /**
      * Give a paged list of all contractees of a certain administrator.
-     * @param signed whether to show those that are signed or those that are not signed
+     * @param type: 0 contract not signed, 1 signed but not member, 2 member
      */
-    public Page<Membership> getContractees (int adminId, boolean signed, int page, int pageSize);
+    public Page<Membership> getContractees (int adminId, int type, int page, int pageSize);
 
 }

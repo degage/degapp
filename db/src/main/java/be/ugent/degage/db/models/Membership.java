@@ -37,23 +37,31 @@ import java.time.LocalDate;
 public class Membership {
 
     private int id;
+    private int approvalId;
 
     private String fullName;
 
     private Integer deposit;
     private Integer fee;
     private LocalDate contractDate;
+    private MembershipStatus status;
 
-    public Membership(int id, String fullName, Integer deposit, Integer fee, LocalDate contractDate) {
+    public Membership(int id, int approvalId, String fullName, Integer deposit, Integer fee, LocalDate contractDate, MembershipStatus status) {
         this.id = id;
+        this.approvalId = approvalId;
         this.fullName = fullName;
         this.deposit = deposit;
         this.fee = fee;
         this.contractDate = contractDate;
+        this.status = status;
     }
 
     public int getId() {
         return id;
+    }
+
+    public int getApprovalId() {
+        return approvalId;
     }
 
     public String getFullName() {
@@ -70,5 +78,13 @@ public class Membership {
 
     public LocalDate getContractDate() {
         return contractDate;
+    }
+
+    public boolean canBecomeMember() {
+        return contractDate != null && deposit != null && fee != null;
+    }
+
+    public MembershipStatus getStatus() {
+        return status;
     }
 }

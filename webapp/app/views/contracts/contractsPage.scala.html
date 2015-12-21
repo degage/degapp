@@ -27,24 +27,37 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(list: Page[Membership])
+@(list: Page[Membership], tp: Int)
 
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-contracts">
     <thead>
         <tr role="row">
             <th>Naam</th>
-            <th>Acties</th>
+            @if(tp > 0) { <th>Getekend</th> }
+            <th>Borg</th>
+            <th>Instap</th>
+            @if(tp < 2) { <th>Acties</th> }
         </tr>
     </thead>
     <tbody>
         @foreach.trOrElse(list){ m =>
             <td><a href="@routes.Profile.index(m.getId)">@m.getFullName</a></td>
-            <th>@* TODO *@</th>
-        }{
-        <tr>
-            <td class="empty-row" colspan="7">Geen contracten beschikbaar</td>
-        </tr>
-        }
+            @if(tp > 0) { <td>@Utils.toLocalizedDateString(m.getContractDate)</td> }
+            <td>@m.getDeposit</td>
+            <td>@m.getFee</td>
+            @tp match {
+                case 0 =>  {
+                    <td>@btnWarning("Contractdatum invullen", routes.Contracts.contract(m.getId))</td>
+                }
+                case 1 =>  {
+                    @if(m.canBecomeMember) {
+                      <td>@btnWarning("Afronden", routes.Approvals.approvalApproveReject(m.getApprovalId))</td>
+                    }
+                }
+                case _ => {
+                }
+            }
+        }{ @noresults() }
     </tbody>
 </table>
 @pagination(list)

@@ -193,6 +193,7 @@
 
                         @if(CurrentUser.isAdmin){
                             <li class="submenu">BEHEER</li>
+                            @menu.contractAdmin(title)
                             @menu.profileInfosessionAdmin(title)
                             @menu.carAdmin(title)
                             @menu.superUser(title)

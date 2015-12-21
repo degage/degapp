@@ -89,7 +89,7 @@ public class Contracts extends Controller {
         } else {
             Data data = form.get();
             dao.updateUserContract(userId, data.signed ? Utils.toLocalDate(data.date) : null);
-            return redirect(routes.Profile.index(userId));
+            return redirect(routes.Contracts.showContracts(0));
         }
     }
 
@@ -102,10 +102,16 @@ public class Contracts extends Controller {
     @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result showContractsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+        int type = 2;
+        if (searchString.endsWith("PENDING")) {
+            type = 0;
+        } else if (searchString.endsWith("ACCEPTED")) {
+            type = 1;
+        }
         return ok(contractsPage.render(DataAccess.getInjectedContext().getMembershipDAO().getContractees(
                 CurrentUser.getId(),
-                searchString.endsWith("ACCEPTED"),
-                page, pageSize)));
+                type,
+                page, pageSize), type));
     }
 
 
