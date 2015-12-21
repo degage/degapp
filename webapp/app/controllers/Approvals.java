@@ -53,7 +53,7 @@ import java.util.*;
 public class Approvals extends Controller {
 
 
-    private static Iterable<String> checkApprovalConditions(int userId, UserDAO udao, FileDAO fdao) {
+    private static Iterable<String> checkApprovalConditions(int userId, UserDAO udao, MembershipDAO mdao, FileDAO fdao) {
         // TODO: minimize data transfer by using a query with true/false results
         User user = udao.getUser(userId); // gets the full user instead of small cached one
 
@@ -74,11 +74,15 @@ public class Approvals extends Controller {
         } else if (!fdao.hasUserFile(userId, FileDAO.UserFileType.LICENSE)) {
             errors.add("Ingescand rijbewijs ontbreekt");
         }
-        if (!user.isPayedDeposit()) {
-            errors.add("Waarborg nog niet betaald.");
-        }
         if (user.getCellPhone() == null && user.getPhone() == null) {
             errors.add("Telefoon/GSM ontbreekt.");
+        }
+        Membership membership = mdao.getMembership(userId);
+        if (membership.getDeposit() == null) {
+            errors.add("Waarborg nog niet betaald.");
+        }
+        if (membership.getFee() == null) {
+            errors.add("Lidgeld nog niet betaald.");
         }
         return errors;
     }
@@ -117,7 +121,7 @@ public class Approvals extends Controller {
                 return redirect(routes.InfoSessions.showUpcomingSessions());
             } else {
                 return ok(approvalrequest.render(
-                        checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
+                        checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getMembershipDAO(), context.getFileDAO()),
                         Form.form(RequestApprovalData.class))
                 );
             }
@@ -134,7 +138,7 @@ public class Approvals extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         if (form.hasErrors()) {
             return badRequest(approvalrequest.render(
-                    checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
+                    checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getMembershipDAO(), context.getFileDAO()),
                     form
                     )
             );
@@ -246,7 +250,7 @@ public class Approvals extends Controller {
             status = idao.getUserEnrollmentStatus(ap.getSession().getId(), userId);
         }
         UserHeader user = context.getUserDAO().getUserHeader(userId);
-        Iterable<String> reasons = checkApprovalConditions(userId, context.getUserDAO(), context.getFileDAO());
+        Iterable<String> reasons = checkApprovalConditions(userId, context.getUserDAO(), context.getMembershipDAO(), context.getFileDAO());
         if (!bad) {
             return ok(approvaladmin.render(ap, user, status, reasons, form));
         } else {

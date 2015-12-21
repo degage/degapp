@@ -41,8 +41,6 @@ public class User extends UserHeader {
     private String license;
     private LocalDate licenseDate;
     private LocalDate dateJoined;
-    private Integer deposit;
-    private Integer fee;
     private String identityId;
     private String nationalId;
     private String damageHistory;
@@ -102,10 +100,6 @@ public class User extends UserHeader {
 
     public void setDamageHistory(String damageHistory) {
         this.damageHistory = damageHistory;
-    }
-
-    public boolean isPayedDeposit() {
-        return deposit != null;
     }
 
     public boolean isAgreeTerms() {

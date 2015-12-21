@@ -118,6 +118,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         user.setVatNr(rs.getString("users.user_vat"));
 
+
         return user;
     }
 
