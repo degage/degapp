@@ -30,12 +30,12 @@
 @(tab: Int)
 
 @tabbedPagination(tab,"status",
-    "ACCEPTED" -> ("Gepland",true),
+    "ACCEPTED" -> ("Gepland","from", true),
     "REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" ->
           (defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST_DETAILS, true) +
                   Trips.reservationsWithStatus(ReservationStatus.DETAILS_PROVIDED, false)) { amount =>
-              "Voorbij" + ( if(amount > 0) " ("+amount+")" else "" ) }.toString,false),
+              "Voorbij" + ( if(amount > 0) " ("+amount+")" else "" ) }.toString,"from",false),
     "REQUEST" ->
           (defining(Trips.reservationsWithStatus(ReservationStatus.REQUEST, false)) { amount =>
-              "Aanvragen" + ( if(amount > 0) " ("+amount+")" else "" ) }.toString,true),
-    "REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" -> ("Andere",false))
+              "Aanvragen" + ( if(amount > 0) " ("+amount+")" else "" ) }.toString,"from", true),
+    "REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" -> ("Andere","from",false))

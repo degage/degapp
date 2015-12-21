@@ -56,9 +56,9 @@
 
     @* simpler than @tabtrips, does not contain counts *@
     @tabbedPagination(2,"status",
-        "ACCEPTED" -> ("Gepland", true),
-        "REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" -> ("Voorbij",false),
-        "REQUEST" -> ("Aanvragen",true),
-        "REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" -> ("Andere",false))
+        "ACCEPTED" -> ("Gepland", "from", true),
+        "REQUEST_DETAILS|DETAILS_PROVIDED|DETAILS_REJECTED|FINISHED" -> ("Voorbij","from", false),
+        "REQUEST" -> ("Aanvragen","from", true),
+        "REFUSED|CANCELLED|CANCELLED_LATE|FROZEN" -> ("Andere","from", false))
 
 }

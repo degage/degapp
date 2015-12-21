@@ -32,8 +32,8 @@
 @stdlayout("Autokosten (beheer)", stylesheets=sheets("statuses"), scripts=js.paginationWithTabs("Costs.showCostsPage", tab)) {
 
     @tabbedPagination(tab, "status",
-        "REQUEST" -> ("Aangevraagd", true),
-        "ACCEPTED" -> ("Goedgekeurd", false),
-        "REFUSED" -> ("Geweigerd", false),
-        "FROZEN" -> ("(Gedeeltelijk) verwerkt", false) )
+        "REQUEST" -> ("Aangevraagd", "car_cost_date", true),
+        "ACCEPTED" -> ("Goedgekeurd", "car_cost_date", false),
+        "REFUSED" -> ("Geweigerd", "car_cost_date", false),
+        "FROZEN" -> ("(Gedeeltelijk) verwerkt", "car_cost_date", false) )
 }

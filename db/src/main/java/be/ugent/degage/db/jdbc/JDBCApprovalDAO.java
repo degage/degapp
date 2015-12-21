@@ -92,7 +92,7 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
                 sql += "users.user_lastname " + ascString + ", users.user_firstname " + ascString;
                 break;
             case FROM:
-                sql += "users.user_date_joined"+ ascString;
+                sql += "users.user_date_joined "+ ascString;
                 break;
             default: // should be 'instant'
                 sql += "approval_submission " + ascString;

@@ -38,7 +38,7 @@
 @stdlayout("Contracten", scripts=scripts) {
 
     @tabbedPagination(tab, "status",
-        "PENDING" -> ("Niet getekend",true),
-        "ACCEPTED" -> ("Getekend",true),
-        "FROZEN" -> ("Afgewerkt",false) )
+        "PENDING" -> ("Niet getekend","instant", true),
+        "ACCEPTED" -> ("Getekend","instant", true),
+        "FROZEN" -> ("Afgewerkt","instant", false) )
 }

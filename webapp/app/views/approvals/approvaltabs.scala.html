@@ -31,13 +31,12 @@
 
 @scripts = {
     @js.paginationWithTabs("Approvals.pendingApprovalListPaged", tab)
-    <script>beginOrder = '@if(tab==1)("from")else("instant")';</script>
 }
 
 @stdlayout("Goedkeuringen gebruikers", scripts=scripts) {
 
     @tabbedPagination(tab, "status",
-        "PENDING" -> ("In afwachting",true),
-        "ACCEPTED" -> ("Goedgekeurd",false),
-        "DENIED" -> ("Afgekeurd",false) )
+        "PENDING" -> ("In afwachting","instant",true),
+        "ACCEPTED" -> ("Goedgekeurd","from",false),
+        "DENIED" -> ("Afgekeurd","instant",false) )
 }
