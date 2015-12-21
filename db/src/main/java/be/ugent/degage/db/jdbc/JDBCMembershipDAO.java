@@ -47,6 +47,10 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
         super(context);
     }
 
+    private static final String MEMBERSHIP_HEADER =
+            "user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract, " +
+            "approval_id, approval_status, approval_admin ";
+
     private static Membership populateMembership(ResultSet rs) throws SQLException {
         Date contractDate = rs.getDate("user_contract");
 
@@ -57,6 +61,7 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
                 rs.getString("user_lastname") + ", " + rs.getString("user_firstname"),
                 (Integer) rs.getObject("user_deposit"),
                 (Integer) rs.getObject("user_fee"),
+                rs.getInt("approval_admin"),
                 contractDate == null ? null : contractDate.toLocalDate(),
                 approval_status == null ? null : MembershipStatus.valueOf(approval_status)
         );
@@ -65,7 +70,7 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
     @Override
     public Membership getMembership(int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract, approval_id, approval_status " +
+                "SELECT " + MEMBERSHIP_HEADER  +
                         "FROM users LEFT JOIN approvals ON approval_user = user_id WHERE user_id = ?"
         )) {
             ps.setInt(1, userId);
@@ -124,7 +129,7 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
     @Override
     public Page<Membership> getContractees(int adminId, int type , int page, int pageSize) {
         StringBuilder builder = new StringBuilder (
-                "SELECT SQL_CALC_FOUND_ROWS user_id, user_lastname, user_firstname, user_deposit, user_fee, user_contract, approval_id, approval_status " +
+                "SELECT SQL_CALC_FOUND_ROWS " + MEMBERSHIP_HEADER +
                 "FROM approvals JOIN users ON approval_user = user_id " +
                 "WHERE approval_admin = ? AND ");
         switch (type) {

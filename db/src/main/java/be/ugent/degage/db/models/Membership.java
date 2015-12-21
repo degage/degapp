@@ -43,10 +43,11 @@ public class Membership {
 
     private Integer deposit;
     private Integer fee;
+    private int contractAdmin;
     private LocalDate contractDate;
     private MembershipStatus status;
 
-    public Membership(int id, int approvalId, String fullName, Integer deposit, Integer fee, LocalDate contractDate, MembershipStatus status) {
+    public Membership(int id, int approvalId, String fullName, Integer deposit, Integer fee, int contractAdmin, LocalDate contractDate, MembershipStatus status) {
         this.id = id;
         this.approvalId = approvalId;
         this.fullName = fullName;
@@ -54,6 +55,7 @@ public class Membership {
         this.fee = fee;
         this.contractDate = contractDate;
         this.status = status;
+        this.contractAdmin = contractAdmin;
     }
 
     public int getId() {
@@ -78,6 +80,10 @@ public class Membership {
 
     public LocalDate getContractDate() {
         return contractDate;
+    }
+
+    public int getContractAdmin() {
+        return contractAdmin;
     }
 
     public boolean canBecomeMember() {

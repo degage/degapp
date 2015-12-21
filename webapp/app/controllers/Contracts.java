@@ -66,30 +66,36 @@ public class Contracts extends Controller {
         }
     }
 
-    @AllowRoles({UserRole.CONTRACT_ADMIN})
+    @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result contract(int userId) {
         Membership membership = DataAccess.getInjectedContext().getMembershipDAO().getMembership(userId);
-        return ok(edit.render(
-                Form.form(Data.class).fill(new Data().populate(membership.getContractDate())),
-                userId,
-                membership.getFullName()
-                )
-        );
+        if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
+            return ok(edit.render(
+                    Form.form(Data.class).fill(new Data().populate(membership.getContractDate())),
+                    userId,
+                    membership.getFullName()
+                    )
+            );
+        } else {
+            return badRequest();
+        }
     }
 
-    @AllowRoles({UserRole.CONTRACT_ADMIN})
+    @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result contractPost(int userId) {
         Form<Data> form = Form.form(Data.class).bindFromRequest();
         MembershipDAO dao = DataAccess.getInjectedContext().getMembershipDAO();
+        Membership membership = dao.getMembership(userId);
         if (form.hasErrors()) {
-            Membership membership = dao.getMembership(userId);
             return badRequest(edit.render(form, membership.getId(), membership.getFullName()));
-        } else {
+        } else if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
             Data data = form.get();
             dao.updateUserContract(userId, data.signed ? Utils.toLocalDate(data.date) : null);
             return redirect(routes.Contracts.showContracts(0));
+        } else {
+            return badRequest();
         }
     }
 

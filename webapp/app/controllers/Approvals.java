@@ -40,6 +40,7 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
+import org.omg.CORBA.Current;
 import play.data.Form;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;
@@ -158,7 +159,7 @@ public class Approvals extends Controller {
         }
     }
 
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalList(int tab) {
         return ok(approvaltabs.render(tab));
@@ -167,7 +168,7 @@ public class Approvals extends Controller {
     /**
      * Shows a list of all approvals in the database.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalListPaged(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         // searchString not used
@@ -184,7 +185,7 @@ public class Approvals extends Controller {
     /**
      * Show the page that assigns a contract administrator for the given approval record.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalAdmin(int approvalId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -203,7 +204,7 @@ public class Approvals extends Controller {
     /**
      * Assigns a contract administrator for the given approval record.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalAdminPost(int id) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -264,7 +265,7 @@ public class Approvals extends Controller {
     /**
      * Show the page that allows approval or rejection of membership
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalApproveReject(int approvalId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -273,17 +274,19 @@ public class Approvals extends Controller {
         if (ap.getAdminId() == 0) {
             flash("danger", "Gelieve eerst een contractverantwoordelijke op te geven.");
             return redirect(routes.Approvals.approvalAdmin(approvalId));
-        } else {
+        } else if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(ap.getAdminId())) {
             ApprovalAdminData data = new ApprovalAdminData();
             data.message = ap.getAdminMessage();
             return approvalForm(ap, context, Form.form(ApprovalAdminData.class).fill(data), false);
+        } else {
+            return badRequest(); // hacker?
         }
     }
 
     /**
      * Process approval or rejection of membership
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result approvalApproveRejectPost(int approvalId) {
         Form<ApprovalAdminData> form = Form.form(ApprovalAdminData.class).bindFromRequest();
@@ -293,6 +296,10 @@ public class Approvals extends Controller {
 
         if (form.hasErrors()) {
             return approvalForm(ap, context, form, true);
+        }
+
+        if (CurrentUser.hasRole(UserRole.CONTRACT_ADMIN) && CurrentUser.isNot(ap.getAdminId())) {
+            badRequest(); // hacker?
         }
 
         ApprovalAdminData data = form.get();
