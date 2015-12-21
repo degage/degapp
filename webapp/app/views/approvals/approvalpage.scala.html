@@ -57,13 +57,19 @@
             <td>
                 <div class="btn-group btn-group-xs">
                     @if(! approval.isAdminAssigned) {
-                        <a class="btn btn-info" href="@routes.Approvals.approvalAdmin(approval.getId)">Admin toewijzen</a>
+                        @btnInfo("Admin toewijzen", routes.Approvals.approvalAdmin(approval.getId))
                     } else {
+                      @if(approval.getDeposit == null || approval.getFee == null) {
+                        @btnSuccess("Borg/lidgeld", routes.Profile.deposit(approval.getUser.getId))
+                      }
+                      @if(approval.getContractDate == null) {
+                        @btnWarning("Contractdatum", routes.Contracts.contract(approval.getUser.getId))
+                      }
                       @if(approval.getStatus == MembershipStatus.PENDING) {
-                          <a class="btn btn-primary" href="@routes.Approvals.approvalApproveReject(approval.getId)">Afronden</a>
+                          @btnPrimary("Afronden", routes.Approvals.approvalApproveReject(approval.getId))
                       } else {
                          @if(approval.getStatus == MembershipStatus.DENIED) {
-                             <a class="btn btn-warning" href="@routes.Approvals.approvalApproveReject(approval.getId)">Aanpassen</a>
+                             @btnWarning("Aanpassen", routes.Approvals.approvalApproveReject(approval.getId))
                          }
                       }
                     }

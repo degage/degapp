@@ -81,6 +81,9 @@ public class Approvals extends Controller {
         if (membership.getDeposit() == null) {
             errors.add("Waarborg nog niet betaald.");
         }
+        if (membership.getContractDate() == null) {
+            errors.add("Contract nog niet getekend");
+        }
         if (membership.getFee() == null) {
             errors.add("Lidgeld nog niet betaald.");
         }
