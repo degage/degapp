@@ -39,7 +39,6 @@
             @if(tp < 2) { <th>Acties</th> }
         </tr>
     </thead>
-    <tbody>
         @foreach.trOrElse(list){ m =>
             <td><a href="@routes.Profile.index(m.getId)">@m.getFullName</a></td>
             @if(tp > 0) { <td>@Utils.toLocalizedDateString(m.getContractDate)</td> }
@@ -50,9 +49,9 @@
                     <td>@btnWarning("Contractdatum invullen", routes.Contracts.contract(m.getId))</td>
                 }
                 case 1 =>  {
-                    @if(m.canBecomeMember) {
-                      <td>@btnWarning("Afronden", routes.Approvals.approvalApproveReject(m.getApprovalId))</td>
-                    }
+                    <td>@if(m.canBecomeMember) {
+                      @btnWarning("Afronden", routes.Approvals.approvalApproveReject(m.getApprovalId))
+                    }</td>
                 }
                 case _ => {
                 }
