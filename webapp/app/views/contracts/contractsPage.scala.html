@@ -46,7 +46,7 @@
             <td>@m.getFee</td>
             @tp match {
                 case 0 =>  {
-                    <td>@btnWarning("Contractdatum invullen", routes.Contracts.contract(m.getId))</td>
+                    <td>@btnWarning("Contractdatum invullen", routes.Contracts.contract(m.getId, Contracts.REF_CONTRACTS))</td>
                 }
                 case 1 =>  {
                 @*

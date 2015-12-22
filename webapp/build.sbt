@@ -43,3 +43,4 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava,SbtWeb) // SbtWeb 
 
 TwirlKeys.templateImports ++= Seq ("snippets._", "be.ugent.degage.db.models._")
 
+PlayKeys.routesImport ++= Seq ("data._", "binders._", "binders.Binders._")

@@ -29,6 +29,7 @@
 
 import controllers.Utils;
 import controllers.util.ConfigurationHelper;
+import data.Referrer;
 import db.DataAccess;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;

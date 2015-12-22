@@ -33,6 +33,7 @@ import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.models.Membership;
 import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.UserRole;
+import data.Referrer;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -73,13 +74,14 @@ public class Contracts extends Controller {
 
     @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result contract(int userId) {
+    public static Result contract(int userId, Referrer ref) {
         Membership membership = DataAccess.getInjectedContext().getMembershipDAO().getMembership(userId);
         if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
             return ok(edit.render(
                     Form.form(Data.class).fill(new Data().populate(membership.getContractDate())),
                     userId,
-                    membership.getFullName()
+                    membership.getFullName(),
+                    ref
                     )
             );
         } else {
@@ -89,20 +91,24 @@ public class Contracts extends Controller {
 
     @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result contractPost(int userId) {
+    public static Result contractPost(int userId, Referrer ref) {
         Form<Data> form = Form.form(Data.class).bindFromRequest();
         MembershipDAO dao = DataAccess.getInjectedContext().getMembershipDAO();
         Membership membership = dao.getMembership(userId);
         if (form.hasErrors()) {
-            return badRequest(edit.render(form, membership.getId(), membership.getFullName()));
+            return badRequest(edit.render(form, membership.getId(), membership.getFullName(), ref));
         } else if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
             Data data = form.get();
             dao.updateUserContract(userId, data.signed ? Utils.toLocalDate(data.date) : null);
-            return redirect(routes.Contracts.showContracts(0));
+            return redirect(ref.getCall());
         } else {
             return badRequest();
         }
     }
+
+    public static Referrer REF_CONTRACTS =
+            Referrer.register ("Contracten", routes.Contracts.showContracts(0), "CTRCT");
+
 
     @AllowRoles({UserRole.CONTRACT_ADMIN})
     @InjectContext

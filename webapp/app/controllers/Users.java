@@ -38,6 +38,7 @@ import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.UserHeader;
 import be.ugent.degage.db.models.UserRole;
 import controllers.util.Pagination;
+import data.Referrer;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -54,6 +55,10 @@ import java.util.Set;
  * Created by HannesM on 27/03/14.
  */
 public class Users extends Controller {
+
+    public static Referrer REF_USERS =
+            Referrer.register ("Gebruikers", routes.Users.showUsers(), "USRS");
+
 
     /**
      * @return The users index-page with all users

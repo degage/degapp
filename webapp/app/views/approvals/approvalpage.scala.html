@@ -63,7 +63,7 @@
                         @btnSuccess("Borg/lidgeld", routes.Profile.deposit(approval.getUser.getId))
                       }
                       @if(approval.getContractDate == null) {
-                        @btnWarning("Contractdatum", routes.Contracts.contract(approval.getUser.getId))
+                        @btnWarning("Contractdatum", routes.Contracts.contract(approval.getUser.getId, Approvals.REF_APPROVALS))
                       }
                       @if(approval.getStatus == MembershipStatus.PENDING) {
                           @btnPrimary("Afronden", routes.Approvals.approvalApproveReject(approval.getId))

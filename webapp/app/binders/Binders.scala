@@ -1,4 +1,4 @@
-@* edit.scala.html
+/* Binders.scala
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -25,35 +25,34 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ */
 
-@(form: Form[Contracts.Data], userId: Int, userName: String, ref: data.Referrer)
+package binders
 
-@scripts={
-    @js.datetimepicker();
-<script>
-    $(function(){
-       $checkbox=$("#signed");
-       $datebox=$("#date-container").parent();
-       showhide=function(){
-           if ($checkbox.prop('checked')) {
-              $datebox.show();
-           } else {
-              $datebox.hide();
-           }
-       };
-       $checkbox.change(showhide);
-       showhide();
-      });
-</script>}
+import data.Referrer
+import play.api.mvc.{JavascriptLitteral, QueryStringBindable}
 
-@stdlayout("Contract",scripts=scripts,extrabc=ref.breadcrumb){
-    @panel("Contractgegevens", "fa-pencil"){
-        @helper.form(routes.Contracts.contractPost(userId, ref)){
-            @std.static(userName, "Gebruiker",css="col-md-4 col-lg-2")
-            @std.checkbox(form("signed"), "Contract", "getekend?", css="col-md-4 col-lg-2")
-            @std.datepicker(form("date"), "datum van ondertekening", css="col-md-4")
-            @std.submitButton("Wijzigen")
-        }
+/**
+ * Defines implicit binders for existing types.
+ */
+object Binders {
+  // Note: this was easier to implement here in Scala, than make Referrer to implement QueryStringBindable<Referrer>
+  // in Java. (One requirement seems to be that there must be a no arg constructor.)
+
+  implicit def queryStringBinder = new QueryStringBindable[Referrer] with JavascriptLitteral[Referrer] {
+
+    override def bind(key: String, params: Map[String, Seq[String]]): Option[Either[String, Referrer]] = {
+      params.get(key).flatMap(_.headOption) match {
+        case Some(string) => Some(Right(Referrer.get(string)))
+        case _ => None
+      }
     }
+
+    override def unbind(key: String, ref: Referrer): String = {
+      key + "=" + ref.getKey()
+    }
+
+    override def to(ref: Referrer) = ref.getKey()
+
+  }
 }

@@ -36,6 +36,7 @@ import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
 import controllers.util.Pagination;
 import controllers.util.UserpickerData;
+import data.Referrer;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -164,7 +165,8 @@ public class Approvals extends Controller {
         return DataAccess.getInjectedContext().getApprovalDAO().getNrOfPendingApprovals();
     }
 
-
+    public static Referrer REF_APPROVALS =
+            Referrer.register ("Goedkeuring gebruikers", routes.Approvals.pendingApprovalList(0), "APPS");
 
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
