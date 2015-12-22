@@ -48,22 +48,27 @@ public interface MembershipDAO {
     /**
      * Update the deposit/fee of the user
      */
-    public void updateUserMembership(int userId, Integer deposit, Integer fee);
+    public void updateUserMembership(int userId, Integer deposit, Integer fee) throws DataAccessException;
 
     /**
      * Update the contract information of the user
      */
-    public void updateUserContract(int userId, LocalDate contract);
+    public void updateUserContract(int userId, LocalDate contract) throws DataAccessException;
 
     /**
      * Is the first user the contract administrator of the second? Used in privacy checks.
      */
-    public boolean isContractAdminOf(int adminId, int userId);
+    public boolean isContractAdminOf(int adminId, int userId) throws DataAccessException;
 
     /**
      * Give a paged list of all contractees of a certain administrator.
      * @param type: 0 contract not signed, 1 signed but not member, 2 member
      */
-    public Page<Membership> getContractees (int adminId, int type, int page, int pageSize);
+    public Page<Membership> getContractees (int adminId, int type, int page, int pageSize) throws DataAccessException;
+
+    /**
+     * The number of unsigned contracts for the given contract admin
+     */
+    public int getNrOfUnsignedContracts (int adminId) throws DataAccessException;
 
 }

@@ -159,6 +159,13 @@ public class Approvals extends Controller {
         }
     }
 
+    // must be used with injected context - used in contracts menu
+    public static int getNrOfPendingApprovals() {
+        return DataAccess.getInjectedContext().getApprovalDAO().getNrOfPendingApprovals();
+    }
+
+
+
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result pendingApprovalList(int tab) {
@@ -226,9 +233,7 @@ public class Approvals extends Controller {
 
             UserHeader contractManager = udao.getUserHeader(userId);
 
-            Set<UserRole> userRoles = context.getUserRoleDAO().getUserRoles(userId);
-            if (userRoles.contains(UserRole.INFOSESSION_ADMIN) || userRoles.contains(UserRole.SUPER_USER)) {
-                // TODO: introduce hasRole method in DAO
+            if (CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN)) {
                 adao.setApprovalAdmin(id, userId);
                 Notifier.sendContractManagerAssignedMail(user, contractManager);
                 flash("success", "De aanvraag werd successvol toegewezen aan " + contractManager);
@@ -298,7 +303,7 @@ public class Approvals extends Controller {
             return approvalForm(ap, context, form, true);
         }
 
-        if (CurrentUser.hasRole(UserRole.CONTRACT_ADMIN) && CurrentUser.isNot(ap.getAdminId())) {
+        if (!CurrentUser.hasRole(UserRole.PROFILE_ADMIN) && CurrentUser.isNot(ap.getAdminId())) {
             badRequest(); // hacker?
         }
 

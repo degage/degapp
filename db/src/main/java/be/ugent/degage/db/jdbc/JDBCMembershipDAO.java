@@ -154,4 +154,18 @@ public class JDBCMembershipDAO extends AbstractDAO implements MembershipDAO {
             throw new DataAccessException(ex);
         }
     }
+
+    @Override
+    public int getNrOfUnsignedContracts(int adminId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT COUNT(*) " +
+                    "FROM approvals  JOIN users ON approval_user = user_id " +
+                    "WHERE approval_admin = ? AND user_contract IS NULL"
+        )) {
+            ps.setInt(1, adminId);
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
 }

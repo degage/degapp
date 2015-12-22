@@ -36,6 +36,8 @@ import be.ugent.degage.db.models.ApprovalListInfo;
 import be.ugent.degage.db.models.MembershipStatus;
 import be.ugent.degage.db.models.Page;
 
+import javax.xml.crypto.Data;
+
 /**
  * Data access object for approvals
  */
@@ -43,6 +45,12 @@ public interface ApprovalDAO {
 
     public boolean hasApprovalPending (int userId) throws DataAccessException;
     public Page<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException;
+
+    /**
+     * The number of pending approvals.
+     */
+    public int getNrOfPendingApprovals() throws DataAccessException;
+
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException;
     public Approval getApproval(int approvalId) throws DataAccessException;
 

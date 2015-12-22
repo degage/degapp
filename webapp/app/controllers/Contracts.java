@@ -66,6 +66,11 @@ public class Contracts extends Controller {
         }
     }
 
+    // must be used with injected context - used in contracts menu
+    public static int getNrOfUnsignedContracts() {
+        return DataAccess.getInjectedContext().getMembershipDAO().getNrOfUnsignedContracts(CurrentUser.getId());
+    }
+
     @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result contract(int userId) {

@@ -123,6 +123,17 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
+    public int getNrOfPendingApprovals() throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT count(*) FROM approvals WHERE approval_status = 'PENDING'"
+        )) {
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
+
+    @Override
     public void setApprovalAdmin(int approvalId, int adminId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE approvals SET approval_admin=? WHERE approval_id=?"

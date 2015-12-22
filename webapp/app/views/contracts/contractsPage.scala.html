@@ -49,9 +49,12 @@
                     <td>@btnWarning("Contractdatum invullen", routes.Contracts.contract(m.getId))</td>
                 }
                 case 1 =>  {
+                @*
                     <td>@if(m.canBecomeMember) {
-                      @btnWarning("Afronden", routes.Approvals.approvalApproveReject(m.getApprovalId))
+                      @btnWarning("Maak lid", routes.Approvals.approvalApproveReject(m.getApprovalId))
                     }</td>
+                *@
+                   <td>@btnWarning("Maak lid", routes.Approvals.approvalApproveReject(m.getApprovalId))</td>
                 }
                 case _ => {
                 }
