@@ -35,7 +35,6 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
 import java.time.LocalDate;
-import java.util.List;
 
 /**
  * Data access objects for users

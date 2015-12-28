@@ -497,19 +497,14 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-    private LazyStatement isCarOfUserStatement = new LazyStatement(
-            " SELECT 1 FROM cars WHERE car_id = ? AND car_owner_user_id = ?"
-    );
-
     @Override
     public boolean isCarOfUser(int carId, int userId) throws DataAccessException {
-        try {
-            PreparedStatement ps = isCarOfUserStatement.value();
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT 1 FROM cars WHERE car_id = ? AND car_owner_user_id = ?"
+        )) {
             ps.setInt(1, carId);
             ps.setInt(2, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            return isNonEmpty(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not determine car ownership");
         }

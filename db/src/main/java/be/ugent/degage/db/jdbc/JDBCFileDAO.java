@@ -173,9 +173,7 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
                 "SELECT 1 FROM " + getTableName(uft) + " WHERE user_id = ? LIMIT 1"
         )) {
             ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            return isNonEmpty(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to find license files", ex);
         }

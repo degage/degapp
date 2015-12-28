@@ -42,7 +42,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Year;
-import java.util.List;
 
 /**
  * JDBC implementation of @link{UserDAO}
@@ -437,9 +436,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         )) {
             ps.setInt(1, ownerId);
             ps.setInt(2, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            return isNonEmpty(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not privacy information", ex);
         }
@@ -457,9 +454,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         )) {
             ps.setInt(1, ownerId);
             ps.setInt(2, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            return isNonEmpty(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not privacy information", ex);
         }

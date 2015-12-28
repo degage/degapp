@@ -36,8 +36,6 @@ import be.ugent.degage.db.models.ApprovalListInfo;
 import be.ugent.degage.db.models.MembershipStatus;
 import be.ugent.degage.db.models.Page;
 
-import javax.xml.crypto.Data;
-
 /**
  * Data access object for approvals
  */

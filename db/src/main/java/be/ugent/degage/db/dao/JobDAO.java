@@ -53,19 +53,9 @@ public interface JobDAO {
      */
     public void deleteJob(JobType type, int refId) throws DataAccessException;
 
-
     /**
      * Indicate that the given job is now finished.
-     * @param jobId
-     * @throws DataAccessException
      */
     public void finishJob(long jobId) throws DataAccessException;
 
-    /**
-     * Does a job of this type exist in the database?
-     * @param type
-     * @return
-     * @throws DataAccessException
-     */
-    public boolean existsJobOfType(JobType type) throws DataAccessException;
 }
