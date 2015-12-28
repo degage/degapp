@@ -221,4 +221,9 @@ class JDBCDataAccessContext implements DataAccessContext {
     public AnnouncementDAO getAnnouncementDAO() {
         return new JDBCAnnouncementDAO(this);
     }
+
+    @Override
+    public CarPreferencesDAO getCarPreferencesDao() {
+        return new JDBCCarPreferencesDAO(this);
+    }
 }

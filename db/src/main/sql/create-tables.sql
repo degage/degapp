@@ -196,6 +196,12 @@ CREATE TABLE `cars` (
 	FOREIGN KEY (`car_images_id`) REFERENCES files(`file_id`)
 );
 
+create table carpreferences (
+   user_id int references users(id),
+   car_id int references cars(id),
+   primary key (user_id, car_id)
+);
+
 CREATE TABLE `reservations` (
 	`reservation_id` INT NOT NULL AUTO_INCREMENT,
 	-- IMPORTANT: do not change the order of these statuses. Indices are used in code
