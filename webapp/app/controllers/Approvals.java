@@ -118,7 +118,7 @@ public class Approvals extends Controller {
             return redirect(routes.Application.index());
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
-            if (context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())) {
+            if (context.getApprovalDAO().membershipRequested(CurrentUser.getId())) {
                 flash("warning", "We nemen op dit moment je aanvraag om lid te worden in beschouwing.");
                 return redirect(routes.Application.index());
             } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == 0) {

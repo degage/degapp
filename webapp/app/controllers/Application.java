@@ -96,7 +96,7 @@ public class Application extends Controller {
                                 user.getFirstName(),
                                 pc.getPercentage(),
                                 InfoSessions.didUserGoToInfoSession(),
-                                context.getApprovalDAO().hasApprovalPending(CurrentUser.getId())
+                                context.getApprovalDAO().membershipRequested(CurrentUser.getId())
                         )
                 );
             }

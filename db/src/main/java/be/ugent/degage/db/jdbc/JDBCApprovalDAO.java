@@ -59,16 +59,14 @@ class JDBCApprovalDAO extends AbstractDAO implements ApprovalDAO {
     }
 
     @Override
-    public boolean hasApprovalPending(int userId) throws DataAccessException {
+    public boolean membershipRequested (int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT 1 FROM approvals WHERE approval_user = ? AND approval_status = 'PENDING'"
+                "SELECT 1 FROM approvals WHERE approval_user = ?"
         )) {
             ps.setInt(1, userId);
-            try (ResultSet rs = ps.executeQuery()) {
-                return rs.next();
-            }
+            return isNonEmpty (ps);
         } catch (SQLException ex) {
-            throw new DataAccessException("Failed to check pending approvals for user.", ex);
+            throw new DataAccessException( ex);
         }
     }
 

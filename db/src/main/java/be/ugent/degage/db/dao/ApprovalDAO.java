@@ -43,7 +43,11 @@ import javax.xml.crypto.Data;
  */
 public interface ApprovalDAO {
 
-    public boolean hasApprovalPending (int userId) throws DataAccessException;
+    /**
+     * Was membership requested by this user?
+     */
+    public boolean membershipRequested (int userId) throws DataAccessException;
+
     public Page<ApprovalListInfo> getApprovals(FilterField orderBy, boolean asc, int page, int pageSize, MembershipStatus status) throws DataAccessException;
 
     /**
