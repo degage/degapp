@@ -31,13 +31,21 @@
 
 @* Panel with reservation actions on the dashboard. *@
 
-@panel("", "fa-pencil"){
-    <div class="col-xs-12">
-           Reserveer
-           <a class="btn btn-primary btn-sm" href="@routes.Calendars.startCar">Bepaalde auto</a>
-           <a class="btn btn-primary btn-sm" href="@routes.Calendars.index">Voor bepaalde periode</a>
-           Of toon overzicht
-           <a class="btn btn-primary btn-sm" href="@routes.Calendars.showCarsForReservation()">Auto's</a>
-           <a class="btn btn-primary btn-sm" href="@routes.Calendars.overview(null)">Dag</a>
+<div class="row">
+    <div class="col-xs-12 col-lg-8">
+        <div class="well">
+            Reserveer
+            @btnPrimary("Bepaalde auto",routes.Calendars.startCar)
+            @btnPrimary("Voor bepaalde periode", routes.Calendars.index)
+            of toon overzicht
+            @btnPrimary("Auto's", routes.Calendars.showCarsForReservation())
+            @btnPrimary("Dag", routes.Calendars.overview(null))
+        </div>
     </div>
-}
+    @* TODO: this well should go into a separate template in another directory? *@
+    <div class="col-xs-12 col-lg-4">
+        <div class="well">
+            @btnSuccess("Voorkeursauto's",routes.CarPreferences.edit())
+        </div>
+    </div>
+</div>

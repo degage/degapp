@@ -211,6 +211,10 @@ POST        /cars/changepicture                     controllers.Cars.doPictureUp
 GET         /cars/deprec                            controllers.Cars.showDepreciation(id: Int)
 POST        /cars/deprec                            controllers.Cars.doEditDepreciation(id: Int)
 
+# Car preferences of current user
+GET         /carprefs                               controllers.CarPreferences.edit()
+POST        /carprefs                               controllers.CarPreferences.doEdit()
+
 # Costs
 GET         /costs/car                              controllers.Costs.showCostsForCar(id: Int)
 GET         /costs/detail                           controllers.Costs.showCostDetail(id: Int)
@@ -225,9 +229,6 @@ POST        /costs/new                              controllers.CostsCreate.doCr
 GET         /costs/edit                             controllers.CostsCreate.showEdit(id: Int)
 POST        /costs/edit                             controllers.CostsCreate.doEdit(id: Int)
 POST        /costs/proof                            controllers.CostsCreate.doUpdateProof(id: Int)
-
-# (Temporarily) disables
-#GET         /cars/availabilities/edit              controllers.Availabilities.updateAvailabilities(id : Int, values : String)
 
 #Refuels
 GET         /refuels                                controllers.Refuels.showRefuels()

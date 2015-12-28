@@ -1,4 +1,4 @@
-@* reservationpanelowner.scala.html
+/* CarPreference.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,30 +24,37 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-@(ofclist: java.lang.Iterable[Calendars.OverviewForCar])
+package be.ugent.degage.db.models;
 
-@* Panel with reservation actions, specific for car owner (on the dashboard). *@
+/**
+ * Record that indicates whether a car is preferred or not
+ */
+public class CarPreference {
 
-<div class="row">
-    <div class="col-xs-12 col-lg-8">
-        <div class="well">
-            Reserveer
-            @foreach(ofclist) { ofc =>
-               @btnPrimary(ofc.name,routes.Calendars.indexWithCar(ofc.name,ofc.id))
-            }
-            @btnPrimary("Voor bepaalde periode", routes.Calendars.index)
-            of toon overzicht
-            @btnPrimary("Auto's", routes.Calendars.showCarsForReservation())
-            @btnPrimary("Dag", routes.Calendars.overview(null))
-        </div>
-    </div>
-    @* TODO: this well should go into a separate template in another directory? *@
-    <div class="col-xs-12 col-lg-4">
-        <div class="well">
-            @btnSuccess("Voorkeursauto's",routes.CarPreferences.edit())
-        </div>
-    </div>
-</div>
+    private int carId;
+
+    private String carName;
+
+    private boolean preferred;
+
+    public CarPreference(int carId, String carName, boolean preferred) {
+        this.carId = carId;
+        this.carName = carName;
+        this.preferred = preferred;
+    }
+
+    public int getCarId() {
+        return carId;
+    }
+
+    public String getCarName() {
+        return carName;
+    }
+
+    public boolean isPreferred() {
+        return preferred;
+    }
+}

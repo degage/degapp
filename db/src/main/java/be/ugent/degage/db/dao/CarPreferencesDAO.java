@@ -1,4 +1,4 @@
-@* reservationpanelowner.scala.html
+/* CarPreferencesDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,30 +24,29 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-@(ofclist: java.lang.Iterable[Calendars.OverviewForCar])
+package be.ugent.degage.db.dao;
 
-@* Panel with reservation actions, specific for car owner (on the dashboard). *@
+import be.ugent.degage.db.models.CarPreference;
 
-<div class="row">
-    <div class="col-xs-12 col-lg-8">
-        <div class="well">
-            Reserveer
-            @foreach(ofclist) { ofc =>
-               @btnPrimary(ofc.name,routes.Calendars.indexWithCar(ofc.name,ofc.id))
-            }
-            @btnPrimary("Voor bepaalde periode", routes.Calendars.index)
-            of toon overzicht
-            @btnPrimary("Auto's", routes.Calendars.showCarsForReservation())
-            @btnPrimary("Dag", routes.Calendars.overview(null))
-        </div>
-    </div>
-    @* TODO: this well should go into a separate template in another directory? *@
-    <div class="col-xs-12 col-lg-4">
-        <div class="well">
-            @btnSuccess("Voorkeursauto's",routes.CarPreferences.edit())
-        </div>
-    </div>
-</div>
+import java.util.List;
+
+/**
+ * Data access object for car preferences
+ */
+public interface CarPreferencesDAO {
+
+    /**
+     * List the car preferences for a given user
+     */
+    public List<CarPreference> listPreferences(int userId);
+
+    /**
+     * Changes the preferences
+     * @param userId user for whom the preferences should be altered
+     * @param carIds complete list of car ids for the preferred cars
+     */
+    public void updatePreferences(int userId, Iterable<Integer> carIds);
+}
