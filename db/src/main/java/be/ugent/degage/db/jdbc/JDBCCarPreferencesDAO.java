@@ -51,7 +51,7 @@ public class JDBCCarPreferencesDAO extends  AbstractDAO implements CarPreference
         try (PreparedStatement ps = prepareStatement(
                 "SELECT cars.car_id, car_name, user_id " +
                         "FROM cars LEFT JOIN carpreferences on cars.car_id=carpreferences.car_id AND user_id = ? " +
-                        "ORDER BY car_name"
+                        "WHERE cars.car_active ORDER BY car_name"
         )) {
             ps.setInt(1, userId);
             return toList (ps, rs -> new CarPreference(
@@ -68,7 +68,8 @@ public class JDBCCarPreferencesDAO extends  AbstractDAO implements CarPreference
     public void updatePreferences(int userId, Iterable<Integer> carIds) {
         // first delete existing preferences
         try (PreparedStatement ps = prepareStatement(
-                "DELETE FROM carpreferences WHERE user_id = ?"
+                "DELETE carpreferences FROM carpreferences JOIN cars USING (car_id) " +
+                "WHERE user_id = ? AND car_active"
         )) {
             ps.setInt(1, userId);
             ps.executeUpdate();
