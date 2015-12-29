@@ -84,7 +84,7 @@ public class AllowRolesWrapper extends Action<AllowRoles> {
             }
 
             //It this point is reached, then user is not authorized
-            return F.Promise.pure((Result) unauthorized(views.html.errors.unauthorized.render()));
+            return F.Promise.pure(unauthorized(views.html.errors.unauthorized.render()));
 
         } catch (Throwable t) {
             throw new RuntimeException(t);

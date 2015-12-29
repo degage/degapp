@@ -41,7 +41,6 @@ import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
 import notifiers.Notifier;
-import org.omg.CORBA.Current;
 import play.data.Form;
 import play.data.validation.ValidationError;
 import play.mvc.Controller;

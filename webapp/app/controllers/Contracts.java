@@ -31,7 +31,6 @@ package controllers;
 
 import be.ugent.degage.db.dao.MembershipDAO;
 import be.ugent.degage.db.models.Membership;
-import be.ugent.degage.db.models.Page;
 import be.ugent.degage.db.models.UserRole;
 import data.Referrer;
 import db.CurrentUser;

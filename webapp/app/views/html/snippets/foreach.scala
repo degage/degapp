@@ -103,11 +103,22 @@ object foreach {
   }
 
   /**
-   * Same as apply, but allows an alternative if the list is empty
+   * Same as tr, but allows an alternative if the list is empty
    */
   def trOrElse[T](iterable: java.lang.Iterable[T])(block: T => Html)(elseBlock: => Html): Html = {
     if (iterable != null && iterable.iterator().hasNext) {
       tr(iterable)(block)
+    } else {
+      elseBlock
+    }
+  }
+
+  /**
+   * Same as withIndex, but allows an alternative if the list is empty
+   */
+  def withIndexOrElse[T](iterable: java.lang.Iterable[T])(block: (T, Int) => Html)(elseBlock: => Html): Html = {
+    if (iterable != null && iterable.iterator().hasNext) {
+      withIndex(iterable)(block)
     } else {
       elseBlock
     }

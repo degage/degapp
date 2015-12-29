@@ -30,7 +30,9 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.*;
+import be.ugent.degage.db.dao.InfoSessionDAO;
+import be.ugent.degage.db.dao.JobDAO;
+import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
 import controllers.util.UserpickerData;
@@ -46,7 +48,8 @@ import play.mvc.Result;
 import views.html.infosession.*;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Cedric on 2/21/14.
@@ -261,7 +264,6 @@ public class InfoSessions extends Controller {
         return ok(detail.render(
                 dao.getInfoSession(sessionId),
                 Form.form(UserpickerData.class),
-                dao.getAttendingInfoSession(CurrentUser.getId()),
                 dao.getEnrollees(sessionId), null));
     }
 
@@ -359,7 +361,6 @@ public class InfoSessions extends Controller {
             return ok(detail.render(
                     idao.getInfoSession(sessionId),
                     form,
-                    idao.getAttendingInfoSession(CurrentUser.getId()),
                     idao.getEnrollees(sessionId), null));
         } else {
             // TODO: loop in database
@@ -415,7 +416,7 @@ public class InfoSessions extends Controller {
             } else {
                 flash("warning", "Je was reeds ingeschreven voor deze infosessie");
             }
-            return redirect(routes.InfoSessions.detail(sessionId));
+            return redirect(routes.InfoSessions.showUpcomingSessions());
         }
     }
 
@@ -460,7 +461,7 @@ public class InfoSessions extends Controller {
 
 
                 return redirect(
-                        routes.InfoSessions.showUpcomingSessions() // return to infosession list
+                        routes.InfoSessions.showSessions() // return to infosession list
                 );
             }
         }
@@ -513,6 +514,10 @@ public class InfoSessions extends Controller {
         }
     }
     */
+
+    /**
+     * Shows the upcoming session, together with the infosession which was chosen by the current user
+     */
 
     @AllowRoles({})
     @InjectContext

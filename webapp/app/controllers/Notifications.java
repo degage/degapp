@@ -44,8 +44,6 @@ import providers.DataProvider;
 import views.html.notifiers.notifications;
 import views.html.notifiers.notificationspage;
 
-import java.util.List;
-
 /**
  * Created by stefaan on 22/03/14.
  */

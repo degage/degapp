@@ -49,7 +49,7 @@ object Binders {
     }
 
     override def unbind(key: String, ref: Referrer): String = {
-      key + "=" + ref.getKey()
+      key + "=" + ref.getKey
     }
 
     override def to(ref: Referrer) = ref.getKey()

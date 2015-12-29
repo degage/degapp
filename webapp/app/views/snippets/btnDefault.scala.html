@@ -1,4 +1,4 @@
-@* infosessionsAdminPage.scala.html
+@* btnDefault.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -26,31 +26,6 @@
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
-@(sessions: Page[InfoSession])
 
-@* Show a list of upcoming sessions for an infosession admin. See also: infosessionspage *@
-
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
-    <thead>
-    <tr role="row">
-        <th>Type</th>
-        <th>Tijdstip</th>
-        <th>Inschrijvingen</th>
-        <th>Gastvrouw / -heer</th>
-        <th>Adres</th>
-        <th>Acties</th>
-    </tr>
-    </thead>
-    <tbody>
-    @foreach.tr(sessions){ session =>
-        @columns(session)
-        <td>
-            <div class="btn-group btn-group-xs">
-                @btnPrimary("details",routes.InfoSessions.detail(session.getId))
-                @btnSuccess("bewerken",routes.InfoSessions.editSession(session.getId))
-            </div>
-        </td>
-    }
-    </tbody>
-</table>
-@pagination(sessions)
+@(caption: String, call: Call)
+@btn(caption,call,"default")
