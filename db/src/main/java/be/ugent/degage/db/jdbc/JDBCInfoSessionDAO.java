@@ -31,7 +31,6 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
-import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.InfoSessionDAO;
 import be.ugent.degage.db.models.*;
 
@@ -59,19 +58,6 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     private static String INFOSESSION_SELECTOR = "SELECT " + INFOSESSION_FIELDS + ", sub.total FROM infosessions AS ses " +
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id " + SUBTTOTAL_QUERY;
-
-    private static String FILTER_FRAGMENT = "WHERE ses.infosession_timestamp > ? AND ses.infosession_timestamp < ?"; // TODO: get something to filter on
-
-    private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
-        if (filter == null) {
-            // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
-            filter = createInfoSessionFilter();
-        }
-
-        ps.setString(start, filter.getValue(FilterField.FROM));
-        ps.setString(start + 1, filter.getValue(FilterField.UNTIL));
-        // TODO get something to filter on
-    }
 
     public JDBCInfoSessionDAO(JDBCDataAccessContext context) {
         super(context);
@@ -184,26 +170,6 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
-    private LazyStatement getAmountOfInfoSessionsStatement = new LazyStatement(
-            "SELECT COUNT(ses.infosession_id) AS amount_of_infosessions FROM infosessions AS ses " + FILTER_FRAGMENT
-    );
-
-    /**
-     * @param filter The filter to apply to
-     * @return The amount of filtered infosessions, SINCE TODAY
-     * @throws DataAccessException
-     */
-    @Override
-    public int getNumberOfInfoSessions(Filter filter) throws DataAccessException {
-        try {
-            PreparedStatement ps = getAmountOfInfoSessionsStatement.value();
-            fillFragment(ps, filter, 1);
-            return toSingleInt(ps);
-        } catch (SQLException ex) {
-            throw new DataAccessException("Could not get count of infosessions", ex);
-        }
-    }
-
     private static String INFOSESSION_EXTENDED_FIELDS =
             "infosession_id, infosession_type, " +
                     "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
@@ -215,7 +181,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     private static String GET_INFO_SESSIONS_HEAD =
             "SELECT " + INFOSESSION_EXTENDED_FIELDS + "FROM infosessions_extended ";
 
-    private static InfoSession getInfoSessionFromResultSet(ResultSet rs) throws SQLException {
+    private static InfoSession populateInfosession(ResultSet rs) throws SQLException {
         Address address = new Address(
                 rs.getInt("address_id"),
                 rs.getString("address_country"),
@@ -242,14 +208,31 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     /**
      */
     @Override
-    public Iterable<InfoSession> getInfoSessions(boolean onlyUpcoming) throws DataAccessException {
-        String sql = GET_INFO_SESSIONS_HEAD;
-        if (onlyUpcoming) {
-            sql += " WHERE infosession_timestamp > NOW() ";
+    public Iterable<InfoSession> getUpcomingInfoSessions() throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                GET_INFO_SESSIONS_HEAD + " WHERE infosession_timestamp > NOW() ORDER BY infosession_timestamp"
+        )) {
+            return toList(ps, JDBCInfoSessionDAO::populateInfosession);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of infosessions", ex);
         }
-        sql += " ORDER BY infosession_timestamp";
-        try (PreparedStatement ps = prepareStatement(sql)) {
-            return toList(ps, JDBCInfoSessionDAO::getInfoSessionFromResultSet);
+    }
+
+    @Override
+    public Page<InfoSession> getInfoSessions(boolean future, int page, int pageSize) throws DataAccessException {
+        StringBuilder builder = new StringBuilder(
+                "SELECT SQL_CALC_FOUND_ROWS " + INFOSESSION_EXTENDED_FIELDS + " FROM infosessions_extended "
+        );
+        if (future) {
+            builder.append ( "WHERE infosession_timestamp > NOW() ORDER BY infosession_timestamp ASC ");
+        } else {
+            builder.append ( "WHERE infosession_timestamp <= NOW() ORDER BY infosession_timestamp DESC ");
+        }
+        builder.append("LIMIT ?, ?");
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setInt(1, (page-1)*pageSize);
+            ps.setInt(2, pageSize);
+            return toPage(ps, pageSize, JDBCInfoSessionDAO::populateInfosession);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of infosessions", ex);
         }
@@ -325,7 +308,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                         " ORDER BY infosession_timestamp"
         )) {
             ps.setInt(1, userId);
-            return toSingleObject(ps, JDBCInfoSessionDAO::getInfoSessionFromResultSet);
+            return toSingleObject(ps, JDBCInfoSessionDAO::populateInfosession);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to fetch infosession for user", ex);
         }
@@ -383,7 +366,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 LastSessionResult iop = new LastSessionResult();
                 if (rs.next()) {
-                    iop.session = getInfoSessionFromResultSet(rs);
+                    iop.session = populateInfosession(rs);
                     iop.present = "PRESENT".equals(rs.getString("infosession_enrollment_status"));
                     if (!iop.present && iop.session.getTime().isBefore(Instant.now())) {
                         iop.session = null; // a nonattended session in the past is ignored

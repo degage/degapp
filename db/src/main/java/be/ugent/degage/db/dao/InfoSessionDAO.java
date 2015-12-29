@@ -54,12 +54,17 @@ public interface InfoSessionDAO {
     public Filter createInfoSessionFilter();
 
     /**
-     * Return the list of infosessions, ordered by date
-     * @param onlyUpcoming  if true only those infosessions are listed that will occur after the current instant
+     * Return the list of upcoming infosessions, ordered by date
      */
-    public Iterable<InfoSession> getInfoSessions(boolean onlyUpcoming) throws DataAccessException;
+    public Iterable<InfoSession> getUpcomingInfoSessions() throws DataAccessException;
 
-    public int getNumberOfInfoSessions(Filter filter) throws DataAccessException;
+    /**
+     * Return a page of infosessions
+     * @param future if true only those infosessions are listed that will occur after the current instant, ordered
+     *                 with dates increasing, otherwise the infosessions in the past are listed, ordered with dates
+     *                 decreasing
+     */
+    public Page<InfoSession> getInfoSessions(boolean future, int page, int pageSize) throws DataAccessException;
 
     // attendees
 

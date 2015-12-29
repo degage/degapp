@@ -164,6 +164,7 @@ GET         /infosession/new                        controllers.InfoSessions.new
 POST        /infosession/new                        controllers.InfoSessions.createNewSession()
 GET         /infosession                            controllers.InfoSessions.showUpcomingSessions()
 GET         /infosession/admin                      controllers.InfoSessions.showSessions()
+GET         /infosession/page                       controllers.InfoSessions.showSessionsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /infosession/enroll                     controllers.InfoSessions.enrollSession(id: Int)
 GET         /infosession/unenroll                   controllers.InfoSessions.unenrollSession()
 GET         /infosession/view                       controllers.InfoSessions.detail(id: Int)

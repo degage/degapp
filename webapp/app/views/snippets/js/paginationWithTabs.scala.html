@@ -41,7 +41,6 @@
             beginAsc = $(this).data("asc");
             beginOrder = $(this).data("order-by");
         }
-        console.log("clicked = beginAsc: " + beginAsc + " beginOrder: " + beginOrder);
         $('#searchButton').click();
     }
 
@@ -53,7 +52,6 @@
         beginAsc = $field.data("asc");
         beginOrder = $field.data("order-by");
         $field=$field.find('input');
-        console.log("initial load = beginAsc: " + beginAsc + " beginOrder: " + beginOrder);
         loadFirstPage($field.attr('name')+"="+$field.attr('value'));
     });
 </script>

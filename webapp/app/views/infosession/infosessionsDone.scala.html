@@ -37,7 +37,7 @@
 
 @stdlayout("Infosessies", sheets("/lib/leaflet/leaflet"), scripts) {
     @panel("Aanwezigheid bevestigd","fa-check-square-o", "panel-success"){
-        Jouw aanwezigheid op onderstaande infosessie werd bevestigd.
+        <div class="col-xs-12">Jouw aanwezigheid op onderstaande infosessie werd bevestigd.</div>
     }
     @panel("Infosessie", "fa-lighbulb-o") {
         @detailPartial(enrolled, map)

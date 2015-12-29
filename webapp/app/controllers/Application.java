@@ -133,6 +133,7 @@ public class Application extends Controller {
                         javascript.Contracts.showContractsPage(),
                         javascript.Costs.showCostsPage(),
                         javascript.Cars.showCarsPage(),
+                        javascript.InfoSessions.showSessionsPage(),
                         javascript.Damages.showDamagesPage(),
                         javascript.Damages.showDamagesPageOwner(),
                         javascript.Damages.showDamagesPageAdmin(),

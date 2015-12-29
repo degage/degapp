@@ -312,7 +312,7 @@ public class InfoSessions extends Controller {
      * @param userId    Userid of the user to be removed
      * @return Status of the operation page
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result removeUserFromSession(int sessionId, int userId) {
 
@@ -330,7 +330,7 @@ public class InfoSessions extends Controller {
      * @param status    New status of the user.
      * @return Redirect to the session detail page if successful.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         DataAccess.getInjectedContext().getInfoSessionDAO().setUserEnrollmentStatus(
@@ -349,7 +349,7 @@ public class InfoSessions extends Controller {
      * @param sessionId
      * @return
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result addUserToSession(int sessionId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -426,7 +426,7 @@ public class InfoSessions extends Controller {
      *
      * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result createNewSession() {
         Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
@@ -528,7 +528,7 @@ public class InfoSessions extends Controller {
             ));
         } else {
             return ok(infosessions.render(
-                dao.getInfoSessions(true),
+                dao.getUpcomingInfoSessions(),
                 lis.session,
                 null,
                 lis.present)
@@ -537,22 +537,31 @@ public class InfoSessions extends Controller {
     }
 
     /**
-     * Method: GET*
-     *
-     * @return A table containing the upcoming sessions
+     * A list of all sessions. Divided into upcoming / past
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result showSessions() {
-        return ok(infosessionsAdmin.render(
-                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(false)
+        return ok(infosessionsAdmin.render());
+    }
+
+    /**
+     * Page with infosessions
+     */
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
+    @InjectContext
+    public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+
+        return ok(infosessionsAdminPage.render(
+                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(
+                        searchString.endsWith("PENDING"), page, pageSize)
         ));
     }
 
     @InjectContext
     public static Result showUpcomingSessionsRaw() {
         return ok(infosessionsraw.render(
-                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(true)
+                DataAccess.getInjectedContext().getInfoSessionDAO().getUpcomingInfoSessions()
         ));
     }
 
