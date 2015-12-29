@@ -625,7 +625,7 @@ public class Profile extends Controller {
             updateAddress(data.domicileAddress, user.getAddressDomicile().getId(), adao);
             updateAddress(data.residenceAddress, user.getAddressResidence().getId(), adao);
 
-            flash("success", "De profielgegevens werden met succes aangepast");
+            flash("success", "De profielgegevens werden aangepast");
 
             return redirect(routes.Profile.index(userId));
         } else {

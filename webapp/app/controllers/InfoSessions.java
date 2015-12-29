@@ -162,7 +162,7 @@ public class InfoSessions extends Controller {
         // Delete the reminder
         context.getJobDAO().deleteJob(JobType.IS_REMINDER, sessionId);
 
-        flash("success", "De infosessie werd succesvol verwijderd.");
+        flash("success", "De infosessie werd verwijderd.");
         return redirect(routes.InfoSessions.showUpcomingSessions());
     }
 
@@ -251,7 +251,7 @@ public class InfoSessions extends Controller {
         } else {
             dao.unregisterUser(alreadyAttending.getId(), CurrentUser.getId());
 
-            flash("success", "Je bent succesvol uitgeschreven uit deze infosessie.");
+            flash("success", "Je bent uitgeschreven uit deze infosessie.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         }
     }
@@ -320,7 +320,7 @@ public class InfoSessions extends Controller {
 
         DataAccess.getInjectedContext().getInfoSessionDAO().unregisterUser(sessionId, userId);
 
-        flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
+        flash("success", "De gebruiker werd uitgeschreven uit de infosessie.");
         return redirect(routes.InfoSessions.detail(sessionId));
     }
 
@@ -340,7 +340,7 @@ public class InfoSessions extends Controller {
                 userId,
                 Enum.valueOf(EnrollementStatus.class, status)
         );
-        flash("success", "De gebruikersstatus werd met succes aangepast.");
+        flash("success", "De gebruikersstatus werd aangepast.");
         return redirect(routes.InfoSessions.detail(sessionId));
     }
 
@@ -363,19 +363,11 @@ public class InfoSessions extends Controller {
                     form,
                     idao.getEnrollees(sessionId), null));
         } else {
-            // TODO: loop in database
-            int userId = form.get().userId;
-            for (Enrollee others : idao.getEnrollees(sessionId)) {
-                if (others.getUser().getId() == userId) {
-                    flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
-                    return redirect(routes.InfoSessions.detail(sessionId));
-                }
+            if (idao.registerUser(sessionId, form.get().userId)) {
+                flash("success", "De gebruiker werd toegevoegd aan deze infosessie.");
+            } else {
+                flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
             }
-
-            // Now we enroll
-            idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
-
-            flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
             return redirect(routes.InfoSessions.detail(sessionId));
         }
     }
@@ -406,7 +398,7 @@ public class InfoSessions extends Controller {
             if (dao.registerUser(sessionId, CurrentUser.getId())) {
                 flash("success",
                         (alreadyAttending == null ?
-                                "Je bent met succes ingeschreven voor de infosessie op " :
+                                "Je bent ingeschreven voor de infosessie op " :
                                 "Je bent van infosessie veranderd naar ")
                                 + Utils.toLocalizedString(session.getTime()) + ".");
 

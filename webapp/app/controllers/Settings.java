@@ -156,7 +156,7 @@ public class Settings extends Controller {
         } else {
             EditSettingModel model = form.get();
             dao.createSettingAfterDate(name, model.value, model.after.toInstant());
-            flash("success", "De systeemvariabele werd met succes aangepast.");
+            flash("success", "De systeemvariabele werd aangepast.");
             return redirect(routes.Settings.sysvarsOverview());
         }
     }

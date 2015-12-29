@@ -34,10 +34,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.dao.InfoSessionDAO;
 import be.ugent.degage.db.models.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.Instant;
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
@@ -59,7 +56,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             "JOIN users ON infosession_host_user_id = user_id " +
             "JOIN addresses ON infosession_address_id = address_id " + SUBTTOTAL_QUERY;
 
-    public JDBCInfoSessionDAO(JDBCDataAccessContext context) {
+    JDBCInfoSessionDAO(JDBCDataAccessContext context) {
         super(context);
     }
 
@@ -70,7 +67,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      * @return An Infosession with the information from the resultset
      * @throws SQLException
      */
-    public static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
+    private static InfoSession populateInfoSession(ResultSet rs) throws SQLException {
         InfoSession result = populateInfoSessionPartial(rs);
         result.setAddress(JDBCAddressDAO.populateAddress(rs));
         result.setHost(JDBCUserDAO.populateUserHeader(rs));
@@ -78,7 +75,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         return result;
     }
 
-    public static InfoSession populateInfoSessionPartial(ResultSet rs) throws SQLException {
+    static InfoSession populateInfoSessionPartial(ResultSet rs) throws SQLException {
 
         return new InfoSession(
                 rs.getInt("ses.infosession_id"),
@@ -248,7 +245,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             ps.executeUpdate();
             return true;
         } catch (SQLException ex) {
-            if (ex.getErrorCode() == 1062) {
+            if (ex.getErrorCode() == MYSQL_ERROR_DUPLICATE_ENTRY) {
                 return false;
             } else {
                 throw new DataAccessException("Failed to register user.", ex);
@@ -382,19 +379,25 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
+    private static Enrollee populateEnrollee (ResultSet rs) throws SQLException {
+        Date dateJoined = rs.getDate("user_date_joined");
+        return new Enrollee(
+                    JDBCUserDAO.populateUserHeader(rs),
+                    EnrollementStatus.valueOf(rs.getString("infosession_enrollment_status")),
+                    dateJoined == null ? null : dateJoined.toLocalDate()
+        );
+    }
+
     @Override
     public Iterable<Enrollee> getEnrollees(int infosessionId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT " + USER_HEADER_FIELDS + ", infosession_enrollment_status " +
+                "SELECT " + USER_HEADER_FIELDS + ", user_date_joined, infosession_enrollment_status " +
                         "FROM infosessionenrollees " +
                         "INNER JOIN users ON user_id = infosession_enrollee_id " +
                         "WHERE infosession_id = ?"
         )) {
             ps.setInt(1, infosessionId);
-            return toList(ps, rs -> new Enrollee(
-                    JDBCUserDAO.populateUserHeader(rs),
-                    EnrollementStatus.valueOf(rs.getString("infosession_enrollment_status"))
-            ));
+            return toList(ps, JDBCInfoSessionDAO::populateEnrollee);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not find enrollees", ex);
         }

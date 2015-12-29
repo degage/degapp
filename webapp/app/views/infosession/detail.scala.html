@@ -57,11 +57,9 @@
             <button type="button" id="deleteButton" class="btn btn-danger btn-sm">Infosessie verwijderen</button>
         </div>
     </div>
-    @panel("Gebruiker toevoegen", "fa-plus-square-o"){
-        @helper.form(routes.InfoSessions.addUserToSession(infoSession.getId)) {
-            @std.userpicker(form("userId"), form("userIdAsString"), "Gebruiker")
-            @std.submitButton("Toevoegen")
-        }
+
+    @panel() {
+        @detailPartial(infoSession, map)
     }
 
     @panel("Ingeschreven (" + infoSession.getEnrolleeCount +")", "fa-users"){
@@ -73,6 +71,7 @@
                         <th>Naam</th>
                         <th>Aanwezigheid</th>
                         <th>Aanwezigheid wijzigen</th>
+                        <th>Lid</th>
                         <th>Acties</th>
                     </tr>
                 </thead>
@@ -106,6 +105,8 @@
                                         afwezig</a>
                             </div>
                         </td>
+                        <td>@Utils.toLocalizedDateString(enrollee.getDateJoined)</td>
+                        </td>
                         <td>
                             @btnSuccess("verwijderen", routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId))
                         </td>
@@ -114,5 +115,12 @@
                 </tbody>
             </table>
         </div>
+    }
+
+    @panel("Gebruiker toevoegen", "fa-plus-square-o"){
+        @helper.form(routes.InfoSessions.addUserToSession(infoSession.getId)) {
+            @std.userpicker(form("userId"), form("userIdAsString"), "Gebruiker")
+            @std.submitButton("Toevoegen")
+        }
     }
 }

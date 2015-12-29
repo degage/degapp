@@ -418,7 +418,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.executeUpdate();
             return true;
         } catch (SQLException ex) {
-            if (ex.getErrorCode() == 1062) {
+            if (ex.getErrorCode() == MYSQL_ERROR_DUPLICATE_ENTRY) {
                 return false;
             } else {
                 throw new DataAccessException("Could not update user email", ex);

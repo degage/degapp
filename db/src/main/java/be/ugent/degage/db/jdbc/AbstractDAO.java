@@ -41,6 +41,9 @@ import java.util.List;
  */
 class AbstractDAO {
 
+    // mysql error codes
+    protected static final int MYSQL_ERROR_DUPLICATE_ENTRY = 1062;
+
     protected final JDBCDataAccessContext context;
 
     /*

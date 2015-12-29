@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.models;
 
+import java.time.LocalDate;
+
 /**
  *
  * @author Laurent
@@ -36,27 +38,23 @@ package be.ugent.degage.db.models;
 public class Enrollee {
     private UserHeader user;
     private EnrollementStatus status;
+    private LocalDate dateJoined;
 
-    public Enrollee(UserHeader user, EnrollementStatus status) {
+    public Enrollee(UserHeader user, EnrollementStatus status, LocalDate dateJoined) {
         this.user = user;
         this.status = status;
+        this.dateJoined = dateJoined;
     }
 
     public UserHeader getUser() {
         return user;
     }
 
-    public void setUser(UserHeader user) {
-        this.user = user;
-    }
-
     public EnrollementStatus getStatus() {
         return status;
     }
 
-    public void setStatus(EnrollementStatus status) {
-        this.status = status;
+    public LocalDate getDateJoined() {
+        return dateJoined;
     }
-    
-    
 }

@@ -278,7 +278,7 @@ public class Damages extends Controller {
     @InjectContext
     public static Result setDamageFinished(int damageId, int status) {
         DataAccess.getInjectedContext().getDamageDAO().updateDamageFinished(damageId, status != 0);
-        flash("success", "Status van schadedossier succesvol aangepast");
+        flash("success", "Status van schadedossier met succes aangepast");
         return redirect(routes.Damages.showDamageDetails(damageId));
     }
 
@@ -313,7 +313,7 @@ public class Damages extends Controller {
                     fdao.addDamageFile(damageId, file.getId()); // TODO: make this one (atomic) call to fdao
                 }
             }
-            flash("success", "Bestand succesvol toegevoegd.");
+            flash("success", "Bestand met succes toegevoegd.");
             return redirect(routes.Damages.showDamageDetails(damageId));
         } catch (IOException ex) { //IO or database error causes a rollback
             throw new RuntimeException(ex); //unchecked
@@ -346,7 +346,7 @@ public class Damages extends Controller {
         File file = fileDAO.getFile(fileId);
         fileDAO.deleteFile(file.getId());
         FileHelper.deleteFile(Paths.get(file.getPath()));
-        flash("success", "Bestand succesvol verwijderd.");
+        flash("success", "Bestand verwijderd.");
         return redirect(routes.Damages.showDamageDetails(damageId));
     }
 

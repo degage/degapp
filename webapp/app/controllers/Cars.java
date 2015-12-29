@@ -445,7 +445,7 @@ public class Cars extends Controller {
 
         dao.updateCar(car);
 
-        flash("success", "Jouw wijzigingen werden succesvol toegepast.");
+        flash("success", "Jouw wijzigingen werden met succes toegepast.");
         return redirect(routes.Cars.detail(car.getId()));
     }
 
@@ -495,7 +495,7 @@ public class Cars extends Controller {
         pdao.addPrivileged(carId, usersToAdd);
         pdao.deletePrivileged(carId, usersToDelete);
 
-        flash("success", "Je wijzigingen werden succesvol toegepast.");
+        flash("success", "Je wijzigingen werden met succes toegepast.");
         return redirect(routes.Cars.detail(car.getId()));
     }
 
