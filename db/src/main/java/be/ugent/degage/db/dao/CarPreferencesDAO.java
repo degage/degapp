@@ -39,12 +39,12 @@ import java.util.List;
 public interface CarPreferencesDAO {
 
     /**
-     * List the car preferences for a given user
+     * List the car preferences for a given user. Only lists active cars
      */
     public List<CarPreference> listPreferences(int userId);
 
     /**
-     * Changes the preferences
+     * Changes the preferences (for active cars only)
      * @param userId user for whom the preferences should be altered
      * @param carIds complete list of car ids for the preferred cars
      */
