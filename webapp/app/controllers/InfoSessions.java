@@ -31,7 +31,6 @@ package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.InfoSessionDAO;
-import be.ugent.degage.db.dao.JobDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
@@ -56,7 +55,7 @@ import java.util.List;
  */
 public class InfoSessions extends Controller {
 
-    public static class InfoSessionCreationModel {
+    public static class InfoSessionData {
 
         public Integer userId;
 
@@ -89,8 +88,8 @@ public class InfoSessions extends Controller {
 
         public void populate(InfoSession i) {
 
-            userId = i.getHost().getId();
-            userIdAsString = i.getHost().getFullName();
+            userId = i.getHostId();
+            userIdAsString = i.getHostName();
 
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
@@ -111,15 +110,15 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result newSession() {
 
-        InfoSessionCreationModel model = new InfoSessionCreationModel();
-        model.userId = CurrentUser.getId();
-        model.userIdAsString = CurrentUser.getFullName();
-        model.address.populate(
+        InfoSessionData data = new InfoSessionData();
+        data.userId = CurrentUser.getId();
+        data.userIdAsString = CurrentUser.getFullName();
+        data.address.populate(
                 DataAccess.getInjectedContext().getUserDAO().getUser(CurrentUser.getId()).getAddressResidence()
         );
-        model.type = "NORMAL";
+        data.type = "NORMAL";
         return ok(addinfosession.render(
-                Form.form(InfoSessionCreationModel.class).fill(model))
+                Form.form(InfoSessionData.class).fill(data))
         );
     }
 
@@ -138,10 +137,10 @@ public class InfoSessions extends Controller {
             flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
-            InfoSessionCreationModel model = new InfoSessionCreationModel();
-            model.populate(is);
+            InfoSessionData data = new InfoSessionData();
+            data.populate(is);
 
-            Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
+            Form<InfoSessionData> editForm = Form.form(InfoSessionData.class).fill(data);
             return ok(editinfosession.render(editForm, sessionId));
         }
     }
@@ -176,57 +175,36 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result editSessionPost(int sessionId) {
-        Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
+        Form<InfoSessionData> editForm = Form.form(InfoSessionData.class).bindFromRequest();
         if (editForm.hasErrors()) {
             return badRequest(editinfosession.render(editForm, sessionId));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             UserDAO udao = context.getUserDAO();
-            InfoSessionCreationModel model = editForm.get();
-            if ("copyAddress".equals(model.submit)) {
-                User host = udao.getUser(model.userId);
-                model.address.populate(host.getAddressResidence());
-                return ok(addinfosession.render (Form.form(InfoSessionCreationModel.class).fill(model)));
+            InfoSessionData data = editForm.get();
+            if ("copyAddress".equals(data.submit)) {
+                User host = udao.getUser(data.userId);
+                data.address.populate(host.getAddressResidence());
+                return ok(addinfosession.render (Form.form(InfoSessionData.class).fill(data)));
             } else {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
-                InfoSession session = dao.getInfoSession(sessionId);
-                UserHeader host = udao.getUserHeader(model.userId);
-                session.setHost(host);
-
-                // update address
-                session.setAddress(model.address.toAddress());
-
-                // update time
-                Instant time = model.time;
-                if (!session.getTime().equals(time)) {
-                    session.setTime(time);
-
-                    // Schedule the reminder
-                    JobDAO jdao = context.getJobDAO();
-                    jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
-                    jdao.createJob(
-                            JobType.IS_REMINDER,
-                            session.getId(),
-                            session.getTime().minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
-                    );
-                }
 
                 // check if amountOfAttendees < new max
-                int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
-                if (model.max_enrollees != 0 && model.max_enrollees < amountOfAttendees) {
-                    flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
+                int amountOfAttendees = dao.getAmountOfAttendees(sessionId);
+                if (data.max_enrollees != 0 && data.max_enrollees < amountOfAttendees) {
+                    editForm.reject("max_enrollees", "Het nieuwe maximum mag niet kleiner zijn dan het aantal huidige inschrijvingen");
                     return badRequest(editinfosession.render(editForm, sessionId));
-                } else {
-                    session.setMaxEnrollees(model.max_enrollees);
                 }
 
-                // type
-                session.setType(InfoSessionType.valueOf(model.type));
+                // reschedule the reminder
+                context.getJobDAO().updateJobTime(
+                        JobType.IS_REMINDER,
+                        sessionId,
+                        data.time.minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                );
 
-                // comments
-                session.setComments(model.comments);
-
-                dao.updateInfoSession(session);
+                dao.updateInfoSession(sessionId, InfoSessionType.valueOf(data.type), data.max_enrollees, data.time,
+                        data.userId, data.comments, data.address.toAddress());
                 flash("success", "De wijzigingen werden met succes toegepast.");
                 return redirect(routes.InfoSessions.detail(sessionId));
             }
@@ -422,35 +400,32 @@ public class InfoSessions extends Controller {
     @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result createNewSession() {
-        Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
+        Form<InfoSessionData> createForm = Form.form(InfoSessionData.class).bindFromRequest();
         if (createForm.hasErrors()) {
             return badRequest(addinfosession.render(createForm));
         } else {
-            InfoSessionCreationModel model = createForm.get();
+            InfoSessionData data = createForm.get();
             DataAccessContext context = DataAccess.getInjectedContext();
             UserDAO udao = context.getUserDAO();
-            if ("copyAddress".equals(model.submit)) {
-                User host = udao.getUser(model.userId);
-                model.address.populate(host.getAddressResidence());
-                return ok(addinfosession.render (Form.form(InfoSessionCreationModel.class).fill(model)));
+            if ("copyAddress".equals(data.submit)) {
+                User host = udao.getUser(data.userId);
+                data.address.populate(host.getAddressResidence());
+                return ok(addinfosession.render (Form.form(InfoSessionData.class).fill(data)));
             } else {
-                InfoSessionDAO dao = context.getInfoSessionDAO();
-
-
-                InfoSessionType type = InfoSessionType.valueOf(model.type);
-
-                UserHeader host = udao.getUserHeader(model.userId);
-                InfoSession session = dao.createInfoSession(type, host, model.address.toAddress(), model.time,
-                        model.max_enrollees == null ? 0 : model.max_enrollees,
-                        model.comments);
+                int sessionId = context.getInfoSessionDAO().createInfoSession(
+                        InfoSessionType.valueOf(data.type),
+                        data.userId,
+                        data.address.toAddress(),
+                        data.time,
+                        data.max_enrollees == null ? 0 : data.max_enrollees,
+                        data.comments);
 
                 // Schedule the reminder
                 context.getJobDAO().createJob(
                         JobType.IS_REMINDER,
-                        session.getId(),
-                        session.getTime().minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                        sessionId,
+                        data.time.minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
                 );
-
 
                 return redirect(
                         routes.InfoSessions.showSessions() // return to infosession list
@@ -549,10 +524,17 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
 
-        return ok(infosessionsAdminPage.render(
-                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(
-                        searchString.endsWith("PENDING"), page, pageSize)
-        ));
+
+        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        if (searchString.endsWith("PENDING")) {
+            return ok(infosessionsAdminPage.render(
+                    dao.getFutureInfoSessions(page, pageSize), true
+            ));
+        } else {
+            return ok(infosessionsAdminPage.render(
+                    dao.getPastInfoSessions(page, pageSize), false
+            ));
+        }
     }
 
     @InjectContext

@@ -46,7 +46,10 @@ public interface JobDAO {
     public Iterable<Job> listScheduledForNow() throws DataAccessException;
 
     /** Create a new job for the scheduler to execute at the requested time. */
-    public Job createJob(JobType type, Integer refId, Instant when) throws DataAccessException;
+    public void createJob(JobType type, int refId, Instant when) throws DataAccessException;
+
+    /** Update the time for which this particular job is scheduled. */
+    public void updateJobTime(JobType type, int refId, Instant when) throws DataAccessException;
 
     /**
      * Delete the job of the given type and reference id.

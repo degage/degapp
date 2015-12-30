@@ -45,6 +45,7 @@
         @foreach(sessions) { session =>
             <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" }>
                 @columns(session)
+                <td>@session.getAddress</td>
                 <td>
                     <div class="btn-group btn-group-xs">
                         @if(enrolled == null && (session.getMaxEnrollees == 0 || session.getEnrolleeCount < session.getMaxEnrollees)) {

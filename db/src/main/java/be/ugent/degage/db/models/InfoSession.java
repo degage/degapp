@@ -40,19 +40,23 @@ public class InfoSession {
     private InfoSessionType type;
     private Instant time;
     private Address address;
-    private UserHeader host;
+    private int hostId;
+    private String hostName;
     private int maxEnrollees;
     private int enrolleeCount;
+    private int membershipCount;
     private String comments;
 
-    public InfoSession(int id, InfoSessionType type, Instant time, Address address, UserHeader host, int maxEnrollees, String comments) {
+    public InfoSession(int id, InfoSessionType type, Instant time, Address address, int hostId, String hostName, int maxEnrollees, String comments) {
         this.id = id;
         this.type = type;
         this.time = time;
         this.address = address;
-        this.host = host;
+        this.hostId = hostId;
+        this.hostName = hostName;
         this.maxEnrollees = maxEnrollees;
         this.comments = comments;
+        this.membershipCount = 0;
     }
 
     public int getId() {
@@ -87,12 +91,12 @@ public class InfoSession {
         this.address = address;
     }
 
-    public UserHeader getHost() {
-        return host;
+    public int getHostId() {
+        return hostId;
     }
 
-    public void setHost(UserHeader host) {
-        this.host = host;
+    public String getHostName() {
+        return hostName;
     }
 
     public int getMaxEnrollees() {
@@ -117,5 +121,17 @@ public class InfoSession {
 
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    /**
+     * Number of enrollees for this infosession that are already a member.
+     * Not always filled in.
+     */
+    public int getMembershipCount() {
+        return membershipCount;
+    }
+
+    public void setMembershipCount(int membershipCount) {
+        this.membershipCount = membershipCount;
     }
 }
