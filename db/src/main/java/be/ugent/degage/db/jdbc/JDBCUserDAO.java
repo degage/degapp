@@ -274,12 +274,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         // first retrieve new Degage id
         int newDegageId;
-        try (PreparedStatement ps = prepareStatement("SELECT max(user_degage_id) AS id FROM users ");
-             ResultSet rs = ps.executeQuery()) {
-            if (rs.next()) {
-                newDegageId = rs.getInt("id") + 1;
-            } else {
-                newDegageId = (Year.now().getValue() - 2000) * 10000 + 1;
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT max(user_degage_id) AS id FROM users WHERE user_degage_id > ?"
+        )) {
+            int yearValue = (Year.now().getValue() - 2000) * 10000;
+            ps.setInt (1, yearValue);
+            newDegageId = toSingleInt(ps) + 1;
+            if (newDegageId == 1) { // first for this year
+                newDegageId = yearValue + 1;
             }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to retreive degage id", ex);
