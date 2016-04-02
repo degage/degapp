@@ -27,16 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, admin: UserHeader, deposit: Int, initial: Int)
+@(user: UserHeader, admin: UserHeader, deposit: Int, initial: Int, loginURL: String)
 
 @* Contract tekenen *@
 <p>Beste @user.getFirstName,</p>
 
-<p><b>@admin.getFirstName @admin.getLastName</b> werd je toegewezen als
+<p>Leuk dat je wil autodelen via Dégage! Om jouw lidmaatschap compleet te maken,
+hoef je nog slechts enkele stappen te ondernemen.</p>
+
+<p>Heb je al een contract getekend op de infosessie, dan is de eerste stap reeds
+vervuld. Heb je nog niet getekend, neem dan contact op met
+    <b>@admin.getFirstName @admin.getLastName</b> om een contract te ondertekenen.
+    Deze persoon werd je toegewezen als
 contractverantwoordelijke.</p>
-<p>Ben je na de infosessie overtuigd dat autodelen via&nbsp;Dégage!
-iets voor jou is, neem dan contact op met deze persoon om
-een contract te ondertekenen.</p>
 <ul>
     <li><b>E-mail:</b> @admin.getEmail</li>
 @if(admin.getPhone != null && !admin.getPhone.isEmpty){
@@ -53,3 +56,9 @@ een contract te ondertekenen.</p>
 <p>van Dégage! VZW. De waarborg bedraagt <b>@deposit euro</b>,
     de instapsom is <b>@initial euro</b>.
 </p>
+
+<p>Als de betaling ontvangen is, keuren we je lidmaatschap snel goed.</p>
+
+<p>Ondertussen kan je ook jouw profiel verder invullen (rijbewijs, ID, contactgegevens,
+profielfoto). Meld je hiervoor opnieuw aan met je e-mailadres op
+<a href="@loginURL">@loginURL</a>.</p>
