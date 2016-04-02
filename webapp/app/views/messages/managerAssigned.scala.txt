@@ -27,17 +27,19 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, admin: UserHeader, deposit: Int, initial: Int)
+@(user: UserHeader, admin: UserHeader, deposit: Int, initial: Int, loginURL: String)
 
 @* Contract tekenen *@
 Beste @user.getFirstName,
 
-@admin.getFirstName @admin.getLastName werd je toegewezen als
-contractverantwoordelijke.
+Leuk dat je wil autodelen via Dégage! Om jouw lidmaatschap compleet te maken,
+hoef je nog slechts enkele stappen te ondernemen.
 
-Ben je na de infosessie overtuigd dat autodelen via&nbsp;Dégage!
-iets voor jou is, neem dan contact op met deze persoon om
-een contract te ondertekenen.
+Heb je al een contract getekend op de infosessie, dan is de eerste stap reeds
+vervuld. Heb je nog niet getekend, neem dan contact op met
+@admin.getFirstName @admin.getLastName om
+een contract te ondertekenen. Deze persoon werd je toegewezen als
+contractverantwoordelijke.
 
     E-mail: @admin.getEmail
 @if(admin.getPhone != null && !admin.getPhone.isEmpty){    Tel: @admin.getPhone}
@@ -48,4 +50,10 @@ Je kan alvast de waarborg en het instapgeld betalen op rekening nr.
     IBAN BE78 5230 8045 2986 - BIC Code TRIOBEBB
 
 van Dégage! VZW. De waarborg bedraagt @deposit euro, de instapsom is  @initial euro.
+
+Als de betaling ontvangen is, keuren we je lidmaatschap snel goed.
+
+Ondertussen kan je ook jouw profiel verder invullen (rijbewijs, ID, contactgegevens,
+profielfoto). Meld je hiervoor opnieuw aan met je e-mailadres op
+@loginURL
 
