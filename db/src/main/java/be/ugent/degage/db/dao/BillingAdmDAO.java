@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.dao;
 
+import be.ugent.degage.db.models.BillingDetailsUser;
+import be.ugent.degage.db.models.BillingDetailsUserKm;
 import be.ugent.degage.db.models.KmPrice;
 
 import java.time.LocalDate;
@@ -121,12 +123,15 @@ public interface BillingAdmDAO {
         public int fuel;
         public int total;
         public String structuredComment;
+        public int seqNr;
     }
 
     /**
      * Return information about user invoices, per user
      */
-    public Iterable<UserBillingInfo> listUserBillingOverview (int billingId);
+    public List<UserBillingInfo> listUserBillingOverview (int billingId);
 
-
-}
+    /**
+     *  Further user information for the given billing
+     */
+    public List<BillingDetailsUserKm> getUserKmDetails(int billingId);}

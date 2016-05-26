@@ -488,7 +488,7 @@ CREATE TABLE `cars_billed` (
 
 CREATE TABLE `km_price` (
     `km_price_billing_id` INT NOT NULL,
-    `km_price_from` INT NOT NULL,
+    `km_price_from` INT NOT NULL,      -- typically 1, 101, 201
     `km_price_eurocents` INT NOT NULL, -- price for interval - as printed
     `km_price_factor` INT NOT NULL,    -- cummulative price (for computations)
     PRIMARY KEY (`km_price_billing_id`, `km_price_from`),
@@ -554,6 +554,8 @@ CREATE TABLE b_costs (
     bcc_refunded INT, -- amount actually refunded for this cost during this period
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
+
+
 -- EVENTS
 -- ~~~~~~
 
@@ -617,7 +619,8 @@ CREATE VIEW b_user_overview AS
      bu_km_cost AS km,
      bu_fuel_cost AS fuel,
      bu_km_cost - bu_fuel_cost AS total,
-     structured_comment(bu_billing_id,0,bu_seq_nr,bu_user_id) as sc
+     structured_comment(bu_billing_id,0,bu_seq_nr,bu_user_id) as sc,
+     bu_seq_nr as seq_nr
   FROM b_user JOIN users ON users.user_id = b_user.bu_user_id;
 
 -- TRIGGERS

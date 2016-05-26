@@ -31,13 +31,13 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.BillingAdmDAO;
+import be.ugent.degage.db.models.BillingDetailsUser;
+import be.ugent.degage.db.models.BillingDetailsUserKm;
 import be.ugent.degage.db.models.KmPrice;
 
-import java.sql.CallableStatement;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,7 +45,7 @@ import java.util.List;
  */
 class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
 
-    public JDBCBillingAdmDAO(JDBCDataAccessContext context) {
+    JDBCBillingAdmDAO(JDBCDataAccessContext context) {
         super(context);
     }
 
@@ -231,9 +231,9 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     }
 
     @Override
-    public Iterable<UserBillingInfo> listUserBillingOverview(int billingId) {
+    public List<UserBillingInfo> listUserBillingOverview(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT user_id, name, km, fuel, total, sc FROM b_user_overview WHERE billing_id = ? ORDER BY user_id"
+                "SELECT user_id, name, km, fuel, total, sc, seq_nr FROM b_user_overview WHERE billing_id = ? ORDER BY user_id"
         )) {
             ps.setInt(1, billingId);
             return toList(ps, rs -> {
@@ -244,10 +244,68 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 ubi.fuel = rs.getInt("fuel");
                 ubi.total = rs.getInt("total");
                 ubi.structuredComment = rs.getString("sc");
+                ubi.seqNr = rs.getInt("seq_nr");
                 return ubi;
             });
         } catch (SQLException e) {
             throw new DataAccessException("Could not list billing", e);
         }
     }
+
+    private static void setKilometers(BillingDetailsUserKm bdu, List<Integer> list) {
+        if (bdu == null) {
+            return;
+        }
+        int size = list.size();
+        int[] tab = new int[size];
+        bdu.setTotalKilometers(list.get(0));
+        for (int i = 1; i < size; i++) {
+            tab[i - 1] = list.get(i - 1) - list.get(i);
+        }
+        tab[size - 1] = list.get(size - 1);
+        bdu.setKilometersInRange(tab);
+    }
+
+    // TODO: combine getUserKmDetails and listUserBillingOverview into a single call
+    // so that no merging needs to be done later. Might be difficult, because some
+    // users have no kilometers and only fuel
+
+    /**
+     * Retreive all user information for the given billing
+     */
+    public List<BillingDetailsUserKm> getUserKmDetails(int billingId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT bt_user_id, sum_of_excess_kms " +
+                        "FROM b_user_km WHERE bt_billing_id = ? ORDER BY bt_user_id ASC, km_price_from ASC"
+        )) {
+            ps.setInt(1, billingId);
+            List<BillingDetailsUserKm> result = new ArrayList<>();
+            int userId = 0;
+            BillingDetailsUserKm bduk = null;
+            List<Integer> kmList = new ArrayList<>();
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int newUserId = rs.getInt("bt_user_id");
+                    // start a new user?
+                    if (bduk == null || newUserId != userId) {
+                        // finalize old record
+                        setKilometers(bduk, kmList);
+                        // start a new record
+                        userId = newUserId;
+                        bduk = new BillingDetailsUserKm(userId);
+                        result.add(bduk);
+
+                        kmList.clear();
+                    }
+                    kmList.add(rs.getInt("sum_of_excess_kms"));
+                }
+                setKilometers(bduk, kmList);
+                return result;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Cannot get user details", ex);
+        }
+    }
+
+
 }
