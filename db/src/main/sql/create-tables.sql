@@ -214,7 +214,7 @@ CREATE TABLE `reservations` (
 	`reservation_from` DATETIME NOT NULL,
 	`reservation_to` DATETIME NOT NULL,
 	`reservation_message` VARCHAR(4096),
-	`reservation_archived``  BIT(1) NOT NULL DEFAULT 0,
+	`reservation_archived`  BIT(1) NOT NULL DEFAULT 0,
 	`reservation_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`reservation_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
@@ -555,7 +555,7 @@ CREATE TABLE b_costs (
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
 -- EVENTS
-------------------------------------------------------
+-- ~~~~~~
 
 DROP EVENT IF EXISTS update_reservation_status;
 CREATE EVENT update_reservation_status

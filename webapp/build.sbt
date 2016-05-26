@@ -18,7 +18,7 @@ libraryDependencies ++= Seq(
 resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/modules/releases/"))(Resolver.ivyStylePatterns)
 
 libraryDependencies ++= Seq(
-  "be.ugent.degage"         % "db"                           % "1.2-SNAPSHOT",
+  "be.ugent.degage"         % "db"                           % "1.3-SNAPSHOT",
   "be.ugent.caagt"           % "sheeter"                      % "1.0-SNAPSHOT",
   "com.edulify"             %% "play-hikaricp"               % "1.5.0-fork-2",    // 1.5.0 adapted to use hikari 2.3.2
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
@@ -32,8 +32,8 @@ libraryDependencies ++= Seq(
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
   "org.webjars"             % "jquery_are-you-sure"          % "1.5.0", // checks user does not leave page when form data is changed
   "org.webjars"             % "js-cookie"                    % "2.0.2", // cookie manipulation
-  "mysql"                   % "mysql-connector-java"         % "5.1.34",
-  "com.itextpdf"            % "itextpdf"                     % "5.5.6",      // most recent version, shoul override version use by next module?
+  "mysql"                   % "mysql-connector-java"         % "5.1.37",
+  "com.itextpdf"            % "itextpdf"                     % "5.5.6",      // most recent version, should override version use by next module?
   "it.innove"               % "play2-pdf"                    % "1.1.3-fork", // adapted to iText 5
   "com.typesafe"            % "config"                       % "1.2.1"
   // "org.webjars"             % "jquery-ui"                    % "1.11.0-1", customized version stored in javascript/
