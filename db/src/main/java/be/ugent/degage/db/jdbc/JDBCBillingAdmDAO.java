@@ -31,7 +31,6 @@ package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.BillingAdmDAO;
-import be.ugent.degage.db.models.BillingDetailsUser;
 import be.ugent.degage.db.models.BillingDetailsUserKm;
 import be.ugent.degage.db.models.KmPrice;
 
@@ -113,8 +112,8 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                         "FROM cars_billed " +
                         "LEFT JOIN ( SELECT reservation_car_id AS id, 1 as d FROM trips,billing " +
                         "WHERE reservation_status > 5 AND reservation_from < billing_limit AND billing_id = ? " + //[ENUM INDEX]
-                "UNION " +
-                "SELECT reservation_car_id AS id, 1 as d FROM refuels " +
+                        "UNION " +
+                        "SELECT reservation_car_id AS id, 1 as d FROM refuels " +
                         "JOIN reservations ON reservation_id = refuel_car_ride_id " +
                         "JOIN billing " +
                         " WHERE refuel_status != 'REFUSED' AND NOT refuel_archived AND reservation_from < billing_limit AND billing_id = ? " +
@@ -211,18 +210,39 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     @Override
     public Iterable<CarBillingInfo> listCarBillingOverview(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT car_id, name, fuel, deprec, costs, total, sc FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
+                "SELECT car_id, name, owner_name, fuel, deprec, costs, total, sc, " +
+                        "seq_nr, bc_total_km, bc_deprec_km, bc_fuel_total, bc_first_km, bc_last_km, " +
+                        "bc_costs, car_deprec, car_deprec_limit " +
+                        "FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
         )) {
             ps.setInt(1, billingId);
             return toList(ps, rs -> {
+                int lastKm = rs.getInt("bc_last_km");
+                int firstKm = rs.getInt("bc_first_km");
+
                 CarBillingInfo cbi = new CarBillingInfo();
                 cbi.carId = rs.getInt("car_id");
                 cbi.carName = rs.getString("name");
+                cbi.ownerName = rs.getString("owner_name");
                 cbi.fuel = rs.getInt("fuel");
                 cbi.deprec = rs.getInt("deprec");
                 cbi.costs = rs.getInt("costs");
                 cbi.total = rs.getInt("total");
                 cbi.structuredComment = rs.getString("sc");
+                cbi.seqNr = rs.getInt("seq_nr");
+                cbi.totalKm = rs.getInt("bc_total_km");
+                cbi.deprecKm = rs.getInt("bc_deprec_km");
+                cbi.fuelPerKm = lastKm <= firstKm ? 0 : rs.getInt("bc_fuel_total") * 10 / (lastKm - firstKm);
+                cbi.costsPerKm = rs.getInt("bc_costs") * 10 / cbi.totalKm;
+                cbi.depreciationFactor = rs.getInt("car_deprec");
+
+                // remaining car value
+                int remainingValue = rs.getInt("car_deprec_limit") - lastKm;
+                if (remainingValue <= 0) {
+                    cbi.remainingCarValue = 0;
+                } else {
+                    cbi.remainingCarValue = remainingValue * cbi.depreciationFactor / 1000;
+                }
                 return cbi;
             });
         } catch (SQLException e) {

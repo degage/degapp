@@ -29,7 +29,6 @@
 
 package be.ugent.degage.db.dao;
 
-import be.ugent.degage.db.models.BillingDetailsUser;
 import be.ugent.degage.db.models.BillingDetailsUserKm;
 import be.ugent.degage.db.models.KmPrice;
 
@@ -102,12 +101,26 @@ public interface BillingAdmDAO {
     public static class CarBillingInfo {
         public int carId;
         public String carName;
-        // amounts are in EUROCENT
+        public String ownerName;
+        public int seqNr;
+        public String structuredComment;
+
+        public int totalKm;         // actual amount of km driven
+        public int deprecKm;        // amount of km for deprecation purposes
+
+        public int  remainingCarValue; // in €
+
+        // amounts are in eurocent
         public int fuel;
         public int deprec;
         public int costs;
         public int total;
-        public String structuredComment;
+
+        // in eurocent per 10 km
+        public int depreciationFactor; // in eurocent per 10 km
+        public int costsPerKm;
+        public int fuelPerKm;
+
     }
 
     /**

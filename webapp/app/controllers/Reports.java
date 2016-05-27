@@ -32,7 +32,6 @@ package controllers;
 import be.ugent.caagt.sheeter.*;
 import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.BillingAdmDAO;
-import be.ugent.degage.db.models.BillingDetailsUser;
 import be.ugent.degage.db.models.BillingDetailsUserKm;
 import be.ugent.degage.db.models.UserRole;
 import db.DataAccess;
@@ -51,22 +50,6 @@ import java.util.List;
  */
 public class Reports extends Controller {
 
-    private static WorkbookDefinition billingCarWorkbook;
-
-    static {
-        billingCarWorkbook = new WorkbookDefinition(
-                // TODO: set sheet name (dynamically)
-                new TableDefinition<BillingAdmDAO.CarBillingInfo>(
-                        new NumericColumnDefinition<>("Auto ID", cbi -> cbi.carId),
-                        new StringColumnDefinition<>("Auto NAAM", cbi -> cbi.carName),
-                        new EurocentColumnDefinition<>("Saldo brandstof", cbi -> cbi.fuel),
-                        new EurocentColumnDefinition<>("Recup afschrijving", cbi -> cbi.deprec),
-                        new EurocentColumnDefinition<>("Recup kosten", cbi -> cbi.costs),
-                        new EurocentColumnDefinition<>("Totaal", cbi -> cbi.total),
-                        new StringColumnDefinition<>(null, cbi -> cbi.structuredComment)
-                ));
-    }
-
     @InjectContext
     @AllowRoles(UserRole.SUPER_USER)
     public static Result billingCarOverview(int billingId) {
@@ -74,8 +57,27 @@ public class Reports extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         String prefix = context.getBillingDAO().getBilling(billingId).getPrefix();
         Iterable<BillingAdmDAO.CarBillingInfo> list = context.getBillingAdmDAO().listCarBillingOverview(billingId);
+
+        TableDefinition<BillingAdmDAO.CarBillingInfo> tableDefinition = new TableDefinition<>(
+                new StringColumnDefinition<>("Afrekening", cbi -> String.format("E%s-%04d", prefix, cbi.seqNr)),
+                new NumericColumnDefinition<>("Auto ID", cbi -> cbi.carId),
+                new StringColumnDefinition<>("Auto NAAM", cbi -> cbi.carName),
+                new StringColumnDefinition<>("Eigenaar", cbi -> cbi.ownerName),
+                new EurocentColumnDefinition<>("Saldo brandstof", cbi -> cbi.fuel),
+                new EurocentColumnDefinition<>("Recup afschrijving", cbi -> cbi.deprec),
+                new EurocentColumnDefinition<>("Recup kosten", cbi -> cbi.costs),
+                new EurocentColumnDefinition<>("Totaal te ontv.", cbi -> cbi.total),
+                new StringColumnDefinition<>(null, cbi -> cbi.structuredComment),
+                new NumericColumnDefinition<>("Totaal km", cbi -> cbi.totalKm),
+                new NumericColumnDefinition<>("Af te schr. km", cbi -> cbi.deprecKm),
+                new NumericColumnDefinition<>("Afschr/km", cbi -> 0.001 * cbi.depreciationFactor),
+                new NumericColumnDefinition<>("Brandstof/km", cbi -> 0.001 * cbi.fuelPerKm),
+                new NumericColumnDefinition<>("Kosten/km", cbi -> 0.001 * cbi.costsPerKm),
+                new NumericColumnDefinition<>("Restwaarde auto", cbi -> (double) cbi.remainingCarValue)
+        );
+
         try (ByteArrayOutputStream out = new ByteArrayOutputStream()) {
-            billingCarWorkbook.write(out, "E" + prefix, list);
+            new WorkbookDefinition(tableDefinition).write(out, "E" + prefix, list);
             response().setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             response().setHeader("Content-Disposition", "attachment; filename=E" + prefix + ".xlsx");
             response().setHeader(CACHE_CONTROL, "no-cache, must-revalidate");
@@ -84,23 +86,6 @@ public class Reports extends Controller {
             throw new RuntimeException("Could not create file to download", ex);
         }
     }
-
-    /*
-    private static WorkbookDefinition billingUserWorkbook;
-
-    static {
-        billingUserWorkbook = new WorkbookDefinition(
-                // TODO: set sheet name (dynamically)
-                new TableDefinition<BillingAdmDAO.UserBillingInfo>(
-                        new NumericColumnDefinition<>("Gebruiker ID", ubi -> ubi.userId),
-                        new StringColumnDefinition<>("Gebruiker NAAM", ubi -> ubi.userName),
-                        new EurocentColumnDefinition<>("Kost kilometers", ubi -> ubi.km),
-                        new EurocentColumnDefinition<>("Brandstof betaald", ubi -> ubi.fuel),
-                        new EurocentColumnDefinition<>("Totaal", ubi -> ubi.total),
-                        new StringColumnDefinition<>(null, ubi -> ubi.structuredComment)
-                ));
-    }
-    */
 
     private static class Combined {
         public BillingAdmDAO.UserBillingInfo b;
@@ -120,7 +105,7 @@ public class Reports extends Controller {
     @AllowRoles(UserRole.SUPER_USER)
     public static Result billingUserOverview(int billingId) {
 
-        // TODO: simplify this!
+        // TODO: simplify this!   Maybe a full join of the two views ?
 
         DataAccessContext context = DataAccess.getInjectedContext();
         String prefix = context.getBillingDAO().getBilling(billingId).getPrefix();
