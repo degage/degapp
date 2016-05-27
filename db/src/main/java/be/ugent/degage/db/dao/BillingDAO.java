@@ -52,7 +52,7 @@ public interface BillingDAO {
     public Billing getBilling (int id);
 
     /**
-     * Retreive the user information for the given billng and user
+     * Retreive the user information for the given billing and user (totals not filled in!)
      */
     public BillingDetailsUser getUserDetails (int billingId, int userId);
 

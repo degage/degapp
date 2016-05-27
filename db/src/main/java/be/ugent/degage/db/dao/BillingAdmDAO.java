@@ -29,6 +29,7 @@
 
 package be.ugent.degage.db.dao;
 
+import be.ugent.degage.db.models.BillingDetailsUserKm;
 import be.ugent.degage.db.models.KmPrice;
 
 import java.time.LocalDate;
@@ -100,12 +101,26 @@ public interface BillingAdmDAO {
     public static class CarBillingInfo {
         public int carId;
         public String carName;
-        // amounts are in EUROCENT
+        public String ownerName;
+        public int seqNr;
+        public String structuredComment;
+
+        public int totalKm;         // actual amount of km driven
+        public int deprecKm;        // amount of km for deprecation purposes
+
+        public int  remainingCarValue; // in €
+
+        // amounts are in eurocent
         public int fuel;
         public int deprec;
         public int costs;
         public int total;
-        public String structuredComment;
+
+        // in eurocent per 10 km
+        public int depreciationFactor; // in eurocent per 10 km
+        public int costsPerKm;
+        public int fuelPerKm;
+
     }
 
     /**
@@ -121,12 +136,15 @@ public interface BillingAdmDAO {
         public int fuel;
         public int total;
         public String structuredComment;
+        public int seqNr;
     }
 
     /**
      * Return information about user invoices, per user
      */
-    public Iterable<UserBillingInfo> listUserBillingOverview (int billingId);
+    public List<UserBillingInfo> listUserBillingOverview (int billingId);
 
-
-}
+    /**
+     *  Further user information for the given billing
+     */
+    public List<BillingDetailsUserKm> getUserKmDetails(int billingId);}

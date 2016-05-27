@@ -289,14 +289,14 @@ public class Billings extends Controller {
         public ShortInvoiceLine total;
     }
 
-    private static Iterable<OwnerTable> getOwnerTables (Iterable<BillingDetailsOwner> list) {
+    private static Iterable<OwnerTable> getOwnerTables(Iterable<BillingDetailsOwner> list) {
         List<OwnerTable> result = new ArrayList<>();
         for (BillingDetailsOwner details : list) {
             OwnerTable ot = new OwnerTable();
             ot.name = details.getUser();
             ot.lines = getShortInvoiceLines(details.getTrips(), details.getRefuels());
             ot.total = total(ot.lines);
-            result.add (ot);
+            result.add(ot);
         }
         return result;
     }
@@ -326,7 +326,7 @@ public class Billings extends Controller {
     }
 
     private static String structuredComment(int billingId, int xtra, BillingDetailsUser bdu) {
-        return structuredComment (billingId, xtra, bdu.getIndex(), bdu.getUserId());
+        return structuredComment(billingId, xtra, bdu.getIndex(), bdu.getUserId());
     }
 
     private static String structuredComment(int billingId, int xtra, int index, int id) {
@@ -416,7 +416,7 @@ public class Billings extends Controller {
 
             Iterable<OwnerTable> tables = getOwnerTables(ownerDetails);
             CarDepreciation depreciation = context.getCarDAO().getDepreciation(carId);
-            int remainingValue = depreciation.getLimit()- bCar.getLastKm();
+            int remainingValue = depreciation.getLimit() - bCar.getLastKm();
             if (remainingValue <= 0) {
                 remainingValue = 0;
             } else {
@@ -426,7 +426,7 @@ public class Billings extends Controller {
                     billing, billNr, car, owner,
                     tables, tableTotal(tables),
                     bCar, remainingValue, structuredComment(billingId, 1, bCar.getIndex(), carId)
-                    ), null);
+            ), null);
         } else {
             return badRequest(); // hacker?
         }

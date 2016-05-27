@@ -220,7 +220,7 @@ CREATE TABLE `reservations` (
 	`reservation_from` DATETIME NOT NULL,
 	`reservation_to` DATETIME NOT NULL,
 	`reservation_message` VARCHAR(4096),
-	`reservation_archived``  BIT(1) NOT NULL DEFAULT 0,
+	`reservation_archived`  BIT(1) NOT NULL DEFAULT 0,
 	`reservation_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	`reservation_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`reservation_id`),
@@ -494,7 +494,7 @@ CREATE TABLE `cars_billed` (
 
 CREATE TABLE `km_price` (
     `km_price_billing_id` INT NOT NULL,
-    `km_price_from` INT NOT NULL,
+    `km_price_from` INT NOT NULL,      -- typically 1, 101, 201
     `km_price_eurocents` INT NOT NULL, -- price for interval - as printed
     `km_price_factor` INT NOT NULL,    -- cummulative price (for computations)
     PRIMARY KEY (`km_price_billing_id`, `km_price_from`),
@@ -560,8 +560,10 @@ CREATE TABLE b_costs (
     bcc_refunded INT, -- amount actually refunded for this cost during this period
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
+
+
 -- EVENTS
-------------------------------------------------------
+-- ~~~~~~
 
 DROP EVENT IF EXISTS update_reservation_status;
 CREATE EVENT update_reservation_status
@@ -608,12 +610,24 @@ CREATE VIEW b_car_overview AS
      bc_billing_id AS billing_id,
      bc_car_id AS car_id,
      car_name AS name,
+     concat(user_lastname, ", ", user_firstname) AS owner_name,
      bc_fuel_due - bc_fuel_owner AS fuel,
      - bc_deprec_recup AS deprec,
      - bc_costs_recup AS  costs,
      bc_fuel_due - bc_fuel_owner - bc_deprec_recup - bc_costs_recup AS total,
-     structured_comment(bc_billing_id,1,bc_seq_nr,bc_car_id) as sc
-  FROM b_cars JOIN cars ON cars.car_id = b_cars.bc_car_id;
+     structured_comment(bc_billing_id,1,bc_seq_nr,bc_car_id) as sc,
+     bc_seq_nr as seq_nr,
+     bc_total_km,
+     bc_deprec_km,
+     bc_costs,
+     bc_first_km,
+     bc_last_km,
+     bc_fuel_total,
+     car_deprec,
+     car_deprec_limit
+  FROM b_cars
+      JOIN cars ON cars.car_id = b_cars.bc_car_id
+      JOIN users ON users.user_id = cars.car_owner_user_id;
 
 CREATE VIEW b_user_overview AS
   SELECT
@@ -623,8 +637,20 @@ CREATE VIEW b_user_overview AS
      bu_km_cost AS km,
      bu_fuel_cost AS fuel,
      bu_km_cost - bu_fuel_cost AS total,
-     structured_comment(bu_billing_id,0,bu_seq_nr,bu_user_id) as sc
+     structured_comment(bu_billing_id,0,bu_seq_nr,bu_user_id) as sc,
+     bu_seq_nr as seq_nr
   FROM b_user JOIN users ON users.user_id = b_user.bu_user_id;
+
+CREATE VIEW b_user_km
+   AS SELECT
+        bt_billing_id,
+        bt_user_id,
+        km_price_from,
+        SUM(bt_km - km_price_from + 1) AS sum_of_excess_kms
+    FROM b_trip
+      JOIN km_price ON bt_km >= km_price_from AND km_price_billing_id = bt_billing_id
+    WHERE NOT bt_privileged
+    GROUP BY bt_billing_id, bt_user_id, km_price_from;
 
 -- TRIGGERS
 -- ~~~~~~~~
