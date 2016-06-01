@@ -61,7 +61,7 @@ CREATE TABLE `files` (
   `file_content_type` VARCHAR(64) NULL,
   `file_created_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `file_updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-	PRIMARY KEY (`file_id`)F
+	PRIMARY KEY (`file_id`)
 );
 
 
@@ -197,8 +197,8 @@ CREATE TABLE `cars` (
 );
 
 create table carpreferences (
-   user_id int references users(id),
-   car_id int references cars(id),
+   user_id int references users(user_id),
+   car_id int references cars(car_id),
    primary key (user_id, car_id)
 );
 
@@ -486,8 +486,8 @@ CREATE TABLE `billing` (
 );
 
 CREATE TABLE `cars_billed` (
-    billing_id INT REFERENCES billing,
-    car_id INT REFERENCES cars,
+    billing_id INT REFERENCES billing(billing_id),
+    car_id INT REFERENCES cars(car_id),
     included BIT(1) NOT NULL DEFAULT b'0',
     PRIMARY KEY (`billing_id`, `car_id`)
 );
@@ -561,7 +561,6 @@ CREATE TABLE b_costs (
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
 
-
 -- EVENTS
 -- ~~~~~~
 
@@ -591,14 +590,14 @@ BEGIN
    IF m = 0 THEN
       SET m = 97;
    END IF;
-   RETURN CONCAT ("+++",
+   RETURN CONCAT ('+++',
        SUBSTRING(1000+pre FROM -3),
-       "/",
+       '/',
        SUBSTRING(10000+mid FROM -4),
-       "/",
+       '/',
        SUBSTRING(1000+e FROM -3),
        SUBSTRING(100+m FROM -2),
-       "+++"
+       '+++'
    );
 END $$
 
@@ -610,7 +609,7 @@ CREATE VIEW b_car_overview AS
      bc_billing_id AS billing_id,
      bc_car_id AS car_id,
      car_name AS name,
-     concat(user_lastname, ", ", user_firstname) AS owner_name,
+     concat(user_lastname, ', ', user_firstname) AS owner_name,
      bc_fuel_due - bc_fuel_owner AS fuel,
      - bc_deprec_recup AS deprec,
      - bc_costs_recup AS  costs,
@@ -633,7 +632,7 @@ CREATE VIEW b_user_overview AS
   SELECT
      bu_billing_id AS billing_id,
      bu_user_id AS user_id,
-     concat(user_lastname, ", ", user_firstname) AS name,
+     concat(user_lastname, ', ', user_firstname) AS name,
      bu_km_cost AS km,
      bu_fuel_cost AS fuel,
      bu_km_cost - bu_fuel_cost AS total,
