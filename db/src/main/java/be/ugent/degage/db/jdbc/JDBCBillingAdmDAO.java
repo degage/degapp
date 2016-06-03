@@ -211,7 +211,7 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     public Iterable<CarBillingInfo> listCarBillingOverview(int billingId) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT car_id, name, owner_name, fuel, deprec, costs, total, sc, " +
-                        "seq_nr, bc_total_km, bc_deprec_km, bc_fuel_total, bc_first_km, bc_last_km, " +
+                        "seq_nr, bc_total_km, bc_owner_km, bc_deprec_km, bc_fuel_total, bc_first_km, bc_last_km, " +
                         "bc_costs, car_deprec, car_deprec_limit " +
                         "FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
         )) {
@@ -231,6 +231,7 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 cbi.structuredComment = rs.getString("sc");
                 cbi.seqNr = rs.getInt("seq_nr");
                 cbi.totalKm = rs.getInt("bc_total_km");
+                cbi.ownerKm = rs.getInt("bc_owner_km");
                 cbi.deprecKm = rs.getInt("bc_deprec_km");
                 cbi.fuelPerKm = lastKm <= firstKm ? 0 : rs.getInt("bc_fuel_total") * 10 / (lastKm - firstKm);
                 cbi.costsPerKm = rs.getInt("bc_costs") * 10 / cbi.totalKm;

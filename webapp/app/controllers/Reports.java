@@ -69,6 +69,8 @@ public class Reports extends Controller {
                 new EurocentColumnDefinition<>("Totaal te ontv.", cbi -> cbi.total),
                 new StringColumnDefinition<>(null, cbi -> cbi.structuredComment),
                 new NumericColumnDefinition<>("Totaal km", cbi -> cbi.totalKm),
+                new NumericColumnDefinition<>("door eigenaar", cbi -> cbi.ownerKm),
+                new NumericColumnDefinition<>("door ontlener", cbi -> cbi.totalKm - cbi.ownerKm),
                 new NumericColumnDefinition<>("Af te schr. km", cbi -> cbi.deprecKm),
                 new NumericColumnDefinition<>("Afschr/km", cbi -> 0.001 * cbi.depreciationFactor),
                 new NumericColumnDefinition<>("Brandstof/km", cbi -> 0.001 * cbi.fuelPerKm),
