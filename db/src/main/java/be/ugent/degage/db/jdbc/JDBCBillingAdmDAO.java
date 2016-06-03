@@ -295,8 +295,13 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
      */
     public List<BillingDetailsUserKm> getUserKmDetails(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT bt_user_id, sum_of_excess_kms " +
-                        "FROM b_user_km WHERE bt_billing_id = ? ORDER BY bt_user_id ASC, km_price_from ASC"
+                "SELECT bt_user_id, sum_of_excess_kms, nr_of_trips " +
+                        "FROM b_user_km JOIN (" +
+                        "   SELECT bt_billing_id, bt_user_id, count(*) AS nr_of_trips FROM b_trip " +
+                        "   WHERE bt_km > 0 " +
+                        "   GROUP BY bt_billing_id, bt_user_id" +
+                        ") AS t2 USING (bt_billing_id, bt_user_id) " +
+                "WHERE bt_billing_id = ? ORDER BY bt_user_id ASC, km_price_from ASC"
         )) {
             ps.setInt(1, billingId);
             List<BillingDetailsUserKm> result = new ArrayList<>();
@@ -312,7 +317,7 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                         setKilometers(bduk, kmList);
                         // start a new record
                         userId = newUserId;
-                        bduk = new BillingDetailsUserKm(userId);
+                        bduk = new BillingDetailsUserKm(userId, rs.getInt("nr_of_trips"));
                         result.add(bduk);
 
                         kmList.clear();
