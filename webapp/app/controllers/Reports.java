@@ -68,6 +68,7 @@ public class Reports extends Controller {
                 new EurocentColumnDefinition<>("Recup kosten", cbi -> cbi.costs),
                 new EurocentColumnDefinition<>("Totaal te ontv.", cbi -> cbi.total),
                 new StringColumnDefinition<>(null, cbi -> cbi.structuredComment),
+                new NumericColumnDefinition<>("Aantal ritten", cbi -> cbi.nrOfTrips),
                 new NumericColumnDefinition<>("Totaal km", cbi -> cbi.totalKm),
                 new NumericColumnDefinition<>("door eigenaar", cbi -> cbi.ownerKm),
                 new NumericColumnDefinition<>("door ontlener", cbi -> cbi.totalKm - cbi.ownerKm),

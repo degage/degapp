@@ -212,8 +212,13 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT car_id, name, owner_name, fuel, deprec, costs, total, sc, " +
                         "seq_nr, bc_total_km, bc_owner_km, bc_deprec_km, bc_fuel_total, bc_first_km, bc_last_km, " +
-                        "bc_costs, car_deprec, car_deprec_limit " +
-                        "FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
+                        "bc_costs, car_deprec, car_deprec_limit, nr_of_trips " +
+                    "FROM b_car_overview " +
+                    "JOIN ( SELECT bt_billing_id, bt_car_id, count(*) AS nr_of_trips FROM b_trip " +
+                    "   WHERE bt_km > 0 " +
+                    "   GROUP BY bt_billing_id, bt_car_id " +
+                    ") AS t2 ON car_id=bt_car_id AND billing_id = bt_billing_id " +
+                "WHERE billing_id = ? ORDER BY car_id"
         )) {
             ps.setInt(1, billingId);
             return toList(ps, rs -> {
@@ -236,6 +241,8 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 cbi.fuelPerKm = lastKm <= firstKm ? 0 : rs.getInt("bc_fuel_total") * 10 / (lastKm - firstKm);
                 cbi.costsPerKm = rs.getInt("bc_costs") * 10 / cbi.totalKm;
                 cbi.depreciationFactor = rs.getInt("car_deprec");
+                cbi.nrOfTrips = rs.getInt ("nr_of_trips");
+
 
                 // remaining car value
                 int remainingValue = rs.getInt("car_deprec_limit") - lastKm;

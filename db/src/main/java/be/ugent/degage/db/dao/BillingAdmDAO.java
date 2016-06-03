@@ -111,6 +111,8 @@ public interface BillingAdmDAO {
 
         public int  remainingCarValue; // in €
 
+        public int nrOfTrips;       // nr of trips made by this car
+
         // amounts are in eurocent
         public int fuel;
         public int deprec;
