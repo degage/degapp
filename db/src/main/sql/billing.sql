@@ -363,7 +363,7 @@ BEGIN
     IF done THEN
       LEAVE main;
     END IF;
-    UPDATE b_cars SET bc_seq_nr = seq WHERE bc_car_id = _id;
+    UPDATE b_cars SET bc_seq_nr = seq WHERE bc_car_id = _id AND bc_billing_id = b_id;
     SET seq = seq + 1;
   END LOOP main;
 
