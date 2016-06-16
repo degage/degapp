@@ -38,6 +38,12 @@ public class BillingDetailsUserKm {
 
     private int totalKilometers;
 
+    private int nrOfTrips;
+
+    public int getNrOfTrips() {
+        return nrOfTrips;
+    }
+
     private int[] kilometersInRange;
 
     public int getUserId() {
@@ -60,8 +66,9 @@ public class BillingDetailsUserKm {
         this.kilometersInRange = kilometersInRange;
     }
 
-    public BillingDetailsUserKm(int userId) {
+    public BillingDetailsUserKm(int userId, int nrOfTrips) {
         this.userId = userId;
+        this.nrOfTrips = nrOfTrips;
         this.totalKilometers = 0;
         this.kilometersInRange = null;
     }

@@ -106,9 +106,12 @@ public interface BillingAdmDAO {
         public String structuredComment;
 
         public int totalKm;         // actual amount of km driven
+        public int ownerKm;         // of which by owner
         public int deprecKm;        // amount of km for deprecation purposes
 
         public int  remainingCarValue; // in €
+
+        public int nrOfTrips;       // nr of trips made by this car
 
         // amounts are in eurocent
         public int fuel;

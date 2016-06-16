@@ -211,9 +211,14 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
     public Iterable<CarBillingInfo> listCarBillingOverview(int billingId) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT car_id, name, owner_name, fuel, deprec, costs, total, sc, " +
-                        "seq_nr, bc_total_km, bc_deprec_km, bc_fuel_total, bc_first_km, bc_last_km, " +
-                        "bc_costs, car_deprec, car_deprec_limit " +
-                        "FROM b_car_overview WHERE billing_id = ? ORDER BY car_id"
+                        "seq_nr, bc_total_km, bc_owner_km, bc_deprec_km, bc_fuel_total, bc_first_km, bc_last_km, " +
+                        "bc_costs, car_deprec, car_deprec_limit, nr_of_trips " +
+                    "FROM b_car_overview " +
+                    "JOIN ( SELECT bt_billing_id, bt_car_id, count(*) AS nr_of_trips FROM b_trip " +
+                    "   WHERE bt_km > 0 " +
+                    "   GROUP BY bt_billing_id, bt_car_id " +
+                    ") AS t2 ON car_id=bt_car_id AND billing_id = bt_billing_id " +
+                "WHERE billing_id = ? ORDER BY car_id"
         )) {
             ps.setInt(1, billingId);
             return toList(ps, rs -> {
@@ -231,10 +236,13 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                 cbi.structuredComment = rs.getString("sc");
                 cbi.seqNr = rs.getInt("seq_nr");
                 cbi.totalKm = rs.getInt("bc_total_km");
+                cbi.ownerKm = rs.getInt("bc_owner_km");
                 cbi.deprecKm = rs.getInt("bc_deprec_km");
                 cbi.fuelPerKm = lastKm <= firstKm ? 0 : rs.getInt("bc_fuel_total") * 10 / (lastKm - firstKm);
                 cbi.costsPerKm = rs.getInt("bc_costs") * 10 / cbi.totalKm;
                 cbi.depreciationFactor = rs.getInt("car_deprec");
+                cbi.nrOfTrips = rs.getInt ("nr_of_trips");
+
 
                 // remaining car value
                 int remainingValue = rs.getInt("car_deprec_limit") - lastKm;
@@ -295,8 +303,13 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
      */
     public List<BillingDetailsUserKm> getUserKmDetails(int billingId) {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT bt_user_id, sum_of_excess_kms " +
-                        "FROM b_user_km WHERE bt_billing_id = ? ORDER BY bt_user_id ASC, km_price_from ASC"
+                "SELECT bt_user_id, sum_of_excess_kms, nr_of_trips " +
+                        "FROM b_user_km JOIN (" +
+                        "   SELECT bt_billing_id, bt_user_id, count(*) AS nr_of_trips FROM b_trip " +
+                        "   WHERE bt_km > 0 " +
+                        "   GROUP BY bt_billing_id, bt_user_id" +
+                        ") AS t2 USING (bt_billing_id, bt_user_id) " +
+                "WHERE bt_billing_id = ? ORDER BY bt_user_id ASC, km_price_from ASC"
         )) {
             ps.setInt(1, billingId);
             List<BillingDetailsUserKm> result = new ArrayList<>();
@@ -312,7 +325,7 @@ class JDBCBillingAdmDAO extends AbstractDAO implements BillingAdmDAO {
                         setKilometers(bduk, kmList);
                         // start a new record
                         userId = newUserId;
-                        bduk = new BillingDetailsUserKm(userId);
+                        bduk = new BillingDetailsUserKm(userId, rs.getInt("nr_of_trips"));
                         result.add(bduk);
 
                         kmList.clear();

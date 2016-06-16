@@ -68,7 +68,10 @@ public class Reports extends Controller {
                 new EurocentColumnDefinition<>("Recup kosten", cbi -> cbi.costs),
                 new EurocentColumnDefinition<>("Totaal te ontv.", cbi -> cbi.total),
                 new StringColumnDefinition<>(null, cbi -> cbi.structuredComment),
+                new NumericColumnDefinition<>("Aantal ritten", cbi -> cbi.nrOfTrips),
                 new NumericColumnDefinition<>("Totaal km", cbi -> cbi.totalKm),
+                new NumericColumnDefinition<>("door eigenaar", cbi -> cbi.ownerKm),
+                new NumericColumnDefinition<>("door ontlener", cbi -> cbi.totalKm - cbi.ownerKm),
                 new NumericColumnDefinition<>("Af te schr. km", cbi -> cbi.deprecKm),
                 new NumericColumnDefinition<>("Afschr/km", cbi -> 0.001 * cbi.depreciationFactor),
                 new NumericColumnDefinition<>("Brandstof/km", cbi -> 0.001 * cbi.fuelPerKm),
@@ -135,7 +138,7 @@ public class Reports extends Controller {
                 i++;
                 j++;
             } else if (combined.b.km == 0) {
-                combined.d = new BillingDetailsUserKm(combined.b.userId);
+                combined.d = new BillingDetailsUserKm(combined.b.userId, 0);
                 result.add(combined);
                 i++;
             } else {
@@ -145,7 +148,7 @@ public class Reports extends Controller {
         while (i < list.size()) {
             Combined combined = new Combined();
             combined.b = list.get(i);
-            combined.d = new BillingDetailsUserKm(combined.b.userId);
+            combined.d = new BillingDetailsUserKm(combined.b.userId, 0);
             result.add(combined);
             i++;
         }
@@ -162,6 +165,7 @@ public class Reports extends Controller {
         tableDefinition.addColumn(new EurocentColumnDefinition<>("Totaal", c -> c.b.total));
         tableDefinition.addColumn(new StringColumnDefinition<>(null, c -> c.b.structuredComment));
 
+        tableDefinition.addColumn(new NumericColumnDefinition<>("Aantal ritten", c -> c.d.getNrOfTrips()));
         tableDefinition.addColumn(new NumericColumnDefinition<>("Aantal kilometer", c -> c.d.getTotalKilometers()));
         tableDefinition.addColumn(new NumericColumnDefinition<>("Opgesplitst", c -> c.getKm(0)));
         tableDefinition.addColumn(new NumericColumnDefinition<>(null, c -> c.getKm(1)));
