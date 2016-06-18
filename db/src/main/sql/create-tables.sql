@@ -561,6 +561,18 @@ CREATE TABLE b_costs (
     PRIMARY KEY (bcc_billing_id, bcc_cost_id)
 );
 
+-- Keeps track of car privileges for billings (reporting only)
+CREATE TABLE `b_privileges` (
+  `bp_billing_id` INT NOT NULL,
+  `bp_user_id`    INT NOT NULL,
+  `bp_car_id`     INT NOT NULL,
+  PRIMARY KEY (`bp_billing_id`, `bp_user_id`, `bp_car_id`),
+  FOREIGN KEY (`bp_billing_id`) REFERENCES billing (`billing_id`),
+  FOREIGN KEY (`bp_user_id`) REFERENCES users (`user_id`),
+  FOREIGN KEY (`bp_car_id`) REFERENCES cars (`car_id`)
+);
+
+
 -- EVENTS
 -- ~~~~~~
 
