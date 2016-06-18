@@ -161,6 +161,16 @@ BEGIN
 
 END  $$
 
+-- store the current privileges for later reference
+DROP PROCEDURE IF EXISTS billing_privileges $$
+CREATE PROCEDURE billing_privileges (b_id INT)
+BEGIN
+  DELETE FROM b_privileges WHERE bp_billing_id = b_id;
+  INSERT INTO b_privileges(bp_billing_id,bp_user_id,bp_car_id)
+      SELECT b_id, car_privilege_user_id, car_privilege_car_id FROM carprivileges;
+END $$
+
+
 -- perform a simulation run
 DROP PROCEDURE IF EXISTS billing_user_simulate $$
 CREATE PROCEDURE billing_user_simulate (b_id INT)
@@ -181,6 +191,9 @@ BEGIN
 
   -- clear results of earlier simulations
   CALL billing_reset_all(b_id);
+
+  -- store carprivileges
+  CALL billing_privileges(b_id);
 
   -- bill trips and fuels for every car
   OPEN cur;
@@ -538,6 +551,8 @@ BEGIN
   UPDATE billing SET billing_status='ARCHIVED' WHERE billing_id = b_id;
 
 END $$
+
+
 
 -- TODO: make sure refuels cannot be added to frozen reservations
 -- TODO: check remaining refuels for frozen reservations

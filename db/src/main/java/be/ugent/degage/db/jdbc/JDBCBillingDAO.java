@@ -232,20 +232,21 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
 
     @Override
     public Iterable<BillingDetailsOwner> listOwnerDetails(int billingId, int carId) {
-        // TODO: combine these into fewer SQL statements? Or at least maek a view?
+        // TODO: combine these into fewer SQL statements? Or at least make a view?
 
         // get names and ids of owners and cars
         Iterable<UserHeader> users;
         try (PreparedStatement ps = prepareStatement(
                 "SELECT u, user_firstname, user_lastname " +
                         "FROM users JOIN (" +
-                        "SELECT car_privilege_user_id as u from carprivileges WHERE car_privilege_car_id=? " +
+                        "SELECT bp_user_id as u from b_privileges WHERE bp_billing_id=? AND bp_car_id=? " +
                         "UNION " +
-                        "SELECT car_owner_user_id as u From cars WHERE car_id=?) AS t " +
+                        "SELECT car_owner_user_id as u FROM cars WHERE car_id=?) AS t " +
                         "ON user_id=u"
         )) {
-            ps.setInt(1, carId);
+            ps.setInt(1, billingId);
             ps.setInt(2, carId);
+            ps.setInt(3, carId);
             users = toList(ps, rs -> new UserHeader(
                     rs.getInt("u"),
                     null,
