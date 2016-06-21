@@ -186,6 +186,7 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
             throw new DataAccessException("Cannot get user details", ex);
         }
     }
+
     @Override
     public Iterable<BillingDetailsTrip> listTripDetails(int billingId, int userId, boolean privileged) {
         try (PreparedStatement ps = prepareStatement(
@@ -207,6 +208,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         }
     }
 
+
+
     @Override
     public Iterable<BillingDetailsFuel> listFuelDetails(int billingId, int userId, boolean privileged) {
         try (PreparedStatement ps = prepareStatement(
@@ -217,6 +220,50 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
             ps.setInt(1, billingId);
             ps.setInt(2, userId);
             ps.setBoolean(3, privileged);
+            return toList(ps, rs -> new BillingDetailsFuel(
+                    rs.getInt("bf_reservation_id"),
+                    rs.getInt("bf_refuel_id"),
+                    rs.getString("bf_car_name"),
+                    rs.getInt("bf_fuel_cost"),
+                    rs.getTimestamp("bf_datetime").toLocalDateTime()
+
+            ));
+        } catch (SQLException ex) {
+            throw new DataAccessException("Cannot get fuel details", ex);
+        }
+    }
+
+    private Iterable<BillingDetailsTrip> listPrivilegedTripDetails(int billingId, int userId, int carId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT bt_reservation_id, bt_car_name, bt_km, bt_km_cost, bt_datetime FROM b_trip " +
+                        "WHERE bt_billing_id = ? AND bt_user_id = ? AND bt_privileged AND bt_car_id = ? AND bt_km > 0 " +
+                        "ORDER BY bt_datetime")) {
+            ps.setInt(1, billingId);
+            ps.setInt(2, userId);
+            ps.setInt(3, carId);
+            return toList(ps, rs -> new BillingDetailsTrip(
+                    rs.getInt("bt_reservation_id"),
+                    rs.getString("bt_car_name"),
+                    rs.getInt("bt_km"),
+                    rs.getInt("bt_km_cost"),
+                    rs.getTimestamp("bt_datetime").toLocalDateTime()
+            ));
+        } catch (SQLException ex) {
+            throw new DataAccessException("Cannot get trip details", ex);
+        }
+    }
+
+
+
+    private Iterable<BillingDetailsFuel> listPrivilegedFuelDetails(int billingId, int userId, int carId) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT bf_reservation_id, bf_refuel_id, bf_car_name, bf_fuel_cost, bf_datetime FROM b_fuel " +
+                        "WHERE bf_billing_id = ? AND bf_user_id = ? AND bf_privileged AND bf_car_id = ? " +
+                        "ORDER BY bf_datetime"
+        )) {
+            ps.setInt(1, billingId);
+            ps.setInt(2, userId);
+            ps.setInt(3, carId);
             return toList(ps, rs -> new BillingDetailsFuel(
                     rs.getInt("bf_reservation_id"),
                     rs.getInt("bf_refuel_id"),
@@ -262,8 +309,8 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         for (UserHeader user : users) {
             result.add(new BillingDetailsOwner(
                     user.getFullName(),
-                    listTripDetails(billingId, user.getId(), true),
-                    listFuelDetails(billingId, user.getId(), true)
+                    listPrivilegedTripDetails(billingId, user.getId(), carId),
+                    listPrivilegedFuelDetails(billingId, user.getId(), carId)
             ));
         }
         return result;
