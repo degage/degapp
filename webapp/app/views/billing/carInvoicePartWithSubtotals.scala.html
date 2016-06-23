@@ -1,0 +1,47 @@
+@* carInvoicePartWithSubtotals.scala.html
+* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* Copyright Ⓒ 2014-2015 Universiteit Gent
+*
+* This file is part of the Degage Web Application
+*
+* Corresponding author (see also AUTHORS.txt)
+*
+* Kris Coolsaet
+* Department of Applied Mathematics, Computer Science and Statistics
+* Ghent University
+* Krijgslaan 281-S9
+* B-9000 GENT Belgium
+*
+* The Degage Web Application is free software: you can redistribute it and/or modify
+* it under the terms of the GNU Affero General Public License as published by
+* the Free Software Foundation, either version 3 of the License, or
+* (at your option) any later version.
+*
+* The Degage Web Application is distributed in the hope that it will be useful,
+* but WITHOUT ANY WARRANTY; without even the implied warranty of
+* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+* GNU Affero General Public License for more details.
+*
+* You should have received a copy of the GNU Affero General Public License
+* along with the Degage Web Application (file LICENSE.txt in the
+* distribution). If not, see http://www.gnu.org/licenses/.
+*@
+@(table: Billings.OwnerTable)
+
+@* Same as carInvoicePart, but also displays subtotals (for use when car has multiple privileged users). *@
+
+<tr><td class="driver" colspan="3">Bestuurder: <b>@table.name</b></td></tr>
+@if(table.lines.isEmpty) {
+    <tr><td colspan="3">Geen ritten</td></tr>
+} else {
+    @foreach.tr(table.lines) { line =>
+        <td>@Utils.toLocalizedDateStringShort(line.date)</td>
+        <td class="km">@line.km</td>
+        <td class="numeric">@if(line.fuelCost != null) {@data.EurocentAmount.toString(line.fuelCost)}</td>
+    }
+    @if(table.lines.size > 1) {
+          <th>Subtotaal:</th>
+          <td class="km">@table.total.km</td>
+          <td>@data.EurocentAmount.toString(table.total.fuelCost)</td>
+    }
+}

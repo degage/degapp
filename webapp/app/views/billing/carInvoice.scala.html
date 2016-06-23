@@ -30,7 +30,7 @@
 @import com.google.common.base.Strings;
 
 @(billing: Billing, billNr: String, car: CarHeaderShort, owner: UserHeader,
-  tables: Iterable[Billings.OwnerTable], totals: Billings.ShortInvoiceLine,
+  tables: List[Billings.OwnerTable], totals: Billings.ShortInvoiceLine,
   details: BillingDetailsCar, remainingValue: Int, struct: String)
 
 @cents(v:Int)={
@@ -80,16 +80,11 @@
                   </tr>
                   </thead>
                   <tbody>
-                    @foreach(tables) { table =>
-                        <tr><td class="driver" colspan="3">Bestuurder: <b>@table.name</b></td></tr>
-                        @foreach.trOrElse(table.lines) { line =>
-                            <td>@Utils.toLocalizedDateStringShort(line.date)</td>
-                            <td class="km">@line.km</td>
-                            <td class="numeric">@if(line.fuelCost!=null){@data.EurocentAmount.toString(line.fuelCost)}</td>
-                        }{
-                            <tr><td colspan="3">Geen ritten</td></tr>
-                        }
-                    }
+                      @if(tables.size>1) {
+                        @foreach(tables)(table => carInvoicePartWithSubtotals(table))
+                      } else {
+                        @foreach(tables)(table => carInvoicePart(table))
+                      }
                   </tbody>
                   <tfoot>
                       <tr>
