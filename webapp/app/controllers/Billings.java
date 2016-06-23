@@ -245,7 +245,7 @@ public class Billings extends Controller {
     }
 
     // TODO: factor out code in common with getInvoiceLines
-    private static Iterable<ShortInvoiceLine> getShortInvoiceLines(
+    private static List<ShortInvoiceLine> getShortInvoiceLines(
             Iterable<BillingDetailsTrip> trips, Iterable<BillingDetailsFuel> fuels) {
         // store all invoice lines according to reservation id
         Map<Integer, ILEntry<ShortInvoiceLine>> map = new HashMap<>();
@@ -285,11 +285,11 @@ public class Billings extends Controller {
 
     public static class OwnerTable {
         public String name;
-        public Iterable<ShortInvoiceLine> lines;
+        public List<ShortInvoiceLine> lines;
         public ShortInvoiceLine total;
     }
 
-    private static Iterable<OwnerTable> getOwnerTables(Iterable<BillingDetailsOwner> list) {
+    private static List<OwnerTable> getOwnerTables(Iterable<BillingDetailsOwner> list) {
         List<OwnerTable> result = new ArrayList<>();
         for (BillingDetailsOwner details : list) {
             OwnerTable ot = new OwnerTable();
@@ -414,7 +414,7 @@ public class Billings extends Controller {
 
             Iterable<BillingDetailsOwner> ownerDetails = dao.listOwnerDetails(billingId, carId);
 
-            Iterable<OwnerTable> tables = getOwnerTables(ownerDetails);
+            List<OwnerTable> tables = getOwnerTables(ownerDetails);
             CarDepreciation depreciation = context.getCarDAO().getDepreciation(carId);
             int remainingValue = depreciation.getLimit() - bCar.getLastKm();
             if (remainingValue <= 0) {
