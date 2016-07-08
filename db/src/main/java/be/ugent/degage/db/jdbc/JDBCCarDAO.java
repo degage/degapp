@@ -311,19 +311,17 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-    private LazyStatement getCarStatement = new LazyStatement(
-            "SELECT * FROM cars " +
+    @Override
+    public Car getCar(int id) throws DataAccessException {
+        try (
+            PreparedStatement ps = prepareStatement(
+                "SELECT * FROM cars " +
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
                     "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
                     "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
                     "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
-                    "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id " +
-                    "WHERE car_id=?");
-
-    @Override
-    public Car getCar(int id) throws DataAccessException {
-        try {
-            PreparedStatement ps = getCarStatement.value();
+                    "WHERE car_id=?"
+            )) {
             ps.setInt(1, id);
             return toSingleObject(ps, JDBCCarDAO::populateCar);
         } catch (SQLException ex) {
@@ -337,8 +335,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
            "SELECT * FROM cars " +
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
                     "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
-                    "WHERE car_id=?");
-        ) {
+                    "WHERE car_id=?"
+        )) {
             ps.setInt(1, id);
             return toSingleObject(ps, JDBCCarDAO::populateCarHeaderLongAndOwner);
         } catch (SQLException ex) {

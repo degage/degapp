@@ -266,16 +266,6 @@ CREATE VIEW `infosessions_extended` AS
         LEFT JOIN infosessionenrollees USING (infosession_id)
     GROUP BY infosession_id;
 
--- Keeps track of intervals where cars are NOT available
-CREATE TABLE `caravailabilities` (
-	`car_availability_id` INT NOT NULL AUTO_INCREMENT,
-	`car_availability_car_id` INT NOT NULL,
-	`car_availability_start` INT NOT NULL, -- seconds in range 0-604800
-	`car_availability_end` INT NOT NULL,  -- seconds in range ...start-1209600
-	PRIMARY KEY (`car_availability_id`),
-	FOREIGN KEY (`car_availability_car_id`) REFERENCES cars(`car_id`)
-);
-
 CREATE TABLE `carprivileges` (
 	`car_privilege_user_id` INT NOT NULL,
 	`car_privilege_car_id` INT NOT NULL,
