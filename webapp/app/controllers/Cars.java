@@ -562,8 +562,7 @@ public class Cars extends Controller {
     @AllowRoles
     @InjectContext
     public static Result getCarInfoModal(int id) {
-        Car car = DataAccess.getInjectedContext().getCarDAO().getCar(id);
-        return ok(carinfomodal.render(car));
+        return ok(carinfomodal.render(DataAccess.getInjectedContext().getCarDAO().getCarHeaderLong(id)));
 
     }
 

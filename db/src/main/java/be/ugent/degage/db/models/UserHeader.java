@@ -34,10 +34,7 @@ package be.ugent.degage.db.models;
  */
 public class UserHeader extends UserHeaderShort {
 
-    private int id;
     private String email;
-    private String firstName;
-    private String lastName;
     private UserStatus status;
 
     private String phone;
