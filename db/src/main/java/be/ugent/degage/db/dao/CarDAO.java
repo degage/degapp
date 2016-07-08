@@ -52,6 +52,8 @@ public interface CarDAO {
 
     public Car getCar(int id) throws DataAccessException;
 
+    public CarHeaderLong getCarHeaderLong(int id) throws DataAccessException;
+
     /**
      * Returns a filtered list of cars. Only active cars are shown. Always contains a location. Owner is
      * left null.

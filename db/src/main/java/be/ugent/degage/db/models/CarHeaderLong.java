@@ -53,9 +53,9 @@ public class CarHeaderLong extends CarHeaderAndOwner {
     public CarHeaderLong(int id, String name, String brand, String type, String email,
                          boolean active, Integer seats, Integer doors,
                          boolean manual, boolean gps, boolean hook, CarFuel fuel,
-                         String comments, UserHeader owner) {
-        super(id, name, brand, type, email, active, owner == null ? 0 : owner.getId(), owner == null ? "" : owner.toString());
-        this.owner = owner;
+                         String comments) {
+        super(id, name, brand, type, email, active, 0 , "");
+        this.owner = null;
         this.seats = seats;
         this.doors = doors;
         this.manual = manual;
@@ -67,6 +67,12 @@ public class CarHeaderLong extends CarHeaderAndOwner {
 
     public UserHeader getOwner() {
         return owner;
+    }
+
+    public void setOwner(UserHeader owner) {
+        this.owner = owner;
+        setOwnerId(owner.getId());
+        setOwnerName(owner.toString());
     }
 
     public Integer getSeats() {

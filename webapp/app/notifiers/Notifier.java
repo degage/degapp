@@ -348,8 +348,8 @@ public class Notifier extends Mailer {
     public static void sendContractManagerAssignedMail(UserHeader user, UserHeader admin) {
         String loginURL = toFullURL(routes.Login.login(null));
         createNotificationAndSend(user, "managerAssigned",
-                views.txt.messages.managerAssigned.render(user, admin, 75, 30, loginURL), // TODO: not hardcoded
-                views.html.messages.managerAssigned.render(user, admin, 75, 30, loginURL)
+                views.txt.messages.managerAssigned.render(user, admin, 75, 35, loginURL), // TODO: not hardcoded
+                views.html.messages.managerAssigned.render(user, admin, 75, 35, loginURL)
         );
     }
 

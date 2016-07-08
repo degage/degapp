@@ -60,4 +60,8 @@ public class CarHeaderShort {
     public int getOwnerId() {
         return ownerId;
     }
+
+    public void setOwnerId(int ownerId) {
+        this.ownerId = ownerId;
+    }
 }

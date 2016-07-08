@@ -48,4 +48,8 @@ public class CarHeaderAndOwner extends CarHeader {
     public String getOwnerName() {
         return ownerName;
     }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
 }

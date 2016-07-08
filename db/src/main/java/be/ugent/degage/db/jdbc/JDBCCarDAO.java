@@ -131,10 +131,15 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getBoolean("car_gps"),
                 rs.getBoolean("car_hook"),
                 CarFuel.valueOf(rs.getString("car_fuel")),
-                rs.getString("car_comments"),
-                null
+                rs.getString("car_comments")
         );
         result.setLocation(JDBCAddressDAO.populateAddress(rs));
+        return result;
+    }
+
+    private static CarHeaderLong populateCarHeaderLongAndOwner(ResultSet rs) throws SQLException {
+        CarHeaderLong result = populateCarHeaderLong(rs);
+        result.setOwner(JDBCUserDAO.populateUserHeader(rs));
         return result;
     }
 
@@ -245,12 +250,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-    private LazyStatement updateLocationStatement = new LazyStatement(
-            "UPDATE addresses JOIN cars ON car_location=address_id " +
-                    "SET address_city = ?, address_zipcode = ?, address_street = ?, address_number = ?, address_country=? " +
-                    "WHERE car_id = ?"
-    );
-
     private void updateLocation(int carId, Address location) {
         JDBCAddressDAO.updateLocation(
                 getConnection(),
@@ -312,25 +311,38 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
     }
 
-    private LazyStatement getCarStatement = new LazyStatement(
-            "SELECT * FROM cars " +
+    @Override
+    public Car getCar(int id) throws DataAccessException {
+        try (
+            PreparedStatement ps = prepareStatement(
+                "SELECT * FROM cars " +
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
                     "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
                     "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
                     "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
-                    "LEFT JOIN caravailabilities ON caravailabilities.car_availability_car_id = cars.car_id " +
-                    "WHERE car_id=?");
-
-    @Override
-    public Car getCar(int id) throws DataAccessException {
-        try {
-            PreparedStatement ps = getCarStatement.value();
+                    "WHERE car_id=?"
+            )) {
             ps.setInt(1, id);
             return toSingleObject(ps, JDBCCarDAO::populateCar);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
     }
+
+    @Override
+    public CarHeaderLong getCarHeaderLong(int id) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+           "SELECT * FROM cars " +
+                    "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
+                    "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+                    "WHERE car_id=?"
+        )) {
+            ps.setInt(1, id);
+            return toSingleObject(ps, JDBCCarDAO::populateCarHeaderLongAndOwner);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch car by id.", ex);
+        }
+    };
 
     private static void appendCarFilter(StringBuilder builder, Filter filter) {
 

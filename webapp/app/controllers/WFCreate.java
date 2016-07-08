@@ -70,7 +70,7 @@ public class WFCreate extends WFCommon {
                                 untilString.isEmpty() ? fromDateTime : Utils.toLocalDateTime(untilString)
                         )
                 ),
-                DataAccess.getInjectedContext().getCarDAO().getCar(carId)
+                DataAccess.getInjectedContext().getCarDAO().getCarHeaderLong(carId)
         ));
     }
 
