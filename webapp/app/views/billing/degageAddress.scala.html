@@ -1,4 +1,4 @@
-@* userInvoiceFinal.scala.html
+@* degageAddress.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,25 +27,13 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(billing: Billing, billNr: String, user: User, kpi: Billings.KmPriceInfo,
-           lines: Iterable[Billings.InvoiceLine], totals: Billings.InvoiceLine, struct: String)
-@userInvoice(billing,billing.getDriversDate,billNr,user,kpi,lines,totals){
-@if(totals.kmCost>totals.fuelCost){
-<div class="highlight">
-<p>Gelieve dit bedrag te storten op rekeningnummer
-    <b>IBAN BE78 5230 8045 2986</b> - BIC code TRIOBEBB,
-met vermelding
-van de gestructureerde mededeling <b>@struct</b>. </p>
-<p>De uiterste betalingsdatum is
-    <b>@(Utils.toLocalizedDateString(billing.getDriversDate.plusDays(14)))</b>.
-</p>
-</div>
+@(id: Int)
+
+@* Address changed after billing nr 6 *@
+
+@if(id < 7) {
+    <p>Degage! vzw - Fuchsiastraat 81, 9000 Gent</p>
 }else{
-<p>Dit bedrag zal door ons worden terugbetaald.</p>
+    <p>Degage! vzw - Pannestraat 31, 9000 Gent</p>
 }
-<ul class="note">
-<li>Ben je niet akkoord met deze afrekening, reageer dan binnen de 7 dagen met een e-mail naar
-    de administratie (admin@@degage.be).</li>
-</ul>
-    @degageAddress(billing.getId)
-}
+
