@@ -1,4 +1,4 @@
-@* carInvoicePartWithSubtotals.scala.html
+@* degageAddress.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,22 +27,13 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(table: Billings.OwnerTable)
+@(id: Int)
 
-@* Same as carInvoicePart, but also displays subtotals (for use when car has multiple privileged users). *@
+@* Address changed after billing nr 6 *@
 
-<tr><td class="driver" colspan="3">Bestuurder: <b>@table.name</b></td></tr>
-@if(table.lines.isEmpty) {
-    <tr><td colspan="3">Geen ritten</td></tr>
-} else {
-    @foreach.tr(table.lines) { line =>
-        <td>@Utils.toLocalizedDateStringShort(line.date)</td>
-        <td class="km">@line.km</td>
-        <td class="numeric">@if(line.fuelCost != null) {@data.EurocentAmount.toString(line.fuelCost)}</td>
-    }
-    @if(table.lines.size > 1) {
-          <th>Subtotaal:</th>
-          <td class="km">@table.total.km</td>
-          <td>@data.EurocentAmount.toString(table.total.fuelCost)</td>
-    }
+@if(id < 7) {
+    <p>Degage! vzw - Fuchsiastraat 81, 9000 Gent</p>
+}else{
+    <p>Degage! vzw - Pannestraat 31, 9000 Gent</p>
 }
+
