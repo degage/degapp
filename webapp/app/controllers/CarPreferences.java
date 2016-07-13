@@ -29,6 +29,7 @@
 
 package controllers;
 
+import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.dao.CarPreferencesDAO;
 import be.ugent.degage.db.models.CarPreference;
 import db.CurrentUser;
