@@ -2,7 +2,7 @@ name := "Degage - web layer"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.8"
 
 fork in run := true
 
@@ -19,7 +19,7 @@ resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/mo
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.4-SNAPSHOT",
-  "be.ugent.caagt"           % "sheeter"                      % "1.0-SNAPSHOT",
+  "be.ugent.caagt"           % "sheeter"                      % "1.1-SNAPSHOT",
   "com.edulify"             %% "play-hikaricp"               % "1.5.0-fork-2",    // 1.5.0 adapted to use hikari 2.3.2
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
