@@ -27,7 +27,26 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
+
 @(headerHtml: String, ofclist: java.lang.Iterable[Calendars.OverviewForCar])
+
+@scripts={
+  @js.paginationWithTabs("Trips.showTripsPage", 2)
+  @js.usesajax()
+    <script>
+     function loadCarData ( carId, dateString  ) {
+        console.log('date1', carId, dateString);
+         $.ajax(myJsRoutes.controllers.Calendars.availabilityCar(carId, dateString))
+         .done (function (html) {
+             $ ("#car-availability-panel").html (html) ;
+         })
+         .fail (function ( ) {
+             // TODO: make clearer
+             $ ( "#car-availability-panel" ).html ("Er ging iets mis...") ;
+         });
+     }
+    </script>
+}
 
 @import providers.DataProvider
 @import db.CurrentUser
@@ -40,7 +59,8 @@
     @breadcrumbs {
     }
 
-    <div id="page-wrapper">        @* Does not use maincontent because of header *@
+    <div id="page-wrapper">        
+    @* Does not use maincontent because of header *@
         @dashboardHeader(headerHtml)
         @calendars.reservationpanelowner(ofclist)
 
@@ -48,13 +68,15 @@
             @flashes()
         </div>
         @foreach(ofclist) { ofc =>
-            @calendars.overviewpanel(ofc.name + " (deze week)", "fa-calendar", ofc.lines, percentage=10){
+            @calendars.overviewpanel(ofc.name + " (deze week)", "fa-calendar", ofc, percentage=10){
                 @* no header. *@
-            }{ <a class="btn btn-primary btn-sm" href="@routes.Calendars.indexWithCar(ofc.name, ofc.id)">Andere periode...</a>
+            }{ 
+               <a class="btn btn-primary btn-sm" href="@routes.Calendars.indexWithCar(ofc.name, ofc.id)">Andere periode...</a>
                <a class="btn btn-warning btn-sm" href="@routes.WFCreate.createOld(ofc.id)">Reservatie in het verleden...</a>
             }
         }
         <h4>Reservaties / ritten</h4>
+        <div id='drieskeeee'></div>
         @trips.triptabs(2)
     </div>
 }

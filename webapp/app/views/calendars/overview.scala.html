@@ -57,8 +57,7 @@
             @std.submitButton("Toon!", css="col-sm-4")
         }
     }
-
-    @overviewpanel("Beschikbare auto's", "fa-car", lines){
+    overviewpanel("Beschikbare auto's", "fa-car", lines){
         <tr>
             <td>&nbsp;</td>
             <td colspan="4"><a class="btn btn-sm"
@@ -68,5 +67,5 @@
                     href="@routes.Calendars.overview(Utils.toDateString(next))"><i class="fa fa-chevron-right"></i></a></td>
         </tr>
     }{  @* no footer. *@ }
-
+ 
 }

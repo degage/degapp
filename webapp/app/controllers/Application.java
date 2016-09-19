@@ -73,13 +73,11 @@ public class Application extends Controller {
                         Calendars.CarDateData data = new Calendars.CarDateData();
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();
-                        data.date = Utils.toDateString(date);
+                        data.date = Utils.toDateString(LocalDate.now());
                         data.period = "week";
                         ofclist.add(Calendars.getOverviewForCar(data));
                     }
-                    String previousWeek = Utils.toDateString(date.plusDays(-7));
-                    String nextWeek = Utils.toDateString(date.plusDays(7));
-                    return ok(dashboardOwner.render(headerHtml, ofclist, previousWeek, nextWeek));
+                    return ok(dashboardOwner.render(headerHtml, ofclist));
                 } else {
                     return ok(dashboardFullUser.render(headerHtml));
                 }

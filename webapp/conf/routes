@@ -46,7 +46,7 @@ GET         /calendar                               controllers.Calendars.index(
 GET         /calendar/list                          controllers.Calendars.listAvailableCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /calendar/cars                          controllers.Calendars.showCarsForReservation()
 GET         /calendar/car                           controllers.Calendars.startCar()
-GET         /calendar/car/availablility             controllers.Calendars.availabilityCar(id: Int)
+GET         /calendar/car/availablility             controllers.Calendars.availabilityCar(id: Int, date: String?= null)
 POST        /calendar/car                           controllers.Calendars.overviewCarPost()
 GET         /calendar/car/index                     controllers.Calendars.indexWithCar(carName: String, id: Int)
 GET         /calendar/date                          controllers.Calendars.overview(date: String ?= null)

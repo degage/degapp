@@ -154,12 +154,13 @@ public class Calendars extends Controller {
      */
     @AllowRoles
     @InjectContext
-    public static Result availabilityCar (int carId) {
+    public static Result availabilityCar (int carId, String dateString) {
+        LocalDate date = dateString == null ? LocalDate.now() : Utils.toLocalDate(dateString);
         CarDateData data = new CarDateData();
         data.carId = carId;
         // data.carIdAsString = carName;
-        data.date = Utils.toDateString(LocalDate.now());
-        return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", getOverviewLines(data), 10, null, null));
+        data.date = Utils.toDateString(date);
+        return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(carId, "", data.date, getOverviewLines(data)), 10, null, null));
         // return overviewPanel("titelke", "fa-calendar", getOverviewLines(data), 10);
     }
 
@@ -173,9 +174,23 @@ public class Calendars extends Controller {
         if (form.hasErrors()) {
             return badRequest(startcar.render(form));
         } else {
-            return overviewCar(form);
+            return overviewPanel(form);
         }
     }
+
+    // /**
+    //  * Show an overview raster per day of reservations for a specific car during a certain week.
+    //  */
+    // @AllowRoles
+    // @InjectContext
+    // public static Result overviewPanelCarPost () {
+    //     Form<CarDateData> form = Form.form(CarDateData.class).bindFromRequest();
+    //     if (form.hasErrors()) {
+    //         return badRequest(startcar.render(form));
+    //     } else {
+    //         return overviewPanel(form);
+    //     }
+    // }
 
     /**
      * Same as overviewCarPost, but with car id and car name already filled in and day of today
@@ -234,12 +249,19 @@ public class Calendars extends Controller {
     }
 
     private static Result overviewCar(Form<CarDateData> form) {
-        return ok(overviewcar.render(form, getOverviewLines(form.get())));
+        return ok(overviewcar.render(form, new OverviewForCar(form)));
+    }
+
+    private static Result overviewPanel(Form<CarDateData> form) {
+        return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(form), 10, null, null));
     }
 
     public static class OverviewForCar {
         public int id;
         public String name;
+        public String date;
+        public String nextWeek;
+        public String previousWeek;
         public Iterable<OverviewLine> lines;
 
         public OverviewForCar(int id, String name, Iterable<OverviewLine> lines) {
@@ -247,10 +269,32 @@ public class Calendars extends Controller {
             this.name = name;
             this.lines = lines;
         }
+
+        public OverviewForCar(int id, String name, String date, Iterable<OverviewLine> lines) {
+            this.id = id;
+            this.name = name;
+            this.lines = lines;
+            this.date = date;
+            LocalDate localDate = Utils.toLocalDate(date);
+            nextWeek = Utils.toDateString(localDate.plusDays(7));
+            previousWeek = Utils.toDateString(localDate.plusDays(-7));
+            System.out.println("1 previousWeek"+previousWeek);
+        }
+
+        public OverviewForCar(Form<CarDateData> form) {
+            this.id = form.get().carId;
+            this.name = form.get().carIdAsString;
+            this.lines = getOverviewLines(form.get());
+            this.date = form.get().date;
+            LocalDate localDate = Utils.toLocalDate(date);
+            nextWeek = Utils.toDateString(localDate.plusDays(7));
+            previousWeek = Utils.toDateString(localDate.plusDays(-7));
+            System.out.println("2 previousWeek"+previousWeek);
+        }
     }
 
     public static OverviewForCar getOverviewForCar(CarDateData data) {
-        return new OverviewForCar(data.carId, data.carIdAsString, getOverviewLines(data));
+        return new OverviewForCar(data.carId, data.carIdAsString, data.date, getOverviewLines(data));
     }
 
     public static Collection<OverviewLine> getOverviewLines(CarDateData data) {
