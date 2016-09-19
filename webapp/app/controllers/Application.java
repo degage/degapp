@@ -73,11 +73,13 @@ public class Application extends Controller {
                         Calendars.CarDateData data = new Calendars.CarDateData();
                         data.carId = car.getId();
                         data.carIdAsString = car.getName();
-                        data.date = Utils.toDateString(LocalDate.now());
+                        data.date = Utils.toDateString(date);
                         data.period = "week";
                         ofclist.add(Calendars.getOverviewForCar(data));
                     }
-                    return ok(dashboardOwner.render(headerHtml, ofclist));
+                    String previousWeek = Utils.toDateString(date.plusDays(-7));
+                    String nextWeek = Utils.toDateString(date.plusDays(7));
+                    return ok(dashboardOwner.render(headerHtml, ofclist, previousWeek, nextWeek));
                 } else {
                     return ok(dashboardFullUser.render(headerHtml));
                 }
@@ -118,7 +120,8 @@ public class Application extends Controller {
                         javascript.Damages.addStatus(),
                         javascript.Damages.addProof(),
                         javascript.InfoSessions.enrollSession(),
-                        javascript.Maps.getMap()
+                        javascript.Maps.getMap(),
+                        javascript.Calendars.availabilityCar()
                 )
         );
     }

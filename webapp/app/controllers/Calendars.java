@@ -149,6 +149,21 @@ public class Calendars extends Controller {
     }
 
     /**
+     * Shows a reservation search form containing a car and a date. Results in a calendar overview
+     * for the given car, starting at the given date.
+     */
+    @AllowRoles
+    @InjectContext
+    public static Result availabilityCar (int carId) {
+        CarDateData data = new CarDateData();
+        data.carId = carId;
+        // data.carIdAsString = carName;
+        data.date = Utils.toDateString(LocalDate.now());
+        return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", getOverviewLines(data), 10, null, null));
+        // return overviewPanel("titelke", "fa-calendar", getOverviewLines(data), 10);
+    }
+
+    /**
      * Show an overview of reservations for a specific car during a certain week.
      */
     @AllowRoles
