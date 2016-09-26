@@ -160,7 +160,7 @@ public class Calendars extends Controller {
         data.carId = carId;
         // data.carIdAsString = carName;
         data.date = Utils.toDateString(date);
-        return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(carId, "", data.date, getOverviewLines(data)), 10, null, null));
+        return ok(overviewForCarPanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(carId, "", data.date, getOverviewLines(data)), 10, null, null));
         // return overviewPanel("titelke", "fa-calendar", getOverviewLines(data), 10);
     }
 
@@ -174,7 +174,7 @@ public class Calendars extends Controller {
         if (form.hasErrors()) {
             return badRequest(startcar.render(form));
         } else {
-            return overviewPanel(form);
+            return overviewForCarPanel(form);
         }
     }
 
@@ -252,9 +252,13 @@ public class Calendars extends Controller {
         return ok(overviewcar.render(form, new OverviewForCar(form)));
     }
 
-    private static Result overviewPanel(Form<CarDateData> form) {
-        return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(form), 10, null, null));
+    private static Result overviewForCarPanel(Form<CarDateData> form) {
+        return ok(overviewForCarPanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(form), 10, null, null));
     }
+
+    // private static Result overviewPanel(Form<CarDateData> form) {
+    //     return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(form), 10, null, null));
+    // }
 
     public static class OverviewForCar {
         public int id;

@@ -33,20 +33,6 @@
 
 @scripts={
   @js.datetimepicker()
-  @js.usesajax()
-    <script>
-     function loadModal ( carId ) {
-         $.ajax(myJsRoutes.controllers.Cars.getCarInfoModal(carId))
-         .done (function (html) {
-             $ ("#resultModal").html (html) ;
-             $ ('#detailsModal').modal ('show') ;
-         })
-         .fail (function ( ) {
-             // TODO: make clearer
-             $ ( "#resultModal" ).html ("Er ging iets mis...") ;
-         });
-     }
-    </script>
 }
 
 @stdlayout("Overzicht vrije perioden", sheets("reservationtable", "taglabels"), scripts){
@@ -57,7 +43,7 @@
             @std.submitButton("Toon!", css="col-sm-4")
         }
     }
-    overviewpanel("Beschikbare auto's", "fa-car", lines){
+    @overviewpanel("Beschikbare auto's", "fa-car", lines){
         <tr>
             <td>&nbsp;</td>
             <td colspan="4"><a class="btn btn-sm"

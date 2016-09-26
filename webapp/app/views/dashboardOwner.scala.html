@@ -33,19 +33,7 @@
 @scripts={
   @js.paginationWithTabs("Trips.showTripsPage", 2)
   @js.usesajax()
-    <script>
-     function loadCarData ( carId, dateString  ) {
-        console.log('date1', carId, dateString);
-         $.ajax(myJsRoutes.controllers.Calendars.availabilityCar(carId, dateString))
-         .done (function (html) {
-             $ ("#car-availability-panel").html (html) ;
-         })
-         .fail (function ( ) {
-             // TODO: make clearer
-             $ ( "#car-availability-panel" ).html ("Er ging iets mis...") ;
-         });
-     }
-    </script>
+  @js.ajaxCarData()
 }
 
 @import providers.DataProvider
@@ -68,7 +56,7 @@
             @flashes()
         </div>
         @foreach(ofclist) { ofc =>
-            @calendars.overviewpanel(ofc.name + " (deze week)", "fa-calendar", ofc, percentage=10){
+            @calendars.overviewForCarPanel(ofc.name + " (deze week)", "fa-calendar", ofc, percentage=10){
                 @* no header. *@
             }{ 
                <a class="btn btn-primary btn-sm" href="@routes.Calendars.indexWithCar(ofc.name, ofc.id)">Andere periode...</a>

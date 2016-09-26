@@ -1,4 +1,4 @@
-@* overviewcar.scala.html
+@* ajaxCarData.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Calendars.CarDateData], ofc: Calendars.OverviewForCar)
+@()
+@* Add to header of a page to load script to load car data via ajax *@
 
-@scripts={
-  @js.userpicker()
-  @js.datetimepicker()
-  @js.usesajax()
-  @js.ajaxCarData()
-}
-
-@stdlayout("Beschikbaarheid auto", sheets("reservationtable"), scripts) {
-    @cardatepanel(form,routes.Calendars.overviewCarPost())
-    @overviewForCarPanel("Beschikbare perioden", "fa-calendar", ofc, percentage=10){
-        @* no header. *@
-    }{  @* no footer. *@ }
-}
+<script src='@routes.Assets.at("javascripts/ajaxCarData.js")'></script>
