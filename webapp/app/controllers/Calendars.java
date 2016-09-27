@@ -160,7 +160,7 @@ public class Calendars extends Controller {
         data.carId = carId;
         // data.carIdAsString = carName;
         data.date = Utils.toDateString(date);
-        return ok(overviewForCarPanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(carId, "", data.date, getOverviewLines(data)), 10, null, null));
+        return ok(overviewForCarGrid.render(new OverviewForCar(carId, "", data.date, getOverviewLines(data)), 10, null, null));
         // return overviewPanel("titelke", "fa-calendar", getOverviewLines(data), 10);
     }
 

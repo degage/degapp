@@ -1,0 +1,42 @@
+@(ofc: Calendars.OverviewForCar,
+                 percentage:Int = 15)(header: => Html)(footer: => Html)
+
+@* Overview panel for use in overview and overviewcar templates. *@
+
+@import util.OverviewLine._
+<div id="car-availability-panel">
+    <table class="overview">
+      <tr>
+        <td>&nbsp;</td>
+        <td colspan="4">
+          <a class="btn btn-sm" onclick="loadCarData(@ofc.id, '@ofc.previousWeek')"><i class="fa fa-chevron-left"></i></a>
+        </td>
+        <td colspan="4" class="text-right"><a class="btn btn-sm" onclick="loadCarData(@ofc.id, '@ofc.nextWeek')"><i class="fa fa-chevron-right"></i></a>
+        </td>
+      </tr>
+        <tr>
+            <th class="res-car">&nbsp;</th>
+            @for(i <- START_HOUR until END_HOUR) {
+                <th class="res-hour" colspan="@INTERVALS_PER_HOUR"
+                    width="@((100.0-percentage)/(END_HOUR-START_HOUR))%">@i:00</th>
+            }
+        </tr>
+        @foreach.tr(ofc.lines) { line =>
+            <th class="res-car" width="@percentage%">@line.lineHeader</th>
+            @for(str <- line.freeTimes){
+               <td class="@if(str==null){res-notfree}else{res-free}">
+                   @if(str!=null) {
+                        <a href='@routes.WFCreate.create(line.carId,str,"")'>&nbsp;</a>
+                   }
+               </td>
+            }
+        }
+        <tr>
+            <td colspan="@(NUMBER_OF_INTERVALS+1)" class="text-right">
+                <b>Legende:</b>
+                <span class="res-label res-notfree">Bezet</span>
+            </td>
+        </tr>
+    </table>
+    <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
+  </div>

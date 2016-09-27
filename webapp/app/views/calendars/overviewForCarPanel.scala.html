@@ -35,36 +35,9 @@
 @import util.OverviewLine._
 @panel(title,faClass){
     <div class="col-xs-12">
-        <div id="car-availability-panel">
-            <table class="overview">
-                @header
-                <tr>
-                    <th class="res-car">&nbsp;</th>
-                    @for(i <- START_HOUR until END_HOUR) {
-                        <th class="res-hour" colspan="@INTERVALS_PER_HOUR"
-                            width="@((100.0-percentage)/(END_HOUR-START_HOUR))%">@i:00</th>
-                    }
-                </tr>
-                @foreach.tr(ofc.lines) { line =>
-                    <th class="res-car" width="@percentage%">@line.lineHeader</th>
-                    @for(str <- line.freeTimes){
-                       <td class="@if(str==null){res-notfree}else{res-free}">
-                           @if(str!=null) {
-                                <a href='@routes.WFCreate.create(line.carId,str,"")'>&nbsp;</a>
-                           }
-                       </td>
-                    }
-                }
-                <tr>
-                    <td colspan="@(NUMBER_OF_INTERVALS+1)" class="text-right">
-                        <b>Legende:</b>
-                        <span class="res-label res-notfree">Bezet</span>
-                    </td>
-                </tr>
-            </table>
-            <p>Klik op het eerste kwartier van een periode om een reservatie te maken.</p>
-            <a href="#1" onclick="loadCarData(@ofc.id, '@ofc.previousWeek')">Load car data << @ofc.previousWeek</a>
-        </div>
+        @overviewForCarGrid(ofc, percentage=10){
+            @* no header. *@
+        }{  @* no footer. *@ }
         @footer
     </div>
 }
