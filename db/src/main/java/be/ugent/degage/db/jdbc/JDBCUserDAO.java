@@ -308,13 +308,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     @Override
     public void updateUserMainProfile(User user) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE users SET user_firstname=?, user_lastname=?,  user_phone=?, user_cellphone=? WHERE user_id = ?"
+                "UPDATE users SET user_firstname=?, user_lastname=?,  user_phone=?, user_cellphone=?, user_vat=? WHERE user_id = ?"
         )) {
             ps.setString(1, user.getFirstName());
             ps.setString(2, user.getLastName());
             ps.setString(3, user.getPhone());
             ps.setString(4, user.getCellPhone());
-            ps.setInt(5, user.getId());
+            ps.setString(5, user.getVatNr());
+            ps.setInt(6, user.getId());
 
             ps.executeUpdate();
         } catch (SQLException ex) {
