@@ -471,11 +471,21 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 builder.append(" ORDER BY car_brand ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
+            case ACTIVE:
+                builder.append(" ORDER BY car_active ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case OWNER:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
         }
 
         builder.append (" LIMIT ").append (pageSize).append(" OFFSET ").append((page-1)*pageSize);
 
-        //System.err.println("SQL statement = " + builder.toString());
+        System.out.println("SQL statement = " + builder.toString());
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             return toPage(ps, pageSize, rs -> new CarHeaderAndOwner(

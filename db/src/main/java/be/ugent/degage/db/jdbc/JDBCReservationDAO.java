@@ -431,19 +431,38 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     @Override
     public Page<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            String sql = getReservationsPageStatement(filter);
-            sql += " ORDER BY ";
-            switch (orderBy) {
-                // TODO: get some other things to sort on
-                default:
-                    sql += " reservation_from " + (asc ? " asc " : " desc ");
-                    break;
-            }
-            sql += " LIMIT " + (page - 1) * pageSize + ", " + pageSize;
-            try (PreparedStatement ps = prepareStatement(sql)) {
-                return toPage(ps, pageSize, JDBCReservationDAO::populateReservation);
-            }
+        StringBuilder builder = new StringBuilder(getReservationsPageStatement(filter));
+        // add order
+        switch (orderBy) {
+            case NAME:
+                builder.append(" ORDER BY car_name ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case FROM:
+                builder.append(" ORDER BY reservation_from ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case UNTIL:
+                builder.append(" ORDER BY reservation_to ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case STATUS:
+                builder.append(" ORDER BY reservation_status ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case BORROWER:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+        builder.append(" LIMIT ?,?");
+        System.out.println(builder.toString());
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setInt(1, (page - 1) * pageSize);
+            ps.setInt(2, pageSize);
+            return toPage(ps, pageSize, JDBCReservationDAO::populateReservation);
         } catch (Exception ex) {
             throw new DataAccessException("Could not retrieve a list of reservations", ex);
         }

@@ -154,6 +154,7 @@ public class Trips extends Controller {
 
         // We only want reservations from the current user (or his car(s))
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, CurrentUser.getId());
+        System.out.println("showTripsPage:" + ascInt + ", " + orderBy + ", " + searchString);
 
         return ok(tripspage.render(
                 CurrentUser.getId(),

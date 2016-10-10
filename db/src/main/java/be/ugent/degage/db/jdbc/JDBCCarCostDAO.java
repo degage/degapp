@@ -131,7 +131,12 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 "JOIN carcostcategories ON car_cost_category_id = category_id " +
                 "JOIN cars ON car_cost_car_id = car_id ");
         appendCostFilter(builder, filter);
-        builder.append(" ORDER BY car_cost_created_at ").append(asc?"ASC":"DESC").append(" LIMIT ?, ?");
+        String orderColumn = orderBy == null ? "car_cost_created_at" : orderBy.toString();        
+        builder.append(" ORDER BY ");
+        builder.append(orderColumn);
+        builder.append(asc ? " asc " : " desc ");
+        builder.append(" LIMIT ?,?");
+        System.out.println(builder.toString());
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);

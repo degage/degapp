@@ -32,16 +32,16 @@
 <table class="table table-striped table-bordered table-hover no-footer" >
     <thead>
         <tr role="row">
-            <th>Auto</th>
-            <th>Type</th>
+            <th class="sortable" name="car_name">Auto</th>
+            <th class="sortable" name="category_description">Type</th>
             <th width="30%">Toelichting</th>
-            <th>Datum</th>
-            <th>Bedrag</th>
+            <th class="sortable" name="car_cost_time">Datum</th>
+            <th class="sortable" name="car_cost_amount">Bedrag</th>
             @if(withSpread){
                 <th>Afgeschr.</th>
                 <th>Spreiding</th>
             }
-            <th>Status</th>
+            <th class="sortable" name="car_cost_status">Status</th>
             <th>Acties</th>
         </tr>
     </thead>

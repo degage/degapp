@@ -36,17 +36,26 @@ import com.google.common.base.Strings;
  */
 public enum FilterField {
 
+    ACTIVE(true),
+    AMOUNT(true),
+    BORROWER(false),
+    DRIVER(false),
     NAME(true), BRAND(true), SEATS(true), AUTOMATIC(true), GPS(true), HOOK(true), CAR_ID(true), FUEL(true), CAR_ACTIVE(true),
-    CAR_COST_DATE(true),
-    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true),
+    KM(true), LITER(true),
+    CAR_NAME(false),
+    CAR_COST_DATE(true), CAR_COST_TIME(true), CAR_COST_AMOUNT(true), CAR_COST_STATUS(true),
+    CATEGORY_DESCRIPTION(true),
+    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true), REFUEL_KM(true), REFUEL_STATUS(true), REFUEL_EUROCENTS(true), REFUEL_AMOUNT(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
     INFOSESSION_TYPE(false),
-    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true),
+    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true), 
+    RESERVATION_STATUS(true),
     STATUS(true),
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
     NOTIFICATION_READ(true),
+    OWNER(false),
     INSTANT(true),
     FROM(true), UNTIL(true);
 
