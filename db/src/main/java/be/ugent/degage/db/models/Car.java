@@ -46,7 +46,7 @@ public class Car extends CarHeaderLong {
                CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                String comments, boolean active, UserHeader owner) {
         super(id, name, brand, type, email, active,
-                seats, doors, manual, gps, hook, fuel, comments);
+                seats, doors, manual, gps, hook, fuel, comments, year);
         if (owner != null) {
             setOwner(owner);
         }

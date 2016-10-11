@@ -40,8 +40,8 @@ public class CarHeaderAndOwner extends CarHeader {
      * Create an object of this type.
      */
     public CarHeaderAndOwner(int id, String name, String brand, String type, String email,
-                             boolean active, int ownerId, String ownerName) {
-        super(id, name, brand, type, email, active, ownerId);
+                             boolean active, int ownerId, String ownerName, int carYear) {
+        super(id, name, brand, type, email, active, ownerId, carYear);
         this.ownerName = ownerName;
     }
 

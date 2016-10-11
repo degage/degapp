@@ -39,13 +39,15 @@ public enum FilterField {
     ACTIVE(true),
     AMOUNT(true),
     BORROWER(false),
+    CATEGORY(true),
+    DATE(true),
     DRIVER(false),
     NAME(true), BRAND(true), SEATS(true), AUTOMATIC(true), GPS(true), HOOK(true), CAR_ID(true), FUEL(true), CAR_ACTIVE(true),
     KM(true), LITER(true),
     CAR_NAME(false),
-    CAR_COST_DATE(true), CAR_COST_TIME(true), CAR_COST_AMOUNT(true), CAR_COST_STATUS(true),
+    CAR_COST_DATE(true), 
     CATEGORY_DESCRIPTION(true),
-    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true), REFUEL_KM(true), REFUEL_STATUS(true), REFUEL_EUROCENTS(true), REFUEL_AMOUNT(true),
+    REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
@@ -57,7 +59,8 @@ public enum FilterField {
     NOTIFICATION_READ(true),
     OWNER(false),
     INSTANT(true),
-    FROM(true), UNTIL(true);
+    FROM(true), UNTIL(true),
+    YEAR(true);
 
     boolean exactValue;
 

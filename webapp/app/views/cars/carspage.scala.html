@@ -35,6 +35,7 @@
             <th name="brand" class="sortable" tabindex="0" >Merk</th>
             <th name="active" class="sortable" tabindex="0" >Actief</th>
             <th name="owner" class="sortable" tabindex="0" >Eigenaar</th>
+            <th name="year" class="sortable" tabindex="0" >Bouwjaar</th>
             <th>Acties</th>
         </tr>
     </thead>
@@ -50,6 +51,7 @@
             }
         </td>
         <td><a href="@routes.Profile.index(car.getOwnerId)">@car.getOwnerName</a></td>
+        <td><a href="@routes.Profile.index(car.getOwnerId)">@car.getCarYear</a></td>
         <td>
             @btnWarning("Wijzig", routes.Cars.editCar(car.getId))
             @btnPrimary("Km-standen", routes.Trips.overview(car.getId))

@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(refuelList: Page[RefuelExtended], asc : Int, orderBy : String)
+@(refuelList: Page[RefuelExtended])
 
 @defining(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
     <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">

@@ -77,9 +77,7 @@ public class Refuels extends RefuelCommon {
         filter.putValue(FilterField.REFUEL_USER_ID, CurrentUser.getId());
         FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
         return ok(refuelspage.render(
-                DataAccess.getInjectedContext().getRefuelDAO().getRefuels(field, (ascInt == 1), page, pageSize, filter),
-                ascInt,
-                orderBy
+                DataAccess.getInjectedContext().getRefuelDAO().getRefuels(field, (ascInt == 1), page, pageSize, filter)
                 ));
     }
 
@@ -94,9 +92,7 @@ public class Refuels extends RefuelCommon {
         FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
         System.out.println(field);
         return ok(refuelspage.render(
-                DataAccess.getInjectedContext().getRefuelDAO().getRefuels(field, (ascInt == 1), page, pageSize, filter),
-                ascInt,
-                orderBy
+                DataAccess.getInjectedContext().getRefuelDAO().getRefuels(field, (ascInt == 1), page, pageSize, filter)
                 ));
         // return ok(refuelList(page, pageSize, filter));
     }
@@ -107,15 +103,14 @@ public class Refuels extends RefuelCommon {
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
         Filter filter = Pagination.parseFilter(searchString);
-        return ok(refuelList(page, pageSize, filter));
+        FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
+        return ok(refuelList(field, ascInt, page, pageSize, filter));
     }
 
     // should be used with an injected context only
-    private static Html refuelList(int page, int pageSize, Filter filter) {
+    private static Html refuelList(FilterField field, int ascInt, int page, int pageSize, Filter filter) {
         return refuelspage.render(
-                DataAccess.getInjectedContext().getRefuelDAO().getRefuels(page, pageSize, filter),
-                0,
-                "FROM"
+                DataAccess.getInjectedContext().getRefuelDAO().getRefuels(field, ascInt == 1 ? true : false, page, pageSize, filter)
         );
     }
 

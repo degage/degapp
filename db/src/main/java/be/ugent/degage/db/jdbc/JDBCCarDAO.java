@@ -113,7 +113,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getString("car_type"),
                 rs.getString("car_email"),
                 rs.getBoolean("car_active"),
-                rs.getInt("car_owner_user_id")
+                rs.getInt("car_owner_user_id"),
+                rs.getInt("car_year")
         );
     }
 
@@ -131,7 +132,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getBoolean("car_gps"),
                 rs.getBoolean("car_hook"),
                 CarFuel.valueOf(rs.getString("car_fuel")),
-                rs.getString("car_comments")
+                rs.getString("car_comments"),
+                rs.getInt("car_year")
         );
         result.setLocation(JDBCAddressDAO.populateAddress(rs));
         return result;
@@ -370,7 +372,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     private static final String NEW_CAR_QUERY =
             "SELECT SQL_CALC_FOUND_ROWS cars.car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
-                    "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, " +
+                    "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, car_year, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
                     "FROM cars JOIN addresses ON address_id=car_location " +
                     "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? ";
@@ -481,6 +483,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 builder.append(" , user_firstname ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
+            case YEAR:
+                builder.append(" ORDER BY car_year ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
         }
 
         builder.append (" LIMIT ").append (pageSize).append(" OFFSET ").append((page-1)*pageSize);
@@ -496,7 +502,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     rs.getString("car_email"),
                     rs.getBoolean("car_active"),
                     rs.getInt("car_owner_user_id"),
-                    rs.getString("user_firstname") + " " + rs.getString("user_lastname")
+                    rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
+                    rs.getInt("car_year")
             ));
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
@@ -504,7 +511,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     }
 
     public static final String CAR_HEADER_FIELDS =
-            "car_id, car_name, car_brand, car_type, car_email, car_active, car_owner_user_id ";
+            "car_id, car_name, car_brand, car_type, car_email, car_active, car_owner_user_id, car_year ";
 
 
     @Override
