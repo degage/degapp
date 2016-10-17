@@ -40,6 +40,7 @@ public class Car extends CarHeaderLong {
     private Integer ownerAnnualKm;
     private TechnicalCarDetails technicalCarDetails;
     private CarInsurance insurance;
+    private CarAssistance assistance;
 
     public Car(int id, String name, String email, String brand, String type,
                Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
@@ -105,5 +106,12 @@ public class Car extends CarHeaderLong {
         this.insurance = insurance;
     }
 
+    public CarAssistance getAssistance() {
+        return assistance;
+    }
+
+    public void setAssistance(CarAssistance assistance) {
+        this.assistance = assistance;
+    }
 
 }

@@ -103,6 +103,14 @@
                         @std.textField(form("polisNr"), "Polisnummer", "col-md-6")
                     </fieldset>
                 }
+                @panel("Pechverhelping", "fa-wrench") {
+                    <fieldset>
+                        @std.textField(form("assistanceName"), "Pechverhelper", "col-md-6")
+                        @std.datepicker(form("assistanceExpiration"), "Vervaldatum", "col-md-4")
+                        @std.selectEnum(classOf[CarAssistanceType], form("assistanceType"), "Type", "col-md-6")                        
+                        @std.textField(form("assistanceContractNr"), "Contractnummer", "col-md-6")
+                    </fieldset>
+                }                
                 @std.submitButton("Auto aanmaken")
             </div>
         </div>

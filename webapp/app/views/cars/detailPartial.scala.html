@@ -92,7 +92,8 @@
                         <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
                         <strong>Trekhaak aanwezig: </strong> @if(car.isHook) { ja } else { nee } <br>
                         <strong>Brandstof: </strong>  @{car.getFuel } <br>
-                        <strong>Commentaar: </strong> <br> @car.getComments
+                        <strong>Commentaar: </strong> <br> @car.getComments <br>
+                        <strong>Pechverhelping: </strong> @if(car.getAssistance == null || car.getAssistance.getName == null) { Onbekend } else { @car.getAssistance.getName }
                     </div>
                 </div>
 
