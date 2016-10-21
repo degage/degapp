@@ -393,14 +393,27 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     @Override
     public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        if (orderBy != FilterField.USER_NAME) {
-            throw new DataAccessException("Could not create getUserList statement");
-        }
-        String sql = USER_QUERY + FILTER_FRAGMENT +
-                "ORDER BY users.user_lastname " + (asc?"ASC":"DESC") +
-                ", users.user_firstname " + (asc?"ASC":"DESC") + " LIMIT ?, ?";
+        StringBuilder builder = new StringBuilder();
+        builder.append(USER_QUERY);
+        builder.append(FILTER_FRAGMENT);
 
-        try (PreparedStatement ps = prepareStatement(sql)) {
+        // add order
+        switch (orderBy) {
+            case NAME:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case DATE:
+                builder.append(" ORDER BY user_date_joined ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+
+        builder.append(" LIMIT ?, ?");
+
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
             fillFragment(ps, filter, 1);
             ps.setInt(5, (page - 1) * pageSize);
             ps.setInt(6, pageSize);
