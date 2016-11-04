@@ -556,7 +556,6 @@ public class Profile extends Controller {
     public static class MainProfileData {
         public String phone;
         public String mobile;
-        public String vat;
 
         @Constraints.Required
         public String firstName;
@@ -578,7 +577,6 @@ public class Profile extends Controller {
             this.lastName = user.getLastName();
             this.phone = user.getPhone();
             this.mobile = user.getCellPhone();
-            this.vat = user.getVatNr();
 
             this.domicileAddress.populate(user.getAddressDomicile());
             this.residenceAddress.populate(user.getAddressResidence());
@@ -619,7 +617,6 @@ public class Profile extends Controller {
             MainProfileData data = form.get();
             user.setPhone(data.phone);
             user.setCellPhone(data.mobile);
-            user.setVatNr(data.vat);
             user.setFirstName(data.firstName);
             user.setLastName(data.lastName);
             dao.updateUserMainProfile(user);
