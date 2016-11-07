@@ -1,4 +1,4 @@
-@* superUser.scala.html
+@* assistancesAdmin.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,13 +27,17 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String)
+@scripts = {
+    @js.pagination("Assistances.showAllAssistancesPage")
+    @js.userpicker()
+}
 
-@if(db.CurrentUser.hasRole(UserRole.SUPER_USER)){
-    @item(title, "Rollen", "fa-key", routes.UserRoles.index)
-    @item(title, "Aankondigingen", "fa-bars", routes.Announcements.index)
-@* TODO: incorporate these
-    @item(title, "Systeemvariabelen", "fa-wrench", routes.Settings.sysvarsOverview)
-    @item(title, "Rapportering", "fa-files-o", routes.Reports.index)
-*@
+@stdlayout("Pechverhelping (beheer)", stylesheets=sheets("statuses"), scripts=scripts) {
+
+    @panel("Zoek contracten", "fa-search") {
+        @search.carpicker("car_id", "Auto")
+        @search.button("Zoek!")
+    }
+
+    @resultsTablePanel()
 }

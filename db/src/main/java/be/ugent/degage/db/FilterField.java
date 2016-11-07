@@ -60,7 +60,9 @@ public enum FilterField {
     OWNER(false),
     INSTANT(true),
     FROM(true), UNTIL(true),
-    YEAR(true);
+    YEAR(true),
+    CONTRACT_ID(true),
+    TYPE(true);
 
     boolean exactValue;
 
