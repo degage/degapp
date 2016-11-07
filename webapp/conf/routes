@@ -291,6 +291,10 @@ POST        /billadm/users                          controllers.BillingsAdmin.do
 GET         /billadm/cars                           controllers.BillingsAdmin.carInvoices(id: Int)
 POST        /billadm/cars                           controllers.BillingsAdmin.doCarInvoices(id: Int)
 
+#Assistance
+GET         /assistances/list                       controllers.Assistances.showAllAssistances()
+GET         /assistances/admin/page                 controllers.Assistances.showAllAssistancesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+
 #Announcements
 GET         /announcements                          controllers.Announcements.index()
 GET         /announcements/edit                     controllers.Announcements.edit(key: String)

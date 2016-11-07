@@ -1,4 +1,4 @@
-@* superUser.scala.html
+/* CarAssistanceExtended.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -24,16 +24,32 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-@(title: String)
+package be.ugent.degage.db.models;
 
-@if(db.CurrentUser.hasRole(UserRole.SUPER_USER)){
-    @item(title, "Rollen", "fa-key", routes.UserRoles.index)
-    @item(title, "Aankondigingen", "fa-bars", routes.Announcements.index)
-@* TODO: incorporate these
-    @item(title, "Systeemvariabelen", "fa-wrench", routes.Settings.sysvarsOverview)
-    @item(title, "Rapportering", "fa-files-o", routes.Reports.index)
-*@
+import java.time.LocalDate;
+
+/**
+ * Extends {@link CarAssistance} with context information (car/owner)
+ */
+public class CarAssistanceExtended extends CarAssistance {
+
+    private String carName;
+    private int carId;
+
+    public CarAssistanceExtended(String name, LocalDate expiration, CarAssistanceType type, String contractNr, String carName, int carId) {
+        super(name, expiration, type, contractNr);
+        this.carName = carName;
+        this.carId = carId;
+    }
+
+    public String getCarName() {
+        return carName;
+    }
+
+    public int getCarId() {
+        return carId;
+    }
 }

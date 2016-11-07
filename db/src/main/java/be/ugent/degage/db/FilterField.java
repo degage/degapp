@@ -48,7 +48,10 @@ public enum FilterField {
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
     NOTIFICATION_READ(true),
     INSTANT(true),
-    FROM(true), UNTIL(true);
+    FROM(true), UNTIL(true),
+    YEAR(true),
+    CONTRACT_ID(true),
+    TYPE(true);
 
     boolean exactValue;
 
