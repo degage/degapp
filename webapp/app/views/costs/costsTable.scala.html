@@ -47,7 +47,7 @@
     </thead>
     <tbody>
         @foreach.trOrElse(carCostList) { carCost =>
-            <td>@carCost.getCarName</td>
+            <td><a href="@routes.Costs.showCostsForCar(carCost.getCarId)">@carCost.getCarName</a></td>
             <td>@carCost.getCategory.getDescription</td>
             <td>@carCost.getDescription</td>
             <td>@Utils.toLocalizedDateString(carCost.getDate)</td>
