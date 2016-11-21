@@ -301,7 +301,7 @@ GET         /announcements/edit                     controllers.Announcements.ed
 POST        /announcements/edit                     controllers.Announcements.doEdit(key: String)
 
 # User Picker
-GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
+GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "", status : String ?= "")
 # Car Picker
 GET         /carpicker                              controllers.CarPicker.getList(search: String ?= "")
 

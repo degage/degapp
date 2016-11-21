@@ -35,6 +35,7 @@ import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 /**
  * Data access objects for users
@@ -133,6 +134,6 @@ public interface UserDAO {
     /**
      * Return a user list for users with fist and/or last name containing the given string. Used in pickers.
      */
-    public Iterable<UserHeaderShort> listUserByName(String str, int limit);
+    public Iterable<UserHeaderShort> listUserByName(String str, List<String> status, int limit);
 
 }
