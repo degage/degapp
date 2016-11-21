@@ -42,6 +42,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.List;
 
 /**
  * JDBC implementation of @link{UserDAO}
@@ -476,15 +477,31 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public Iterable<UserHeaderShort> listUserByName(String str, int limit) {
-        try (PreparedStatement ps = prepareStatement(
-                "SELECT user_id, user_firstname, user_lastname FROM users " +
-                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')" +
-                        "ORDER BY user_lastname ASC, user_firstname ASC " +
+    public Iterable<UserHeaderShort> listUserByName(String str, List<String> status, int limit) {
+        StringBuilder builder = new StringBuilder();
+        builder.append( "SELECT user_id, user_firstname, user_lastname FROM users " +
+                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')"
+        );
+        if (status.size() > 0) {
+            builder.append("AND user_status IN (");
+            for( int i = 0 ; i < status.size(); i++ ) {
+                builder.append("?,");
+            }
+            builder.deleteCharAt(builder.length() -1 );
+            builder.append(")");
+        }
+        builder.append( "ORDER BY user_lastname ASC, user_firstname ASC " +
                         "LIMIT ?"
-        )) {
+        );
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setString(1, str);
-            ps.setInt(2, limit);
+            int i = 2;
+            for (String s: status) {
+                System.out.println("status: " + s);
+                ps.setString(i, s);
+                i++;
+            }
+            ps.setInt(i, limit);
             return toList(ps, JDBCUserDAO::populateUserHeaderShort);
         } catch (SQLException ex) {
             throw new DataAccessException(ex);

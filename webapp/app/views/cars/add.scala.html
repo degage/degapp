@@ -50,7 +50,7 @@
                         </div>
                         @* TODO: Use a user picker that only shows people with CAR_OWNER status *@
                         @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
-                            @std.userpicker(form("userId"), form("userIdAsString"), "Eigenaar", css="col-md-12")
+                            @std.userpicker(form("userId"), form("userIdAsString"), "Eigenaar", css="col-md-12", status="FULL")
                         } else {
                             @std.hiddenField(form("userId")) @std.hiddenField(form("userIdAsString"))
                         }

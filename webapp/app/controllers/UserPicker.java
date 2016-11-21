@@ -38,6 +38,7 @@ import play.mvc.Result;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Arrays;
 
 public class UserPicker extends Controller {
 
@@ -45,12 +46,12 @@ public class UserPicker extends Controller {
 
     @AllowRoles
     @InjectContext
-    public static Result getList(String search) {
+    public static Result getList(String search, String status) {
         if (search.isEmpty()) {
             return ok(); // normally does not occur
         } else {
             Collection<PickerLine> lines = new ArrayList<>();
-            for (UserHeaderShort user : DataAccess.getInjectedContext().getUserDAO().listUserByName(search, MAX_VISIBLE_RESULTS)) {
+            for (UserHeaderShort user : DataAccess.getInjectedContext().getUserDAO().listUserByName(search, status != "" ? Arrays.asList(status.split(",")) : new ArrayList<String>(), MAX_VISIBLE_RESULTS)) {
                 lines.add (new PickerLine(user.getFullName(),search, user.getId()));
             }
             return ok(views.html.picker.pickerlines.render(lines));
