@@ -51,7 +51,7 @@ public class UserPicker extends Controller {
             return ok(); // normally does not occur
         } else {
             Collection<PickerLine> lines = new ArrayList<>();
-            for (UserHeaderShort user : DataAccess.getInjectedContext().getUserDAO().listUserByName(search, Arrays.asList(status.split(",")), MAX_VISIBLE_RESULTS)) {
+            for (UserHeaderShort user : DataAccess.getInjectedContext().getUserDAO().listUserByName(search, status != "" ? Arrays.asList(status.split(",")) : new ArrayList<String>(), MAX_VISIBLE_RESULTS)) {
                 lines.add (new PickerLine(user.getFullName(),search, user.getId()));
             }
             return ok(views.html.picker.pickerlines.render(lines));

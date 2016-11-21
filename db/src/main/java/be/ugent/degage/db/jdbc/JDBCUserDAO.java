@@ -480,21 +480,24 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     public Iterable<UserHeaderShort> listUserByName(String str, List<String> status, int limit) {
         StringBuilder builder = new StringBuilder();
         builder.append( "SELECT user_id, user_firstname, user_lastname FROM users " +
-                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')" +
-                        "AND user_status IN ("
+                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')"
         );
-        for( int i = 0 ; i < status.size(); i++ ) {
-            builder.append("?,");
+        if (status.size() > 0) {
+            builder.append("AND user_status IN (");
+            for( int i = 0 ; i < status.size(); i++ ) {
+                builder.append("?,");
+            }
+            builder.deleteCharAt(builder.length() -1 );
+            builder.append(")");
         }
-        builder.deleteCharAt(builder.length() -1 );
-        builder.append( ")" +
-                        "ORDER BY user_lastname ASC, user_firstname ASC " +
+        builder.append( "ORDER BY user_lastname ASC, user_firstname ASC " +
                         "LIMIT ?"
         );
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setString(1, str);
             int i = 2;
             for (String s: status) {
+                System.out.println("status: " + s);
                 ps.setString(i, s);
                 i++;
             }
