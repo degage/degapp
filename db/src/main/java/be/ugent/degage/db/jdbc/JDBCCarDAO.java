@@ -69,6 +69,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 (Integer) rs.getObject("car_owner_annual_km"),
                 rs.getString("car_comments"),
                 rs.getBoolean("car_active"),
+                rs.getDate("car_created_at") == null ? null : rs.getDate("car_created_at").toLocalDate(),
                 JDBCUserDAO.populateUserHeader(rs)
         );
 

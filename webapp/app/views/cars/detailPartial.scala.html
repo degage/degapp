@@ -116,6 +116,7 @@
                             <strong>Vervaldatum verzekering: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getInsurance.getExpiration) }<br>
                             <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus== null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
                             <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr== null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>
+                            <strong>Datum van creatie: </strong> @if(car.getCreatedAt == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getCreatedAt) }<br>
 
                         </div>
                     </div>
