@@ -43,7 +43,7 @@
         @helper.form(routes.WFCreate.doCreateOld(car.getId)) {
             @std.datetimepicker(form("from"), "Van:", "col-md-4", minuteStep=15)
             @std.datetimepicker(form("until"), "Tot:", "col-md-4", minuteStep=15)
-            @std.userpicker(form("userId"), form("userIdAsString"), "Ontlener")
+            @std.userpicker(form("userId"), form("userIdAsString"), "Ontlener", status="FULL,BLOCKED")
             @std.submitButton("Doorgeven (en meteen goedkeuren)")
         }
     }

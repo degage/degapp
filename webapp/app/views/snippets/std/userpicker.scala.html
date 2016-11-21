@@ -27,11 +27,11 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(field: Field, fieldAsString: Field, label: String, css: String="col-xs-4")
+@(field: Field, fieldAsString: Field, label: String, status: String="", css: String="col-xs-4")
 
 @* user picker input component for use in a form context *@
 
-<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.UserPicker.getList()">
+<div class="form-group userpicker @css @if(field.hasErrors||fieldAsString.hasErrors) {has-error}" data-url="@routes.UserPicker.getList()" data-status="@status">
 
     <label class="control-label" for="@fieldAsString.name">@label</label>
 
