@@ -86,11 +86,9 @@ public class Refuels extends RefuelCommon {
     public static Result showOwnerRefuelsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         //FilterField field = FilterField.stringToField(orderBy);
         //boolean asc = Pagination.parseBoolean(ascInt);
-        System.out.println("showOwnerRefuelsPage:" + ascInt + ", " + orderBy + ", " + searchString);
         Filter filter = Pagination.parseFilter(searchString);
         filter.putValue(FilterField.REFUEL_OWNER_ID, CurrentUser.getId());
         FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
-        System.out.println(field);
         return ok(refuelspage.render(
                 DataAccess.getInjectedContext().getRefuelDAO().getRefuels(field, (ascInt == 1), page, pageSize, filter)
                 ));

@@ -154,7 +154,6 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 break;
         }
         builder.append(" LIMIT ?,?");
-        System.out.println(builder.toString());
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);

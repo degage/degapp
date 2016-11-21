@@ -67,7 +67,6 @@ public class Assistances extends Controller {
     public static Result showAllAssistancesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         Filter filter = Pagination.parseFilter(searchString);
         FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
-        System.out.println("showAllAssistancesPage");
         return ok(assistancesPage.render(
             DataAccess.getInjectedContext().getCarAssistanceDAO().getAllCarAssistances(field, ascInt == 1 ? true : false, page, pageSize, filter)
             // DataAccess.getInjectedContext().getCarAssistanceDAO().getAllCarAssistances()
@@ -82,7 +81,6 @@ public class Assistances extends Controller {
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
     public static Result showAllAssistances() {
-        System.out.println("showAllAssistances");
         return ok(assistancesAdmin.render());
     }
 }

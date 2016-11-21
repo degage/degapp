@@ -103,7 +103,6 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
                 break;
         }
         builder.append(" LIMIT ?,?");
-        System.out.println(builder.toString());
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);

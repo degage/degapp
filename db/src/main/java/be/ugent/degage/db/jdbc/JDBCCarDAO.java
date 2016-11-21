@@ -525,8 +525,6 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
         builder.append (" LIMIT ").append (pageSize).append(" OFFSET ").append((page-1)*pageSize);
 
-        System.out.println("SQL statement = " + builder.toString());
-
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             return toPage(ps, pageSize, rs -> new CarHeaderAndOwner(
                     rs.getInt("car_id"),
