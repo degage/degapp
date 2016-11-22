@@ -70,7 +70,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
-            "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?)";
+            "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
+            "AND user_status LIKE ?";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
@@ -82,6 +83,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         ps.setString(start + 1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start + 2, filter.getValue(FilterField.USER_NAME));
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
+        ps.setString(start + 4, "%" + filter.getValue(FilterField.USER_STATUS) + "%");
     }
 
     public JDBCUserDAO(JDBCDataAccessContext context) {
@@ -413,11 +415,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
 
         builder.append(" LIMIT ?, ?");
-
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             fillFragment(ps, filter, 1);
-            ps.setInt(5, (page - 1) * pageSize);
-            ps.setInt(6, pageSize);
+            ps.setInt(6, (page - 1) * pageSize);
+            ps.setInt(7, pageSize);
             return toPage(ps, pageSize, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);

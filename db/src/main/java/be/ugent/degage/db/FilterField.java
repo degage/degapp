@@ -62,7 +62,8 @@ public enum FilterField {
     FROM(true), UNTIL(true),
     YEAR(true),
     CONTRACT_ID(true),
-    TYPE(true);
+    TYPE(true),
+    USER_STATUS(true);
 
     boolean exactValue;
 

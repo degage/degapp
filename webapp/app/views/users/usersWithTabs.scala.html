@@ -1,4 +1,4 @@
-@* profileAdmin.scala.html
+@* usertabs.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -6,11 +6,7 @@
  * 
  * Corresponding author (see also AUTHORS.txt)
  * 
- * Kris Coolsaet
- * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
- * Krijgslaan 281-S9
- * B-9000 GENT Belgium
+ * Emmanuel Isebaert
  * 
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -27,11 +23,20 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String)
+@(tab: Int)
 
-@if(db.CurrentUser.hasRole(UserRole.PROFILE_ADMIN)){
-    @item(title, "Gebruikers", "fa-users", routes.Users.showUsersWithTabs(0))
-    @item(title, "Goedkeuring", "fa-plus-square-o", routes.Approvals.pendingApprovalList(0), "Goedkeuring gebruikers",
-        extra = Approvals.getNrOfPendingApprovals)
+@stdlayout("Gebruikers", scripts=js.paginationWithTabs("Users.showUsersPage", tab)) {
+    @panel("Gebruikers zoeken", "fa-search"){
+        @search.textField("user_firstname", "Voornaam", "col-xs-12 col-sm-6")
+        @search.textField("user_lastname", "Familienaam", "col-xs-12 col-sm-6")
+        @search.button("Zoek")
+    }
+
+    @tabbedPagination(tab,"user_status",
+        "FULL" -> ("Leden", "name", true),
+        "FULL_VALIDATING" -> ("Lidmaatschap aangevraagd", "name", true),
+        "REGISTERED" -> ("Geregistreerd", "name", true),
+        "BLOCKED" -> ("Geblokkeerd", "name", true),
+        "DROPPED" -> ("Verwijderd", "name", true)
+    )
 }
-
