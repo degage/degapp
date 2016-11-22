@@ -21,3 +21,4 @@ BEGIN
   INSERT INTO carinsurances(insurance_id) VALUES (new.car_id);
   INSERT INTO carassistances(assistance_id) VALUES (new.car_id);
 END $$
+DELIMITER ;
