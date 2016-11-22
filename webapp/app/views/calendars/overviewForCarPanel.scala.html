@@ -1,4 +1,4 @@
-@* overviewcar.scala.html
+@* overviewpanel.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -27,18 +27,17 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Calendars.CarDateData], ofc: Calendars.OverviewForCar)
+@(title: String, faClass: String, ofc: Calendars.OverviewForCar,
+                 percentage:Int = 15)(header: => Html)(footer: => Html)
 
-@scripts={
-  @js.userpicker()
-  @js.datetimepicker()
-  @js.usesajax()
-  @js.ajaxCarData()
-}
+@* Overview panel for use in overview and overviewcar templates. *@
 
-@stdlayout("Beschikbaarheid auto", sheets("reservationtable"), scripts) {
-    @cardatepanel(form,routes.Calendars.overviewCarPost())
-    @overviewForCarPanel("Beschikbare perioden", "fa-calendar", ofc, percentage=10){
-        @* no header. *@
-    }{  @* no footer. *@ }
+@import util.OverviewLine._
+@panel(title,faClass){
+    <div class="col-xs-12">
+        @overviewForCarGrid(ofc, percentage=10){
+            @* no header. *@
+        }{  @* no footer. *@ }
+        @footer
+    </div>
 }
