@@ -141,6 +141,7 @@ POST        /contracts/edit                         controllers.Contracts.contra
 
 # Users
 GET         /users                                  controllers.Users.showUsers()
+GET         /users/tabbed                           controllers.Users.showUsersWithTabs(tab : Int ?= 0)
 GET         /users/page                             controllers.Users.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /users/impersonate                      controllers.Users.impersonate(userId: Int)
 
