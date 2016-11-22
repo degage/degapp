@@ -162,6 +162,9 @@ public class Cars extends Controller {
         public String validate() {
             /* TODO: dit moeten Field Errors worden, en niet één global error */
             String error = "";
+            if (year == null) {
+                error += "Geef het bouwjaar van de auto op. ";
+            }
             if (Strings.isNullOrEmpty(address.street)) {
                 error += "Geef het adres op.";
             }

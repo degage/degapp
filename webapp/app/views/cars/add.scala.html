@@ -78,7 +78,7 @@
                             @std.checkboxInline(form("manual"),"Manuele versnellingsbak")
                         </div>
                         @std.selectEnum(classOf[CarFuel], form("fuel"), "Brandstof")
-                        @std.textField(form("year"),"Bouwjaar")
+                        @std.textField(form("year"),"Bouwjaar", required=true)
                         @std.textField(form("fuelEconomy"), "Gemiddeld verbruik (per 100 km)")
                         @std.textField(form("estimatedValue"), "Geschatte huidige waarde")
                         @std.textField(form("ownerAnnualKm"), "Gemiddeld aantal kilometers (per jaar)")
