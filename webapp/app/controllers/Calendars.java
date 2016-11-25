@@ -174,7 +174,7 @@ public class Calendars extends Controller {
         if (form.hasErrors()) {
             return badRequest(startcar.render(form));
         } else {
-            return overviewForCarPanel(form);
+            return overviewPanel(form);
         }
     }
 
@@ -256,9 +256,10 @@ public class Calendars extends Controller {
         return ok(overviewForCarPanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(form), 10, null, null));
     }
 
-    // private static Result overviewPanel(Form<CarDateData> form) {
-    //     return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", new OverviewForCar(form), 10, null, null));
-    // }
+    private static Result overviewPanel(Form<CarDateData> form) {
+        // return ok(overviewpanel.render("Beschikbare perioden", "fa-calendar", (new OverviewForCar(form)).lines, 10, null, null));
+        return ok(overviewcar.render(form, new OverviewForCar(form)));
+    }
 
     public static class OverviewForCar {
         public int id;
@@ -282,7 +283,6 @@ public class Calendars extends Controller {
             LocalDate localDate = Utils.toLocalDate(date);
             nextWeek = Utils.toDateString(localDate.plusDays(7));
             previousWeek = Utils.toDateString(localDate.plusDays(-7));
-            System.out.println("1 previousWeek"+previousWeek);
         }
 
         public OverviewForCar(Form<CarDateData> form) {
@@ -293,7 +293,6 @@ public class Calendars extends Controller {
             LocalDate localDate = Utils.toLocalDate(date);
             nextWeek = Utils.toDateString(localDate.plusDays(7));
             previousWeek = Utils.toDateString(localDate.plusDays(-7));
-            System.out.println("2 previousWeek"+previousWeek);
         }
     }
 
