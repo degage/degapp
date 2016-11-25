@@ -280,8 +280,8 @@ public class Cars extends Controller {
     @InjectContext
     public static Result newCar() {
         CarModelExtended model = new CarModelExtended();
-        model.userId = CurrentUser.getId();
-        model.userIdAsString = CurrentUser.getFullName();
+        // model.userId = CurrentUser.getId();
+        // model.userIdAsString = CurrentUser.getFullName();
         return ok(views.html.cars.add.render(Form.form(CarModelExtended.class).fill(model)));
     }
 
