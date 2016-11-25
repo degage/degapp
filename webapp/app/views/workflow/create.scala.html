@@ -42,7 +42,7 @@
         @helper.form(routes.WFCreate.doCreate(car.getId)) {
             @std.datetimepicker(form("from"), "Van:", "col-md-6", minuteStep=15)
             @std.datetimepicker(form("until"), "Tot:", "col-md-6", minuteStep=15)
-            @std.textArea(form("message"), "Ev. opmerking (wordt naar de eigenaar gemaild)", 5)
+            @std.textArea(form("message"), "Voorstel voor sleutelafspraak, vraag of opmerking (wordt naar de eigenaar gemaild)", 5)
             @std.submitButton("Vraag reservatie aan")
         }
     }
