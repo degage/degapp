@@ -97,6 +97,17 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                         rs.getString("assistance_contract_id")
                 ));
 
+
+        Date parkingcardExpiration = rs.getDate("parkingcard_expiration");
+        car.setParkingcard(
+                new CarParkingcard(
+                        rs.getString("parkingcard_city"),
+                        parkingcardExpiration == null ? null : parkingcardExpiration.toLocalDate(),
+                        rs.getString("parkingcard_zones"),
+                        rs.getString("parkingcard_contract_id")
+                ));
+
+
         car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
 
         return car;
@@ -157,7 +168,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     @Override
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, UserHeader owner, String comments, boolean active) throws DataAccessException {
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, CarParkingcard parkingcard, UserHeader owner, String comments, boolean active) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO cars(car_name, car_type, car_brand, " +
                         "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
@@ -200,6 +211,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 updateTechnicalCarDetails(id, technicalCarDetails);
                 updateInsurance(id, insurance);
                 updateAssistance(id, assistance);
+                updateParkingcard(id, parkingcard);
                 updateLocation(id, location);
 
                 Car car = new Car(id, name, email, brand, type,
@@ -210,6 +222,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 car.setTechnicalCarDetails(technicalCarDetails);
                 car.setInsurance(insurance);
                 car.setAssistance(assistance);
+                car.setParkingcard(parkingcard);
                 return car;
             }
         } catch (SQLException ex) {
@@ -281,7 +294,29 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         ps.setInt(5, id);
 
         if (ps.executeUpdate() == 0) {
-            throw new DataAccessException("No rows were affected when updating carInsurance.");
+            throw new DataAccessException("No rows were affected when updating CarAssistance.");
+        }
+    }
+
+    private LazyStatement updateParkingcardStatement = new LazyStatement(
+            "UPDATE carparkingcards SET parkingcard_city=?, parkingcard_expiration=?, " +
+                    "parkingcard_contract_id=?, parkingcard_zones=? WHERE parkingcard_id = ?"
+    );
+
+    private void updateParkingcard(int id, CarParkingcard parkingcard) throws SQLException {
+        PreparedStatement ps = updateParkingcardStatement.value();
+        ps.setString(1, parkingcard.getCity());
+        if (parkingcard.getExpiration() == null) {
+            ps.setDate(2, null);
+        } else {
+            ps.setDate(2, Date.valueOf(parkingcard.getExpiration()));
+        }
+        ps.setString(3, parkingcard.getContractNr());
+        ps.setString(4, parkingcard.getZones());
+        ps.setInt(5, id);
+
+        if (ps.executeUpdate() == 0) {
+            throw new DataAccessException("No rows were affected when updating CarParkingcard.");
         }
     }
 
@@ -340,6 +375,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             updateTechnicalCarDetails(carId, car.getTechnicalCarDetails());
             updateInsurance(carId, car.getInsurance());
             updateAssistance(carId, car.getAssistance());
+            updateParkingcard(carId, car.getParkingcard());
             updateLocation(carId, car.getLocation());
 
         } catch (SQLException ex) {
@@ -357,6 +393,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     "LEFT JOIN technicalcardetails ON technicalcardetails.details_id = cars.car_id " +
                     "LEFT JOIN carinsurances ON carinsurances.insurance_id = cars.car_id " +
                     "LEFT JOIN carassistances ON carassistances.assistance_id = cars.car_id " +
+                    "LEFT JOIN carparkingcards ON carparkingcards.parkingcard_id = cars.car_id " +
                     "WHERE car_id=?"
             )) {
             ps.setInt(1, id);

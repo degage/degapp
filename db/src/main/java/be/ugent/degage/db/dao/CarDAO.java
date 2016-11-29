@@ -41,7 +41,7 @@ public interface CarDAO {
 
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, UserHeader owner, String comments, boolean active) throws DataAccessException;
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, CarParkingcard parkingcard, UserHeader owner, String comments, boolean active) throws DataAccessException;
     public void updateCar(Car car) throws DataAccessException;
 
     public int getCarPicture (int carId);

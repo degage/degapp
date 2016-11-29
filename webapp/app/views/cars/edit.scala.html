@@ -110,6 +110,14 @@
                         @std.textField(form("assistanceContractNr"), "Contractnummer", "col-md-6")
                     </fieldset>
                 }
+                @panel("Parkeerkaart", "fa-product-hunt") {
+                    <fieldset>
+                        @std.textField(form("parkingcardCity"), "Stad/gemeente", "col-md-6")
+                        @std.datepicker(form("parkingcardExpiration"), "Vervaldatum", "col-md-4")
+                        @std.textField(form("parkingcardZones"), "Zones", "col-md-6")                        
+                        @std.textField(form("parkingcardContractNr"), "Contractnummer", "col-md-6")
+                    </fieldset>
+                }
                 @std.submitButton("Wijzigingen opslaan")
             </div>
         </div>

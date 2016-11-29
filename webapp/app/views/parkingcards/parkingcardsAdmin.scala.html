@@ -1,4 +1,4 @@
-@* carAdmin.scala.html
+@* parkingcardsAdmin.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -6,11 +6,7 @@
  * 
  * Corresponding author (see also AUTHORS.txt)
  * 
- * Kris Coolsaet
- * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
- * Krijgslaan 281-S9
- * B-9000 GENT Belgium
+ * Emmanuel Isebaert
  * 
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -27,10 +23,17 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(title: String)
+@scripts = {
+    @js.pagination("Parkingcards.showAllParkingcardsPage")
+    @js.userpicker()
+}
 
-@if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)){
-    @item(title, "Autokosten", "fa-money", routes.Costs.showCosts(0))
-    @item(title, "Pechverhelping", "fa-wrench", routes.Assistances.showAllAssistances())
-    @item(title, "Parkeerkaarten", "fa-product-hunt", routes.Parkingcards.showAllParkingcards())
+@stdlayout("Parkeerkaarten (beheer)", stylesheets=sheets("statuses"), scripts=scripts) {
+
+    @panel("Zoek kaarten", "fa-search") {
+        @search.carpicker("car_id", "Auto")
+        @search.button("Zoek!")
+    }
+
+    @resultsTablePanel()
 }

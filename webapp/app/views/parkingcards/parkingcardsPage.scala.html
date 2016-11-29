@@ -1,0 +1,56 @@
+@* parkingcardspage.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Emmanuel Isebaert
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(parkingcardList: Page[CarParkingcardExtended])
+
+@defining(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-parkingcards">
+        <thead>
+            <tr role="row">
+                <th class="sortable" name="car_name">Auto</th>
+                <th class="sortable" name="name">Stad/gemeente</th>
+                <th class="sortable" name="date">Vervaldatum</th>
+                <th class="sortable" name="contract_id">KaartNr</th>
+                <th class="sortable" name="type">Zones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach.trOrElse(parkingcardList) { parkingcard =>
+                <td><a href="@routes.Cars.detail(parkingcard.getCarId)">@parkingcard.getCarName</a></td>
+                <td>@parkingcard.getCity</td>
+                <td>@Utils.toLocalizedDateString(parkingcard.getExpiration)</td>
+                <td>@parkingcard.getContractNr</td>
+                <td>@parkingcard.getZones</td>
+            }{
+                <tr>
+                    <td class="empty-row" colspan="7">
+                        Geen resultaten.
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    @pagination(parkingcardList)
+}

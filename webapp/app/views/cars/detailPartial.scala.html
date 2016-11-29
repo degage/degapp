@@ -93,7 +93,8 @@
                         <strong>Trekhaak aanwezig: </strong> @if(car.isHook) { ja } else { nee } <br>
                         <strong>Brandstof: </strong>  @{car.getFuel } <br>
                         <strong>Commentaar: </strong> <br> @car.getComments <br>
-                        <strong>Pechverhelping: </strong> @if(car.getAssistance == null || car.getAssistance.getName == null) { Onbekend } else { @car.getAssistance.getName }
+                        <strong>Pechverhelping: </strong> @if(car.getAssistance == null || car.getAssistance.getName == null) { Onbekend } else { @car.getAssistance.getName } <br>
+                        <strong>Parkeerkaart: </strong> @if(car.getParkingcard == null || car.getParkingcard.getCity == null) { Onbekend } else { @car.getParkingcard.getCity }
                     </div>
                 </div>
 

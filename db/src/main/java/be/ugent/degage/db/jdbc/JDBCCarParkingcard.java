@@ -1,4 +1,4 @@
-/* CarAssistanceDAO.java
+/* CarParkingcardDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -28,10 +28,9 @@ package be.ugent.degage.db.jdbc;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
-import be.ugent.degage.db.dao.CarAssistanceDAO;
+import be.ugent.degage.db.dao.CarParkingcardDAO;
 import be.ugent.degage.db.models.Car;
-import be.ugent.degage.db.models.CarAssistanceExtended;
-import be.ugent.degage.db.models.CarAssistanceType;
+import be.ugent.degage.db.models.CarParkingcardExtended;
 import be.ugent.degage.db.models.Page;
 
 import java.sql.PreparedStatement;
@@ -40,40 +39,40 @@ import java.sql.SQLException;
 import java.sql.Date;
 
 /**
- * JDBC implementation of {@link be.ugent.degage.db.dao.CarAssistanceDAO}
+ * JDBC implementation of {@link be.ugent.degage.db.dao.CarParkingcardDAO}
  */
-class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
+class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
 
 	private static final String ASSISTANCE_QUERY =
-		"SELECT SQL_CALC_FOUND_ROWS assistance_id, assistance_name, assistance_expiration, assistance_contract_id, assistance_type, " +
-		"assistance_updated_at, car_name FROM carassistances " +
-		"LEFT JOIN cars ON assistance_id = car_id ";
+		"SELECT SQL_CALC_FOUND_ROWS parkingcard_id, parkingcard_city, parkingcard_expiration, parkingcard_contract_id, parkingcard_zones, " +
+		"parkingcard_updated_at, car_name FROM carparkingcards " +
+		"LEFT JOIN cars ON parkingcard_id = car_id ";
 
-    public JDBCCarAssistanceDAO(JDBCDataAccessContext context) {
+    public JDBCCarParkingcardDAO(JDBCDataAccessContext context) {
         super(context);
     }
 
-    private static CarAssistanceExtended populateCarAssistance(ResultSet rs) throws SQLException {
-        Date assistanceExpiration = rs.getDate("assistance_expiration");
-        return new CarAssistanceExtended(
-            rs.getString("assistance_name"),
-            assistanceExpiration == null ? null : assistanceExpiration.toLocalDate(),
-            CarAssistanceType.valueOf(rs.getString("assistance_type")),
-            rs.getString("assistance_contract_id"),
+    private static CarParkingcardExtended populateCarParkingcard(ResultSet rs) throws SQLException {
+        Date parkingcardExpiration = rs.getDate("parkingcard_expiration");
+        return new CarParkingcardExtended(
+            rs.getString("parkingcard_city"),
+            parkingcardExpiration == null ? null : parkingcardExpiration.toLocalDate(),
+            rs.getString("parkingcard_zones"),
+            rs.getString("parkingcard_contract_id"),
             rs.getString("car_name"),
-            rs.getInt("assistance_id")
+            rs.getInt("parkingcard_id")
         );
     }
 
-	// public CarAssistanceExtended createCarAssistance(String name, Date expiration, CarAssistanceType type, String contractNr, Car car) throws DataAccessException;
-	// public void updateCarAssistance(CarAssistanceExtended assistance) throws DataAccessException;
-	// public void deleteCarAssistance(CarAssistanceExtended assistance) throws DataAccessException;
+	// public CarParkingcardExtended createCarParkingcard(String name, Date expiration, CarParkingcardType type, String contractNr, Car car) throws DataAccessException;
+	// public void updateCarParkingcard(CarParkingcardExtended parkingcard) throws DataAccessException;
+	// public void deleteCarParkingcard(CarParkingcardExtended parkingcard) throws DataAccessException;
 	
 	@Override
-    public Page<CarAssistanceExtended> getAllCarAssistances(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+    public Page<CarParkingcardExtended> getAllCarParkingcards(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
 		StringBuilder builder = new StringBuilder(ASSISTANCE_QUERY);
         if (Integer.parseInt(filter.getValue(FilterField.CAR_ID)) >= 0) {
-        	builder.append("WHERE assistance_id = " + filter.getValue(FilterField.CAR_ID));
+        	builder.append("WHERE parkingcard_id = " + filter.getValue(FilterField.CAR_ID));
         }
         // add order
         switch (orderBy) {
@@ -81,20 +80,20 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
                 builder.append(" ORDER BY car_name ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
-            case NAME:
-                builder.append(" ORDER BY assistance_name ");
+            case CITY:
+                builder.append(" ORDER BY parkingcard_city ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
             case DATE:
-                builder.append(" ORDER BY assistance_expiration ");
+                builder.append(" ORDER BY parkingcard_expiration ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
             case CONTRACT_ID:
-                builder.append(" ORDER BY assistance_contract_id ");
+                builder.append(" ORDER BY parkingcard_contract_id ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
-            case TYPE:
-                builder.append(" ORDER BY assistance_type ");
+            case ZONES:
+                builder.append(" ORDER BY parkingcard_zones ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
         }
@@ -103,11 +102,11 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
-            return toPage(ps, pageSize, JDBCCarAssistanceDAO::populateCarAssistance);
+            return toPage(ps, pageSize, JDBCCarParkingcardDAO::populateCarParkingcard);
         } catch (SQLException ex) {
-            throw new DataAccessException("Cannot get carassistance", ex);
+            throw new DataAccessException("Cannot get carparkingcard", ex);
         }
     }
 
-	// public void deleteAllCarAssistances(Car car) throws DataAccessException;
+	// public void deleteAllCarParkingcards(Car car) throws DataAccessException;
 }

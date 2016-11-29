@@ -1,4 +1,4 @@
-/* CarAssistanceDAO.java
+/* CarParkingcardDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -32,15 +32,14 @@ import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.Car;
-import be.ugent.degage.db.models.CarAssistanceExtended;
-import be.ugent.degage.db.models.CarAssistanceType;
+import be.ugent.degage.db.models.CarParkingcardExtended;
 import be.ugent.degage.db.models.Page;
 
-public interface CarAssistanceDAO {
+public interface CarParkingcardDAO {
 
-	// public CarAssistanceExtended createCarAssistance(String name, Date expiration, CarAssistanceType type, String contractNr, Car car) throws DataAccessException;
-	// public void updateCarAssistance(CarAssistanceExtended assistance) throws DataAccessException;
-	// public void deleteCarAssistance(CarAssistanceExtended assistance) throws DataAccessException;
-	public Page<CarAssistanceExtended> getAllCarAssistances(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
-	// public void deleteAllCarAssistances() throws DataAccessException;
+	// public CarParkingcardExtended createCarParkingcard(String name, Date expiration, CarParkingcardType type, String contractNr, Car car) throws DataAccessException;
+	// public void updateCarParkingcard(CarParkingcardExtended assistance) throws DataAccessException;
+	// public void deleteCarParkingcard(CarParkingcardExtended assistance) throws DataAccessException;
+	public Page<CarParkingcardExtended> getAllCarParkingcards(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
+	// public void deleteAllCarParkingcards() throws DataAccessException;
 }

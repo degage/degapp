@@ -1,4 +1,4 @@
-@* carAdmin.scala.html
+/* CarParkingcardExtended.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -6,11 +6,7 @@
  * 
  * Corresponding author (see also AUTHORS.txt)
  * 
- * Kris Coolsaet
- * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
- * Krijgslaan 281-S9
- * B-9000 GENT Belgium
+ * Emmanuel Isebaert
  * 
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,13 +20,32 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-@(title: String)
+package be.ugent.degage.db.models;
 
-@if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)){
-    @item(title, "Autokosten", "fa-money", routes.Costs.showCosts(0))
-    @item(title, "Pechverhelping", "fa-wrench", routes.Assistances.showAllAssistances())
-    @item(title, "Parkeerkaarten", "fa-product-hunt", routes.Parkingcards.showAllParkingcards())
+import java.time.LocalDate;
+
+/**
+ * Extends {@link CarParkingcard} with context information (car/owner)
+ */
+public class CarParkingcardExtended extends CarParkingcard {
+
+    private String carName;
+    private int carId;
+
+    public CarParkingcardExtended(String city, LocalDate expiration, String zones, String contractNr, String carName, int carId) {
+        super(city, expiration, zones, contractNr);
+        this.carName = carName;
+        this.carId = carId;
+    }
+
+    public String getCarName() {
+        return carName;
+    }
+
+    public int getCarId() {
+        return carId;
+    }
 }

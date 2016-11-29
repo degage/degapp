@@ -43,6 +43,7 @@ public class Car extends CarHeaderLong {
     private TechnicalCarDetails technicalCarDetails;
     private CarInsurance insurance;
     private CarAssistance assistance;
+    private CarParkingcard parkingcard;
     private LocalDate createdAt;
 
     public Car(int id, String name, String email, String brand, String type,
@@ -131,6 +132,14 @@ public class Car extends CarHeaderLong {
 
     public void setAssistance(CarAssistance assistance) {
         this.assistance = assistance;
+    }
+
+    public CarParkingcard getParkingcard() {
+        return parkingcard;
+    }
+
+    public void setParkingcard(CarParkingcard parkingcard) {
+        this.parkingcard = parkingcard;
     }
 
     public LocalDate getCreatedAt() {
