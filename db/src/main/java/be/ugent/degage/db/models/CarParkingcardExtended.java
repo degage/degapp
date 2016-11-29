@@ -34,11 +34,13 @@ public class CarParkingcardExtended extends CarParkingcard {
 
     private String carName;
     private int carId;
+    private String carLicensePlate;
 
-    public CarParkingcardExtended(String city, LocalDate expiration, String zones, String contractNr, String carName, int carId) {
+    public CarParkingcardExtended(String city, LocalDate expiration, String zones, String contractNr, String carName, int carId, String carLicensePlate) {
         super(city, expiration, zones, contractNr);
         this.carName = carName;
         this.carId = carId;
+        this.carLicensePlate = carLicensePlate;
     }
 
     public String getCarName() {
@@ -47,5 +49,9 @@ public class CarParkingcardExtended extends CarParkingcard {
 
     public int getCarId() {
         return carId;
+    }
+
+    public String getCarLicensePlate() {
+        return carLicensePlate;
     }
 }

@@ -45,8 +45,10 @@ class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
 
 	private static final String ASSISTANCE_QUERY =
 		"SELECT SQL_CALC_FOUND_ROWS parkingcard_id, parkingcard_city, parkingcard_expiration, parkingcard_contract_id, parkingcard_zones, " +
-		"parkingcard_updated_at, car_name FROM carparkingcards " +
-		"LEFT JOIN cars ON parkingcard_id = car_id ";
+		"parkingcard_updated_at, car_name, details_car_license_plate " +
+        "FROM carparkingcards " +
+		"LEFT JOIN cars ON parkingcard_id = car_id " +
+        "LEFT JOIN technicalcardetails on details_id = car_id ";
 
     public JDBCCarParkingcardDAO(JDBCDataAccessContext context) {
         super(context);
@@ -60,7 +62,8 @@ class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
             rs.getString("parkingcard_zones"),
             rs.getString("parkingcard_contract_id"),
             rs.getString("car_name"),
-            rs.getInt("parkingcard_id")
+            rs.getInt("parkingcard_id"),
+            rs.getString("details_car_license_plate")
         );
     }
 
