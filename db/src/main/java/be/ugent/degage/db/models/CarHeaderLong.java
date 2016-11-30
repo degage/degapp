@@ -45,6 +45,7 @@ public class CarHeaderLong extends CarHeaderAndOwner {
     private CarFuel fuel;
 
     private UserHeader owner;
+    private CarParkingcard parkingcard;
 
 
     /**
@@ -56,6 +57,7 @@ public class CarHeaderLong extends CarHeaderAndOwner {
                          String comments, int year) {
         super(id, name, brand, type, email, active, 0 , "", year);
         this.owner = null;
+        this.parkingcard = null;
         this.seats = seats;
         this.doors = doors;
         this.manual = manual;
@@ -73,6 +75,14 @@ public class CarHeaderLong extends CarHeaderAndOwner {
         this.owner = owner;
         setOwnerId(owner.getId());
         setOwnerName(owner.toString());
+    }
+
+    public CarParkingcard getParkingcard() {
+        return parkingcard;
+    }
+
+    public void setParkingcard(CarParkingcard parkingcard) {
+        this.parkingcard = parkingcard;
     }
 
     public Integer getSeats() {

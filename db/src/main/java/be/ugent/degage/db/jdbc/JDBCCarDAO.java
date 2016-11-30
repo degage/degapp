@@ -159,9 +159,17 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         return result;
     }
 
-    private static CarHeaderLong populateCarHeaderLongAndOwner(ResultSet rs) throws SQLException {
+    private static CarHeaderLong populateCarHeaderLongAndOwnerAndParkingcard(ResultSet rs) throws SQLException {
         CarHeaderLong result = populateCarHeaderLong(rs);
         result.setOwner(JDBCUserDAO.populateUserHeader(rs));
+        Date parkingcardExpiration = rs.getDate("parkingcard_expiration");
+        result.setParkingcard(
+                new CarParkingcard(
+                        rs.getString("parkingcard_city"),
+                        parkingcardExpiration == null ? null : parkingcardExpiration.toLocalDate(),
+                        rs.getString("parkingcard_zones"),
+                        rs.getString("parkingcard_contract_id")
+                ));
         return result;
     }
 
@@ -409,10 +417,11 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
            "SELECT * FROM cars " +
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
                     "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
+                    "LEFT JOIN carparkingcards ON parkingcard_id = car_id " +
                     "WHERE car_id=?"
         )) {
             ps.setInt(1, id);
-            return toSingleObject(ps, JDBCCarDAO::populateCarHeaderLongAndOwner);
+            return toSingleObject(ps, JDBCCarDAO::populateCarHeaderLongAndOwnerAndParkingcard);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch car by id.", ex);
         }
