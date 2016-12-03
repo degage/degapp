@@ -45,11 +45,9 @@
                         <img src="@routes.Cars.getPicture(0)" alt="" class="img-responsive">
                     </div>
                     <fieldset>
-                        @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
-                            <div class="form-group col-md-6">
-                                    @helper.checkbox(form("active"), '_label -> "Actief")
-                            </div>
-                        }
+                        <div class="form-group col-md-6">
+                                @helper.checkbox(form("active"), '_label -> "Actief")
+                        </div>
                         @* TODO: Use a user picker that only shows people with CAR_OWNER status *@
                         @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
                             @std.userpicker(form("userId"), form("userIdAsString"), "Eigenaar", css="col-md-12", status="FULL")
