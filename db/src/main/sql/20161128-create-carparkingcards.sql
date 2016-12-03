@@ -4,7 +4,7 @@ CREATE TABLE `carparkingcards` (
 	`parkingcard_expiration` DATE,
 	`parkingcard_contract_id` VARCHAR(64),
 	`parkingcard_zones` VARCHAR(64),
-	`parkingcard_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`parkingcard_updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`parkingcard_id`)
 );
 
