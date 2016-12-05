@@ -46,8 +46,9 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
 
 	private static final String ASSISTANCE_QUERY =
 		"SELECT SQL_CALC_FOUND_ROWS assistance_id, assistance_name, assistance_expiration, assistance_contract_id, assistance_type, " +
-		"assistance_updated_at, car_name FROM carassistances " +
-		"LEFT JOIN cars ON assistance_id = car_id ";
+		"assistance_updated_at, car_name, details_car_license_plate FROM carassistances " +
+		"LEFT JOIN cars ON assistance_id = car_id " +
+        "LEFT JOIN technicalcardetails ON details_id = car_id ";
 
     public JDBCCarAssistanceDAO(JDBCDataAccessContext context) {
         super(context);
@@ -61,7 +62,8 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
             CarAssistanceType.valueOf(rs.getString("assistance_type")),
             rs.getString("assistance_contract_id"),
             rs.getString("car_name"),
-            rs.getInt("assistance_id")
+            rs.getInt("assistance_id"),
+            rs.getString("details_car_license_plate")
         );
     }
 
@@ -96,6 +98,14 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
             case TYPE:
                 builder.append(" ORDER BY assistance_type ");
                 builder.append(asc ? "ASC" : "DESC");
+                break;
+            case LICENSE_PLATE:
+                builder.append(" ORDER BY details_car_license_plate ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            default:
+                builder.append(" ORDER BY car_id ");
+                builder.append("DESC");
                 break;
         }
         builder.append(" LIMIT ?,?");

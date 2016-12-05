@@ -34,6 +34,7 @@
         <thead>
             <tr role="row">
                 <th class="sortable" name="car_name">Auto</th>
+                <th class="sortable" name="license_plate">Nummerplaat</th>
                 <th class="sortable" name="name">Naam</th>
                 <th class="sortable" name="date">Vervaldatum</th>
                 <th class="sortable" name="contract_id">ContractNr</th>
@@ -43,6 +44,7 @@
         <tbody>
             @foreach.trOrElse(assistanceList) { assistance =>
                 <td><a href="@routes.Cars.detail(assistance.getCarId)">@assistance.getCarName</a></td>
+                <td>@assistance.getLicensePlate()</td>
                 <td>@assistance.getName</td>
                 <td>@Utils.toLocalizedDateString(assistance.getExpiration)</td>
                 <td>@assistance.getContractNr</td>

@@ -65,7 +65,8 @@ public enum FilterField {
     TYPE(true),
     USER_STATUS(true),
     CITY(true),
-    ZONES(true);
+    ZONES(true),
+    LICENSE_PLATE(true);
 
     boolean exactValue;
 

@@ -38,11 +38,14 @@ public class CarAssistanceExtended extends CarAssistance {
 
     private String carName;
     private int carId;
+    public String licensePlate;
 
-    public CarAssistanceExtended(String name, LocalDate expiration, CarAssistanceType type, String contractNr, String carName, int carId) {
+    public CarAssistanceExtended(String name, LocalDate expiration, CarAssistanceType type, String contractNr,
+        String carName, int carId, String licensePlate) {
         super(name, expiration, type, contractNr);
         this.carName = carName;
         this.carId = carId;
+        this.licensePlate = licensePlate;
     }
 
     public String getCarName() {
@@ -51,5 +54,9 @@ public class CarAssistanceExtended extends CarAssistance {
 
     public int getCarId() {
         return carId;
+    }
+
+    public String getLicensePlate() {
+        return licensePlate;
     }
 }
