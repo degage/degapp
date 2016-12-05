@@ -36,7 +36,7 @@
                 <li id="tab_@index" @if(tab == index) { class="active" }
                     data-order-by="@orderBy" data-asc="@if(asc)(1)else(0)"
                 ><a href="#resultpanel" data-toggle="tab">@text</a>
-                    <input name="@name" value="@value" class="searchTextField hidden">
+                    <input name="@name" value="@value" @if(tab == index) { class="hidden searchTextField" } else { class="hidden" } >
                 </li>
             }
             <li class="hidden"><button id="searchButton"></button></li>
