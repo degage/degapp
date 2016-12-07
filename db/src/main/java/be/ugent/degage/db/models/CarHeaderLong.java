@@ -54,8 +54,8 @@ public class CarHeaderLong extends CarHeaderAndOwner {
     public CarHeaderLong(int id, String name, String brand, String type, String email,
                          boolean active, Integer seats, Integer doors,
                          boolean manual, boolean gps, boolean hook, CarFuel fuel,
-                         String comments, int year) {
-        super(id, name, brand, type, email, active, 0 , "", year);
+                         String comments, int year, String licensePlate) {
+        super(id, name, brand, type, email, active, 0 , "", year, licensePlate);
         this.owner = null;
         this.parkingcard = null;
         this.seats = seats;

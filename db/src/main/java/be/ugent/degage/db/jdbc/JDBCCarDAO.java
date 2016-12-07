@@ -70,7 +70,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getString("car_comments"),
                 rs.getBoolean("car_active"),
                 rs.getDate("car_created_at") == null ? null : rs.getDate("car_created_at").toLocalDate(),
-                JDBCUserDAO.populateUserHeader(rs)
+                JDBCUserDAO.populateUserHeader(rs),
+                rs.getString("details_car_license_plate")
         );
 
         car.setLocation(JDBCAddressDAO.populateAddress(rs));
@@ -153,7 +154,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getBoolean("car_hook"),
                 CarFuel.valueOf(rs.getString("car_fuel")),
                 rs.getString("car_comments"),
-                rs.getInt("car_year")
+                rs.getInt("car_year"),
+                rs.getString("details_car_license_plate")
         );
         result.setLocation(JDBCAddressDAO.populateAddress(rs));
         return result;
@@ -418,6 +420,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     "LEFT JOIN addresses ON addresses.address_id=cars.car_location " +
                     "LEFT JOIN users ON users.user_id=cars.car_owner_user_id " +
                     "LEFT JOIN carparkingcards ON parkingcard_id = car_id " +
+                    "LEFT JOIN technicalcardetails ON details_id = car_id " +
                     "WHERE car_id=?"
         )) {
             ps.setInt(1, id);
@@ -455,8 +458,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             "SELECT SQL_CALC_FOUND_ROWS cars.car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, car_year, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
+                    "details_car_license_plate " +
                     "FROM cars JOIN addresses ON address_id=car_location " +
-                    "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? ";
+                    "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? " + 
+                    "LEFT JOIN technicalcardetails ON details_id = car_id ";
 
     private static final String SELECT_NOT_OVERLAP =
             " AND cars.car_id NOT IN (" +
@@ -532,15 +537,23 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     @Override
     public Page<CarHeaderAndOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         StringBuilder builder = new StringBuilder(
-                "SELECT SQL_CALC_FOUND_ROWS " + CAR_HEADER_FIELDS + ", user_firstname, user_lastname " +
-                        "FROM cars JOIN users ON car_owner_user_id = user_id "
+                "SELECT SQL_CALC_FOUND_ROWS " + CAR_HEADER_FIELDS + ", user_firstname, user_lastname, details_car_license_plate " +
+                        "FROM cars " +
+                        "JOIN users ON car_owner_user_id = user_id " +
+                        "LEFT JOIN technicalcardetails ON details_id = car_id "
         );
 
         // add filters
         StringBuilder filterBuilder = new StringBuilder();
         FilterUtils.appendContainsFilter(filterBuilder, "car_name", filter.getValue(FilterField.NAME));
         FilterUtils.appendContainsFilter(filterBuilder, "car_brand", filter.getValue(FilterField.BRAND));
-                if (filterBuilder.length() > 0) {
+        FilterUtils.appendContainsFilter(filterBuilder, "details_car_license_plate", filter.getValue(FilterField.LICENSE_PLATE));
+        if (filter.getValue(FilterField.OWNER) != null && ! filter.getValue(FilterField.OWNER).isEmpty()) {
+            filterBuilder.append(" AND ")
+                    .append("CONCAT(user_lastname, ', ', user_firstname)")
+                    .append(" LIKE CONCAT ('").append(filter.getValue(FilterField.OWNER)).append("')");
+        }
+        if (filterBuilder.length() > 0) {
             builder.append("WHERE ").append(filterBuilder.substring(4));
         }
 
@@ -568,6 +581,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 builder.append(" ORDER BY car_year ");
                 builder.append(asc ? "ASC" : "DESC");
                 break;
+            case LICENSE_PLATE:
+                builder.append(" ORDER BY details_car_license_plate ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;               
         }
 
         builder.append (" LIMIT ").append (pageSize).append(" OFFSET ").append((page-1)*pageSize);
@@ -582,7 +599,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     rs.getBoolean("car_active"),
                     rs.getInt("car_owner_user_id"),
                     rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
-                    rs.getInt("car_year")
+                    rs.getInt("car_year"),
+                    rs.getString("details_car_license_plate")
             ));
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
