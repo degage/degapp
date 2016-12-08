@@ -32,7 +32,13 @@
 @import providers.DataProvider
 @import db.CurrentUser
 
-@stdlayout("Bewerk auto", scripts=js.datetimepicker()) {
+@scripts = {
+    js.datetimepicker()
+    <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+    <script>tinymce.init({ selector:'textarea', plugins: [ 'lists' ]  });</script>
+}
+
+@stdlayout("Bewerk auto", scripts) {
 
     @helper.form(routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
         <div class="row">
