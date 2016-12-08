@@ -70,7 +70,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
-                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now())
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
@@ -86,7 +87,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
-                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now())
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
@@ -131,7 +133,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 ReservationHeader reservation = new ReservationHeader(
                         id,
                         userId, carId, rs.getInt("reservation_owner_id"),
-                        from, until, null, false);
+                        from, until, null, false, null);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
                 reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
                 return reservation;
@@ -254,12 +256,13 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getTimestamp("r.reservation_from").toLocalDateTime(),
                 rs.getTimestamp("r.reservation_to").toLocalDateTime(),
                 null,
-                false // not important
+                false, // not important
+                rs.getTimestamp("r.reservation_created_at").toLocalDateTime()
         );
     }
 
     private LazyStatement getNextReservationStatement = new LazyStatement(
-            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, " +
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, r.reservation_created_at " +
                     USER_HEADER_FIELDS +
                     "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +

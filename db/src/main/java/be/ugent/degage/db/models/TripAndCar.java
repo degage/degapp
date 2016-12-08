@@ -43,8 +43,8 @@ public class TripAndCar extends Trip {
     }
 
     public TripAndCar(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until,
-                      String message, boolean old, CarHeader car) {
-        super(id, carId, userId, ownerId, from, until, message, old);
+                      String message, boolean old, LocalDateTime createdAt, CarHeader car) {
+        super(id, carId, userId, ownerId, from, until, message, old, createdAt);
         this.car = car;
     }
 }

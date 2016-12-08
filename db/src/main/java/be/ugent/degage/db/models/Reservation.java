@@ -40,8 +40,8 @@ public class Reservation extends ReservationHeader {
     private UserHeader driver;
 
     public Reservation(int id, CarHeader car, UserHeader driver, int ownerId,
-                       LocalDateTime from, LocalDateTime until, String message, boolean old) {
-        super (id, car == null ? 0 : car.getId(), driver == null ? 0 : driver.getId(), ownerId, from, until, message, old);
+                       LocalDateTime from, LocalDateTime until, String message, boolean old, LocalDateTime createdAt) {
+        super (id, car == null ? 0 : car.getId(), driver == null ? 0 : driver.getId(), ownerId, from, until, message, old, createdAt);
         this.car = car;
         this.driver = driver;
     }
