@@ -31,6 +31,8 @@ package be.ugent.degage.db.models;
 
 
 import java.time.LocalDateTime;
+import java.text.DateFormat;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Contains the most essential information for reservations.
@@ -48,6 +50,7 @@ public class ReservationHeader {
     protected String message;
     protected boolean privileged;
     protected boolean old;
+    private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
 
     public ReservationHeader(int id, int carId, int driverId, int ownerId, LocalDateTime from, LocalDateTime until, String message, boolean old) {
         this.id = id;
@@ -88,8 +91,16 @@ public class ReservationHeader {
         return from;
     }
 
+    public String getFromIcs() {
+        return getFrom().format(dateFormat);
+    }
+
     public LocalDateTime getUntil() {
         return until;
+    }
+
+    public String getUntilIcs() {
+        return getUntil().format(dateFormat);
     }
 
     public String getMessage() {
