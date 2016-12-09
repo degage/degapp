@@ -35,6 +35,8 @@ import be.ugent.degage.db.models.*;
 
 import java.sql.*;
 import java.time.Instant;
+import java.util.Map;
+import java.util.HashMap;
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 
@@ -132,7 +134,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     @Override
     public int getAmountOfAttendees(int id) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT COUNT(*) FROM infosessionenrollees WHERE infosession_id = ?"
+                "SELECT COUNT(*) FROM infosessionenrollees WHERE infosession_id = ? and infosession_enrollment_status = "
         )) {
             ps.setInt(1, id);
             return toSingleInt(ps);
@@ -222,10 +224,44 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         ) {
             ps.setInt(1, (page-1)*pageSize);
             ps.setInt(2, pageSize);
-            return toPage(ps, pageSize, JDBCInfoSessionDAO::populatePastInfoSession);
+            Page<InfoSession> infoSessions = toPage(ps, pageSize, JDBCInfoSessionDAO::populatePastInfoSession);   
+            Map<Integer, Integer> attendeeCountMap = getAttendeeCountMap(page, pageSize);         
+            for (InfoSession infoSession : infoSessions) {
+                infoSession.setAttendeeCount(attendeeCountMap.get(infoSession.getId()) == null ? 0 : attendeeCountMap.get(infoSession.getId()));
+            }
+            return infoSessions;
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of infosessions", ex);
         }
+    }
+
+    private Map<Integer, Integer> getAttendeeCountMap(int page, int pageSize) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+            "SELECT SQL_CALC_FOUND_ROWS " +
+                    "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, " +
+                    "h.user_id, h.user_firstname, h.user_lastname, " +
+                    "count(infosession_enrollee_id) AS attendee_count, " +
+                    "count(u.user_date_joined) AS member_count " +
+            "FROM infosessions " +
+                    "JOIN infosessionenrollees USING(infosession_id) " +
+                    "JOIN users AS h ON infosession_host_user_id = h.user_id " +
+                    "JOIN users AS u ON infosession_enrollee_id = u.user_id " +
+            "WHERE infosession_timestamp <= NOW() AND infosessionenrollees.infosession_enrollment_status = 'PRESENT' " +
+            "GROUP BY infosession_id " +
+                    "ORDER BY infosession_timestamp DESC LIMIT ?, ?")
+        ) {
+            ps.setInt(1, (page-1)*pageSize);
+            ps.setInt(2, pageSize);
+            Map<Integer, Integer> attendeeCountMap = new HashMap<Integer, Integer>();
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                attendeeCountMap.put(rs.getInt("infosession_id"), rs.getInt("attendee_count"));
+            }
+            return attendeeCountMap;
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of infosessions", ex);
+        }
+
     }
 
     @Override

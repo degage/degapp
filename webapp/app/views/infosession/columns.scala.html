@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(session: InfoSession)
+@(session: InfoSession, future: Boolean)
 
 <td>
     @session.getType match {
@@ -52,5 +52,7 @@
 } else {
     <td>@session.getEnrolleeCount</td>
 }
-
+@if(!future){
+    <td>@session.getAttendeeCount</td>
+}
 <td>@session.getHostName</td>

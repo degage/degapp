@@ -44,7 +44,7 @@
     <tbody>
         @foreach(sessions) { session =>
             <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" }>
-                @columns(session)
+                @columns(session, true)
                 <td>@session.getAddress</td>
                 <td>
                     <div class="btn-group btn-group-xs">
