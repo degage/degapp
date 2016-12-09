@@ -46,6 +46,7 @@ public class InfoSession {
     private int enrolleeCount;
     private int membershipCount;
     private String comments;
+    private int attendeeCount = 0;
 
     public InfoSession(int id, InfoSessionType type, Instant time, Address address, int hostId, String hostName, int maxEnrollees, String comments) {
         this.id = id;
@@ -133,5 +134,13 @@ public class InfoSession {
 
     public void setMembershipCount(int membershipCount) {
         this.membershipCount = membershipCount;
+    }
+
+    public void setAttendeeCount(int count) {
+        this.attendeeCount = count;
+    }
+    
+    public int getAttendeeCount() {
+        return attendeeCount;
     }
 }

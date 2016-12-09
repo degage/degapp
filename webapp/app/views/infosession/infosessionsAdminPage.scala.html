@@ -36,6 +36,9 @@
         <th>Type</th>
         <th>Tijdstip</th>
         <th>Inschrijvingen</th>
+        @if(!future){
+            <th>Aanwezigen</th>
+        }
         <th>Gastvrouw / -heer</th>
         <th>@if(future){Adres}else{Leden}</th>
         <th>Acties</th>
@@ -43,7 +46,7 @@
     </thead>
     <tbody>
     @foreach.trOrElse(sessions){ session =>
-        @columns(session)
+        @columns(session, future)
         <td>@if(future){@session.getAddress}else{@session.getMembershipCount}</td>
         <td>
             <div class="btn-group btn-group-xs">
