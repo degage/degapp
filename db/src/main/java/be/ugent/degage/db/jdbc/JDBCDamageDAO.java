@@ -61,7 +61,8 @@ class JDBCDamageDAO extends AbstractDAO implements DamageDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 null,
-                false
+                false,
+                rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         reservation.setPrivileged(rs.getBoolean("reservation_privileged"));

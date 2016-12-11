@@ -69,7 +69,8 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
-                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now())
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
         populateExtras(rs, trip);
         return trip;
@@ -90,6 +91,7 @@ class JDBCTripDAO extends AbstractDAO implements TripDAO {
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
                 rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                rs.getTimestamp("reservation_created_at").toLocalDateTime(),
                 car
         );
         populateExtras(rs, trip);
