@@ -71,19 +71,23 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
-            "AND user_status LIKE ?";
+            "AND user_status LIKE ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-
         ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start + 1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start + 2, filter.getValue(FilterField.USER_NAME));
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
-        ps.setString(start + 4, "%" + filter.getValue(FilterField.USER_STATUS) + "%");
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")
+            || filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            ps.setString(start + 4, "%REGISTERED%");
+        } else {
+            ps.setString(start + 4, "%" + filter.getValue(FilterField.USER_STATUS) + "%");
+        }
     }
 
     public JDBCUserDAO(JDBCDataAccessContext context) {
@@ -398,7 +402,15 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         StringBuilder builder = new StringBuilder();
         builder.append(USER_QUERY);
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
+            builder.append("JOIN degage.infosessionenrollees on users.user_id = infosession_enrollee_id and infosession_enrollment_status = 'PRESENT' ");
+        } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("LEFT JOIN degage.infosessionenrollees on users.user_id = infosession_enrollee_id ");
+        }
         builder.append(FILTER_FRAGMENT);
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("AND (infosession_enrollment_status != 'PRESENT' OR infosession_enrollment_status IS NULL) ");
+        }
 
         // add order
         switch (orderBy) {
