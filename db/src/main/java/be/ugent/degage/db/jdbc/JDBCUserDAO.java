@@ -63,7 +63,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
                     "users.user_damage_history, users.user_agree_terms,  " +
-                    "users.user_date_joined, users.user_driver_license_date, users.user_vat " +
+                    "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
+                    "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped, " +
+                    "NULL as approval_submission, NULL as infosession_timestamp " +
                     "FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
                     "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
@@ -71,7 +73,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
-            "AND user_status LIKE ? ";
+            "AND user_status = ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
@@ -84,9 +86,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
         if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")
             || filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
-            ps.setString(start + 4, "%REGISTERED%");
+            ps.setString(start + 4, "REGISTERED");
         } else {
-            ps.setString(start + 4, "%" + filter.getValue(FilterField.USER_STATUS) + "%");
+            ps.setString(start + 4, filter.getValue(FilterField.USER_STATUS));
         }
     }
 
@@ -121,6 +123,21 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         Date dateLicense = rs.getDate("users.user_driver_license_date");
         user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
+
+        Date dateCreated = rs.getDate("users.user_created_at");
+        user.setDateCreated(dateCreated == null ? null : dateCreated.toLocalDate());
+
+        Date dateBlocked = rs.getDate("users.user_date_blocked");
+        user.setDateBlocked(dateBlocked == null ? null : dateBlocked.toLocalDate());
+
+        Date dateDropped = rs.getDate("users.user_date_dropped");
+        user.setDateDropped(dateDropped == null ? null : dateDropped.toLocalDate());
+
+        Date dateApprovalSubmitted = rs.getDate("approval_submission");
+        user.setDateApprovalSubmitted(dateApprovalSubmitted == null ? null : dateApprovalSubmitted.toLocalDate());
+
+        Date dateSessionAttended = rs.getDate("infosession_timestamp");
+        user.setDateSessionAttended(dateSessionAttended == null ? null : dateSessionAttended.toLocalDate());
 
         user.setVatNr(rs.getString("users.user_vat"));
 
@@ -401,13 +418,44 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     @Override
     public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         StringBuilder builder = new StringBuilder();
-        builder.append(USER_QUERY);
-        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
-            builder.append("JOIN degage.infosessionenrollees on users.user_id = infosession_enrollee_id and infosession_enrollment_status = 'PRESENT' ");
-        } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
-            builder.append("LEFT JOIN degage.infosessionenrollees on users.user_id = infosession_enrollee_id ");
+        // builder.append(USER_QUERY);
+        builder.append("SELECT SQL_CALC_FOUND_ROWS " + USER_HEADER_FIELDS + ",  " +
+                    "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
+                    "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
+                    "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
+                    "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
+                    "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
+                    "users.user_damage_history, users.user_agree_terms,  " +
+                    "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
+                    "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped ");
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
+            builder.append(", approval_submission ");
+        } else {
+            builder.append(", NULL as approval_submission ");
         }
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
+            builder.append(", infosession_timestamp ");
+        } else {
+            builder.append(", NULL as infosession_timestamp ");
+        }
+
+        builder.append("FROM users " +
+                    "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
+                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ");
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
+            builder.append("LEFT JOIN approvals on users.user_id =  approval_user ");
+        } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
+            builder.append("JOIN infosessionenrollees on users.user_id = infosession_enrollee_id and infosession_enrollment_status = 'PRESENT' ");
+            builder.append("JOIN infosessions on infosessionenrollees.infosession_id = infosessions.infosession_id ");
+        } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("LEFT JOIN infosessionenrollees on users.user_id = infosession_enrollee_id ");
+        } 
+
         builder.append(FILTER_FRAGMENT);
+
         if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
             builder.append("AND (infosession_enrollment_status != 'PRESENT' OR infosession_enrollment_status IS NULL) ");
         }
@@ -421,7 +469,26 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 builder.append(asc ? "ASC" : "DESC");
                 break;
             case DATE:
-                builder.append(" ORDER BY user_date_joined ");
+                switch (filter.getValue(FilterField.USER_STATUS)) {
+                    case "FULL":
+                        builder.append(" ORDER BY user_date_joined ");
+                        break;
+                    case "FULL_VALIDATING":
+                        builder.append(" ORDER BY approval_submission ");
+                        break;
+                    case "REGISTERD_INFO_PRESENT":
+                        builder.append(" ORDER BY infosession_timestamp ");
+                        break;
+                    case "REGISTERD_INFO_NOT_PRESENT":
+                        builder.append(" ORDER BY user_created_at ");
+                        break;
+                    case "BLOCKED":
+                        builder.append(" ORDER BY user_date_blocked ");
+                        break;
+                    case "DROPPED":
+                        builder.append(" ORDER BY user_date_dropped ");
+                        break;
+                }
                 builder.append(asc ? "ASC" : "DESC");
                 break;
         }

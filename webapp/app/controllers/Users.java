@@ -96,7 +96,7 @@ public class Users extends Controller {
         UserDAO dao = DataAccess.getInjectedContext().getUserDAO();
 
         Page<User> listOfUsers = dao.getUserList(field, asc, page, pageSize, filter);
-        return ok(userspage.render(listOfUsers));
+        return ok(userspage.render(listOfUsers, filter.getValue(FilterField.USER_STATUS)));
     }
 
     @AllowRoles({UserRole.SUPER_USER})

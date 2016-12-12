@@ -41,6 +41,12 @@ public class User extends UserHeader {
     private String license;
     private LocalDate licenseDate;
     private LocalDate dateJoined;
+    private LocalDate dateCreated;
+    private LocalDate dateBlocked;
+    private LocalDate dateDropped;
+    private LocalDate dateApprovalSubmitted;
+    private LocalDate dateSessionAttended;
+
     private String identityId;
     private String nationalId;
     private String damageHistory;
@@ -125,6 +131,47 @@ public class User extends UserHeader {
 
     public void setDateJoined(LocalDate dateJoined) {
         this.dateJoined = dateJoined;
+    }
+
+
+    public LocalDate getDateCreated() {
+        return dateCreated;
+    }
+
+    public void setDateCreated(LocalDate dateCreated) {
+        this.dateCreated = dateCreated;
+    }
+
+    public LocalDate getDateBlocked() {
+        return dateBlocked;
+    }
+
+    public void setDateBlocked(LocalDate dateBlocked) {
+        this.dateBlocked = dateBlocked;
+    }
+
+    public LocalDate getDateDropped() {
+        return dateDropped;
+    }
+
+    public void setDateDropped(LocalDate dateDropped) {
+        this.dateDropped = dateDropped;
+    }
+
+    public LocalDate getDateApprovalSubmitted() {
+        return dateApprovalSubmitted;
+    }
+
+    public void setDateApprovalSubmitted(LocalDate dateApprovalSubmitted) {
+        this.dateApprovalSubmitted = dateApprovalSubmitted;
+    }
+
+    public LocalDate getDateSessionAttended() {
+        return dateSessionAttended;
+    }
+
+    public void setDateSessionAttended(LocalDate dateSessionAttended) {
+        this.dateSessionAttended = dateSessionAttended;
     }
 
     public String getVatNr() {
