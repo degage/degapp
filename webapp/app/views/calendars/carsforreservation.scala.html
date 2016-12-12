@@ -27,17 +27,20 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carList: Iterable[CarHeaderLong])
+@(carList: Iterable[CarHeaderLong], user: User)
 
 @scripts = {
     <script>
         var map;
         function initMap() {
-            var ghent = {lat: 51.0535, lng: 3.7304};
+            var center = {lat: 51.0535, lng: 3.7304};
+            if ('@user.getAddressResidence().getLat()' !== undefined && parseFloat('@user.getAddressResidence().getLat()') > 0) {
+                center = {lat: parseFloat('@user.getAddressResidence().getLat()'), lng: parseFloat('@user.getAddressResidence().getLng()')};
+            }
             var geocoder = new google.maps.Geocoder();
             var map = new google.maps.Map(document.getElementById('map'), {
-              zoom: 12,
-              center: ghent
+              zoom: 15,
+              center: center
             });
             $('#resultsTable > table > tbody  > tr').each( function(index, el) {
                 var firstEl = $(el).first();

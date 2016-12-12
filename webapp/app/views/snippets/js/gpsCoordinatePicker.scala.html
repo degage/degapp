@@ -1,0 +1,22 @@
+@(addressPrefix: String)
+<script>
+function fillInGpsCoordinates(ev) {
+    ev.preventDefault();
+    console.log('fillInGpsCoordinates', '@addressPrefix');
+    var geocoder = new google.maps.Geocoder();
+    var address = $('#' + '@addressPrefix' + '_street').val() + ' ' + $('#' + '@addressPrefix' + '_num').val() + ' ' + $('#' + '@addressPrefix' + '_zipCode').val() + ' ' + $('#' + '@addressPrefix' + '_city').val() + ' ' + $('#' + '@addressPrefix' + '_country').val();
+    geocoder.geocode({'address': address}, function(results, status) {
+        console.log(results);
+        console.log(results[0].geometry.location.lng());
+        console.log('lat', results[0].geometry.location.lat());
+        console.log('status', status);
+        if (status === 'OK') {
+            $('#'+ '@addressPrefix' + '_lat').val(results[0].geometry.location.lat());
+            $('#' + '@addressPrefix' + '_lng').val(results[0].geometry.location.lng());
+        } else {
+            console.error('Problem for ', locationTag.innerText, status);
+        }
+    });
+  } 
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U"></script>

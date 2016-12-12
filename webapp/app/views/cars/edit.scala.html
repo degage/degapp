@@ -33,30 +33,10 @@
 @import db.CurrentUser
 
 @scripts = {
-    js.datetimepicker()
+    @js.datetimepicker()
     <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
     <script>tinymce.init({ selector:'textarea', plugins: [ 'lists' ]  });</script>
-    <script>
-    function fillInGpsCoordinates(ev) {
-        ev.preventDefault();
-        console.log('fillInGpsCoordinates');
-        var geocoder = new google.maps.Geocoder();
-        var address = $('#address_street').val() + ' ' + $('#address_num').val() + ' ' + $('#address_zipCode').val() + ' ' + $('#address_city').val() + ' ' + $('#address_country').val();
-        geocoder.geocode({'address': address}, function(results, status) {
-            console.log(results);
-            console.log(results[0].geometry.location.lng());
-            console.log('lat', results[0].geometry.location.lat());
-            console.log('status', status);
-            if (status === 'OK') {
-                $('#address_lat').val(results[0].geometry.location.lat());
-                $('#address_lng').val(results[0].geometry.location.lng());
-            } else {
-                console.error('Problem for ', locationTag.innerText, status);
-            }
-        });
-      } 
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U"></script>
+    @js.gpsCoordinatePicker("address")
 }
 
 @stdlayout("Bewerk auto", scripts) {
@@ -96,9 +76,6 @@
                 @panel("Standplaats", "fa-home"){
                     <fieldset>
                         @addressFields(form)
-                        <div class="form-group col-md-6 ">
-                            <button class="btn btn-sm btn-warning" onClick='fillInGpsCoordinates(event)'>Get GPS coordinates</button>
-                        </div>
                     </fieldset>
                 }
                 @panel("Details", "fa-bar-chart-o"){

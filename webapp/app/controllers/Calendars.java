@@ -32,7 +32,9 @@ package controllers;
 import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarDAO;
+import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.dao.ReservationDAO;
+import be.ugent.degage.db.models.User;
 import be.ugent.degage.db.models.CarHeaderLong;
 import be.ugent.degage.db.models.ReservationHeader;
 import be.ugent.degage.db.models.Page;
@@ -115,9 +117,11 @@ public class Calendars extends Controller {
     @AllowRoles
     @InjectContext
     public static Result showCarsForReservation() {
+        UserDAO userDAO = DataAccess.getInjectedContext().getUserDAO();
+        User user = userDAO.getUser(CurrentUser.getId());
         return ok(carsforreservation.render(
-                DataAccess.getInjectedContext().getCarDAO().listAllActiveCars(CurrentUser.getId())
-        ));
+                DataAccess.getInjectedContext().getCarDAO().listAllActiveCars(CurrentUser.getId()), user)
+        );
     }
 
     public static class DateData {
