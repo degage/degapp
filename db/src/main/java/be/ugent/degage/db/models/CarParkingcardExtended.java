@@ -1,4 +1,4 @@
-@* carsAdmin.scala.html
+/* CarParkingcardExtended.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -6,11 +6,7 @@
  * 
  * Corresponding author (see also AUTHORS.txt)
  * 
- * Kris Coolsaet
- * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
- * Krijgslaan 281-S9
- * B-9000 GENT Belgium
+ * Emmanuel Isebaert
  * 
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -24,24 +20,38 @@
  * 
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
- * distribution).  If not, see http://www.gnu.org/licenses/.
- *@
+ * distribution).  If not, see <http://www.gnu.org/licenses/>.
+ */
 
-@stdlayout("Auto's (beheer)", scripts=js.pagination("Cars.showCarsPage")) {
-    @panel(){
-        <div class="col-xs-12">
-            <a class="btn btn-primary btn-sm" href="@routes.Cars.newCar">Nieuwe auto</a>
-            @* <a class="btn btn-primary btn-sm" href="@routes.Reports.getCars">Exporteer auto's</a> *@
-        </div>
+package be.ugent.degage.db.models;
+
+import java.time.LocalDate;
+
+/**
+ * Extends {@link CarParkingcard} with context information (car/owner)
+ */
+public class CarParkingcardExtended extends CarParkingcard {
+
+    private String carName;
+    private int carId;
+    private String carLicensePlate;
+
+    public CarParkingcardExtended(String city, LocalDate expiration, String zones, String contractNr, String carName, int carId, String carLicensePlate) {
+        super(city, expiration, zones, contractNr);
+        this.carName = carName;
+        this.carId = carId;
+        this.carLicensePlate = carLicensePlate;
     }
 
-    @panel("Auto's zoeken", "fa-search"){
-        @search.textField("name", "Naam", "col-xs-6")
-        @search.textField("brand", "Merk", "col-xs-6")
-        @search.textField("license_plate", "Nummerplaat", "col-xs-6")
-        @search.textField("owner", "Eigenaar", "col-xs-6")
-        @search.button("Zoek!")
+    public String getCarName() {
+        return carName;
     }
 
-    @resultsTablePanel("Auto's", "fa-car")
+    public int getCarId() {
+        return carId;
+    }
+
+    public String getCarLicensePlate() {
+        return carLicensePlate;
+    }
 }

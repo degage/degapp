@@ -35,14 +35,16 @@ package be.ugent.degage.db.models;
 public class CarHeaderAndOwner extends CarHeader {
 
     private String ownerName;
+    public String licensePlate;
 
     /**
      * Create an object of this type.
      */
     public CarHeaderAndOwner(int id, String name, String brand, String type, String email,
-                             boolean active, int ownerId, String ownerName, int carYear) {
+                             boolean active, int ownerId, String ownerName, int carYear, String licensePlate) {
         super(id, name, brand, type, email, active, ownerId, carYear);
         this.ownerName = ownerName;
+        this.licensePlate = licensePlate;
     }
 
     public String getOwnerName() {
@@ -51,5 +53,8 @@ public class CarHeaderAndOwner extends CarHeader {
 
     public void setOwnerName(String ownerName) {
         this.ownerName = ownerName;
+    }
+    public String getLicensePlate() {
+        return licensePlate;
     }
 }

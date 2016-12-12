@@ -27,13 +27,18 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(form: Form[Calendars.CarDateData], lines: Iterable[util.OverviewLine])
+@(form: Form[Calendars.CarDateData], ofc: Calendars.OverviewForCar)
 
-@scripts={@js.userpicker()@js.datetimepicker()}
+@scripts={
+  @js.userpicker()
+  @js.datetimepicker()
+  @js.usesajax()
+  @js.ajaxCarData()
+}
 
 @stdlayout("Beschikbaarheid auto", sheets("reservationtable"), scripts) {
     @cardatepanel(form,routes.Calendars.overviewCarPost())
-    @overviewpanel("Beschikbare perioden", "fa-calendar", lines, percentage=10){
+    @overviewForCarPanel("Beschikbare perioden", "fa-calendar", ofc, percentage=10){
         @* no header. *@
     }{  @* no footer. *@ }
 }

@@ -32,6 +32,7 @@
     <thead>
         <tr role="row">
             <th name="name" class="sortable" tabindex="0" >Naam</th>
+            <th name="license_plate" class="sortable" tabindex="0" >Nummerplaat</th>
             <th name="brand" class="sortable" tabindex="0" >Merk</th>
             <th name="active" class="sortable" tabindex="0" >Actief</th>
             <th name="owner" class="sortable" tabindex="0" >Eigenaar</th>
@@ -42,6 +43,7 @@
     <tbody>
     @foreach.trOrElse(cars){ car =>
         <td> <a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
+        <td>@car.getLicensePlate</a></td>
         <td>@car.getBrand</td>
         <td>
             @if(car.isActive) {

@@ -122,6 +122,11 @@ class JDBCDataAccessContext implements DataAccessContext {
         return new JDBCCarAssistanceDAO(this);
     }
 
+    @Override
+    public CarParkingcardDAO getCarParkingcardDAO() {
+        return new JDBCCarParkingcardDAO(this);
+    }
+
 	@Override
 	public CarDAO getCarDAO() {
 		return new JDBCCarDAO(this);

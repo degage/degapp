@@ -120,7 +120,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     private static void appendCostFilter(StringBuilder builder, Filter filter) {
-        builder.append(" WHERE NOT car_cost_archived ");
+        // builder.append(" WHERE NOT car_cost_archived ");
         FilterUtils.appendIdFilter(builder, "car_cost_car_id", filter.getValue(FilterField.CAR_ID));
         FilterUtils.appendStringFilter(builder, "car_cost_status", filter.getValue(FilterField.STATUS));
     }
@@ -154,7 +154,6 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 break;
         }
         builder.append(" LIMIT ?,?");
-        System.out.println(builder.toString());
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
@@ -168,7 +167,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public Iterable<CarCost> listCostsOfCar(int carId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 CAR_COST_QUERY +
-                        " WHERE NOT car_cost_archived AND car_cost_car_id = ?  ORDER BY car_cost_time DESC"
+                        " WHERE car_cost_car_id = ?  ORDER BY car_cost_time DESC"
+                        // " WHERE NOT car_cost_archived AND car_cost_car_id = ?  ORDER BY car_cost_time DESC"
         )) {
             ps.setInt(1, carId);
             return toList(ps, JDBCCarCostDAO::populateCarCost);

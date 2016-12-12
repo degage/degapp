@@ -27,7 +27,7 @@ libraryDependencies ++= Seq(
   "org.pegdown"             %  "pegdown"                     % "1.4.0",
   "org.webjars"             %  "bootstrap"                   % "3.3.6",
   "org.webjars"             % "jquery"                       % "2.1.1",
-  "org.webjars"             % "font-awesome"                 % "4.3.0-4",
+  "org.webjars"             % "font-awesome"                 % "4.7.0",
   "org.webjars"             % "bootstrap-datetimepicker"     % "2.2.0", // Timepicker for bootstrap v3
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
   "org.webjars"             % "jquery_are-you-sure"          % "1.5.0", // checks user does not leave page when form data is changed

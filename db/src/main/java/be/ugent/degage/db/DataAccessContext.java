@@ -48,6 +48,8 @@ public interface DataAccessContext extends AutoCloseable {
     
     public CarAssistanceDAO getCarAssistanceDAO();
 
+    public CarParkingcardDAO getCarParkingcardDAO();
+
     public CarDAO getCarDAO();
 
     public PrivilegedDAO getPrivilegedDAO();

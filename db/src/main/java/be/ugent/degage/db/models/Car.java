@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.models;
 
+import java.time.LocalDate;
+
 /**
  * Represents information about a certain car.
  */
@@ -41,13 +43,15 @@ public class Car extends CarHeaderLong {
     private TechnicalCarDetails technicalCarDetails;
     private CarInsurance insurance;
     private CarAssistance assistance;
+    private CarParkingcard parkingcard;
+    private LocalDate createdAt;
 
     public Car(int id, String name, String email, String brand, String type,
                Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
                CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
                String comments, boolean active, UserHeader owner) {
         super(id, name, brand, type, email, active,
-                seats, doors, manual, gps, hook, fuel, comments, year);
+                seats, doors, manual, gps, hook, fuel, comments, year, "");
         if (owner != null) {
             setOwner(owner);
         }
@@ -55,6 +59,22 @@ public class Car extends CarHeaderLong {
         this.fuelEconomy = fuelEconomy;
         this.estimatedValue = estimatedValue;
         this.ownerAnnualKm = ownerAnnualKm;
+    }
+
+    public Car(int id, String name, String email, String brand, String type,
+               Integer seats, Integer doors, Integer year, boolean manual, boolean gps, boolean hook,
+               CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
+               String comments, boolean active, LocalDate createdAt, UserHeader owner, String licensePlate) {
+        super(id, name, brand, type, email, active,
+                seats, doors, manual, gps, hook, fuel, comments, year, licensePlate);
+        if (owner != null) {
+            setOwner(owner);
+        }
+        this.year = year;
+        this.fuelEconomy = fuelEconomy;
+        this.estimatedValue = estimatedValue;
+        this.ownerAnnualKm = ownerAnnualKm;
+        this.createdAt = createdAt;
     }
 
 
@@ -112,6 +132,18 @@ public class Car extends CarHeaderLong {
 
     public void setAssistance(CarAssistance assistance) {
         this.assistance = assistance;
+    }
+
+    public CarParkingcard getParkingcard() {
+        return parkingcard;
+    }
+
+    public void setParkingcard(CarParkingcard parkingcard) {
+        this.parkingcard = parkingcard;
+    }
+
+    public LocalDate getCreatedAt() {
+        return createdAt;
     }
 
 }

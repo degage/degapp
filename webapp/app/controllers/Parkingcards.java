@@ -1,4 +1,4 @@
-/* Assistances.java
+/* Parkingcards.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -6,11 +6,7 @@
  * 
  * Corresponding author (see also AUTHORS.txt)
  * 
- * Kris Coolsaet
- * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
- * Krijgslaan 281-S9
- * B-9000 GENT Belgium
+ * Emmanuel Isebaert
  * 
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -45,42 +41,42 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Http;
 import play.mvc.Result;
-import views.html.assistances.*;
+import views.html.parkingcards.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 
-public class Assistances extends Controller {
+public class Parkingcards extends Controller {
 
-    public static class AssistanceModel {
+    public static class ParkingcardModel {
 
-        public String assistanceName;
-        public LocalDate assistanceExpiration;
-        public String assistanceType;
-        public String assistanceContractNr;
+        public String parkingcardCity;
+        public LocalDate parkingcardExpiration;
+        public String parkingcardZones;
+        public String parkingcardContractNr;
     }
 
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result showAllAssistancesPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+    public static Result showAllParkingcardsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         Filter filter = Pagination.parseFilter(searchString);
         FilterField field = FilterField.stringToField(orderBy, FilterField.FROM);
-        return ok(assistancesPage.render(
-            DataAccess.getInjectedContext().getCarAssistanceDAO().getAllCarAssistances(field, ascInt == 1 ? true : false, page, pageSize, filter)
-            // DataAccess.getInjectedContext().getCarAssistanceDAO().getAllCarAssistances()
+        return ok(parkingcardsPage.render(
+            DataAccess.getInjectedContext().getCarParkingcardDAO().getAllCarParkingcards(field, ascInt == 1 ? true : false, page, pageSize, filter)
+            // DataAccess.getInjectedContext().getCarParkingcardDAO().getAllCarParkingcards()
         ));
     }
 
     /**
      * Method: GET
      *
-     * @return index page containing all the assistances from everyone
+     * @return index page containing all the parkingcards from everyone
      */
     @AllowRoles({UserRole.CAR_ADMIN})
     @InjectContext
-    public static Result showAllAssistances() {
-        return ok(assistancesAdmin.render());
+    public static Result showAllParkingcards() {
+        return ok(parkingcardsAdmin.render());
     }
 }

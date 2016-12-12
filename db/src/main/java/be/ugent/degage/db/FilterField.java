@@ -63,7 +63,10 @@ public enum FilterField {
     YEAR(true),
     CONTRACT_ID(true),
     TYPE(true),
-    USER_STATUS(true);
+    USER_STATUS(true),
+    CITY(true),
+    ZONES(true),
+    LICENSE_PLATE(true);
 
     boolean exactValue;
 

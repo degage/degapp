@@ -1,4 +1,4 @@
-/* CarAssistanceExtended.java
+/* CarParkingcard.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
  * 
@@ -6,11 +6,7 @@
  * 
  * Corresponding author (see also AUTHORS.txt)
  * 
- * Kris Coolsaet
- * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
- * Krijgslaan 281-S9
- * B-9000 GENT Belgium
+ * Emmanuel Isebaert
  * 
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
@@ -31,32 +27,46 @@ package be.ugent.degage.db.models;
 
 import java.time.LocalDate;
 
-/**
- * Extends {@link CarAssistance} with context information (car/owner)
- */
-public class CarAssistanceExtended extends CarAssistance {
+public class CarParkingcard {
 
-    private String carName;
-    private int carId;
-    public String licensePlate;
+    private String city;
+	private LocalDate expiration;
+	private String zones;
+	private String contractNr;
 
-    public CarAssistanceExtended(String name, LocalDate expiration, CarAssistanceType type, String contractNr,
-        String carName, int carId, String licensePlate) {
-        super(name, expiration, type, contractNr);
-        this.carName = carName;
-        this.carId = carId;
-        this.licensePlate = licensePlate;
+	public CarParkingcard(String city, LocalDate expiration, String zones, String contractNr) {
+        this.city = city;
+		this.expiration = expiration;
+		this.zones = zones;
+		this.contractNr = contractNr;
+	}
+	
+	
+	public LocalDate getExpiration() {
+		return expiration;
+	}
+	public void setExpiration(LocalDate expiration) {
+		this.expiration = expiration;
+	}
+
+	public String getContractNr() {
+		return contractNr;
+	}
+	public void setContractNr(String contractNr) {
+		this.contractNr = contractNr;
+	}
+
+	public String getZones() {
+		return zones;
+	}
+	public void setZones(String zones) {
+		this.zones = zones;
+	}
+
+    public String getCity() {
+        return city;
     }
-
-    public String getCarName() {
-        return carName;
-    }
-
-    public int getCarId() {
-        return carId;
-    }
-
-    public String getLicensePlate() {
-        return licensePlate;
+    public void setCity(String city) {
+        this.city = city;
     }
 }

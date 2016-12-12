@@ -498,7 +498,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.setString(1, str);
             int i = 2;
             for (String s: status) {
-                System.out.println("status: " + s);
                 ps.setString(i, s);
                 i++;
             }
