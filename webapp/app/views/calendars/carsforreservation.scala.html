@@ -35,32 +35,36 @@
         function initMap() {
             var ghent = {lat: 51.0535, lng: 3.7304};
             var geocoder = new google.maps.Geocoder();
-            geocoder.geocode({'address': 'Noordstraat 16, 9000 Gent'}, function(results, status) {
-              if (status === 'OK') {
-                var map = new google.maps.Map(document.getElementById('map'), {
-                  zoom: 14,
-                  center: ghent
-                });
-                map.setCenter(results[0].geometry.location);
-                console.log('it', '@carList.iterator().size');
-                var it = '@carList.iterator()';
-                console.log('it', it);
-                console.log('it.next');
-                console.log(it.next);
-                console.log('carList.length', '@carList.iterator().next');
-                console.log('carList.length', '@carList.iterator().next');
-                console.log('carList.length', 'it.next().getId()');
-                var marker = new google.maps.Marker({
-                  map: map,
-                  position: results[0].geometry.location,
-                  label: 'testcar' 
-                });
-                marker.addListener('click', function() {
-                    alert('redirect to ...');
-                });
-              } 
+            var map = new google.maps.Map(document.getElementById('map'), {
+              zoom: 12,
+              center: ghent
             });
-        }
+            // map.setCenter(results[0].geometry.location);
+            $('#resultsTable > table > tbody  > tr').each( function(index, el) {
+                console.log('el', el);
+                var firstEl = $(el).first();
+                console.log('first el', firstEl);
+                var aTag = $(firstEl).find('a')[0];
+                var tdTag = $(firstEl).find('td')[0];
+                var locationTag = $(firstEl).find('td')[3];
+                console.log(tdTag);
+                console.log(locationTag.innerText);
+                geocoder.geocode({'address': locationTag.innerText}, function(results, status) {
+                    if (status === 'OK') {
+                        var marker = new google.maps.Marker({
+                          map: map,
+                          position: results[0].geometry.location,
+                          label: tdTag.innerText
+                        });
+                        marker.addListener('click', function() {
+                            alert('redirect to ...' + aTag);
+                        });                    
+                    } else {
+                        console.log('Problem for ', locationTag.innerText, status);
+                    }
+                });
+            })
+          } 
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
 }
@@ -86,7 +90,7 @@
                         <td><a href='@routes.Calendars.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
                         <td>@car.getBrand @car.getType</td>
                         <td>@cars.cartags(car)</td>
-                        <td>@car.getLocation.getStreet, @car.getLocation.getCity</td>
+                        <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
                         <td>@car.getComments </td>
                     }
                 </tbody>
