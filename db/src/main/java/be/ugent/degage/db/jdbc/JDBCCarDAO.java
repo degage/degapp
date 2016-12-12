@@ -458,10 +458,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             "SELECT SQL_CALC_FOUND_ROWS cars.car_id, car_name, car_email, car_type, car_brand, car_seats, car_doors, " +
                     "car_manual, car_gps, car_hook, car_active, car_fuel, car_comments, car_owner_user_id, car_year, " +
                     JDBCAddressDAO.ADDRESS_FIELDS +
-                    "details_car_license_plate " +
+                    ", details_car_license_plate " +
                     "FROM cars JOIN addresses ON address_id=car_location " +
                     "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? " + 
-                    "LEFT JOIN technicalcardetails ON details_id = car_id ";
+                    "LEFT JOIN technicalcardetails ON details_id = cars.car_id ";
 
     private static final String SELECT_NOT_OVERLAP =
             " AND cars.car_id NOT IN (" +
