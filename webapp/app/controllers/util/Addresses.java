@@ -46,6 +46,8 @@ public class Addresses  {
         public String street;
         public String zipCode;
         public String country;
+        public float lat;
+        public float lng;
 
         public void populate(Address address) {
             if (address == null) {
@@ -58,10 +60,12 @@ public class Addresses  {
             street = address.getStreet();
             zipCode = address.getZip();
             country = address.getCountry();
+            lat = address.getLat();
+            lng = address.getLng();
         }
 
         public Address toAddress() {
-            return new Address(country, zipCode, city, street, num);
+            return new Address(country, zipCode, city, street, num, lat, lng);
         }
     }
 
@@ -89,7 +93,7 @@ public class Addresses  {
      */
     public static void updateAddress(EditAddressModel model, int addressId, AddressDAO dao) {
         dao.updateAddress(
-                new Address(addressId, model.country, model.zipCode, model.city, model.street, model.num)
+                new Address(addressId, model.country, model.zipCode, model.city, model.street, model.num, model.lat, model.lng)
         );
     }
 }
