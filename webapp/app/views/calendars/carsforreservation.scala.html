@@ -29,9 +29,46 @@
 
 @(carList: Iterable[CarHeaderLong])
 
-@stdlayout("Reserveer een auto", sheets("taglabels")) {
+@scripts = {
+    <script>
+        var map;
+        function initMap() {
+            var ghent = {lat: 51.0535, lng: 3.7304};
+            var geocoder = new google.maps.Geocoder();
+            geocoder.geocode({'address': 'Noordstraat 16, 9000 Gent'}, function(results, status) {
+              if (status === 'OK') {
+                var map = new google.maps.Map(document.getElementById('map'), {
+                  zoom: 14,
+                  center: ghent
+                });
+                map.setCenter(results[0].geometry.location);
+                console.log('it', '@carList.iterator().size');
+                var it = '@carList.iterator()';
+                console.log('it', it);
+                console.log('it.next');
+                console.log(it.next);
+                console.log('carList.length', '@carList.iterator().next');
+                console.log('carList.length', '@carList.iterator().next');
+                console.log('carList.length', 'it.next().getId()');
+                var marker = new google.maps.Marker({
+                  map: map,
+                  position: results[0].geometry.location,
+                  label: 'testcar' 
+                });
+                marker.addListener('click', function() {
+                    alert('redirect to ...');
+                });
+              } 
+            });
+        }
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
+}
+
+@stdlayout("Reserveer een auto", sheets("taglabels"), scripts=scripts) {
 
     @panel("De autovloot", "fa-car"){
+        <div id="map" class="col-xs-12"></div>
         <div id="resultsTable" class="table-responsive col-xs-12">
             <p>Klik op de autonaam om de auto te reserveren.</p>
             <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">

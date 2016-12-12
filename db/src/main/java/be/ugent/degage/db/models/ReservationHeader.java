@@ -51,8 +51,9 @@ public class ReservationHeader {
     protected boolean privileged;
     protected boolean old;
     private DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss");
+    protected LocalDateTime createdAt;
 
-    public ReservationHeader(int id, int carId, int driverId, int ownerId, LocalDateTime from, LocalDateTime until, String message, boolean old) {
+    public ReservationHeader(int id, int carId, int driverId, int ownerId, LocalDateTime from, LocalDateTime until, String message, boolean old, LocalDateTime createdAt) {
         this.id = id;
         this.carId = carId;
         this.driverId = driverId;
@@ -61,6 +62,7 @@ public class ReservationHeader {
         this.until = until;
         this.message = message;
         this.old = old;
+        this.createdAt = createdAt;
     }
     
     public int getId() {
@@ -121,5 +123,9 @@ public class ReservationHeader {
 
     public void setPrivileged(boolean privileged) {
         this.privileged = privileged;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }

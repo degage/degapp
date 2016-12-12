@@ -4,7 +4,7 @@ CREATE TABLE `carassistances` (
 	`assistance_expiration` DATE,
 	`assistance_contract_id` VARCHAR(64),
 	`assistance_type` ENUM('NONE','FULL','ACCIDENT','DEFECT'),
-	`assistance_updated_at` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+	`assistance_updated_at` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
 	PRIMARY KEY (`assistance_id`)
 );
 
