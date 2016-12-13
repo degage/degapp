@@ -33,9 +33,17 @@
 
 @editstatus(user){
    <div class="col-xs-4">
-       <a class="btn btn-warning btn-sm" href="@routes.Profile.blockUser(user.getId)">Blokkeer gebruiker</a>
+       <a class="btn btn-warning btn-sm" href="@routes.Profile.blockUser(user.getId, user.getEmail)">Blokkeer gebruiker</a>
     </div>
     <div class="col-xs-8">
     Een geblokkeerde gebruiker kan niet meer inloggen.
    </div>
+
+   <div class="col-xs-4">
+       <a class="btn btn-error btn-sm" href="@routes.Profile.dropUser(user.getId, user.getEmail)">Verwijder gebruiker</a>
+    </div>
+    <div class="col-xs-8">
+    Een verwijderde gebruiker kan niet meer inloggen.
+   </div>
+
 }

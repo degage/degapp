@@ -503,8 +503,8 @@ public class Profile extends Controller {
 
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result blockUser(int userId) {
-        DataAccess.getInjectedContext().getUserDAO().updateUserStatus(userId, UserStatus.BLOCKED);
+    public static Result blockUser(int userId, String reason) {
+        DataAccess.getInjectedContext().getUserDAO().updateUserStatusWithReason(userId, UserStatus.BLOCKED, reason);
         return redirect(routes.Profile.editUserStatus(userId));
     }
 
@@ -512,6 +512,13 @@ public class Profile extends Controller {
     @InjectContext
     public static Result unblockUser(int userId) {
         DataAccess.getInjectedContext().getUserDAO().updateUserStatus(userId, UserStatus.REGISTERED);
+        return redirect(routes.Profile.editUserStatus(userId));
+    }
+
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result dropUser(int userId, String reason) {
+        DataAccess.getInjectedContext().getUserDAO().updateUserStatusWithReason(userId, UserStatus.DROPPED, reason);
         return redirect(routes.Profile.editUserStatus(userId));
     }
 

@@ -100,6 +100,11 @@ public interface UserDAO {
     public void updateUserStatus(int userId, UserStatus status);
 
     /**
+     * Update the user status with a reason
+     */
+    public void updateUserStatusWithReason(int userId, UserStatus status, String reason);
+
+    /**
      * Update the email address of a user.
      *
      * @return true if succeeded, false if mail address existed already

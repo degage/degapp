@@ -291,6 +291,21 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
     }
 
+    @Override
+    public void updateUserStatusWithReason(int userId, UserStatus status, String reason) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement("UPDATE users SET user_status=? WHERE user_id = ?")) {
+
+
+
+
+            ps.setString(1, status.name());
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user status", ex);
+        }
+    }
+
     public void makeUserFull(int userId) {
         // note: there is no easy way in MySQL (apart from using a stored procedure) to do
         // what is done below with a single call to the database. But this not important
