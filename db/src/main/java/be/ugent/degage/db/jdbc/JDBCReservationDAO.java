@@ -262,7 +262,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getNextReservationStatement = new LazyStatement(
-            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, r.reservation_created_at " +
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, r.reservation_created_at, " +
                     USER_HEADER_FIELDS +
                     "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
