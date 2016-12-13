@@ -134,7 +134,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     @Override
     public int getAmountOfAttendees(int id) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT COUNT(*) FROM infosessionenrollees WHERE infosession_id = ? and infosession_enrollment_status = "
+                "SELECT COUNT(*) FROM infosessionenrollees WHERE infosession_id = ? and infosession_enrollment_status = 'PRESENT'"
         )) {
             ps.setInt(1, id);
             return toSingleInt(ps);
