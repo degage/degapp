@@ -31,8 +31,13 @@
 @import providers.DataProvider
 @import db.CurrentUser
 
+@scripts={
+    @js.loadCalendarEvent()
+    @js.paginationWithTabs("Trips.showTripsPage", 1)
+}
 
-@app("Welkom", stylesheets=sheets("statuses"), scripts=js.paginationWithTabs("Trips.showTripsPage", 1)){
+
+@app("Welkom", stylesheets=sheets("statuses"), scripts=scripts){
     @breadcrumbs {
     }
 
