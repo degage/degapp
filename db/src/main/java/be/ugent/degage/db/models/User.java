@@ -51,6 +51,8 @@ public class User extends UserHeader {
     private String nationalId;
     private String damageHistory;
     private String vatNr;
+    private String userReasonBlocked;
+    private String userReasonDropped;
 
     // private int profilePictureId; // picture must be retrieved separately
 
@@ -180,5 +182,21 @@ public class User extends UserHeader {
 
     public void setVatNr(String vatNr) {
         this.vatNr = vatNr;
+    }
+
+    public String getUserReasonBlocked() {
+        return userReasonBlocked;
+    }
+
+    public void setUserReasonBlocked(String userReasonBlocked) {
+        this.userReasonBlocked = userReasonBlocked;
+    }
+
+    public String getUserReasonDropped() {
+        return userReasonDropped;
+    }
+
+    public void setUserReasonDropped(String userReasonDropped) {
+        this.userReasonDropped = userReasonDropped;
     }
 }

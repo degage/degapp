@@ -158,6 +158,26 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         );
     }
 
+    public static User populateUserHeaderBlocked(ResultSet rs) throws SQLException {
+        User user = new User(
+                rs.getInt("user_id"),
+                rs.getString("user_email"),
+                rs.getString("user_firstname"),
+                rs.getString("user_lastname"),
+                UserStatus.valueOf(rs.getString("user_status")),
+                rs.getString("user_phone"),
+                rs.getString("user_cellphone"),
+                (Integer) rs.getObject("user_degage_id")
+        );
+        Date dateBlocked = rs.getDate("users.user_date_blocked");
+        user.setDateBlocked(dateBlocked == null ? null : dateBlocked.toLocalDate());
+        Date dateDropped = rs.getDate("users.user_date_dropped");
+        user.setDateDropped(dateDropped == null ? null : dateDropped.toLocalDate());
+        user.setUserReasonBlocked(rs.getString("user_reason_blocked"));
+        user.setUserReasonDropped(rs.getString("user_reason_dropped"));
+        return user;
+    }
+
     public static UserHeaderShort populateUserHeaderShort(ResultSet rs, String tableName) throws SQLException {
         int id = rs.getInt(tableName + ".user_id");
         if (rs.wasNull()) {
@@ -281,6 +301,20 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
+    public User getUserHeaderBlocked(int userId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS +
+                " , users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped " +
+                " FROM users WHERE user_id = ?"
+        )) {
+            ps.setInt(1, userId);
+            return toSingleObject(ps, JDBCUserDAO::populateUserHeaderBlocked);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by id.", ex);
+        }
+    }
+
+    @Override
     public void updateUserStatus(int userId, UserStatus status) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement("UPDATE users SET user_status=? WHERE user_id = ?")) {
             ps.setString(1, status.name());
@@ -293,13 +327,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     @Override
     public void updateUserStatusWithReason(int userId, UserStatus status, String reason) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement("UPDATE users SET user_status=? WHERE user_id = ?")) {
-
-
-
-
+        try (PreparedStatement ps = prepareStatement(
+            "UPDATE users SET user_status=?, " + 
+            (status == UserStatus.BLOCKED ? "user_date_blocked" : "user_date_dropped") + "=current_timestamp, " +
+            (status == UserStatus.BLOCKED ? "user_reason_blocked=? " : "user_reason_dropped=? ") +
+            "WHERE user_id = ?")) {
             ps.setString(1, status.name());
-            ps.setInt(2, userId);
+            ps.setString(2, reason);
+            ps.setInt(3, userId);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user status", ex);
