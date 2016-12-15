@@ -30,7 +30,11 @@
 @(form: play.data.Form[InfoSessions.InfoSessionData])
 @* TODO: shares lots of code with editinfosession *@
 
-@scripts = {@js.datetimepicker() @js.userpicker() }
+@scripts = {
+    @js.datetimepicker() 
+    @js.userpicker()
+    @js.gpsCoordinatePicker("address")
+ }
 
 @stdlayout("Nieuwe infosessie", scripts=scripts, extrabc=breadcrumb("Infosessies",routes.InfoSessions.showSessions)) {
     @helper.form(routes.InfoSessions.createNewSession) {

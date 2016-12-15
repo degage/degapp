@@ -239,10 +239,13 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result detail(int sessionId) {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        InfoSession infoSession = dao.getInfoSession(sessionId);
         return ok(detail.render(
-                dao.getInfoSession(sessionId),
-                Form.form(UserpickerData.class),
-                dao.getEnrollees(sessionId), null));
+            infoSession,
+            Form.form(UserpickerData.class),
+            dao.getEnrollees(sessionId), 
+            new Maps.MapDetails(infoSession.getAddress().getLat(), infoSession.getAddress().getLng(), 14, "Infosessie"))
+        );
     }
 
 
@@ -496,13 +499,13 @@ public class InfoSessions extends Controller {
         if (lis.present) {
             return ok(infosessionsDone.render(
                 lis.session,
-                null
+                new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie")
             ));
         } else {
             return ok(infosessions.render(
                 dao.getUpcomingInfoSessions(),
                 lis.session,
-                null,
+                new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie"),
                 lis.present)
             );
         }

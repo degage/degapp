@@ -37,7 +37,6 @@
             if ('@user.getAddressResidence().getLat()' !== undefined && parseFloat('@user.getAddressResidence().getLat()') > 0) {
                 center = {lat: parseFloat('@user.getAddressResidence().getLat()'), lng: parseFloat('@user.getAddressResidence().getLng()')};
             }
-            var geocoder = new google.maps.Geocoder();
             var map = new google.maps.Map(document.getElementById('map'), {
               zoom: 15,
               center: center
@@ -47,7 +46,14 @@
                 var aTag = $(firstEl).find('a')[0];
                 var tdTag = $(firstEl).find('td')[0];
                 var locationTag = $(firstEl).find('td')[3];
+                var info = $(firstEl).find('td')[1].innerText;
+                var address = $(firstEl).find('td')[3].innerText;
+                var comments = $($(firstEl).find('td')[4]).html();
                 var latLng = JSON.parse($(firstEl).find('td')[5].innerText);
+                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a></h3><h5>'+info+'</h5><p>'+address+'</p>'+comments;
+                var infowindow = new google.maps.InfoWindow({
+                  content: contentString
+                });
                 if (parseFloat(latLng.lat) > 0) {
                     var marker = new google.maps.Marker({
                       map: map,
@@ -55,7 +61,7 @@
                       label: tdTag.innerText
                     });
                     marker.addListener('click', function() {
-                        window.location = aTag;
+                        infowindow.open(map, marker);
                     });                  
                 }  
             })
@@ -67,9 +73,9 @@
 @stdlayout("Reserveer een auto", sheets("taglabels"), scripts=scripts) {
 
     @panel("De autovloot", "fa-car"){
-        <div id="map" class="col-xs-12"></div>
+        <div id="map" class="map col-xs-12 col-lg-8"></div>
         <div id="resultsTable" class="table-responsive col-xs-12">
-            <p>Klik op de autonaam om de auto te reserveren.</p>
+            <h4>Klik op de autonaam om de auto te reserveren.</h4>
             <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
                 <thead>
                     <tr role="row">

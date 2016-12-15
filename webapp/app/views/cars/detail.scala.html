@@ -30,29 +30,7 @@
 @(car: Car, privilegedUsers: Iterable[UserHeader], mapDetails: Maps.MapDetails = null)
 
 @scripts = {
-    <script>
-        var map;
-        function initMap() {
-            var ghent = {lat: 51.0535, lng: 3.7304};
-            var geocoder = new google.maps.Geocoder();
-            if ('@car.getLocation().getLat()' !== undefined && parseFloat('@car.getLocation().getLat()') > 0) {
-                var markerPosition = {lat: parseFloat('@car.getLocation().getLat()'), lng: parseFloat('@car.getLocation().getLng()')};
-                var map = new google.maps.Map(document.getElementById('map'), {
-                  zoom: 14,
-                  center: ghent
-                });
-                map.setCenter(markerPosition);
-                var marker = new google.maps.Marker({
-                  map: map,
-                  position: markerPosition,
-                  label: '@car.getName()' 
-                });
-            } else {
-                $('#map').html('Gelieve gps coordinaten in te geven via knop Basisinformatie Wijzigen');
-            }
-        }
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
+    @js.showMap(mapDetails)
 }
 
 @import db.CurrentUser

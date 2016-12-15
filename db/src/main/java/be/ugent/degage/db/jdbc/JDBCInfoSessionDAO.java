@@ -159,6 +159,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             "infosession_id, infosession_type, " +
                     "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
                     "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
+                    "address_latitude, address_longitude, " +
                     "user_id, user_firstname, user_lastname, enrollee_count ";
 
 
