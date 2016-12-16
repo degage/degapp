@@ -34,13 +34,23 @@
         var map;
         function initMap() {
             var center = {lat: 51.0535, lng: 3.7304};
+            var centerLabel = null;
             if ('@user.getAddressResidence().getLat()' !== undefined && parseFloat('@user.getAddressResidence().getLat()') > 0) {
                 center = {lat: parseFloat('@user.getAddressResidence().getLat()'), lng: parseFloat('@user.getAddressResidence().getLng()')};
+                centerLabel = 'Thuis';
             }
             var map = new google.maps.Map(document.getElementById('map'), {
               zoom: 15,
               center: center
             });
+            if (centerLabel !== null) {
+                var centerMarker = new google.maps.Marker({
+                  map: map,
+                  position: center,
+                  label: centerLabel,
+                  icon: 'http://maps.google.com/mapfiles/ms/icons/blue.png'
+                });
+            }
             $('#resultsTable > table > tbody  > tr').each( function(index, el) {
                 var firstEl = $(el).first();
                 var aTag = $(firstEl).find('a')[0];
