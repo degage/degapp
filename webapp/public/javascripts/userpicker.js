@@ -7,7 +7,7 @@ function initUserPicker() {
         var userpicker = $(this).parent();
         var search = userpicker.find("input[type=text]").val();
         if (search) {
-            $.get(userpicker.data("url") + "?search=" + userpicker.find("input[type=text]").val(), function(data) {
+            $.get(userpicker.data("url") + "?search=" + userpicker.find("input[type=text]").val() + "&status=" + (userpicker.data("status")) , function(data) {
                 userpicker.find(".dropdown-menu").html(data);
                 userpicker.find("input[type=text]").dropdown("toggle");
             });

@@ -43,8 +43,8 @@ public class Trip extends ReservationHeader {
     private String driverName;
 
     public Trip(int id, int carId, int userId, int ownerId, LocalDateTime from, LocalDateTime until,
-                String message, boolean old) {
-        super(id, carId, userId, ownerId, from, until, message, old);
+                String message, boolean old, LocalDateTime createdAt) {
+        super(id, carId, userId, ownerId, from, until, message, old, createdAt);
         this.startKm = 0;
         this.endKm = 0;
         this.damaged = false;

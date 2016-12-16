@@ -1,0 +1,42 @@
+@* usertabs.scala.html
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Copyright Ⓒ 2014-2015 Universiteit Gent
+ * 
+ * This file is part of the Degage Web Application
+ * 
+ * Corresponding author (see also AUTHORS.txt)
+ * 
+ * Emmanuel Isebaert
+ * 
+ * The Degage Web Application is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Affero General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * The Degage Web Application is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Affero General Public License for more details.
+ * 
+ * You should have received a copy of the GNU Affero General Public License
+ * along with the Degage Web Application (file LICENSE.txt in the
+ * distribution).  If not, see http://www.gnu.org/licenses/.
+ *@
+
+@(tab: Int)
+
+@stdlayout("Gebruikers", scripts=js.paginationWithTabs("Users.showUsersPage", tab)) {
+    @panel("Gebruikers zoeken", "fa-search"){
+        @search.textField("user_firstname", "Voornaam", "col-xs-12 col-sm-6")
+        @search.textField("user_lastname", "Familienaam", "col-xs-12 col-sm-6")
+        @search.button("Zoek")
+    }
+
+    @tabbedPagination(tab,"user_status",
+        "FULL" -> ("Leden", "name", true),
+        "FULL_VALIDATING" -> ("Lidmaatschap aangevraagd", "name", true),
+        "REGISTERED" -> ("Geregistreerd", "name", true),
+        "BLOCKED" -> ("Geblokkeerd", "name", true),
+        "DROPPED" -> ("Verwijderd", "name", true)
+    )
+}

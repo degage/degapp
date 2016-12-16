@@ -30,7 +30,7 @@
 @(title: String)
 
 @if(db.CurrentUser.hasRole(UserRole.SUPER_USER)){
-    @item(title, "Rollen", "fa-wrench", routes.UserRoles.index)
+    @item(title, "Rollen", "fa-key", routes.UserRoles.index)
     @item(title, "Aankondigingen", "fa-bars", routes.Announcements.index)
 @* TODO: incorporate these
     @item(title, "Systeemvariabelen", "fa-wrench", routes.Settings.sysvarsOverview)

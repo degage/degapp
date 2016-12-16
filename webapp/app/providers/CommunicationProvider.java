@@ -30,7 +30,6 @@
 package providers;
 
 import be.ugent.degage.db.*;
-import be.ugent.degage.db.jdbc.JDBCFilter;
 import be.ugent.degage.db.models.Message;
 import be.ugent.degage.db.models.Notification;
 import db.CurrentUser;

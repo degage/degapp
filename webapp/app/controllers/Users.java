@@ -47,6 +47,7 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import views.html.users.users;
 import views.html.users.userspage;
+import views.html.users.usersWithTabs;
 
 import java.util.Set;
 
@@ -66,6 +67,15 @@ public class Users extends Controller {
     @InjectContext
     public static Result showUsers() {
         return ok(users.render());
+    }
+
+    /**
+     * @return The users index-page with all users
+     */
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result showUsersWithTabs(int tab) {
+        return ok(usersWithTabs.render(tab));
     }
 
     /**

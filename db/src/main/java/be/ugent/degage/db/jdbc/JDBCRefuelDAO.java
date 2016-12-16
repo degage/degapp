@@ -91,7 +91,7 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getInt("reservation_user_id"),
-                rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
+                rs.getString("user_lastname") + " " + rs.getString("user_firstname"),
                 rs.getInt("reservation_owner_id"),
                 rs.getInt("car_ride_start_km"),
                 rs.getInt("car_ride_end_km")
@@ -222,6 +222,50 @@ class JDBCRefuelDAO extends AbstractDAO implements RefuelDAO {
         StringBuilder builder = new StringBuilder(REFUEL_EXTENDED_QUERY);
         appendRefuelFilter(builder, filter);
         builder.append(" ORDER BY refuel_created_at DESC LIMIT ?,?");
+
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setInt(1, (page - 1) * pageSize);
+            ps.setInt(2, pageSize);
+            return toPage(ps, pageSize, JDBCRefuelDAO::populateRefuelExtended);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve a list of refuels", ex);
+        }
+    }
+
+    @Override
+    public Page<RefuelExtended> getRefuels(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
+        StringBuilder builder = new StringBuilder(REFUEL_EXTENDED_QUERY);
+        appendRefuelFilter(builder, filter);
+        // add order
+        switch (orderBy) {
+            case FROM:
+                builder.append(" ORDER BY reservation_from ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case AMOUNT:
+                builder.append(" ORDER BY refuel_eurocents ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case KM:
+                builder.append(" ORDER BY refuel_km ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case LITER:
+                builder.append(" ORDER BY refuel_amount ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case STATUS:
+                builder.append(" ORDER BY refuel_status ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case DRIVER:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+        builder.append(" LIMIT ?,?");
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);

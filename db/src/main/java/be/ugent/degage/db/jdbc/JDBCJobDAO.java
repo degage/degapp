@@ -76,27 +76,31 @@ class JDBCJobDAO extends AbstractDAO implements JobDAO {
      * Create a new job for the scheduler to be executed at the requested time.
      */
     @Override
-    public Job createJob(JobType type, Integer refId, Instant when) throws DataAccessException {
+    public void createJob(JobType type, int refId, Instant when) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO jobs(job_type, job_ref_id, job_time, job_finished) " +
-                        "VALUES(?,?,?,false)",
-                "job_id"
+                        "VALUES(?,?,?,false)"
         )) {
             ps.setString(1, type.name());
-            ps.setObject(2, refId, Types.INTEGER);
+            ps.setInt(2, refId);
             ps.setTimestamp(3, Timestamp.from(when));
-
             ps.executeUpdate();
-
-            try (ResultSet keys = ps.getGeneratedKeys()) {
-                if (keys.next()) {
-                    return new Job(keys.getLong(1), type, refId);
-                } else {
-                    throw new DataAccessException("Failed to read keys for new job record.");
-                }
-            }
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to create job.", ex);
+        }
+    }
+
+    @Override
+    public void updateJobTime(JobType type, int refId, Instant when) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE jobs SET job_time = ? WHERE job_type = ? AND job_ref_id = ?"
+        )) {
+            ps.setTimestamp(1, Timestamp.from(when));
+            ps.setString(2, type.name());
+            ps.setInt(3, refId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
         }
     }
 
@@ -106,7 +110,7 @@ class JDBCJobDAO extends AbstractDAO implements JobDAO {
                 "DELETE FROM jobs WHERE job_type=? AND job_ref_id=?"
         )) {
             ps.setString(1, type.name());
-            ps.setObject(2, refId, Types.INTEGER);
+            ps.setInt(2, refId);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to delete job.", ex);

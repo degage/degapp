@@ -32,7 +32,13 @@
 @import providers.DataProvider
 @import db.CurrentUser
 
-@stdlayout("Bewerk auto", scripts=js.datetimepicker()) {
+@scripts = {
+    @js.datetimepicker()
+    <script src="//cdn.tinymce.com/4/tinymce.min.js"></script>
+    <script>tinymce.init({ selector:'textarea', plugins: [ 'lists' ]  });</script>
+}
+
+@stdlayout("Bewerk auto", scripts) {
 
     @helper.form(routes.Cars.editCarPost(car.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
         <div class="row">
@@ -43,11 +49,23 @@
                         <img src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive">
                     </div>
                     <fieldset>
-                        <div class="form-group col-md-6">
-                                @helper.checkbox(form("active"), '_label -> "Actief")
-                        </div>
                         @std.static(car.getOwner.toString,"Eigenaar")
-                        @std.textField(form("name"),"Autonaam",required=true)
+                        @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
+                            <div class="form-group col-md-6">
+                                    @helper.checkbox(form("active"), '_label -> "Actief")
+                            </div>
+                            @std.textField(form("name"),"Autonaam",required=true)
+                        } else {
+                            <h2>@car.getName.toString</h2>
+                            <strong>Status:</strong>
+                            @if(car.isActive) {
+                                <span class="label label-success">Actief</span>
+                            } else {
+                                <span class="label label-danger">Non-actief</span>
+                            }
+                            <input type="hidden" id="name" name="name" value="@car.getName" />
+                            <input type="hidden" id="active" name="active" value="@car.isActive">
+                        }
                         @std.textField(form("brand"),"Merk",required=true)
                         @std.textField(form("type"),"Type",required=true)
                     </fieldset>
@@ -100,6 +118,22 @@
                         @std.datepicker(form("expiration"), "Vervaldatum", "col-md-4")
                         @std.textField(form("bonusMalus"), "Bonus Malus", "col-md-6")
                         @std.textField(form("polisNr"), "Polisnummer", "col-md-6")
+                    </fieldset>
+                }
+                @panel("Pechverhelping", "fa-wrench") {
+                    <fieldset>
+                        @std.textField(form("assistanceName"), "Pechverhelper", "col-md-6")
+                        @std.datepicker(form("assistanceExpiration"), "Vervaldatum", "col-md-4")
+                        @std.selectEnum(classOf[CarAssistanceType], form("assistanceType"), "Type", "col-md-6")                        
+                        @std.textField(form("assistanceContractNr"), "Contractnummer", "col-md-6")
+                    </fieldset>
+                }
+                @panel("Parkeerkaart", "fa-product-hunt") {
+                    <fieldset>
+                        @std.textField(form("parkingcardCity"), "Stad/gemeente", "col-md-6")
+                        @std.datepicker(form("parkingcardExpiration"), "Vervaldatum", "col-md-4")
+                        @std.textField(form("parkingcardZones"), "Zones", "col-md-6")                        
+                        @std.textField(form("parkingcardContractNr"), "Contractnummer", "col-md-6")
                     </fieldset>
                 }
                 @std.submitButton("Wijzigingen opslaan")

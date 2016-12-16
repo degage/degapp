@@ -30,7 +30,6 @@
 package be.ugent.degage.db.dao;
 
 import be.ugent.degage.db.DataAccessException;
-import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.models.*;
 
 import java.time.Instant;
@@ -42,24 +41,38 @@ public interface InfoSessionDAO {
 
     // info session
 
-    public InfoSession createInfoSession(InfoSessionType type, UserHeader host, Address address,
+    /**
+     * Create a new info session.
+     * @return the id of the new session
+     */
+    public int createInfoSession(InfoSessionType type, int hostId, Address address,
                                          Instant time, int maxEnrollees, String comments) throws DataAccessException;
+
     public InfoSession getInfoSession(int id) throws DataAccessException;
 
-    public void updateInfoSession(InfoSession session) throws DataAccessException;
+    public void updateInfoSession(int sessionId, InfoSessionType type, int maxEnrollees, Instant time, int hostId,
+                                  String comments, Address address) throws DataAccessException;
+
     public void deleteInfoSession(int id) throws DataAccessException;
 
     // filtered
 
-    public Filter createInfoSessionFilter();
+    /**
+     * Return the list of upcoming infosessions, ordered by date
+     */
+    public Iterable<InfoSession> getUpcomingInfoSessions() throws DataAccessException;
 
     /**
-     * Return the list of infosessions, ordered by date
-     * @param onlyUpcoming  if true only those infosessions are listed that will occur after the current instant
+     * Return a page of infosessions. Only those infosessions are listed that will occur after the current instant,
+     * ordered with dates increasing, address field filled in, but not the membership count
      */
-    public Iterable<InfoSession> getInfoSessions(boolean onlyUpcoming) throws DataAccessException;
+    public Page<InfoSession> getFutureInfoSessions(int page, int pageSize) throws DataAccessException;
 
-    public int getNumberOfInfoSessions(Filter filter) throws DataAccessException;
+    /**
+     * Return a page of infosessions. Only those infosessions are listed that occurred in the past, ordered with
+     * dates decreasing, membership count is filled in, address and comment fields are not
+     */
+    public Page<InfoSession> getPastInfoSessions(int page, int pageSize) throws DataAccessException;
 
     // attendees
 

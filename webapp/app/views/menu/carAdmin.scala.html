@@ -31,4 +31,6 @@
 
 @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)){
     @item(title, "Autokosten", "fa-money", routes.Costs.showCosts(0))
+    @item(title, "Pechverhelping", "fa-wrench", routes.Assistances.showAllAssistances())
+    @item(title, "Parkeerkaarten", "fa-product-hunt", routes.Parkingcards.showAllParkingcards())
 }

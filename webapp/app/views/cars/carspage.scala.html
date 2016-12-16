@@ -32,15 +32,18 @@
     <thead>
         <tr role="row">
             <th name="name" class="sortable" tabindex="0" >Naam</th>
+            <th name="license_plate" class="sortable" tabindex="0" >Nummerplaat</th>
             <th name="brand" class="sortable" tabindex="0" >Merk</th>
-            <th>Actief</th>
-            <th>Eigenaar</th>
+            <th name="active" class="sortable" tabindex="0" >Actief</th>
+            <th name="owner" class="sortable" tabindex="0" >Eigenaar</th>
+            <th name="year" class="sortable" tabindex="0" >Bouwjaar</th>
             <th>Acties</th>
         </tr>
     </thead>
     <tbody>
     @foreach.trOrElse(cars){ car =>
         <td> <a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
+        <td>@car.getLicensePlate</a></td>
         <td>@car.getBrand</td>
         <td>
             @if(car.isActive) {
@@ -50,6 +53,7 @@
             }
         </td>
         <td><a href="@routes.Profile.index(car.getOwnerId)">@car.getOwnerName</a></td>
+        <td><a href="@routes.Profile.index(car.getOwnerId)">@car.getCarYear</a></td>
         <td>
             @btnWarning("Wijzig", routes.Cars.editCar(car.getId))
             @btnPrimary("Km-standen", routes.Trips.overview(car.getId))

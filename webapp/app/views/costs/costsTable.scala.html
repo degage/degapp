@@ -32,22 +32,22 @@
 <table class="table table-striped table-bordered table-hover no-footer" >
     <thead>
         <tr role="row">
-            <th>Auto</th>
-            <th>Type</th>
+            <th class="sortable" name="name">Auto</th>
+            <th class="sortable" name="category">Type</th>
             <th width="30%">Toelichting</th>
-            <th>Datum</th>
-            <th>Bedrag</th>
+            <th class="sortable" name="date">Datum</th>
+            <th class="sortable" name="amount">Bedrag</th>
             @if(withSpread){
                 <th>Afgeschr.</th>
                 <th>Spreiding</th>
             }
-            <th>Status</th>
+            <th class="sortable" name="status">Status</th>
             <th>Acties</th>
         </tr>
     </thead>
     <tbody>
         @foreach.trOrElse(carCostList) { carCost =>
-            <td>@carCost.getCarName</td>
+            <td><a href="@routes.Costs.showCostsForCar(carCost.getCarId)">@carCost.getCarName</a></td>
             <td>@carCost.getCategory.getDescription</td>
             <td>@carCost.getDescription</td>
             <td>@Utils.toLocalizedDateString(carCost.getDate)</td>

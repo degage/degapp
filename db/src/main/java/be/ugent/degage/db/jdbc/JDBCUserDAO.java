@@ -42,6 +42,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.Year;
+import java.util.List;
 
 /**
  * JDBC implementation of @link{UserDAO}
@@ -69,7 +70,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
-            "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?)";
+            "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
+            "AND user_status LIKE ?";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
@@ -81,6 +83,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         ps.setString(start + 1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start + 2, filter.getValue(FilterField.USER_NAME));
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
+        ps.setString(start + 4, "%" + filter.getValue(FilterField.USER_STATUS) + "%");
     }
 
     public JDBCUserDAO(JDBCDataAccessContext context) {
@@ -393,17 +396,29 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
     @Override
     public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        if (orderBy != FilterField.USER_NAME) {
-            throw new DataAccessException("Could not create getUserList statement");
-        }
-        String sql = USER_QUERY + FILTER_FRAGMENT +
-                "ORDER BY users.user_lastname " + (asc?"ASC":"DESC") +
-                ", users.user_firstname " + (asc?"ASC":"DESC") + " LIMIT ?, ?";
+        StringBuilder builder = new StringBuilder();
+        builder.append(USER_QUERY);
+        builder.append(FILTER_FRAGMENT);
 
-        try (PreparedStatement ps = prepareStatement(sql)) {
+        // add order
+        switch (orderBy) {
+            case NAME:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case DATE:
+                builder.append(" ORDER BY user_date_joined ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+
+        builder.append(" LIMIT ?, ?");
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
             fillFragment(ps, filter, 1);
-            ps.setInt(5, (page - 1) * pageSize);
-            ps.setInt(6, pageSize);
+            ps.setInt(6, (page - 1) * pageSize);
+            ps.setInt(7, pageSize);
             return toPage(ps, pageSize, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);
@@ -420,7 +435,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             ps.executeUpdate();
             return true;
         } catch (SQLException ex) {
-            if (ex.getErrorCode() == 1062) {
+            if (ex.getErrorCode() == MYSQL_ERROR_DUPLICATE_ENTRY) {
                 return false;
             } else {
                 throw new DataAccessException("Could not update user email", ex);
@@ -463,15 +478,30 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public Iterable<UserHeaderShort> listUserByName(String str, int limit) {
-        try (PreparedStatement ps = prepareStatement(
-                "SELECT user_id, user_firstname, user_lastname FROM users " +
-                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')" +
-                        "ORDER BY user_lastname ASC, user_firstname ASC " +
+    public Iterable<UserHeaderShort> listUserByName(String str, List<String> status, int limit) {
+        StringBuilder builder = new StringBuilder();
+        builder.append( "SELECT user_id, user_firstname, user_lastname FROM users " +
+                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')"
+        );
+        if (status.size() > 0) {
+            builder.append("AND user_status IN (");
+            for( int i = 0 ; i < status.size(); i++ ) {
+                builder.append("?,");
+            }
+            builder.deleteCharAt(builder.length() -1 );
+            builder.append(")");
+        }
+        builder.append( "ORDER BY user_lastname ASC, user_firstname ASC " +
                         "LIMIT ?"
-        )) {
+        );
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setString(1, str);
-            ps.setInt(2, limit);
+            int i = 2;
+            for (String s: status) {
+                ps.setString(i, s);
+                i++;
+            }
+            ps.setInt(i, limit);
             return toList(ps, JDBCUserDAO::populateUserHeaderShort);
         } catch (SQLException ex) {
             throw new DataAccessException(ex);

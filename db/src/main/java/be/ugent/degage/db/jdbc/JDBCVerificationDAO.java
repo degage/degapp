@@ -99,7 +99,7 @@ class JDBCVerificationDAO  extends AbstractDAO implements VerificationDAO {
             deleteVerifications(emailNormalized);
             return Result.OK;
         } catch (SQLException ex) {
-            if (ex.getErrorCode() == 1062) {
+            if (ex.getErrorCode() == MYSQL_ERROR_DUPLICATE_ENTRY) {
                 return Result.ALREADY_EXISTS; // unique key violation
             } else {
                 throw new DataAccessException("Failed to create user.", ex);

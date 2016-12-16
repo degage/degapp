@@ -2,7 +2,7 @@ name := "Degage - web layer"
 
 version := "1.0-SNAPSHOT"
 
-scalaVersion := "2.11.1"
+scalaVersion := "2.11.8"
 
 fork in run := true
 
@@ -19,7 +19,7 @@ resolvers += Resolver.url("Edulify Repository", url("http://edulify.github.io/mo
 
 libraryDependencies ++= Seq(
   "be.ugent.degage"         % "db"                           % "1.4-SNAPSHOT",
-  "be.ugent.caagt"           % "sheeter"                      % "1.0-SNAPSHOT",
+  "be.ugent.caagt"           % "sheeter"                      % "1.1-SNAPSHOT",
   "com.edulify"             %% "play-hikaricp"               % "1.5.0-fork-2",    // 1.5.0 adapted to use hikari 2.3.2
   "org.springframework"     % "spring-beans"                 % "4.0.6.RELEASE", // needed for recursive direct field binding
   "com.typesafe.play"       %% "play-mailer"                 % "2.4.0-RC1",
@@ -27,13 +27,13 @@ libraryDependencies ++= Seq(
   "org.pegdown"             %  "pegdown"                     % "1.4.0",
   "org.webjars"             %  "bootstrap"                   % "3.3.6",
   "org.webjars"             % "jquery"                       % "2.1.1",
-  "org.webjars"             % "font-awesome"                 % "4.3.0-4",
+  "org.webjars"             % "font-awesome"                 % "4.7.0",
   "org.webjars"             % "bootstrap-datetimepicker"     % "2.2.0", // Timepicker for bootstrap v3
   "org.webjars"             % "leaflet"                      % "0.7.2", // Library for maps
   "org.webjars"             % "jquery_are-you-sure"          % "1.5.0", // checks user does not leave page when form data is changed
   "org.webjars"             % "js-cookie"                    % "2.0.2", // cookie manipulation
   "mysql"                   % "mysql-connector-java"         % "5.1.37",
-  "com.itextpdf"            % "itextpdf"                     % "5.5.6",      // most recent version, should override version use by next module?
+  "com.itextpdf"            % "itextpdf"                     % "5.5.6",      // most recent version, shoul override version use by next module?
   "it.innove"               % "play2-pdf"                    % "1.1.3-fork", // adapted to iText 5
   "com.typesafe"            % "config"                       % "1.2.1"
   // "org.webjars"             % "jquery-ui"                    % "1.11.0-1", customized version stored in javascript/

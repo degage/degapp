@@ -28,15 +28,14 @@
  *@
 
 @(userId: Int, reservations: Page[Reservation], asc : Int, orderBy : String, filter : String)
-
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-trips">
     <thead>
         <tr role="row">
-            <th>Autonaam</th>
-            <th class="sortable" name="from" >Van</th>
-            <th>Tot</th>
-            <th>Lener</th>
-            <th>Status</th>
+            <th class="sortable" name="name">Autonaam</th>
+            <th class="sortable" name="from">Van</th>
+            <th class="sortable" name="until">Tot</th>
+            <th class="sortable" name="borrower">Lener</th>
+            <th class="sortable" name="status">Status</th>
             <th>Acties</th>
         </tr>
     </thead>
@@ -54,6 +53,7 @@
                 <td>
                     @btnPrimary("Details",routes.Trips.details(reservation.getId))
                     @foreach(util.WorkflowAction.getCurrentActions(reservation))(_.asNarrowButton(reservation.getId))
+                     <button class="btn btn-primary btn-xs" onclick="loadCalendarEvent( '@reservation.getCar().getName()', '@reservation.getFromIcs()', '@reservation.getUntilIcs()' )">Kalender event downloaden</button>
                 </td>
         }{
         <tr>

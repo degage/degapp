@@ -27,40 +27,29 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(sessions: Iterable[InfoSession])
+@()
 
-@app("Infosessies (beheer)", scripts=js.usesajax()) {
+@app("Infosessies (beheer)", scripts=js.paginationWithTabs("InfoSessions.showSessionsPage",0)) {
     @breadcrumbs{
         @breadcrumb("Infosessies (beheer)")
     }
 
-<div id="page-wrapper">
-    <div class="row">
-        <div class="col-lg-12">
-            <h1 class="page-header">Infosessies</h1>
-            @flashes()
-            <div class="panel panel-default">
-                <div class="panel-body">
-                    <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
+    <div id="page-wrapper">
+        <div class="row">
+            <div class="col-lg-12">
+                <h1 class="page-header">Infosessies</h1>
+                @flashes()
+                <div class="panel panel-default">
+                    <div class="panel-body">
+                        <a class="btn btn-primary btn-sm" href="@routes.InfoSessions.newSession">Nieuwe infosessie</a>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    @* Lijst is altijd kort. Zoeken heeft geen zin. TODO: sorteren wel? *@
+        @tabbedPagination(0, "status",
+            "PENDING" -> ("Gepland","instant", true),
+            "ACCEPTED" -> ("Voorbij","instant", false) )
 
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <i class="fa fa-bar-chart-o fa-fw"></i> Infosessies
-        </div>
-        <!-- /.panel-heading -->
-        <div class="panel-body">
-            <div id="resultsTable" class="table-responsive">
-                <!-- Here comes the loaded table-->
-                @infosessionsAdminPage(sessions)
-            </div>
-        </div>
-        <!-- /.panel-body -->
     </div>
-</div>
 }

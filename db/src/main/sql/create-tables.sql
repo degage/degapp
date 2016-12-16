@@ -672,6 +672,7 @@ CREATE TRIGGER cars_make AFTER INSERT ON cars FOR EACH ROW
 BEGIN
   INSERT INTO technicalcardetails(details_id) VALUES (new.car_id);
   INSERT INTO carinsurances(insurance_id) VALUES (new.car_id);
+  INSERT INTO carassistances(assistance_id) VALUES (new.car_id);
 END $$
 
 CREATE TRIGGER cars_create BEFORE INSERT ON cars FOR EACH ROW

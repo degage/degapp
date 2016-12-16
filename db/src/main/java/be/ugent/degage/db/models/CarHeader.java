@@ -39,17 +39,19 @@ public class CarHeader extends  CarHeaderShort {
     private String email;
     private Address location;
     private boolean active;
+    private int year;
 
     /**
      * Create an object containing the given information.
      */
     public CarHeader(int id, String name, String brand, String type, String email,
-                     boolean active, int ownerId) {
+                     boolean active, int ownerId, int carYear) {
         super (id, name, ownerId);
         this.brand = brand;
         this.type = type;
         this.email = email;
         this.active = active;
+        this.year = carYear;
     }
 
     public String getEmail() {
@@ -92,5 +94,8 @@ public class CarHeader extends  CarHeaderShort {
         this.active = active;
     }
 
+    public int getCarYear() {
+        return year;
+    }
 
 }

@@ -103,6 +103,18 @@ public class Cars extends Controller {
         public String bonusMalus;
         public String polisNr;
 
+        // Assistance
+        public String assistanceName;
+        public LocalDate assistanceExpiration;
+        public String assistanceType;
+        public String assistanceContractNr;
+
+        // Parkingcard
+        public String parkingcardCity;
+        public LocalDate parkingcardExpiration;
+        public String parkingcardZones;
+        public String parkingcardContractNr;
+
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
         public void populate(Car car) {
@@ -136,6 +148,18 @@ public class Cars extends Controller {
             bonusMalus = insurance.getBonusMalus();
             polisNr = insurance.getPolisNr();
 
+            CarAssistance assistance = car.getAssistance();
+            assistanceName = assistance.getName();
+            assistanceExpiration = assistance.getExpiration();
+            assistanceType = assistance.getType().name();
+            assistanceContractNr = assistance.getContractNr();
+
+            CarParkingcard parkingcard = car.getParkingcard();
+            parkingcardCity = parkingcard.getCity();
+            parkingcardExpiration = parkingcard.getExpiration();
+            parkingcardZones = parkingcard.getZones();
+            parkingcardContractNr = parkingcard.getContractNr();
+
             address.populate(car.getLocation());
         }
 
@@ -150,6 +174,9 @@ public class Cars extends Controller {
         public String validate() {
             /* TODO: dit moeten Field Errors worden, en niet één global error */
             String error = "";
+            if (year == null) {
+                error += "Geef het bouwjaar van de auto op. ";
+            }
             if (Strings.isNullOrEmpty(address.street)) {
                 error += "Geef het adres op.";
             }
@@ -265,8 +292,8 @@ public class Cars extends Controller {
     @InjectContext
     public static Result newCar() {
         CarModelExtended model = new CarModelExtended();
-        model.userId = CurrentUser.getId();
-        model.userIdAsString = CurrentUser.getFullName();
+        // model.userId = CurrentUser.getId();
+        // model.userIdAsString = CurrentUser.getFullName();
         return ok(views.html.cars.add.render(Form.form(CarModelExtended.class).fill(model)));
     }
 
@@ -320,6 +347,10 @@ public class Cars extends Controller {
                     new TechnicalCarDetails(model.licensePlate, registrationPictureFileId, model.chassisNumber);
             CarInsurance insurance =
                     new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
+            CarAssistance assistance =
+                    new CarAssistance(model.assistanceName, model.assistanceExpiration, CarAssistanceType.valueOf(model.assistanceType), model.assistanceContractNr);
+            CarParkingcard parkingcard =
+                    new CarParkingcard(model.parkingcardCity, model.parkingcardExpiration, model.parkingcardZones, model.parkingcardContractNr);
 
             // TODO: fill in real email address
             Car car = dao.createCar(
@@ -328,7 +359,7 @@ public class Cars extends Controller {
                     model.address.toAddress(), model.seats, model.doors,
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
-                    model.ownerAnnualKm, technicalCarDetails, insurance, owner,
+                    model.ownerAnnualKm, technicalCarDetails, insurance, assistance, parkingcard, owner,
                     model.comments, model.active
             );
 
@@ -438,6 +469,18 @@ public class Cars extends Controller {
         insurance.setBonusMalus(model.bonusMalus);
         insurance.setPolisNr(model.polisNr);
 
+        CarAssistance assistance = car.getAssistance();
+        assistance.setName(model.assistanceName);
+        assistance.setExpiration(model.assistanceExpiration);
+        assistance.setType(CarAssistanceType.valueOf(model.assistanceType));
+        assistance.setContractNr(model.assistanceContractNr);
+
+        CarParkingcard parkingcard = car.getParkingcard();
+        parkingcard.setCity(model.parkingcardCity);
+        parkingcard.setExpiration(model.parkingcardExpiration);
+        parkingcard.setZones(model.parkingcardZones);
+        parkingcard.setContractNr(model.parkingcardContractNr);
+
         car.setLocation(model.address.toAddress());
         car.setComments(model.comments);
 
@@ -445,7 +488,7 @@ public class Cars extends Controller {
 
         dao.updateCar(car);
 
-        flash("success", "Jouw wijzigingen werden succesvol toegepast.");
+        flash("success", "Jouw wijzigingen werden met succes toegepast.");
         return redirect(routes.Cars.detail(car.getId()));
     }
 
@@ -495,7 +538,7 @@ public class Cars extends Controller {
         pdao.addPrivileged(carId, usersToAdd);
         pdao.deletePrivileged(carId, usersToDelete);
 
-        flash("success", "Je wijzigingen werden succesvol toegepast.");
+        flash("success", "Je wijzigingen werden met succes toegepast.");
         return redirect(routes.Cars.detail(car.getId()));
     }
 

@@ -92,7 +92,9 @@
                         <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
                         <strong>Trekhaak aanwezig: </strong> @if(car.isHook) { ja } else { nee } <br>
                         <strong>Brandstof: </strong>  @{car.getFuel } <br>
-                        <strong>Commentaar: </strong> <br> @car.getComments
+                        <strong>Commentaar: </strong> <br> @Html(car.getComments) <br>
+                        <strong>Pechverhelping: </strong> @if(car.getAssistance == null || car.getAssistance.getName == null) { Onbekend } else { @car.getAssistance.getName } <br>
+                        <strong>Parkeerkaart: </strong> @if(car.getParkingcard == null || car.getParkingcard.getCity == null) { Onbekend } else { @car.getParkingcard.getCity }
                     </div>
                 </div>
 
@@ -115,6 +117,7 @@
                             <strong>Vervaldatum verzekering: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getInsurance.getExpiration) }<br>
                             <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus== null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
                             <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr== null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>
+                            <strong>Datum van creatie: </strong> @if(car.getCreatedAt == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getCreatedAt) }<br>
 
                         </div>
                     </div>

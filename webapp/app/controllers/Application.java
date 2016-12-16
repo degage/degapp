@@ -118,7 +118,8 @@ public class Application extends Controller {
                         javascript.Damages.addStatus(),
                         javascript.Damages.addProof(),
                         javascript.InfoSessions.enrollSession(),
-                        javascript.Maps.getMap()
+                        javascript.Maps.getMap(),
+                        javascript.Calendars.availabilityCar()
                 )
         );
     }
@@ -133,6 +134,9 @@ public class Application extends Controller {
                         javascript.Contracts.showContractsPage(),
                         javascript.Costs.showCostsPage(),
                         javascript.Cars.showCarsPage(),
+                        javascript.InfoSessions.showSessionsPage(),
+                        javascript.Assistances.showAllAssistancesPage(),
+                        javascript.Parkingcards.showAllParkingcardsPage(),
                         javascript.Damages.showDamagesPage(),
                         javascript.Damages.showDamagesPageOwner(),
                         javascript.Damages.showDamagesPageAdmin(),

@@ -58,7 +58,7 @@
                     <dt>Bestuurder</dt><dd>Jij</dd>
                 }
             } else {
-                <dt>Bestuurder</dt><dd>@refuel.getDriverName</dd>
+                <dt>Bestuurder</dt><dd><a href="@routes.Profile.index(refuel.getDriverId)">@refuel.getDriverName</a></dd>
             }
             <dt>Auto</dt>
             <dd><a href="@routes.Cars.detail(refuel.getCarId)">@refuel.getCarName</a></dd>

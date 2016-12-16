@@ -120,7 +120,7 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     }
 
     private static void appendCostFilter(StringBuilder builder, Filter filter) {
-        builder.append(" WHERE NOT car_cost_archived ");
+        // builder.append(" WHERE NOT car_cost_archived ");
         FilterUtils.appendIdFilter(builder, "car_cost_car_id", filter.getValue(FilterField.CAR_ID));
         FilterUtils.appendStringFilter(builder, "car_cost_status", filter.getValue(FilterField.STATUS));
     }
@@ -131,7 +131,29 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 "JOIN carcostcategories ON car_cost_category_id = category_id " +
                 "JOIN cars ON car_cost_car_id = car_id ");
         appendCostFilter(builder, filter);
-        builder.append(" ORDER BY car_cost_created_at ").append(asc?"ASC":"DESC").append(" LIMIT ?, ?");
+        switch (orderBy) {
+            case NAME:
+                builder.append(" ORDER BY car_name ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case CATEGORY:
+                builder.append(" ORDER BY category_description ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case DATE:
+                builder.append(" ORDER BY car_cost_time ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case AMOUNT:
+                builder.append(" ORDER BY car_cost_amount ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case STATUS:
+                builder.append(" ORDER BY car_cost_status ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+        builder.append(" LIMIT ?,?");
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
@@ -145,7 +167,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
     public Iterable<CarCost> listCostsOfCar(int carId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 CAR_COST_QUERY +
-                        " WHERE NOT car_cost_archived AND car_cost_car_id = ?  ORDER BY car_cost_time DESC"
+                        " WHERE car_cost_car_id = ?  ORDER BY car_cost_time DESC"
+                        // " WHERE NOT car_cost_archived AND car_cost_car_id = ?  ORDER BY car_cost_time DESC"
         )) {
             ps.setInt(1, carId);
             return toList(ps, JDBCCarCostDAO::populateCarCost);

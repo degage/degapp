@@ -30,7 +30,8 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
-import be.ugent.degage.db.dao.*;
+import be.ugent.degage.db.dao.InfoSessionDAO;
+import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
 import controllers.util.UserpickerData;
@@ -46,14 +47,15 @@ import play.mvc.Result;
 import views.html.infosession.*;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Cedric on 2/21/14.
  */
 public class InfoSessions extends Controller {
 
-    public static class InfoSessionCreationModel {
+    public static class InfoSessionData {
 
         public Integer userId;
 
@@ -86,8 +88,8 @@ public class InfoSessions extends Controller {
 
         public void populate(InfoSession i) {
 
-            userId = i.getHost().getId();
-            userIdAsString = i.getHost().getFullName();
+            userId = i.getHostId();
+            userIdAsString = i.getHostName();
 
             time = i.getTime();
             max_enrollees = i.getMaxEnrollees();
@@ -108,15 +110,15 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result newSession() {
 
-        InfoSessionCreationModel model = new InfoSessionCreationModel();
-        model.userId = CurrentUser.getId();
-        model.userIdAsString = CurrentUser.getFullName();
-        model.address.populate(
+        InfoSessionData data = new InfoSessionData();
+        data.userId = CurrentUser.getId();
+        data.userIdAsString = CurrentUser.getFullName();
+        data.address.populate(
                 DataAccess.getInjectedContext().getUserDAO().getUser(CurrentUser.getId()).getAddressResidence()
         );
-        model.type = "NORMAL";
+        data.type = "NORMAL";
         return ok(addinfosession.render(
-                Form.form(InfoSessionCreationModel.class).fill(model))
+                Form.form(InfoSessionData.class).fill(data))
         );
     }
 
@@ -135,10 +137,10 @@ public class InfoSessions extends Controller {
             flash("danger", "Infosessie met ID=" + sessionId + " bestaat niet.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         } else {
-            InfoSessionCreationModel model = new InfoSessionCreationModel();
-            model.populate(is);
+            InfoSessionData data = new InfoSessionData();
+            data.populate(is);
 
-            Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).fill(model);
+            Form<InfoSessionData> editForm = Form.form(InfoSessionData.class).fill(data);
             return ok(editinfosession.render(editForm, sessionId));
         }
     }
@@ -159,7 +161,7 @@ public class InfoSessions extends Controller {
         // Delete the reminder
         context.getJobDAO().deleteJob(JobType.IS_REMINDER, sessionId);
 
-        flash("success", "De infosessie werd succesvol verwijderd.");
+        flash("success", "De infosessie werd verwijderd.");
         return redirect(routes.InfoSessions.showUpcomingSessions());
     }
 
@@ -173,57 +175,36 @@ public class InfoSessions extends Controller {
     @AllowRoles({UserRole.INFOSESSION_ADMIN})
     @InjectContext
     public static Result editSessionPost(int sessionId) {
-        Form<InfoSessionCreationModel> editForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
+        Form<InfoSessionData> editForm = Form.form(InfoSessionData.class).bindFromRequest();
         if (editForm.hasErrors()) {
             return badRequest(editinfosession.render(editForm, sessionId));
         } else {
             DataAccessContext context = DataAccess.getInjectedContext();
             UserDAO udao = context.getUserDAO();
-            InfoSessionCreationModel model = editForm.get();
-            if ("copyAddress".equals(model.submit)) {
-                User host = udao.getUser(model.userId);
-                model.address.populate(host.getAddressResidence());
-                return ok(addinfosession.render (Form.form(InfoSessionCreationModel.class).fill(model)));
+            InfoSessionData data = editForm.get();
+            if ("copyAddress".equals(data.submit)) {
+                User host = udao.getUser(data.userId);
+                data.address.populate(host.getAddressResidence());
+                return ok(addinfosession.render (Form.form(InfoSessionData.class).fill(data)));
             } else {
                 InfoSessionDAO dao = context.getInfoSessionDAO();
-                InfoSession session = dao.getInfoSession(sessionId);
-                UserHeader host = udao.getUserHeader(model.userId);
-                session.setHost(host);
-
-                // update address
-                session.setAddress(model.address.toAddress());
-
-                // update time
-                Instant time = model.time;
-                if (!session.getTime().equals(time)) {
-                    session.setTime(time);
-
-                    // Schedule the reminder
-                    JobDAO jdao = context.getJobDAO();
-                    jdao.deleteJob(JobType.IS_REMINDER, session.getId()); // remove old reminder
-                    jdao.createJob(
-                            JobType.IS_REMINDER,
-                            session.getId(),
-                            session.getTime().minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
-                    );
-                }
 
                 // check if amountOfAttendees < new max
-                int amountOfAttendees = dao.getAmountOfAttendees(session.getId());
-                if (model.max_enrollees != 0 && model.max_enrollees < amountOfAttendees) {
-                    flash("danger", "Er zijn al meer inschrijvingen dan het nieuwe toegelaten aantal. Aantal huidige inschrijvingen: " + amountOfAttendees + ".");
+                int amountOfAttendees = dao.getAmountOfAttendees(sessionId);
+                if (data.max_enrollees != 0 && data.max_enrollees < amountOfAttendees) {
+                    editForm.reject("max_enrollees", "Het nieuwe maximum mag niet kleiner zijn dan het aantal huidige inschrijvingen");
                     return badRequest(editinfosession.render(editForm, sessionId));
-                } else {
-                    session.setMaxEnrollees(model.max_enrollees);
                 }
 
-                // type
-                session.setType(InfoSessionType.valueOf(model.type));
+                // reschedule the reminder
+                context.getJobDAO().updateJobTime(
+                        JobType.IS_REMINDER,
+                        sessionId,
+                        data.time.minusSeconds(60 * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                );
 
-                // comments
-                session.setComments(model.comments);
-
-                dao.updateInfoSession(session);
+                dao.updateInfoSession(sessionId, InfoSessionType.valueOf(data.type), data.max_enrollees, data.time,
+                        data.userId, data.comments, data.address.toAddress());
                 flash("success", "De wijzigingen werden met succes toegepast.");
                 return redirect(routes.InfoSessions.detail(sessionId));
             }
@@ -248,7 +229,7 @@ public class InfoSessions extends Controller {
         } else {
             dao.unregisterUser(alreadyAttending.getId(), CurrentUser.getId());
 
-            flash("success", "Je bent succesvol uitgeschreven uit deze infosessie.");
+            flash("success", "Je bent uitgeschreven uit deze infosessie.");
             return redirect(routes.InfoSessions.showUpcomingSessions());
         }
     }
@@ -261,7 +242,6 @@ public class InfoSessions extends Controller {
         return ok(detail.render(
                 dao.getInfoSession(sessionId),
                 Form.form(UserpickerData.class),
-                dao.getAttendingInfoSession(CurrentUser.getId()),
                 dao.getEnrollees(sessionId), null));
     }
 
@@ -312,13 +292,13 @@ public class InfoSessions extends Controller {
      * @param userId    Userid of the user to be removed
      * @return Status of the operation page
      */
-    @AllowRoles(value = {UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result removeUserFromSession(int sessionId, int userId) {
 
         DataAccess.getInjectedContext().getInfoSessionDAO().unregisterUser(sessionId, userId);
 
-        flash("success", "De gebruiker werd succesvol uitgeschreven uit de infosessie.");
+        flash("success", "De gebruiker werd uitgeschreven uit de infosessie.");
         return redirect(routes.InfoSessions.detail(sessionId));
     }
 
@@ -330,7 +310,7 @@ public class InfoSessions extends Controller {
      * @param status    New status of the user.
      * @return Redirect to the session detail page if successful.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result setUserSessionStatus(int sessionId, int userId, String status) {
         DataAccess.getInjectedContext().getInfoSessionDAO().setUserEnrollmentStatus(
@@ -338,7 +318,7 @@ public class InfoSessions extends Controller {
                 userId,
                 Enum.valueOf(EnrollementStatus.class, status)
         );
-        flash("success", "De gebruikersstatus werd met succes aangepast.");
+        flash("success", "De gebruikersstatus werd aangepast.");
         return redirect(routes.InfoSessions.detail(sessionId));
     }
 
@@ -349,7 +329,7 @@ public class InfoSessions extends Controller {
      * @param sessionId
      * @return
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result addUserToSession(int sessionId) {
         DataAccessContext context = DataAccess.getInjectedContext();
@@ -359,22 +339,13 @@ public class InfoSessions extends Controller {
             return ok(detail.render(
                     idao.getInfoSession(sessionId),
                     form,
-                    idao.getAttendingInfoSession(CurrentUser.getId()),
                     idao.getEnrollees(sessionId), null));
         } else {
-            // TODO: loop in database
-            int userId = form.get().userId;
-            for (Enrollee others : idao.getEnrollees(sessionId)) {
-                if (others.getUser().getId() == userId) {
-                    flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
-                    return redirect(routes.InfoSessions.detail(sessionId));
-                }
+            if (idao.registerUser(sessionId, form.get().userId)) {
+                flash("success", "De gebruiker werd toegevoegd aan deze infosessie.");
+            } else {
+                flash("danger", "De gebruiker is reeds ingeschreven voor deze sessie.");
             }
-
-            // Now we enroll
-            idao.registerUser(sessionId, userId); // TODO: do not allow registration if already registered
-
-            flash("success", "De gebruiker werd succesvol toegevoegd aan deze infosessie.");
             return redirect(routes.InfoSessions.detail(sessionId));
         }
     }
@@ -405,7 +376,7 @@ public class InfoSessions extends Controller {
             if (dao.registerUser(sessionId, CurrentUser.getId())) {
                 flash("success",
                         (alreadyAttending == null ?
-                                "Je bent met succes ingeschreven voor de infosessie op " :
+                                "Je bent ingeschreven voor de infosessie op " :
                                 "Je bent van infosessie veranderd naar ")
                                 + Utils.toLocalizedString(session.getTime()) + ".");
 
@@ -415,7 +386,7 @@ public class InfoSessions extends Controller {
             } else {
                 flash("warning", "Je was reeds ingeschreven voor deze infosessie");
             }
-            return redirect(routes.InfoSessions.detail(sessionId));
+            return redirect(routes.InfoSessions.showUpcomingSessions());
         }
     }
 
@@ -426,41 +397,38 @@ public class InfoSessions extends Controller {
      *
      * @return A redirect to the newly created infosession, or the infosession edit page if the form contains errors.
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result createNewSession() {
-        Form<InfoSessionCreationModel> createForm = Form.form(InfoSessionCreationModel.class).bindFromRequest();
+        Form<InfoSessionData> createForm = Form.form(InfoSessionData.class).bindFromRequest();
         if (createForm.hasErrors()) {
             return badRequest(addinfosession.render(createForm));
         } else {
-            InfoSessionCreationModel model = createForm.get();
+            InfoSessionData data = createForm.get();
             DataAccessContext context = DataAccess.getInjectedContext();
             UserDAO udao = context.getUserDAO();
-            if ("copyAddress".equals(model.submit)) {
-                User host = udao.getUser(model.userId);
-                model.address.populate(host.getAddressResidence());
-                return ok(addinfosession.render (Form.form(InfoSessionCreationModel.class).fill(model)));
+            if ("copyAddress".equals(data.submit)) {
+                User host = udao.getUser(data.userId);
+                data.address.populate(host.getAddressResidence());
+                return ok(addinfosession.render (Form.form(InfoSessionData.class).fill(data)));
             } else {
-                InfoSessionDAO dao = context.getInfoSessionDAO();
-
-
-                InfoSessionType type = InfoSessionType.valueOf(model.type);
-
-                UserHeader host = udao.getUserHeader(model.userId);
-                InfoSession session = dao.createInfoSession(type, host, model.address.toAddress(), model.time,
-                        model.max_enrollees == null ? 0 : model.max_enrollees,
-                        model.comments);
+                int sessionId = context.getInfoSessionDAO().createInfoSession(
+                        InfoSessionType.valueOf(data.type),
+                        data.userId,
+                        data.address.toAddress(),
+                        data.time,
+                        data.max_enrollees == null ? 0 : data.max_enrollees,
+                        data.comments);
 
                 // Schedule the reminder
                 context.getJobDAO().createJob(
                         JobType.IS_REMINDER,
-                        session.getId(),
-                        session.getTime().minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
+                        sessionId,
+                        data.time.minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
                 );
 
-
                 return redirect(
-                        routes.InfoSessions.showUpcomingSessions() // return to infosession list
+                        routes.InfoSessions.showSessions() // return to infosession list
                 );
             }
         }
@@ -514,6 +482,10 @@ public class InfoSessions extends Controller {
     }
     */
 
+    /**
+     * Shows the upcoming session, together with the infosession which was chosen by the current user
+     */
+
     @AllowRoles({})
     @InjectContext
     public static Result showUpcomingSessions() {
@@ -528,7 +500,7 @@ public class InfoSessions extends Controller {
             ));
         } else {
             return ok(infosessions.render(
-                dao.getInfoSessions(true),
+                dao.getUpcomingInfoSessions(),
                 lis.session,
                 null,
                 lis.present)
@@ -537,22 +509,38 @@ public class InfoSessions extends Controller {
     }
 
     /**
-     * Method: GET*
-     *
-     * @return A table containing the upcoming sessions
+     * A list of all sessions. Divided into upcoming / past
      */
-    @AllowRoles({UserRole.INFOSESSION_ADMIN})
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result showSessions() {
-        return ok(infosessionsAdmin.render(
-                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(false)
-        ));
+        return ok(infosessionsAdmin.render());
+    }
+
+    /**
+     * Page with infosessions
+     */
+    @AllowRoles(UserRole.INFOSESSION_ADMIN)
+    @InjectContext
+    public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
+
+
+        InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        if (searchString.endsWith("PENDING")) {
+            return ok(infosessionsAdminPage.render(
+                    dao.getFutureInfoSessions(page, pageSize), true
+            ));
+        } else {
+            return ok(infosessionsAdminPage.render(
+                    dao.getPastInfoSessions(page, pageSize), false
+            ));
+        }
     }
 
     @InjectContext
     public static Result showUpcomingSessionsRaw() {
         return ok(infosessionsraw.render(
-                DataAccess.getInjectedContext().getInfoSessionDAO().getInfoSessions(true)
+                DataAccess.getInjectedContext().getInfoSessionDAO().getUpcomingInfoSessions()
         ));
     }
 

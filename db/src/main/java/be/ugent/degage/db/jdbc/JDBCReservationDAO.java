@@ -70,7 +70,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
-                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now())
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
@@ -86,7 +87,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
                 rs.getString("reservation_message"),
-                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now())
+                rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
+                rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
         reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
         reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
@@ -131,7 +133,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 ReservationHeader reservation = new ReservationHeader(
                         id,
                         userId, carId, rs.getInt("reservation_owner_id"),
-                        from, until, null, false);
+                        from, until, null, false, null);
                 reservation.setStatus(ReservationStatus.valueOf(rs.getString("reservation_status")));
                 reservation.setPrivileged(rs.getBoolean("reservation_privileged"));
                 return reservation;
@@ -254,12 +256,13 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 rs.getTimestamp("r.reservation_from").toLocalDateTime(),
                 rs.getTimestamp("r.reservation_to").toLocalDateTime(),
                 null,
-                false // not important
+                false, // not important
+                rs.getTimestamp("r.reservation_created_at").toLocalDateTime()
         );
     }
 
     private LazyStatement getNextReservationStatement = new LazyStatement(
-            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, " +
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, r.reservation_created_at, " +
                     USER_HEADER_FIELDS +
                     "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
@@ -290,7 +293,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     private LazyStatement getPreviousReservationStatement = new LazyStatement(
-            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, " +
+            "SELECT r.reservation_id, r.reservation_from, r.reservation_to, r.reservation_owner_id, r.reservation_created_at, " +
                     USER_HEADER_FIELDS +
                     "FROM reservations AS r JOIN reservations AS o " +
                     "ON r.reservation_car_id = o.reservation_car_id " +
@@ -431,19 +434,37 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     @Override
     public Page<Reservation> getReservationListPage(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
-        try {
-            String sql = getReservationsPageStatement(filter);
-            sql += " ORDER BY ";
-            switch (orderBy) {
-                // TODO: get some other things to sort on
-                default:
-                    sql += " reservation_from " + (asc ? " asc " : " desc ");
-                    break;
-            }
-            sql += " LIMIT " + (page - 1) * pageSize + ", " + pageSize;
-            try (PreparedStatement ps = prepareStatement(sql)) {
-                return toPage(ps, pageSize, JDBCReservationDAO::populateReservation);
-            }
+        StringBuilder builder = new StringBuilder(getReservationsPageStatement(filter));
+        // add order
+        switch (orderBy) {
+            case NAME:
+                builder.append(" ORDER BY car_name ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case FROM:
+                builder.append(" ORDER BY reservation_from ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case UNTIL:
+                builder.append(" ORDER BY reservation_to ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case STATUS:
+                builder.append(" ORDER BY reservation_status ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case BORROWER:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+        builder.append(" LIMIT ?,?");
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            ps.setInt(1, (page - 1) * pageSize);
+            ps.setInt(2, pageSize);
+            return toPage(ps, pageSize, JDBCReservationDAO::populateReservation);
         } catch (Exception ex) {
             throw new DataAccessException("Could not retrieve a list of reservations", ex);
         }

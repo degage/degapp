@@ -46,6 +46,7 @@ GET         /calendar                               controllers.Calendars.index(
 GET         /calendar/list                          controllers.Calendars.listAvailableCarsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /calendar/cars                          controllers.Calendars.showCarsForReservation()
 GET         /calendar/car                           controllers.Calendars.startCar()
+GET         /calendar/car/availablility             controllers.Calendars.availabilityCar(id: Int, date: String?= null)
 POST        /calendar/car                           controllers.Calendars.overviewCarPost()
 GET         /calendar/car/index                     controllers.Calendars.indexWithCar(carName: String, id: Int)
 GET         /calendar/date                          controllers.Calendars.overview(date: String ?= null)
@@ -141,6 +142,7 @@ POST        /contracts/edit                         controllers.Contracts.contra
 
 # Users
 GET         /users                                  controllers.Users.showUsers()
+GET         /users/tabbed                           controllers.Users.showUsersWithTabs(tab : Int ?= 0)
 GET         /users/page                             controllers.Users.showUsersPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /users/impersonate                      controllers.Users.impersonate(userId: Int)
 
@@ -164,6 +166,7 @@ GET         /infosession/new                        controllers.InfoSessions.new
 POST        /infosession/new                        controllers.InfoSessions.createNewSession()
 GET         /infosession                            controllers.InfoSessions.showUpcomingSessions()
 GET         /infosession/admin                      controllers.InfoSessions.showSessions()
+GET         /infosession/page                       controllers.InfoSessions.showSessionsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
 GET         /infosession/enroll                     controllers.InfoSessions.enrollSession(id: Int)
 GET         /infosession/unenroll                   controllers.InfoSessions.unenrollSession()
 GET         /infosession/view                       controllers.InfoSessions.detail(id: Int)
@@ -290,13 +293,21 @@ POST        /billadm/users                          controllers.BillingsAdmin.do
 GET         /billadm/cars                           controllers.BillingsAdmin.carInvoices(id: Int)
 POST        /billadm/cars                           controllers.BillingsAdmin.doCarInvoices(id: Int)
 
+#Assistance
+GET         /assistances/list                       controllers.Assistances.showAllAssistances()
+GET         /assistances/admin/page                 controllers.Assistances.showAllAssistancesPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+
+#Parkingcard
+GET         /parkingcards/list                       controllers.Parkingcards.showAllParkingcards()
+GET         /parkingcards/admin/page                 controllers.Parkingcards.showAllParkingcardsPage(page: Int, pageSize: Int, asc: Int ?= 1, orderBy: String ?= "", filter: String ?= "")
+
 #Announcements
 GET         /announcements                          controllers.Announcements.index()
 GET         /announcements/edit                     controllers.Announcements.edit(key: String)
 POST        /announcements/edit                     controllers.Announcements.doEdit(key: String)
 
 # User Picker
-GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "")
+GET         /userpicker                             controllers.UserPicker.getList(search: String ?= "", status : String ?= "")
 # Car Picker
 GET         /carpicker                              controllers.CarPicker.getList(search: String ?= "")
 

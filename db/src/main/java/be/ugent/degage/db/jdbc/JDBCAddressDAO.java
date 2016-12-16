@@ -48,12 +48,22 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
     }
 
     // TODO: avoid these
-    public static Address populateAddress(ResultSet rs) throws SQLException {
-        return populateAddress(rs, "addresses");
+    static Address populateAddress(ResultSet rs) throws SQLException {
+        if(rs.getObject("address_id") == null)
+            return null;
+        else
+            return new Address(
+                    rs.getInt("address_id"),
+                    rs.getString("address_country"),
+                    rs.getString("address_zipcode"),
+                    rs.getString("address_city"),
+                    rs.getString("address_street"),
+                    rs.getString("address_number")
+            );
     }
 
     // TODO: avoid these
-    public static Address populateAddress(ResultSet rs, String tableName) throws SQLException {
+    static Address populateAddress(ResultSet rs, String tableName) throws SQLException {
         if(rs.getObject(tableName + ".address_id") == null)
             return null;
         else
