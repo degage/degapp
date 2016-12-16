@@ -472,8 +472,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         builder.append("SELECT SQL_CALC_FOUND_ROWS " + USER_HEADER_FIELDS + ",  " +
                     "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
                     "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
+                    "domicileAddresses.address_latitude, domicileAddresses.address_longitude, " +
                     "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
+                    "residenceAddresses.address_latitude, residenceAddresses.address_longitude, " +
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
                     "users.user_damage_history, users.user_agree_terms,  " +
                     "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
