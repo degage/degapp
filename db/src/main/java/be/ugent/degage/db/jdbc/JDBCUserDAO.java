@@ -63,7 +63,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
                     "users.user_damage_history, users.user_agree_terms,  " +
-                    "users.user_date_joined, users.user_driver_license_date, users.user_vat " +
+                    "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
+                    "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped, " +
+                    "NULL as approval_submission, NULL as infosession_timestamp " +
                     "FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
                     "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
@@ -71,19 +73,23 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
-            "AND user_status LIKE ?";
+            "AND user_status = ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
             // getFieldContains on a "empty" filter will return the default string "%%", so this does not filter anything
             filter = new JDBCFilter();
         }
-
         ps.setString(start, filter.getValue(FilterField.USER_FIRSTNAME));
         ps.setString(start + 1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start + 2, filter.getValue(FilterField.USER_NAME));
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
-        ps.setString(start + 4, "%" + filter.getValue(FilterField.USER_STATUS) + "%");
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")
+            || filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            ps.setString(start + 4, "REGISTERED");
+        } else {
+            ps.setString(start + 4, filter.getValue(FilterField.USER_STATUS));
+        }
     }
 
     public JDBCUserDAO(JDBCDataAccessContext context) {
@@ -118,6 +124,21 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         Date dateLicense = rs.getDate("users.user_driver_license_date");
         user.setLicenseDate(dateLicense == null ? null : dateLicense.toLocalDate());
 
+        Date dateCreated = rs.getDate("users.user_created_at");
+        user.setDateCreated(dateCreated == null ? null : dateCreated.toLocalDate());
+
+        Date dateBlocked = rs.getDate("users.user_date_blocked");
+        user.setDateBlocked(dateBlocked == null ? null : dateBlocked.toLocalDate());
+
+        Date dateDropped = rs.getDate("users.user_date_dropped");
+        user.setDateDropped(dateDropped == null ? null : dateDropped.toLocalDate());
+
+        Date dateApprovalSubmitted = rs.getDate("approval_submission");
+        user.setDateApprovalSubmitted(dateApprovalSubmitted == null ? null : dateApprovalSubmitted.toLocalDate());
+
+        Date dateSessionAttended = rs.getDate("infosession_timestamp");
+        user.setDateSessionAttended(dateSessionAttended == null ? null : dateSessionAttended.toLocalDate());
+
         user.setVatNr(rs.getString("users.user_vat"));
 
 
@@ -135,6 +156,26 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 rs.getString("user_cellphone"),
                 (Integer) rs.getObject("user_degage_id")
         );
+    }
+
+    public static User populateUserHeaderBlocked(ResultSet rs) throws SQLException {
+        User user = new User(
+                rs.getInt("user_id"),
+                rs.getString("user_email"),
+                rs.getString("user_firstname"),
+                rs.getString("user_lastname"),
+                UserStatus.valueOf(rs.getString("user_status")),
+                rs.getString("user_phone"),
+                rs.getString("user_cellphone"),
+                (Integer) rs.getObject("user_degage_id")
+        );
+        Date dateBlocked = rs.getDate("users.user_date_blocked");
+        user.setDateBlocked(dateBlocked == null ? null : dateBlocked.toLocalDate());
+        Date dateDropped = rs.getDate("users.user_date_dropped");
+        user.setDateDropped(dateDropped == null ? null : dateDropped.toLocalDate());
+        user.setUserReasonBlocked(rs.getString("user_reason_blocked"));
+        user.setUserReasonDropped(rs.getString("user_reason_dropped"));
+        return user;
     }
 
     public static UserHeaderShort populateUserHeaderShort(ResultSet rs, String tableName) throws SQLException {
@@ -260,10 +301,40 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
+    public User getUserHeaderBlocked(int userId) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS +
+                " , users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped " +
+                " FROM users WHERE user_id = ?"
+        )) {
+            ps.setInt(1, userId);
+            return toSingleObject(ps, JDBCUserDAO::populateUserHeaderBlocked);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by id.", ex);
+        }
+    }
+
+    @Override
     public void updateUserStatus(int userId, UserStatus status) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement("UPDATE users SET user_status=? WHERE user_id = ?")) {
             ps.setString(1, status.name());
             ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user status", ex);
+        }
+    }
+
+    @Override
+    public void updateUserStatusWithReason(int userId, UserStatus status, String reason) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+            "UPDATE users SET user_status=?, " + 
+            (status == UserStatus.BLOCKED ? "user_date_blocked" : "user_date_dropped") + "=current_timestamp, " +
+            (status == UserStatus.BLOCKED ? "user_reason_blocked=? " : "user_reason_dropped=? ") +
+            "WHERE user_id = ?")) {
+            ps.setString(1, status.name());
+            ps.setString(2, reason);
+            ps.setInt(3, userId);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user status", ex);
@@ -397,8 +468,47 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     @Override
     public Page<User> getUserList(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException {
         StringBuilder builder = new StringBuilder();
-        builder.append(USER_QUERY);
+        // builder.append(USER_QUERY);
+        builder.append("SELECT SQL_CALC_FOUND_ROWS " + USER_HEADER_FIELDS + ",  " +
+                    "domicileAddresses.address_id, domicileAddresses.address_country, domicileAddresses.address_city, " +
+                    "domicileAddresses.address_zipcode, domicileAddresses.address_street, domicileAddresses.address_number, " +
+                    "residenceAddresses.address_id, residenceAddresses.address_country, residenceAddresses.address_city, " +
+                    "residenceAddresses.address_zipcode, residenceAddresses.address_street, residenceAddresses.address_number,  " +
+                    "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
+                    "users.user_damage_history, users.user_agree_terms,  " +
+                    "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
+                    "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped ");
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
+            builder.append(", approval_submission ");
+        } else {
+            builder.append(", NULL as approval_submission ");
+        }
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
+            builder.append(", infosession_timestamp ");
+        } else {
+            builder.append(", NULL as infosession_timestamp ");
+        }
+
+        builder.append("FROM users " +
+                    "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
+                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ");
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
+            builder.append("LEFT JOIN approvals on users.user_id =  approval_user ");
+        } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
+            builder.append("JOIN infosessionenrollees on users.user_id = infosession_enrollee_id and infosession_enrollment_status = 'PRESENT' ");
+            builder.append("JOIN infosessions on infosessionenrollees.infosession_id = infosessions.infosession_id ");
+        } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("LEFT JOIN infosessionenrollees on users.user_id = infosession_enrollee_id ");
+        } 
+
         builder.append(FILTER_FRAGMENT);
+
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("AND (infosession_enrollment_status != 'PRESENT' OR infosession_enrollment_status IS NULL) ");
+        }
 
         // add order
         switch (orderBy) {
@@ -409,7 +519,26 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                 builder.append(asc ? "ASC" : "DESC");
                 break;
             case DATE:
-                builder.append(" ORDER BY user_date_joined ");
+                switch (filter.getValue(FilterField.USER_STATUS)) {
+                    case "FULL":
+                        builder.append(" ORDER BY user_date_joined ");
+                        break;
+                    case "FULL_VALIDATING":
+                        builder.append(" ORDER BY approval_submission ");
+                        break;
+                    case "REGISTERD_INFO_PRESENT":
+                        builder.append(" ORDER BY infosession_timestamp ");
+                        break;
+                    case "REGISTERD_INFO_NOT_PRESENT":
+                        builder.append(" ORDER BY user_created_at ");
+                        break;
+                    case "BLOCKED":
+                        builder.append(" ORDER BY user_date_blocked ");
+                        break;
+                    case "DROPPED":
+                        builder.append(" ORDER BY user_date_dropped ");
+                        break;
+                }
                 builder.append(asc ? "ASC" : "DESC");
                 break;
         }

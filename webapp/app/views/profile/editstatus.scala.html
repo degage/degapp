@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader)(body: => Html)
+@(user: User)(body: => Html)
 
 @* Common code for the various status changing pages. *@
 @app("Gebruikersstatus wijzigen") {
@@ -47,6 +47,14 @@
                     <dt>Status</dt><dd>@user.getStatus</dd>
                     @if(user.getStatus==UserStatus.FULL){
                        <dt>Dégage ID</dt><dd>@user.getDegageId</dd>
+                    }
+                    @if(user.getStatus==UserStatus.BLOCKED){
+                       <dt>Reden blokkering</dt><dd>@user.getUserReasonBlocked</dd>
+                       <dt>Datum blokkering</dt><dd>@user.getDateBlocked</dd>
+                    }
+                    @if(user.getStatus==UserStatus.DROPPED){
+                       <dt>Reden verwijdering</dt><dd>@user.getUserReasonDropped</dd>
+                       <dt>Datum verwijdering</dt><dd>@user.getDateDropped</dd>
                     }
                 </dl>
             </div>
