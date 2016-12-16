@@ -66,6 +66,8 @@ connection.query(query, function(err, rows, fields) {
             , err => {
               console.error('Err!', err)
             })
+          } else {
+            console.log('bad result', result)
           }
     }, function(err) {
         console.error('err', err)

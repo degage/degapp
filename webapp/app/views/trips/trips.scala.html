@@ -29,6 +29,11 @@
 
 @(tab: Int)
 
-@stdlayout("Ritten", scripts=js.paginationWithTabs("Trips.showTripsPage", tab), stylesheets=sheets("statuses")) {
+@scripts = {
+    @js.paginationWithTabs("Trips.showTripsPage", tab)
+    @js.loadCalendarEvent()
+}
+
+@stdlayout("Ritten", scripts=scripts, stylesheets=sheets("statuses")) {
     @triptabs(tab)
 }

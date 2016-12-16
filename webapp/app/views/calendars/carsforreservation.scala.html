@@ -27,13 +27,55 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(carList: Iterable[CarHeaderLong])
+@(carList: Iterable[CarHeaderLong], user: User)
 
-@stdlayout("Reserveer een auto", sheets("taglabels")) {
+@scripts = {
+    <script>
+        var map;
+        function initMap() {
+            var center = {lat: 51.0535, lng: 3.7304};
+            if ('@user.getAddressResidence().getLat()' !== undefined && parseFloat('@user.getAddressResidence().getLat()') > 0) {
+                center = {lat: parseFloat('@user.getAddressResidence().getLat()'), lng: parseFloat('@user.getAddressResidence().getLng()')};
+            }
+            var map = new google.maps.Map(document.getElementById('map'), {
+              zoom: 15,
+              center: center
+            });
+            $('#resultsTable > table > tbody  > tr').each( function(index, el) {
+                var firstEl = $(el).first();
+                var aTag = $(firstEl).find('a')[0];
+                var tdTag = $(firstEl).find('td')[0];
+                var locationTag = $(firstEl).find('td')[3];
+                var info = $(firstEl).find('td')[1].innerText;
+                var address = $(firstEl).find('td')[3].innerText;
+                var comments = $($(firstEl).find('td')[4]).html();
+                var latLng = JSON.parse($(firstEl).find('td')[5].innerText);
+                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a></h3><h5>'+info+'</h5><p>'+address+'</p>'+comments;
+                var infowindow = new google.maps.InfoWindow({
+                  content: contentString
+                });
+                if (parseFloat(latLng.lat) > 0) {
+                    var marker = new google.maps.Marker({
+                      map: map,
+                      position: latLng,
+                      label: tdTag.innerText
+                    });
+                    marker.addListener('click', function() {
+                        infowindow.open(map, marker);
+                    });                  
+                }  
+            })
+          } 
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
+}
+
+@stdlayout("Reserveer een auto", sheets("taglabels"), scripts=scripts) {
 
     @panel("De autovloot", "fa-car"){
+        <div id="map" class="map col-xs-12 col-lg-8"></div>
         <div id="resultsTable" class="table-responsive col-xs-12">
-            <p>Klik op de autonaam om de auto te reserveren.</p>
+            <h4>Klik op de autonaam om de auto te reserveren.</h4>
             <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
                 <thead>
                     <tr role="row">
@@ -49,8 +91,9 @@
                         <td><a href='@routes.Calendars.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
                         <td>@car.getBrand @car.getType</td>
                         <td>@cars.cartags(car)</td>
-                        <td>@car.getLocation.getStreet, @car.getLocation.getCity</td>
-                        <td>@car.getComments </td>
+                        <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
+                        <td>@Html(car.getComments) </td>
+                        <td style="display: none;">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
                     }
                 </tbody>
             </table>

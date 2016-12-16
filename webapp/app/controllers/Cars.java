@@ -597,7 +597,7 @@ public class Cars extends Controller {
         return ok(detail.render(
                 car,
                 context.getPrivilegedDAO().getPrivileged(carId),
-                null)
+                new Maps.MapDetails(car.getLocation().getLat(), car.getLocation().getLng(), 14, car.getName()))
         );
     }
 

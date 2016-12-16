@@ -29,7 +29,7 @@
 
 @(map: Maps.MapDetails = null)
 @if(map != null) {
-    <div id="map" data-lat="@map.getLatitude" data-lon="@map.getLongtitude" data-zoom="@map.getZoom" data-message="@map.getMessage"></div>
+    <div id="map" data-lat="@map.getLatitude" data-lon="@map.getLongitude" data-zoom="@map.getZoom" data-message="@map.getMessage"></div>
 } else {
     <div id="map" class="alert alert-info">(Voorlopig) geen kaart beschikbaar.</div>
 }

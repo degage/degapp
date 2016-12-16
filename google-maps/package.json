@@ -1,5 +1,5 @@
 {
-  "name": "@degage/update-address-coordinates",
+  "name": "update-address-coordinates",
   "version": "0.0.0",
   "main": "dist/update-address-coordinates.js",
   "scripts": {

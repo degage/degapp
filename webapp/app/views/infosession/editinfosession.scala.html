@@ -29,7 +29,11 @@
 
 @(form: play.data.Form[InfoSessions.InfoSessionData], sessionId: Int)
 @* TODO: shares lots of code with addinfosession *@
-@scripts = {@js.datetimepicker() @js.userpicker() }
+@scripts = {
+    @js.datetimepicker() 
+    @js.userpicker() 
+    @js.gpsCoordinatePicker("address")
+}
 
 @stdlayout("Bewerk infosessie", scripts=scripts, extrabc=breadcrumb("Infosessies",routes.InfoSessions.showSessions)) {
     @helper.form(routes.InfoSessions.editSessionPost(sessionId)) {

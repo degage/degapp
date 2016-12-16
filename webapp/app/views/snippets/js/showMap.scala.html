@@ -1,0 +1,24 @@
+@(mapDetails: Maps.MapDetails)
+<script>
+    var map;
+    function initMap() {
+        var ghent = {lat: 51.0535, lng: 3.7304};
+        var geocoder = new google.maps.Geocoder();
+        if ('@mapDetails.getLatitude()' !== undefined && parseFloat('@mapDetails.getLatitude()') > 0) {
+            var markerPosition = {lat: parseFloat('@mapDetails.getLatitude()'), lng: parseFloat('@mapDetails.getLongitude()')};
+            var map = new google.maps.Map(document.getElementById('map'), {
+              zoom: parseInt('@mapDetails.getZoom()'),
+              center: ghent
+            });
+            map.setCenter(markerPosition);
+            var marker = new google.maps.Marker({
+              map: map,
+              position: markerPosition,
+              label: '@mapDetails.getMessage()'
+            });
+        } else {
+            $('#map').html('Gelieve gps coordinaten in te geven via knop Infosessie Wijzigen');
+        }
+    }
+</script>
+<script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
