@@ -75,7 +75,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
-            "AND user_status = ? ";
+            "AND user_status = ? AND residenceAddresses.address_city LIKE ? AND domicileAddresses.address_street LIKE ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
@@ -92,6 +92,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         } else {
             ps.setString(start + 4, filter.getValue(FilterField.USER_STATUS));
         }
+        ps.setString(start + 5, filter.getValue(FilterField.CITY));
+        ps.setString(start + 6, filter.getValue(FilterField.STREET));
     }
 
     public JDBCUserDAO(JDBCDataAccessContext context) {
@@ -497,7 +499,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         builder.append("FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
-                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ");
+                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
+                    "LEFT JOIN userroles on userroles.userrole_userid = users.user_id ");
 
         if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
             builder.append("LEFT JOIN approvals on users.user_id =  approval_user ");
@@ -510,9 +513,19 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         builder.append(FILTER_FRAGMENT);
 
+        if (filter.getValue(FilterField.ROLE).equals("ALL")) {
+            builder.append("");
+        } else if (filter.getValue(FilterField.ROLE).equals("")) {
+            builder.append("AND userrole_role IS NULL ");
+        } else {
+            builder.append("AND userrole_role = '" + filter.getValue(FilterField.ROLE) + "' ");
+        }
+
         if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
             builder.append("AND (infosession_enrollment_status != 'PRESENT' OR infosession_enrollment_status IS NULL) ");
         }
+
+        builder.append(" GROUP BY user_id");
 
         // add order
         switch (orderBy) {
@@ -550,8 +563,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         builder.append(" LIMIT ?, ?");
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             fillFragment(ps, filter, 1);
-            ps.setInt(6, (page - 1) * pageSize);
-            ps.setInt(7, pageSize);
+            ps.setInt(8, (page - 1) * pageSize);
+            ps.setInt(9, pageSize);
             return toPage(ps, pageSize, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);

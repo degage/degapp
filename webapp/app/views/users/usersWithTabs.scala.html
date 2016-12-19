@@ -29,6 +29,22 @@
     @panel("Gebruikers zoeken", "fa-search"){
         @search.textField("user_firstname", "Voornaam", "col-xs-12 col-sm-6")
         @search.textField("user_lastname", "Familienaam", "col-xs-12 col-sm-6")
+        @search.textField("city", "Gemeente", "col-xs-12 col-sm-6")
+        @search.textField("street", "Straat", "col-xs-12 col-sm-6")
+        <div class="form-group col-xs-12 col-sm-6">
+            <label class="control-label">
+                <input type="radio" name="role" value="ALL" checked class="searchRadioButton searchTextField"/> Alle 
+            </label>
+            <label class="control-label">
+                <input type="radio" name="role" value="CAR_USER" class="searchRadioButton"/> Gebruiker 
+            </label>
+            <label class="control-label">
+                <input type="radio" name="role" value="CAR_OWNER" class="searchRadioButton" /> Eigenaar 
+            </label>
+            <label class="control-label">
+                <input type="radio" name="role" value="" class="searchRadioButton"/> Andere 
+            </label>
+        </div>
         @search.button("Zoek")
     }
 

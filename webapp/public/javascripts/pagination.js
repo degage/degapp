@@ -89,6 +89,12 @@ if(searchButton != null) {
     }
 }
 
+$('.searchRadioButton').click(function() {
+    $('.searchRadioButton').removeClass('searchTextField')
+    $(this).addClass('searchTextField')
+});
+
+
 function importSearchTextFields() {
     var searchFields = document.getElementsByClassName("searchTextField");
     var values = new Array();
@@ -98,6 +104,8 @@ function importSearchTextFields() {
         fields[i] = searchField.getAttribute('name');
         if (searchField.type == "checkbox") {
           values[i] = searchField.checked ? "1" : "0";
+        // } else if (searchField.type == "radio") {
+        //   values[i] = (searchField.checked !== undefined);
         } else {
           values[i] = searchField.value;
         }
