@@ -52,7 +52,10 @@
         beginAsc = $field.data("asc");
         beginOrder = $field.data("order-by");
         $field=$field.find('input');
-        loadFirstPage($field.attr('name')+"="+$field.attr('value'));
+
+        // loadFirstPage($field.attr('name')+"="+$field.attr('value'));
+        var searchString = importSearchTextFields();
+        loadFirstPage(searchString);
     });
 </script>
 <script type='text/javascript' src='@routes.Assets.at("javascripts/pagination.js")'></script>
