@@ -39,7 +39,7 @@
                 center = {lat: parseFloat('@user.getAddressResidence().getLat()'), lng: parseFloat('@user.getAddressResidence().getLng()')};
                 centerLabel = 'Thuis';
             }
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
               zoom: 15,
               center: center
             });
@@ -56,14 +56,17 @@
                 var aTag = $(firstEl).find('a')[0];
                 var tdTag = $(firstEl).find('td')[0];
                 var locationTag = $(firstEl).find('td')[3];
-                var info = $(firstEl).find('td')[1].innerText;
-                var address = $(firstEl).find('td')[3].innerText;
-                var comments = $($(firstEl).find('td')[4]).html();
-                var latLng = JSON.parse($(firstEl).find('td')[5].innerText);
-                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a></h3><h5>'+info+'</h5><p>'+address+'</p>'+comments;
-                var infowindow = new google.maps.InfoWindow({
-                  content: contentString
-                });
+                var info = $(firstEl).find('td')[2].innerText;
+                var address = $(firstEl).find('td')[4].innerText;
+                var comments = $($(firstEl).find('td')[5]).html();
+                var latLng = JSON.parse($(firstEl).find('td')[6].innerText);
+                var autoFiche = $(firstEl).find('td')[7].innerText;
+                var imgLink = $(firstEl).find('td')[8].innerText;
+                var carId = $(firstEl).find('td')[6].id.substring(6);
+                var imgTag = '<img src=' + imgLink + ' alt="" class="img-responsive">';
+                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
+                    + '<p>'+address+'</p>' + imgTag + comments;
+                var infowindow = new google.maps.InfoWindow({});
                 if (parseFloat(latLng.lat) > 0) {
                     var marker = new google.maps.Marker({
                       map: map,
@@ -71,11 +74,18 @@
                       label: tdTag.innerText
                     });
                     marker.addListener('click', function() {
+                        console.log('contentString', contentString);
+                        infowindow.setContent(contentString);
                         infowindow.open(map, marker);
                     });                  
                 }  
             })
-          } 
+        }
+        function centerMap(lat, lng) {
+            var center = {lat: parseFloat(lat), lng: parseFloat(lng)};
+            map.setCenter(center);
+        } 
+        $('.car-popover').popover({html: true, container: 'table#dataTables-cars'});
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
 }
@@ -84,26 +94,33 @@
 
     @panel("De autovloot", "fa-car"){
         <div id="map" class="map col-xs-12 col-lg-8"></div>
-        <div id="resultsTable" class="table-responsive col-xs-12">
-            <h4>Klik op de autonaam om de auto te reserveren.</h4>
+        <div id="resultsTable" class="table-responsive col-xs-12" style="max-height: 500px; overflow-y: scroll; padding: 0; margin-top: 10px;">
             <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
                 <thead>
                     <tr role="row">
                         <th>Naam</th>
+                        <th>Acties</th>
                         <th>Merk/Type</th>
                         <th>&nbsp;</th>
                         <th>Standplaats</th>
-                        <th>Opmerkingen</th>
+                        <th style="display: none;">Opmerkingen</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach.tr(carList) { car =>
                         <td><a href='@routes.Calendars.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
-                        <td>@car.getBrand @car.getType</td>
+                        <td>
+                            @btnPrimary("Reserveer", routes.Calendars.indexWithCar(car.getName,car.getId))
+                            <button class="btn btn-primary btn-xs" onClick="centerMap(@car.getLocation.getLat, @car.getLocation.getLng)">Locatie</button>
+                            @btnWarning("Autofiche", routes.Cars.detail(car.getId))
+                        </td>
+                        <td><button class="car-popover btn btn-default btn-xs" data-toggle="popover" data-placement="bottom" data-trigger="focus" title="@car.getName" data-content="@Html(car.getComments)">@car.getBrand @car.getType</button></td>
                         <td>@cars.cartags(car)</td>
                         <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
-                        <td>@Html(car.getComments) </td>
-                        <td style="display: none;">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
+                        <td style="display: none;">@Html(car.getComments) </td>
+                        <td style="display: none;" id="car-id-@car.getId">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
+                        <td style="display: none;">@routes.Cars.detail(car.getId)</td> 
+                        <td style="display: none;">@routes.Cars.getPicture(car.getId)</td> 
                     }
                 </tbody>
             </table>
