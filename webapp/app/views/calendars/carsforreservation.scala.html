@@ -74,7 +74,6 @@
                       label: tdTag.innerText
                     });
                     marker.addListener('click', function() {
-                        console.log('contentString', contentString);
                         infowindow.setContent(contentString);
                         infowindow.open(map, marker);
                     });                  
