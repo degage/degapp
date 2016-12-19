@@ -39,7 +39,7 @@
                 center = {lat: parseFloat('@user.getAddressResidence().getLat()'), lng: parseFloat('@user.getAddressResidence().getLng()')};
                 centerLabel = 'Thuis';
             }
-            var map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(document.getElementById('map'), {
               zoom: 15,
               center: center
             });
@@ -59,8 +59,13 @@
                 var info = $(firstEl).find('td')[1].innerText;
                 var address = $(firstEl).find('td')[3].innerText;
                 var comments = $($(firstEl).find('td')[4]).html();
-                var latLng = JSON.parse($(firstEl).find('td')[5].innerText);
-                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a></h3><h5>'+info+'</h5><p>'+address+'</p>'+comments;
+                var latLng = JSON.parse($(firstEl).find('td')[6].innerText);
+                var autoFiche = $(firstEl).find('td')[7].innerText;
+                var imgLink = $(firstEl).find('td')[8].innerText;
+                var carId = $(firstEl).find('td')[6].id.substring(6);
+                var imgTag = '<img src=' + imgLink + ' alt="" class="img-responsive">';
+                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
+                    + '<p>'+address+'</p>' + imgTag + comments;
                 var infowindow = new google.maps.InfoWindow({
                   content: contentString
                 });
@@ -75,7 +80,11 @@
                     });                  
                 }  
             })
-          } 
+        }
+        function centerMap(lat, lng) {
+            var center = {lat: parseFloat(lat), lng: parseFloat(lng)};
+            map.setCenter(center);
+        } 
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
 }
@@ -94,6 +103,7 @@
                         <th>&nbsp;</th>
                         <th>Standplaats</th>
                         <th>Opmerkingen</th>
+                        <th>Acties</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -103,7 +113,14 @@
                         <td>@cars.cartags(car)</td>
                         <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
                         <td>@Html(car.getComments) </td>
-                        <td style="display: none;">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
+                        <td>
+                            @btnPrimary("Reserveer", routes.Calendars.indexWithCar(car.getName,car.getId))
+                            <button class="btn btn-primary btn-xs" onClick="centerMap(@car.getLocation.getLat, @car.getLocation.getLng)">Locatie</button>
+                            @btnWarning("Autofiche", routes.Cars.detail(car.getId))
+                        </td>
+                        <td style="display: none;" id="car-id-@car.getId">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
+                        <td style="display: none;">@routes.Cars.detail(car.getId)</td> 
+                        <td style="display: none;">@routes.Cars.getPicture(car.getId)</td> 
                     }
                 </tbody>
             </table>
