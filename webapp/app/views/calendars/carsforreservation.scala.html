@@ -66,9 +66,7 @@
                 var imgTag = '<img src=' + imgLink + ' alt="" class="img-responsive">';
                 var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
                     + '<p>'+address+'</p>' + imgTag + comments;
-                var infowindow = new google.maps.InfoWindow({
-                  content: contentString
-                });
+                var infowindow = new google.maps.InfoWindow({});
                 if (parseFloat(latLng.lat) > 0) {
                     var marker = new google.maps.Marker({
                       map: map,
@@ -76,6 +74,8 @@
                       label: tdTag.innerText
                     });
                     marker.addListener('click', function() {
+                        console.log('contentString', contentString);
+                        infowindow.setContent(contentString);
                         infowindow.open(map, marker);
                     });                  
                 }  
@@ -85,6 +85,7 @@
             var center = {lat: parseFloat(lat), lng: parseFloat(lng)};
             map.setCenter(center);
         } 
+        $('.car-popover').popover({html: true, container: 'table#dataTables-cars'});
     </script>
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
 }
@@ -113,7 +114,7 @@
                             <button class="btn btn-primary btn-xs" onClick="centerMap(@car.getLocation.getLat, @car.getLocation.getLng)">Locatie</button>
                             @btnWarning("Autofiche", routes.Cars.detail(car.getId))
                         </td>
-                        <td>@car.getBrand @car.getType</td>
+                        <td><button class="car-popover btn btn-default btn-xs" data-toggle="popover" data-placement="bottom" data-trigger="focus" title="@car.getName" data-content="@Html(car.getComments)">@car.getBrand @car.getType</button></td>
                         <td>@cars.cartags(car)</td>
                         <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
                         <td style="display: none;">@Html(car.getComments) </td>
