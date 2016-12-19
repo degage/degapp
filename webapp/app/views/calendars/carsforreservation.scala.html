@@ -56,9 +56,9 @@
                 var aTag = $(firstEl).find('a')[0];
                 var tdTag = $(firstEl).find('td')[0];
                 var locationTag = $(firstEl).find('td')[3];
-                var info = $(firstEl).find('td')[1].innerText;
-                var address = $(firstEl).find('td')[3].innerText;
-                var comments = $($(firstEl).find('td')[4]).html();
+                var info = $(firstEl).find('td')[2].innerText;
+                var address = $(firstEl).find('td')[4].innerText;
+                var comments = $($(firstEl).find('td')[5]).html();
                 var latLng = JSON.parse($(firstEl).find('td')[6].innerText);
                 var autoFiche = $(firstEl).find('td')[7].innerText;
                 var imgLink = $(firstEl).find('td')[8].innerText;
@@ -93,31 +93,30 @@
 
     @panel("De autovloot", "fa-car"){
         <div id="map" class="map col-xs-12 col-lg-8"></div>
-        <div id="resultsTable" class="table-responsive col-xs-12">
-            <h4>Klik op de autonaam om de auto te reserveren.</h4>
+        <div id="resultsTable" class="table-responsive col-xs-12" style="max-height: 500px; overflow-y: scroll; padding: 0; margin-top: 10px;">
             <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
                 <thead>
                     <tr role="row">
                         <th>Naam</th>
+                        <th>Acties</th>
                         <th>Merk/Type</th>
                         <th>&nbsp;</th>
                         <th>Standplaats</th>
-                        <th>Opmerkingen</th>
-                        <th>Acties</th>
+                        <th style="display: none;">Opmerkingen</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach.tr(carList) { car =>
                         <td><a href='@routes.Calendars.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
-                        <td>@car.getBrand @car.getType</td>
-                        <td>@cars.cartags(car)</td>
-                        <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
-                        <td>@Html(car.getComments) </td>
                         <td>
                             @btnPrimary("Reserveer", routes.Calendars.indexWithCar(car.getName,car.getId))
                             <button class="btn btn-primary btn-xs" onClick="centerMap(@car.getLocation.getLat, @car.getLocation.getLng)">Locatie</button>
                             @btnWarning("Autofiche", routes.Cars.detail(car.getId))
                         </td>
+                        <td>@car.getBrand @car.getType</td>
+                        <td>@cars.cartags(car)</td>
+                        <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
+                        <td style="display: none;">@Html(car.getComments) </td>
                         <td style="display: none;" id="car-id-@car.getId">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
                         <td style="display: none;">@routes.Cars.detail(car.getId)</td> 
                         <td style="display: none;">@routes.Cars.getPicture(car.getId)</td> 
