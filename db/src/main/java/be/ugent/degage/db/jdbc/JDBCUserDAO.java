@@ -75,7 +75,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
-            "AND user_status = ? AND residenceAddresses.address_city LIKE ? AND domicileAddresses.address_street LIKE ? ";
+            "AND residenceAddresses.address_city LIKE ? AND domicileAddresses.address_street LIKE ? ";
 
     private void fillFragment(PreparedStatement ps, Filter filter, int start) throws SQLException {
         if (filter == null) {
@@ -86,14 +86,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         ps.setString(start + 1, filter.getValue(FilterField.USER_LASTNAME));
         ps.setString(start + 2, filter.getValue(FilterField.USER_NAME));
         ps.setString(start + 3, filter.getValue(FilterField.USER_NAME));
-        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")
-            || filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
-            ps.setString(start + 4, "REGISTERED");
-        } else {
-            ps.setString(start + 4, filter.getValue(FilterField.USER_STATUS));
-        }
-        ps.setString(start + 5, filter.getValue(FilterField.CITY));
-        ps.setString(start + 6, filter.getValue(FilterField.STREET));
+        ps.setString(start + 4, filter.getValue(FilterField.CITY));
+        ps.setString(start + 5, filter.getValue(FilterField.STREET));
     }
 
     public JDBCUserDAO(JDBCDataAccessContext context) {
@@ -500,7 +494,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         builder.append("FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
                     "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ");
-        if (!filter.getValue(FilterField.ROLE).equals("ALL")) {
+        if (!filter.getValue(FilterField.ROLE).equals("ALL") && !filter.getValue(FilterField.ROLE).equals("")) {
             builder.append("LEFT JOIN userroles on userroles.userrole_userid = users.user_id ");
         }
 
@@ -516,9 +510,17 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         builder.append(FILTER_FRAGMENT);
 
-        if (filter.getValue(FilterField.ROLE).equals("ALL")) {
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")
+            || filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("AND user_status = 'REGISTERED' ");
+        } else if (!filter.getValue(FilterField.USER_STATUS).equals("")) {
+            builder.append("AND user_status = '" + filter.getValue(FilterField.USER_STATUS) + "' ");
+        }
+
+
+        if (filter.getValue(FilterField.ROLE).equals("ALL") || filter.getValue(FilterField.ROLE).equals("")) {
             builder.append("");
-        } else if (filter.getValue(FilterField.ROLE).equals("")) {
+        } else if (filter.getValue(FilterField.ROLE).equals("OTHER")) {
             builder.append("AND userrole_role IS NULL ");
         } else {
             builder.append("AND userrole_role = '" + filter.getValue(FilterField.ROLE) + "' ");
@@ -564,10 +566,11 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
 
         builder.append(" LIMIT ?, ?");
+        // System.out.println("query users: " + builder.toString());
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             fillFragment(ps, filter, 1);
-            ps.setInt(8, (page - 1) * pageSize);
-            ps.setInt(9, pageSize);
+            ps.setInt(7, (page - 1) * pageSize);
+            ps.setInt(8, pageSize);
             return toPage(ps, pageSize, JDBCUserDAO::populateUser);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retrieve a list of users", ex);
