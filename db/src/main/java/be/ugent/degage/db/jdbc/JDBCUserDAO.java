@@ -499,8 +499,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         builder.append("FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
-                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id " +
-                    "LEFT JOIN userroles on userroles.userrole_userid = users.user_id ");
+                    "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ");
+        if (!filter.getValue(FilterField.ROLE).equals("ALL")) {
+            builder.append("LEFT JOIN userroles on userroles.userrole_userid = users.user_id ");
+        }
 
         if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
             builder.append("LEFT JOIN approvals on users.user_id =  approval_user ");
@@ -509,6 +511,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             builder.append("JOIN infosessions on infosessionenrollees.infosession_id = infosessions.infosession_id ");
         } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
             builder.append("LEFT JOIN infosessionenrollees on users.user_id = infosession_enrollee_id ");
+            builder.append("AND infosession_enrollment_status = 'PRESENT' ");
         } 
 
         builder.append(FILTER_FRAGMENT);
@@ -520,12 +523,12 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         } else {
             builder.append("AND userrole_role = '" + filter.getValue(FilterField.ROLE) + "' ");
         }
-
-        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
-            builder.append("AND (infosession_enrollment_status != 'PRESENT' OR infosession_enrollment_status IS NULL) ");
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_PRESENT")) {
+            builder.append("AND infosession_enrollment_status = 'PRESENT' ");
         }
-
-        builder.append(" GROUP BY user_id");
+        if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
+            builder.append("AND infosession_enrollment_status IS NULL ");
+        }
 
         // add order
         switch (orderBy) {
