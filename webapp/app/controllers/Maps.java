@@ -57,6 +57,13 @@ public class Maps extends Controller {
         private int zoom;
         private String message;
 
+        public MapDetails() {
+            this.latitude = 51.0535;
+            this.longitude = 3.7304;
+            this.zoom = 14;
+            this.message = "unknown";
+        }
+
         public MapDetails(double latitude, double longitude, int zoom, String message) {
             this.latitude = latitude;
             this.longitude = longitude;

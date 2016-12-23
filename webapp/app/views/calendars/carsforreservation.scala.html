@@ -125,7 +125,7 @@
                         </td>
                         <td><button class="car-popover btn btn-default btn-xs" data-toggle="popover" data-placement="bottom" data-trigger="focus" title="@car.getName" data-content="@Html(car.getComments)">@car.getBrand @car.getType</button></td>
                         <td>@cars.cartags(car)</td>
-                        <td>@car.getLocation.getStreet @car.getLocation.getNum, @car.getLocation.getCity</td>
+                        <td>@car.getLocation.getStreet, @car.getLocation.getCity</td>
                         <td style="display: none;">@Html(car.getComments) </td>
                         <td style="display: none;" id="car-id-@car.getId">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
                         <td style="display: none;">@routes.Cars.detail(car.getId)</td> 

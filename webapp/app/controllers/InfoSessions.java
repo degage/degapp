@@ -495,17 +495,20 @@ public class InfoSessions extends Controller {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         InfoSessionDAO.LastSessionResult lis = dao.getLastInfoSession(CurrentUser.getId());
-
+        Maps.MapDetails mapDetails = new Maps.MapDetails();
+        if (lis.session != null && lis.session.getAddress() != null) {
+            mapDetails = new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie");
+        }
         if (lis.present) {
             return ok(infosessionsDone.render(
                 lis.session,
-                new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie")
+                mapDetails
             ));
         } else {
             return ok(infosessions.render(
                 dao.getUpcomingInfoSessions(),
                 lis.session,
-                new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie"),
+                mapDetails,
                 lis.present)
             );
         }
