@@ -27,20 +27,38 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(users: Page[User])
+@(users: Page[User], tab: String)
 @import db.CurrentUser
 <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
     <thead>
         <tr role="row">
             <th name="name" class="sortable" tabindex="0" >Naam</th>
-            <th name="date" class="sortable" tabindex="1" >Start lidmaatschap</th>
+            <th name="date" class="sortable" tabindex="1" >
+                @tab match {
+                    case "FULL" => {Start lidmaatschap}
+                    case "FULL_VALIDATING" => {Lidmaatschap aangevraagd}
+                    case "REGISTERD_INFO_PRESENT" => {Datum infosessie}
+                    case "REGISTERD_INFO_NOT_PRESENT" => {Registratiedatum}
+                    case "BLOCKED" => {Datum blokkering}
+                    case "DROPPED" => {Datum verwijdering}
+                }
+            </th>
             <th>Acties</th>
         </tr>
     </thead>
     <tbody>
         @foreach.trOrElse(users) { user =>
             <td><a href="@routes.Profile.index(user.getId)">@user.getFullName</a></td>
-            <td>@user.getDateJoined</td>
+            <td>
+                @tab match {
+                    case "FULL" => {@user.getDateJoined}
+                    case "FULL_VALIDATING" => {@user.getDateApprovalSubmitted}
+                    case "REGISTERD_INFO_PRESENT" => {@user.getDateSessionAttended}
+                    case "REGISTERD_INFO_NOT_PRESENT" => {@user.getDateCreated}
+                    case "BLOCKED" => {@user.getDateBlocked}
+                    case "DROPPED" => {@user.getDateDropped}
+                }
+            </td>
             <td>
                 <div class="btn-group btn-group-xs">
                     @if(CurrentUser.hasRole(UserRole.SUPER_USER) && user.canLogin) {

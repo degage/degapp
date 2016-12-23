@@ -53,27 +53,34 @@ public class Maps extends Controller {
 
     public static class MapDetails {
         private double latitude;
-        private double longtitude;
+        private double longitude;
         private int zoom;
         private String message;
 
-        public MapDetails(double latitude, double longtitude, int zoom, String message) {
+        public MapDetails() {
+            this.latitude = 51.0535;
+            this.longitude = 3.7304;
+            this.zoom = 14;
+            this.message = "unknown";
+        }
+
+        public MapDetails(double latitude, double longitude, int zoom, String message) {
             this.latitude = latitude;
-            this.longtitude = longtitude;
+            this.longitude = longitude;
             this.zoom = zoom;
             this.message = message;
         }
 
-        public MapDetails(double latitude, double longtitude, int zoom) {
-            this(latitude, longtitude, zoom, null);
+        public MapDetails(double latitude, double longitude, int zoom) {
+            this(latitude, longitude, zoom, null);
         }
 
         public double getLatitude() {
             return latitude;
         }
 
-        public double getLongtitude() {
-            return longtitude;
+        public double getLongitude() {
+            return longitude;
         }
 
         public int getZoom() {
@@ -86,7 +93,7 @@ public class Maps extends Controller {
     }
 
     /**
-     * Returns a map tile for given longtitude, latitude and zoom.
+     * Returns a map tile for given longitude, latitude and zoom.
      *
      * @param zoom
      * @param x
@@ -104,10 +111,10 @@ public class Maps extends Controller {
     }
 
     /**
-     * Resolves the longtitude and latitude for a given address ID
+     * Resolves the longitude and latitude for a given address ID
      *
      * @param addressId The address to resolve
-     * @return A promise with the longtitude and latitude
+     * @return A promise with the longitude and latitude
      */
     @InjectContext
     // TODO: inject context probably does not work here

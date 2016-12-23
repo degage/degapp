@@ -489,7 +489,7 @@ public class Profile extends Controller {
     @InjectContext
     public static Result editUserStatus(int userId) {
         UserDAO udao = DataAccess.getInjectedContext().getUserDAO();
-        UserHeader user = udao.getUserHeader(userId);
+        User user = udao.getUserHeaderBlocked(userId);
         switch (user.getStatus()) {
             case FULL:
                 return ok(editstatusFull.render(user));
@@ -501,18 +501,33 @@ public class Profile extends Controller {
         }
     }
 
+    public static class Data {
+        public int userId;
+        public String reason;
+    }
+
+
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
-    public static Result blockUser(int userId) {
-        DataAccess.getInjectedContext().getUserDAO().updateUserStatus(userId, UserStatus.BLOCKED);
-        return redirect(routes.Profile.editUserStatus(userId));
+    public static Result blockUser() {
+        Data data = Form.form(Data.class).bindFromRequest().get();
+        DataAccess.getInjectedContext().getUserDAO().updateUserStatusWithReason(data.userId, UserStatus.BLOCKED, data.reason);
+        return redirect(routes.Users.showUsersWithTabs(4));
+    }
+
+    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @InjectContext
+    public static Result dropUser() {
+        Data data = Form.form(Data.class).bindFromRequest().get();
+        DataAccess.getInjectedContext().getUserDAO().updateUserStatusWithReason(data.userId, UserStatus.DROPPED, data.reason);
+        return redirect(routes.Users.showUsersWithTabs(5));
     }
 
     @AllowRoles({UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result unblockUser(int userId) {
         DataAccess.getInjectedContext().getUserDAO().updateUserStatus(userId, UserStatus.REGISTERED);
-        return redirect(routes.Profile.editUserStatus(userId));
+        return redirect(routes.Users.showUsersWithTabs(2));
     }
 
     public static class DepositData {

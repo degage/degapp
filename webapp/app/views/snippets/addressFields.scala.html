@@ -34,3 +34,9 @@
 @std.textField(form(fieldPrefix+".zipCode"), "Postcode", "col-md-3", required=true)
 @std.textField(form(fieldPrefix+".city"), "Stad", "col-md-6", required=true)
 @selectCountry(form(fieldPrefix+".country"), "Land")
+@std.textField(form(fieldPrefix+".lat"), "Lat", "col-md-3")
+@std.textField(form(fieldPrefix+".lng"), "Lng", "col-md-3")
+<div class="form-group col-md-3 ">
+  <label class="control-label" for="address_lng"></label>
+    <button class="btn btn-sm btn-warning form-control input-md" onClick='fillInGpsCoordinates(event)'>Vraag GPS coördinaten op</button>
+</div>

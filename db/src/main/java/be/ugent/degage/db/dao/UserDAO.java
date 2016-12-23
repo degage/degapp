@@ -70,6 +70,11 @@ public interface UserDAO {
     public UserHeader getUserHeader(int userId) throws DataAccessException;
 
     /**
+     * Return partial information on the user with the given id,
+     */
+    public User getUserHeaderBlocked(int userId) throws DataAccessException;
+
+    /**
      * Update the main profile information about a user, i.e., names and telephone numbers
      */
     public void updateUserMainProfile(User user) throws DataAccessException;
@@ -98,6 +103,11 @@ public interface UserDAO {
      * Update the user status
      */
     public void updateUserStatus(int userId, UserStatus status);
+
+    /**
+     * Update the user status with a reason
+     */
+    public void updateUserStatusWithReason(int userId, UserStatus status, String reason);
 
     /**
      * Update the email address of a user.

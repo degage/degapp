@@ -39,19 +39,32 @@ public class Address {
     private String city;
     private String street;
     private String num;
+    private float lat;
+    private float lng;
 
     public Address(String country, String zip, String city, String street, String num) {
-        this(0, country, zip, city, street, num);
+        this(0, country, zip, city, street, num, 0, 0);
+    }
+
+    public Address(String country, String zip, String city, String street, String num, float lat, float lng) {
+        this(0, country, zip, city, street, num, lat, lng);
     }
 
     public Address(int id, String country, String zip, String city, String street, String num) {
+        this(id, country, zip, city, street, num, 0 , 0);
+    }
+
+    public Address(int id, String country, String zip, String city, String street, String num, float lat, float lng) {
         this.country = country;
         this.id = id;
         this.zip = zip;
         this.city = city;
         this.street = street;
         this.num = num;
+        this.lat = lat;
+        this.lng = lng;
     }
+
 
     public int getId() {
         return id;
@@ -99,6 +112,22 @@ public class Address {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public float getLng() {
+        return lng;
+    }
+
+    public void setLng(float lng) {
+        this.lng = lng;
+    }
+
+    public float getLat() {
+        return lat;
+    }
+
+    public void setLat(float lat) {
+        this.lat = lat;
     }
 
     @Override

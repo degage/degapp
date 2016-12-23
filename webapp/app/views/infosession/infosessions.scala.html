@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(sessions: Iterable[InfoSession], enrolled: InfoSession = null, map: Maps.MapDetails = null, showApprovalButton: Boolean = false)
+@(sessions: Iterable[InfoSession], enrolled: InfoSession = null, mapDetails: Maps.MapDetails = null, showApprovalButton: Boolean = false)
 @import db.CurrentUser
 @import providers.DataProvider
 @scripts = {
@@ -46,17 +46,14 @@
             window.location = myJsRoutes.controllers.InfoSessions.enrollSession(infoSessionId).url;
         }
     </script>
-
-    <!-- Maps: -->
-    <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
-    <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
+    @js.showMap(mapDetails)
 }
 
-@stdlayout("Infosessies", sheets("/lib/leaflet/leaflet"), scripts) {
+@stdlayout("Infosessies", scripts) {
 
     @if(enrolled != null) {
         @panel("Gekozen infosessie", "fa-lighbulb-o") {
-            @detailPartial(enrolled, map)
+            @detailPartial(enrolled, mapDetails)
             <div class="col-xs-12">
                 @btnWarning("Uitschrijven", routes.InfoSessions.unenrollSession)
             </div>

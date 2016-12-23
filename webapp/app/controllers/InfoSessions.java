@@ -239,10 +239,13 @@ public class InfoSessions extends Controller {
     @InjectContext
     public static Result detail(int sessionId) {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
+        InfoSession infoSession = dao.getInfoSession(sessionId);
         return ok(detail.render(
-                dao.getInfoSession(sessionId),
-                Form.form(UserpickerData.class),
-                dao.getEnrollees(sessionId), null));
+            infoSession,
+            Form.form(UserpickerData.class),
+            dao.getEnrollees(sessionId), 
+            new Maps.MapDetails(infoSession.getAddress().getLat(), infoSession.getAddress().getLng(), 14, "Infosessie"))
+        );
     }
 
 
@@ -492,17 +495,20 @@ public class InfoSessions extends Controller {
         // TODO: adjust so that it shows a map, like in showUpcomingSessionsOriginal
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         InfoSessionDAO.LastSessionResult lis = dao.getLastInfoSession(CurrentUser.getId());
-
+        Maps.MapDetails mapDetails = new Maps.MapDetails();
+        if (lis.session != null && lis.session.getAddress() != null) {
+            mapDetails = new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie");
+        }
         if (lis.present) {
             return ok(infosessionsDone.render(
                 lis.session,
-                null
+                mapDetails
             ));
         } else {
             return ok(infosessions.render(
                 dao.getUpcomingInfoSessions(),
                 lis.session,
-                null,
+                mapDetails,
                 lis.present)
             );
         }

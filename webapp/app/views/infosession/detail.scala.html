@@ -27,17 +27,16 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(infoSession: InfoSession, form: Form[util.UserpickerData], enrollees: Iterable[Enrollee], map: Maps.MapDetails = null)
+@(infoSession: InfoSession, form: Form[util.UserpickerData], enrollees: Iterable[Enrollee], mapDetails: Maps.MapDetails = null)
 
 @* shows details of an infosession. Only used by info administrators *@
 
 @scripts = {
     @js.usesajax()
     @js.userpicker()
+    @js.showMap(mapDetails)
 
     <!-- For maps: -->
-    <script type='text/javascript' src='@routes.Assets.at("lib/leaflet/leaflet.js")'></script>
-    <script src='@routes.Assets.at("javascripts/maps-custom.js")' type="text/javascript"></script>
     <script>
         $(document).ready(function() {
             $( "#deleteButton" ).click(function() {
@@ -47,9 +46,10 @@
             });
         });
     </script>
+
 }
 
-@stdlayout("Details Infosessie", sheets("/lib/leaflet/leaflet"), scripts, extrabc=breadcrumb("Infosessies", routes.InfoSessions.showSessions)) {
+@stdlayout("Details Infosessie", scripts, extrabc=breadcrumb("Infosessies", routes.InfoSessions.showSessions)) {
 
     <div class="panel panel-default">
         <div class="panel-body">
@@ -59,7 +59,7 @@
     </div>
 
     @panel() {
-        @detailPartial(infoSession, map)
+        @detailPartial(infoSession, mapDetails)
     }
 
     @panel("Ingeschreven (" + infoSession.getEnrolleeCount +")", "fa-users"){

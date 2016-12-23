@@ -30,27 +30,7 @@
 @(car: Car, privilegedUsers: Iterable[UserHeader], mapDetails: Maps.MapDetails = null)
 
 @scripts = {
-    <script>
-        var map;
-        function initMap() {
-            var ghent = {lat: 51.0535, lng: 3.7304};
-            var geocoder = new google.maps.Geocoder();
-            geocoder.geocode({'address': '@car.getLocation().toString()'}, function(results, status) {
-              if (status === 'OK') {
-                var map = new google.maps.Map(document.getElementById('map'), {
-                  zoom: 14,
-                  center: ghent
-                });
-                map.setCenter(results[0].geometry.location);
-                var marker = new google.maps.Marker({
-                  map: map,
-                  position: results[0].geometry.location
-                });
-              } 
-            });
-        }
-    </script>
-    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
+    @js.showMap(mapDetails)
 }
 
 @import db.CurrentUser
