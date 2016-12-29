@@ -102,6 +102,7 @@ class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
             case LICENSE_PLATE:
                 builder.append(" ORDER BY details_car_license_plate ");
                 builder.append(asc ? "ASC" : "DESC");
+                break;
             default:
                 builder.append(" ORDER BY car_id ");
                 builder.append("DESC");
