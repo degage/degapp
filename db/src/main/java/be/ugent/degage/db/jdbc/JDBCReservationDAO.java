@@ -534,10 +534,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                         "LEFT JOIN reservations ON reservation_car_id = cars.car_id " +
                         "WHERE cars.car_id = ? " + OVERLAP_CLAUSE_WIDE +
                         "ORDER BY car_name ASC, reservation_from ASC";
-        System.out.println(query);
-        System.out.println(carId);
-        System.out.println(Timestamp.valueOf(LocalDateTime.now()));
-        System.out.println(Timestamp.valueOf(LocalDateTime.now().plus(1, ChronoUnit.YEARS)));
         try (PreparedStatement ps = prepareStatement(query)) {
             ps.setInt(1, carId);
             ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
@@ -546,9 +542,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 CRInfo crInfo = new CRInfo();
                 crInfo.carId = carId;
                 crInfo.reservations = new ArrayList<>();
-        System.out.println(crInfo);
                 while (rs.next()) {
-        System.out.println(rs);
 
                     if (!rs.wasNull()) {
                         crInfo.carName = rs.getString("car_name");     // TODO: add car info GPS, etc.
