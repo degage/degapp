@@ -1,40 +1,66 @@
 <script type="text/javascript" src="https://rawgithub.com/nwcell/ics.js/master/ics.deps.min.js"></script>
 <script>
-    var loadCalendarEvent = function(carName, from , until) {
-        console.log('reservation', carName, from, until);
-        var SEPARATOR = (navigator.appVersion.indexOf('Win') !== -1) ? '\r\n' : '\n';
-        var calendarEvents = [];
-        var calendarStart = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0'
-        ].join(SEPARATOR);
-        var calendarEnd = SEPARATOR + 'END:VCALENDAR';
-        var calendarEvent = [
-            'BEGIN:VCALENDAR',
-            'VERSION:2.0',
-            'BEGIN:VEVENT',
-            'CLASS:PUBLIC',
-            'DESCRIPTION:' + 'Degage ' + carName,
-            'DTSTART;VALUE=DATE:' + from,
-            'DTEND;VALUE=DATE:' + until,
-            'LOCATION:' + location,
-            'SUMMARY;LANGUAGE=en-us:' + 'Degage',
-            'TRANSP:TRANSPARENT',
-            'END:VEVENT',
-            'END:VCALENDAR'
-        ].join(SEPARATOR);
+    var loadCalendarEvent = function(reservationId) {
+        var separator = (navigator.appVersion.indexOf('Win') !== -1) ? '\r\n' : '\n';
+        $.ajax(myJsRoutes.controllers.CalendarEvents.getEventForReservation(reservationId, separator))
+        .done(function ( calendarEvent ) {
+            var ext = (typeof ext !== 'undefined') ? ext : '.ics';
+            var filename = (typeof filename !== 'undefined') ? filename : 'calendar';
 
-        var ext = (typeof ext !== 'undefined') ? ext : '.ics';
-        var filename = (typeof filename !== 'undefined') ? filename : 'calendar';
-
-        var blob;
-        if (navigator.userAgent.indexOf('MSIE 10') === -1) { // chrome or firefox
-            blob = new Blob([calendarEvent]);
-        } else { // ie
-            var bb = new BlobBuilder();
-            bb.append(calendarEvent);
-            blob = bb.getBlob('text/x-vCalendar;charset=' + document.characterSet);
-        }
-        saveAs(blob, filename + ext);
+            var blob;
+            if (navigator.userAgent.indexOf('MSIE 10') === -1) { // chrome or firefox
+                blob = new Blob([calendarEvent]);
+            } else { // ie
+                var bb = new BlobBuilder();
+                bb.append(calendarEvent);
+                blob = bb.getBlob('text/x-vCalendar;charset=' + document.characterSet);
+            }
+            saveAs(blob, filename + ext);
+        }).fail(function ( ) {
+            $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        });
     };
+
+    var loadCalendarEventsForCar = function(carId) {
+        var separator = (navigator.appVersion.indexOf('Win') !== -1) ? '\r\n' : '\n';
+        $.ajax(myJsRoutes.controllers.CalendarEvents.getEventsForCar(carId, separator))
+        .done(function ( calendarEvent ) {
+            var ext = (typeof ext !== 'undefined') ? ext : '.ics';
+            var filename = (typeof filename !== 'undefined') ? filename : 'calendar';
+
+            var blob;
+            if (navigator.userAgent.indexOf('MSIE 10') === -1) { // chrome or firefox
+                blob = new Blob([calendarEvent]);
+            } else { // ie
+                var bb = new BlobBuilder();
+                bb.append(calendarEvent);
+                blob = bb.getBlob('text/x-vCalendar;charset=' + document.characterSet);
+            }
+            saveAs(blob, filename + ext);
+        }).fail(function ( ) {
+            $ ( "#resultModal" ).html ( "Er ging iets mis..." ) ;
+        });
+    };
+    //     var SEPARATOR = (navigator.appVersion.indexOf('Win') !== -1) ? '\r\n' : '\n';
+    //     var calendarEvents = [];
+    //     var calendarStart = [
+    //         'BEGIN:VCALENDAR',
+    //         'VERSION:2.0'
+    //     ].join(SEPARATOR);
+    //     var calendarEnd = SEPARATOR + 'END:VCALENDAR';
+    //     var calendarEvent = [
+    //         'BEGIN:VCALENDAR',
+    //         'VERSION:2.0',
+    //         'BEGIN:VEVENT',
+    //         'CLASS:PUBLIC',
+    //         'DESCRIPTION:' + 'http://www.degage.be/degapp',
+    //         'DTSTART;VALUE=DATE:' + from,
+    //         'DTEND;VALUE=DATE:' + until,
+    //         'LOCATION:' + location,
+    //         'SUMMARY;LANGUAGE=en-us:' + carName,
+    //         'TRANSP:TRANSPARENT',
+    //         'END:VEVENT',
+    //         'END:VCALENDAR'
+    //     ].join(SEPARATOR);
+
 </script>

@@ -29,9 +29,14 @@
 
 @(cars: Iterable[CarHeader])
 
+@scripts = {
+    @js.usesajax()
+    @js.loadCalendarEvent()
+}
+
 @import db.CurrentUser
 
-@stdlayout("Mijn auto's") {
+@stdlayout("Mijn auto's", scripts=scripts) {
 
     @panel(){
         <div id="resultsTable" class="table-responsive col-xs-12">
@@ -60,6 +65,8 @@
                             @btnPrimary("Km-standen", routes.Trips.overview(car.getId))
                             @btnPrimary("Tankbeurten", routes.Refuels.startOverviewForCar(car.getId))
                             @btnPrimary("Kosten", routes.Costs.showCostsForCar(car.getId))
+                             <button class="btn btn-primary btn-xs" onclick="loadCalendarEventsForCar( '@car.getId()' )">
+                                Kalender events downloaden</button>
                             @btnSuccess("Reserveer", routes.Calendars.indexWithCar(car.getName, car.getId))
                         </td>
                     } {

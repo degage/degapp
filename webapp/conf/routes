@@ -322,3 +322,7 @@ GET         /assets/javascripts/paginationRoutes    controllers.Application.pagi
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                           controllers.Assets.at(path="/public", file)
+
+#Calendar Events
+GET         /calendarevents/reservation             controllers.CalendarEvents.getEventForReservation(id: Int, separator: String)
+GET         /calendarevents/car                     controllers.CalendarEvents.getEventsForCar(id: Int, separator: String)

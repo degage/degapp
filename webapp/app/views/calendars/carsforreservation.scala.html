@@ -63,9 +63,9 @@
                 var autoFiche = $(firstEl).find('td')[7].innerText;
                 var imgLink = $(firstEl).find('td')[8].innerText;
                 var carId = $(firstEl).find('td')[6].id.substring(6);
-                var imgTag = '<img src=' + imgLink + ' alt="" class="img-responsive">';
-                var contentString = '<h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
-                    + '<p>'+address+'</p>' + imgTag + comments;
+                var imgTag = '<img src=' + imgLink + ' alt="" width="150px" class="img-responsive">';
+                var contentString = '<table><tr><td>'+imgTag+'</td><td style="padding-left:12px;"><h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
+                    + '<p>'+address+'</p></td></tr></table>' + comments;
                 var infowindow = new google.maps.InfoWindow({});
                 if (parseFloat(latLng.lat) > 0) {
                     var marker = new google.maps.Marker({

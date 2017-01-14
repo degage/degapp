@@ -45,6 +45,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
 
@@ -526,8 +527,41 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         } catch (SQLException ex) {
             throw new DataAccessException("Could not retreive reservation information", ex);
         }
-
     }
+
+    public CRInfo listFutureReservationsForCar (int carId) {
+        String query = "SELECT cars.car_id, car_name, " + RESERVATION_HEADER_FIELDS + " FROM cars " +
+                        "LEFT JOIN reservations ON reservation_car_id = cars.car_id " +
+                        "WHERE cars.car_id = ? " + OVERLAP_CLAUSE_WIDE +
+                        "ORDER BY car_name ASC, reservation_from ASC";
+        System.out.println(query);
+        System.out.println(carId);
+        System.out.println(Timestamp.valueOf(LocalDateTime.now()));
+        System.out.println(Timestamp.valueOf(LocalDateTime.now().plus(1, ChronoUnit.YEARS)));
+        try (PreparedStatement ps = prepareStatement(query)) {
+            ps.setInt(1, carId);
+            ps.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
+            ps.setTimestamp(3, Timestamp.valueOf(LocalDateTime.now().plus(1, ChronoUnit.YEARS)));
+            try (ResultSet rs = ps.executeQuery()) {
+                CRInfo crInfo = new CRInfo();
+                crInfo.carId = carId;
+                crInfo.reservations = new ArrayList<>();
+        System.out.println(crInfo);
+                while (rs.next()) {
+        System.out.println(rs);
+
+                    if (!rs.wasNull()) {
+                        crInfo.carName = rs.getString("car_name");     // TODO: add car info GPS, etc.
+                        crInfo.reservations.add(populateReservationHeader(rs));
+                    }
+                }
+                return crInfo;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not retrieve listFutureReservationsForCar", ex);
+        }
+    }
+
 
     public static final String OVERLAP_CLAUSE_WIDE =
             "AND reservation_to >= ? AND reservation_from <= ? " +

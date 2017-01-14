@@ -119,7 +119,9 @@ public class Application extends Controller {
                         javascript.Damages.addProof(),
                         javascript.InfoSessions.enrollSession(),
                         javascript.Maps.getMap(),
-                        javascript.Calendars.availabilityCar()
+                        javascript.Calendars.availabilityCar(),
+                        javascript.CalendarEvents.getEventForReservation(),
+                        javascript.CalendarEvents.getEventsForCar()
                 )
         );
     }
