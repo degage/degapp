@@ -543,7 +543,6 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                 crInfo.carId = carId;
                 crInfo.reservations = new ArrayList<>();
                 while (rs.next()) {
-
                     if (!rs.wasNull()) {
                         crInfo.carName = rs.getString("car_name");     // TODO: add car info GPS, etc.
                         crInfo.reservations.add(populateReservationHeader(rs));

@@ -32,6 +32,7 @@
 @import db.CurrentUser
 
 @scripts={
+    @js.usesajax()
     @js.loadCalendarEvent()
     @js.paginationWithTabs("Trips.showTripsPage", 1)
 }
