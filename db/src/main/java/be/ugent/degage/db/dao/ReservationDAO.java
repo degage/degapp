@@ -145,5 +145,7 @@ public interface ReservationDAO {
      */
     public Iterable<CRInfo> listCRInfo (LocalDateTime from, LocalDateTime to, int uid);
 
+    public CRInfo listFutureReservationsForCar (int carID) throws DataAccessException;
+
 
 }

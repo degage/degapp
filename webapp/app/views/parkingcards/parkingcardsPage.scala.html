@@ -30,21 +30,21 @@
         <thead>
             <tr role="row">
                 <th class="sortable" name="car_name">Auto</th>
+                <th class="sortable" name="license_plate">Nummerplaat</th>
                 <th class="sortable" name="city">Stad/gemeente</th>
                 <th class="sortable" name="date">Vervaldatum</th>
                 <th class="sortable" name="contract_id">KaartNr</th>
                 <th class="sortable" name="zones">Zones</th>
-                <th class="sortable" name="license_plate">Nummerplaat</th>
             </tr>
         </thead>
         <tbody>
             @foreach.trOrElse(parkingcardList) { parkingcard =>
                 <td><a href="@routes.Cars.detail(parkingcard.getCarId)">@parkingcard.getCarName</a></td>
+                <td>@parkingcard.getCarLicensePlate</td>
                 <td>@parkingcard.getCity</td>
                 <td>@Utils.toLocalizedDateString(parkingcard.getExpiration)</td>
                 <td>@parkingcard.getContractNr</td>
                 <td>@parkingcard.getZones</td>
-                <td>@parkingcard.getCarLicensePlate</td>
             }{
                 <tr>
                     <td class="empty-row" colspan="7">

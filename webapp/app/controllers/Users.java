@@ -57,7 +57,7 @@ import java.util.Set;
 public class Users extends Controller {
 
     public static Referrer REF_USERS =
-            Referrer.register ("Gebruikers", routes.Users.showUsers(), "USRS");
+            Referrer.register ("Gebruikers", routes.Users.showUsersWithTabs(0), "USRS");
 
 
     /**

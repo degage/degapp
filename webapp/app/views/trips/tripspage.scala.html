@@ -53,7 +53,7 @@
                 <td>
                     @btnPrimary("Details",routes.Trips.details(reservation.getId))
                     @foreach(util.WorkflowAction.getCurrentActions(reservation))(_.asNarrowButton(reservation.getId))
-                     <button class="btn btn-primary btn-xs" onclick="loadCalendarEvent( '@reservation.getCar().getName()', '@reservation.getFromIcs()', '@reservation.getUntilIcs()' )">Kalender event downloaden</button>
+                     <button class="btn btn-primary btn-xs" onclick="loadCalendarEvent( '@reservation.getId()' )">Kalender event downloaden</button>
                 </td>
         }{
         <tr>
