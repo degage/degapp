@@ -30,19 +30,26 @@
 package be.ugent.degage.db.models;
 
 import java.time.LocalDate;
-
+import com.google.gson.annotations.Expose;
 public class CarAssistance {
 
-    private String name;
+	@Expose
+  private String name;
+	@Expose
 	private LocalDate expiration;
+	@Expose
 	private CarAssistanceType type;
+	@Expose
 	private String contractNr;
+	@Expose
+	private Integer fileId;
 
-	public CarAssistance(String name, LocalDate expiration, CarAssistanceType type, String contractNr) {
-        this.name = name;
+	public CarAssistance(String name, LocalDate expiration, CarAssistanceType type, String contractNr, int fileId) {
+    this.name = name;
 		this.expiration = expiration;
 		this.type = type;
 		this.contractNr = contractNr;
+		this.fileId = fileId;
 	}
 	
 	
@@ -72,5 +79,13 @@ public class CarAssistance {
     }
     public void setName(String name) {
         this.name = name;
-    }
+	}
+	
+	public Integer getFileId() {
+		return fileId;
+	}
+
+	public void setFileId(int fileId) {
+		this.fileId = fileId;
+	}
 }

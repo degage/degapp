@@ -1,0 +1,7 @@
+UPDATE `users` set `user_created_at` = `user_updated_at` WHERE `user_created_at` IS NULL;
+	ALTER TABLE `users` MODIFY COLUMN `user_created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP;
+ALTER TABLE `users` 
+  MODIFY COLUMN `user_updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+ALTER TABLE `cars` 
+  MODIFY COLUMN `car_updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP;
+

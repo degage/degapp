@@ -1,0 +1,173 @@
+@(title: String)
+@import db.CurrentUser
+@import providers.DataProvider
+@import providers.CommunicationProvider
+
+@addadmin()=@{if(CurrentUser.isAdmin) "admin" else ""}
+
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>hello</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <link rel="shortcut icon" type="image/png" href="@routes.Assets.at("images/favicon.png")">
+        <link rel="stylesheet" media="screen" href="@routes.Assets.at("stylesheets/main.css")">
+        <script type='text/javascript' src='@routes.Assets.at("lib/jquery/jquery.min.js")'></script>
+        <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")'></script>
+        @sheets("/lib/bootstrap/css/bootstrap.min", "/lib/font-awesome/css/font-awesome.min", "sb-admin")
+
+    </head>
+    <body>
+      <div id="wrapper">
+          <nav class="navbar navbar-default navbar-static-top @addadmin" role="navigation" style="margin-bottom: 0">
+              <div class="navbar-header">
+                  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                      <span class="sr-only">Toggle navigation</span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                      <span class="icon-bar"></span>
+                  </button>
+                  <a class="navbar-brand" href="@routes.Application.index">Dégage</a>
+              </div>
+              <!-- /.navbar-header -->
+              <ul class="nav navbar-top-links navbar-right">
+                  <li class="dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                          <i class="fa fa-envelope fa-fw"></i>
+                          @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadMessages()) { unread_number =>
+                              @if(unread_number>0){
+                                  <span class="topnumber">@unread_number</span>
+                              }
+                          }
+                      </a>
+                      <ul class="dropdown-menu dropdown-messages">
+                          @* TODO: fill this with AJAX? *@
+                          @defining(DataProvider.getCommunicationProvider().getMessages(CurrentUser.getId)) { messages =>
+                              @foreach(messages){ message =>
+                                  <li>
+                                      <a href="@routes.Messages.showMessages()">
+                                          <div>
+                                              <strong>@message.getUser</strong> @* enkel ongelezen berichten *@
+                                              <span class="pull-right text-muted">
+                                                  <em>@Utils.toLocalizedString(message.getTimestamp)</em>
+                                              </span>
+                                          </div>
+                                          <div>
+                                              <strong>@message.getSubject</strong>
+                                          </div>
+                                          <div>
+                                              <pre>@message.getBody.substring(0,math.min(80,message.getBody.length))...</pre>
+                                          </div>
+                                      </a>
+                                  </li>
+                                  <li class="divider"></li>
+                              }
+                          }
+                          <li>
+                              <a class="text-center" href="@routes.Messages.showMessages()">
+                                  <strong>Bekijk alle berichten</strong>
+                                  <i class="fa fa-angle-right"></i>
+                              </a>
+                          </li>
+                      </ul>
+                      <!-- /.dropdown-messages -->
+                  </li>
+                  <!-- /.dropdown -->
+                  <li class="dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                          <i class="fa fa-bell fa-fw"></i>
+                          @defining(DataProvider.getCommunicationProvider().getNumberOfUnreadNotifications()) { unread_number =>
+                            @if(unread_number>0){
+                                <span class="topnumber">@unread_number</span>
+                            }
+                          }
+                      </a>
+                      <ul class="dropdown-menu dropdown-messages">
+                          @* TODO: fill this with AJAX? *@
+                          @defining(DataProvider.getCommunicationProvider().getNotifications(CurrentUser.getId)) { notifications =>
+                              @for((notification, index) <- notifications.zipWithIndex) {
+                                  @if(index < CommunicationProvider.AMOUNT_OF_VISIBLE_NOTIFICATIONS){
+                                      <li>
+                                          <a href="@routes.Notifications.showNotifications()">
+                                              <div>
+                                                  @if(!notification.getRead){
+                                                  <strong>@notification.getSubject (ongelezen)</strong>
+                                                  }else{
+                                                      @notification.getSubject
+                                                  }
+                                                  <span class="pull-right text-muted">
+                                                      <em>@Utils.toLocalizedString(notification.getTimestamp)</em>
+                                                  </span>
+                                              </div>
+                                              <div>
+                                                  @Html(notification.getBody.substring(0,math.min(80,notification.getBody.length)))...</b></i> @* hack: closes tags that were left open *@
+                                              </div>
+                                          </a>
+                                      </li>
+                                      <li class="divider"></li>
+                                  }
+                              }
+                          }
+                          <li>
+                              <a class="text-center" href="@routes.Notifications.showNotifications()">
+                                  <strong>Bekijk alle mededelingen</strong>
+                                  <i class="fa fa-angle-right"></i>
+                              </a>
+                          </li>
+                      </ul>
+                      <!-- /.dropdown-messages -->
+                  </li>
+                  <li class="dropdown">
+                      <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                          <span class="">@CurrentUser.getFullName</span>
+                      </a>
+                      <ul class="dropdown-menu dropdown-user">
+                          <li><a href="@routes.Profile.indexWithoutId"><i class="fa fa-user fa-fw"></i> Profiel</a>
+                          </li>
+                          <li><a href="@routes.Settings.changePassword"><i class="fa fa-gear fa-fw"></i> Wachtwoord wijzigen</a>
+                          </li>
+                          <li class="divider"></li>
+                          <li><a href="@routes.Login.logout()"><i class="fa fa-sign-out fa-fw"></i> Logout</a>
+                          </li>
+                      </ul>
+                      <!-- /.dropdown-user -->
+                  </li>
+                  <!-- /.dropdown -->
+              </ul>
+              <!-- /.navbar-top-links -->
+          </nav>
+          <!-- /.navbar-static-top -->
+
+          <nav class="navbar-default navbar-static-side" role="navigation">
+              <div class="sidebar-collapse">
+                  <ul class="nav" id="side-menu">
+                      @menu.dashboard(title)
+                      @menu.driver(title)
+                      @menu.car(title)
+                      @menu.account(title)
+
+                      @if(CurrentUser.isAdmin){
+                          <li class="submenu">BEHEER</li>
+                          @menu.contractAdmin(title)
+                          @menu.profileAdmin(title)
+                          @menu.infosessionAdmin(title)
+                          @menu.carAdmin(title)
+                          @menu.superUser(title)
+                          @menu.invoiceAdmin(title)
+                      }
+                      @menu.item(title, "Logout", "fa-sign-out", routes.Login.logout)
+                  </ul>
+                  <!-- /#side-menu -->
+              </div>
+              <!-- /.sidebar-collapse -->
+          </nav>
+          <!-- /.navbar-static-side -->
+          <div id="app"></div>
+          <div id="root"></div>
+      </div>
+
+
+        <script src="@routes.Assets.at("main.js")" type="text/javascript"></script>
+    </body>
+</html>

@@ -1,0 +1,32 @@
+
+@(list: Iterable[Invoice])
+
+@scripts = {
+    @js.pagination("Invoices.showInvoicesPage")
+    @js.userpicker()
+}
+
+@stdlayout("Debiteurenbeheer: afrekeningen", scripts=scripts) {
+
+  @js.paymentMenu()
+
+  @panel("Afrekeningen zoeken", "fa-search"){
+      @search.textField("number", "Nummer", "col-xs-4")
+      @search.textField("date", "Datum", "col-xs-4")
+      @search.userpicker("user_id", "Gebruiker", "col-xs-4")
+      @search.textField("amount", "Bedrag", "col-xs-4")
+      @* @search.selectEnumStatus(classOf[InvoiceStatus], "status", "Status", "col-md-4") *@
+      @search.textField("status", "Status (open, betaald of te laat)", "col-xs-4")
+      @search.textField("structured_comm", "Gestructureerde communicatie", "col-xs-4")
+      @search.textField("reminder_description", "Rappel", "col-xs-4")
+      <div class="col-md-4">
+          @search.checkboxInline("all_invoices", "Bekijk alle afrekeningen")
+      </div>
+      @search.button("Zoek!")
+  }
+
+  @btnPrimary("Check uiterste betalingsdatum afrekeningen", routes.Invoices.checkDueDate())
+  @btnPrimary("Verstuur rappels", routes.Reminders.sendReminders())
+  @resultsTablePanel("Afrekeningen", "fa-file")
+
+}

@@ -29,7 +29,7 @@
 
 @(userId: Int, form: Form[Profile.IdentityCardData], listOfFiles: Iterable[File], canDelete: Boolean)
 
-@stdlayout("Identiteitsgegevens", extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
+@stdlayout("Identiteitsgegevens", scripts=js.datetimepicker(), extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
 
 @* TODO: shares a lot of code with driverslicense.scala.html *@
 
@@ -37,10 +37,11 @@
         @helper.form(routes.Profile.editIdentityCardPost(userId)) {
             @std.textField(form("cardNumber"), "Nummer v/d identiteitskaart", css="col-md-4")
             @std.textField(form("nationalNumber"), "Rijksregisternummer", css="col-md-4")
+            @std.datepicker(form("expirationDate"), "Vervaldatum", css="col-md-6", startView=4)
             @std.submitButton("Wijzigen")
         }
     }
-    @panel("Nieuw bestand uploaden") {
+    @panel("Laad hier een digitale kopie van je identiteitskaart (voor- en achterzijde) op") {
         @helper.form(routes.Profile.addIdentityCardFile(userId), 'enctype -> "multipart/form-data") {
             <div class="form-group col-xs-12">
                 <input type="file" name="file">

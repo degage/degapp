@@ -1,27 +1,27 @@
 @* app.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -40,6 +40,7 @@
         <script type='text/javascript' src='@routes.Assets.at("lib/jquery/jquery.min.js")'></script>
         <script type='text/javascript' src='@routes.Assets.at("lib/bootstrap/js/bootstrap.min.js")'></script>
         <script type='text/javascript' src='@routes.Assets.at("javascripts/responsiveTables.js")'></script>
+        <script type="text/javascript" src="@routes.Assets.at("main.js")"></script>
 
         <script>
             // Loadingimage to use in pagination.js
@@ -183,7 +184,7 @@
             </nav>
             <!-- /.navbar-static-top -->
 
-            <nav class="navbar-default navbar-static-side" role="navigation">
+            <nav class="navbar-default navbar-static-side" style="z-index:0;" role="navigation">
                 <div class="sidebar-collapse">
                     <ul class="nav" id="side-menu">
                         @menu.dashboard(title)
@@ -198,6 +199,8 @@
                             @menu.infosessionAdmin(title)
                             @menu.carAdmin(title)
                             @menu.superUser(title)
+                            @menu.invoiceAdmin(title)
+                            @menu.settingsAdmin(title)
                         }
                         @menu.item(title, "Logout", "fa-sign-out", routes.Login.logout)
                     </ul>
@@ -206,7 +209,6 @@
                 <!-- /.sidebar-collapse -->
             </nav>
             <!-- /.navbar-static-side -->
-
             @content
             <div id="resultModal"></div>
         </div>
@@ -214,4 +216,3 @@
         @scripts
     </body>
 </html>
-

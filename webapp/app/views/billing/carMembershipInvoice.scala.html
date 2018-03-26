@@ -1,0 +1,74 @@
+@import com.google.common.base.Strings;
+
+@(invoiceAndUser: InvoiceAndUser)
+
+@cents(v:Int)={
+    @("0,%03d".format(v))
+}
+
+
+<html>
+   <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+        <link rel="stylesheet" media="print" href="/public/stylesheets/billing.css" /> @* Important: href must start with / *@
+   </head>
+   <body>
+      <div id="logo"><img src='/public/images/logo-brief-2.5in.png'  width="2.5in"/></div>
+      <div id="top">
+          <table>
+              <tbody>
+                <tr><th>Afrekening n°:</th> <td>@invoiceAndUser.getInvoice().getNumber</td> </tr>
+                <tr><th>Datum:</th><td>@Utils.toLocalizedDateString(invoiceAndUser.getInvoice().getDate)</td></tr>
+                <tr><th>naam:</th><td>@invoiceAndUser.getUser().getFullName</td></tr>
+                @defining(invoiceAndUser.getUser.getAddressDomicile){ address =>
+                    <tr><th>Adres:</th><td>@address.getStreet @address.getNum</td></tr>
+                    <tr><th></th><td>@address.getZip @address.getCity (@address.getCountry)</td></tr>
+                }
+                        </td></tr>                
+              </tbody>
+          </table>
+      </div>
+      <div id="data" style="margin-top: 150px">
+          <table style="font-size:14px">
+              <thead>
+                  <tr> </tr>
+              </thead>
+              <tbody>
+                    <tr>
+                            <th>Instapgeld</th>
+                            <th align = "right">35,00 €</th>
+                    </tr>
+                  
+                    <tr>
+                            <th >Borg</th>
+                            <th align = "right">75,00 €</th>
+                    </tr>
+                  
+              </tbody>
+              <tfoot>
+                    <tr>
+                            <th >TOTAAL TE BETALEN:</th>
+                            <th>110,00 €</th>
+                    </tr>   
+              </tfoot>
+          </table>
+      </div>
+      <br>
+      <div id="text" style="margin-top: 200px">
+          <div class="highlight">
+              <p>Gelieve dit bedrag te storten op rekeningnummer
+                  <b>IBAN BE78 5230 8045 2986</b> - BIC code TRIOBEBB,
+              met vermelding
+              van de gestructureerde mededeling <b>@invoiceAndUser.getInvoice.getStructuredCommunication</b>. </p>
+              <p>De uiterste betalingsdatum is
+                  <b>@Utils.toLocalizedDateString(invoiceAndUser.getInvoice().getDate().plusDays(14))</b>.
+              </p>
+          </div>
+        <ul class="note">
+          <li>Ben je niet akkoord met deze afrekening, reageer dan binnen de 7 dagen met een e-mail naar
+              de administratie (admin@@degage.be).</li>
+        </ul>
+        @degageAddress(7)
+      </div>
+   </body>
+</html>

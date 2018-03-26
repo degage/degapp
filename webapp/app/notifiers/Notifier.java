@@ -1,27 +1,27 @@
 /* Notifier.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -30,22 +30,30 @@
 package notifiers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.dao.BillingDAO;
 import be.ugent.degage.db.dao.NotificationDAO;
 import be.ugent.degage.db.models.*;
 import com.google.common.base.Strings;
+
+import controllers.Billings;
 import controllers.Utils;
 import controllers.routes;
 import data.EurocentAmount;
 import db.DataAccess;
+import play.Logger;
 import play.Play;
 import play.api.mvc.Call;
 import play.i18n.Messages;
 import play.twirl.api.Html;
 import play.twirl.api.Txt;
 import providers.DataProvider;
+import schedulers.utils.ReportGenerator;
+import schedulers.utils.ReportGeneratorFactory;
 
+import java.io.File;
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.util.*;
 
 
 /**
@@ -76,21 +84,40 @@ public class Notifier extends Mailer {
         createNotificationAndSend(DataAccess.getInjectedContext(), user, subjectKey, text, html, args);
     }
 
-    private static void createNotificationAndSend(DataAccessContext context, UserHeader user, String subjectKey,
-                                                  Txt text, Html html, Object... args) {
+    private static String formatSubject (String subjectKey, Object...args){
         String subject = Messages.get("subject." + subjectKey);
         if (args.length > 0) {
             subject = MessageFormat.format(subject, args);
         }
+        return subject;
+    }
+    private static void createNotificationAndSend(DataAccessContext context, UserHeader user, String subjectKey,
+                                                  Txt text, Html html, Object... args) {
+        String subject = formatSubject(subjectKey, args);
         createNotification(context.getNotificationDAO(), user, subject, html.body().trim());
-        sendMail(user.getEmail(), subject, text, html);
+        sendMail(user.getEmail(), subject, text, html, getSignatureProps(context));
     }
 
-    public static void sendVerificationMail(String email, String verificationUrl) {
+    private static void createNotificationAndSendWithBcc(DataAccessContext context, UserHeader user, String subjectKey,
+                                                  Txt text, Html html, String bcc, Object... args) {
+        String subject = formatSubject(subjectKey, args);
+        createNotification(context.getNotificationDAO(), user, subject, html.body().trim());
+        sendMail(user.getEmail(), subject, text, html, bcc, getSignatureProps(context));
+    }
+
+    private static void createNotificationAndSendWithAttachAndBcc(DataAccessContext context, UserHeader user, String subjectKey,
+                                                  Txt text, Html html, String bcc, byte[] data, String fileName, String mimeType, Object... args){
+         String subject = formatSubject(subjectKey, args) ; 
+
+         createNotification(context.getNotificationDAO(), user, subject, html.body().trim());
+         sendMail(user.getEmail(), subject, text, html, bcc, getSignatureProps(context), data, fileName, mimeType );
+    }
+
+    public static void sendVerificationMail(DataAccessContext context, String email, String verificationUrl) {
         String url = toFullURL(routes.Login.registerVerification(verificationUrl));
         sendMailWithSubjectKey(email, "verification",
                 views.txt.messages.verification.render(url),
-                views.html.messages.verification.render(url)
+                views.html.messages.verification.render(url), getSignatureProps(context)
         );
     }
 
@@ -214,6 +241,43 @@ public class Notifier extends Mailer {
 
     }
 
+    public static void sendPostInfoSessionMail(DataAccessContext context, Enrollee er, InfoSession infoSession){
+        String infoDate = Utils.toLocalizedDateString(infoSession.getTime()); 
+        String address  = infoSession.getAddress().toString();
+        EnrollmentStatus status = er.getStatus(); 
+        LocalDate contDateObj = er.getDateContract();
+        String contractDate = null; 
+        if(contDateObj != null){
+            contractDate =  contDateObj.toString();
+        }
+
+        Txt txt = null; 
+        Html html = null;
+        Logger.debug(er.getUser().getFirstName() + "'s status: "  +  status);
+        switch (status){         
+            case ABSENT: 
+                txt = views.txt.messages.infoSessionAbsent.render(er.getUser(), infoDate);
+                html = views.html.messages.infoSessionAbsent.render(er.getUser(), infoDate);
+                break;
+            case PRESENT: 
+                if (contractDate == null) {
+                    txt = views.txt.messages.infoSessionPresentNotContracted.render(er.getUser(), infoDate);
+                    html = views.html.messages.infoSessionPresentNotContracted.render(er.getUser(), infoDate);
+                } else {
+                    txt = views.txt.messages.infoSessionPresentAndContracted.render(er.getUser(), infoDate);
+                    html = views.html.messages.infoSessionPresentAndContracted.render(er.getUser(), infoDate);
+                }
+                break; 
+            default:
+                return;  
+        }
+        
+        createNotificationAndSend(context, er.getUser(), "postInfosession", 
+                    txt,
+                    html
+        );
+        Logger.debug("Sent post infosession mail to " + er.getUser());
+    }
     public static void sendReservationApproveRequestMail(UserHeader owner, Reservation reservation, String carName) {
         String url = toFullURL(routes.WFApprove.approveReservation(reservation.getId()));
         UserHeader driver = reservation.getDriver();
@@ -222,9 +286,9 @@ public class Notifier extends Mailer {
         createNotificationAndSend (
                 owner, "reservationRequest",
                 views.txt.messages.reservationRequest.render(
-                        owner, driver, carName, from,  until, url, reservation.getMessage()),
+                        owner, driver, carName, from,  until, url, new ArrayList(Arrays.asList(reservation.getMessages()))),
                 views.html.messages.reservationRequest.render(
-                        owner, driver, carName, from,  until, url, reservation.getMessage()),
+                        owner, driver, carName, from,  until, url, new ArrayList(Arrays.asList(reservation.getMessages()))),
                 carName, from
         );
     }
@@ -321,9 +385,9 @@ public class Notifier extends Mailer {
         createNotificationAndSend (
                 owner, "reservationCancelled",
                 views.txt.messages.reservationCancelled.render(
-                        owner, driverName, carName, from,  until, trip.getMessage()),
+                        owner, driverName, carName, from,  until, new ArrayList(Arrays.asList(trip.getMessages()))),
                 views.html.messages.reservationCancelled.render(
-                        owner, driverName, carName, from,  until, trip.getMessage()),
+                        owner, driverName, carName, from,  until, new ArrayList(Arrays.asList(trip.getMessages()))),
                 carName, from
         );
     }
@@ -335,11 +399,11 @@ public class Notifier extends Mailer {
         String carName = trip.getCar().getName();
         String from = Utils.toLocalizedString(trip.getFrom());
         String until = Utils.toLocalizedString(trip.getUntil());
-        String message = trip.getMessage();
+        Iterable<String> messages = Arrays.asList(trip.getMessages());
         createNotificationAndSend(
                 driver, "lateCancel",
-                views.txt.messages.lateCancel.render(driver, carName, from, until, message),
-                views.html.messages.lateCancel.render(driver, carName, from, until, message),
+                views.txt.messages.lateCancel.render(driver, carName, from, until, messages),
+                views.html.messages.lateCancel.render(driver, carName, from, until, messages),
                 carName
         );
     }
@@ -353,11 +417,12 @@ public class Notifier extends Mailer {
         );
     }
 
-    public static void sendPasswordResetMail(UserHeader user, String verificationUrl) {
+    public static void sendPasswordResetMail(DataAccessContext context, UserHeader user, String verificationUrl) {
         String url = toFullURL(routes.Login.resetPassword(verificationUrl));
         sendMailWithSubjectKey(user.getEmail(), "passwordReset",
                 views.txt.messages.passwordReset.render(user, url),
-                views.html.messages.passwordReset.render(user, url)
+                views.html.messages.passwordReset.render(user, url),
+                getSignatureProps(context)
         );
     }
 
@@ -366,8 +431,122 @@ public class Notifier extends Mailer {
         String url = toFullURL(routes.Application.index());
         sendMailWithSubjectKey(user.getEmail(), "reminder",
                 views.txt.messages.reminder.render(user, url),
-                views.html.messages.reminder.render(user, url)
+                views.html.messages.reminder.render(user, url),
+                getSignatureProps(context)
         );
     }
 
+
+    public static void sendPaymentReminderMail(DataAccessContext context, ReminderAndUserAndInvoice reminderAndUserAndInvoice, LocalDate lastPaymentDate) {
+        String url = toFullURL(routes.Billings.list(reminderAndUserAndInvoice.getUser().getId()));
+        // sendMailWithSubjectKey(reminderAndUserAndInvoice.getUser().getEmail(), "firstPaymentReminder",
+        // String subject = Messages.get("subject." + subjectKey);
+        Reminder.Builder rb = new Reminder.Builder(reminderAndUserAndInvoice.getReminder());
+        rb.sendDate(LocalDate.now());
+        context.getReminderDAO().updateReminder(rb.build());
+        List<Reminder> reminders = null;
+
+
+        Invoice invoice = reminderAndUserAndInvoice.getInvoice();
+        User user = reminderAndUserAndInvoice.getUser();
+        InvoiceAndUser invoiceAndUser =  new InvoiceAndUser(invoice,user);
+        ReportGenerator generator = ReportGeneratorFactory.getGenerator(invoice.getType());
+        byte[] data = generator.generate(context, invoice.getId());
+        String fileName = invoice.getNumber();
+        String mimeType = "application/pdf";
+        
+        String subjectKey = ""; 
+        Html  html = null;
+        Txt  txt = null;
+        switch (reminderAndUserAndInvoice.getReminder().getDescription()) {
+          case "FIRST":
+            subjectKey = "firstPaymentReminder";
+            txt = views.txt.messages.firstPaymentReminder.render(reminderAndUserAndInvoice, url);
+            html = views.html.messages.firstPaymentReminder.render(reminderAndUserAndInvoice, url);
+            break;
+          case "SECOND":
+            subjectKey = "secondPaymentReminder";
+            reminders = context.getReminderDAO().listRemindersForInvoice(reminderAndUserAndInvoice.getInvoice().getId());
+            txt = views.txt.messages.secondPaymentReminder.render(reminders.get(0), reminderAndUserAndInvoice, lastPaymentDate, url);
+            html = views.html.messages.secondPaymentReminder.render(reminders.get(0), reminderAndUserAndInvoice, lastPaymentDate, url);
+            break;
+
+          case "THIRD":
+            subjectKey = "thirdPaymentReminder";
+            reminders = context.getReminderDAO().listRemindersForInvoice(reminderAndUserAndInvoice.getInvoice().getId());
+            txt = views.txt.messages.thirdPaymentReminder.render(reminders.get(0), reminders.get(1), reminderAndUserAndInvoice, url);
+            html = views.html.messages.thirdPaymentReminder.render(reminders.get(0), reminders.get(1), reminderAndUserAndInvoice, url);
+            break;
+
+          case "INITIAL":
+            subjectKey = "initialPaymentReminder"; 
+            txt = views.txt.messages.initialPaymentReminder.render(reminderAndUserAndInvoice, url);
+            html = views.html.messages.initialPaymentReminder.render(reminderAndUserAndInvoice, url);
+            break;
+
+          default:
+             throw new IllegalArgumentException("Ongeldig rappel type: " + reminderAndUserAndInvoice.getReminder().getDescription());
+        }
+
+
+        createNotificationAndSendWithAttachAndBcc(context, reminderAndUserAndInvoice.getUser(), "firstPaymentReminder",
+              txt,
+              html,
+              "reminder@degage.be",
+              data,
+              fileName,
+              mimeType,
+              reminderAndUserAndInvoice.getInvoice().getNumber(),
+              reminderAndUserAndInvoice.getInvoice().getDueDate()
+            );
+    }
+
+    public static void sendCodaUploadReminder(DataAccessContext context) {
+        sendMail("admin@degage.be",
+          "Coda's opladen",
+          views.txt.messages.codaUploadReminder.render(),
+          views.html.messages.codaUploadReminder.render(),
+          "reminder@degage.be",
+          getSignatureProps(context));
+    }
+
+
+/**
+ * TODO: TEST THIS METHOD  
+ */
+     
+    public static void sendMembershipInvoiceMail(DataAccessContext context, InvoiceAndUser invoiceAndUser) {
+        System.out.println("Send membership mail to " + invoiceAndUser.getUser().getLastName());
+        int invoiceId =  invoiceAndUser.getInvoice().getInvoiceId();
+        int billingId = invoiceAndUser.getInvoice().getBillingId();
+        int userId  = invoiceAndUser.getUser().getId();
+        InvoiceType type = invoiceAndUser.getInvoice().getType();
+        if(type != InvoiceType.CAR_MEMBERSHIP){
+            Logger.warn("Invoice type for membership invoice mailing is wrong: " + type.name());
+            return;
+        }
+        ReportGenerator generator = ReportGeneratorFactory.getGenerator(type);
+        byte[] attachment = generator.generate(context, invoiceId);
+        System.out.println("size: " + attachment.length);
+        String fileName = invoiceAndUser.getInvoice().getNumber();
+        // String fileName = Billings.getBillNr(invoiceAndUser, context);
+        String mimeType = "application/pdf";
+        System.out.println("attachemt: " + fileName);
+
+        createNotificationAndSendWithAttachAndBcc(context, invoiceAndUser.getUser(), "membershipInvoice",
+              views.txt.messages.membershipInvoice.render(invoiceAndUser),
+              views.html.messages.membershipInvoice.render(invoiceAndUser),
+              "admin@degage.be", 
+              attachment,
+              fileName,
+              mimeType
+            );
+    }
+
+    private static Map<String, String> getSignatureProps(DataAccessContext context){
+      Map<String, String> props = new HashMap<String,String>();
+      props.put("mail_signature_link", context.getPropertyDAO().getPropertyByKey("mail_signature_link").getValue());
+      props.put("mail_signature_image", context.getPropertyDAO().getPropertyByKey("mail_signature_image").getValue());
+      return props;
+    }
 }

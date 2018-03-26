@@ -1,0 +1,59 @@
+@import data.ProfileCompleteness
+
+@(pc: ProfileCompleteness)
+
+@if(pc.getPercentage() != 100) {
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            Je profielinformatie is voor @pc.getPercentage()% compleet.
+        </div>
+        <div class="panel-body">
+            Gelieve de onderstaande ontbrekende informatie aan te vullen.
+            <ul>
+                @if(!pc.hasFirstName()) {
+                    <li>Voornaam</li>
+                }
+                @if(!pc.hasLastName()) {
+                    <li>Familienaam</li>
+                }
+                @if(!pc.hasAddressDomicile()) {
+                    <li>Domicilieadres</li>
+                }
+                @if(!pc.hasAddressResidence()) {
+                    <li>Verblijfsadres</li>
+                }
+                @if(!pc.hasValidEmail()) {
+                    <li>E-mail</li>
+                }
+                @if(!pc.hasPhone()) {
+                    <li>Telefoon nummer</li>
+                }
+                @if(!pc.hasAccountNumber()) {
+                    <li>Rekeningnummer</li>
+                }
+                @if(!pc.hasIdentityId()) {
+                    <li>Nummer identiteitskaart</li>
+                }
+                @if(!pc.hasIdExpirationDate()) {
+                    <li>Vervaldatum identiteitskaart (vervallen of niet ingevuld)</li>
+                }
+                @if(!pc.hasNationalId()) {
+                    <li>Rijksregisternummer</li>
+                }
+                @if(!pc.hasDrivingLicense()) {
+                    <li>Nummer rijbewijs</li>
+                }
+                @if(!pc.hasDrivingLicenseDate()) {
+                    <li>Datum afgifte rijbewijs</li>
+                }
+                @if(!pc.hasPicture()) {
+                    <li>Profielfoto</li>
+                }
+                @if(!pc.hasLicenseFile()) {
+                    <li>Ingescand rijbewijs</li>
+                }
+            </ul>
+            Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
+        </div>
+    </div>
+}

@@ -29,6 +29,8 @@
 
 package be.ugent.degage.db.models;
 
+import java.time.LocalDate;
+
 /**
  * Transfer object for technical car details for a certain car.
  *
@@ -38,6 +40,21 @@ public class TechnicalCarDetails {
     private String licensePlate;
     private int registrationId;
     private String chassisNumber;
+
+    private Integer ecoScore;
+    private String euroNorm;
+    private LocalDate startDate;
+    private Integer kiloWatt;
+
+    public TechnicalCarDetails(String licensePlate, int registrationId, String chassisNumber, Integer ecoScore, String euroNorm, LocalDate startDate, Integer kiloWatt) {
+        this.licensePlate = licensePlate;
+        this.registrationId = registrationId;
+        this.chassisNumber = chassisNumber;
+        this.ecoScore = ecoScore;
+        this.euroNorm = euroNorm;
+        this.startDate = startDate;
+        this.kiloWatt = kiloWatt;
+    }
 
     public TechnicalCarDetails(String licensePlate, int registrationId, String chassisNumber) {
         this.licensePlate = licensePlate;
@@ -67,5 +84,37 @@ public class TechnicalCarDetails {
 
     public void setChassisNumber(String chassisNumber) {
         this.chassisNumber = chassisNumber;
+    }
+
+    public Integer getEcoScore() {
+        return ecoScore;
+    }
+
+    public void setEcoScore(Integer ecoScore) {
+        this.ecoScore = ecoScore;
+    }
+
+    public String getEuroNorm() {
+        return euroNorm;
+    }
+
+    public void setEuroNorm(String euroNorm) {
+        this.euroNorm = euroNorm;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public Integer getKiloWatt() {
+        return kiloWatt;
+    }
+
+    public void setKiloWatt(Integer kiloWatt) {
+        this.kiloWatt = kiloWatt;
     }
 }

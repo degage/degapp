@@ -1,27 +1,27 @@
 @* edit.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -56,6 +56,10 @@
                                     @helper.checkbox(form("active"), '_label -> "Actief")
                             </div>
                             @std.textField(form("name"),"Autonaam",required=true)
+                            @std.emailField(form("email"),"Email",required=true)
+                            @std.datepicker(form("startSharing"), "Startdatum autodelen", "col-md-12")
+                            @std.datepicker(form("endSharing"), "Einddatum autodelen", "col-md-12")
+
                         } else {
                             <h2>@car.getName.toString</h2>
                             <strong>Status:</strong>
@@ -66,9 +70,27 @@
                             }
                             <input type="hidden" id="name" name="name" value="@car.getName" />
                             <input type="hidden" id="active" name="active" value="@car.isActive">
+                            <input type="hidden" id="email" name="email" value="@car.getEmail">
+                            <input type="hidden" id="startSharing" name="startSharing" value="@car.getStartSharing">
+                            <input type="hidden" id="endSharing" name="endSharing" value="@car.getEndSharing">
                         }
                         @std.textField(form("brand"),"Merk",required=true)
                         @std.textField(form("type"),"Type",required=true)
+                    </fieldset>
+                }
+                @panel("Contract", "fa-handshake-o"){
+                    <fieldset id="contract">
+                         @std.datepicker(form("contract"), "Datum contract", "col-md-12")
+                        <div class="form-group col-md-6">
+                            <label class="control-label" for="contractfile">Contract</label>
+                            <div>
+                                Huidig: @if(car.getContractFileId==0) { Onbekend } else {
+                                <a href="@routes.Cars.getContractPicture(car.getId)" target="_blank">Link</a>
+                                }
+                            </div>
+                            <input id="contractfile" name="contractfile" type="file" class="form-control input-md">
+                        </div>
+                         @std.numberField(form("carAgreedValue"),"Overeengekomen waarde", css="col-md-12", required=true)
                     </fieldset>
                 }
             </div>
@@ -91,7 +113,7 @@
                         @std.selectEnum(classOf[CarFuel], form("fuel"), "Brandstof")
                         @std.textField(form("year"),"Bouwjaar")
                         @std.textField(form("fuelEconomy"), "Gemiddeld verbruik (per 100 km)")
-                        @std.textField(form("estimatedValue"), "Geschatte huidige waarde")
+                        @std.textField(form("estimatedValue"), "Geschatte waarde bij start autodelen")
                         @std.textField(form("ownerAnnualKm"), "Gemiddeld aantal kilometers (per jaar)")
                         @std.textArea(form("comments"), "Opmerkingen", 6)
                     </fieldset>
@@ -99,9 +121,13 @@
                 @panel("Technische details", "fa-cogs") {
                     <fieldset>
                         @std.textField(form("licensePlate"), "Nummerplaat", "col-md-6")
-                        @std.textField(form("chassisNumber"), "ChassisNumber", "col-md-6")
+                        @std.textField(form("chassisNumber"), "Chassisnummer", "col-md-6")
+                        @std.textField(form("ecoScore"), "Ecoscore", "col-md-6")
+                        @std.textField(form("euroNorm"), "Euronorm", "col-md-6")
+                        @std.textField(form("kiloWatt"), "KiloWatt", "col-md-6")
+                        @std.datepicker(form("startDate"), "Startdatum", "col-md-4")
                         <div class="form-group col-md-6">
-                            <label class="control-label" for="file">Inschrijvingsbewijs</label>
+                            <label class="control-label" for="registrationfile">Inschrijvingsbewijs</label>
                             <div>
                                 Huidig: @if(car.getTechnicalCarDetails.getRegistrationId==0) {
                                     Onbekend
@@ -109,32 +135,80 @@
                                     <a href="@routes.Cars.getRegistrationPicture(car.getId)" target="_blank">Link</a>
                                 }
                             </div>
-                            <input id="file" name="file" type="file" class="form-control input-md">
+                            <input id="registrationfile" name="registrationfile" type="file" class="form-control input-md">
                         </div>
                     </fieldset>
                 }
                 @panel("Verzekering", "fa-money") {
-                    <fieldset>
+                    <fieldset id="insurance">
                         @std.textField(form("insuranceName"), "Verzekeraar", "col-md-6")
                         @std.datepicker(form("expiration"), "Vervaldatum", "col-md-4")
                         @std.textField(form("bonusMalus"), "Bonus Malus", "col-md-6")
+                        @std.textField(form("startBonusMalus"), "Start Bonus Malus", "col-md-6")
                         @std.textField(form("polisNr"), "Polisnummer", "col-md-6")
+                        @std.datepicker(form("startInsurancePolicy"), "Startdatum polis", "col-md-4")
+                        <div class="form-group col-xs-12">
+                            @std.checkboxInline(form("civilLiability"),"Burgerlijke aansprakelijkheid")
+                            @std.checkboxInline(form("legalCounsel"),"Rechtsbijstand")
+                            @std.checkboxInline(form("driverInsurance"),"Bestuurdersverzekering")
+                            @std.checkboxInline(form("materialDamage"),"Stoffelijke schade")
+                            @std.checkboxInline(form("glassBreakage"),"Glasbreuk")
+                            @std.checkboxInline(form("theft"),"Diefstal")
+                        </div>
+                        @std.textField(form("valueExclusiveVAT"), "Huidige waarde exclusief BTW", "col-md-6")
+                        @std.textField(form("exemption"), "Vrijstelling", "col-md-6")
+                        <div class="form-group col-md-6">
+                            <label class="control-label" for="insurancefile">Verzekeringspolis</label>
+                            <div>
+                                Huidig: @if(car.getInsurance.getInsuranceFileId==0) { Onbekend } else {
+                                <a href="@routes.Cars.getInsurancePicture(car.getId)" target="_blank">Link</a>
+                                }
+                            </div>
+                            <input id="insurancefile" name="insurancefile" type="file" class="form-control input-md">
+                        </div>
+                        <div class="form-group col-md-6">
+                            <label class="control-label" for="greencardfile">Groene kaart</label>
+                            <div>
+                                Huidig: @if(car.getInsurance.getGreenCardFileId==0) { Onbekend } else {
+                                <a href="@routes.Cars.getGreenCardPicture(car.getId)" target="_blank">Link</a>
+                                }
+                            </div>
+                            <input id="greencardfile" name="greencardfile" type="file" class="form-control input-md">
+                        </div>
                     </fieldset>
                 }
                 @panel("Pechverhelping", "fa-wrench") {
-                    <fieldset>
+                    <fieldset id="assistance">
                         @std.textField(form("assistanceName"), "Pechverhelper", "col-md-6")
                         @std.datepicker(form("assistanceExpiration"), "Vervaldatum", "col-md-4")
-                        @std.selectEnum(classOf[CarAssistanceType], form("assistanceType"), "Type", "col-md-6")                        
+                        @std.selectEnum(classOf[CarAssistanceType], form("assistanceType"), "Type", "col-md-6")
                         @std.textField(form("assistanceContractNr"), "Contractnummer", "col-md-6")
+                        <!-- <div class="form-group col-md-6">
+                            <label class="control-label" for="assistancefile">Pechverhelpingscontract</label>
+                            <div>
+                                Huidig: @if(car.getAssistance.getFileId==0) { Onbekend } else {
+                                <a href="@routes.Cars.getAssistancePicture(car.getId)" target="_blank">Link</a>
+                                }
+                            </div>
+                            <input id="assistancefile" name="assistancefile" type="file" class="form-control input-md">
+                        </div> -->
                     </fieldset>
                 }
                 @panel("Parkeerkaart", "fa-product-hunt") {
-                    <fieldset>
+                    <fieldset id="parkingcard">
                         @std.textField(form("parkingcardCity"), "Stad/gemeente", "col-md-6")
                         @std.datepicker(form("parkingcardExpiration"), "Vervaldatum", "col-md-4")
-                        @std.textField(form("parkingcardZones"), "Zones", "col-md-6")                        
+                        @std.textField(form("parkingcardZones"), "Zones", "col-md-6")
                         @std.textField(form("parkingcardContractNr"), "Contractnummer", "col-md-6")
+                        <div class="form-group col-md-6">
+                            <label class="control-label" for="parkingcardfile">Parkeerkaart</label>
+                            <div>
+                                Huidig: @if(car.getParkingcard.getFileId==0) { Onbekend } else {
+                                <a href="@routes.Cars.getParkingcardPicture(car.getId)" target="_blank">Link</a>
+                                }
+                            </div>
+                            <input id="parkingcardfile" name="parkingcardfile" type="file" class="form-control input-md">
+                        </div>
                     </fieldset>
                 }
                 @std.submitButton("Wijzigingen opslaan")

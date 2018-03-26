@@ -65,7 +65,7 @@
                             @btnPrimary("Km-standen", routes.Trips.overview(car.getId))
                             @btnPrimary("Tankbeurten", routes.Refuels.startOverviewForCar(car.getId))
                             @btnPrimary("Kosten", routes.Costs.showCostsForCar(car.getId))
-                             <button class="btn btn-primary btn-xs" onclick="loadCalendarEventsForCar( '@car.getId()' )">
+                            <button class="btn btn-primary btn-xs" onclick="loadCalendarEventsForCar( '@car.getId()' )">
                                 Kalender events downloaden</button>
                             @btnSuccess("Reserveer", routes.Calendars.indexWithCar(car.getName, car.getId))
                         </td>

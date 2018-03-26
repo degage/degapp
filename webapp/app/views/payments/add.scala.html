@@ -1,0 +1,36 @@
+
+
+@(form: Form[Payments.PaymentModel])
+@scripts = {
+    @js.datetimepicker()
+    @js.userpicker()
+}
+
+@stdlayout("Debiteurenbeheer: nieuwe betaling", scripts=scripts) {
+
+    @js.paymentMenu()
+
+    @helper.form(routes.Payments.createNewPayment(), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+      <div class="row">
+          @formErrors(form)
+          <div class="col-lg-12">
+              <fieldset>
+                  @std.textField(form("number"), "Betalingsnummer", "col-md-4")
+                  @std.datepicker(form("date"), "Datum", "col-md-4")
+                  @std.textField(form("accountNumber"), "Rekeningnummer", "col-md-4")
+                  @std.textField(form("name"), "Rekeninghouder", "col-md-4")
+                  @std.userpicker(form("userId"), form("userIdAsString"), "Gebruiker", css="col-md-4", status="FULL")
+                  @std.textField(form("invoiceId"), "Afrekening ID", "col-md-4")
+                  @std.textField(form("address"), "Adres 1", "col-md-4")
+                  @std.textField(form("bank"), "Bankcode", "col-md-4")
+                  @std.textField(form("amount"), "Bedrag", "col-md-4")
+                  @std.textField(form("comment"), "Vrije mededeling", "col-md-4")
+                  @std.textField(form("structuredCommunication"), "Gestructureerde mededeling", "col-md-4")
+                  @std.textField(form("currency"), "Munteenheid", "col-md-4")
+                  @std.textField(form("filename"), "Bestandsnaam", "col-md-4")
+              </fieldset>
+          </div>
+      </div>
+      @std.submitButton("Opslaan")
+    }
+}

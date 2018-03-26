@@ -1,0 +1,8 @@
+@(carId: Integer)
+@import providers.DataProvider
+
+@stdlayout("Staat van de auto bij inschrijving") {
+  <div id='car-initial-state'></div>
+  <script>DegageReactPort.setInitialCarState('car-initial-state', @carId)</script>
+
+}

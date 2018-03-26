@@ -1,0 +1,12 @@
+
+
+@(currentValue: String, value: String, valueNL: String)(body: => Html)
+
+@* Displays a single option tag, selected according to whether the
+   current value is equal to the tag value. *@
+
+@if(currentValue == valueNL) {
+    <option value="@value" selected="selected">@body</option>
+} else {
+    <option value="@value">@body</option>
+}

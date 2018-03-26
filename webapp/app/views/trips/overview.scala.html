@@ -1,27 +1,27 @@
 @* overview.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -104,7 +104,7 @@ $( function() {
 
 @approve(trip: Trip, form: Form[Trips.KmData])={
     @defining(form("km["+trip.getId+"].approve")) { field =>
-        <input type="checkbox" name="@field.name" @if(field.value){checked}>
+        <input type="checkbox" name="@field.name" @if(field.value){value="true"}else{value="false"}>
     }
 }
 @startend(trip: Trip, form: Form[Trips.KmData])={
@@ -149,7 +149,8 @@ $( function() {
         @helper.form(routes.Trips.doOverview(car.getId, thisMonth)){
         <div class="table-responsive col-xs-12">
             @formErrors(form)
-            <table class="table table-striped table-bordered table-hover no-footer" >
+            <div id="resultsTable" class="table-responsive col-xs-12">
+                <table class="table table-striped table-bordered table-hover no-footer" >
             <thead>
                <tr>
                    <th colspan="2">Periode </th>
@@ -157,6 +158,7 @@ $( function() {
                    <th>Status</th>
                    <th width="20">&nbsp;</th>
                    <th>Km-standen</th>
+                   <th>Acties</th>
                </tr>
             </thead>
             @if(trips.iterator.hasNext){
@@ -182,6 +184,7 @@ $( function() {
                             <td>@startEndDisabled(trip)</td>
                         }
                     }
+                    <td>@foreach(util.WorkflowAction.getCurrentActions(trip))(_.asNarrowButton(trip.getId))</td>
                 }
                 <tr><td colspan="4">&nbsp;</td>
                     <td colspan="2">
@@ -192,8 +195,9 @@ $( function() {
                 <tr><td class="empty-row" colspan="7">Geen resultaten.</td></tr>
             }
             </table>
+            </div>
         </div>
-        @std.submitButton("Doorsturen (en meteen goedkeuren)")
+        @std.submitButton("Opslaan")
         }
     }
     @divModalHelp()

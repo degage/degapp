@@ -23,18 +23,26 @@
         </tr>
         @foreach.tr(ofc.lines) { line =>
             <th class="res-car" width="@percentage%">@line.lineHeader</th>
-            @for(str <- line.freeTimes){
-               <td class="@if(str==null){res-notfree}else{res-free}">
-                   @if(str!=null) {
-                        <a href='@routes.WFCreate.create(line.carId,str,"")'>&nbsp;</a>
+            @for(idx <- 0 to line.getNumberOfIntervals()-1){
+               <td class="@if(line.reservationStatus(idx) == "FREE"){res-free}else{
+                 @if(line.byCurrentUser(idx) == true) {
+                   @if(line.reservationStatus(idx) == "REQUEST"){res-owner-request}else{res-owner-accepted}
+                 }else{
+                   @if(line.reservationStatus(idx) == "REQUEST"){res-notowner-request}else{res-notowner-accepted}
+                 }
+               }">@if(line.freeTimes(idx)!=null) {
+                        <a href='@routes.WFCreate.create(line.carId,line.freeTimes(idx),"")'>&nbsp;</a>
                    }
                </td>
             }
         }
         <tr>
             <td colspan="@(NUMBER_OF_INTERVALS+1)" class="text-right">
-                <b>Legende:</b>
-                <span class="res-label res-notfree">Bezet</span>
+                <span class="res-label res-free">Vrij</span>
+                <span class="res-label res-owner-request">Mijn onbevestigde reservaties</span>
+                <span class="res-label res-owner-accepted">Mijn bevestigde reservaties</span>
+                <span class="res-label res-notowner-request">Onbevestigde reservaties van andere gebruikers</span>
+                <span class="res-label res-notowner-accepted">Bevestigde registraties van andere gebruikers</span>
             </td>
         </tr>
     </table>

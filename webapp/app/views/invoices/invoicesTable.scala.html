@@ -1,0 +1,59 @@
+@(list: Iterable[Invoice])
+
+    <div id="resultsTable" class="table-responsive col-xs-12">
+      <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+      <thead>
+          <tr role="row">
+              <th name="number" class="sortable" tabindex="0" >Nummer</th>
+              <th name="date" class="sortable" tabindex="0" >Datum</th>
+              <th name="payment_date" class="sortable" tabindex="0" >Betalingsdatum</th>
+              <th name="due_date" class="sortable" tabindex="0" >Uiterste betalingsdatum</th>
+              <th name="amount" class="sortable" tabindex="0" >Bedrag</th>
+              <th name="status" class="sortable" tabindex="0" >Status</th>
+              <th name="structured_comm" tabindex="0" >Gestructureerde communicatie</th>
+              <th>Acties</th>
+          </tr>
+      </thead>
+      <tbody>
+        @foreach.trOrElse(list){ invoice =>
+          <td> <a href="@routes.Invoices.showDetails(invoice.getId)">@invoice.getNumber</a></td>
+          <td>@invoice.getDate</td>
+          <td>@invoice.getPaymentDate</td>
+          <td>@invoice.getDueDate</td>
+          <td align="right">@invoice.getAmount</td>
+          <td>
+            @if(invoice.getStatus == InvoiceStatus.PAID) {
+              <span class="label label-success">Betaald</span>
+            } else {
+              @if(invoice.getStatus == InvoiceStatus.OPEN) {
+                <span class="label label-warning">Open</span>
+              } else {
+                @if(invoice.getStatus == InvoiceStatus.OVERDUE) {
+                  <span class="label label-danger">Te laat</span>
+                }
+              }
+            }
+          </td>
+          <td>
+            @if(invoice.getStructuredCommunication == null) {
+                -
+            } else {
+                @invoice.getStructuredCommunication
+            }
+          </td>
+          <td>
+              @btnPrimary("Bekijk betaling(en)", routes.Invoices.getPaymentsForInvoice(invoice.getId))
+              @btnPrimary("Download pdf", routes.Billings.userDetails(invoice.getBillingId, invoice.getUserId))
+              @btnSuccess("Bewerken", routes.Invoices.editInvoice(invoice.getId))
+              @btnWarning("Links met betalingen verwijderen", routes.Invoices.unlinkInvoice(invoice.getId))
+          </td>
+        }{
+          <tr>
+              <td class="empty-row" colspan="12">
+                  Geen afrekeningen gevonden.
+              </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>

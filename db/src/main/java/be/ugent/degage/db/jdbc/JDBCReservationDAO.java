@@ -1,27 +1,27 @@
 /* JDBCReservationDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -45,6 +45,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.Objects;
 import java.time.temporal.ChronoUnit;
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
@@ -64,13 +65,14 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static ReservationHeader populateReservationHeader(ResultSet rs) throws SQLException {
         ReservationHeader reservation = new ReservationHeader(
+
                 rs.getInt("reservation_id"),
                 rs.getInt("reservation_car_id"),
                 rs.getInt("reservation_user_id"),
                 rs.getInt("reservation_owner_id"),
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
-                rs.getString("reservation_message"),
+                extractMessages(rs),
                 rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
                 rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
@@ -81,13 +83,14 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     public static Reservation populateReservation(ResultSet rs) throws SQLException {
         Reservation reservation = new Reservation(
+
                 rs.getInt("reservation_id"),
                 JDBCCarDAO.populateCarHeader (rs),
                 JDBCUserDAO.populateUserHeader(rs),
                 rs.getInt("reservation_owner_id"),
                 rs.getTimestamp("reservation_from").toLocalDateTime(),
                 rs.getTimestamp("reservation_to").toLocalDateTime(),
-                rs.getString("reservation_message"),
+                extractMessages(rs),
                 rs.getTimestamp("reservation_created_at").toInstant().plusSeconds(TimeUnit.DAYS.toSeconds(1)).isBefore(Instant.now()),
                 rs.getTimestamp("reservation_created_at").toLocalDateTime()
         );
@@ -96,9 +99,17 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         return reservation;
     }
 
+    /**
+    * The message column in the database contains all messages separated by a ASCII
+    * code 30 character. This function will do the splitting for you.
+    */
+    static String[] extractMessages(ResultSet rs) throws SQLException {
+      return rs.getString("reservation_message") != null ? rs.getString("reservation_message").split("[|]") : new String[0];
+    }
+
     private LazyStatement createReservationStatement = new LazyStatement(
             "INSERT INTO reservations (reservation_user_id, reservation_car_id, "
-                    + "reservation_from, reservation_to) VALUES (?,?,?,?)",
+                    + "reservation_from, reservation_to, reservation_message) VALUES (?,?,?,?,?)",
             "reservation_id"
     );
 
@@ -108,16 +119,24 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     @Override
     public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId) throws DataAccessException {
+        return createReservation(from,until,carId,userId,null);
+    }
+
+    @Override
+    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId, String message) throws DataAccessException {
         try {
+
             // TODO: find a way to do this with a single SQL statement
             PreparedStatement ps = createReservationStatement.value();
+
             ps.setInt(1, userId);
             ps.setInt(2, carId);
             ps.setTimestamp(3, Timestamp.valueOf(from));
             ps.setTimestamp(4, Timestamp.valueOf(until));
-
-            if (ps.executeUpdate() == 0)
-                throw new DataAccessException("No rows were affected when creating reservation.");
+            ps.setString(5, message);
+            if (ps.executeUpdate() == 0){
+                throw new DataAccessException("No rows were affected when creating reservation.");                
+            }
 
             // create
             int id;
@@ -145,18 +164,22 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
     }
 
     @Override
-    public void updateReservationStatus(int reservationId, ReservationStatus status, String message) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(
-                "UPDATE reservations SET reservation_status=?, reservation_message = ?  WHERE reservation_id = ?"
-        )) {
-            ps.setString(1, status.name());
-            ps.setString(2, message);
-            ps.setInt(3, reservationId);
+    public void updateReservationStatusAndAppendMessage(int reservationId, ReservationStatus status, String message) throws DataAccessException {
+      try (PreparedStatement ps = prepareStatement(
+              "UPDATE reservations SET reservation_status=?, reservation_message = "+
+              " if(reservation_message is null, concat('|',?) ,"+
+                "concat(reservation_message, concat('|',?) )) WHERE reservation_id = ?"
+                // using ASCII character 30 as separator between the messages
+      )) {
+          ps.setString(1, status.name());
+          ps.setString(2, message);
+          ps.setString(3, message);
+          ps.setInt(4, reservationId);
 
-            ps.executeUpdate();
-        } catch (SQLException e) {
-            throw new DataAccessException("Unable to update reservation", e);
-        }
+          ps.executeUpdate();
+      } catch (SQLException e) {
+          throw new DataAccessException("Unable to update reservation", e);
+      }
     }
 
     @Override
@@ -171,6 +194,22 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
         } catch (SQLException e) {
             throw new DataAccessException("Unable to update reservation", e);
         }
+    }
+
+    public void appendReservationMessage (int reservationId, String message) throws DataAccessException {
+      try (PreparedStatement ps = prepareStatement(
+              "UPDATE reservations SET reservation_message = if(reservation_message is null, concat('|',?) ,"+
+                "concat(reservation_message, concat('|',?) )) WHERE reservation_id = ?"
+                // using ASCII character 30 as separator between the messages
+      )) {
+          ps.setString(1, message);
+          ps.setString(2, message);
+          ps.setInt(3, reservationId);
+
+          ps.executeUpdate();
+      } catch (SQLException e) {
+          throw new DataAccessException("Unable to update reservation", e);
+      }
     }
 
     private LazyStatement getUpdateReservationTimeStatement = new LazyStatement(
@@ -250,6 +289,7 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
 
     private Reservation populateNextPrevious(ResultSet rs) throws SQLException {
         return new Reservation(
+
                 rs.getInt("r.reservation_id"),
                 null,
                 JDBCUserDAO.populateUserHeader(rs),
@@ -270,9 +310,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
                     "AND NOT r.reservation_archived " +
-                    "AND r.reservation_status = 'ACCEPTED' " +
+                    "AND r.reservation_status != 'CANCELLED' " +
                     "AND r.reservation_from >= o.reservation_to  " +
-                    "AND r.reservation_from <= o.reservation_to + INTERVAL 1 DAY " +
                     "ORDER BY r.reservation_from ASC LIMIT 1"
     );
 
@@ -301,9 +340,8 @@ class JDBCReservationDAO extends AbstractDAO implements ReservationDAO {
                     "JOIN users ON r.reservation_user_id = user_id " +
                     "WHERE o.reservation_id = ? " +
                     "AND NOT r.reservation_archived " +
-                    "AND r.reservation_status > 4 " +  // [ENUM INDEX] = accepted or already in the past
+                    "AND r.reservation_status != 'CANCELLED' " +
                     "AND r.reservation_to <= o.reservation_from  " +
-                    "AND r.reservation_to + INTERVAL 1 DAY >= o.reservation_from " +
                     "ORDER BY r.reservation_to DESC LIMIT 1"
     );
 

@@ -30,6 +30,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarAssistanceDAO;
 import be.ugent.degage.db.models.Car;
+import be.ugent.degage.db.models.CarAssistance;
 import be.ugent.degage.db.models.CarAssistanceExtended;
 import be.ugent.degage.db.models.CarAssistanceType;
 import be.ugent.degage.db.models.Page;
@@ -45,8 +46,10 @@ import java.sql.Date;
 class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
 
 	private static final String ASSISTANCE_QUERY =
-		"SELECT SQL_CALC_FOUND_ROWS assistance_id, assistance_name, assistance_expiration, assistance_contract_id, assistance_type, " +
-		"assistance_updated_at, car_name, details_car_license_plate FROM carassistances " +
+        "SELECT SQL_CALC_FOUND_ROWS " +
+        "carassistances.*, " + 
+        "car_name, details_car_license_plate " +
+        "FROM carassistances " +
 		"LEFT JOIN cars ON assistance_id = car_id " +
         "LEFT JOIN technicalcardetails ON details_id = car_id ";
 
@@ -54,13 +57,22 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
         super(context);
     }
 
-    private static CarAssistanceExtended populateCarAssistance(ResultSet rs) throws SQLException {
-        Date assistanceExpiration = rs.getDate("assistance_expiration");
-        return new CarAssistanceExtended(
+    public static CarAssistance populateCarAssistance(ResultSet rs) throws SQLException {
+        return new CarAssistance(
             rs.getString("assistance_name"),
-            assistanceExpiration == null ? null : assistanceExpiration.toLocalDate(),
+            rs.getDate("assistance_expiration") == null ? null : rs.getDate("assistance_expiration").toLocalDate(),
             CarAssistanceType.valueOf(rs.getString("assistance_type")),
             rs.getString("assistance_contract_id"),
+            rs.getInt("assistance_file_id"));
+    }
+
+    public static CarAssistanceExtended populateCarAssistanceExtended(ResultSet rs) throws SQLException {
+        return new CarAssistanceExtended(
+            rs.getString("assistance_name"),
+            rs.getDate("assistance_expiration") == null ? null : rs.getDate("assistance_expiration").toLocalDate(),
+            CarAssistanceType.valueOf(rs.getString("assistance_type")),
+            rs.getString("assistance_contract_id"),
+            rs.getInt("assistance_file_id"),
             rs.getString("car_name"),
             rs.getInt("assistance_id"),
             rs.getString("details_car_license_plate")
@@ -113,11 +125,22 @@ class JDBCCarAssistanceDAO extends AbstractDAO implements CarAssistanceDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
-            return toPage(ps, pageSize, JDBCCarAssistanceDAO::populateCarAssistance);
+            return toPage(ps, pageSize, JDBCCarAssistanceDAO::populateCarAssistanceExtended);
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot get carassistance", ex);
         }
     }
 
-	// public void deleteAllCarAssistances(Car car) throws DataAccessException;
+    // public void deleteAllCarAssistances(Car car) throws DataAccessException;
+    
+    @Override
+    public void updateCarAssistanceDocument(int autoId, int fileId) {
+        try (PreparedStatement ps = prepareStatement("UPDATE carassistances SET assistance_file_id = ? WHERE assistance_id = ?")) {
+            ps.setInt(1, fileId);
+            ps.setInt(2, autoId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update CarAssistance document", ex);
+        }
+    }
 }

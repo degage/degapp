@@ -43,6 +43,9 @@
                 @btnPrimary("Basisinformatie wijzigen", routes.Cars.editCar(car.getId))
                 @btnPrimary("Foto wijzigen", routes.Cars.pictureUpload(car.getId))
                 @btnWarning("Afschrijvingsinfo", routes.Cars.showDepreciation(car.getId))
+                @if(CurrentUser hasRole UserRole.CAR_ADMIN) {
+                    @btnWarning("Oorspronkelijke staat", routes.Cars.showInitialStateFiles(car.getId))
+                }
             </div>
         }
     }

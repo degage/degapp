@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(previousLoaner: UserHeader, nextLoaner: UserHeader, status: ReservationStatus = ReservationStatus.FINISHED)
+@(previousLoaner: UserHeader, nextLoaner: UserHeader, nextDate: String, status: ReservationStatus = ReservationStatus.FINISHED)
 
 <div class="col-lg-6">
     <h4>Bestuurder vorige rit</h4>
@@ -41,5 +41,11 @@
         <p>Geen volgende reservatie voor deze auto.</p>
     } else {
         @userInfo(nextLoaner,status)
+    }
+    <h4>Begin volgende rit</h4>
+    @if(nextDate == null) {
+        <p>Geen volgende reservatie voor deze auto.</p>
+    } else {
+        <p>@nextDate</p>
     }
 </div>

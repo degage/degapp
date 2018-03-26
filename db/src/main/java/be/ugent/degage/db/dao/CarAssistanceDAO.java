@@ -43,4 +43,5 @@ public interface CarAssistanceDAO {
 	// public void deleteCarAssistance(CarAssistanceExtended assistance) throws DataAccessException;
 	public Page<CarAssistanceExtended> getAllCarAssistances(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 	// public void deleteAllCarAssistances() throws DataAccessException;
+	public void updateCarAssistanceDocument(int autoId, int fileId) throws DataAccessException;
 }

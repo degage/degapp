@@ -52,6 +52,7 @@ import views.html.cars.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -71,8 +72,7 @@ public class Cars extends Controller {
 
         @Constraints.Required
         public String name;
-
-        // TODO: add email
+        public String email;
 
         @Constraints.Required
         public String brand;
@@ -91,29 +91,54 @@ public class Cars extends Controller {
         public Integer ownerAnnualKm;
         public String comments;
         public boolean active;
+        public LocalDate startSharing;
+        public LocalDate endSharing;
 
         // TechnicalCarDetails
         public String licensePlate;
         // public String registration; // TODO: file inschrijvingsbewijs
         public String chassisNumber;
+        public Integer ecoScore;
+        public String euroNorm;
+        public LocalDate startDate;
+        public Integer kiloWatt;
 
         // Insurance
         public String insuranceName;
         public LocalDate expiration;
         public String bonusMalus;
         public String polisNr;
+        public LocalDate startInsurancePolicy;
+        public Integer startBonusMalus;
+        public boolean civilLiability;
+        public boolean legalCounsel;
+        public boolean driverInsurance;
+        public boolean materialDamage;
+        public Integer valueExclusiveVAT;
+        public Integer exemption; //vrijstelling
+        public boolean glassBreakage;
+        public boolean theft;
+        public Integer insuranceFileId;
+        public Integer greenCardFileId;
 
         // Assistance
         public String assistanceName;
         public LocalDate assistanceExpiration;
         public String assistanceType;
         public String assistanceContractNr;
+        public Integer assistanceFileId;
 
         // Parkingcard
         public String parkingcardCity;
         public LocalDate parkingcardExpiration;
         public String parkingcardZones;
         public String parkingcardContractNr;
+        public Integer parkingcardFileId;
+
+        // Contract
+        public Integer contractFileId;
+        public LocalDate contract;
+        public Integer carAgreedValue;        
 
         public Addresses.EditAddressModel address = new Addresses.EditAddressModel();
 
@@ -123,6 +148,7 @@ public class Cars extends Controller {
             }
 
             name = car.getName();
+            email = car.getEmail();
             brand = car.getBrand();
             type = car.getType();
             seats = car.getSeats();
@@ -137,28 +163,51 @@ public class Cars extends Controller {
             ownerAnnualKm = car.getOwnerAnnualKm();
             comments = car.getComments();
             active = car.isActive();
+            startSharing = car.getStartSharing();
+            endSharing = car.getEndSharing();
+            contractFileId = car.getContractFileId();
+            contract = car.getContract();
+            carAgreedValue = car.getCarAgreedValue();
 
             TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
             licensePlate = technicalCarDetails.getLicensePlate();
             chassisNumber = technicalCarDetails.getChassisNumber();
+            ecoScore = technicalCarDetails.getEcoScore();
+            euroNorm = technicalCarDetails.getEuroNorm();
+            startDate = technicalCarDetails.getStartDate();
+            kiloWatt = technicalCarDetails.getKiloWatt();
 
             CarInsurance insurance = car.getInsurance();
             insuranceName = insurance.getName();
             expiration = insurance.getExpiration();
             bonusMalus = insurance.getBonusMalus();
             polisNr = insurance.getPolisNr();
+            startInsurancePolicy = insurance.getStartInsurancePolicy();
+            startBonusMalus = insurance.getStartBonusMalus();
+            civilLiability = insurance.isCivilLiability();
+            legalCounsel = insurance.isLegalCounsel();
+            driverInsurance = insurance.isDriverInsurance();
+            materialDamage = insurance.isMaterialDamage();
+            valueExclusiveVAT = insurance.getValueExclusiveVAT();
+            exemption = insurance.getExemption();
+            glassBreakage = insurance.isGlassBreakage();
+            theft = insurance.isTheft();
+            insuranceFileId = insurance.getInsuranceFileId();
+            greenCardFileId = insurance.getGreenCardFileId();
 
             CarAssistance assistance = car.getAssistance();
             assistanceName = assistance.getName();
             assistanceExpiration = assistance.getExpiration();
             assistanceType = assistance.getType().name();
             assistanceContractNr = assistance.getContractNr();
+            assistanceFileId = assistance.getFileId();
 
             CarParkingcard parkingcard = car.getParkingcard();
             parkingcardCity = parkingcard.getCity();
             parkingcardExpiration = parkingcard.getExpiration();
             parkingcardZones = parkingcard.getZones();
             parkingcardContractNr = parkingcard.getContractNr();
+            parkingcardFileId = parkingcard.getFileId();
 
             address.populate(car.getLocation());
         }
@@ -345,12 +394,26 @@ public class Cars extends Controller {
 
             TechnicalCarDetails technicalCarDetails =
                     new TechnicalCarDetails(model.licensePlate, registrationPictureFileId, model.chassisNumber);
+            technicalCarDetails.setEcoScore(model.ecoScore);
+            technicalCarDetails.setEuroNorm(model.euroNorm);
+            technicalCarDetails.setStartDate(model.startDate);
+            technicalCarDetails.setKiloWatt(model.kiloWatt);
             CarInsurance insurance =
                     new CarInsurance(model.insuranceName, model.expiration, model.bonusMalus, model.polisNr);
+            insurance.setStartInsurancePolicy(model.startInsurancePolicy);
+            insurance.setStartBonusMalus(model.startBonusMalus);
+            insurance.setCivilLiability(model.civilLiability);
+            insurance.setLegalCounsel(model.legalCounsel);
+            insurance.setDriverInsurance(model.driverInsurance);
+            insurance.setMaterialDamage(model.materialDamage);
+            insurance.setValueExclusiveVAT(model.valueExclusiveVAT);
+            insurance.setExemption(model.exemption);
+            insurance.setGlassBreakage(model.glassBreakage);
+            insurance.setTheft(model.theft);
             CarAssistance assistance =
-                    new CarAssistance(model.assistanceName, model.assistanceExpiration, CarAssistanceType.valueOf(model.assistanceType), model.assistanceContractNr);
+                    new CarAssistance(model.assistanceName, model.assistanceExpiration, CarAssistanceType.valueOf(model.assistanceType), model.assistanceContractNr, 0);
             CarParkingcard parkingcard =
-                    new CarParkingcard(model.parkingcardCity, model.parkingcardExpiration, model.parkingcardZones, model.parkingcardContractNr);
+                    new CarParkingcard(model.parkingcardCity, model.parkingcardExpiration, model.parkingcardZones, model.parkingcardContractNr, 0);
 
             // TODO: fill in real email address
             Car car = dao.createCar(
@@ -360,7 +423,7 @@ public class Cars extends Controller {
                     model.year, model.manual, model.gps, model.hook,
                     CarFuel.valueOf(model.fuel), model.fuelEconomy, model.estimatedValue,
                     model.ownerAnnualKm, technicalCarDetails, insurance, assistance, parkingcard, owner,
-                    model.comments, model.active
+                    model.comments, model.active, model.startSharing, model.endSharing
             );
 
 
@@ -421,6 +484,7 @@ public class Cars extends Controller {
 
         CarModel model = editForm.get();
         car.setName(model.name);
+        car.setEmail(model.email);
         car.setBrand(model.brand);
         car.setType(model.type);
         car.setDoors(model.doors);
@@ -433,10 +497,37 @@ public class Cars extends Controller {
         car.setFuelEconomy(model.fuelEconomy);
         car.setEstimatedValue(model.estimatedValue);
         car.setOwnerAnnualKm(model.ownerAnnualKm);
+        car.setStartSharing(model.startSharing);
+        car.setEndSharing(model.endSharing);
+        car.setContract(model.contract);
+        car.setCarAgreedValue(model.carAgreedValue);
 
         Http.MultipartFormData body = request().body().asMultipartFormData();
-        Http.MultipartFormData.FilePart registrationFile = body.getFile("file");
-        int fileId = 0;
+
+        Http.MultipartFormData.FilePart contractFile = body.getFile("contractfile");
+        int contractFileId = 0;
+        if (contractFile != null) {
+            String contentType = contractFile.getContentType();
+            if (!FileHelper.isDocumentContentType(contentType)) {
+                flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                return redirect(routes.Cars.detail(car.getId()));
+            } else {
+                try {
+                    // TODO: similar code occurs several times
+                    Path relativePath = FileHelper.saveFile(contractFile, ConfigurationHelper.getConfigurationString("uploads.contractscar"));
+                    FileDAO fdao = context.getFileDAO();
+                    contractFileId = fdao.createFile(relativePath.toString(), contractFile.getFilename(), contractFile.getContentType()).getId();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        }
+        if (contractFileId != 0) {
+            car.setContractFileId(contractFileId);
+        }
+
+        Http.MultipartFormData.FilePart registrationFile = body.getFile("registrationfile");
+        int registrationFileId = 0;
         if (registrationFile != null) {
             String contentType = registrationFile.getContentType();
             if (!FileHelper.isDocumentContentType(contentType)) {
@@ -447,9 +538,7 @@ public class Cars extends Controller {
                     // TODO: similar code occurs several times
                     Path relativePath = FileHelper.saveFile(registrationFile, ConfigurationHelper.getConfigurationString("uploads.carregistrations"));
                     FileDAO fdao = context.getFileDAO();
-                    fileId = fdao.createFile(
-                            relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType()
-                    ).getId();
+                    registrationFileId = fdao.createFile(relativePath.toString(), registrationFile.getFilename(), registrationFile.getContentType()).getId();
                 } catch (IOException ex) {
                     throw new RuntimeException(ex); //no more checked catch -> error page!
                 }
@@ -459,8 +548,53 @@ public class Cars extends Controller {
         TechnicalCarDetails technicalCarDetails = car.getTechnicalCarDetails();
         technicalCarDetails.setLicensePlate(model.licensePlate);
         technicalCarDetails.setChassisNumber(model.chassisNumber);
-        if (fileId != 0) {
-            technicalCarDetails.setRegistrationId(fileId);
+        technicalCarDetails.setEcoScore(model.ecoScore);
+        technicalCarDetails.setEuroNorm(model.euroNorm);
+        technicalCarDetails.setStartDate(model.startDate);
+        technicalCarDetails.setKiloWatt(model.kiloWatt);
+        if (registrationFileId != 0) {
+            technicalCarDetails.setRegistrationId(registrationFileId);
+        }
+
+        Http.MultipartFormData.FilePart insuranceFile = body.getFile("insurancefile");
+        int insuranceFileId = 0;
+        if (insuranceFile != null) {
+            String contentType = insuranceFile.getContentType();
+            if (!FileHelper.isDocumentContentType(contentType)) {
+                flash("danger", "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: " + contentType + ")");
+                return redirect(routes.Cars.detail(car.getId()));
+            } else {
+                try {
+                    // TODO: similar code occurs several times
+                    Path relativePath = FileHelper.saveFile(insuranceFile, ConfigurationHelper.getConfigurationString("uploads.contractsinsurance"));
+                    FileDAO fdao = context.getFileDAO();
+                    insuranceFileId = fdao.createFile(relativePath.toString(), insuranceFile.getFilename(), insuranceFile.getContentType()).getId();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        }
+
+        Http.MultipartFormData.FilePart greenCardFile = body.getFile("greencardfile");
+        int greenCardFileId = 0;
+        if (greenCardFile != null) {
+            String contentType = greenCardFile.getContentType();
+            if (!FileHelper.isDocumentContentType(contentType)) {
+                flash("danger",
+                        "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: "
+                                + contentType + ")");
+                return redirect(routes.Cars.detail(car.getId()));
+            } else {
+                try {
+                    // TODO: similar code occurs several times
+                    Path relativePath = FileHelper.saveFile(greenCardFile,
+                            ConfigurationHelper.getConfigurationString("uploads.greencards"));
+                    FileDAO fdao = context.getFileDAO();
+                    greenCardFileId = fdao.createFile(relativePath.toString(), greenCardFile.getFilename(), greenCardFile.getContentType()).getId();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
         }
 
         CarInsurance insurance = car.getInsurance();
@@ -468,18 +602,84 @@ public class Cars extends Controller {
         insurance.setExpiration(model.expiration);
         insurance.setBonusMalus(model.bonusMalus);
         insurance.setPolisNr(model.polisNr);
+        insurance.setStartInsurancePolicy(model.startInsurancePolicy);
+        insurance.setStartBonusMalus(model.startBonusMalus);
+        insurance.setCivilLiability(model.civilLiability);
+        insurance.setLegalCounsel(model.legalCounsel);
+        insurance.setDriverInsurance(model.driverInsurance);
+        insurance.setMaterialDamage(model.materialDamage);
+        insurance.setValueExclusiveVAT(model.valueExclusiveVAT);
+        insurance.setExemption(model.exemption);
+        insurance.setGlassBreakage(model.glassBreakage);
+        insurance.setTheft(model.theft);
+        if (insuranceFileId != 0) {
+            insurance.setInsuranceFileId(insuranceFileId);
+        }
+        if (greenCardFileId != 0) {
+            insurance.setGreenCardFileId(greenCardFileId);
+        }
 
+        Http.MultipartFormData.FilePart assistanceFile = body.getFile("assistancefile");
+        int assistanceFileId = 0;
+        if (assistanceFile != null) {
+            String contentType = assistanceFile.getContentType();
+            if (!FileHelper.isDocumentContentType(contentType)) {
+                flash("danger",
+                        "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: "
+                                + contentType + ")");
+                return redirect(routes.Cars.detail(car.getId()));
+            } else {
+                try {
+                    // TODO: similar code occurs several times
+                    Path relativePath = FileHelper.saveFile(assistanceFile,
+                            ConfigurationHelper.getConfigurationString("uploads.contractsassistance"));
+                    FileDAO fdao = context.getFileDAO();
+                    assistanceFileId = fdao.createFile(relativePath.toString(), assistanceFile.getFilename(),
+                            assistanceFile.getContentType()).getId();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        }
         CarAssistance assistance = car.getAssistance();
         assistance.setName(model.assistanceName);
         assistance.setExpiration(model.assistanceExpiration);
         assistance.setType(CarAssistanceType.valueOf(model.assistanceType));
         assistance.setContractNr(model.assistanceContractNr);
+        if (assistanceFileId != 0) {
+            assistance.setFileId(assistanceFileId);
+        }
 
+        Http.MultipartFormData.FilePart parkingcardFile = body.getFile("parkingcardfile");
+        int parkingcardFileId = 0;
+        if (parkingcardFile != null) {
+            String contentType = parkingcardFile.getContentType();
+            if (!FileHelper.isDocumentContentType(contentType)) {
+                flash("danger",
+                        "Verkeerd bestandstype opgegeven. Enkel documenten zijn toegelaten. (ontvangen MIME-type: "
+                                + contentType + ")");
+                return redirect(routes.Cars.detail(car.getId()));
+            } else {
+                try {
+                    // TODO: similar code occurs several times
+                    Path relativePath = FileHelper.saveFile(parkingcardFile,
+                            ConfigurationHelper.getConfigurationString("uploads.parkingcards"));
+                    FileDAO fdao = context.getFileDAO();
+                    parkingcardFileId = fdao.createFile(relativePath.toString(), parkingcardFile.getFilename(),
+                            parkingcardFile.getContentType()).getId();
+                } catch (IOException ex) {
+                    throw new RuntimeException(ex); //no more checked catch -> error page!
+                }
+            }
+        }
         CarParkingcard parkingcard = car.getParkingcard();
         parkingcard.setCity(model.parkingcardCity);
         parkingcard.setExpiration(model.parkingcardExpiration);
         parkingcard.setZones(model.parkingcardZones);
         parkingcard.setContractNr(model.parkingcardContractNr);
+        if (parkingcardFileId != 0) {
+            parkingcard.setFileId(parkingcardFileId);
+        }
 
         car.setLocation(model.address.toAddress());
         car.setComments(model.comments);
@@ -624,6 +824,71 @@ public class Cars extends Controller {
         }
     }
 
+    @AllowRoles
+    @InjectContext
+    public static Result getContractPicture(int carId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (isOwnerOrAdmin(car)) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), car.getContractFileId());
+        } else {
+            return badRequest(); // hacker!
+        }
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result getInsurancePicture(int carId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (isOwnerOrAdmin(car)) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), car.getInsurance().getInsuranceFileId());
+        } else {
+            return badRequest(); // hacker!
+        }
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result getGreenCardPicture(int carId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (isOwnerOrAdmin(car)) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), car.getInsurance().getGreenCardFileId());
+        } else {
+            return badRequest(); // hacker!
+        }
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result getAssistancePicture(int carId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (isOwnerOrAdmin(car)) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), car.getAssistance().getFileId());
+        } else {
+            return badRequest(); // hacker!
+        }
+    }
+
+    @AllowRoles
+    @InjectContext
+    public static Result getParkingcardPicture(int carId) {
+        // TODO: check authorization
+        DataAccessContext context = DataAccess.getInjectedContext();
+        Car car = context.getCarDAO().getCar(carId);
+        if (isOwnerOrAdmin(car)) {
+            return FileHelper.getFileStreamResult(context.getFileDAO(), car.getParkingcard().getFileId());
+        } else {
+            return badRequest(); // hacker!
+        }
+    }
+
     @AllowRoles({UserRole.CAR_OWNER, UserRole.CAR_ADMIN})
     @InjectContext
     public static Result pictureUpload(int carId) {
@@ -704,6 +969,85 @@ public class Cars extends Controller {
             DepreciationData data = form.get();
             dao.updateDepreciation(carId, data.cents, data.limit, data.last);
             return redirect(routes.Cars.showDepreciation(carId));
+        }
+    }
+
+    @AllowRoles({ UserRole.CAR_OWNER, UserRole.CAR_ADMIN })
+    @InjectContext
+    public static Result showInitialStateFiles(int carId) {
+        CarDAO dao = DataAccess.getInjectedContext().getCarDAO();
+        CarHeaderShort car = dao.getCarHeaderShort(carId);
+        DataAccessContext context = DataAccess.getInjectedContext();
+        if (isOwnerOrAdmin(car)) {
+            return ok(initialstate.render(carId, car.getName(), context.getFileDAO().getFilesByType(carId, FileDAO.FileType.INITIAL_STATE)));
+        } else {
+            return badRequest();
+        }
+    }
+
+    @AllowRoles({ UserRole.CAR_OWNER, UserRole.CAR_ADMIN })
+    @InjectContext
+    public static Result addInitialStateFile(int carId) {
+        try {
+            DataAccessContext context = DataAccess.getInjectedContext();
+            CarDAO dao = context.getCarDAO();
+            if (isOwnerOrAdmin(dao.getCarHeaderShort(carId))) {
+                Http.MultipartFormData.FilePart newFile = request().body().asMultipartFormData().getFile("file");
+                if (newFile == null) {
+                    flash("danger", "Geen bestand gekozen");
+                } else {
+                    if (!FileHelper.isDocumentContentType(newFile.getContentType())) {
+                        flash("danger", "Het document of de afbeelding heeft een type dat niet wordt herkend of toegestaan");
+                    } else {
+                        // Now we add the file to the group
+                        FileDAO fdao = context.getFileDAO();
+                        File file = fdao.createFile(
+                                FileHelper.saveFile(newFile, ConfigurationHelper.getConfigurationString("uploads.carinitialstates")).toString(),
+                                newFile.getFilename(),
+                                newFile.getContentType());
+                        fdao.addFileByType(carId, file.getId(), FileDAO.FileType.INITIAL_STATE);
+                    }
+                }
+                return redirect(routes.Cars.showInitialStateFiles(carId));
+            } else {
+                return badRequest();
+            }
+        } catch (IOException ex) {
+            throw new RuntimeException(ex); //unchecked
+        }
+    }
+
+    @AllowRoles({ UserRole.CAR_OWNER, UserRole.CAR_ADMIN })
+    @InjectContext
+    public static Result deleteInitialStateFile(int carId, int fileId) {
+        DataAccessContext context = DataAccess.getInjectedContext();
+        CarDAO dao = context.getCarDAO();
+        if (isOwnerOrAdmin(dao.getCarHeaderShort(carId))) {
+            FileDAO fdao = DataAccess.getInjectedContext().getFileDAO();
+            File file = fdao.getFileByType(carId, fileId, FileDAO.FileType.INITIAL_STATE);
+            if (file == null) {
+                flash("danger", "Bestand niet gevonden.");
+                return badRequest();
+            } else {
+                fdao.deleteFileByType(carId, fileId, FileDAO.FileType.INITIAL_STATE);
+                FileHelper.deleteFile(Paths.get(file.getPath()));
+                return redirect(routes.Cars.showInitialStateFiles(carId));
+            }
+        } else {
+            return badRequest();
+        }
+    }
+
+    @AllowRoles({})
+    @InjectContext
+    public static Result viewInitialStateFile(int carId, int fileId) {
+        FileDAO fdao = DataAccess.getInjectedContext().getFileDAO();
+        File file = fdao.getFileByType(carId, fileId, FileDAO.FileType.INITIAL_STATE);
+        if (file == null) {
+            flash("danger", "Bestand niet gevonden.");
+            return null;
+        } else {
+            return FileHelper.getFileStreamResult(fdao, fileId);
         }
     }
 }

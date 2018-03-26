@@ -1,0 +1,33 @@
+
+@(codas: Page[Coda])
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+    <thead>
+    <tr role="row">
+        <th name="number" tabindex="0" >Bestandsnaam</th>
+        <th name="date" tabindex="0" >Datum</th>
+        <th name="user" tabindex="0" >Gebruiker</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach.trOrElse(codas){ coda =>
+        <td>@coda.getFilename</td>
+        <td>@coda.getDate</td>
+        <td>
+            @if(coda.getUser == null) {
+                Geen gebruiker gevonden
+            } else {
+                <a href="@routes.Profile.index(coda.getUser.getId)">@coda.getUser.getFirstName @coda.getUser.getLastName</a>
+            }
+        </td>
+    }{
+    <tr>
+        <td class="empty-row" colspan="12">
+            Geen enkele coda gevonden
+        </td>
+    </tr>
+    }
+    </tbody>
+</table>
+</div>
+@pagination(codas)

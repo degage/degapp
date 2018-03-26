@@ -1,27 +1,27 @@
 /* Approvals.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -54,7 +54,7 @@ import java.util.*;
 public class Approvals extends Controller {
 
 
-    private static Iterable<String> checkApprovalConditions(int userId, UserDAO udao, MembershipDAO mdao, FileDAO fdao) {
+    private static Iterable<String> checkApprovalConditions(int userId, UserDAO udao, FileDAO fdao) {
         // TODO: minimize data transfer by using a query with true/false results
         User user = udao.getUser(userId); // gets the full user instead of small cached one
 
@@ -67,27 +67,18 @@ public class Approvals extends Controller {
         }
         if (user.getIdentityId() == null) {
             errors.add("Identiteitsgegevens ontbreken.");
-        } else if (!fdao.hasUserFile(userId, FileDAO.UserFileType.ID)) {
+        } else if (!fdao.hasFileByType(userId, FileDAO.FileType.ID)) {
             errors.add("Scan identiteitskaart ontbreekt");
         }
         if (user.getLicense() == null) {
             errors.add("Rijbewijs ontbreekt.");
-        } else if (!fdao.hasUserFile(userId, FileDAO.UserFileType.LICENSE)) {
+        } else if (!fdao.hasFileByType(userId, FileDAO.FileType.LICENSE)) {
             errors.add("Ingescand rijbewijs ontbreekt");
         }
         if (user.getCellPhone() == null && user.getPhone() == null) {
             errors.add("Telefoon/GSM ontbreekt.");
         }
-        Membership membership = mdao.getMembership(userId);
-        if (membership.getDeposit() == null) {
-            errors.add("Waarborg nog niet betaald.");
-        }
-        if (membership.getContractDate() == null) {
-            errors.add("Contract nog niet getekend");
-        }
-        if (membership.getFee() == null) {
-            errors.add("Lidgeld nog niet betaald.");
-        }
+
         return errors;
     }
 
@@ -122,11 +113,16 @@ public class Approvals extends Controller {
                 return redirect(routes.Application.index());
             } else if (context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId()) == 0) {
                 flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
-                return redirect(routes.InfoSessions.showUpcomingSessions());
+                if (context.getInfoSessionDAO().getAttendingInfoSession(CurrentUser.getId()) == null) {
+                    return redirect(routes.InfoSessions.enrollWithCar(CurrentUser.getId()));
+                } else {
+                    return redirect(routes.InfoSessions.showUpcomingSessions());
+                }
+                
             } else {
                 return ok(approvalrequest.render(
-                        checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getMembershipDAO(), context.getFileDAO()),
-                        Form.form(RequestApprovalData.class))
+                    checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
+                    Form.form(RequestApprovalData.class))
                 );
             }
         }
@@ -142,7 +138,7 @@ public class Approvals extends Controller {
         DataAccessContext context = DataAccess.getInjectedContext();
         if (form.hasErrors()) {
             return badRequest(approvalrequest.render(
-                    checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getMembershipDAO(), context.getFileDAO()),
+                    checkApprovalConditions(CurrentUser.getId(), context.getUserDAO(), context.getFileDAO()),
                     form
                     )
             );
@@ -150,7 +146,7 @@ public class Approvals extends Controller {
             int isp = context.getInfoSessionDAO().getInfoSessionWherePresent(CurrentUser.getId());
             if (isp == 0) {
                 flash("danger", "Je bent nog niet naar een infosessie geweest en kan dus nog geen lid worden.");
-                return redirect(routes.InfoSessions.showUpcomingSessions());
+                return redirect(routes.InfoSessions.enrollWithCar(CurrentUser.getId()));
             } else {
                 context.getApprovalDAO().createApproval(CurrentUser.getId(), isp, form.get().message);
                 flash("success", "Bedankt voor de interesse. We nemen je aanvraag tot lidmaatschap in beraad.");
@@ -162,6 +158,10 @@ public class Approvals extends Controller {
     // must be used with injected context - used in contracts menu
     public static int getNrOfPendingApprovals() {
         return DataAccess.getInjectedContext().getApprovalDAO().getNrOfPendingApprovals();
+    }
+
+    public static int getNrOfPendingCarApprovals() {
+        return DataAccess.getInjectedContext().getCarApprovalDAO().getNrOfPendingCarApprovals();
     }
 
     public static Referrer REF_APPROVALS =
@@ -187,7 +187,13 @@ public class Approvals extends Controller {
         searchString = searchString.substring(searchString.lastIndexOf('=') + 1);
         MembershipStatus membershipStatus = MembershipStatus.valueOf(searchString);
         Page<ApprovalListInfo> approvals = dao.getApprovals(field, asc, page, pageSize, membershipStatus);
-        return ok(approvalpage.render(approvals));
+        List<InfoSession> lastInfoSessions = new ArrayList<>();
+        InfoSessionDAO iDao = context.getInfoSessionDAO();
+        for(ApprovalListInfo a : approvals) {
+          int infosessionId = iDao.getInfoSessionWherePresent(a.getUser().getId());
+          lastInfoSessions.add(infosessionId > 0 ? iDao.getInfoSession(infosessionId) : null);
+        }
+        return ok(approvalpage.render(approvals,lastInfoSessions));
     }
 
     /**
@@ -198,7 +204,7 @@ public class Approvals extends Controller {
     public static Result approvalAdmin(int approvalId) {
         DataAccessContext context = DataAccess.getInjectedContext();
         Approval ap = context.getApprovalDAO().getApproval(approvalId);
-        EnrollementStatus status = EnrollementStatus.ABSENT;
+        EnrollmentStatus status = EnrollmentStatus.ABSENT;
         if (ap.getSession() != null) {
             status = context.getInfoSessionDAO().getUserEnrollmentStatus(ap.getSession().getId(), ap.getUserId());
         }
@@ -223,7 +229,7 @@ public class Approvals extends Controller {
         UserHeader user = udao.getUserHeader(app.getUserId());
         if (form.hasErrors()) {
             // TODO: code in common with approvalAdmin
-            EnrollementStatus status = EnrollementStatus.ABSENT;
+            EnrollmentStatus status = EnrollmentStatus.ABSENT;
             if (app.getSession() != null) {
                 InfoSessionDAO idao = context.getInfoSessionDAO();
                 status = idao.getUserEnrollmentStatus(app.getSession().getId(), app.getUserId());
@@ -253,14 +259,14 @@ public class Approvals extends Controller {
 
     // used in injected context
     private static Result approvalForm(Approval ap, DataAccessContext context, Form<ApprovalAdminData> form, boolean bad) {
-        EnrollementStatus status = EnrollementStatus.ABSENT;
+        EnrollmentStatus status = EnrollmentStatus.ABSENT;
         int userId = ap.getUserId();
         if (ap.getSession() != null) {
             InfoSessionDAO idao = context.getInfoSessionDAO();
             status = idao.getUserEnrollmentStatus(ap.getSession().getId(), userId);
         }
         UserHeader user = context.getUserDAO().getUserHeader(userId);
-        Iterable<String> reasons = checkApprovalConditions(userId, context.getUserDAO(), context.getMembershipDAO(), context.getFileDAO());
+        Iterable<String> reasons = checkApprovalConditions(userId, context.getUserDAO(), context.getFileDAO());
         if (!bad) {
             return ok(approvaladmin.render(ap, user, status, reasons, form));
         } else {

@@ -1,0 +1,14 @@
+
+@(e: Class[_ <: Enum[_]], field: play.api.data.Field, label: String, css: String="col-md-6")
+<div class="form-group @css @if(field.hasErrors) {has-error}" >
+    <label class="control-label" for="@field.name">@label</label>
+    <select name="@field.name" class="form-control" id="@field.id">
+        @option("",""){ Alle }
+        @for(item <- e.getEnumConstants) {
+            @option("",item.name){ @item.toString }
+        }
+    </select>
+    @field.errors.map { error =>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+    }
+</div>

@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(trip: TripAndCar, driver: UserHeader, previousDriver: UserHeader, nextDriver: UserHeader)
+@(trip: TripAndCar, driver: UserHeader, previousDriver: UserHeader, nextDriver: UserHeader, nextDate: String)
 
 
 @* only called when the user owns the car but is not a reservation admin*@
@@ -46,6 +46,6 @@
             @userInfo(driver)
         </div>
 
-        @previousnext(previousDriver, nextDriver)
+        @previousnext(previousDriver, nextDriver, nextDate)
     }
 }

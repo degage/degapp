@@ -1,0 +1,11 @@
+@(reminderAndUserAndInvoice: ReminderAndUserAndInvoice, url: String)
+
+Dag @reminderAndUserAndInvoice.getUser.getFirstName,
+
+Voor je afrekening @reminderAndUserAndInvoice.getInvoice.getNumber (@url) vonden we nog geen betaling terug.
+We hadden de betaling ten laatste verwacht op @reminderAndUserAndInvoice.getInvoice.getDueDate.
+
+Mogelijk heb je dit over het hoofd gezien.
+Kan je dit nakijken ?
+
+Als we ons vergissen, laat je dit best weten aan admin@@degage.be met vermelding van afrekeningnummer @reminderAndUserAndInvoice.getInvoice.getNumber.

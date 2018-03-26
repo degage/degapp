@@ -56,35 +56,35 @@ public interface FileDAO {
 
     // USER FILES
 
-    public enum UserFileType {
-        ID, LICENSE // TODO: add DAMAGE?
+    public enum FileType {
+        ID, LICENSE, INITIAL_STATE // TODO: add DAMAGE?
     }
 
     /**
      * Delete an image file for an identity card or a drivers license
      */
-    public void deleteUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException;
+    public void deleteFileByType(int userId, int fileId, FileType uft) throws DataAccessException;
 
 
     /**
      * Return all the image files for an identity card or a drivers license
      */
-    public Iterable<File> getUserFiles(int userId, UserFileType uft) throws DataAccessException;
+    public Iterable<File> getFilesByType(int userId, FileType uft) throws DataAccessException;
 
     /**
      * Return a single user image file, or null if it does not exist
      */
-    public File  getUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException;
+    public File  getFileByType(int userId, int fileId, FileType uft) throws DataAccessException;
 
     /**
      * Add an image file for an identity card  or a drivers license
      */
-    public void addUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException;
+    public void addFileByType(int userId, int fileId, FileType uft) throws DataAccessException;
 
     /**
      * Did the given user upload at least one file of the given type? (Used to check completeness of profile.)
      */
-    public boolean hasUserFile (int userId, UserFileType uft) throws DataAccessException;
+    public boolean hasFileByType (int userId, FileType uft) throws DataAccessException;
 
     // DAMAGE FILES
 

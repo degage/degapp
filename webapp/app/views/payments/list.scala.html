@@ -1,0 +1,33 @@
+
+@(list: Iterable[Payment])
+
+@scripts = {
+    @js.pagination("Payments.showPaymentsPage")
+    @js.userpicker()
+}
+
+@stdlayout("Debiteurenbeheer: betalingen", scripts=scripts) {
+
+  @js.paymentMenu()
+
+  @panel("Betalingen zoeken", "fa-search"){
+      @search.textField("payment_id", "nummer", "col-xs-4")
+      @search.textField("date", "Datum", "col-xs-4")
+      @search.textField("account_number", "Rekeningnummer", "col-xs-4")
+      @search.userpicker("user_id", "Gebruiker", "col-xs-4")
+      @search.textField("bank", "Bankcode", "col-xs-4")
+      @search.textField("name", "Naam", "col-xs-4")
+      @search.textField("amount", "Bedrag", "col-xs-4")
+      @* @search.selectEnumStatus(classOf[PaymentStatus], "status", "Status", "col-md-4") *@
+      @search.textField("status", "Status (ok, te bekijken, geen afrekening)", "col-xs-4")
+      @search.textField("type", "Debit / credit", "col-xs-4")
+      @search.textField("comment", "Vrije communicatie", "col-xs-4")
+      @search.textField("structured_comm", "Gestructureerde communicatie", "col-xs-4")
+      @search.textField("filename", "Bestandsnaam", "col-xs-4")
+      @search.button("Zoek!")
+  }
+
+  @resultsTablePanel("Betalingen", "fa-file")
+  <div id='select-invoice' ></div>
+  <script src="@routes.Assets.at("main.js")" type="text/javascript"></script>
+}

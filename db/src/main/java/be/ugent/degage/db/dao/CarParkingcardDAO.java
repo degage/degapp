@@ -42,4 +42,5 @@ public interface CarParkingcardDAO {
 	// public void deleteCarParkingcard(CarParkingcardExtended assistance) throws DataAccessException;
 	public Page<CarParkingcardExtended> getAllCarParkingcards(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 	// public void deleteAllCarParkingcards() throws DataAccessException;
+	public void updateCarParkingcardDocument(int autoId, int fileId) throws DataAccessException;
 }

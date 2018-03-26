@@ -1,27 +1,27 @@
 /* CheckDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -30,6 +30,7 @@
 package be.ugent.degage.db.dao;
 
 import java.time.LocalDateTime;
+import be.ugent.degage.db.models.ApprovalStatus;
 
 /**
  * DAO which checks for inconsistencies and anomalies in the database.
@@ -37,7 +38,7 @@ import java.time.LocalDateTime;
 public interface CheckDAO {
 
     public enum AnomalyType {
-        OVERLAP, GAP, ZERO_KM
+        OVERLAP, GAP, ZERO_KM, REQUEST_DETAILS
     }
 
     /**
@@ -76,11 +77,29 @@ public interface CheckDAO {
     public class RefuelAnomaly {
         public int carId;  // id of the car
         public String carName;
+        public ApprovalStatus refuelStatus;
         public int reservationId;
         public int refuelId;
         public LocalDateTime from;
         public int eurocents;
     }
 
+    /**
+     * Return a list of anomalies concerning duplicate refuels
+     *
+     * @param carId     The car for which the anomalies should be checked, if zero then
+     *                  check all cars.
+     * @param billingId Only check trips that start before the limit date in this billing
+     */
+    public Iterable<RefuelAnomaly> getDuplicateRefuels(int billingId, int carId);
+
+    /**
+     * Return a list of anomalies concerning unreviewed refuels
+     *
+     * @param carId     The car for which the anomalies should be checked, if zero then
+     *                  check all cars.
+     * @param billingId Only check trips that start before the limit date in this billing
+     */
+    public Iterable<RefuelAnomaly> getUnReviewedRefuels(int billingId, int carId);
 
 }

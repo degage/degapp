@@ -28,7 +28,8 @@
  *@
 
 @(userId: Int, reservations: Page[Reservation], asc : Int, orderBy : String, filter : String)
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-trips">
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-trips">
     <thead>
         <tr role="row">
             <th class="sortable" name="name">Autonaam</th>
@@ -62,4 +63,5 @@
         }
     </tbody>
 </table>
+</div>
 @pagination(reservations)

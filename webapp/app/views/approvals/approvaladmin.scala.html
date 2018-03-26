@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approval: Approval, user: UserHeader, enrollStatus: EnrollementStatus, reasons: Iterable[String] = null, form: Form[Approvals.ApprovalAdminData])
+@(approval: Approval, user: UserHeader, enrollStatus: EnrollmentStatus, reasons: Iterable[String] = null, form: Form[Approvals.ApprovalAdminData])
 
 @stdlayout("Goedkeuringsaanvraag") {
     @if(reasons.iterator.hasNext) {

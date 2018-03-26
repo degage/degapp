@@ -1,0 +1,65 @@
+
+@(payment: PaymentAndUser, invoices: Iterable[Invoice])
+
+@panel("Details", "fa-bar-chart-o"){
+    <div class="col-sm-6">
+        <h4>Betaling</h4>
+        <dl class="dl-horizontal">
+            <dt>Betalingsnummer</dt>
+            <dd>@payment.getPayment.getNumber</dd>
+            <dt>Datum</dt>
+            <dd>@payment.getPayment.getDate</dd>
+            <dt>Rekeningnummer</dt>
+            <dd>@payment.getPayment.getAccountNumber</dd>
+            <dt>Rekeninghouder</dt>
+            <dd>@payment.getPayment.getName</dd>
+            <dt>Gebruiker</dt>
+            <dd>
+              @if(payment.getPayment.getUserId == 0) {
+                Geen gebruiker gevonden
+              } else {
+                @payment.getPayment.getUserId - @payment.getUser.getFirstName @payment.getUser.getLastName
+              }
+            </dd>
+            <dt>Adres</dt>
+            <dd>@payment.getPayment.getAddress</dd>
+            <dt>Bank</dt>
+            <dd>@payment.getPayment.getBank</dd>
+            <dt>Bedrag</dt>
+            <dd>@payment.getPayment.getAmount</dd>
+            <dt>Status</dt>
+            <dd>
+              @if(payment.getPayment.getStatus == PaymentStatus.OK) {
+                <span class="label label-success">OK</span>
+              } else {
+                @if(payment.getPayment.getStatus == PaymentStatus.CHANGE) {
+                  <span class="label label-warning">Te bekijken</span>
+                } else {
+                  @if(payment.getPayment.getStatus == PaymentStatus.UNASSIGNED) {
+                    <span class="label label-danger">Geen afrekening</span>
+                  }
+                }
+              }
+            </dd>
+            <dt>Vrije communicatie</dt>
+            @if(payment.getPayment.getComment == null) {
+                <dd>-</dd>
+            } else {
+                <dd>@payment.getPayment.getComment</dd>
+            }
+            <dt>Gestructureerde communicatie</dt>
+            @if(payment.getPayment.getStructuredCommunication == null) {
+                <dd>-</dd>
+            } else {
+                <dd>@payment.getPayment.getStructuredCommunication</dd>
+            }
+            <dt>Munteenheid</dt>
+            <dd>@payment.getPayment.getCurrency</dd>
+            <dt>Filename</dt>
+            <dd>@payment.getPayment.getFilename</dd>
+        </dl>
+        <!-- <div><a href="/degapp/payments/@payment.getPayment.getId/invoices">Bekijk afrekening voor deze betaling</a></div> -->
+    </div>
+    @views.html.invoices.invoicesTable(invoices)
+
+}

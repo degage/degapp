@@ -1,27 +1,27 @@
 @* carInvoice.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -43,6 +43,7 @@
         <link rel="stylesheet" media="print" href="/public/stylesheets/billing.css" /> @* Important: href must start with / *@
    </head>
    <body>
+     <div>
       @defining(-details.getRecuperatedCarCosts+details.getOwnerFuelDue-details.getOwnerFuelPaid-details.getRecuperatedDepreciationCost) { total =>
       <div id="logo"><img src='/public/images/logo-brief-2.5in.png'  width="2.5in"/></div>
       <div id="top">
@@ -109,7 +110,11 @@
                </tr>
                <tr>
                    <td>% kms eigenaar</td>
-                   <td class="km">@(100*details.getOwnerKm/details.getTotalKm)%</td>
+                   <td class="km">@if(details.getTotalKm > 0) {
+                     @(100*details.getOwnerKm/details.getTotalKm)%
+                   } else {
+                     -
+                   }</td>
                </tr>
                <tr>
                    <td>door ontleners gereden kms</td>
@@ -117,7 +122,11 @@
                </tr>
                <tr>
                    <td>% gedeelde kms</td>
-                   <td class="km">@(100*(details.getTotalKm-details.getOwnerKm)/details.getTotalKm)%</td>
+                   <td class="km">@if(details.getTotalKm > 0) {
+                     @(100*(details.getTotalKm-details.getOwnerKm)/details.getTotalKm)%
+                   } else {
+                     -
+                   }</td>
                </tr>
                <tr>
                    <td class="vfiller"></td>
@@ -150,7 +159,13 @@
                </tr>
                <tr>
                    <td>autokost per km</td>
-                   <td class="numeric">@cents(details.getCarCosts*10/details.getTotalKm) €</td>
+                   @if(details.getTotalKm > 0) {
+                      <td class="numeric">
+                        @cents(details.getCarCosts*10/details.getTotalKm) €
+                      </td>
+                   } else {
+                     <td></td>
+                   }
                </tr>
                <tr>
                    <th>recuperatie autokosten</th>
@@ -187,7 +202,15 @@
                </tr>
                <tr>
                    <td>kilometerprijs in deze periode (1 + 2 + 3)</td>
-                   <td class="numeric">@cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDepreciationFactor*details.getDepreciationKm)/details.getTotalKm) €</td>
+
+                     @if(details.getTotalKm > 0) {
+                        <td class="numeric">
+                          @cents((10*(details.getTotalFuelCost+details.getCarCosts)+details.getDepreciationFactor*details.getDepreciationKm)/details.getTotalKm) €
+                        </td>
+                     } else {
+                       <td></td>
+                     }
+                   </td>
                </tr>
                <tr>
                    <td>terugverdienbedrag (1 + 2)</td>
@@ -239,5 +262,6 @@
       @degageAddress(billing.getId)
       </div>
    }
+ </div>
    </body>
 </html>

@@ -37,9 +37,11 @@ import be.ugent.degage.db.models.Car;
 import be.ugent.degage.db.models.CarInsurance;
 
 public interface CarInsuranceDAO {
-	public CarInsurance createCarInsurance(Date expiration, int bonus_malus, int polisNr, Car car) throws DataAccessException;
-	public void updateCarInsurance(CarInsurance insurance) throws DataAccessException;
-	public void deleteCarInsurance(CarInsurance insurance) throws DataAccessException;
-	public List<CarInsurance> getAllCarInsurances(Car car) throws DataAccessException;
-	public void deleteAllCarInsurances(Car car) throws DataAccessException;
+	// public CarInsurance createCarInsurance(Date expiration, int bonus_malus, int polisNr, Car car) throws DataAccessException;
+	// public void updateCarInsurance(CarInsurance insurance) throws DataAccessException;
+	// public void deleteCarInsurance(CarInsurance insurance) throws DataAccessException;
+	// public List<CarInsurance> getAllCarInsurances(Car car) throws DataAccessException;
+	// public void deleteAllCarInsurances(Car car) throws DataAccessException;
+	public void updateCarInsuranceDocument(int autoId, int fileId) throws DataAccessException;
+	public void updateCarGreenCardDocument(int autoId, int fileId) throws DataAccessException;
 }

@@ -1,0 +1,7 @@
+@(reminderAndUserAndInvoice: ReminderAndUserAndInvoice, url: String)
+
+<p>Dag @reminderAndUserAndInvoice.getUser.getFirstName,</p>
+
+<p>De volgende afrekening staat klaar voor je: <a href="@url">@reminderAndUserAndInvoice.getInvoice.getNumber</a>.
+</p>
+<br />

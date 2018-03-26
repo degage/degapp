@@ -30,6 +30,7 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.CarParkingcardDAO;
 import be.ugent.degage.db.models.Car;
+import be.ugent.degage.db.models.CarParkingcard;
 import be.ugent.degage.db.models.CarParkingcardExtended;
 import be.ugent.degage.db.models.Page;
 
@@ -44,7 +45,8 @@ import java.sql.Date;
 class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
 
 	private static final String ASSISTANCE_QUERY =
-		"SELECT SQL_CALC_FOUND_ROWS parkingcard_id, parkingcard_city, parkingcard_expiration, parkingcard_contract_id, parkingcard_zones, " +
+        "SELECT SQL_CALC_FOUND_ROWS " +
+        "carparkingcards.*, " +
 		"parkingcard_updated_at, car_name, details_car_license_plate " +
         "FROM carparkingcards " +
 		"LEFT JOIN cars ON parkingcard_id = car_id " +
@@ -54,13 +56,23 @@ class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
         super(context);
     }
 
-    private static CarParkingcardExtended populateCarParkingcard(ResultSet rs) throws SQLException {
-        Date parkingcardExpiration = rs.getDate("parkingcard_expiration");
-        return new CarParkingcardExtended(
+    public static CarParkingcard populateCarParkingcard(ResultSet rs) throws SQLException {
+        return new CarParkingcard(
             rs.getString("parkingcard_city"),
-            parkingcardExpiration == null ? null : parkingcardExpiration.toLocalDate(),
+            rs.getDate("parkingcard_expiration") == null ? null : rs.getDate("parkingcard_expiration").toLocalDate(),
             rs.getString("parkingcard_zones"),
             rs.getString("parkingcard_contract_id"),
+            rs.getInt("parkingcard_file_id")
+        );
+    }
+
+    public static CarParkingcardExtended populateCarParkingcardExtended(ResultSet rs) throws SQLException {
+        return new CarParkingcardExtended(
+            rs.getString("parkingcard_city"),
+            rs.getDate("parkingcard_expiration") == null ? null : rs.getDate("parkingcard_expiration").toLocalDate(),
+            rs.getString("parkingcard_zones"),
+            rs.getString("parkingcard_contract_id"),
+            rs.getInt("parkingcard_file_id"),
             rs.getString("car_name"),
             rs.getInt("parkingcard_id"),
             rs.getString("details_car_license_plate")
@@ -113,11 +125,24 @@ class JDBCCarParkingcardDAO extends AbstractDAO implements CarParkingcardDAO {
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page - 1) * pageSize);
             ps.setInt(2, pageSize);
-            return toPage(ps, pageSize, JDBCCarParkingcardDAO::populateCarParkingcard);
+            return toPage(ps, pageSize, JDBCCarParkingcardDAO::populateCarParkingcardExtended);
         } catch (SQLException ex) {
             throw new DataAccessException("Cannot get carparkingcard", ex);
         }
     }
 
-	// public void deleteAllCarParkingcards(Car car) throws DataAccessException;
+    // public void deleteAllCarParkingcards(Car car) throws DataAccessException;
+    
+    @Override
+    public void updateCarParkingcardDocument(int autoId, int fileId) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carparkingcards SET parkingcard_file_id = ? WHERE parkingcard_id = ?")) {
+            ps.setInt(1, fileId);
+            ps.setInt(2, autoId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update CarParkingcard document", ex);
+        }
+    }
+
 }

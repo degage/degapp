@@ -27,8 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
+
+ 
 @(name: String, id: Int)
 
 @* Used as a header for the car overview *@
 
-<a href="#1" onclick="loadModal(@id)">@name</a>
+<a href="@routes.Cars.detail(id)">@name</a>  
+
+         

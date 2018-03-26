@@ -75,6 +75,9 @@ public class CostsCommon extends Controller {
 
         public int spread; // not always used
 
+        public String commentCarAdmin;
+        public String commentCarOwner;
+
         public List<ValidationError> validate() {
             List<ValidationError> errors = new ArrayList<>();
             if (amount.getValue() <= 0) {
@@ -103,6 +106,10 @@ public class CostsCommon extends Controller {
             time = cost.getDate();
             spread = cost.getSpread();
             start = cost.getStartDate();
+            //show empty field
+            //content has to be prepended after
+            commentCarAdmin = null;
+            commentCarOwner = null;
         }
 
         public static CostData EMPTY = new CostData();

@@ -1,37 +1,38 @@
 @* listUser.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(list: Iterable[BillingInfo], userId: Int)
+@(list: Iterable[BillingInfo], invoiceList: Iterable[InvoiceAndUser], userId: Int)
 
 @stdlayout("Afrekeningen") {
+
 @panel("Afrekeningen", "fa-bar-chart-o") {
-<div class="table-responsive col-xs-12">
+<div id="resultsTable" class="table-responsive col-xs-12">
     <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
         <thead>
         <tr role="row">
@@ -77,4 +78,69 @@
     </table>
 </div>
 }
+
+@panel("Afrekeningen", "fa-money") {
+    <div id="resultsTable" class="table-responsive col-xs-12">
+      <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        <thead>
+            <tr role="row">
+                <th name="number" tabindex="0" >Nummer</th>
+                <th name="date" tabindex="0" >Datum</th>
+                <th name="payment_date" tabindex="0" >Betalingsdatum</th>
+                <th name="due_date" tabindex="0" >Uiterste betalingsdatum</th>
+                <th name="amount" tabindex="0" >Bedrag</th>
+                <th name="status" tabindex="0" >Status</th>
+                <th name="structured_comm" tabindex="0" >Gestructureerde communicatie</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+          @foreach.trOrElse(invoiceList){ invoiceAndUser =>
+            <td>@invoiceAndUser.getInvoice.getNumber</td>
+            <td>@invoiceAndUser.getInvoice.getDate</td>
+            <td>@invoiceAndUser.getInvoice.getPaymentDate</td>
+            <td>@invoiceAndUser.getInvoice.getDueDate</td>
+            <td>@invoiceAndUser.getInvoice.getAmount</td>
+            <td>
+              @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.PAID) {
+                <span class="label label-success">Betaald</span>
+              } else {
+                @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.OPEN) {
+                  <span class="label label-warning">Open</span>
+                } else {
+                  @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.OVERDUE) {
+                    <span class="label label-danger">Te laat</span>
+                  }
+                  @if(invoiceAndUser.getInvoice.getPaidAmount > 0) {
+                    (Reeds betaald:  @invoiceAndUser.getInvoice.getPaidAmount €)
+                  }
+                }
+              }
+            </td>
+            <td>
+              @if(invoiceAndUser.getInvoice.getStructuredCommunication == null) {
+                  -
+              } else {
+                  @invoiceAndUser.getInvoice.getStructuredCommunication
+              }
+            </td>
+            <td>
+              @if(invoiceAndUser.getInvoice.getCarId == 0){
+                  @btnPrimary("PDF lenersafrekening downloaden", routes.Billings.userDetails(invoiceAndUser.getInvoice.getBillingId, invoiceAndUser.getInvoice.getUserId))
+              } else {
+                  @btnPrimary("PDF eigenaarsafrekening downloaden", routes.Billings.carDetails(invoiceAndUser.getInvoice.getBillingId, invoiceAndUser.getInvoice.getCarId))
+              }
+            </td>
+          }{
+            <tr>
+                <td class="empty-row" colspan="12">
+                    Geen afrekeningen gevonden.
+                </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+}
+
 }

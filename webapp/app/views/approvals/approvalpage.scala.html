@@ -1,81 +1,92 @@
 @* approvalpage.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approvals: Page[ApprovalListInfo])
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
-    <thead>
-        <tr role="row">
-            <th name="user_name" class="sortable" tabindex="0" >Naam</th>
-            <th name="instant" class="sortable" tabindex="1">Ingediend</th>
-            <th>Admin</th>
-            <th>Lid</th>
-            <th>Getekend</th>
-            <th>Borg</th>
-            <th>Instap</th>
-            <th>Acties</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach.trOrElse(approvals) { approval =>
-            <td> <a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser.getFullName</a></td>
-            <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
-            <td>@if(approval.isAdminAssigned) {
-                <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin.getFullName</a>
-            }
-            </td>
-            @* note: null is printed as blank *@
-            <td>@Utils.toLocalizedDateString(approval.getDateJoined)</td>
-            <td>@Utils.toLocalizedDateString(approval.getContractDate)</td>
-            <td>@approval.getDeposit</td>
-            <td>@approval.getFee</td>
-            <td>
-                <div class="btn-group btn-group-xs">
-                    @if(! approval.isAdminAssigned) {
-                        @btnInfo("Admin toewijzen", routes.Approvals.approvalAdmin(approval.getId))
-                    } else {
-                      @if(approval.getDeposit == null || approval.getFee == null) {
-                        @btnSuccess("Borg/lidgeld", routes.Profile.deposit(approval.getUser.getId))
-                      }
-                      @if(approval.getContractDate == null) {
-                        @btnWarning("Contractdatum", routes.Contracts.contract(approval.getUser.getId, Approvals.REF_APPROVALS))
-                      }
-                      @if(approval.getStatus == MembershipStatus.PENDING) {
-                          @btnPrimary("Afronden", routes.Approvals.approvalApproveReject(approval.getId))
-                      } else {
-                         @if(approval.getStatus == MembershipStatus.DENIED) {
-                             @btnWarning("Aanpassen", routes.Approvals.approvalApproveReject(approval.getId))
-                         }
-                      }
+@(approvals: Page[ApprovalListInfo], lastInfoSessions: List[InfoSession])
+@import java.math.BigInteger;var loopIndex = -1
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-users">
+        <thead>
+            <tr role="row">
+                <th name="user_name" class="sortable" tabindex="0" >Naam</th>
+                <th name="instant" class="sortable" tabindex="1">Ingediend</th>
+                <th>Admin</th>
+                <th>Lid</th>
+                <th>Getekend</th>
+                <th>Borg</th>
+                <th>Instap</th>
+                <th>Bijgewoonde infosessie</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach.trOrElse(approvals) { approval =>
+                @(loopIndex = loopIndex + 1)
+                <td> <a href="@routes.Profile.index(approval.getUser.getId)">@approval.getUser.getFullName</a></td>
+                <td>@Utils.toLocalizedDateString(approval.getSubmitted)</td>
+                <td>@if(approval.isAdminAssigned) {
+                    <a href="@routes.Profile.index(approval.getAdmin.getId)">@approval.getAdmin.getFullName</a>
+                }
+                </td>
+                @* note: null is printed as blank *@
+                <td>@Utils.toLocalizedDateString(approval.getDateJoined)</td>
+                <td>@Utils.toLocalizedDateString(approval.getContractDate)</td>
+                <td>@approval.getDeposit</td>
+                <td>@approval.getFee</td>
+                <td>
+                    @if(lastInfoSessions.get(loopIndex) != null) {
+                        @lastInfoSessions.get(loopIndex).getType().toString()
+                        <a href="@routes.InfoSessions.detail(lastInfoSessions.get(loopIndex).getId())">Bekijken</a>
                     }
-                </div>
-            </td>
-        }{ @noresults() }
-    </tbody>
-</table>
+                </td>
+                <td>
+                    <div class="btn-group btn-group-xs">
+                        @if(! approval.isAdminAssigned) {
+                            @btnInfo("Admin toewijzen", routes.Approvals.approvalAdmin(approval.getId))
+                        } else {
+                          @if(approval.getDeposit == null || approval.getFee == null) {
+                            @btnSuccess("Borg/lidgeld", routes.Profile.deposit(approval.getUser.getId))
+                          }
+                          @if(approval.getContractDate == null) {
+                            @btnWarning("Contractdatum", routes.Contracts.contract(approval.getUser.getId, Approvals.REF_APPROVALS))
+                          }
+                          @if(approval.getStatus == MembershipStatus.PENDING) {
+                              @btnPrimary("Afronden", routes.Approvals.approvalApproveReject(approval.getId))
+                          } else {
+                             @if(approval.getStatus == MembershipStatus.DENIED) {
+                                 @btnWarning("Aanpassen", routes.Approvals.approvalApproveReject(approval.getId))
+                             }
+                          }
+                        }
+                    </div>
+                </td>
+            }{ @noresults() }
+        </tbody>
+    </table>
+</div>
 @pagination(approvals)

@@ -1,0 +1,15 @@
+@(user: UserHeader, infoDate: String)
+
+
+@*Post info session mail. User was absent *@
+
+Beste @user.getFirstName,
+
+Je was niet aanwezig op de infosessie van @infoDate. 
+
+Als je graag meer info wil over onze autodeelgroep, kan je je inschrijven voor een nieuwe infosessie via de website. 
+(http://www.degage.be/degapp)
+
+Wil je graag nog even wachten tot er een auto in je buurt komt, volg dan onze autodeelkaart. 
+(http://www.degage.be/autodelen/deelauto/)
+

@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(approval: Approval, user: UserHeader, enrollStatus: EnrollementStatus)
+@(approval: Approval, user: UserHeader, enrollStatus: EnrollmentStatus)
 @panel("Gebruiker", "fa-user"){
    <div class="col-xs-12">
        <dl class="dl-horizontal">
@@ -39,13 +39,13 @@
                     <span class="label label-danger">Nooit ingeschreven</span>
                 } else {
                     @enrollStatus match {
-                        case EnrollementStatus.ABSENT => {
+                        case EnrollmentStatus.ABSENT => {
                             <span class="label label-danger">Afwezig</span>
                         }
-                        case EnrollementStatus.ENROLLED => {
+                        case EnrollmentStatus.ENROLLED => {
                             <span class="label label-warning">Ingeschreven</span>
                         }
-                        case EnrollementStatus.PRESENT => {
+                        case EnrollmentStatus.PRESENT => {
                             <span class="label label-success">Aanwezig</span>
                         }
                     }

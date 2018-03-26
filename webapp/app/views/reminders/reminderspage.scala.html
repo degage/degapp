@@ -1,0 +1,73 @@
+
+@(reminders: Page[ReminderAndUserAndInvoice])
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        <thead>
+        <tr role="row">
+            <th name="number" tabindex="0" >Nummer</th>
+            <th name="date" class="sortable" tabindex="0" >Datum</th>
+            <th name="description" tabindex="0" >Beschrijving</th>
+            <th name="user" class="sortable" tabindex="0" >Gebruiker</th>
+            <th name="invoice" tabindex="0" >Afrekening</th>
+            <th name="status" tabindex="0" >Status</th>
+            <th>Acties</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach.trOrElse(reminders){ reminder =>
+            <td>
+               @reminder.getReminder.getId
+            </td>
+            <td>@reminder.getReminder.getDate</td>
+            <td>
+                @if(reminder.getReminder.getDescription == "FIRST") {
+                    <span class="label label-default">Eerste rappel</span>
+                } else {
+                    @if(reminder.getReminder.getDescription == "SECOND") {
+                        <span class="label label-warning">Tweede rappel</span>
+                    } else {
+                        @if(reminder.getReminder.getDescription == "THIRD") {
+                            <span class="label label-danger">Derde rappel</span>
+                        } else {
+                            reminder.getReminder.getDescription
+                        }
+                    }
+                }
+            </td>
+            <td>
+                @if(reminder.getUser == null) {
+                    Geen gebruiker gevonden
+                } else {
+                    <a href="@routes.Profile.index(reminder.getUser.getId)">@reminder.getUser.getFirstName @reminder.getUser.getLastName</a>
+                }
+            </td>
+            <td>
+                @if(reminder.getInvoice == null) {
+                    Geen afrekening gevonden
+                } else {
+                <a href="@routes.Invoices.showDetails(reminder.getInvoice.getId)">@reminder.getInvoice.getNumber</a>
+                }
+            </td>
+            <td>
+                @if(reminder.getReminder.getStatus == "PAID") {
+                    <span class="label label-success">Betaald</span>
+                } else {
+                    @if(reminder.getReminder.getStatus == "OPEN") {
+                        <span class="label label-danger">Open</span>
+                    }
+                }
+            </td>
+            <td>
+                Knoppen
+            </td>
+        }{
+            <tr>
+                <td class="empty-row" colspan="12">
+                    Geen enkele rappel voldoet aan jouw zoekterm(en)
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+@pagination(reminders)

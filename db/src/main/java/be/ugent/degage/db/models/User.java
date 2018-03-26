@@ -1,27 +1,27 @@
 /* User.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -30,16 +30,27 @@
 package be.ugent.degage.db.models;
 
 import java.time.LocalDate;
+import com.google.gson.annotations.Expose;
 
 /**
  * Represents a single user
  */
 public class User extends UserHeader {
 
+    @Expose
     private Address addressDomicile;
+    @Expose
     private Address addressResidence;
+    @Expose
     private String license;
     private LocalDate licenseDate;
+
+    /**
+    * The number of the user's bank account.
+    */
+    @Expose
+    private String accountNumber;
+    @Expose
     private LocalDate dateJoined;
     private LocalDate dateCreated;
     private LocalDate dateBlocked;
@@ -53,6 +64,16 @@ public class User extends UserHeader {
     private String vatNr;
     private String userReasonBlocked;
     private String userReasonDropped;
+
+    private LocalDate licenseExpiration;
+    private LocalDate idExpiration;
+
+    @Expose
+    private boolean sendReminder;
+    @Expose
+    private String paymentInfo;
+    @Expose
+    private UserCreditStatus creditStatus;
 
     // private int profilePictureId; // picture must be retrieved separately
 
@@ -78,12 +99,21 @@ public class User extends UserHeader {
     public void setAddressResidence(Address addressResidence) {
         this.addressResidence = addressResidence;
     }
+
     public String getLicense() {
         return license;
     }
 
     public void setLicense(String license) {
         this.license = license;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public void setAccountNumber(String accountNumber) {
+        this.accountNumber = accountNumber;
     }
 
     public String getIdentityId() {
@@ -198,5 +228,56 @@ public class User extends UserHeader {
 
     public void setUserReasonDropped(String userReasonDropped) {
         this.userReasonDropped = userReasonDropped;
+    }
+
+    public LocalDate getLicenseExpiration() {
+        return licenseExpiration;
+    }
+
+    public void setLicenseExpiration(LocalDate licenseExpiration) {
+        this.licenseExpiration = licenseExpiration;
+    }
+
+    public LocalDate getIdExpiration() {
+        return idExpiration;
+    }
+
+    public void setIdExpiration(LocalDate idExpiration) {
+        this.idExpiration = idExpiration;
+    }
+
+    public boolean getSendReminder() {
+        return sendReminder;
+    }
+
+    public void setSendReminder(boolean sendReminder) {
+        this.sendReminder = sendReminder;
+    }
+
+    public boolean isSendReminder() {
+        return sendReminder;
+    }
+
+    public String getPaymentInfo() {
+        return paymentInfo;
+    }
+
+    public void setPaymentInfo(String paymentInfo) {
+        this.paymentInfo = paymentInfo;
+    }
+
+    public void setCreditStatus(UserCreditStatus status) {
+      this.creditStatus = status;
+    }
+
+    public UserCreditStatus getCreditStatus() {
+      return creditStatus;
+    }
+
+    //builder pattern
+    //TODO refactor entir class to this pattern
+    public User setPaymentInfoBuilder(String paymentInfo) {
+        this.paymentInfo = paymentInfo;
+        return this;
     }
 }

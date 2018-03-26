@@ -1,0 +1,10 @@
+@(lines: Iterable[util.InvoicePickerLine])
+
+@foreach(lines) { line =>
+<li data-uid="@line.getId">
+    <a href="#">
+        <span>@line.getPrefix<strong>@line.getStrong</strong>@line.getSuffix</span> : € @line.getAmount
+            -  @line.getUser.getFirstName @line.getUser.getLastName
+    </a>
+</li>
+}

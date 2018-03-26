@@ -49,7 +49,8 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             "car_cost_id, car_cost_car_id,	car_cost_proof,	car_cost_amount, car_cost_description, " +
                     "car_cost_status, car_cost_time, car_cost_mileage, car_name, car_owner_user_id, " +
                     "category_id, category_description, car_cost_spread, " +
-                    "car_cost_comment, car_cost_already_paid, car_cost_start ";
+                    "car_cost_comment, car_cost_already_paid, car_cost_start, " +
+                    "car_cost_car_admin_comment, car_cost_car_owner_comment ";
 
     public static final String CAR_COST_QUERY =
             "SELECT " + CAR_COST_FIELDS + " FROM carcosts " +
@@ -80,7 +81,9 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
                 rs.getInt("car_cost_spread"),
                 rs.getString("car_cost_comment"),
                 rs.getDate("car_cost_start").toLocalDate(),
-                rs.getInt("car_cost_already_paid")
+                rs.getInt("car_cost_already_paid"),
+                rs.getString("car_cost_car_admin_comment"),
+                rs.getString("car_cost_car_owner_comment")
         );
         carCost.setStatus(ApprovalStatus.valueOf(rs.getString("car_cost_status")));
 
@@ -332,6 +335,51 @@ class JDBCCarCostDAO extends AbstractDAO implements CarCostDAO {
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Error while updating cost status ", ex);
+        }
+    }
+
+    // returns a string with the new message prependend to the old
+    private String prependMessage(String newMessage, String oldMessage) {
+        String res;
+        if (oldMessage == null) {
+            res = newMessage;
+        } else {
+            res = newMessage + " <br> -------------------- <br> " + oldMessage;
+        }
+        return res;
+    }
+
+    //prepend the new comment instead of overwriting it
+    @Override
+    public void addCommentCarAdmin(int costId, String message) throws DataAccessException {
+        String oldMessage = getCarCost(costId).getCommentCarAdmin();
+        String newMessage = prependMessage(message, oldMessage);
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carcosts SET car_cost_status = 'REQUEST', car_cost_car_admin_comment = ? " +
+                        "WHERE car_cost_id = ?"
+        )) {
+            ps.setString(1, newMessage);
+            ps.setInt(2, costId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while updating comment ", ex);
+        }
+    }
+
+    //prepend the new comment instead of overwriting it
+    @Override
+    public void addCommentCarOwner(int costId, String message) throws DataAccessException {
+        String oldMessage = getCarCost(costId).getCommentCarOwner();
+        String newMessage = prependMessage(message, oldMessage);
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE carcosts SET car_cost_status = 'REQUEST', car_cost_car_owner_comment = ? " +
+                        "WHERE car_cost_id = ?"
+        )) {
+            ps.setString(1, newMessage);
+            ps.setInt(2, costId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Error while updating comment ", ex);
         }
     }
 }

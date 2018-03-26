@@ -29,6 +29,19 @@
 
 @(car: CarHeaderLong)
 
+<span style = "background-color:darkgoldenrod" class="label label-gps">@car.getSeats zetels</span>
+<span style = "background-color:darkgoldenrod" class="label label-gps">@car.getDoors deurs</span>
+<span style = "background-color:gray" class="label label-gps">@car.getCarYear</span>
+
+@if(car.getFuel().toString() == "Benzine") {<span style = "background-color:orange" class="label label-gps">@car.getFuel</span>} 
+@if(car.getFuel().toString() == "Diesel") {<span style = "background-color:rgb(100, 100, 100)" class="label label-gps">@car.getFuel</span>} 
+@if(car.getFuel().toString() == "Elektrisch") {<span style = "background-color:darkgreen" class="label label-gps">@car.getFuel</span>} 
+@if(car.getFuel().toString() == "Hybride") {<span style = "background-color:green" class="label label-gps">@car.getFuel</span>}
+@if(car.getFuel().toString() == "LPG") {<span style = "background-color:darkolivegreen" class="label label-gps">@car.getFuel</span>}
+@if(car.getFuel().toString() == "CNG") {<span style = "background-color:olivedrab" class="label label-gps">@car.getFuel</span>}
+@if(car.getFuel().toString() == "Biodiesel") {<span style = "background-color:lightgreen" class="label label-gps">@car.getFuel</span>}
+@*car.fueleconomy is km per 100km (moet nog toegevoegd worden)*@
+
 @if(car.isGps){ <span class="label label-gps">gps</span> }
 @if(car.isHook){ <span class="label label-hook">trekhaak</span> }
 @if(!car.isManual){ <span class="label label-automatic">automaat</span> }

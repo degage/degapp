@@ -70,7 +70,7 @@ public class CarPreferences extends Controller {
     @InjectContext
     @AllowRoles({})
     public static Result edit() {
-        CarPreferencesDAO dao = DataAccess.getInjectedContext().getCarPreferencesDao();
+        CarPreferencesDAO dao = DataAccess.getInjectedContext().getCarPreferencesDAO();
         List<CarPreference> list = dao.listPreferences(CurrentUser.getId());
         Form<CarPreferencesData> form = Form.form(CarPreferencesData.class).fill(new CarPreferencesData(list));
         return ok(preferences.render(
@@ -86,7 +86,7 @@ public class CarPreferences extends Controller {
         if (form.hasErrors()) {
             return badRequest(); // this should not happen
         } else {
-            DataAccess.getInjectedContext().getCarPreferencesDao().updatePreferences(
+            DataAccess.getInjectedContext().getCarPreferencesDAO().updatePreferences(
                     CurrentUser.getId(),
                     form.get().included.keySet()
             );

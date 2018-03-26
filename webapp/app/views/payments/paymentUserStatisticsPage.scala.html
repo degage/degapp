@@ -1,0 +1,42 @@
+@(stats: Page[PaymentUserStatistic])
+
+<div class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
+        <thead>
+        <tr role="row">
+            <th name="name" class="sortable">Naam</th>
+            <th align="right">Totaal te betalen</th>
+            <th align="right">Totaal betaald</th>
+            <th align="right">Verschil</th>
+            <th>Acties</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach.trOrElse(stats){ stat =>
+        <td>
+            <a href="@routes.Profile.index(stat.getUser.getId)">@stat.getUser.getFirstName @stat.getUser.getLastName</a>
+        </td>
+        <td align="right">
+            @((math rint stat.getAmountToPay * 100) / 100) €
+        </td>
+        <td align="right">
+            @((math rint stat.getAmountPaid * 100) / 100) €
+        </td>
+        <td align="right">
+            @((math rint (stat.getAmountToPay - stat.getAmountPaid) * 100) / 100) €
+        </td>
+        <td >
+            @btnPrimary("Afrekeningen", routes.Invoices.getInvoicesForUser(stat.getUser.getId))
+            @btnPrimary("Betalingen", routes.Payments.getPaymentsForUser(stat.getUser.getId))
+        </td>
+        }{
+        <tr>
+            <td class="empty-row" colspan="12">
+                Niks gevonden
+            </td>
+        </tr>
+        }
+        </tbody>
+    </table>
+</div>
+@pagination(stats)

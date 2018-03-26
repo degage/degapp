@@ -1,0 +1,24 @@
+
+@(list: Iterable[Reminder])
+
+@scripts = {
+    @js.pagination("Reminders.showRemindersPage")
+    @js.userpicker()
+}
+
+@stdlayout("Debiteurenbeheer: rappels", scripts=scripts) {
+
+    @js.paymentMenu()
+
+    @panel("Rappels zoeken", "fa-search"){
+        @search.textField("reminder_date", "Datum", "col-xs-4")
+        @search.textField("invoice_number", "Afrekeningnummer", "col-xs-4")
+        @search.userpicker("user_id", "Gebruiker", "col-xs-4")
+        @search.textField("reminder_description", "Beschrijving", "col-xs-4")
+        @search.textField("reminder_status", "Status (open of betaald)", "col-xs-4")
+        @search.button("Zoek !")
+    }
+
+    @resultsTablePanel("Rappels", "fa-file")
+
+}

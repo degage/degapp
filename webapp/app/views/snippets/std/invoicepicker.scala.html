@@ -1,0 +1,9 @@
+
+@(name: String, label: String, css: String = "col-xs-6 col-md-4", initialId: Int = -1, initialName: String = "")
+@* invoice picker component *@
+<div class="form-group userpicker @css" data-url="@routes.InvoicePicker.getList()">
+    <label class="control-label" for="@name">@label</label>
+    <input id="invoiceInputNumber" type="text" data-toggle="dropdown" class="form-control input-md" value="@initialName" autocomplete="off"/>
+    <input type="hidden" class="searchTextField" id="@name" name="@name" value="@initialId" />
+    <div class="viewId"></div><ul class="dropdown-menu" role="menu"></ul>
+</div>

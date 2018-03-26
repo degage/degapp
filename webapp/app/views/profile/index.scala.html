@@ -27,7 +27,7 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: User, completeness: Int = 0)
+@(user: User, completeness: Int = 0, ownProfile: Boolean)
 
 @* Displays an editable version of the profile page for the given user. *@
 
@@ -43,10 +43,18 @@
                 </div>
             <div class="col-xs-12">
 
-                @btnPrimary("Profielinformatie wijzigen",routes.Profile.edit(user.getId))
-                @btnPrimary("Profielfoto wijzigen",routes.Profile.profilePictureUpload(user.getId))
-                @btnPrimary("Rijbewijsgegevens wijzigen",routes.Profile.editDriversLicense(user.getId))
-                @btnPrimary("Identiteitsgegevens wijzigen",routes.Profile.editIdentityCard(user.getId))
+                @if((db.CurrentUser hasRole UserRole.PROFILE_ADMIN) || ownProfile ||
+                    !(db.CurrentUser hasRole UserRole.INFOSESSION_ADMIN)) {
+                    @btnPrimary("Profielinformatie wijzigen",routes.Profile.edit(user.getId))
+                    @btnPrimary("Profielfoto wijzigen",routes.Profile.profilePictureUpload(user.getId))
+                    @btnPrimary("Rijbewijsgegevens wijzigen",routes.Profile.editDriversLicense(user.getId))
+                    @btnPrimary("Identiteitsgegevens wijzigen",routes.Profile.editIdentityCard(user.getId))
+                    @btnPrimary("Rekeningnummer wijzigen",routes.Profile.editAccountNumber(user.getId))
+                }
+
+                @if(db.CurrentUser hasRole UserRole.INFOSESSION_ADMIN){
+                    @btnWarning("Contractdatum",routes.Contracts.contract(user.getId, Users.REF_USERS))
+                }
 
                 @if(db.CurrentUser hasRole UserRole.PROFILE_ADMIN){
                     @if(user.getStatus != UserStatus.REGISTERED && user.getStatus != UserStatus.FULL_VALIDATING) {
@@ -54,6 +62,7 @@
                     }
                     @btnWarning("Lidmaatschap",routes.Profile.deposit(user.getId))
                     @btnWarning("E-mailadres aanpassen",routes.Profile.updateEmail(user.getId))
+                    @btnWarning("Betalingen info",routes.Profile.updatePaymentInfo(user.getId))
                 }
             </div>
         }
@@ -85,6 +94,14 @@
                                 @user.getLicense
                             } else {
                                 (onbekend)
+                            }
+                        </dd>
+                        <dt>Rekeningnummer</dt>
+                        <dd>
+                            @if(user.getAccountNumber != null) {
+                            @user.getAccountNumber
+                            } else {
+                            (onbekend)
                             }
                         </dd>
                     </dl>

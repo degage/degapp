@@ -36,6 +36,7 @@ error.email=Ongeldig e-mailadres
 subject.passwordReset=Wachtwoord opnieuw instellen
 subject.verification=Aanvraag toegang webapplicatie
 subject.infosessionEnrolled=Bevestiging infosessie autodelen
+subject.postInfosession=Infosessie over autodelen van gisteren 
 subject.reservationRequest=Aanvraag reservatie {0} voor {1}
 subject.reservationApproved=Reservatie {0} goedgekeurd voor {1}
 subject.oldReservationApproved=Reservatie {0} a posteriori goedgekeurd
@@ -43,6 +44,7 @@ subject.reservationRejected=Reservatie {0} geweigerd
 subject.reservationCancelled=Goedgekeurde reservatie {0} geannuleerd voor {1}
 subject.membershipApproved=Bevestiging lidmaatschap {0} {1}
 subject.membershipRejected=Lidmaatschap geweigerd
+subject.membershipInvoice=Lidmaatschap betaling
 subject.costApproved=Kost goedgekeurd
 subject.costRejected=Kost niet goedgekeurd
 subject.refuelApproved=Tankbeurt {0} goedgekeurd. Rit van {1}
@@ -55,10 +57,7 @@ subject.managerAssigned=Contract ondertekenen
 subject.detailsProvided=Kilometerstanden {0} voor {1} ({2})
 subject.lateCancel=Rit {0} gemarkeerd als niet doorgegaan
 subject.detailsRejected=Kilometerstanden {0} niet goedgekeurd. Rit van {1}
-
-
-
-
-
-
-
+subject.initialPaymentReminder={0} ({1}) - factuur
+subject.firstPaymentReminder={0} ({1}) - herinnering
+subject.secondPaymentReminder={0} ({1}) - betalingsherinnering
+subject.thirdPaymentReminder={0} ({1}) - 3de herinnering

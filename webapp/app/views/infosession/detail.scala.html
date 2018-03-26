@@ -71,7 +71,7 @@
                         <th>Naam</th>
                         <th>Aanwezigheid</th>
                         <th>Aanwezigheid wijzigen</th>
-                        <th>Lid</th>
+                        <th>Contract / Lid</th>
                         <th>Acties</th>
                     </tr>
                 </thead>
@@ -84,28 +84,35 @@
                         </td>
                         <td>
                             @enrollee.getStatus match {
-                                case EnrollementStatus.ENROLLED => {
+                                case EnrollmentStatus.ENROLLED => {
                                     onbekend
                                 }
-                                case EnrollementStatus.PRESENT => {
+                                case EnrollmentStatus.PRESENT => {
                                     aanwezig
                                 }
-                                case EnrollementStatus.ABSENT => {
+                                case EnrollmentStatus.ABSENT => {
                                     afwezig
                                 }
                             }
                         </td>
                         <td>
                             <div class="btn-group btn-group-xs">
-                                <a class="btn btn-default" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ENROLLED.name())">
+                                <a class="btn btn-default" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollmentStatus.ENROLLED.name())">
                                         onbekend</a>
-                                <a class="btn btn-success" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.PRESENT.name())">
+                                <a class="btn btn-success" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollmentStatus.PRESENT.name())">
                                         aanwezig</a>
-                                <a class="btn btn-warning" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollementStatus.ABSENT.name())">
+                                <a class="btn btn-warning" href="@routes.InfoSessions.setUserSessionStatus(infoSession.getId, enrollee.getUser.getId, EnrollmentStatus.ABSENT.name())">
                                         afwezig</a>
                             </div>
                         </td>
-                        <td>@Utils.toLocalizedDateString(enrollee.getDateJoined)</td>
+                        <td>@if(Utils.toLocalizedDateString(enrollee.getDateContract) != null) {
+                                @Utils.toLocalizedDateString(enrollee.getDateContract) / @Utils.toLocalizedDateString(enrollee.getDateJoined)
+                            } else {
+                                <div class="row"><div id='contract-date-modal-@enrollee.getUser.getId'></div></div>
+                                <script>DegageReactPort.contractDate('contract-date-modal-@enrollee.getUser.getId', '@enrollee.getUser.getId')</script>
+                                <a class="btn btn-default btn-xs" href="@routes.Contracts.contract(enrollee.getUser.getId, Users.REF_USERS)">Contract</a>
+                            }
+                        </td>
                         </td>
                         <td>
                             @btnSuccess("verwijderen", routes.InfoSessions.removeUserFromSession(infoSession.getId, enrollee.getUser.getId))

@@ -1,0 +1,14 @@
+@(user: UserHeader, infoDate: String)
+
+@*Post info session mail. User is present and contracted *@
+Beste @user.getFirstName, 
+
+Je was aanwezig op de infosessie van @infoDate en tekende je contract.
+Om toegang tot de deelauto's te hebben, dien je enkel nog het instapgeld 
+en de borg over te maken. Je zal hier nog een mail voor krijgen of 
+je kan de afrekening hiervan vinden op je dashboard van de website (www.degage.be/degapp).
+
+Na ontvangst van je betaling wordt je account automatisch geactiveerd en 
+zijn alle auto's zichtbaar.
+Log in op de website (www.degage.be/degapp) voor je eerste reservatie en voor het vervolledigen van je profiel.
+

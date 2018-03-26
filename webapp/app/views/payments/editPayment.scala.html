@@ -1,0 +1,63 @@
+
+@(form: Form[Payments.PaymentModel], payment: Payment)
+@import providers.DataProvider
+
+@scripts = {
+    @js.userpicker()
+    <script>
+        $(document).ready(function () {
+            $("#invoiceId").trigger("change");
+
+            $("#invoiceInputNumber").change(function() {
+                var id = document.getElementById("invoiceId").getAttribute("value");
+                if(id > 0) {
+                    $("select#status").value = "OK";
+                }
+            });
+        });
+    </script>
+}
+
+@stdlayout("Debiteurenbeheer: bewerk betaling", scripts) {
+
+    @js.paymentMenu()
+
+    @helper.form(routes.Payments.editPaymentPost(payment.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+        <div class="row">
+            @formErrors(form)
+            <div class="col-lg-12">
+                @panel("Bewerk betaling", "fa-pencil-square-o"){
+                    <fieldset>
+                        @std.static(payment.getNumber.toString,"Betalingsnummer", "col-md-4")
+                        @std.static(payment.getDate.toString,"Betalingsdatum", "col-md-4")
+                        @std.static(payment.getAccountNumber.toString,"Rekeningnummer", "col-md-4")
+                        @std.userpicker(form("userId"), form("userIdAsString"), "Gebruiker", css="col-md-4")
+                        @std.invoicepicker("invoiceId", "Afrekening", css="col-md-4", Integer.parseInt(form("invoiceId").value), form("invoiceNumber").value)
+                        @std.static(payment.getName.toString,"Naam", "col-md-4")
+                        @if(payment.getAddress == null) {
+                            @std.static("","Adres", "col-md-4")
+                        } else {
+                            @std.static(payment.getAddress,"Adres", "col-md-4")
+                        }
+                        @std.static(payment.getBank.toString,"Bank", "col-md-4")
+                        @std.static(payment.getAmount.toString+" €","Bedrag", "col-md-4")
+                        @std.selectEnumStatus(classOf[PaymentStatus], form("status"), "Status", "col-md-4")
+                        @if(payment.getComment == null) {
+                            @std.static("-","Vrije communicatie", "col-md-4")
+                        } else {
+                            @std.static(payment.getComment,"Vrije communicatie", "col-md-4")
+                        }
+                        @if(payment.getStructuredCommunication == null) {
+                            @std.static("-","Gestructureerde communicatie", "col-md-4")
+                        } else {
+                            @std.static(payment.getStructuredCommunication,"Gestructureerde communicatie", "col-md-4")
+                        }
+                        @std.static(payment.getCurrency.toString,"Munteenheid", "col-md-4")
+                        @std.static(payment.getFilename.toString,"Bestand", "col-md-4")
+                    </fieldset>
+                }
+            </div>
+        </div>
+        @std.submitButton("Wijzigingen opslaan")
+    }
+}

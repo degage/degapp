@@ -97,23 +97,36 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
         }
     }
 
-    private static final Map<UserFileType, String> TABLE_NAMES = new EnumMap<>(UserFileType.class);
+    private static final Map<FileType, String> TABLE_NAMES = new EnumMap<>(FileType.class);
 
     static {
-        TABLE_NAMES.put(UserFileType.ID, "idfiles");
-        TABLE_NAMES.put(UserFileType.LICENSE, "licensefiles");
+        TABLE_NAMES.put(FileType.ID, "idfiles");
+        TABLE_NAMES.put(FileType.LICENSE, "licensefiles");
+        TABLE_NAMES.put(FileType.INITIAL_STATE, "carinitialstatefiles");
     }
 
-    private String getTableName(UserFileType uft) {
+    private String getTableName(FileType uft) {
         return TABLE_NAMES.get(uft);
     }
 
+    private static final Map<FileType, String> TABLE_OWNER_NAMES = new EnumMap<>(FileType.class);
+
+    static {
+        TABLE_OWNER_NAMES.put(FileType.ID, "user_id");
+        TABLE_OWNER_NAMES.put(FileType.LICENSE, "user_id");
+        TABLE_OWNER_NAMES.put(FileType.INITIAL_STATE, "car_id");
+    }
+
+    private String getRecordOwnerName(FileType uft) {
+        return TABLE_OWNER_NAMES.get(uft);
+    }
+
     @Override
-    public void deleteUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException {
+    public void deleteFileByType(int ownerId, int fileId, FileType uft) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "DELETE FROM " + getTableName(uft) + "  WHERE user_id = ? AND file_id = ?"
+                "DELETE FROM " + getTableName(uft) + "  WHERE  " + getRecordOwnerName(uft) + "  = ? AND file_id = ?"
         )) {
-            ps.setInt(1, userId);
+            ps.setInt(1, ownerId);
             ps.setInt(2, fileId);
             if (ps.executeUpdate() != 1)
                 throw new DataAccessException("Failed to delete file in database. 0 rows affected.");
@@ -123,14 +136,14 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
     }
 
     @Override
-    public Iterable<File> getUserFiles(int userId, UserFileType uft) throws DataAccessException {
+    public Iterable<File> getFilesByType(int ownerId, FileType uft) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT file_id, file_path, file_name, file_content_type " +
                         "FROM files JOIN " + getTableName(uft) + " USING (file_id) " +
-                        "WHERE user_id = ?"
+                        "WHERE  " + getRecordOwnerName(uft) + "  = ?"
 
         )) {
-            ps.setInt(1, userId);
+            ps.setInt(1, ownerId);
             return toList(ps, JDBCFileDAO::populateFile);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to get id files", ex);
@@ -138,14 +151,14 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
     }
 
     @Override
-    public File getUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException {
+    public File getFileByType(int ownerId, int fileId, FileType uft) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT file_id, file_path, file_name, file_content_type " +
                         "FROM files JOIN " + getTableName(uft) + " USING (file_id) " +
-                        "WHERE user_id = ? AND file_id = ?"
+                        "WHERE  " + getRecordOwnerName(uft) + "  = ? AND file_id = ?"
 
         )) {
-            ps.setInt(1, userId);
+            ps.setInt(1, ownerId);
             ps.setInt(2, fileId);
             return toSingleObject(ps, JDBCFileDAO::populateFile);
         } catch (SQLException ex) {
@@ -154,12 +167,12 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
     }
 
     @Override
-    public void addUserFile(int userId, int fileId, UserFileType uft) throws DataAccessException {
+    public void addFileByType(int ownerId, int fileId, FileType uft) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "INSERT INTO " + getTableName(uft) + "(user_id,file_id) VALUES (?,?)"
+                "INSERT INTO " + getTableName(uft) + "( " + getRecordOwnerName(uft) + " ,file_id) VALUES (?,?)"
 
         )) {
-            ps.setInt(1, userId);
+            ps.setInt(1, ownerId);
             ps.setInt(2, fileId);
             ps.executeUpdate();
         } catch (SQLException ex) {
@@ -168,11 +181,11 @@ class JDBCFileDAO extends AbstractDAO implements FileDAO {
     }
 
     @Override
-    public boolean hasUserFile(int userId, UserFileType uft) throws DataAccessException {
+    public boolean hasFileByType(int ownerId, FileType uft) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT 1 FROM " + getTableName(uft) + " WHERE user_id = ? LIMIT 1"
+                "SELECT 1 FROM " + getTableName(uft) + " WHERE  " + getRecordOwnerName(uft) + "  = ? LIMIT 1"
         )) {
-            ps.setInt(1, userId);
+            ps.setInt(1, ownerId);
             return isNonEmpty(ps);
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to find license files", ex);

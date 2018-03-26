@@ -42,7 +42,11 @@
             <dt>Kilometerstand</dt>
             <dd>@refuel.getKm</dd>
             <dt>Bonnetje</dt>
-            <dd><a href="@routes.Refuels.getProof(refuel.getId)">Link</a></dd>
+            <dd>
+                <a href="@routes.Refuels.getProof(refuel.getId)">
+                    <img src="@routes.Refuels.getProof(refuel.getId)" alt="Download bonnetje" class="img-responsive">
+                </a>
+            </dd>
             @* TODO: make when.notblank snippet *@
             @if(refuel.getMessage != null && !refuel.getMessage.trim.isEmpty) {
                 <dt>Opmerkingen</dt>

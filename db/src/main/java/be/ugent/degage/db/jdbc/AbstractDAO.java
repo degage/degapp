@@ -1,27 +1,27 @@
 /* AbstractDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -35,11 +35,12 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.time.LocalDate;
 
 /**
  * Common superclass of the data access objects in this package.
  */
-class AbstractDAO {
+public class AbstractDAO {
 
     // mysql error codes
     protected static final int MYSQL_ERROR_DUPLICATE_ENTRY = 1062;
@@ -128,7 +129,7 @@ class AbstractDAO {
      * @param <T>
      */
     @FunctionalInterface
-    interface ResultSetConverter<T> {
+    protected interface ResultSetConverter<T> {
         public T convert(ResultSet rs) throws SQLException;
     }
 
@@ -173,6 +174,15 @@ class AbstractDAO {
     }
 
     /**
+     * Executes a prepared statement and converts it into a page. Executes a 'found rows query' on the same connection
+     */
+    protected static <T> Page<T> toPage(List<T> l, int pageSize, int fullSize) throws SQLException {
+        Page<T> page = new Page<>(l, pageSize, fullSize);
+        page.setFullSize(fullSize);
+        return page;
+    }
+
+    /**
      * Executes a prepared statement and returns true if and only if there is a result
      */
     protected static boolean isNonEmpty(PreparedStatement ps) throws SQLException {
@@ -190,6 +200,32 @@ class AbstractDAO {
                 return rs.getInt(1);
             } else {
                 return 0;
+            }
+        }
+    }
+
+    /**
+     * Executes a prepared statement and converts the first result into a float, or 0 if no result.
+     */
+    protected static float toSingleFloat(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getFloat(1);
+            } else {
+                return 0f;
+            }
+        }
+    }
+
+    /**
+     * Executes a prepared statement and converts the first result into a string, or 0 if no result.
+     */
+    protected static LocalDate toSingleDate(PreparedStatement ps) throws SQLException {
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return rs.getDate(1).toLocalDate();
+            } else {
+                return null;
             }
         }
     }

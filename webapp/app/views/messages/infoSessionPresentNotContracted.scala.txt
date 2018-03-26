@@ -1,0 +1,15 @@
+@(user: UserHeader, infoDate: String)
+
+@*Post info session mail. User is present but not contracted *@
+
+Beste @user.getFirstName,
+
+Je was aanwezig op de infosessie van @infoDate. 
+Hopelijk kreeg je daar een antwoord op al je vragen.
+Het contract kan je nog nalezen op de website (www.degage.be/contract.pdf)
+
+Beslis je om aan te sluiten bij onze autodeelgroep, dien dan je vraag tot lidmaatschap in via de website.
+Iemand uit je buurt wordt aangewezen als contractverantwoordelijke.
+Nadat je daar langsging, ontvang je via e-mail een afrekening voor het betalen van de borg en instap.
+Betaal deze enkel met de gestructureerde mededeling.
+

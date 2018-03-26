@@ -43,6 +43,11 @@ public interface AddressDAO {
     public Address getAddress(int id) throws DataAccessException;
 
     /**
+    * Return the address record linked to the given auto-id. Returns null when not found.
+    */
+    public Address getAddressByAutoId(int autoId) throws DataAccessException;
+
+    /**
      * Create a new address record
      */
     public Address createAddress(String country, String zip, String city, String street, String num, float lat, float lng) throws DataAccessException;

@@ -26,7 +26,8 @@
 @(parkingcardList: Page[CarParkingcardExtended])
 
 @defining(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) { isAdmin =>
-    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-parkingcards">
+    <div id="resultsTable" class="table-responsive col-xs-12">
+        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-parkingcards">
         <thead>
             <tr role="row">
                 <th class="sortable" name="car_name">Auto</th>
@@ -54,5 +55,6 @@
             }
         </tbody>
     </table>
+    </div>
     @pagination(parkingcardList)
 }

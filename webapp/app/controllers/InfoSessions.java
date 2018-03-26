@@ -1,27 +1,27 @@
 /* InfoSessions.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -30,11 +30,13 @@
 package controllers;
 
 import be.ugent.degage.db.DataAccessContext;
+import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.InfoSessionDAO;
 import be.ugent.degage.db.dao.UserDAO;
 import be.ugent.degage.db.models.*;
 import controllers.util.Addresses;
 import controllers.util.UserpickerData;
+import controllers.util.Pagination;
 import db.CurrentUser;
 import db.DataAccess;
 import db.InjectContext;
@@ -65,10 +67,9 @@ public class InfoSessions extends Controller {
         @Constraints.Required
         public Instant time;
         public Integer max_enrollees;
-
         public String type;
-
         public String comments;
+        public String description;
 
         public String submit; // "default" or "copyOwnerAddress"
 
@@ -204,7 +205,7 @@ public class InfoSessions extends Controller {
                 );
 
                 dao.updateInfoSession(sessionId, InfoSessionType.valueOf(data.type), data.max_enrollees, data.time,
-                        data.userId, data.comments, data.address.toAddress());
+                        data.userId, data.comments, data.address.toAddress(), data.description);
                 flash("success", "De wijzigingen werden met succes toegepast.");
                 return redirect(routes.InfoSessions.detail(sessionId));
             }
@@ -243,7 +244,7 @@ public class InfoSessions extends Controller {
         return ok(detail.render(
             infoSession,
             Form.form(UserpickerData.class),
-            dao.getEnrollees(sessionId), 
+            dao.getEnrollees(sessionId),
             new Maps.MapDetails(infoSession.getAddress().getLat(), infoSession.getAddress().getLng(), 14, "Infosessie"))
         );
     }
@@ -319,7 +320,7 @@ public class InfoSessions extends Controller {
         DataAccess.getInjectedContext().getInfoSessionDAO().setUserEnrollmentStatus(
                 sessionId,
                 userId,
-                Enum.valueOf(EnrollementStatus.class, status)
+                Enum.valueOf(EnrollmentStatus.class, status)
         );
         flash("success", "De gebruikersstatus werd aangepast.");
         return redirect(routes.InfoSessions.detail(sessionId));
@@ -367,7 +368,7 @@ public class InfoSessions extends Controller {
 
         InfoSession alreadyAttending = dao.getAttendingInfoSession(CurrentUser.getId());
         InfoSession session = dao.getInfoSession(sessionId);
-        int numberOfAttendees = dao.getAmountOfAttendees(sessionId);
+        int numberOfAttendees = dao.getAmountOfEnrollees(sessionId);
 
         if (session.getMaxEnrollees() != 0 && numberOfAttendees >= session.getMaxEnrollees()) {
             flash("danger", "Deze infosessie zit reeds vol.");
@@ -421,7 +422,8 @@ public class InfoSessions extends Controller {
                         data.address.toAddress(),
                         data.time,
                         data.max_enrollees == null ? 0 : data.max_enrollees,
-                        data.comments);
+                        data.comments,
+                        data.description);
 
                 // Schedule the reminder
                 context.getJobDAO().createJob(
@@ -429,6 +431,13 @@ public class InfoSessions extends Controller {
                         sessionId,
                         data.time.minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("infosession_reminder")))
                 );
+
+                //Schedule post info emails
+                // context.getJobDAO().createJob(
+                //     JobType.IS_POST_INFOSESSION,
+                //     sessionId,
+                //     data.time.minusSeconds(60L * Integer.parseInt(context.getSettingDAO().getSettingForNow("post_infosession")))
+                // );
 
                 return redirect(
                         routes.InfoSessions.showSessions() // return to infosession list
@@ -464,7 +473,7 @@ public class InfoSessions extends Controller {
     public static F.Promise<Result> showUpcomingSessionsOriginal() {
         final User user = DataProvider.getUserProvider().getUser();
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
-        final Tuple<InfoSession, EnrollementStatus> enrolled = dao.getLastInfoSession(user);
+        final Tuple<InfoSession, EnrollmentStatus> enrolled = dao.getLastInfoSession(user);
 
         final boolean didUserGoToInfoSession = didUserGoToInfoSession();
         boolean showMaps = enrolled != null && "true".equals (DataAccess.getInjectedContext().getSettingDAO().getSettingForNow("show_maps"));
@@ -496,6 +505,9 @@ public class InfoSessions extends Controller {
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         InfoSessionDAO.LastSessionResult lis = dao.getLastInfoSession(CurrentUser.getId());
         Maps.MapDetails mapDetails = new Maps.MapDetails();
+        System.out.println("---> show upcoming sessions");
+        System.out.println("is owner" + CurrentUser.hasRole(UserRole.CAR_OWNER));
+        java.util.Set<UserRole> userRoles = DataAccess.getInjectedContext().getUserRoleDAO().getUserRoles(CurrentUser.getId());
         if (lis.session != null && lis.session.getAddress() != null) {
             mapDetails = new Maps.MapDetails(lis.session.getAddress().getLat(), lis.session.getAddress().getLng(), 14, "Infosessie");
         }
@@ -509,9 +521,21 @@ public class InfoSessions extends Controller {
                 dao.getUpcomingInfoSessions(),
                 lis.session,
                 mapDetails,
-                lis.present)
+                lis.present,userRoles.contains(UserRole.CAR_OWNER))
             );
         }
+    }
+
+    @AllowRoles({})
+    @InjectContext
+    public static Result enrollWithCar(int userId) {
+        return ok(enrollWithCar.render(userId));
+    }
+
+    @AllowRoles({})
+    @InjectContext
+    public static Result setInitialCarState(int carId) {
+        return ok(setInitialCarState.render(carId));
     }
 
     /**
@@ -529,16 +553,17 @@ public class InfoSessions extends Controller {
     @AllowRoles(UserRole.INFOSESSION_ADMIN)
     @InjectContext
     public static Result showSessionsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
-
+        FilterField field = FilterField.stringToField(orderBy, FilterField.USER_NAME);
+        boolean isAsc = Pagination.parseBoolean(ascInt);
 
         InfoSessionDAO dao = DataAccess.getInjectedContext().getInfoSessionDAO();
         if (searchString.endsWith("PENDING")) {
             return ok(infosessionsAdminPage.render(
-                    dao.getFutureInfoSessions(page, pageSize), true
+                    dao.getFutureInfoSessions(field, isAsc, page, pageSize), true
             ));
         } else {
             return ok(infosessionsAdminPage.render(
-                    dao.getPastInfoSessions(page, pageSize), false
+                    dao.getPastInfoSessions(field, isAsc, page, pageSize), false
             ));
         }
     }

@@ -72,7 +72,7 @@ public class Users extends Controller {
     /**
      * @return The users index-page with all users
      */
-    @AllowRoles({UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result showUsersWithTabs(int tab) {
         return ok(usersWithTabs.render(tab));

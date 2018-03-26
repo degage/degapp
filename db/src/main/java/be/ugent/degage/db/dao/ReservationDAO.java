@@ -1,27 +1,27 @@
 /* ReservationDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -51,6 +51,12 @@ public interface ReservationDAO {
      */
     public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId) throws DataAccessException;
 
+    /**
+     * Add a new reservation to the database. If the user is privileged for the car then the reservation is accepted automatically. If the
+     * from date is in the past, the reservation is given status REQUEST_DETAILS automatically.
+     */
+    public ReservationHeader createReservation(LocalDateTime from, LocalDateTime until, int carId, int userId, String message) throws DataAccessException;
+
 
     /**
      * Returns the reservation with the given id.
@@ -69,14 +75,19 @@ public interface ReservationDAO {
     /**
      * Update reservation status including an optional message. Should only be used when
      * refusing a reservation or cancelling a reservation that is already in the past
+     * Message parameter will be <b>appended</b> to the previous messages.
      */
-    public void updateReservationStatus (int reservationId, ReservationStatus status, String message);
+    public void updateReservationStatusAndAppendMessage (int reservationId, ReservationStatus status, String message);
 
     /**
      * Update reservation status but not the message.
      */
     public void updateReservationStatus (int reservationId, ReservationStatus status);
 
+    /**
+    * Message parameter will be <b>appended</b> to the previous messages.
+    */
+    public void appendReservationMessage (int reservationId, String message);
 
     public void updateReservationTime (int reservationId, LocalDateTime from, LocalDateTime until);
 

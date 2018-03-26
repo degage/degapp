@@ -1,0 +1,22 @@
+@import java.time.LocalDate
+@import java.time.temporal.IsoFields
+
+@(nbrOfMissingTripInfo: Int, nbrOfMissingRefuelInfo: Int, billingPeriodStartDate: LocalDate, carId: Int)
+
+@if(nbrOfMissingTripInfo > 0 || nbrOfMissingRefuelInfo > 0) {
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            Kwartaal @(billingPeriodStartDate.get(IsoFields.QUARTER_OF_YEAR))-@(billingPeriodStartDate.getYear()): We missen nog info over
+            @if(nbrOfMissingTripInfo > 0) {
+                <a href="@routes.Trips.overview(carId, billingPeriodStartDate.toString())">@nbrOfMissingTripInfo rit(ten)</a>
+            }
+            @if(nbrOfMissingTripInfo > 0 && nbrOfMissingRefuelInfo > 0) {
+                <span> en </span>
+            }
+            @if(nbrOfMissingRefuelInfo > 0) {
+                <a href="@routes.Refuels.showRefuels()">@nbrOfMissingRefuelInfo tankbeurt(en)</a>
+            }
+            <span>.</span>
+        </div>
+    </div>
+}

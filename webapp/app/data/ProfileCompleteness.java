@@ -32,6 +32,8 @@ package data;
 import be.ugent.degage.db.models.Address;
 import be.ugent.degage.db.models.User;
 
+import java.time.LocalDate;
+
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -50,9 +52,12 @@ public class ProfileCompleteness {
         EMAIL_ADDRESS ("Geldig e-mailadres"),
         PHONE("Telefoon- en/of GSM-nummer"),
         ID_CARD_NUMBER ("Nummer identiteitskaart"),
+        ID_EXPIRATION_DATE ("Vervaldatum van identiteitdskaart"),
         NATIONAL_NUMBER ("Rijksregisternummer"),
         LICENSE_NUMBER ("Rijbewijsnummer"),
         LICENSE_SCAN ("Scan/foto van rijbewijs"),
+        LICENSE_DATE ("Geldigheidsdatum van rijbewijs"),
+        ACCOUNT_NUMBER ("Rekeningnummer"),
         PROFILE_PICTURE ("Profielfoto");
 
         private final String description;
@@ -63,7 +68,10 @@ public class ProfileCompleteness {
     }
     
     private Set<Item> set;
+    private User user;
 
+    private boolean hasPicture;
+    private boolean hasLicenseFile;
 
     /**
      * Return the set of profile items which are already complete.
@@ -93,33 +101,45 @@ public class ProfileCompleteness {
      */
     public ProfileCompleteness (User user, boolean hasLicenseFile, boolean hasPicture) {
         set = EnumSet.noneOf(Item.class);
-        if (!isBlank(user.getFirstName())) {
+        this.hasPicture = hasPicture;
+        this.hasLicenseFile = hasLicenseFile;
+        this.user = user;
+        if (hasFirstName()) {
             set.add(Item.FIRST_NAME);
         }
-        if (!isBlank(user.getLastName())) {
+        if (hasLastName()) {
             set.add(Item.LAST_NAME);
         }
-        if (isComplete(user.getAddressDomicile())) {
+        if (hasAddressDomicile()) {
             set.add(Item.ADDRESS_DOMICILE);
         }
-        if (isComplete(user.getAddressResidence())) {
+        if (hasAddressResidence()) {
             set.add(Item.ADDRESS_RESIDENCE);
         }
-        if (isValidEmail(user.getEmail())) {
+        if (hasValidEmail()) {
             set.add(Item.EMAIL_ADDRESS);
         }
-        if (!isBlank(user.getCellPhone()) || !isBlank (user.getPhone())) {
+        if (hasPhone()) {
             set.add(Item.PHONE);
         }
 
-        if (!isBlank(user.getIdentityId())) {
+        if (hasIdentityId()) {
             set.add(Item.ID_CARD_NUMBER);
         }
-        if (!isBlank(user.getNationalId())) {
+        if (hasIdExpirationDate()) {
+            set.add(Item.ID_EXPIRATION_DATE);
+        }
+        if (hasNationalId()) {
             set.add(Item.NATIONAL_NUMBER);
         }
-        if (!isBlank(user.getLicense())) {
+        if (hasDrivingLicense()) {
             set.add(Item.LICENSE_NUMBER);
+        }
+        if (hasDrivingLicenseDate()) {
+            set.add(Item.LICENSE_DATE);
+        }
+        if (!isBlank(user.getAccountNumber())) {
+            set.add(Item.ACCOUNT_NUMBER);
         }
         if (hasPicture) {
             set.add(Item.PROFILE_PICTURE);
@@ -130,9 +150,68 @@ public class ProfileCompleteness {
     }
 
     /**
+     * Checks for profile completion
+     */
+    public boolean hasFirstName() {
+        return !isBlank(user.getFirstName());
+    }
+
+    public boolean hasLastName() { return !isBlank(user.getLastName()); }
+
+    public boolean hasAddressDomicile() {
+        return isComplete(user.getAddressDomicile());
+    }
+
+    public boolean hasAddressResidence() {
+        return isComplete(user.getAddressResidence());
+    }
+
+    public boolean hasValidEmail() { return isValidEmail(user.getEmail()); }
+
+    public boolean hasPhone() { return (!isBlank(user.getCellPhone()) || !isBlank (user.getPhone())); }
+
+    public boolean hasAccountNumber() { return !isBlank(user.getAccountNumber()); }
+
+    public boolean hasIdentityId() {
+        return !isBlank(user.getIdentityId());
+    }
+
+    public boolean hasIdExpirationDate() {
+        if (user.getIdExpiration() == null) {
+            return false;
+        } else {
+            return user.getIdExpiration().isAfter(LocalDate.now());
+        }
+    }
+
+    public boolean hasNationalId() {
+        return !isBlank(user.getNationalId());
+    }
+
+    public boolean hasDrivingLicense() {
+        return !isBlank(user.getLicense());
+    }
+
+    public boolean hasDrivingLicenseDate() {
+        return user.getLicenseDate() != null;
+    }
+
+    public boolean hasPicture() {
+        return hasPicture;
+    }
+
+    public boolean hasLicenseFile() {
+        return hasLicenseFile;
+    }
+
+    /**
      * The (approximate) percentage of the profile which is complete
      */
     public int getPercentage() {
         return 100*set.size() / Item.values().length;
+    }
+
+    public int getUserId() {
+        return user.getId();
     }
 }

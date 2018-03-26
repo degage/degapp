@@ -28,35 +28,50 @@
  *@
 
 @(cars: Page[CarHeaderLong], fromString: String, untilString: String)
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
-    <thead>
-        <tr role="row">
-            <th name="name" class="sortable">Naam</th>
-            <th>Zitplaatsen</th>
-            <th>&nbsp;</th>
-            <th>Standplaats</th>
-            <th>Actie</th>
-        </tr>
-    </thead>
-    <tbody>
-    @foreach.trOrElse(cars){ car =>
-        <td> <a href="@routes.Cars.detail(car.getId)">@car.getName</a></td>
-        <td>@car.getSeats</td>
-        <td>@views.html.cars.cartags(car)</td>
-        <td>@car.getLocation</td>
-        <td>
-            <div class="btn-group">
-                @btnSuccess("reserveer", routes.WFCreate.create(car.getId,fromString,untilString))
+
+<div id="resultsTable" class="table-responsive col-xs-12">
+        <div class="row">
+                <div class="col-md-1">
+                    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars" width='10%'>
+                        <thead>
+                            <tr role="row">
+                                <th name="name" class="sortable">Naam</th>
+                            </tr>
+                        </thead> 
+                    </table>           
+                </div>
             </div>
-        </td>
+                
+    @foreach.trOrElse(cars){ car =>
+        <style>#rij:hover{background-color:beige}</style>
+        <div class="row" id="rij" style=" margin-bottom:4px">
+        <div class="col-md-1" > <a role="button" data-toggle="collapse" href="#collapse-car-@car.getId" aria-expanded="false" aria-controls="collapse-car">@car.getName</a></div>
+        <div class="col-md-3" >
+            <div  class="btn-group">
+                    @btnPrimary("Reserveer", routes.Calendars.indexWithCar(car.getName,car.getId))
+                    &nbsp;
+                    @car.getBrand @car.getType
+            </div>
+
+        </div>
+        <div class="col-md-4" >        
+            @views.html.cars.cartags(car)
+        </div>
+        <div class="col-md-4" >@car.getLocation</div>
+        </div>
+        <div class="row">
+        <div style ="margin-left:20px;  margin-top:5px; background-color:beige" class="row collapse" id="collapse-car-@car.getId" >           
+            <div class="col-md-2"><img style="width:300px;" src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive"></div>
+            <div  class="col-md-10">@Html(car.getComments)</div> 
+        </div>
+        </div>
     }{
-        <tr>
-            <td colspan="6" class="empty-row">
+        <div class ="row">
+            <div class="col-12">
                 Geen resultaten.
-            </td>
-        </tr>
+            </div>
+        </div>
     }
-    </tbody>
-</table>
+</div>
 @pagination(cars)
 

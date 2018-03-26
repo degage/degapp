@@ -1,0 +1,9 @@
+@(userId: Integer)
+@import db.CurrentUser
+@import providers.DataProvider
+
+@stdlayout("Inschrijven voor infosessie", stylesheets=sheets("react-datepicker")) {
+  <div id='enroll-infosession'></div>
+  <script>DegageReactPort.enrollInfosession('enroll-infosession', @userId, @db.CurrentUser.hasRole(UserRole.CAR_OWNER))</script>
+
+}

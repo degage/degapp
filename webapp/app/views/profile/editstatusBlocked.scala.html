@@ -1,27 +1,27 @@
 @* editstatusBlocked.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -32,12 +32,19 @@
 @* Allow the profile admin to change the status of a registered or validating user. *@
 
 @editstatus(user){
-   <div class="col-xs-4">
-       <a class="btn btn-warning btn-sm" href="@routes.Profile.unblockUser(user.getId)">Deblokkeer gebruiker</a>
-   </div>
-   <div class="col-xs-8">
-       <strong>Opgelet!</strong>
-           Hiermee keert de gebruiker terug naar de status <i>geregistreerd</i> en zal opnieuw het
-           lidmaatschap moeten gegeven worden. (Volgend scherm.)
-   </div>
+  <div class="row">
+    <div class="col-xs-4" style="margin-left: 20px">
+        <a class="btn btn-warning btn-sm" href='@routes.Profile.unblockUser(user.getId, "FULL")'>Deblokkeer gebruiker tot volwaardig lid</a>
+    </div>
+  </div>
+  <div class="row" style="margin-top: 20px">
+    <div class="col-xs-4" style="margin-left: 20px">
+        <a class="btn btn-warning btn-sm" href='@routes.Profile.unblockUser(user.getId, "REGISTERED")'>Deblokkeer gebruiker tot geregistreerd lid</a>
+    </div>
+    <div class="col-xs-8"  style="margin-left: 30px">
+        <strong>Opgelet!</strong>
+            Hiermee keert de gebruiker terug naar de status <i>geregistreerd</i> en zal opnieuw het
+            lidmaatschap moeten gegeven worden. (Volgend scherm.)
+    </div>
+  </div>
 }

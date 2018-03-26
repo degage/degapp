@@ -29,7 +29,8 @@
 
 @(carCostList: Iterable[CarCost], withSpread: Boolean)(actions: CarCost => Html)
 
-<table class="table table-striped table-bordered table-hover no-footer" >
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" >
     <thead>
         <tr role="row">
             <th class="sortable" name="name">Auto</th>
@@ -71,3 +72,4 @@
         }
     </tbody>
 </table>
+</div>

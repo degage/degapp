@@ -27,7 +27,9 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(headerHtml: String, firstName: String, completeness: Int, userWentToInfoSession: Boolean, approvalRequestSent: Boolean)
+@import data.ProfileCompleteness
+@(headerHtml: String, firstName: String, userWentToInfoSession: Boolean, futureInfoSession: InfoSession, approvalRequestSent: Boolean,
+    pc: ProfileCompleteness, hasPicture: Boolean)
 
 @app("Welkom"){
     @breadcrumbs {
@@ -48,7 +50,7 @@
         </div>
         <div class="row">
             <div class="col-lg-3">
-                <div  class="panel @if(userWentToInfoSession) { panel-success } else { panel-info } ">
+                <div  class="panel @if(userWentToInfoSession) { panel-success } else { panel-info lead } ">
                     <div class="panel-heading">
                         <strong>1.</strong> Volg een infosessie
                     </div>
@@ -56,27 +58,42 @@
                                 @if(userWentToInfoSession) {
                                     Je bent reeds naar een infosessie geweest. Werk stappen 2. en 3. af om volwaardig
                                     lid te worden.
+                                } else { @if(futureInfoSession != null) {
+                                    Je bent reeds ingeschreven voor een infosessie (zie "Infosessies" in het linkermenu).
                                 } else {
-                                    Inschrijven voor een infosessie doe je <a href="@routes.InfoSessions.showUpcomingSessions">
+                                    Inschrijven voor een infosessie doe je <a href="@routes.InfoSessions.enrollWithCar(pc.getUserId())">
                                         hier</a>.
-                                }
+                                }}
                     </div>
                 </div>
             </div>
             @triangle
             <div class="col-lg-4 col-xs-12">
-                <div class="panel @if(completeness == 100) { panel-success } else { panel-info } ">
+                <div class="panel @if(pc.getPercentage() == 100) { panel-success } else { panel-info }
+                        @if(userWentToInfoSession && (!hasPicture || !pc.hasIdentityId() || !pc.hasNationalId() ||
+                            !pc.hasDrivingLicense() || !pc.hasDrivingLicenseDate())) { lead } ">
                     <div class="panel-heading">
                         <strong>2.</strong> Vul je profiel verder aan
                     </div>
                     <div class="panel-body">
-                        @if(completeness != 100) {
+                        @if(pc.getPercentage() != 100) {
                             Onderstaande zaken vul je best aan voordat je je volwaardig lidmaatschap aanvraagt:
                             <ul>
-                                <li>Domicilieadres</li>
-                                <li>Verblijfsadres</li>
-                                <li>Identiteitskaart</li>
-                                <li>Rijbewijs</li>
+                                @if(!hasPicture) {
+                                    <li>Profielfoto</li>
+                                }
+                                @if(!pc.hasIdentityId()) {
+                                    <li>Nummer identiteitskaart</li>
+                                }
+                                @if(!pc.hasNationalId()) {
+                                    <li>Rijksregisternummer</li>
+                                }
+                                @if(!pc.hasDrivingLicense()) {
+                                    <li>Nummer rijbewijs</li>
+                                }
+                                @if(!pc.hasDrivingLicenseDate()) {
+                                    <li>Datum afgifte rijbewijs</li>
+                                }
                             </ul>
                             Je kan je profiel <a href="@routes.Profile.indexWithoutId">hier</a> wijzigen.
                         } else {
@@ -87,7 +104,9 @@
             </div>
             @triangle
             <div class="col-lg-3 col-xs-12">
-                <div class="panel @if(approvalRequestSent) { panel-success } else { panel-info } ">
+                <div class="panel @if(approvalRequestSent) { panel-success } else { panel-info }
+                        @if(userWentToInfoSession && hasPicture && pc.hasIdentityId() && pc.hasNationalId() &&
+                            pc.hasDrivingLicense() && pc.hasDrivingLicenseDate() && !approvalRequestSent) { lead } ">
                     <div class="panel-heading">
                         <strong>3.</strong> Word volwaardig lid
                     </div>

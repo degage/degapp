@@ -1,0 +1,54 @@
+
+@(form: Form[Profile.ReminderData], user: User)
+
+@stdlayout("Betalingsinfo",extrabc=breadcrumb("Profiel", routes.Profile.index(user.getId))){
+    @panel("Betalingsinfo", "fa-envelope-o"){
+        @formErrors(form)
+        @helper.form(routes.Profile.updatePaymentInfoPost(user.getId)){
+            @std.static(user.getFullName, "Gebruiker",css="col-md-6 col-lg-3")
+            @std.checkbox(form("sendReminders"), "Rappels sturen?", "", css="col-md-4 col-lg-2")
+            @std.textArea(form("paymentInfo"), "Extra betalingsinfo", 6)
+            @std.selectEnumStatus(classOf[UserCreditStatus], form("creditStatus"), "Kredietstatus")
+            @std.submitButton("Wijzigen")
+        }
+        <div class="col-xs-12 alert alert-info">
+            <p>
+                <b>Opgelet!</b>
+                Als dit afgevinkt is worden er geen rappels verzonden naar deze gebruiker!
+            </p>
+        </div>
+    }
+    @panel("Gebruiker blokkeren", "") {
+        @if(user.getStatus.toString == "Volwaardig lid") {
+            <div class="col-xs-12">
+                <h4>Blokkeer gebruiker:</h4>
+            </div>
+            <div class="col-xs-12">
+                @helper.form(routes.Profile.blockUser, 'class -> "form-horizontal") {
+
+                <fieldset>
+                    <input type="hidden" name="userId" value="@user.getId"/>
+
+                    <div class="form-group">
+                        <label class="col-xs-3 control-label" for="reason">Reden</label>
+                        <div class="col-xs-9">
+                            <textarea id="reason" name="reason" maxlength="255" rows="3" class="form-control input-md" value=""></textarea>
+                            <small>Een geblokkeerde gebruiker kan niet meer inloggen!</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="col-xs-offset-3 col-xs-9">
+                            <button type="submit" class="btn btn-warning" name="submit" value="default">Blokkeer</button>
+                        </div>
+                    </div>
+                </fieldset>
+                }
+            </div>
+        } else {
+            <div class="col-xs-12">
+                Deze gebruiker is reeds geblokkeerd (of verwijderd).
+            </div>
+        }
+    }
+}

@@ -1,0 +1,32 @@
+
+@(form: Form[Invoices.InvoiceData], invoice: Invoice)
+@import providers.DataProvider
+
+@scripts = {
+    @js.datetimepicker()
+}
+
+@stdlayout("Bewerk afrekening", scripts) {
+
+    @js.paymentMenu()
+
+    @helper.form(routes.Invoices.editInvoicePost(invoice.getId), 'class -> "form-horizontal", 'enctype -> "multipart/form-data") {
+        <div class="row">
+            @formErrors(form)
+            <div class="col-lg-12">
+                @panel("Algemeen", "fa-bar-chart-o"){
+                    <fieldset>
+                        @std.static(invoice.getNumber.toString,"Afrekeningnummer", "col-md-3")
+                        @std.static(invoice.getDate.toString,"Facturatiedatum", "col-md-3")
+                        @std.datepicker(form("paymentDate"), "Betalingsdatum", "col-md-3")
+                        @std.static(invoice.getDueDate.toString,"Te betalen voor", "col-md-3")
+                        @std.static(invoice.getAmount.toString+" €","Bedrag", "col-md-3")
+                        @std.selectEnumStatus(classOf[InvoiceStatus], form("status"), "Status", "col-md-3")
+                        @std.static(invoice.getStructuredCommunication,"Gestructureerde communicatie", "col-md-3")
+                    </fieldset>
+                }
+            </div>
+        </div>
+        @std.submitButton("Wijzigingen opslaan")
+    }
+}

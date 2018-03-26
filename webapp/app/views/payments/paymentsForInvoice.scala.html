@@ -1,0 +1,69 @@
+
+@(list: Iterable[Payment])
+
+@stdlayout("Betalingen van afrekening") {
+
+  @js.paymentMenu()
+
+    <div id="resultsTable" class="table-responsive col-xs-12">
+        <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        <thead>
+            <tr role="row">
+                <th name="number" class="sortable" tabindex="0" >Nummer</th>
+                <th name="date" class="sortable" tabindex="0" >Datum</th>
+                <th name="account_number" tabindex="0" >Rekeningnummer</th>
+                <th name="amount" class="sortable" tabindex="0" >Bedrag</th>
+                <th name="status" class="sortable" tabindex="0" >Status</th>
+                <th name="comment" tabindex="0" >Vrije communicatie</th>
+                <th name="structured_comm" class="sortable" tabindex="0" >Gestructureerde communicatie</th>
+                <th name="filename" class="sortable" tabindex="0" >Bestand</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+
+          @foreach(list){ payment =>
+            <td>
+              <a href="@routes.Payments.showDetails(payment.getId)">@payment.getNumber</a>
+            </td>
+            <td>@payment.getDate</td>
+            <td>@payment.getAccountNumber</td>
+            <td>@payment.getAmount</td>
+            <td>
+              @if(payment.getStatus == PaymentStatus.OK) {
+                <span class="label label-success">OK</span>
+              } else {
+                @if(payment.getStatus == PaymentStatus.CHANGE) {
+                  <span class="label label-warning">Te bekijken</span>
+                } else {
+                  @if(payment.getStatus == PaymentStatus.UNASSIGNED) {
+                    <span class="label label-danger">Geen afrekening</span>
+                  }
+                }
+              }
+            </td>
+            <td>
+              @if(payment.getComment == null) {
+                  -
+              } else {
+                  @payment.getComment
+              }
+            </td>
+            <td>
+              @if(payment.getStructuredCommunication == null) {
+                  -
+              } else {
+                  @payment.getStructuredCommunication
+              }
+            </td>
+            <td>@payment.getFilename</td>
+            <td>
+                @btnPrimary("Details", routes.Payments.showDetails(payment.getId))
+                @* @btnSuccess("Bewerken", routes.Payments.editPayment(payment.getId)) *@
+            </td>
+        }
+
+        </tbody>
+    </table>
+    </div>
+}

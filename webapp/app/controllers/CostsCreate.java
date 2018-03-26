@@ -124,9 +124,11 @@ public class CostsCreate extends CostsCommon {
                 Form.form(CostData.class).fill(new CostData(cost)),
                     dao.listCategories(),
                     costId,
+                    cost,
                     cost.getCarId(),
                     cost.getCarName(),
-                    CurrentUser.hasRole(UserRole.CAR_ADMIN)
+                    CurrentUser.hasRole(UserRole.CAR_ADMIN),
+                    CurrentUser.is(cost.getOwnerId())
             ));
         } else {
             return badRequest();
@@ -151,9 +153,11 @@ public class CostsCreate extends CostsCommon {
                     form,
                     dao.listCategories(),
                     costId,
+                    cost,
                     cost.getCarId(),
                     cost.getCarName(),
-                    isAdmin
+                    isAdmin,
+                    CurrentUser.is(cost.getOwnerId())
                 ));
             } else {
                 CostData data = form.get();
@@ -166,6 +170,11 @@ public class CostsCreate extends CostsCommon {
                 }
                 dao.updateCarCost(costId, data.amount.getValue(), data.description, data.time, data.mileage,
                         data.spread, data.category, data.start);
+                if (isAdmin) {
+                    dao.addCommentCarAdmin(costId, data.commentCarAdmin);
+                } else if (CurrentUser.is(cost.getOwnerId())) {
+                    dao.addCommentCarOwner(costId, data.commentCarOwner);
+                }
             }
             return redirect(routes.Costs.showCostDetail(costId));
         } else {
@@ -201,9 +210,11 @@ public class CostsCreate extends CostsCommon {
                     form,
                     dao.listCategories(),
                     costId,
+                    cost,
                     cost.getCarId(),
                     cost.getCarName(),
-                    CurrentUser.hasRole(UserRole.CAR_ADMIN)
+                    CurrentUser.hasRole(UserRole.CAR_ADMIN),
+                    CurrentUser.is(cost.getOwnerId())
                 ));
             } else {
                 dao.updateProof (costId, file.getId());

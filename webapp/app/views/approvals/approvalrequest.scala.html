@@ -38,21 +38,21 @@
             <a class="btn btn-primary btn-sm" href="@routes.Profile.edit(db.CurrentUser.getId)">Profiel aanvullen</a>
         </div>
         }
-    }
-
-    @panel("Lidmaatschap aanvragen"){
-        @helper.form(routes.Approvals.requestApprovalPost) {
-            @std.checkbox(form("acceptsTerms"), "Algemene voorwaarden (zie onderaan)",
-                "Ik aanvaard de algemene voorwaarden")
-            @std.textArea(form("message"), "Opmerkingen", 4)
-            @std.submitButton("Aanvraag indienen")
-            <div class="form-group col-xs-12" >
-                <label>Algemene voorwaarden</label>
-                @* <font color="#696969" face="Verdana, sans-serif"><span style="font-size: 12px; line-height: normal;"></span></font> *@
-                <div class="well" style="overflow: auto; max-height:400px;">
-                    @termsAndConditions()
+    } else {
+        @panel("Lidmaatschap aanvragen"){
+            @helper.form(routes.Approvals.requestApprovalPost) {
+                @std.checkbox(form("acceptsTerms"), "Algemene voorwaarden (zie onderaan)",
+                    "Ik aanvaard de algemene voorwaarden")
+                @std.textArea(form("message"), "Opmerkingen", 4)
+                @std.submitButton("Aanvraag indienen")
+                <div class="form-group col-xs-12" >
+                    <label>Algemene voorwaarden</label>
+                    @* <font color="#696969" face="Verdana, sans-serif"><span style="font-size: 12px; line-height: normal;"></span></font> *@
+                    <div class="well" style="overflow: auto; max-height:400px;">
+                        @termsAndConditions()
+                    </div>
                 </div>
-            </div>
+            }
         }
     }
 }

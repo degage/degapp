@@ -133,6 +133,17 @@ public class JDBCBillingDAO extends AbstractDAO implements BillingDAO {
         }
     }
 
+    @Override
+    public int getLatestBillingId() {
+        try (PreparedStatement ps = prepareStatement(
+            "SELECT billing_id FROM billing order by billing_id desc limit 1"
+        )) {
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Cannot get latest billing id", ex);
+        }
+    }
+
     public Iterable<KmPrice> listKmPrices(int billingId) {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT km_price_from, km_price_eurocents, km_price_factor " +

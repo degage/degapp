@@ -1,0 +1,101 @@
+
+@(invoices: Page[ReminderAndUserAndInvoice])
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        <thead>
+            <tr role="row">
+                <th name="number" class="sortable" tabindex="0" >Nummer</th>
+                <th name="date" class="sortable" tabindex="0" >Datum</th>
+                <th name="payment_date" class="sortable" tabindex="0" >Betalingsdatum</th>
+                <th name="due_date" class="sortable" tabindex="0" >Uiterste betalingsdatum</th>
+                <th name="user_id" class="sortable" tabindex="0" >Gebruiker</th>
+                <th name="amount" class="sortable" tabindex="0" >Bedrag (€)</th>
+                <th name="status" class="sortable" tabindex="0" >Status</th>
+                <th name="structured_comm" tabindex="0" >Gestructureerde communicatie</th>
+                <th name="reminder_description" tabindex="0" >Rappel</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach.trOrElse(invoices){ invoice =>
+            <td> <a href="@routes.Invoices.showDetails(invoice.getInvoice.getId)">@invoice.getInvoice.getNumber</a></td>
+            <td>@invoice.getInvoice.getDate</td>
+            <td>@invoice.getInvoice.getPaymentDate</td>
+            <td>@invoice.getInvoice.getDueDate</td>
+            <td>
+                <a href="@routes.Profile.index(invoice.getUser.getId)">@invoice.getUser.getFirstName @invoice.getUser.getLastName</a>
+                @if(invoice.getUser.getPaymentInfo != null && invoice.getUser.getPaymentInfo != "") {
+                    <br>
+                    @if(invoice.getUser.getPaymentInfo.length > 10) {
+                        ( @invoice.getUser.getPaymentInfo.substring(0, 10) ... )
+                    } else {
+                        ( @invoice.getUser.getPaymentInfo )
+                    }
+                }
+            </td>
+            <td align="right">@invoice.getInvoice.getAmount</td>
+            <td>
+              @if(invoice.getInvoice.getStatus == InvoiceStatus.PAID) {
+                <span class="label label-success">Betaald</span>
+              } else {
+                @if(invoice.getInvoice.getStatus == InvoiceStatus.OPEN) {
+                  <span class="label label-warning">Open</span>
+                } else {
+                  @if(invoice.getInvoice.getStatus == InvoiceStatus.OVERDUE) {
+                    <span class="label label-danger">Te laat</span>
+                  }
+                }
+              }
+            </td>
+            <td>
+              @if(invoice.getInvoice.getStructuredCommunication == null) {
+                  -
+              } else {
+                  @invoice.getInvoice.getStructuredCommunication
+              }
+            </td>
+            <td>
+                @if(invoice.getReminder == null) {
+                    Geen rappel verzonden
+                } else {
+                    @invoice.getReminder.getDescription match {
+                        case "FIRST" => {
+                            <span class="label label-default">Eerste</span>
+                        }
+                        case "SECOND" => {
+                            <span class="label label-warning">Tweede</span>
+                        }
+                        case "THIRD" => {
+                            <span class="label label-danger">Derde</span>
+                        }
+                        case _ => {
+                            @invoice.getReminder.getDescription
+                        }
+                    }
+                }
+            </td>
+            <td>
+              @if(invoice.getInvoice.getPaymentDate != null) {
+                  @btnPrimary("Bekijk betalingen", routes.Invoices.getPaymentsForInvoice(invoice.getInvoice.getId))
+                  @btnWarning("Links met betalingen verwijderen", routes.Invoices.unlinkInvoice(invoice.getInvoice.getId))
+              }
+              @btnPrimary("Bekijk afrekeningen van gebruiker", routes.Invoices.getInvoicesForUser(invoice.getInvoice.getUserId))
+              @btnPrimary("Suggereer betalingen", routes.Invoices.getSuggestedPaymentsForInvoice(invoice.getInvoice.getId))
+              @if(invoice.getInvoice.isOwnerInvoice) {
+                @btnPrimary("Download pdf", routes.Billings.carDetails(invoice.getInvoice.getBillingId, invoice.getInvoice.getCarId))
+              } else {
+                @btnPrimary("Download pdf", routes.Billings.userDetails(invoice.getInvoice.getBillingId, invoice.getInvoice.getUserId))
+              }
+              @btnSuccess("Bewerken", routes.Invoices.editInvoice(invoice.getInvoice.getId))
+            </td>
+        }{
+            <tr>
+                <td class="empty-row" colspan="12">
+                    Geen enkele afrekening voldoet aan jouw zoekterm(en)
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>
+@pagination(invoices)

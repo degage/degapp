@@ -1,27 +1,27 @@
 /* CarDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -34,6 +34,9 @@ import be.ugent.degage.db.Filter;
 import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.models.*;
 
+import java.time.LocalDate;
+
+
 /**
  *
  */
@@ -41,7 +44,9 @@ public interface CarDAO {
 
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, CarParkingcard parkingcard, UserHeader owner, String comments, boolean active) throws DataAccessException;
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, CarParkingcard parkingcard, UserHeader owner, String comments, boolean active,
+                         LocalDate startSharing, LocalDate endSharing) throws DataAccessException;
+
     public void updateCar(Car car) throws DataAccessException;
 
     public int getCarPicture (int carId);
@@ -72,6 +77,8 @@ public interface CarDAO {
      */
     public Page<CarHeaderAndOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, Filter filter) throws DataAccessException;
 
+    public Page<CarHeaderAndOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, String filter) throws DataAccessException;
+
     /**
      * Lists all cars of the given user, also those that are not active.
      * Does not contain location information
@@ -86,7 +93,7 @@ public interface CarDAO {
 
     public void updateDepreciation (int carId, int cents, int limit, int last) throws DataAccessException;
 
-
+    public void updateInsurance(int id, CarInsurance insurance) throws DataAccessException;
 
     /**
      * Return a car list for cars with name containing the given string. Used in pickers.

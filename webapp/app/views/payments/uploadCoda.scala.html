@@ -1,0 +1,22 @@
+@(list: Iterable[Coda])
+
+@scripts = {
+    @js.pagination("Codas.showCodasPage")
+}
+
+@stdlayout("Nieuwe coda uploaden", scripts=scripts) {
+
+    @js.paymentMenu()
+
+    @panel("Nieuwe coda uploaden", "fa-file-image-o"){
+         @helper.form(routes.Codas.uploadCodaPost, 'enctype -> "multipart/form-data") {
+             <div class="form-group col-sm-4">
+                 <input type="file" name="coda" class="form-control input-md">
+             </div>
+             @std.submitButton("Doorsturen", css="col-sm-2")
+         }
+    }
+
+    @resultsTablePanel("Geschiedenis", "fa-history")
+
+}

@@ -89,36 +89,49 @@
                         <strong>Aantal zitplaatsen: </strong> @if(car.getSeats == null) { Onbekend } else { @car.getSeats }<br>
                         <strong>Aantal deuren: </strong> @if(car.getDoors == null) { Onbekend } else { @car.getDoors }<br>
                         <strong>Manueel: </strong> @if(car.isManual) { ja } else { nee } <br>
+                        <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
                         <strong>GPS aanwezig: </strong> @if(car.isGps) { ja } else { nee } <br>
                         <strong>Trekhaak aanwezig: </strong> @if(car.isHook) { ja } else { nee } <br>
-                        <strong>Brandstof: </strong>  @{car.getFuel } <br>
+                        <strong>Brandstof: </strong>  @if(car.getFuel== null) { onbekend } else { @car.getFuel } <br>
                         <strong>Commentaar: </strong> <br> @Html(car.getComments) <br>
                         <strong>Pechverhelping: </strong> @if(car.getAssistance == null || car.getAssistance.getName == null) { Onbekend } else { @car.getAssistance.getName } <br>
-                        <strong>Parkeerkaart: </strong> @if(car.getParkingcard == null || car.getParkingcard.getCity == null) { Onbekend } else { @car.getParkingcard.getCity }
+                        <strong>Parkeerkaart: </strong> @if(car.getParkingcard == null || car.getParkingcard.getCity == null) { Onbekend } else { @car.getParkingcard.getCity } <br>
+                        <strong>Ecoscore: </strong>  @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getEcoScore == null) { Onbekend } else { @car.getTechnicalCarDetails.getEcoScore } <br>
+                        <strong>Euronorm: </strong>  @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getEuroNorm == null) { Onbekend } else { @car.getTechnicalCarDetails.getEuroNorm } <br>
                     </div>
                 </div>
 
                 @if(isAdmin || (CurrentUser is car.getOwner.getId)) {
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Geheime details (enkel zichtbaar voor admin en eigenaar)
+                            Technische details (enkel zichtbaar voor admin en eigenaar)
                         </div>
 
                         <div class="panel-body">
-
+                            <strong>Startdatum: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getStartDate == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getTechnicalCarDetails.getStartDate) }<br>
                             <strong>Bouwjaar: </strong> @if(car.getYear == null) { Onbekend } else { @car.getYear }<br>
                             <strong>Gemiddeld verbruik (per 100 km): </strong> @if(car.getFuelEconomy == null) { Onbekend } else { @car.getFuelEconomy }<br>
                             <strong>Geschatte huidige waarde: </strong> @if(car.getEstimatedValue == null) { Onbekend } else { @car.getEstimatedValue }<br>
                             <strong>Gemiddeld aantal kilometers (per jaar): </strong> @if(car.getOwnerAnnualKm == null) { Onbekend } else { @car.getOwnerAnnualKm }<br>
-                            <strong>Nummerplaat: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getLicensePlate == null) { Onbekend } else { @car.getTechnicalCarDetails.getLicensePlate }<br>
                             <strong>Inschrijvingsbewijs: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getRegistrationId==0) { Onbekend } else { <a href="@routes.Cars.getRegistrationPicture(car.getId)">Link</a> }<br>
                             <strong>Chassisnummer: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getChassisNumber== null) { Onbekend } else { @car.getTechnicalCarDetails.getChassisNumber }<br>
+                            <br>
                             <strong>Verzekeraar: </strong> @if(car.getInsurance == null || car.getInsurance.getName == null) { Onbekend } else { @car.getInsurance.getName }<br>
                             <strong>Vervaldatum verzekering: </strong> @if(car.getInsurance == null || car.getInsurance.getExpiration == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getInsurance.getExpiration) }<br>
-                            <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus== null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
-                            <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr== null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>
+                            <strong>Bonus Malus: </strong> @if(car.getInsurance == null || car.getInsurance.getBonusMalus == null) { Onbekend } else { @car.getInsurance.getBonusMalus }<br>
+                            <strong>Polis nummer: </strong> @if(car.getInsurance == null || car.getInsurance.getPolisNr == null) { Onbekend } else { @car.getInsurance.getPolisNr }<br>
                             <strong>Datum van creatie: </strong> @if(car.getCreatedAt == null) { Onbekend } else { @Utils.toLocalizedDateString(car.getCreatedAt) }<br>
-
+                            <strong>KiloWatt: </strong> @if(car.getTechnicalCarDetails == null || car.getTechnicalCarDetails.getKiloWatt == null) { Onbekend } else { @car.getTechnicalCarDetails.getKiloWatt } <br>
+                            <strong>Startdatum polis: </strong> @if(car.getInsurance == null || car.getInsurance.getStartInsurancePolicy == null) { Onbekend } else { @car.getInsurance.getStartInsurancePolicy } <br>
+                            <strong>Start bonus malus: </strong> @if(car.getInsurance == null || car.getInsurance.getStartBonusMalus == null) { Onbekend } else { @car.getInsurance.getStartBonusMalus } <br>
+                            <strong>Burgerlijke aansprakelijkheid: </strong> @if(car.getInsurance == null || car.getInsurance.isCivilLiability) { ja } else { nee } <br>
+                            <strong>Rechtsbijstand: </strong> @if(car.getInsurance == null || car.getInsurance.isLegalCounsel) { ja } else { nee } <br>
+                            <strong>Bestuurdersverzekering: </strong> @if(car.getInsurance == null || car.getInsurance.isDriverInsurance) { ja } else { nee } <br>
+                            <strong>Stoffelijke schade: </strong> @if(car.getInsurance == null || car.getInsurance.isMaterialDamage) { ja } else { nee } <br>
+                            <strong>Huidige waarde exclusief BTW: </strong> @if(car.getInsurance == null || car.getInsurance.getValueExclusiveVAT == null) { Onbekend } else { @car.getInsurance.getValueExclusiveVAT }<br>
+                            <strong>Vrijstelling (bedrag): </strong> @if(car.getInsurance == null || car.getInsurance.getExemption == null) { Onbekend } else { @car.getInsurance.getExemption }<br>
+                            <strong>Glasbreuk: </strong> @if(car.getInsurance == null || car.getInsurance.isGlassBreakage) { ja } else { nee } <br>
+                            <strong>Diefstal: </strong> @if(car.getInsurance == null || car.getInsurance.isTheft) { ja } else { nee } <br>
                         </div>
                     </div>
                 }

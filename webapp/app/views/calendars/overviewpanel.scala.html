@@ -27,6 +27,8 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
+
+ 
 @(title: String, faClass: String, lines: Iterable[util.OverviewLine],
                  percentage:Int = 15)(header: => Html)(footer: => Html)
 
@@ -38,22 +40,30 @@
         <table class="overview">
             @header
             <tr>
-                <th class="res-car">&nbsp;</th>
+                
+                    <th class="res-car">&nbsp;</th>
+                    <th class="res-car" width="150">&nbsp;</th>
                 @for(i <- START_HOUR until END_HOUR) {
                     <th class="res-hour" colspan="@INTERVALS_PER_HOUR"
                         width="@((100.0-percentage)/(END_HOUR-START_HOUR))%">@i:00</th>
                 }
             </tr>
             @foreach.tr(lines) { line =>
-                <th class="res-car" width="@percentage%">@line.lineHeader</th>
+                
+                <th class="res-car">  <a href="@routes.Cars.detail(line.carId)"width="@percentage%">@line.lineHeader</a> </th>
+                
                 @for(str <- line.freeTimes){
                    <td class="@if(str==null){res-notfree}else{res-free}">
                        @if(str!=null) {
-                            <a href='@routes.WFCreate.create(line.carId,str,"")'>&nbsp;</a>
+                        <a href='@routes.WFCreate.create(line.carId,str,"")'>&nbsp;</a>
                        }
                    </td>
                 }
+                @*<tr  width="@percentage%" class="collapse" id='collapseExample-@line.carId' >
+                    <td  width="@percentage%" colspan="69" >comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment comment </td> 
+                </tr>*@
             }
+    
             <tr>
                 <td colspan="@(NUMBER_OF_INTERVALS+1)" class="text-right">
                     <b>Legende:</b>
@@ -65,3 +75,4 @@
         @footer
     </div>
 }
+

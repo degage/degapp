@@ -110,7 +110,7 @@
                       }else{
                           <th colspan="3">Totaal te ontvangen:</th>
                       }
-                      <th>@data.EurocentAmount.toString(totals.kmCost-totals.fuelCost) €</th>
+                      <th>@data.EurocentAmount.toString( totals.getTotal() ) €</th>
                   </tr>
               </tfoot>
           </table>

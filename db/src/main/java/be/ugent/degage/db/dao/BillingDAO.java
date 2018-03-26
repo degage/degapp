@@ -83,4 +83,6 @@ public interface BillingDAO {
      */
     public BillingDetailsCar getCarDetails (int billingId, int carId);
 
+    public int getLatestBillingId();
+
 }

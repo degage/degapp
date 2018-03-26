@@ -30,17 +30,28 @@
 package be.ugent.degage.db.models;
 
 import java.time.LocalDate;
-
+import com.google.gson.annotations.Expose;
 /**
  *
  * @author Laurent
  */
 public class Enrollee {
+    @Expose
     private UserHeader user;
-    private EnrollementStatus status;
+    @Expose
+    private EnrollmentStatus status;
+    @Expose
     private LocalDate dateJoined;
+    private LocalDate dateContract;
 
-    public Enrollee(UserHeader user, EnrollementStatus status, LocalDate dateJoined) {
+    public Enrollee(UserHeader user, EnrollmentStatus status, LocalDate dateJoined, LocalDate dateContract) {
+        this.user = user;
+        this.status = status;
+        this.dateJoined = dateJoined;
+        this.dateContract = dateContract;
+    }
+
+    public Enrollee(UserHeader user, EnrollmentStatus status, LocalDate dateJoined) {
         this.user = user;
         this.status = status;
         this.dateJoined = dateJoined;
@@ -50,11 +61,15 @@ public class Enrollee {
         return user;
     }
 
-    public EnrollementStatus getStatus() {
+    public EnrollmentStatus getStatus() {
         return status;
     }
 
     public LocalDate getDateJoined() {
         return dateJoined;
+    }
+
+    public LocalDate getDateContract() {
+        return dateContract;
     }
 }

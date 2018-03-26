@@ -1,0 +1,12 @@
+@(invoiceAndUser: InvoiceAndUser)
+
+@* Betaling borg en instapgeld *@
+Beste @invoiceAndUser.getUser.getFirstName,
+
+Je was aanwezig op een infosessie en tekende je contract.
+Om toegang tot de deelauto's te hebben, dien je enkel nog het instapgeld 
+en de borg over te maken. Gebruik hiervoor de gestructureerde mededeling 
+op de afrekening in bijlage.
+
+Na ontvangst van je betaling wordt je account automatisch geactiveerd en 
+zijn alle auto's zichtbaar.

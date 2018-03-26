@@ -1,0 +1,12 @@
+
+@(userId: Int, form: Form[Profile.AccountNumberData])
+
+@stdlayout("Rekeningnummer", extrabc=breadcrumb("Profiel", routes.Profile.index(userId))){
+
+    @panel("Gegevens", "fa-pencil"){
+        @helper.form(routes.Profile.editAccountNumberPost(userId)) {
+            @std.textField(form("accountNumber"), "IBAN Rekeningnummer (we hebben dit nodig voor terugbetalingen)", css="col-md-4")
+            @std.submitButton("Wijzigen")
+        }
+    }
+}

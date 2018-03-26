@@ -34,11 +34,11 @@
     @panel("Gegevens", "fa-pencil"){
         @helper.form(routes.Profile.editDriversLicensePost(userId)) {
             @std.textField(form("cardNumber"), "Nummer v/h rijbewijs", css="col-md-4")
-            @std.datepicker(form("cardDate"), "Datum van afgifte", css="col-md-4", startView=4)
+            @std.datepicker(form("cardDate"), "Datum van afgifte", css="col-md-6", startView=4)
             @std.submitButton("Wijzigen")
         }
     }
-    @panel("Nieuw bestand uploaden") {
+    @panel("Laad hier een digitale kopie van je rijbewijs (voor- en achterzijde) op") {
         @helper.form(routes.Profile.addDriversLicenseFile(userId), 'enctype -> "multipart/form-data") {
             <div class="form-group col-xs-12">
                 <input type="file" name="file">

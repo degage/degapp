@@ -1,0 +1,18 @@
+@(invoice: Invoice)
+
+@stdlayout("Details van afrekening", extrabc=breadcrumb("Debiteurenbeheer: afrekeningen",routes.Invoices.getAll)) {
+
+    @panel("Debiteurenbeheer", "fa-bar-chart") {
+        <div class="col-xs-12">
+            @btnPrimary("Afrekeningen", routes.Invoices.getAll())
+            @btnPrimary("Betalingen", routes.Payments.getAll())
+            @btnPrimary("Coda uploaden", routes.Codas.uploadCoda())
+            @btnPrimary("Rappels", routes.Reminders.getAll())
+            @btnPrimary("Statistieken", routes.PaymentStatistics.getStats())
+            @btnPrimary("Statistieken per gebruiker", routes.PaymentStatistics.getUserStats())
+        </div>
+    }
+
+    @detailsPanel(invoice)
+
+}

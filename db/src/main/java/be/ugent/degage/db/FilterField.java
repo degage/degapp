@@ -1,27 +1,27 @@
 /* FilterField.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -40,19 +40,21 @@ public enum FilterField {
     AMOUNT(true),
     BORROWER(false),
     CATEGORY(true),
-    DATE(true),
+    DATE(true), PAYMENT_DATE(true), DUE_DATE(true),
     DRIVER(false),
     NAME(true), BRAND(true), SEATS(true), AUTOMATIC(true), GPS(true), HOOK(true), CAR_ID(true), FUEL(true), CAR_ACTIVE(true),
     KM(true), LITER(true),
     CAR_NAME(false),
-    CAR_COST_DATE(true), 
+    CAR_ADMIN(true),
+    CAR_COST_DATE(true),
+    CAR_CREATION_DATE(true),
     CATEGORY_DESCRIPTION(true),
     REFUEL_USER_ID(true), REFUEL_OWNER_ID(true), REFUEL_CAR_ID(true),
     DAMAGE_FINISHED(true), DAMAGE_USER_ID(true), DAMAGE_CAR_ID(true), DAMAGE_OWNER_ID(true),
     USER_NAME(false), USER_FIRSTNAME(false), USER_LASTNAME(false), USER_ID(true),
     ZIPCODE(false),
     INFOSESSION_TYPE(false),
-    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true), 
+    RESERVATION_USER_OR_OWNER_ID(true), RESERVATION_CAR_ID(true),
     RESERVATION_STATUS(true),
     STATUS(true),
     MESSAGE_RECEIVER_ID(true), MESSAGE_SENDER_ID(true),
@@ -68,7 +70,21 @@ public enum FilterField {
     STREET(false),
     ZONES(true),
     LICENSE_PLATE(true),
-    ROLE(true);
+    ROLE(true),
+    NUMBER(true),
+    STRUCTURED_COMM(true),
+    ACCOUNT_NUMBER(true),
+    BANK(true),
+    COMMENT(true),
+    FILENAME(true),
+    ALL_INVOICES(true),
+    INVOICE_NUMBER(true),
+    REMINDER_DESCRIPTION(true),
+    REMINDER_DATE(true),
+    PAYMENT_ID(true),
+    REMINDER_STATUS(true),
+    SENT_ON(true),
+    DEFAULT(true); //used for a default
 
     boolean exactValue;
 

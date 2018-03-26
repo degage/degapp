@@ -40,9 +40,9 @@ public class CarAssistanceExtended extends CarAssistance {
     private int carId;
     public String licensePlate;
 
-    public CarAssistanceExtended(String name, LocalDate expiration, CarAssistanceType type, String contractNr,
+    public CarAssistanceExtended(String name, LocalDate expiration, CarAssistanceType type, String contractNr, int fileId,
         String carName, int carId, String licensePlate) {
-        super(name, expiration, type, contractNr);
+        super(name, expiration, type, contractNr, fileId);
         this.carName = carName;
         this.carId = carId;
         this.licensePlate = licensePlate;

@@ -1,43 +1,47 @@
 @* reservationRequest.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(user: UserHeader, driver: UserHeader, carName: String, from: String, until: String, url: String, comment: String)
+@(user: UserHeader, driver: UserHeader, carName: String, from: String, until: String, url: String, comments: Collection[String])
 
 @* Aanvraag reservatie *@
 <p>Beste @user.getFirstName,</p>
 <p>Bestuurder <b>@driver</b>
 wenst @carName te reserveren voor de volgende periode:</p>
 <ul><li>@from — @until.</li></ul>
-@if(comment != null && !comment.trim.isEmpty){
+@if(comments != null && comments.size() > 0){
 <p>De aanvrager vermeldt hierbij het volgende:</p>
 <hr />
-@comment
+<ul>
+@foreach(comments) { comment =>
+  <li>@comment</li>
+}
+</ul>
 <hr />
 }
 <p>Gelieve de reservatie zo snel mogelijk goed te keuren. Klik hiervoor op

@@ -1,35 +1,38 @@
 @* dashboardFullUser.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(headerHtml: String)
+@import data.ProfileCompleteness
 @import providers.DataProvider
 @import db.CurrentUser
+
+@(headerHtml: String, pc: ProfileCompleteness, carCosts: java.lang.Iterable[Integer], empty: Boolean,
+    reminders: java.lang.Iterable[Reminder], emptyReminders: Boolean)
 
 @scripts={
     @js.usesajax()
@@ -44,11 +47,20 @@
 
     <div id="page-wrapper">        @* Does not use maincontent because of header *@
         @dashboardHeader(headerHtml)
+
+        @dashboardUncompleteProfile(pc)
+        @dashboardCarCosts(carCosts, empty)
+        <div class="row"><div id='show-unpaid-invoices'></div></div>
+        <script>DegageReactPort.unpaidInvoices('show-unpaid-invoices')</script>
+
         @calendars.reservationpanel()
+        <!-- <div id='show-fasttrack'></div> -->
+        <!-- <script>DegageReactPort.reservationFastTrack('show-fasttrack')</script> -->
 
         <div class="row">
             @flashes()
         </div>
+
         <h4>Reservaties / ritten</h4>
         @trips.triptabs(1)
     </div>

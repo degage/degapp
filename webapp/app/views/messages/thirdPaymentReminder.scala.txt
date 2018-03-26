@@ -1,0 +1,11 @@
+@(firstReminder: Reminder, secondReminder: Reminder, thirdReminderAndUserAndInvoice: ReminderAndUserAndInvoice, url: String)
+
+@* Wachtwoord opnieuw instellen *@
+Beste @thirdReminderAndUserAndInvoice.getUser.getFirstName,
+
+Voor je afrekening @thirdReminderAndUserAndInvoice.getInvoice.getNumber (@url) vonden we nog geen betaling terug.
+We hadden de betaling ten laatste verwacht op @thirdReminderAndUserAndInvoice.getInvoice.getDueDate.
+
+Zowel de eerste (@firstReminder.getSendDate) als de tweede herinnering (@secondReminder.getSendDate) bleven zonder gevolg.
+
+Gelieve dit snel in orde te brengen.

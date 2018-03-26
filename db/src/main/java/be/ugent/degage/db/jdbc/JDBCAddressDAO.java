@@ -1,27 +1,27 @@
 /* JDBCAddressDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -48,7 +48,7 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
     }
 
     // TODO: avoid these
-    static Address populateAddress(ResultSet rs) throws SQLException {
+    public static Address populateAddress(ResultSet rs) throws SQLException {
         if(rs.getObject("address_id") == null)
             return null;
         else
@@ -103,9 +103,28 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
         }
     }
 
+    private LazyStatement getAddressByAutoIdStatement = new LazyStatement(
+            "SELECT " + ADDRESS_FIELDS + "FROM addresses JOIN cars ON car_location=address_id WHERE car_id = ?");
+
+    @Override
+    public Address getAddressByAutoId(int autoId) throws DataAccessException {
+        try {
+            PreparedStatement ps = getAddressByAutoIdStatement.value(); // reused so should not be auto-closed
+            ps.setInt(1, autoId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return populateAddress(rs);
+                } else
+                    return null;
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch address by autoId.", ex);
+        }
+    }
+
     private LazyStatement createAddressStatement = new LazyStatement(
             "INSERT INTO addresses(address_city, address_zipcode, address_street, address_number, address_country, address_latitude, address_longitude) " +
-                    "VALUES (?,?,?,?,?)",
+                    "VALUES (?,?,?,?,?,?,?)",
             "address_id"
     );
 
@@ -133,7 +152,7 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
             throw new DataAccessException("Failed to create address.", ex);
         }
     }
-	
+
     private LazyStatement deleteAddressStatement = new LazyStatement(
             "DELETE FROM addresses WHERE address_id = ?"
     );
@@ -196,7 +215,7 @@ class JDBCAddressDAO extends AbstractDAO implements AddressDAO {
             ps.setFloat(7, address.getLng());
 
             ps.setInt(8, address.getId());
-			
+
             if(ps.executeUpdate() == 0)
                 throw new DataAccessException("Address update affected 0 rows.");
 

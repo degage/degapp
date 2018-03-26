@@ -1,0 +1,12 @@
+@* emailField.scala.html *@
+
+@(field: play.api.data.Field, label: String, css: String="col-xs-12", required: Boolean = false)
+<div class="form-group @css @if(field.hasErrors) {has-error}">
+    <label class="control-label" for="@field.id">@label</label>
+
+    <input id="@field.id" name="@field.name" type="email"
+           class="form-control input-md" value="@field.value" @if(required) {placeholder="Verplicht"} >
+    @field.errors.map { error =>
+        <span class="help-block">@play.api.i18n.Messages(error.message)</span>
+    }
+</div>

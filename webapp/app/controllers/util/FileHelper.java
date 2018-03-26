@@ -1,27 +1,27 @@
 /* FileHelper.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -33,6 +33,7 @@ import be.ugent.degage.db.DataAccessContext;
 import be.ugent.degage.db.DataAccessException;
 import be.ugent.degage.db.dao.FileDAO;
 import com.google.common.collect.Sets;
+import com.google.common.collect.ImmutableMap;
 import db.DataAccess;
 import play.Logger;
 import play.api.Play;
@@ -52,6 +53,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -65,13 +67,23 @@ public class FileHelper {
             = Sets.newHashSet("image/gif", "image/jpeg", "image/png", "image/tiff");
     public static final Collection<String> DOCUMENT_CONTENT_TYPES
             = Sets.newHashSet("text/plain", "application/pdf", "application/x-zip-compressed", "application/x-rar-compressed", "application/octet-stream");
-
+    public static final Collection<String> CODA_CONTENT_TYPES
+            = Sets.newHashSet("text/plain", "application/octet-stream");
     static {
         DOCUMENT_CONTENT_TYPES.addAll(IMAGE_CONTENT_TYPES);
     }
 
-    private static String UPLOAD_FOLDER;
+    public static String UPLOAD_FOLDER;
 
+    public static final Map<String, String> DOCUMENT_TYPES
+        = ImmutableMap.of(
+            "CONTRACTSCAR", "uploads.contractscar",
+            "CONTRACTSINSURANCE", "uploads.contractsinsurance",
+            "CONTRACTSASSISTANCE", "uploads.contractsassistance",
+            "PARKINGCARDS", "uploads.parkingcards",
+            "GREENCARDS", "uploads.greencards"
+    );
+    
     // Initialize path to save uploads  to
     static {
         String property = ConfigurationHelper.getConfigurationString("uploads.path");
@@ -119,6 +131,22 @@ public class FileHelper {
         if (file != null) {
             try {
                 FileInputStream is = new FileInputStream(Paths.get(UPLOAD_FOLDER, file.getPath()).toFile()); //TODO: this cannot be sent with a Try-with-resources (stream already closed), check if Play disposes properly
+                return file.getContentType() != null && !file.getContentType().isEmpty() ? Controller.ok(is).as(file.getContentType()) : Controller.ok(is);
+            } catch (FileNotFoundException e) {
+                Logger.error("Missing file: " + file.getPath());
+                return Controller.notFound();
+            }
+        } else {
+            return Controller.notFound();
+        }
+    }
+
+    public static Result getThumbnailFileStreamResult(FileDAO dao, int fileId) {
+        be.ugent.degage.db.models.File file = dao.getFile(fileId);
+        if (file != null) {
+            try {
+                System.out.println(Paths.get(UPLOAD_FOLDER + "/thumbnail", file.getPath()));
+                FileInputStream is = new FileInputStream(Paths.get(UPLOAD_FOLDER + "/thumbnail", file.getPath()).toFile()); //TODO: this cannot be sent with a Try-with-resources (stream already closed), check if Play disposes properly
                 return file.getContentType() != null && !file.getContentType().isEmpty() ? Controller.ok(is).as(file.getContentType()) : Controller.ok(is);
             } catch (FileNotFoundException e) {
                 Logger.error("Missing file: " + file.getPath());
@@ -233,4 +261,3 @@ public class FileHelper {
     }
 
 }
-

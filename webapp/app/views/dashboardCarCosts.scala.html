@@ -1,0 +1,21 @@
+@(carCosts: java.lang.Iterable[Integer], empty: Boolean)
+
+@if(!empty) {
+<div class="panel panel-danger">
+    <div class="panel-heading">
+        Autokosten in behandeling.
+    </div>
+    <div class="panel-body">
+        Op onderstaande autokosten werd door een admin commentaar gegeven en zijn nog niet afgewerkt.
+
+        <ul>
+        @foreach(carCosts) { cost =>
+            <li>
+                <a href="@routes.Costs.showCostDetail(cost)">Link naar kost nummer @cost</a>
+            </li>
+        }
+        </ul>
+        
+    </div>
+</div>
+}

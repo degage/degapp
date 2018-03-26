@@ -62,4 +62,19 @@
         <dt>Opmerkingen</dt>
         <dd>@cost.getComment</dd>
     }
+    <br>
+    <table class="table table-striped table-bordered table-hover no-footer">
+        <thead>
+        <tr role="row">
+            <th>Commentaar admin</th>
+            <th>Commentaar eigenaar</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>@Html(cost.getCommentCarAdmin)</td>
+            <td>@Html(cost.getCommentCarOwner)</td>
+        </tr>
+        </tbody>
+    </table>
 </dl>

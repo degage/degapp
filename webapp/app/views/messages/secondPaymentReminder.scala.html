@@ -1,0 +1,10 @@
+@(firstReminder: Reminder, secondReminderAndUserAndInvoice: ReminderAndUserAndInvoice, lastPaymentDate: java.time.LocalDate, url: String)
+
+<p>Beste @secondReminderAndUserAndInvoice.getUser.getFirstName,</p>
+
+<p>Voor je afrekening <a href="@url">@secondReminderAndUserAndInvoice.getInvoice.getNumber</a> vonden we nog geen betaling terug.
+We hadden de betaling ten laatste verwacht op @secondReminderAndUserAndInvoice.getInvoice.getDueDate.
+</p>
+<p>Op @firstReminder.getSendDate stuurden we een eerste herinnering maar daar is mogelijk nog geen gevolg aan gegeven.
+Betalingen tot @lastPaymentDate werden nagekeken maar deze vonden we niet terug. Kijk je dit snel na ?
+</p>

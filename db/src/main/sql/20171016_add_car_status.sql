@@ -1,0 +1,3 @@
+ALTER TABLE cars
+ADD column `car_status` enum('REGISTERED','FULL_VALIDATING','FULL','BLOCKED','DROPPED','INACTIVE') NOT NULL DEFAULT 'REGISTERED' AFTER `car_name`;
+UPDATE cars set car_status = 'FULL';

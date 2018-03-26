@@ -1,0 +1,73 @@
+
+@(list: Iterable[InvoiceAndUser])
+
+@stdlayout("Afrekeningen van gebruiker") {
+
+  @panel("Debiteurenbeheer", "fa-bar-chart") {
+        <div class="col-xs-12">
+            @btnPrimary("Afrekeningen", routes.Invoices.getAll())
+            @btnPrimary("Betalingen", routes.Payments.getAll())
+            @btnPrimary("Coda uploaden", routes.Codas.uploadCoda())
+            @btnPrimary("Rappels", routes.Reminders.getAll())
+            @btnPrimary("Statistieken", routes.PaymentStatistics.getStats())
+            @btnPrimary("Statistieken per gebruiker", routes.PaymentStatistics.getUserStats())
+        </div>
+  }
+
+    <div id="resultsTable" class="table-responsive col-xs-12">
+      <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        <thead>
+            <tr role="row">
+                <th name="number" tabindex="0" >Nummer</th>
+                <th name="date" tabindex="0" >Datum</th>
+                <th name="payment_date" tabindex="0" >Betalingsdatum</th>
+                <th name="due_date" tabindex="0" >Uiterste betalingsdatum</th>
+                <th name="amount" tabindex="0" >Bedrag</th>
+                <th name="status" tabindex="0" >Status</th>
+                <th name="structured_comm" tabindex="0" >Gestructureerde communicatie</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+          @foreach.trOrElse(list){ invoiceAndUser =>
+            <td> <a href="@routes.Invoices.showDetails(invoiceAndUser.getInvoice.getId)">@invoiceAndUser.getInvoice.getNumber</a></td>
+            <td>@invoiceAndUser.getInvoice.getDate</td>
+            <td>@invoiceAndUser.getInvoice.getPaymentDate</td>
+            <td>@invoiceAndUser.getInvoice.getDueDate</td>
+            <td align="right">@invoiceAndUser.getInvoice.getAmount</td>
+            <td>
+              @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.PAID) {
+                <span class="label label-success">Betaald</span>
+              } else {
+                @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.OPEN) {
+                  <span class="label label-warning">Open</span>
+                } else {
+                  @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.OVERDUE) {
+                    <span class="label label-danger">Te laat</span>
+                  }
+                }
+              }
+            </td>
+            <td>
+              @if(invoiceAndUser.getInvoice.getStructuredCommunication == null) {
+                  -
+              } else {
+                  @invoiceAndUser.getInvoice.getStructuredCommunication
+              }
+            </td>
+            <td>
+                @btnPrimary("Bekijk betaling(en)", routes.Invoices.getPaymentsForInvoice(invoiceAndUser.getInvoice.getId))
+                @btnPrimary("PDF downloaden", routes.Billings.userDetails(invoiceAndUser.getInvoice.getBillingId, invoiceAndUser.getInvoice.getUserId))
+                @btnSuccess("Bewerken", routes.Invoices.editInvoice(invoiceAndUser.getInvoice.getId))
+            </td>
+          }{
+            <tr>
+                <td class="empty-row" colspan="12">
+                    Geen afrekeningen gevonden.
+                </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+}

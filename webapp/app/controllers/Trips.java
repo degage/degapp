@@ -1,27 +1,27 @@
 /* Trips.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -48,6 +48,8 @@ import views.html.trips.*;
 
 import java.text.MessageFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -102,10 +104,13 @@ public class Trips extends Controller {
 
         UserHeader previousDriver = null;
         UserHeader nextDriver = null;
-        if (status == ReservationStatus.ACCEPTED) {
+        String nextDate = null;
+        if (status != ReservationStatus.CANCELLED) { //reservation status can't be cancelled
             Reservation nextReservation = rdao.getNextReservation(reservationId);
             if (nextReservation != null) {
                 nextDriver = udao.getUserHeader(nextReservation.getDriverId());
+                nextDate = nextReservation.getFrom().format(
+                        DateTimeFormatter.ofPattern("dd/MM/yyyy' om 'HH:mm"));
             }
             Reservation previousReservation = rdao.getPreviousReservation(reservationId);
             if (previousReservation != null) {
@@ -115,15 +120,15 @@ public class Trips extends Controller {
 
         if (CurrentUser.hasRole(UserRole.RESERVATION_ADMIN)) {
             return tripDetailsAsAdmin.render(
-                    trip, owner, driver, previousDriver, nextDriver
+                    trip, owner, driver, previousDriver, nextDriver, nextDate
             );
         } else if (CurrentUser.is(owner.getId())) {
             return tripDetailsAsOwner.render(
-                    trip, driver, previousDriver, nextDriver
+                    trip, driver, previousDriver, nextDriver, nextDate
             );
         } else {
             return tripDetailsAsDriver.render(
-                    trip, owner, previousDriver, nextDriver
+                    trip, owner, previousDriver, nextDriver, nextDate
             );
         }
     }
@@ -155,6 +160,7 @@ public class Trips extends Controller {
         // We only want reservations from the current user (or his car(s))
         filter.putValue(FilterField.RESERVATION_USER_OR_OWNER_ID, CurrentUser.getId());
 
+        response().setHeader("Cache-Control", "no-cache, max-age=0, must-revalidate, no-store");
         return ok(tripspage.render(
                 CurrentUser.getId(),
                 DataAccess.getInjectedContext().getReservationDAO().getReservationListPage(field, asc, page, pageSize, filter),

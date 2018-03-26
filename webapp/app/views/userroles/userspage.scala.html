@@ -28,7 +28,8 @@
  *@
 
 @(users: Page[UserRoles.UserWithRoles])
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-userroles">
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-userroles">
     <thead>
         <tr role="row">
             <th name="user_name" class="sortable" tabindex="0" >Naam</th>
@@ -52,5 +53,6 @@
         }{ @noresults() }
     </tbody>
 </table>
+</div>
 @pagination(users)
 

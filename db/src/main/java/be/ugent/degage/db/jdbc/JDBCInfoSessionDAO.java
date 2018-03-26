@@ -1,27 +1,27 @@
 /* JDBCInfoSessionDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -30,12 +30,14 @@
 package be.ugent.degage.db.jdbc;
 
 import be.ugent.degage.db.DataAccessException;
+import be.ugent.degage.db.FilterField;
 import be.ugent.degage.db.dao.InfoSessionDAO;
 import be.ugent.degage.db.models.*;
 
 import java.sql.*;
 import java.time.Instant;
 import java.util.Map;
+import java.util.List;
 import java.util.HashMap;
 
 import static be.ugent.degage.db.jdbc.JDBCUserDAO.USER_HEADER_FIELDS;
@@ -63,7 +65,8 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 rs.getInt("user_id"),
                 rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
                 rs.getInt("infosession_max_enrollees"),
-                rs.getString("infosession_comments")
+                rs.getString("infosession_comments"),
+                rs.getString("infosession_description")
         );
         infoSession.setEnrolleeCount(rs.getInt("enrollee_count"));
         return infoSession;
@@ -78,17 +81,19 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 null,
                 0, null,
                 rs.getInt("infosession_max_enrollees"),
-                rs.getString("infosession_comments")
+                rs.getString("infosession_comments"),
+                rs.getString("infosession_description")
         );
     }
 
     @Override
     public int createInfoSession(InfoSessionType type, int hostId, Address address,
-                                         Instant time, int maxEnrollees, String comments) throws DataAccessException {
+                                         Instant time, int maxEnrollees, String comments,
+                                         String description) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO infosessions(infosession_type, infosession_timestamp, " +
-                        "infosession_host_user_id, infosession_max_enrollees, infosession_comments) " +
-                        "VALUES (?,?,?,?,?)",
+                        "infosession_host_user_id, infosession_max_enrollees, infosession_comments, infosession_description) " +
+                        "VALUES (?,?,?,?,?,?)",
                 "infosession_id"
         )) {
             ps.setString(1, type.name());
@@ -96,6 +101,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             ps.setInt(3, hostId);
             ps.setInt(4, maxEnrollees);
             ps.setString(5, comments);
+            ps.setString(6, description);
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -143,6 +149,19 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
+
+    @Override
+    public int getAmountOfEnrollees(int id) throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT COUNT(*) FROM infosessionenrollees WHERE infosession_id = ?"
+        )) {
+            ps.setInt(1, id);
+            return toSingleInt(ps);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not get amount of enrollees for infosession.", ex);
+        }
+    }
+
     @Override
     public void deleteInfoSession(int id) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
@@ -156,11 +175,11 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     private static String INFOSESSION_EXTENDED_FIELDS =
-            "infosession_id, infosession_type, " +
-                    "infosession_timestamp, infosession_max_enrollees, infosession_comments, " +
-                    "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
-                    "address_latitude, address_longitude, " +
-                    "user_id, user_firstname, user_lastname, enrollee_count ";
+        "infosession_id, infosession_type, " +
+        "infosession_timestamp, infosession_max_enrollees, infosession_comments, infosession_description, " +
+        "address_id, address_country, address_city, address_zipcode, address_street, address_number, " +
+        "address_latitude, address_longitude, " +
+        "user_id, user_firstname, user_lastname, enrollee_count ";
 
 
     /**
@@ -178,11 +197,23 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     @Override
-    public Page<InfoSession> getFutureInfoSessions(int page, int pageSize) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(
-             "SELECT SQL_CALC_FOUND_ROWS " + INFOSESSION_EXTENDED_FIELDS + " FROM infosessions_extended " +
-             "WHERE infosession_timestamp > NOW() ORDER BY infosession_timestamp ASC LIMIT ?, ?")
-        ) {
+    public Page<InfoSession> getFutureInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
+      StringBuilder builder = new StringBuilder("SELECT SQL_CALC_FOUND_ROWS " + INFOSESSION_EXTENDED_FIELDS + " FROM infosessions_extended " +
+      "WHERE infosession_timestamp > NOW() ");
+      switch(orderBy) {
+        case TYPE:{
+          builder.append("order by infosession_type ");
+          builder.append(asc? "asc" : "desc");
+          break;
+        }
+        case DATE:{
+          builder.append("ORDER BY infosession_timestamp ");
+          builder.append(asc? "asc" : "desc");
+          break;
+        }
+      }
+      builder.append(" LIMIT ?, ?");
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
             ps.setInt(1, (page-1)*pageSize);
             ps.setInt(2, pageSize);
             return toPage(ps, pageSize, JDBCInfoSessionDAO::populateInfoSession);
@@ -200,7 +231,8 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
                 rs.getInt("h.user_id"),
                 rs.getString("h.user_firstname") + " " + rs.getString("h.user_lastname"),
                 rs.getInt("infosession_max_enrollees"),
-                null
+                null,
+                rs.getString("infosession_description")
         );
         infoSession.setEnrolleeCount(rs.getInt("enrollee_count"));
         infoSession.setMembershipCount(rs.getInt("member_count"));
@@ -208,25 +240,36 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     @Override
-    public Page<InfoSession> getPastInfoSessions(int page, int pageSize) throws DataAccessException {
-        try (PreparedStatement ps = prepareStatement(
-            "SELECT SQL_CALC_FOUND_ROWS " +
-                    "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, " +
-                    "h.user_id, h.user_firstname, h.user_lastname, " +
-                    "count(infosession_enrollee_id) AS enrollee_count, " +
-                    "count(u.user_date_joined) AS member_count " +
-            "FROM infosessions " +
-                    "JOIN infosessionenrollees USING(infosession_id) " +
-                    "JOIN users AS h ON infosession_host_user_id = h.user_id " +
-                    "JOIN users AS u ON infosession_enrollee_id = u.user_id " +
-            "WHERE infosession_timestamp <= NOW() " +
-            "GROUP BY infosession_id " +
-                    "ORDER BY infosession_timestamp DESC LIMIT ?, ?")
+    public Page<InfoSession> getPastInfoSessions(FilterField orderBy, boolean asc, int page, int pageSize) throws DataAccessException {
+        StringBuilder builder = new StringBuilder("SELECT SQL_CALC_FOUND_ROWS " +
+                "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_description, " +
+                "h.user_id, h.user_firstname, h.user_lastname, " +
+                "count(infosession_enrollee_id) AS enrollee_count, " +
+                "count(u.user_date_joined) AS member_count " +
+        "FROM infosessions " +
+                "JOIN infosessionenrollees USING(infosession_id) " +
+                "JOIN users AS h ON infosession_host_user_id = h.user_id " +
+                "JOIN users AS u ON infosession_enrollee_id = u.user_id " +
+        "WHERE infosession_timestamp <= NOW() GROUP BY infosession_id ");
+        switch(orderBy) {
+          case TYPE:{
+            builder.append("order by infosession_type ");
+            builder.append(asc? "asc" : "desc");
+            break;
+          }
+          case DATE:{
+            builder.append("ORDER BY infosession_timestamp ");
+            builder.append(asc? "asc" : "desc");
+            break;
+          }
+        }
+        builder.append(" LIMIT ?, ?");
+        try (PreparedStatement ps = prepareStatement(builder.toString())
         ) {
             ps.setInt(1, (page-1)*pageSize);
             ps.setInt(2, pageSize);
-            Page<InfoSession> infoSessions = toPage(ps, pageSize, JDBCInfoSessionDAO::populatePastInfoSession);   
-            Map<Integer, Integer> attendeeCountMap = getAttendeeCountMap(page, pageSize);         
+            Page<InfoSession> infoSessions = toPage(ps, pageSize, JDBCInfoSessionDAO::populatePastInfoSession);
+            Map<Integer, Integer> attendeeCountMap = getAttendeeCountMap(page, pageSize);
             for (InfoSession infoSession : infoSessions) {
                 infoSession.setAttendeeCount(attendeeCountMap.get(infoSession.getId()) == null ? 0 : attendeeCountMap.get(infoSession.getId()));
             }
@@ -239,7 +282,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     private Map<Integer, Integer> getAttendeeCountMap(int page, int pageSize) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
             "SELECT SQL_CALC_FOUND_ROWS " +
-                    "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, " +
+                    "infosession_id, infosession_type, infosession_timestamp, infosession_max_enrollees, infosession_description, " +
                     "h.user_id, h.user_firstname, h.user_lastname, " +
                     "count(infosession_enrollee_id) AS attendee_count, " +
                     "count(u.user_date_joined) AS member_count " +
@@ -284,7 +327,7 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
     }
 
     @Override
-    public EnrollementStatus getUserEnrollmentStatus(int sessionId, int userId) throws DataAccessException {
+    public EnrollmentStatus getUserEnrollmentStatus(int sessionId, int userId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "SELECT infosession_enrollment_status FROM infosessionenrollees " +
                         "WHERE infosession_enrollee_id = ? AND infosession_id = ?"
@@ -292,14 +335,14 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             ps.setInt(1, userId);
             ps.setInt(2, sessionId);
             return toSingleObject(ps,
-                    rs -> EnrollementStatus.valueOf(rs.getString("infosession_enrollment_status")));
+                    rs -> EnrollmentStatus.valueOf(rs.getString("infosession_enrollment_status")));
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to retrieve enrollment status.", ex);
         }
     }
 
     @Override
-    public void setUserEnrollmentStatus(int sessionId, int userId, EnrollementStatus status) throws DataAccessException {
+    public void setUserEnrollmentStatus(int sessionId, int userId, EnrollmentStatus status) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE infosessionenrollees SET infosession_enrollment_status = ? " +
                         "WHERE infosession_enrollee_id = ? AND infosession_id = ?"
@@ -358,19 +401,21 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
      * Update infosession
      */
     @Override
-    public void updateInfoSession(int sessionId, InfoSessionType type, int maxEnrollees, Instant time, int hostId, String comments, Address address) throws DataAccessException {
+    public void updateInfoSession(int sessionId, InfoSessionType type, int maxEnrollees,
+      Instant time, int hostId, String comments, Address address, String description) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "UPDATE infosessions SET infosession_type=?, infosession_max_enrollees=?, " +
-                        "infosession_timestamp=?, infosession_host_user_id=?, infosession_comments=? " +
-                        "WHERE infosession_id=?"
+                        "infosession_timestamp=?, infosession_host_user_id=?, infosession_comments=?, " +
+                        "infosession_description=? WHERE infosession_id=?"
         )) {
             ps.setString(1, type.name());
             ps.setInt(2, maxEnrollees);
             ps.setTimestamp(3, Timestamp.from(time));
             ps.setInt(4, hostId);
             ps.setString(5, comments);
+            ps.setString(6, description);
 
-            ps.setInt(6, sessionId);
+            ps.setInt(7, sessionId);
             ps.executeUpdate();
             updateLocation(sessionId, address);
         } catch (SQLException ex) {
@@ -408,19 +453,21 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
         }
     }
 
-    private static Enrollee populateEnrollee (ResultSet rs) throws SQLException {
+    public static Enrollee populateEnrollee (ResultSet rs) throws SQLException {
         Date dateJoined = rs.getDate("user_date_joined");
+        Date dateContract = rs.getDate("user_contract");
         return new Enrollee(
                     JDBCUserDAO.populateUserHeader(rs),
-                    EnrollementStatus.valueOf(rs.getString("infosession_enrollment_status")),
-                    dateJoined == null ? null : dateJoined.toLocalDate()
+                    EnrollmentStatus.valueOf(rs.getString("infosession_enrollment_status")),
+                    dateJoined == null ? null : dateJoined.toLocalDate(),
+                    dateContract == null ? null : dateContract.toLocalDate()
         );
     }
 
     @Override
     public Iterable<Enrollee> getEnrollees(int infosessionId) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-                "SELECT " + USER_HEADER_FIELDS + ", user_date_joined, infosession_enrollment_status " +
+                "SELECT " + USER_HEADER_FIELDS + ", user_date_joined, user_contract, infosession_enrollment_status " +
                         "FROM infosessionenrollees " +
                         "INNER JOIN users ON user_id = infosession_enrollee_id " +
                         "WHERE infosession_id = ?"
@@ -429,6 +476,20 @@ class JDBCInfoSessionDAO extends AbstractDAO implements InfoSessionDAO {
             return toList(ps, JDBCInfoSessionDAO::populateEnrollee);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not find enrollees", ex);
+        }
+    }
+
+    @Override
+    public List<InfoSession> getInfoSessionsOfYesterday() throws DataAccessException {
+        try (PreparedStatement ps = prepareStatement(
+            "SELECT * FROM infosessions_extended " +
+            " WHERE infosession_timestamp < (NOW() - INTERVAL 1 DAY) AND " + 
+            " infosession_timestamp > (NOW() - INTERVAL 2 DAY) " +
+            " ORDER BY infosession_timestamp"
+        )) {
+            return toList(ps, JDBCInfoSessionDAO::populateInfoSession);
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to fetch infosession in last 24 hours", ex);
         }
     }
 

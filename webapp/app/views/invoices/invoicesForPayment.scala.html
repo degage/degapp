@@ -1,0 +1,8 @@
+@(list: Iterable[Invoice])
+
+@stdlayout("Afrekeningen van betaling") {
+
+  @js.paymentMenu()
+
+  @invoicesTable(list)
+}

@@ -1,27 +1,27 @@
 @* listAll.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -31,7 +31,7 @@
 
 @stdlayout("Afrekeningen (beheer)", scripts=js.datetimepicker()) {
 @panel("Afrekeningen", "fa-bar-chart-o") {
-<div class="table-responsive col-xs-12">
+<div id="resultsTable" class="table-responsive col-xs-12">
     <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
         <thead>
         <tr role="row">
@@ -74,21 +74,28 @@
                         case BillingStatus.USERS_DONE => {
                             @btnWarning("Definitieve eigenaarsafrekening...", routes.BillingsAdmin.carInvoices(billing.getId))
                             @btnExcel("A"+billing.getPrefix, routes.Reports.billingUserOverview(billing.getId))
+                            @btnPdf("Ontleners", routes.Billings.userInvoices(billing.getId, 1, 100000))
                         }
                         case BillingStatus.ALL_DONE => {
                             @btnExcel("A"+billing.getPrefix, routes.Reports.billingUserOverview(billing.getId))
                             @btnExcel("E"+billing.getPrefix, routes.Reports.billingCarOverview(billing.getId))
                             @btnDanger("Afsluiten (archiveren)", routes.BillingsAdmin.archive(billing.getId))
+                            @btnPdf("Ontleners", routes.Billings.userInvoices(billing.getId, 1, 100000))
+                            @btnPdf("Eigenaars", routes.Billings.carInvoices(billing.getId))
                         }
                         case BillingStatus.ARCHIVED => {
                             @if(billing.getId > 1){
                                 @btnExcel("A"+billing.getPrefix, routes.Reports.billingUserOverview(billing.getId))
                                 @btnExcel("E"+billing.getPrefix, routes.Reports.billingCarOverview(billing.getId))
                             }
+                            @btnPdf("Ontleners", routes.Billings.userInvoices(billing.getId, 1, 100000))
+                            @btnPdf("Eigenaars", routes.Billings.carInvoices(billing.getId))
                         }
                         case _ => {
                         }
                     }
+                    @* TODO op juiste plaats zetten na testen *@
+                    @btnPrimary("Maak afrekeningen", routes.Invoices.saveInvoices(billing.getId))
                 </td>
             </tr>
         }

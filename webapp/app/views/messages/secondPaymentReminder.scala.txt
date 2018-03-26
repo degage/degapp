@@ -1,0 +1,10 @@
+@(firstReminder: Reminder, secondReminderAndUserAndInvoice: ReminderAndUserAndInvoice, lastPaymentDate: java.time.LocalDate, url: String)
+
+@* Wachtwoord opnieuw instellen *@
+Beste @secondReminderAndUserAndInvoice.getUser.getFirstName,
+
+Voor je afrekening @secondReminderAndUserAndInvoice.getInvoice.getNumber (@url) vonden we nog geen betaling terug.
+We hadden de betaling ten laatste verwacht op @secondReminderAndUserAndInvoice.getInvoice.getDueDate.
+
+Op @firstReminder.getSendDate stuurden we een eerste herinnering maar daar is mogelijk nog geen gevolg aan gegeven.
+Betalingen tot @lastPaymentDate werden nagekeken maar deze vonden we niet terug. Kijk je dit snel na ?

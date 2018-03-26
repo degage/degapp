@@ -1,27 +1,27 @@
 @* anomalies.scala.html
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see http://www.gnu.org/licenses/.
@@ -52,7 +52,8 @@
         @* Trip anomalies *@
         <div class="tab-content">
         <div class="tab-pane active col-xs-12" id="trips">
-            <table class="table table-striped table-bordered table-hover no-footer">
+            <div id="resultsTable" class="table-responsive col-xs-12">
+                <table class="table table-striped table-bordered table-hover no-footer">
                 <thead>
                     <tr role="row">
                         <th>Auto</th>
@@ -70,6 +71,7 @@
                                 case AnomalyType.ZERO_KM => { Rit van 0 km }
                                 case AnomalyType.OVERLAP => { Ritten overlappen }
                                 case AnomalyType.GAP => { Tussenliggende rit ontbreekt }
+                                case AnomalyType.REQUEST_DETAILS => { Ontbrekende bevestiging }
                                 case _ => { Onbekend }
                             }
                         </td>
@@ -84,13 +86,16 @@
                     }
                 </tbody>
             </table>
+            </div>
         </div>
         @* Refuel anomalies *@
          <div class="tab-pane col-xs-12" id="refuels">
-            <table class="table table-striped table-bordered table-hover no-footer">
+             <div id="resultsTable" class="table-responsive col-xs-12">
+                 <table class="table table-striped table-bordered table-hover no-footer">
                 <thead>
                     <tr role="row">
                         <th>Auto</th>
+                        <th>Tankbeurt status</th>
                         <th>Rit</th>
                         <th>Bedrag</th>
                         <th>Tankbeurt</th>
@@ -99,6 +104,7 @@
                 <tbody>
                     @foreach.trOrElse(list2) { ano =>
                         <td>@ano.carName</td>
+                        <td>@ano.refuelStatus</td>
                         <td><a href="@routes.Refuels.showRefuelsForTrip(ano.reservationId,true)">@Utils.toLocalizedString(ano.from)</a></td>
                         <td>@data.EurocentAmount.toString(ano.eurocents)</td>
                         <td>@btnPrimary("Details", routes.Refuels.showDetails(ano.refuelId))</td>
@@ -109,6 +115,7 @@
                     }
                 </tbody>
             </table>
+             </div>
         </div>
        </div>
    }

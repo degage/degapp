@@ -33,13 +33,13 @@ package controllers.util;
  * Contains information needed for a single line in a user/carpicker dropdownmenu
  */
 public class PickerLine {
-    private String prefix;
+    protected String prefix;
 
-    private String suffix;
+    protected String suffix;
 
-    private String strong;
+    protected String strong;
 
-    private int id;
+    protected int id;
 
     public PickerLine(String value, String search, int id) {
         this.id = id;

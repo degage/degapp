@@ -1,27 +1,27 @@
 /* JDBCCarDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -36,6 +36,8 @@ import be.ugent.degage.db.dao.CarDAO;
 import be.ugent.degage.db.models.*;
 
 import java.sql.*;
+import java.time.LocalDate;
+
 
 /**
  * @author Laurent
@@ -71,7 +73,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 rs.getBoolean("car_active"),
                 rs.getDate("car_created_at") == null ? null : rs.getDate("car_created_at").toLocalDate(),
                 JDBCUserDAO.populateUserHeader(rs),
-                rs.getString("details_car_license_plate")
+                rs.getString("details_car_license_plate"),
+                rs.getDate("car_start_sharing") == null ? null : rs.getDate("car_start_sharing").toLocalDate(),
+                rs.getDate("car_end_sharing") == null ? null : rs.getDate("car_end_sharing").toLocalDate(),
+                rs.getInt("car_contract_file_id"),
+                rs.getDate("car_contract") == null ? null : rs.getDate("car_contract").toLocalDate(),
+                (Integer) rs.getObject("car_agreed_value")
         );
 
         car.setLocation(JDBCAddressDAO.populateAddress(rs));
@@ -79,36 +86,15 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 new TechnicalCarDetails(
                         rs.getString("details_car_license_plate"),
                         rs.getInt("details_car_registration"),
-                        rs.getString("details_car_chassis_number")
+                        rs.getString("details_car_chassis_number"),
+                        rs.getInt("eco_score"),
+                        rs.getString("euro_norm"),
+                        rs.getDate("start_date") == null ? null : rs.getDate("start_date").toLocalDate(),
+                        rs.getInt("kilo_watt")
                 ));
-        Date insuranceExpiration = rs.getDate("insurance_expiration");
-        car.setInsurance(
-                new CarInsurance(
-                        rs.getString("insurance_name"),
-                        insuranceExpiration == null ? null : insuranceExpiration.toLocalDate(),
-                        rs.getString("insurance_bonus_malus"),
-                        rs.getString("insurance_contract_id")
-                ));
-        Date assistanceExpiration = rs.getDate("assistance_expiration");
-        car.setAssistance(
-                new CarAssistance(
-                        rs.getString("assistance_name"),
-                        assistanceExpiration == null ? null : assistanceExpiration.toLocalDate(),
-                        CarAssistanceType.valueOf(rs.getString("assistance_type")),
-                        rs.getString("assistance_contract_id")
-                ));
-
-
-        Date parkingcardExpiration = rs.getDate("parkingcard_expiration");
-        car.setParkingcard(
-                new CarParkingcard(
-                        rs.getString("parkingcard_city"),
-                        parkingcardExpiration == null ? null : parkingcardExpiration.toLocalDate(),
-                        rs.getString("parkingcard_zones"),
-                        rs.getString("parkingcard_contract_id")
-                ));
-
-
+        car.setInsurance(JDBCCarInsuranceDAO.populateCarInsurance(rs));
+        car.setAssistance(JDBCCarAssistanceDAO.populateCarAssistance(rs));
+        car.setParkingcard(JDBCCarParkingcardDAO.populateCarParkingcard(rs));
         car.setFuel(CarFuel.valueOf(rs.getString("car_fuel")));
 
         return car;
@@ -139,6 +125,21 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         );
     }
 
+    public static CarHeaderAndOwner populateCarHeaderAndOwner(ResultSet rs) throws SQLException {
+      return new CarHeaderAndOwner(
+           rs.getInt("car_id"),
+           rs.getString("car_name"),
+           rs.getString("car_brand"),
+           rs.getString("car_type"),
+           rs.getString("car_email"),
+           rs.getBoolean("car_active"),
+           rs.getInt("car_owner_user_id"),
+           rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
+           rs.getInt("car_year"),
+           rs.getString("details_car_license_plate")
+           );
+    }
+
     private static CarHeaderLong populateCarHeaderLong(ResultSet rs) throws SQLException {
         CarHeaderLong result = new CarHeaderLong(
                 rs.getInt("car_id"),
@@ -164,26 +165,20 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
     private static CarHeaderLong populateCarHeaderLongAndOwnerAndParkingcard(ResultSet rs) throws SQLException {
         CarHeaderLong result = populateCarHeaderLong(rs);
         result.setOwner(JDBCUserDAO.populateUserHeader(rs));
-        Date parkingcardExpiration = rs.getDate("parkingcard_expiration");
-        result.setParkingcard(
-                new CarParkingcard(
-                        rs.getString("parkingcard_city"),
-                        parkingcardExpiration == null ? null : parkingcardExpiration.toLocalDate(),
-                        rs.getString("parkingcard_zones"),
-                        rs.getString("parkingcard_contract_id")
-                ));
+        result.setParkingcard(JDBCCarParkingcardDAO.populateCarParkingcard(rs));
         return result;
     }
 
     @Override
     public Car createCar(String name, String email, String brand, String type, Address location, Integer seats, Integer doors, Integer year, boolean manual,
                          boolean gps, boolean hook, CarFuel fuel, Integer fuelEconomy, Integer estimatedValue, Integer ownerAnnualKm,
-                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, CarParkingcard parkingcard, UserHeader owner, String comments, boolean active) throws DataAccessException {
+                         TechnicalCarDetails technicalCarDetails, CarInsurance insurance, CarAssistance assistance, CarParkingcard parkingcard, UserHeader owner, String comments, boolean active,
+                         LocalDate startSharing, LocalDate endSharing) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
                 "INSERT INTO cars(car_name, car_type, car_brand, " +
                         "car_seats, car_doors, car_year, car_manual, car_gps, car_hook, car_fuel, " +
                         "car_fuel_economy, car_estimated_value, car_owner_annual_km, " +
-                        "car_owner_user_id, car_comments, car_active, car_email) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        "car_owner_user_id, car_comments, car_active, car_email, car_start_sharing, car_end_sharing) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 "car_id"
         )) {
 
@@ -211,6 +206,18 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
             ps.setString(17, email);
 
+            if (startSharing == null) {
+                ps.setDate(18, null);
+            } else {
+                ps.setDate(18, Date.valueOf(startSharing));
+            }
+
+            if (endSharing == null) {
+                ps.setDate(19, null);
+            } else {
+                ps.setDate(19, Date.valueOf(endSharing));
+            }
+
             ps.executeUpdate();
 
             try (ResultSet keys = ps.getGeneratedKeys()) {
@@ -227,7 +234,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 Car car = new Car(id, name, email, brand, type,
                         seats, doors, year, manual, gps, hook, fuel,
                         fuelEconomy, estimatedValue, ownerAnnualKm,
-                        comments, active, owner);
+                        comments, active, owner, startSharing, endSharing);
                 car.setLocation(location);
                 car.setTechnicalCarDetails(technicalCarDetails);
                 car.setInsurance(insurance);
@@ -242,7 +249,10 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     private LazyStatement updateTechnicalCarDetailsStatement = new LazyStatement(
             "UPDATE technicalcardetails SET details_car_license_plate=?, " +
-                    "details_car_registration=?, details_car_chassis_number=? WHERE details_id = ?");
+                    "details_car_registration=?, details_car_chassis_number=?, " +
+                    "eco_score=?, euro_norm=?, start_date=?, kilo_watt=? " +
+                    "WHERE details_id=? "
+    );
 
 
     private void updateTechnicalCarDetails(int id, TechnicalCarDetails technicalCarDetails) throws SQLException {
@@ -257,7 +267,23 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             ps.setInt(2, registrationId);
         }
         ps.setString(3, technicalCarDetails.getChassisNumber());
-        ps.setInt(4, id);
+        if (technicalCarDetails.getEcoScore() == null) {
+            ps.setNull(4, Types.INTEGER);
+        } else {
+            ps.setInt(4, technicalCarDetails.getEcoScore());
+        }
+        ps.setString(5, technicalCarDetails.getEuroNorm());
+        if (technicalCarDetails.getStartDate() == null) {
+            ps.setDate(6, null);
+        } else {
+            ps.setDate(6, Date.valueOf(technicalCarDetails.getStartDate()));
+        }
+        if (technicalCarDetails.getKiloWatt() == null) {
+            ps.setNull(7, Types.INTEGER);
+        } else {
+            ps.setInt(7, technicalCarDetails.getKiloWatt());
+        }
+        ps.setInt(8, id);
 
         if (ps.executeUpdate() == 0) {
             throw new DataAccessException("No rows were affected when updating technicalCarDetails.");
@@ -266,29 +292,77 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     private LazyStatement updateInsuranceStatement = new LazyStatement(
             "UPDATE carinsurances SET insurance_name=?, insurance_expiration=?, " +
-                    "insurance_contract_id=?, insurance_bonus_malus=? WHERE insurance_id = ?"
+                    "insurance_contract_id=?, insurance_bonus_malus=?, " +
+                    "start_insurance_policy=?, start_bonus_malus=?, " +
+                    "civil_liability=?, legal_counsel=?, " +
+                    "driver_insurance=?, material_damage=?, " +
+                    "value_exclusive_VAT=?, exemption=?, " +
+                    "glass_breakage=?, theft=?, " +
+                    "insurance_name_before=?, " +
+                    "insurance_file_id=?, " +
+                    "greencard_file_id=? " +
+                    "WHERE insurance_id=? "
     );
 
-    private void updateInsurance(int id, CarInsurance insurance) throws SQLException {
-        PreparedStatement ps = updateInsuranceStatement.value();
-        ps.setString(1, insurance.getName());
-        if (insurance.getExpiration() == null) {
-            ps.setDate(2, null);
-        } else {
-            ps.setDate(2, Date.valueOf(insurance.getExpiration()));
-        }
-        ps.setString(3, insurance.getPolisNr());
-        ps.setString(4, insurance.getBonusMalus());
-        ps.setInt(5, id);
-
-        if (ps.executeUpdate() == 0) {
-            throw new DataAccessException("No rows were affected when updating carInsurance.");
+    public void updateInsurance(int id, CarInsurance insurance) throws DataAccessException {
+        try (PreparedStatement ps = updateInsuranceStatement.value()) {
+            ps.setString(1, insurance.getName());
+            if (insurance.getExpiration() == null) {
+                ps.setDate(2, null);
+            } else {
+                ps.setDate(2, Date.valueOf(insurance.getExpiration()));
+            }
+            ps.setString(3, insurance.getPolisNr());
+            ps.setString(4, insurance.getBonusMalus());
+            if (insurance.getStartInsurancePolicy() == null) {
+                ps.setDate(5, null);
+            } else {
+                ps.setDate(5, Date.valueOf(insurance.getStartInsurancePolicy()));
+            }
+            if (insurance.getStartBonusMalus() == null) {
+                ps.setNull(6, Types.INTEGER);
+            } else {
+                ps.setInt(6, insurance.getStartBonusMalus());
+            }
+            ps.setBoolean(7, insurance.isCivilLiability());
+            ps.setBoolean(8, insurance.isLegalCounsel());
+            ps.setBoolean(9, insurance.isDriverInsurance());
+            ps.setBoolean(10, insurance.isMaterialDamage());
+            if (insurance.getValueExclusiveVAT() == null) {
+                ps.setNull(11, Types.INTEGER);
+            } else {
+                ps.setInt(11, insurance.getValueExclusiveVAT());
+            }
+            if (insurance.getExemption() == null) {
+                ps.setNull(12, Types.INTEGER);
+            } else {
+                ps.setInt(12, insurance.getExemption());
+            }
+            ps.setBoolean(13, insurance.isGlassBreakage());
+            ps.setBoolean(14, insurance.isTheft());
+            ps.setString(15, insurance.getInsuranceNameBefore());
+            if (insurance.getInsuranceFileId() == null) {
+                ps.setNull(16, Types.INTEGER);
+            } else {
+                ps.setInt(16, insurance.getInsuranceFileId());
+            }
+            if (insurance.getGreenCardFileId() == null) {
+                ps.setNull(17, Types.INTEGER);
+            } else {
+                ps.setInt(17, insurance.getGreenCardFileId());
+            }
+            ps.setInt(18, id);
+            if (ps.executeUpdate() == 0) {
+                throw new DataAccessException("No rows were affected when updating carInsurance.");
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update insurance.", ex);
         }
     }
 
     private LazyStatement updateAssistanceStatement = new LazyStatement(
             "UPDATE carassistances SET assistance_name=?, assistance_expiration=?, " +
-                    "assistance_contract_id=?, assistance_type=? WHERE assistance_id = ?"
+                    "assistance_contract_id=?, assistance_type=?, assistance_file_id=? WHERE assistance_id = ?"
     );
 
     private void updateAssistance(int id, CarAssistance assistance) throws SQLException {
@@ -301,7 +375,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
         ps.setString(3, assistance.getContractNr());
         ps.setString(4, assistance.getType().name());
-        ps.setInt(5, id);
+        if (assistance.getFileId() == null) {
+            ps.setNull(5, Types.INTEGER);
+        } else {
+            ps.setInt(5, assistance.getFileId());
+        }
+        ps.setInt(6, id);
 
         if (ps.executeUpdate() == 0) {
             throw new DataAccessException("No rows were affected when updating CarAssistance.");
@@ -310,7 +389,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
     private LazyStatement updateParkingcardStatement = new LazyStatement(
             "UPDATE carparkingcards SET parkingcard_city=?, parkingcard_expiration=?, " +
-                    "parkingcard_contract_id=?, parkingcard_zones=? WHERE parkingcard_id = ?"
+                    "parkingcard_contract_id=?, parkingcard_zones=?, parkingcard_file_id=? WHERE parkingcard_id = ?"
     );
 
     private void updateParkingcard(int id, CarParkingcard parkingcard) throws SQLException {
@@ -323,7 +402,12 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
         }
         ps.setString(3, parkingcard.getContractNr());
         ps.setString(4, parkingcard.getZones());
-        ps.setInt(5, id);
+        if (parkingcard.getFileId() == null) {
+            ps.setNull(5, Types.INTEGER);
+        } else {
+            ps.setInt(5, parkingcard.getFileId());
+        }
+        ps.setInt(6, id);
 
         if (ps.executeUpdate() == 0) {
             throw new DataAccessException("No rows were affected when updating CarParkingcard.");
@@ -344,7 +428,8 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                 "UPDATE cars SET car_name=?, car_type=? , car_brand=? ,  " +
                         "car_seats=? , car_doors=? , car_year=? , car_manual=?, car_gps=? , car_hook=? , car_fuel=? , " +
                         "car_fuel_economy=? , car_estimated_value=? , car_owner_annual_km=? , " +
-                        "car_owner_user_id=? , car_comments=?, car_active=?, car_email=? WHERE car_id = ?"
+                        "car_owner_user_id=? , car_comments=?, car_active=?, car_email=?, " +
+                        "car_start_sharing=?, car_end_sharing=?, car_contract_file_id = ?, car_contract = ?, car_agreed_value = ? WHERE car_id = ?"
 
         )) {
             ps.setString(1, car.getName());
@@ -374,10 +459,29 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
 
             ps.setString(17, car.getEmail());
 
+            if (car.getStartSharing() == null) {
+                ps.setDate(18, null);
+            } else {
+                ps.setDate(18, Date.valueOf(car.getStartSharing()));
+            }
+
+            if (car.getEndSharing() == null) {
+                ps.setDate(19, null);
+            } else {
+                ps.setDate(19, Date.valueOf(car.getEndSharing()));
+            }
+
+            ps.setObject(20, car.getContractFileId(), Types.INTEGER);
+            if (car.getContract() == null) {
+                ps.setDate(21, null);
+            } else {
+                ps.setDate(21, Date.valueOf(car.getContract()));
+            }
+            ps.setObject(22, car.getCarAgreedValue(), Types.INTEGER);
+
             int carId = car.getId();
-
-            ps.setInt(18, carId);
-
+            ps.setInt(23, carId);
+            
             if (ps.executeUpdate() == 0) {
                 throw new DataAccessException("No rows were affected when updating car.");
             }
@@ -460,7 +564,7 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
                     JDBCAddressDAO.ADDRESS_FIELDS +
                     ", details_car_license_plate " +
                     "FROM cars JOIN addresses ON address_id=car_location " +
-                    "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? " + 
+                    "LEFT JOIN carpreferences ON cars.car_id = carpreferences.car_id AND user_id = ? " +
                     "LEFT JOIN technicalcardetails ON details_id = cars.car_id ";
 
     private static final String SELECT_NOT_OVERLAP =
@@ -584,24 +688,87 @@ class JDBCCarDAO extends AbstractDAO implements CarDAO {
             case LICENSE_PLATE:
                 builder.append(" ORDER BY details_car_license_plate ");
                 builder.append(asc ? "ASC" : "DESC");
-                break;               
+                break;
         }
 
         builder.append (" LIMIT ").append (pageSize).append(" OFFSET ").append((page-1)*pageSize);
 
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
-            return toPage(ps, pageSize, rs -> new CarHeaderAndOwner(
-                    rs.getInt("car_id"),
-                    rs.getString("car_name"),
-                    rs.getString("car_brand"),
-                    rs.getString("car_type"),
-                    rs.getString("car_email"),
-                    rs.getBoolean("car_active"),
-                    rs.getInt("car_owner_user_id"),
-                    rs.getString("user_firstname") + " " + rs.getString("user_lastname"),
-                    rs.getInt("car_year"),
-                    rs.getString("details_car_license_plate")
-            ));
+            return toPage(ps, pageSize, JDBCCarDAO::populateCarHeaderAndOwner);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
+
+    /**
+     * @param orderBy  The field you want to order by
+     * @param asc      Ascending
+     * @param page     The page you want to see
+     * @param pageSize The page size
+     * @param filter   The filter you want to apply
+     * @return List of cars with custom ordering and filtering
+     */
+    @Override
+    public Page<CarHeaderAndOwner> listCarsAndOwners(FilterField orderBy, boolean asc, int page, int pageSize, String filter) throws DataAccessException {
+        StringBuilder builder = new StringBuilder(
+                "SELECT SQL_CALC_FOUND_ROWS " + CAR_HEADER_FIELDS + ", user_firstname, user_lastname, details_car_license_plate " +
+                        "FROM cars " +
+                        "JOIN users ON car_owner_user_id = user_id " +
+                        "LEFT JOIN technicalcardetails ON details_id = car_id "
+        );
+
+        // add filters
+        if (filter != null && filter.length() > 0) {
+          builder.append(" WHERE ");
+          String[] searchStrings = filter.trim().split(" ");
+          for (int i = 0; i < searchStrings.length; i++) {
+            if (i > 0) {
+              builder.append(" AND ");
+            }
+            builder.append("(");
+            StringBuilder filterBuilder = new StringBuilder();
+            FilterUtils.appendOrContainsFilter(filterBuilder, "car_name", searchStrings[i]);
+            FilterUtils.appendOrContainsFilter(filterBuilder, "car_status", searchStrings[i]);
+            FilterUtils.appendOrContainsFilter(filterBuilder, "car_brand", searchStrings[i]);
+            FilterUtils.appendOrContainsFilter(filterBuilder, "details_car_license_plate", searchStrings[i]);
+            builder.append(filterBuilder).append(")");
+          }
+        }
+
+        // add order
+        switch (orderBy) {
+            case NAME:
+                builder.append(" ORDER BY car_name ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case BRAND:
+                builder.append(" ORDER BY car_brand ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case ACTIVE:
+                builder.append(" ORDER BY car_active ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case OWNER:
+                builder.append(" ORDER BY user_lastname ");
+                builder.append(asc ? "ASC" : "DESC");
+                builder.append(" , user_firstname ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case YEAR:
+                builder.append(" ORDER BY car_year ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+            case LICENSE_PLATE:
+                builder.append(" ORDER BY details_car_license_plate ");
+                builder.append(asc ? "ASC" : "DESC");
+                break;
+        }
+
+        builder.append (" LIMIT ").append (pageSize).append(" OFFSET ").append((page-1)*pageSize);
+
+        try (PreparedStatement ps = prepareStatement(builder.toString())) {
+            return toPage(ps, pageSize, JDBCCarDAO::populateCarHeaderAndOwner);
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
         }

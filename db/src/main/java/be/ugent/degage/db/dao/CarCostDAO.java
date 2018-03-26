@@ -96,5 +96,13 @@ public interface CarCostDAO {
      */
     public void rejectCost(int costId, String message) throws DataAccessException;
 
+    /*
+     * Add a carAdmin comment
+     */
+    public void addCommentCarAdmin(int costId, String message) throws DataAccessException;
 
+    /*
+     * Add a carOwner comment
+     */
+    public void addCommentCarOwner(int costId, String message) throws DataAccessException;
 }

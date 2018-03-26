@@ -1,27 +1,27 @@
 /* CarCost.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -52,6 +52,8 @@ public class CarCost {
     private int spread; // see getter
     private int alreadyPaid; // in eurocent
     private LocalDate startDate;
+    private String commentCarAdmin;
+    private String commentCarOwner;
     private String comment; // when refused
 
     public int getId() {
@@ -146,9 +148,26 @@ public class CarCost {
         return startDate;
     }
 
+    public String getCommentCarAdmin() {
+        return commentCarAdmin;
+    }
+
+    public void setCommentCarAdmin(String commentCarAdmin) {
+        this.commentCarAdmin = commentCarAdmin;
+    }
+
+    public String getCommentCarOwner() {
+        return commentCarOwner;
+    }
+
+    public void setCommentCarOwner(String commentCarOwner) {
+        this.commentCarOwner = commentCarOwner;
+    }
+
     public CarCost(int id, int amount, int km, String description, LocalDate date, int proofId,
                    int carId, String carName, int ownerId, CarCostCategory category,
-                   int spread, String comment, LocalDate startDate, int alreadyPaid){
+                   int spread, String comment, LocalDate startDate, int alreadyPaid,
+                   String commentCarAdmin, String commentCarOwner){
         this.id = id;
         this.amount = amount;
         this.km = km;
@@ -164,5 +183,8 @@ public class CarCost {
         this.comment = comment;
         this.startDate = startDate;
         this.alreadyPaid = alreadyPaid;
+        this.commentCarAdmin = commentCarAdmin;
+        this.commentCarOwner = commentCarOwner;
     }
+
 }

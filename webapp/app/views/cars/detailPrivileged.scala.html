@@ -37,8 +37,8 @@
     <div class="panel-body">
         <p>Vul hier aan wie privileges heeft voor jouw auto. Deze betalen een lagere kost en hun reservaties worden automatisch goedgekeurd.</p>
 
-            <!-- TODO: make nicer (bootstrap)-->
-        <table class="table table-striped table-bordered table-hover no-footer" id="carPrivileges">
+        <div id="resultsTable" class="table-responsive col-xs-12">
+            <table class="table table-striped table-bordered table-hover no-footer" id="carPrivileges">
             <thead>
                 <tr role="row">
                     <th>Naam</th>
@@ -73,6 +73,7 @@
                 </tr>
             </tbody>
         </table>
+        </div>
         <button class="btn btn-success" onclick="updatePrivileged(@carId)">Wijzigingen opslaan</button>
     </div>
 </div>

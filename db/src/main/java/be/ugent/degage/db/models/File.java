@@ -29,15 +29,20 @@
 
 package be.ugent.degage.db.models;
 
+import com.google.gson.annotations.Expose;
+
 /**
  * Represents an (image) file stored on the server.
  */
 
 public class File {
+    @Expose
     private int fileId;
+    @Expose
     private String path;
-
+    @Expose
     private String fileName;
+    @Expose
     private String contentType;
 
     public File(int fileId, String path, String fileName, String contentType) {

@@ -1,0 +1,3 @@
+@(reminderAndUserAndInvoice: ReminderAndUserAndInvoice, url: String)
+
+De volgende afrekening staat klaar voor je: @reminderAndUserAndInvoice.getInvoice.getNumber.

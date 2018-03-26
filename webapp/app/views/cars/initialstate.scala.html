@@ -1,0 +1,30 @@
+@* initialstate.scala.html
+ *@
+
+@(carId: Int, carName: String, listOfFiles: Iterable[File])
+
+@stdlayout("Oorspronkelijke staat van de auto", extrabc=breadcrumb(carName, routes.Cars.detail(carId))){
+
+    @panel("Laad hier foto's van de oorspronkelijke staat van de auto op") {
+        @helper.form(routes.Cars.addInitialStateFile(carId), 'enctype -> "multipart/form-data") {
+            <div class="form-group col-xs-12">
+                <input type="file" name="file">
+                <br>
+                <input class="btn btn-sm btn-success" type="submit" value="Doorsturen">
+            </div>
+         }
+    }
+    @panel("Reeds geüploade bestanden", "fa-list-ul") {
+        <ul>
+        @foreach.orElse(listOfFiles){ file =>
+            <li>
+                <a href="@routes.Cars.viewInitialStateFile(carId, file.getId)" target="_blank">@file.getFileName</a>
+                <a href="@routes.Cars.deleteInitialStateFile(carId, file.getId)"><span class="glyphicon glyphicon-remove"></span></a>
+            </li>
+         }{
+           Nog geen bestanden geupload.
+         }
+        </ul>
+    }
+
+}

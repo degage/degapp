@@ -1,0 +1,53 @@
+@(stats: Iterable[PaymentStatistic])
+
+@stdlayout("Debiteurenbeheer: Statistieken") {
+
+    @js.paymentMenu()
+
+    @panel("Statistieken per kwartaal", "fa-bar-chart-o") {
+        <div class="table-responsive col-xs-12">
+            <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-refuels">
+                <thead>
+                    <tr role="row">
+                        <th>Kwartaal</th>
+                        <th>Afrekeningen open @btnPrimary("Afrekeningen", routes.Invoices.getAll())</th>
+                        <th>Afrekeningen betaald</th>
+                        <th>Afrekeningen te laat</th>
+                        <th>Ontvangen bedrag</th>
+                        <th>Nog te ontvangen bedrag</th>
+                        <th>Betaald bedrag (door degage)</th>
+                        <th>Nog te betalen bedrag (door degage)</th>
+                        <th>Gemiddelde betalingstijd (dagen)</th>
+                    </tr>
+                </thead>
+                </thead>
+                <tbody>
+                    @foreach(stats){ stat =>
+                        <tr>
+                            <td>@stat.getBillingDescription</td>
+                            @if(stat.getPercentageOpen == 100 && stat.getPercentagePaid == 100) {
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                                <td align="right">Geen afrekeningen</td>
+                            } else {
+                                <td align="right">@stat.getPercentageOpen %</td>
+                                <td align="right">@stat.getPercentagePaid %</td>
+                                <td align="right">@stat.getPercentageOverdue %</td>
+                                <td align="right">@stat.getAmountReceived €</td>
+                                <td align="right">@stat.getAmountToReceive €</td>
+                                <td align="right">@stat.getAmountPaid €</td>
+                                <td align="right">@stat.getAmountToPay €</td>
+                                <td align="right">@stat.getAverageTimeToPay</td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+}

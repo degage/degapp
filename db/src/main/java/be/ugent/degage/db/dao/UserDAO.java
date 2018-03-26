@@ -1,27 +1,27 @@
 /* UserDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -46,6 +46,11 @@ public interface UserDAO {
      * Return the user with the given email address
      */
     public UserHeader getUserByEmail(String email) throws DataAccessException;
+
+    /**
+     * Return the user with the given account number
+     */
+    public UserHeader getUserByAccountNumber(String accountNumber) throws DataAccessException;
 
     /**
      * Return the user with the given email address and (plain text) password.
@@ -92,12 +97,17 @@ public interface UserDAO {
     /**
      * Update the drivers license data for a user
      */
-    public void updateUserLicenseData(int userId, String license, LocalDate date);
+    public void updateUserLicenseData(int userId, String license, LocalDate date, LocalDate expirationDate);
+
+    /**
+     * Update the account number data for a user
+     */
+    public void updateUserAccountNumberData(int userId, String accountNumber);
 
     /**
      * Update identity data for a user
      */
-    public void updateUserIdentityData(int userId, String identityId, String nationalId);
+    public void updateUserIdentityData(int userId, String identityId, String nationalId, LocalDate expirationDate);
 
     /**
      * Update the user status
@@ -145,5 +155,15 @@ public interface UserDAO {
      * Return a user list for users with fist and/or last name containing the given string. Used in pickers.
      */
     public Iterable<UserHeaderShort> listUserByName(String str, List<String> status, int limit);
+
+    /**
+     * If sendReminder is true reminders for payments should be send (default true)
+     */
+    public void updateUserPaymentInfo(int userId, boolean sendReminder, String paymentInfo, UserCreditStatus status);
+
+
+    public UserHeader getUserByInvoice(Invoice invoice);
+
+    public Page<User> findUsers(FilterField orderBy, boolean asc, int page, int pageSize, String filter) throws DataAccessException;
 
 }

@@ -1,0 +1,33 @@
+
+
+@(reminders: java.lang.Iterable[Reminder], empty: Boolean)
+
+@if(!empty) {
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            Rappels:
+        </div>
+        <div class="panel-body">
+            @foreach(reminders) { r =>
+                <li>
+                    @if(r.getDescription == "FIRST") {
+                        <a href="@routes.Invoices.showDetails(r.getInvoiceId)">
+                            Eerste rappel voor afrekening @r.getInvoiceId
+                        </a>
+                    }
+                    @if(r.getDescription == "SECOND") {
+                        <a href="@routes.Invoices.showDetails(r.getInvoiceId)">
+                            Tweede rappel voor afrekening @r.getInvoiceId
+                        </a>
+                    }
+                    @if(r.getDescription == "THIRD"){
+                        <a href="@routes.Invoices.showDetails(r.getInvoiceId)">
+                            Derde rappel voor afrekening @r.getInvoiceId
+                        </a>
+                    }
+
+                </li>
+            }
+        </div>
+    </div>
+}

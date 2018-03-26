@@ -71,11 +71,11 @@ public class Contracts extends Controller {
         return DataAccess.getInjectedContext().getMembershipDAO().getNrOfUnsignedContracts(CurrentUser.getId());
     }
 
-    @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result contract(int userId, Referrer ref) {
         Membership membership = DataAccess.getInjectedContext().getMembershipDAO().getMembership(userId);
-        if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
+        if (CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN) || CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
             return ok(edit.render(
                     Form.form(Data.class).fill(new Data().populate(membership.getContractDate())),
                     userId,
@@ -88,7 +88,7 @@ public class Contracts extends Controller {
         }
     }
 
-    @AllowRoles({UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.CONTRACT_ADMIN, UserRole.PROFILE_ADMIN})
     @InjectContext
     public static Result contractPost(int userId, Referrer ref) {
         Form<Data> form = Form.form(Data.class).bindFromRequest();
@@ -96,7 +96,7 @@ public class Contracts extends Controller {
         Membership membership = dao.getMembership(userId);
         if (form.hasErrors()) {
             return badRequest(edit.render(form, membership.getId(), membership.getFullName(), ref));
-        } else if (CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
+        } else if (CurrentUser.hasRole(UserRole.INFOSESSION_ADMIN) || CurrentUser.hasRole(UserRole.PROFILE_ADMIN) || CurrentUser.is(membership.getContractAdmin())) {
             Data data = form.get();
             dao.updateUserContract(userId, data.signed ? Utils.toLocalDate(data.date) : null);
             return redirect(ref.getCall());
@@ -109,13 +109,13 @@ public class Contracts extends Controller {
             Referrer.register ("Contracten", routes.Contracts.showContracts(0), "CTRCT");
 
 
-    @AllowRoles({UserRole.CONTRACT_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result showContracts(int tab) {
         return ok(contracts.render(tab));
     }
 
-    @AllowRoles({UserRole.CONTRACT_ADMIN})
+    @AllowRoles({UserRole.INFOSESSION_ADMIN, UserRole.CONTRACT_ADMIN})
     @InjectContext
     public static Result showContractsPage(int page, int pageSize, int ascInt, String orderBy, String searchString) {
         int type = 2;

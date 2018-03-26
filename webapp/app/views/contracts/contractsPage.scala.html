@@ -29,7 +29,8 @@
 
 @(list: Page[Membership], tp: Int)
 
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-contracts">
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-contracts">
     <thead>
         <tr role="row">
             <th>Naam</th>
@@ -62,4 +63,5 @@
         }{ @noresults() }
     </tbody>
 </table>
+</div>
 @pagination(list)

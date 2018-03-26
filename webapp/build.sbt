@@ -35,7 +35,9 @@ libraryDependencies ++= Seq(
   "mysql"                   % "mysql-connector-java"         % "5.1.37",
   "com.itextpdf"            % "itextpdf"                     % "5.5.6",      // most recent version, shoul override version use by next module?
   "it.innove"               % "play2-pdf"                    % "1.1.3-fork", // adapted to iText 5
-  "com.typesafe"            % "config"                       % "1.2.1"
+  "com.typesafe"            % "config"                       % "1.2.1",
+  "com.google.code.gson"    % "gson"                         % "2.8.0",
+  "com.fasterxml.jackson.core" % "jackson-databind"           % "2.2.2"
   // "org.webjars"             % "jquery-ui"                    % "1.11.0-1", customized version stored in javascript/
 )
 
@@ -44,3 +46,27 @@ lazy val root = (project in file(".")).enablePlugins(PlayJava,SbtWeb) // SbtWeb 
 TwirlKeys.templateImports ++= Seq ("snippets._", "be.ugent.degage.db.models._")
 
 PlayKeys.routesImport ++= Seq ("data._", "binders._", "binders.Binders._")
+
+val browserifyTask = taskKey[Seq[File]]("Run browserify")
+
+val browserifyOutputDir = settingKey[File]("Browserify output directory")
+
+browserifyOutputDir := target.value / "web" / "browserify"
+
+browserifyTask := {
+  val outputFile = browserifyOutputDir.value / "main.js"
+  browserifyOutputDir.value.mkdirs
+  val cmd = "./node_modules/.bin/browserify -t [ babelify --presets [ es2015 react stage-2 ] ] app/assets/javascripts/main.jsx -o " + outputFile.getPath
+  val stderrBuffer = new scala.collection.mutable.ListBuffer[String]
+  //val status = cmd ! new ProcessLogger {
+//    def info(s: => String) {}
+  //  def error(s: => String) { stderrBuffer.append(s) }
+    //def buffer[T](f: => T): T = f
+  //}
+  //if (status != 0) error(stderrBuffer.mkString("\n", "\n", "\n"))
+  List(outputFile)
+}
+
+sourceGenerators in Assets <+= browserifyTask
+
+resourceDirectories in Assets += browserifyOutputDir.value

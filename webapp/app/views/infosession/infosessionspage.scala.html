@@ -27,10 +27,12 @@
  * distribution).  If not, see http://www.gnu.org/licenses/.
  *@
 
-@(sessions: Iterable[InfoSession], enrolled: InfoSession = null)
+@(sessions: Iterable[InfoSession], enrolled: InfoSession = null, isCarOwner: Boolean = false)
+@import db.CurrentUser
 
 @* Show a list of upcoming sessions for a new user. See also: infosessionsAdminPage *@
-<table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-infosessions">
     <thead>
         <tr role="row">
             <th>Type</th>
@@ -43,7 +45,14 @@
     </thead>
     <tbody>
         @foreach(sessions) { session =>
-            <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" }>
+            <tr @if(enrolled != null && session.getId == enrolled.getId) { class="info" } 
+                @if(isCarOwner && session.getType() == InfoSessionType.NORMAL) {
+                    style="display:none;"
+                }
+                @if(!isCarOwner && session.getType() == InfoSessionType.OWNER) {
+                    style="display:none;"
+                }
+            >
                 @columns(session, true)
                 <td>@session.getAddress</td>
                 <td>
@@ -64,3 +73,4 @@
         }
     </tbody>
 </table>
+</div>

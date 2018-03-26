@@ -54,6 +54,8 @@
                         @* TODO: Use a user picker that only shows people with CAR_OWNER status *@
                         @if(db.CurrentUser.hasRole(UserRole.CAR_ADMIN)) {
                             @std.userpicker(form("userId"), form("userIdAsString"), "Eigenaar", css="col-md-12", status="FULL")
+                            @std.datepicker(form("startSharing"), "Startdatum autodelen", "col-md-12")
+                            @std.datepicker(form("endSharing"), "Einddatum autodelen", "col-md-12")
                         } else {
                             @std.hiddenField(form("userId")) @std.hiddenField(form("userIdAsString"))
                         }
@@ -84,7 +86,7 @@
                         @std.textField(form("year"),"Bouwjaar", required=true)
                         @std.textField(form("fuelEconomy"), "Gemiddeld verbruik (per 100 km)")
                         @std.textField(form("estimatedValue"), "Geschatte huidige waarde")
-                        @std.textField(form("ownerAnnualKm"), "Gemiddeld aantal kilometers (per jaar)")
+                        @std.textField(form("ownerAnnualKm"), "Gemiddeld aantal kilometers door eigenaar (per jaar)")
                         @std.textArea(form("comments"), "Opmerkingen", 6)
                     </fieldset>
                 }
@@ -92,6 +94,10 @@
                     <fieldset>
                         @std.textField(form("licensePlate"), "Nummerplaat", "col-md-6")
                         @std.textField(form("chassisNumber"), "ChassisNumber", "col-md-6")
+                        @std.textField(form("ecoScore"), "Ecoscore", "col-md-6")
+                        @std.textField(form("euroNorm"), "Euronorm", "col-md-6")
+                        @std.textField(form("kiloWatt"), "KiloWatt", "col-md-6")
+                        @std.datepicker(form("startDate"), "Startdatum", "col-md-4")
                         <div class="form-group col-md-6">
                             <label class="control-label" for="file">Inschrijvingsbewijs</label>
                             <input id="file" name="file" type="file" class="form-control input-md">
@@ -103,7 +109,19 @@
                         @std.textField(form("insuranceName"), "Verzekeraar", "col-md-6")
                         @std.datepicker(form("expiration"), "Vervaldatum", "col-md-4")
                         @std.textField(form("bonusMalus"), "Bonus Malus", "col-md-6")
+                        @std.textField(form("startBonusMalus"), "Start Bonus Malus", "col-md-6")
                         @std.textField(form("polisNr"), "Polisnummer", "col-md-6")
+                        @std.datepicker(form("startInsurancePolicy"), "Startdatum polis", "col-md-4")
+                        <div class="form-group col-xs-12">
+                            @std.checkboxInline(form("civilLiability"),"Burgerlijke aansprakelijkheid")
+                            @std.checkboxInline(form("legalCounsel"),"Rechtsbijstand")
+                            @std.checkboxInline(form("driverInsurance"),"Bestuurdersverzekering")
+                            @std.checkboxInline(form("materialDamage"),"Stoffelijke schade")
+                            @std.checkboxInline(form("glassBreakage"),"Glasbreuk")
+                            @std.checkboxInline(form("theft"),"Diefstal")
+                        </div>
+                        @std.textField(form("valueExclusiveVAT"), "Huidige waarde exclusief BTW", "col-md-6")
+                        @std.textField(form("exemption"), "Vrijstelling", "col-md-6")
                     </fieldset>
                 }
                 @panel("Pechverhelping", "fa-wrench") {

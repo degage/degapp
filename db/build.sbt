@@ -14,10 +14,11 @@ libraryDependencies += "com.google.guava" % "guava" % "18.0"
 
 libraryDependencies += "com.novocode" % "junit-interface" % "0.10" % "test"
 
+libraryDependencies += "com.google.code.gson"    % "gson"  % "2.8.0"
+
 // TODO: use java.security instead ?
 libraryDependencies += "org.mindrot"  % "jbcrypt"  % "0.3m"
 
 autoScalaLibrary := false
 
 parallelExecution in Test := false
-

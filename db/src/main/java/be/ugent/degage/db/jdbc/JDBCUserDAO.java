@@ -1,27 +1,27 @@
 /* JDBCUserDAO.java
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Copyright Ⓒ 2014-2015 Universiteit Gent
- * 
+ *
  * This file is part of the Degage Web Application
- * 
+ *
  * Corresponding author (see also AUTHORS.txt)
- * 
+ *
  * Kris Coolsaet
  * Department of Applied Mathematics, Computer Science and Statistics
- * Ghent University 
+ * Ghent University
  * Krijgslaan 281-S9
  * B-9000 GENT Belgium
- * 
+ *
  * The Degage Web Application is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Affero General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * The Degage Web Application is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Affero General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Affero General Public License
  * along with the Degage Web Application (file LICENSE.txt in the
  * distribution).  If not, see <http://www.gnu.org/licenses/>.
@@ -66,13 +66,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
                     "users.user_damage_history, users.user_agree_terms,  " +
                     "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
+                    "users.user_accountnumber, users.user_license_expiration, users.user_id_expiration, " +
                     "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped, " +
+                    "user_send_reminder, user_payment_info, user_credit_status, " +
                     "NULL as approval_submission, NULL as infosession_timestamp " +
                     "FROM users " +
                     "LEFT JOIN addresses as domicileAddresses on domicileAddresses.address_id = user_address_domicile_id " +
                     "LEFT JOIN addresses as residenceAddresses on residenceAddresses.address_id = user_address_residence_id ";
 
-    // TODO: more fields to filter on
     public static final String FILTER_FRAGMENT = " WHERE users.user_firstname LIKE ? AND users.user_lastname LIKE ? " +
             "AND (CONCAT_WS(' ', users.user_firstname, users.user_lastname) LIKE ? OR CONCAT_WS(' ', users.user_lastname, users.user_firstname) LIKE ?) " +
             "AND residenceAddresses.address_city LIKE ? AND domicileAddresses.address_street LIKE ? ";
@@ -113,6 +114,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         user.setLicense(rs.getString("users.user_driver_license_id"));
 
+        user.setAccountNumber(rs.getString("users.user_accountnumber"));
+
         user.setIdentityId(rs.getString("users.user_identity_card_id"));
         user.setNationalId(rs.getString("users.user_identity_card_registration_nr"));
 
@@ -139,6 +142,15 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
 
         user.setVatNr(rs.getString("users.user_vat"));
 
+        Date licenseExpiration = rs.getDate("users.user_license_expiration");
+        user.setLicenseExpiration(licenseExpiration == null ? null : licenseExpiration.toLocalDate());
+
+        Date idExpiration = rs.getDate("users.user_id_expiration");
+        user.setIdExpiration(idExpiration == null ? null : idExpiration.toLocalDate());
+
+        user.setSendReminder(rs.getBoolean("users.user_send_reminder"));
+        user.setPaymentInfo(rs.getString("users.user_payment_info"));
+        user.setCreditStatus(UserCreditStatus.valueOf(rs.getString("users.user_credit_status")));
 
         return user;
     }
@@ -220,6 +232,29 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
             return toSingleObject(ps, JDBCUserDAO::populateUserHeader);
         } catch (SQLException ex) {
             throw new DataAccessException("Could not fetch user by email.", ex);
+        }
+    }
+
+    @Override
+    public UserHeader getUserByAccountNumber(String accountNumber) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS + " FROM users WHERE user_accountnumber = ?"
+        )) {
+            ps.setString(1, accountNumber);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    UserHeader tmp =  populateUserHeader(rs);
+                    if (rs.next()) { //2 users with same account number
+                        return null;
+                    } else {
+                        return tmp;
+                    }
+                } else {
+                    return null;
+                }
+            }
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not fetch user by accountnumber.", ex);
         }
     }
 
@@ -326,7 +361,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     @Override
     public void updateUserStatusWithReason(int userId, UserStatus status, String reason) throws DataAccessException {
         try (PreparedStatement ps = prepareStatement(
-            "UPDATE users SET user_status=?, " + 
+            "UPDATE users SET user_status=?, " +
             (status == UserStatus.BLOCKED ? "user_date_blocked" : "user_date_dropped") + "=current_timestamp, " +
             (status == UserStatus.BLOCKED ? "user_reason_blocked=? " : "user_reason_dropped=? ") +
             "WHERE user_id = ?")) {
@@ -420,13 +455,14 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public void updateUserLicenseData(int userId, String license, LocalDate date) {
+    public void updateUserLicenseData(int userId, String license, LocalDate date, LocalDate expirationDate) {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE users SET user_driver_license_id = ?, user_driver_license_date = ? WHERE user_id = ?"
+                "UPDATE users SET user_driver_license_id = ?, user_driver_license_date = ?, user_license_expiration = ? WHERE user_id = ?"
         )) {
             ps.setString(1, license);
             ps.setDate(2, date == null ? null : Date.valueOf(date));
-            ps.setInt(3, userId);
+            ps.setDate(3, expirationDate == null ? null : Date.valueOf(expirationDate));
+            ps.setInt(4, userId);
             ps.executeUpdate();
         } catch (SQLException ex) {
             throw new DataAccessException("Failed to update user license data", ex);
@@ -434,14 +470,27 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     }
 
     @Override
-    public void updateUserIdentityData(int userId, String identityId, String nationalId) {
+    public void updateUserAccountNumberData(int userId, String accountNumber) {
         try (PreparedStatement ps = prepareStatement(
-                "UPDATE users SET user_identity_card_id = ?, user_identity_card_registration_nr = ? WHERE user_id = ?"
+                "UPDATE users SET user_accountnumber = ? WHERE user_id = ?"
+        )) {
+            ps.setString(1, accountNumber);
+            ps.setInt(2, userId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Failed to update user accountnumber data", ex);
+        }
+    }
+
+    @Override
+    public void updateUserIdentityData(int userId, String identityId, String nationalId, LocalDate expirationDate) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_identity_card_id = ?, user_identity_card_registration_nr = ?, user_id_expiration = ? WHERE user_id = ?"
         )) {
             ps.setString(1, identityId);
             ps.setString(2, nationalId);
-            ps.setInt(3, userId);
-
+            ps.setDate(3, expirationDate == null ? null : Date.valueOf(expirationDate));
+            ps.setInt(4, userId);
             ps.executeUpdate();
 
         } catch (SQLException ex) {
@@ -477,7 +526,10 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                     "users.user_driver_license_id, users.user_identity_card_id, users.user_identity_card_registration_nr,  " +
                     "users.user_damage_history, users.user_agree_terms,  " +
                     "users.user_date_joined, users.user_driver_license_date, users.user_vat, " +
-                    "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped ");
+                    "users.user_accountnumber, users.user_send_reminder, users.user_payment_info, " +
+                    "user_created_at, users.user_date_blocked, users.user_date_dropped, users.user_reason_blocked, users.user_reason_dropped, " +
+                    "users.user_license_expiration, users.user_id_expiration, users.user_credit_status, " +
+                    "users.user_send_reminder, users.user_payment_info ");
 
         if (filter.getValue(FilterField.USER_STATUS).equals("FULL_VALIDATING")) {
             builder.append(", approval_submission ");
@@ -506,7 +558,7 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         } else if (filter.getValue(FilterField.USER_STATUS).equals("REGISTERD_INFO_NOT_PRESENT")) {
             builder.append("LEFT JOIN infosessionenrollees on users.user_id = infosession_enrollee_id ");
             builder.append("AND infosession_enrollment_status = 'PRESENT' ");
-        } 
+        }
 
         builder.append(FILTER_FRAGMENT);
 
@@ -566,7 +618,6 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         }
 
         builder.append(" LIMIT ?, ?");
-        // System.out.println("query users: " + builder.toString());
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
             fillFragment(ps, filter, 1);
             ps.setInt(7, (page - 1) * pageSize);
@@ -633,7 +684,8 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
     public Iterable<UserHeaderShort> listUserByName(String str, List<String> status, int limit) {
         StringBuilder builder = new StringBuilder();
         builder.append( "SELECT user_id, user_firstname, user_lastname FROM users " +
-                        "WHERE CONCAT(user_lastname, ', ', user_firstname) LIKE CONCAT ('%', ?, '%')"
+                        "WHERE CONCAT(user_lastname, ' ', user_firstname) LIKE CONCAT ('%', ?, '%')" +
+                        " OR CONCAT(user_firstname, ' ', user_lastname) LIKE CONCAT ('%', ?, '%')"
         );
         if (status.size() > 0) {
             builder.append("AND user_status IN (");
@@ -647,8 +699,9 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
                         "LIMIT ?"
         );
         try (PreparedStatement ps = prepareStatement(builder.toString())) {
-            ps.setString(1, str);
-            int i = 2;
+          ps.setString(1, str);
+          ps.setString(2, str);
+            int i = 3;
             for (String s: status) {
                 ps.setString(i, s);
                 i++;
@@ -658,5 +711,82 @@ class JDBCUserDAO extends AbstractDAO implements UserDAO {
         } catch (SQLException ex) {
             throw new DataAccessException(ex);
         }
+    }
+
+    @Override
+    public void updateUserPaymentInfo(int userId, boolean sendReminder, String paymentInfo, UserCreditStatus creditStatus) {
+        try (PreparedStatement ps = prepareStatement(
+                "UPDATE users SET user_send_reminder = ?, user_payment_info = ?, user_credit_status = ? WHERE user_id = ?"
+        )) {
+            ps.setBoolean(1, sendReminder);
+            ps.setString(2, paymentInfo);
+            ps.setString(3, creditStatus.name());
+            ps.setInt(4, userId);
+            ps.executeUpdate();
+        } catch (SQLException ex) {
+            throw new DataAccessException("Could not update payment info for user", ex);
+        }
+    }
+
+    @Override
+    public UserHeader getUserByInvoice(Invoice invoice) {
+        try (PreparedStatement ps = prepareStatement(
+                "SELECT " + USER_HEADER_FIELDS + " FROM invoices " +
+                        "INNER JOIN users ON user_id = invoice_user_id " +
+                        "WHERE invoice_id = ? "
+
+        )) {
+            ps.setInt(1, invoice.getId());
+            return toSingleObject(ps, JDBCUserDAO::populateUserHeader);
+        } catch (SQLException ex) {
+            throw new DataAccessException(ex);
+        }
+    }
+
+    @Override
+    public Page<User> findUsers(FilterField orderBy, boolean asc, int page, int pageSize, String filter) throws DataAccessException {
+      StringBuilder builder = new StringBuilder();
+      // builder.append(USER_QUERY);
+      builder.append(USER_QUERY);
+
+      // add filters
+      if (filter != null && filter.length() > 0) {
+        builder.append(" WHERE ");
+        String[] searchStrings = filter.trim().split(" ");
+        for (int i = 0; i < searchStrings.length; i++) {
+          if (i > 0) {
+            builder.append(" AND ");
+          }
+          builder.append("(");
+          StringBuilder filterBuilder = new StringBuilder();
+          FilterUtils.appendOrContainsFilter(filterBuilder, "user_lastname", searchStrings[i]);
+          FilterUtils.appendOrContainsFilter(filterBuilder, "user_firstname", searchStrings[i]);
+          FilterUtils.appendOrContainsFilter(filterBuilder, "user_status", searchStrings[i]);
+          FilterUtils.appendOrContainsFilter(filterBuilder, "user_credit_status", searchStrings[i]);
+          builder.append(filterBuilder).append(")");
+        }
+      }
+
+      // add order
+      switch (orderBy) {
+          case NAME:
+              builder.append(" ORDER BY user_lastname ");
+              builder.append(asc ? "ASC" : "DESC");
+              builder.append(" , user_firstname ");
+              builder.append(asc ? "ASC" : "DESC");
+              break;
+          case DATE:
+              builder.append(" ORDER BY user_created_at ");
+              builder.append(asc ? "ASC" : "DESC");
+              break;
+      }
+
+      builder.append (" LIMIT ").append(pageSize).append(" OFFSET ").append((page-1)*pageSize);
+      try (PreparedStatement ps = prepareStatement(builder.toString())) {
+          return toPage(ps, pageSize, JDBCUserDAO::populateUser);
+      } catch (SQLException ex) {
+          throw new DataAccessException("Could not retrieve a list of users", ex);
+      }
+
     }
 }

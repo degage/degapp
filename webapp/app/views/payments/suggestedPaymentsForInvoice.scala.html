@@ -1,0 +1,130 @@
+@(invoiceAndUser: InvoiceAndUser, payments: Iterable[PaymentAndUser])
+
+@stdlayout("Mogelijke betalingen voor afrekening") {
+
+  @js.paymentMenu()
+
+@panel("Details", "fa-bar-chart-o"){
+    <div class="col-sm-6">
+        <h4>Afrekening @invoiceAndUser.getInvoice.getNumber</h4>
+        <dl class="dl-horizontal">
+            <dt>Afrekeningnummer</dt>
+            <dd>@invoiceAndUser.getInvoice.getNumber</dd>
+            <dt>Facturatiedatum</dt>
+            <dd>@invoiceAndUser.getInvoice.getDate</dd>
+            <dt>Betalingsdatum</dt>
+            <dd>@invoiceAndUser.getInvoice.getPaymentDate</dd>
+            <dt>Uiterste betalingsdatum</dt>
+            <dd>@invoiceAndUser.getInvoice.getDueDate</dd>
+            <dt>Bedrag</dt>
+            <dd>@invoiceAndUser.getInvoice.getAmount €</dd>
+            <dt>Status</dt>
+            <dd>
+              @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.PAID) {
+                <span class="label label-success">Betaald</span>
+              } else {
+                @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.OPEN) {
+                  <span class="label label-warning">Open</span>
+                } else {
+                  @if(invoiceAndUser.getInvoice.getStatus == InvoiceStatus.OVERDUE) {
+                    <span class="label label-danger">Te laat</span>
+                  }
+                }
+              }
+            </dd>
+            <dt>Gestructureerde communicatie</dt>
+            @if(invoiceAndUser.getInvoice.getStructuredCommunication == null) {
+                <dd>-</dd>
+            } else {
+                <dd>@invoiceAndUser.getInvoice.getStructuredCommunication</dd>
+            }
+        </dl>
+    </div>
+}
+
+  @panel("Details", "fa-bar-chart-o"){
+
+<div id="resultsTable" class="table-responsive col-xs-12">
+    <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
+        <thead>
+            <tr role="row">
+                <th name="number" class="sortable" tabindex="0" >Nummer</th>
+                <th name="date" class="sortable" tabindex="0" >Datum</th>
+                <th name="account_number" tabindex="0" >Rekeningnummer</th>
+                <th name="user" class="sortable" tabindex="0" >Gebruiker</th>
+                <th name="name" class="sortable" tabindex="0" >Naam</th>
+                <th name="amount" class="sortable" tabindex="0" >Bedrag</th>
+                <th name="type" class="sortable" tabindex="0" >Type</th>
+                <th name="status" class="sortable" tabindex="0" >Status</th>
+                <th name="comment" tabindex="0" >Vrije communicatie</th>
+                <th name="structured_comm" class="sortable" tabindex="0" >Gestructureerde communicatie</th>
+                <th name="filename" class="sortable" tabindex="0" >Bestand</th>
+                <th>Acties</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach.trOrElse(payments){ payment =>
+            <td>
+              <a href="@routes.Payments.showDetails(payment.getPayment.getId)">@payment.getPayment.getId</a>
+            </td>
+            <td>@payment.getPayment.getDate</td>
+            <td>@payment.getPayment.getAccountNumber</td>
+            <td>
+              @if(payment.getUser == null) {
+                Geen gebruiker gevonden
+              } else {
+                <a href="@routes.Profile.index(payment.getUser.getId)">@payment.getUser.getFirstName @payment.getUser.getLastName</a>
+              }
+            </td>
+            <td>@payment.getPayment.getName</td>
+            <td align="right">@payment.getPayment.getAmount</td>
+            <td>
+              @if(payment.getPayment.getDebitType == PaymentDebitType.CREDIT) {
+                <span class="label label-success">Credit</span>
+              } else {
+                <span class="label label-warning">Debit</span>
+              }
+            </td>
+            <td>
+              @if(payment.getPayment.getStatus == PaymentStatus.OK) {
+                <span class="label label-success">OK</span>
+              } else {
+                @if(payment.getPayment.getStatus == PaymentStatus.CHANGE) {
+                  <span class="label label-warning">Te bekijken</span>
+                } else {
+                  @if(payment.getPayment.getStatus == PaymentStatus.UNASSIGNED) {
+                    <span class="label label-danger">Geen afrekening</span>
+                  }
+                }
+              }
+            </td>
+            <td>
+              @if(payment.getPayment.getComment == null) {
+                  -
+              } else {
+                  @payment.getPayment.getComment
+              }
+            </td>
+            <td>
+              @if(payment.getPayment.getStructuredCommunication == null) {
+                  -
+              } else {
+                  @payment.getPayment.getStructuredCommunication
+              }
+            </td>
+            <td>@payment.getPayment.getFilename</td>
+            <td>
+             @btnPrimary("Link afrekening aan betaling", routes.Payments.createPaymentInvoiceRelationship(invoiceAndUser.getInvoice.getId, payment.getPayment.getId))
+            </td>
+        }{
+            <tr>
+                <td class="empty-row" colspan="12">
+                    Geen enkele betaling voldoet aan jouw zoekterm(en)
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+  </div>
+}
+}

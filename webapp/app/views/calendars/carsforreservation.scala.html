@@ -51,21 +51,29 @@
                   icon: 'http://maps.google.com/mapfiles/ms/icons/blue.png'
                 });
             }
-            $('#resultsTable > table > tbody  > tr').each( function(index, el) {
-                var firstEl = $(el).first();
-                var aTag = $(firstEl).find('a')[0];
-                var tdTag = $(firstEl).find('td')[0];
-                var locationTag = $(firstEl).find('td')[3];
-                var info = $(firstEl).find('td')[2].innerText;
-                var address = $(firstEl).find('td')[4].innerText;
-                var comments = $($(firstEl).find('td')[5]).html();
-                var latLng = JSON.parse($(firstEl).find('td')[6].innerText);
-                var autoFiche = $(firstEl).find('td')[7].innerText;
-                var imgLink = $(firstEl).find('td')[8].innerText;
-                var carId = $(firstEl).find('td')[6].id.substring(6);
+            $('#resultsTable > div').each( function(index, el) {
+                var firstEl     = $(el).first();
+                var aTag        = $(firstEl).find('a')[0];
+                const latLngTag = $(firstEl).find('a')[1];
+                var latLng      = JSON.parse(latLngTag.innerText);
+                var tdTag       = $(firstEl).find('a')[2];
+                var autoFiche   = $(firstEl).find('a')[3].innerText;
+                var imgLink     = $(firstEl).find('a')[4].innerText;
+                var info        = $(firstEl).find('a')[5].innerText;
+                var reserveer   = $(firstEl).find('a')[7];
+                console.log(reserveer)
+                var information = $(firstEl).find('div')[1];
+                //var labels      = $(firstEl).find('div')[2];
+                var address     = $(firstEl).find('div')[4].innerText;
+                var comments    = $(firstEl).find('div')[8].innerText;
+
                 var imgTag = '<img src=' + imgLink + ' alt="" width="150px" class="img-responsive">';
-                var contentString = '<table><tr><td>'+imgTag+'</td><td style="padding-left:12px;"><h3>'+tdTag.innerText+'&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+aTag+'"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
+                var contentString ='<table><tr><td>'+imgTag+'</td><td style="padding-left:12px;"><h3>'+aTag.innerText+
+                '&nbsp;&nbsp;&nbsp;<a style="margin-left: 30" class="btn btn-lnk btn-primary" href="'+reserveer+
+                '"/>Reserveer</a><a style="margin-left: 30" class="btn btn-lnk btn-warning" href="'+autoFiche+'"/>Autofiche</a></h3><h5>'+info+'</h5>'
                     + '<p>'+address+'</p></td></tr></table>' + comments;
+                
+
                 var infowindow = new google.maps.InfoWindow({});
                 if (parseFloat(latLng.lat) > 0) {
                     var marker = new google.maps.Marker({
@@ -99,40 +107,42 @@
     <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1rykJueTRpT3slqiovYfm-YESfq0sh4U&callback=initMap"></script>
 }
 
+
 @stdlayout("Reserveer een auto", sheets("taglabels"), scripts=scripts) {
 
     @panel("De autovloot", "fa-car"){
-        <div id="map" class="map col-xs-12 col-lg-8"></div>
-        <div id="resultsTable" class="table-responsive col-xs-12" style="max-height: 500px; overflow-y: scroll; padding: 0; margin-top: 10px;">
-            <table class="table table-striped table-bordered table-hover no-footer" id="dataTables-cars">
-                <thead>
-                    <tr role="row">
-                        <th>Naam</th>
-                        <th>Acties</th>
-                        <th>Merk/Type</th>
-                        <th>&nbsp;</th>
-                        <th>Standplaats</th>
-                        <th style="display: none;">Opmerkingen</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach.tr(carList) { car =>
-                        <td><a href='@routes.Calendars.indexWithCar(car.getName,car.getId)'>@car.getName</a></td>
-                        <td>
-                            @btnPrimary("Reserveer", routes.Calendars.indexWithCar(car.getName,car.getId))
-                            <button class="btn btn-primary btn-xs" onClick="centerMap(@car.getLocation.getLat, @car.getLocation.getLng)">Locatie</button>
-                            @btnWarning("Autofiche", routes.Cars.detail(car.getId))
-                        </td>
-                        <td><button class="car-popover btn btn-default btn-xs" data-toggle="popover" data-placement="bottom" data-trigger="focus" title="@car.getName" data-content="@Html(car.getComments)">@car.getBrand @car.getType</button></td>
-                        <td>@cars.cartags(car)</td>
-                        <td>@car.getLocation.getStreet, @car.getLocation.getCity</td>
-                        <td style="display: none;">@Html(car.getComments) </td>
-                        <td style="display: none;" id="car-id-@car.getId">{"lat": @car.getLocation.getLat, "lng": @car.getLocation.getLng}</td> 
-                        <td style="display: none;">@routes.Cars.detail(car.getId)</td> 
-                        <td style="display: none;">@routes.Cars.getPicture(car.getId)</td> 
-                    }
-                </tbody>
-            </table>
+        <div id="map" class="map col-xs-12 col-lg-8 col-md-12"></div>
+        <div id="resultsTable" class="table-responsive col-xs-12" style="max-height: 500px; overflow-y: scroll; padding-left:40px; margin-top: 10px;">
+                <style>
+                #rij:hover{background-color:beige}
+                </style>
+         @foreach.tr(carList) { car =>
+            <div class="row" style ="margin-bottom:2px;">
+                    <div class="row" id="rij">
+                <div class = "col-md-1 col-sm-1">
+                    <a  role="button" data-toggle="collapse" href="#collapseExample-@car.getId" aria-expanded="false" aria-controls="collapseExample">@car.getName</a>&nbsp
+                    <a style ="display:none">{"lat": @car.getLocation.getLat,"lng": @car.getLocation.getLng}</a>
+                    <a style ="display:none"></a>
+                    <a style ="display:none">@routes.Cars.detail(car.getId)</a>
+                    <a style ="display:none">@routes.Cars.getPicture(car.getId)</a>
+                    <a style ="display:none">@car.getBrand @car.getType</a>
+                </div>
+                <div   class ="col-md-4 col-sm-4" > 
+                    <a>@btnPrimary("Reserveer", routes.Calendars.indexWithCar(car.getName,car.getId))</a> &nbsp;                      
+                    <i class="fa fa-map-marker" role="button" aria-hidden="true" onClick="centerMap(@car.getLocation.getLat, @car.getLocation.getLng)"></i>&nbsp
+                    <a role="button" href="@routes.Cars.detail(car.getId)"><i style="color:black" class="fa fa-info" aria-hidden="true"></i></a>&nbsp;
+                    @car.getBrand @car.getType
+                </div>
+                <div   class= "col-md-4 col-sm-4">@cars.cartags(car)</div>
+                <div   class= "col-md-3 col-sm-3">@car.getLocation.getStreet, @car.getLocation.getCity</div>
+                </div>
+                <div style ="margin-left:2px; background-color:beige" class="collapse row " id='collapseExample-@car.getId' >                                
+                        <div class = "row">&nbsp; </div>
+                    <div class="col-md-2"><img style ="width:300px" src="@routes.Cars.getPicture(car.getId)" alt="" class="img-responsive"></div>
+                    <div class="col-md-10">@Html(car.getComments)</div> 
+                </div>
+            </div>
+        }
         </div>
     }
 }

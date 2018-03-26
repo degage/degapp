@@ -1,0 +1,41 @@
+
+@(invoice: Invoice)
+
+@panel("Details", "fa-bar-chart-o"){
+    <div class="col-sm-6">
+        <h4>Afrekening @invoice.getNumber</h4>
+        <dl class="dl-horizontal">
+            <dt>Afrekeningnummer</dt>
+            <dd>@invoice.getNumber</dd>
+            <dt>Facturatiedatum</dt>
+            <dd>@invoice.getDate</dd>
+            <dt>Betalingsdatum</dt>
+            <dd>@invoice.getPaymentDate</dd>
+            <dt>Uiterste betalingsdatum</dt>
+            <dd>@invoice.getDueDate</dd>
+            <dt>Bedrag</dt>
+            <dd>@invoice.getAmount €</dd>
+            <dt>Status</dt>
+            <dd>
+              @if(invoice.getStatus == InvoiceStatus.PAID) {
+                <span class="label label-success">Betaald</span>
+              } else {
+                @if(invoice.getStatus == InvoiceStatus.OPEN) {
+                  <span class="label label-warning">Open</span>
+                } else {
+                  @if(invoice.getStatus == InvoiceStatus.OVERDUE) {
+                    <span class="label label-danger">Te laat</span>
+                  }
+                }
+              }
+            </dd>
+            <dt>Gestructureerde communicatie</dt>
+            @if(invoice.getStructuredCommunication == null) {
+                <dd>-</dd>
+            } else {
+                <dd>@invoice.getStructuredCommunication</dd>
+            }
+        </dl>
+        <div><a href="/degapp/invoices/@invoice.getId/payments">Bekijk betalingen voor deze afrekening</a></div>
+    </div>
+}
